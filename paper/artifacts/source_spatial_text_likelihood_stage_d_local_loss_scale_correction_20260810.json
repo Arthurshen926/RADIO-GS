@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_spatial_text_likelihood_stage_d_local_loss_scale_correction",
+  "status": "sealed_before_third_source_fit_and_before_development_open",
+  "fit_initialization_correction_sha256": "ba837a39abf6b136d32618fbba49173033ff485c382b62389ae5f335ef7c75f6",
+  "second_fit": {
+    "checkpoint_written": false,
+    "receipt_written": false,
+    "balanced_bce_improved": true,
+    "positive_negative_gap_improved": true,
+    "local_relation_improved": false,
+    "development_labels_opened": false
+  },
+  "dimension_audit": {
+    "scene0001_legacy_local_relation_loss": 0.0010092625161632895,
+    "scene0002_legacy_local_relation_loss": 0.0017511250916868448,
+    "scene0005_legacy_local_relation_loss": 0.0008651808020658791,
+    "conclusion": "Multiplying raw local loss by 0.15 makes its contribution orders of magnitude smaller than macro BCE."
+  },
+  "correction": {
+    "formula": "mean_scene(local_relation_loss / stop_gradient(legacy_local_relation_loss))",
+    "local_relation_weight": 0.15,
+    "weight_changed": false,
+    "architecture_data_graph_epochs_learning_rate_changed": false,
+    "reason": "dimensionless source loss balancing, independent of scene identity and benchmark outcomes"
+  },
+  "corrected_trainer_sha256": "1c37922444e1217e130443e755736cf8b215bae5905d3e289145942e2edff02d",
+  "target_development_or_lerf_outcome_used": false
+}

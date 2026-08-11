@@ -1,0 +1,71 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_scannet_ovs_sentinel_result.v1",
+  "status": "frozen_single_scene_gate_passed_not_full_paper8",
+  "scene_id": "scene0000_00",
+  "task": "ScanNet OVS text-query semantic segmentation",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_scene0000_scannet_ovs_sentinel_preregistration_20260810.json",
+    "sha256": "fbf66558c8c1ff6c4e75b6e186023bdd03d8457610642ba5e1f7f3a4f1ee0145"
+  },
+  "evaluation_contract": {
+    "persistent_semantic_feature": "canonical_radio_only",
+    "source_rgb_used": false,
+    "target_rgb_used": false,
+    "sam_decoder_cache_mask_feature_or_sidecar_used": false,
+    "query_input": "frozen_split19_text_embedding_bank",
+    "spatial_readout": "frozen_surface_region_h128_0.20_0.40_0.70m",
+    "threshold_or_calibration_change": false,
+    "prediction_receipt_written_before_label_access": true,
+    "prediction_receipt_timestamp": "2026-08-10T22:01:30+08:00",
+    "metric_report_timestamp": "2026-08-10T22:02:26+08:00"
+  },
+  "sealed_prediction": {
+    "score_cache_sha256": "c661d01bf436976346ae332ef162cdc17e46735f288008b8ffb4fe8669f671f6",
+    "receipt_sha256": "02a152d86c857b9c3bfac8fe13086f4a81ffd7afcbb6759ef46e7d6fe17d073e",
+    "candidate_field_sha256": "d623ceea3ea13dad2c8ba27667c5942b3ab2b7af0b9648f0ae8e02304498604e",
+    "semantic_score_tensor_sha256": "5871e8d037cba236f0246808e7cf65817f8f62271858e4bbfa8f95fab7a5d890"
+  },
+  "metric_authority": {
+    "report": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/scannet_ovs_sentinel/evaluation/ours_scannet_gaussian_protocol_results.json",
+    "report_sha256": "93b9c8026731c70d5113c1665fcf9c8e9e6883f2aa73ff33edf8ecf2c5593a0e",
+    "prediction_npz_sha256": "90b7a041dcd04735cc3c3fb7f305c4c598f4cbf0b85ebd864c4678f79bd13344",
+    "pseudo_gt_sha256": "bc021f71a7095a6b895c8f336e623bceac6618d5ea075bf535b586cf169253a4"
+  },
+  "control": {
+    "19": {"miou": 0.2689807912087902, "macc": 0.47557282741725476},
+    "15": {"miou": 0.2924011330144089, "macc": 0.5121553526031974},
+    "10": {"miou": 0.36009162596502886, "macc": 0.5413000859348476}
+  },
+  "candidate": {
+    "19": {"miou": 0.2737479549085195, "macc": 0.47897951965921687},
+    "15": {"miou": 0.2975573473104075, "macc": 0.5158240980945412},
+    "10": {"miou": 0.3656544978413116, "macc": 0.5467710532512975}
+  },
+  "deltas": {
+    "19": {"miou": 0.004767163699729293, "macc": 0.003406692241962106},
+    "15": {"miou": 0.005156214295998607, "macc": 0.0036687454913437723},
+    "10": {"miou": 0.005562871876282738, "macc": 0.005470967316449915},
+    "mean_three_split_miou": 0.005162083290670212
+  },
+  "promotion_gate": {
+    "all_split_miou_delta_at_least_minus_0.002": true,
+    "all_split_macc_delta_at_least_minus_0.002": true,
+    "mean_three_split_miou_delta_strictly_positive": true,
+    "all_gates_passed": true,
+    "next_action_authorized": "expand_identical_mapping_teacher_to_additional_source_scenes_before_full_benchmark"
+  },
+  "causal_conclusion": {
+    "supported": "Legal mapping-time official-SAM relative structure improves a frozen text-query semantic readout even though evaluation consumes only the one RADIO field and text embeddings.",
+    "scope_limit": "The result covers one source scene and must not replace the frozen paper8 aggregate until all eight scenes are rebuilt and evaluated without tuning."
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "telemetry_sha256": "5ad71f570bd07ac861d0f26ab9d605fa8f58f82580fe207fdb4c8eee9fe3b5f2",
+    "owner_audit_sha256": "ff01e006040a8f77efa51710bd3cbdb8222be81dcf481f907fbb34b69790eee3",
+    "maximum_temperature_c": 49,
+    "maximum_sampled_power_w": 31.89,
+    "soft_pause_triggered": false,
+    "hard_stop_triggered": false,
+    "cuda_release_verified": true
+  }
+}

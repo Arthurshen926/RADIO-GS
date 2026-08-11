@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_disjoint_domain_composition_execution_correction_v1",
+  "status": "frozen_before_first_composed_prediction",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_disjoint_domain_composition_fern_trex_preregistration_20260810.json",
+    "sha256": "d25918ee9c266de0ef3ac8ded84a2ad87c9c513bbb3e09babf094a6ef9746275"
+  },
+  "change": {
+    "from_physical_gpu": 1,
+    "to_physical_gpu": 0,
+    "reason": "GPU0 was released while GPU1 remained allocated to the LERF v4 run",
+    "method_parameters_changed": false,
+    "prediction_protocol_changed": false
+  },
+  "thermal_contract": {
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  },
+  "cuda_execution": {
+    "cuda_visible_devices": "0",
+    "ld_preload": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01"
+  },
+  "target_rgb_mask_or_metric_opened": false
+}

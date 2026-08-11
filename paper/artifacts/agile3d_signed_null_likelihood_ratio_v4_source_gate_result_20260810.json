@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-signed-null-likelihood-ratio-v4-source-gate-result",
+  "status": "fail_source_gates_do_not_open_development",
+  "scope": {
+    "fit_scenes": ["scene0000_00", "scene0002_00", "scene0005_00"],
+    "development_scene0003_opened": false,
+    "test312_opened_or_run": false
+  },
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/agile3d_signed_null_likelihood_ratio_v4_preregistration_20260810.json",
+    "sha256": "91be5be4c12700fdd390942666cb8d47169b29747d48c4c61647aeee0740a271"
+  },
+  "authority": {
+    "receipt": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_signed_null_likelihood_ratio_v4/source_gate_receipt.json",
+      "sha256": "327dfc0f1d3d1a2e86bf1df6c48936e869481c059d6ce6b1ccce074c6b8b52cc"
+    },
+    "all_fit_checkpoint_sha256": "87e9cfbdcb1f4c526088a4534716dc63687e7cc77d01cc10a046ebb7412e26a8",
+    "loo_checkpoint_sha256": {
+      "scene0000_00": "43978085614808ca96a03bd2bd97a2b7efb370efe4396aba114a5b9f3cef997e",
+      "scene0002_00": "7861bb2a2ec3a24c1c7e41a7d24958936b584c87c070fbfaf836df3e403fa7b2",
+      "scene0005_00": "06de0b8e9c34970c750739008ef05e0ea5ed847026236159233de24d967595f5"
+    }
+  },
+  "leave_one_scene_out": {
+    "scene0000_00": {
+      "v2_iou": 0.15021407142996163,
+      "v4_iou": 0.03467116151790463,
+      "gain": -0.115542909912057,
+      "v4_precision": 0.03524338820356942,
+      "v4_recall": 0.9165904563676526,
+      "v4_probability_mass": 0.44574957658995445,
+      "target_mass": 0.014245739529420163,
+      "v4_click_response": 0.0065594928240618085
+    },
+    "scene0002_00": {
+      "v2_iou": 0.13900545494405894,
+      "v4_iou": 0.030977656915416218,
+      "gain": -0.10802779802864272,
+      "v4_precision": 0.03131468090711592,
+      "v4_recall": 0.9464895980657088,
+      "v4_probability_mass": 0.43404288606984276,
+      "target_mass": 0.012038076228470475,
+      "v4_click_response": 0.006695321196670316
+    },
+    "scene0005_00": {
+      "v2_iou": 0.2933390664623472,
+      "v4_iou": 0.13850472437900757,
+      "gain": -0.15483434208333963,
+      "v4_precision": 0.14511706226979632,
+      "v4_recall": 0.9255404282774742,
+      "v4_probability_mass": 0.4470263081438401,
+      "target_mass": 0.056493794086717945,
+      "v4_click_response": 0.012988387133859497
+    },
+    "macro_iou_gain": -0.12613501667467977,
+    "scenes_with_iou_gain_over_0.02": 0
+  },
+  "all_fit": {
+    "v2_iou": 0.1941861976121226,
+    "v4_iou": 0.06819600991527612,
+    "v2_precision": 0.24447627618469703,
+    "v4_precision": 0.07073930873638781,
+    "v2_recall": 0.747303664482922,
+    "v4_recall": 0.9298125299771991,
+    "v2_probability_mass": 0.15881319965366208,
+    "v4_probability_mass": 0.4425029474892437,
+    "target_mass": 0.027592536614869528,
+    "v4_click1_probability_mass": 0.4816076871466042,
+    "v4_click10_probability_mass": 0.43251037732731706,
+    "v4_click_response": 0.008942113744830551
+  },
+  "gate": {
+    "iou_pass": false,
+    "precision_pass": false,
+    "mass_pass": false,
+    "click_response_pass": false,
+    "development_authorized": false
+  },
+  "causal_conclusion": {
+    "validated": "The signed transform makes exact null cosine and empty evidence neutral and removes the v3 algebraic positive offset.",
+    "remaining_failure": "Actual click-conditioned scene cosine distributions concentrate near the null boundary, so a fixed zero-bias equal-prior likelihood remains near q=0.5 over most primitives and cannot express sparse-instance posterior mass.",
+    "required_next_step": "Estimate an explicit class-conditional null density ratio or per-observation null anchor from source scenes only. Empty observation sets must remain exactly neutral; the anchor must be learned inside each LOO training fold and must not use development labels or scene-specific thresholds."
+  },
+  "verification": {
+    "focused_tests": "99 passed",
+    "synthetic_null_far_lookalike_negative_click_gates": "pass",
+    "gpu0_released": true
+  }
+}

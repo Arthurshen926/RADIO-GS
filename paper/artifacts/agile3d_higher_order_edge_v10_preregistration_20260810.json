@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-higher-order-topology-edge-v10-preregistration",
+  "status": "sealed_after_query-independent_feature_materialization_before_labels_or_metrics",
+  "design_provenance": {
+    "v9_source_result_used_for_design": true,
+    "v9_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/agile3d_instance_edge_likelihood_v9_source_gate_result_20260810.json",
+      "sha256": "1076695fa998ca6a42ff3da9239a5b1637d2485a3e4323b1495bf280957f97a7"
+    },
+    "v9_observation": "scalar edge carrier has only 0.56 to 0.59 balanced accuracy and causes component percolation",
+    "trajectory_stage": "forbidden unless every v10 edge-only gate passes",
+    "development_scene0003": "forbidden",
+    "test312": "forbidden"
+  },
+  "query_independent_feature_authority": {
+    "scene0000_00": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_higher_order_edge_v10/features/scene0000_00.higher_order_edges_v10.pt",
+      "sha256": "8c3e65a1fbd0d9ad6b0ebe355f1710cbd2f06457e772d14ea903bfbd32f661ae",
+      "receipt_sha256": "f05dcad42a5505acba6cdbe68eb7d11effed7529756c89fde3fdfc07a9ec97d1",
+      "node_count": 63730,
+      "unique_edge_count": 582843
+    },
+    "scene0002_00": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_higher_order_edge_v10/features/scene0002_00.higher_order_edges_v10.pt",
+      "sha256": "f15fa4c547a8ebe27317905dbd1be0ca4f673bbc33ca5078963cf6a54a4f8c6d",
+      "receipt_sha256": "840f4f150872f1ca21558b2d522b3998886823d6689e98db23a4597d4bf6c2a4",
+      "node_count": 198116,
+      "unique_edge_count": 1839138
+    },
+    "scene0005_00": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_higher_order_edge_v10/features/scene0005_00.higher_order_edges_v10.pt",
+      "sha256": "325c96f7ea25e3e1df90438565ff4e1d8fd358324287f3dc70e0ea1d98cb2c8c",
+      "receipt_sha256": "dced60b3766fd5ebb4636cdf0758b36394672e022348906afde57ec5f3c4131b",
+      "node_count": 195387,
+      "unique_edge_count": 1820151
+    },
+    "safety": {
+      "labels_opened": false,
+      "clicks_opened": false,
+      "development_labels_opened": false,
+      "test_labels_opened": false,
+      "point_as_primitive_used": false
+    }
+  },
+  "feature_contract": {
+    "feature_names": [
+      "appearance_similarity",
+      "boundary_similarity",
+      "geometry_affinity",
+      "scaled_distance",
+      "endpoint_reliability",
+      "endpoint_coverage",
+      "principal_normal_alignment",
+      "tangent_offset_compatibility",
+      "scale_continuity",
+      "anisotropy_continuity",
+      "opacity_continuity",
+      "mutual_knn",
+      "shared_neighbor_jaccard",
+      "two_hop_context_continuity"
+    ],
+    "endpoint_exchange_invariance": "every feature is symmetric by construction",
+    "covariance_normal": "smallest-eigenvalue principal direction with sign-invariant dot product",
+    "tangent_offset": "one minus maximum absolute endpoint-normal projection of pair displacement",
+    "shared_neighbor": "Jaccard of reconstructed sealed 16-NN neighbourhoods",
+    "two_hop_context": "mean continuity of local appearance and boundary edge affinity",
+    "view_support_sidecar_present": false,
+    "co_visibility_feature_included": false,
+    "co_visibility_omission_reason": "no explicit source view-support tensor exists in the sealed bundle or graph authority; no search or proxy fabrication allowed"
+  },
+  "edge_label_contract": {
+    "positive": "both canonical Gaussian endpoints map to the same official source instance id greater than zero",
+    "negative": "both endpoints map to different official source instance ids greater than zero",
+    "omit": "background, unknown or conflicting endpoint",
+    "source_labels_only": true,
+    "development_or_test_labels": false
+  },
+  "model_contract": {
+    "schema": "symmetric-higher-order-instance-edge-lr-v10",
+    "architecture": "14 to 16 SiLU to 8 SiLU to 1",
+    "parameter_sharing": "one scene-shared model",
+    "scene_or_object_parameters": false,
+    "query_or_click_inputs": false,
+    "inference_edge_decision": "ell_edge>=0 equal-prior density-ratio decision",
+    "threshold_search": false
+  },
+  "training_recipe": {
+    "recipe_id": "higher-order-edge-balanced-density-ratio-mlp16x8-adam-seed0-e100-lr0.01-v10",
+    "seed": 0,
+    "optimizer": "Adam",
+    "epochs": 100,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0001,
+    "per_scene_training_rows": "all authoritative different-instance edges plus an equal-count deterministic evenly spaced subset of same-instance edges",
+    "objective": "scene-macro equal-prior balanced BCE plus 0.10 deterministic pair ranking",
+    "early_stopping": false,
+    "hyperparameter_or_threshold_search": false
+  },
+  "synthetic_and_integrity_gates": {
+    "focused_tests_passed": 8,
+    "features_bounded_and_symmetric": true,
+    "same_appearance_boundary_case": true,
+    "long_chain_topology_case": true,
+    "wrong_feature_contract_fails_closed": true,
+    "feature_artifacts_label_free": true,
+    "feature_artifacts_sha_sealed": true
+  },
+  "edge_only_source_validation": {
+    "leave_one_scene_out": [
+      {"train": ["scene0002_00", "scene0005_00"], "heldout": "scene0000_00"},
+      {"train": ["scene0000_00", "scene0005_00"], "heldout": "scene0002_00"},
+      {"train": ["scene0000_00", "scene0002_00"], "heldout": "scene0005_00"}
+    ],
+    "required_gates": {
+      "macro_balanced_accuracy_at_least": 0.70,
+      "every_scene_different_instance_recall_at_least": 0.65,
+      "every_scene_same_instance_recall_at_least": 0.60,
+      "macro_balanced_accuracy_gain_over_v9_at_least": 0.10
+    },
+    "v9_loso_macro_balanced_accuracy_reference": 0.5652490773337156,
+    "failure_action": "stop AGILE head; conclude carrier needs new co-visibility or external instance teacher; do not run trajectories, development or test",
+    "pass_action": "only then materialize v10 graphs and run the unchanged v8 absorbing trajectory source gate"
+  },
+  "thermal_contract": {
+    "gpu": "physical GPU0 only",
+    "telemetry": "low frequency approximately 60 seconds",
+    "normal_continue_below_celsius": 78,
+    "pause_at_or_above_celsius": 82,
+    "hard_stop_at_or_above_celsius": 85
+  },
+  "prohibited": {
+    "trajectory_before_edge_gate": true,
+    "development_or_test_labels": true,
+    "co_visibility_proxy_or_search": true,
+    "scene_or_object_parameters": true,
+    "threshold_sweep": true,
+    "point_as_primitive": true
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "artifact_type": "figurines_field_by_text_mapping_2x2_frozen_one_shot_result",
+  "status": "complete_after_pre_metric_four_arm_seal_without_parameter_callback",
+  "scene_id": "figurines",
+  "pre_metric_prediction_batch_seal": {
+    "path": "/root/RADIO-GS/paper/artifacts/figurines_field_text_likelihood_2x2_prediction_batch_seal_20260810.json",
+    "sha256": "7ec390f17ab04cbd64e5f12c7c92e1e870a145b08347af3c700cd5d84e520d24",
+    "all_224_predictions_sealed_before_first_ground_truth_open": true
+  },
+  "frozen_metric_results": {
+    "control_legacy": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/metric_control_legacy.json",
+      "sha256": "d2949bdbd8e4bb65b548beee576571b5b67cb6f455301ae38d631d3b94e13ea7",
+      "miou": 0.44434770941734314,
+      "acc025": 0.7678571428571429,
+      "acc050": 0.5535714285714286,
+      "boundary_f": 0.6662379503250122,
+      "trimap_iou": 0.42230963706970215,
+      "n": 56
+    },
+    "control_learned": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/metric_control_learned.json",
+      "sha256": "176b260b8cfd7ada10ce9f8a9641c73ac64d6b4385c44cc19726b9ffa292bf8f",
+      "miou": 0.4532468616962433,
+      "acc025": 0.7678571428571429,
+      "acc050": 0.44642857142857145,
+      "boundary_f": 0.6876611709594727,
+      "trimap_iou": 0.36822155117988586,
+      "n": 56
+    },
+    "stage_b_v2_legacy": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/metric_stage_b_v2_legacy.json",
+      "sha256": "ce7d7910d2edcb596eba44019f96b059e4c187d0dfd0f292753b4e6c40a1fb42",
+      "miou": 0.44569653272628784,
+      "acc025": 0.7678571428571429,
+      "acc050": 0.5535714285714286,
+      "boundary_f": 0.666334331035614,
+      "trimap_iou": 0.42321401834487915,
+      "n": 56
+    },
+    "stage_b_v2_learned": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/metric_stage_b_v2_learned.json",
+      "sha256": "1965560e69bca0db9bafee2d0d08fe9175b5397c5d145b89c62dd9cbc9959569",
+      "miou": 0.4650331139564514,
+      "acc025": 0.8035714285714286,
+      "acc050": 0.4642857142857143,
+      "boundary_f": 0.7017392516136169,
+      "trimap_iou": 0.36215659976005554,
+      "n": 56
+    }
+  },
+  "factorial_effects": {
+    "field_stage_b_at_legacy_mapping": {"miou": 0.0013488233089447021, "miou_percentage_points": 0.13488233089447021, "boundary_f": 0.00009638071060180664, "trimap_iou": 0.000904381275177002},
+    "mapping_learned_at_control_field": {"miou": 0.008899152278900146, "miou_percentage_points": 0.8899152278900146, "boundary_f": 0.02142322063446045, "trimap_iou": -0.054088085889816284},
+    "field_stage_b_at_learned_mapping": {"miou": 0.01178625226020813, "miou_percentage_points": 1.178625226020813, "boundary_f": 0.014078080654144287, "trimap_iou": -0.006064951419830322},
+    "mapping_learned_at_stage_b_field": {"miou": 0.019336581230163574, "miou_percentage_points": 1.9336581230163574, "boundary_f": 0.03540492057800293, "trimap_iou": -0.06105741858482361},
+    "combined_stage_b_learned_vs_control_legacy": {"miou": 0.020685404539108276, "miou_percentage_points": 2.0685404539108276, "acc025": 0.0357142857142857, "acc050": -0.0892857142857143, "boundary_f": 0.035501301288604736, "trimap_iou": -0.060153037309646606},
+    "positive_field_by_mapping_interaction": {"miou": 0.010437428951263428, "miou_percentage_points": 1.0437428951263428, "boundary_f": 0.01398169994354248}
+  },
+  "query_level_read_only_diagnostic": {
+    "combined_vs_control_legacy": {"improved": 27, "degraded": 27, "unchanged": 2},
+    "stage_b_learned_vs_stage_b_legacy": {"improved": 28, "degraded": 25, "unchanged": 3},
+    "total_prediction_pixels": {"control_legacy": 1782050, "control_learned": 970461, "stage_b_v2_legacy": 1790797, "stage_b_v2_learned": 1141679, "ground_truth": 556089},
+    "largest_combined_gains": [
+      {"frame_id": 152, "query": "waldo", "iou_before": 0.19876362606767023, "iou_after": 0.6284706243288848},
+      {"frame_id": 195, "query": "miffy", "iou_before": 0.15487358880585148, "iou_after": 0.46901960784313723},
+      {"frame_id": 152, "query": "toy cat statue", "iou_before": 0.5192837465564738, "iou_after": 0.8036479373240298}
+    ],
+    "largest_combined_losses": [
+      {"frame_id": 152, "query": "porcelain hand", "iou_before": 0.6655919525406242, "iou_after": 0.10958015885881019},
+      {"frame_id": 41, "query": "pirate hat", "iou_before": 0.7371063441350981, "iou_after": 0.39968237162519854},
+      {"frame_id": 195, "query": "pirate hat", "iou_before": 0.736318407960199, "iou_after": 0.4251434533124674}
+    ],
+    "parameter_or_threshold_selected_from_diagnostic": false
+  },
+  "access_audit": {
+    "source_head_fit_or_dev_used_lerf": false,
+    "all_prediction_masks_sealed_before_lerf_ground_truth_open": true,
+    "same_scorer_and_label_root_used_for_all_arms": true,
+    "field_head_threshold_knn_projection_or_graph_changed_after_outcome": false,
+    "metric_output_no_clobber_prevented_duplicate_overwrite": true,
+    "scanNet_benchmark_metric_run": false
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "maximum_temperature_celsius": 65,
+    "maximum_power_watts": 135.28,
+    "thermal_pause_or_hard_stop": false,
+    "cuda_release_verified": true
+  },
+  "interpretation": {
+    "primary": "The source-trained monotone text likelihood turns the previously small Stage-B descriptor gain into a material frozen LERF3D gain: the joint method improves figurines mIoU by 2.07 points and boundary F by 3.55 points.",
+    "causal": "The positive 1.04-point interaction shows that stronger field directions and a source-trained query likelihood are complementary rather than two independent cosmetic changes; the fixed canonical-negative margin had hidden most of the field improvement.",
+    "remaining_failure": "The learned mapping strongly reduces gross over-selection but over-shrinks several fine or unusual instances, lowering Acc@0.50 and trimap IoU. This is a coverage/granularity mismatch of ScanNet-class source calibration, not evidence for changing the frozen LERF threshold after seeing the result.",
+    "parameter_action_after_outcome": "none"
+  }
+}

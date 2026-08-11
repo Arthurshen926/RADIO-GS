@@ -1,0 +1,51 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_paper8_legacy_feature_bundle_correction.v2",
+  "status": "frozen_before_first_successful_legacy_scene_training",
+  "supersedes": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_paper8_legacy_feature_bundle_correction_20260810.json",
+    "sha256": "63e1132753c2e7a9820a3ef3ee2387a89cd4017016983fb92e3d4746d215af8e"
+  },
+  "trigger": {
+    "scene_id": "scene0062_00",
+    "stage": "strict_mpr_preflight",
+    "first_failure": "legacy cache lacked feature_output_bundle_sha256",
+    "second_failure": "v1 metadata migration did not declare requires_full_observation_source_contract=false",
+    "candidate_checkpoint_written": false,
+    "benchmark_query_gt_or_metric_opened": false
+  },
+  "correction": {
+    "kind": "metadata_only_formal_feature_bundle_and_current_contract_completion",
+    "observation_contract_after_correction": "canonical-mpr-v1",
+    "requires_full_observation_source_contract": false,
+    "compatible_legacy_mode_used": false,
+    "raw_dino_sam_xyz_valid_view_count_reliability_checked_equal": true,
+    "raw_dino_sam_shared_responsibility_checked_equal": true,
+    "source_tensor_values_changed": false,
+    "field_architecture_or_loss_changed": false,
+    "training_hyperparameters_changed": false
+  },
+  "scene0062_migration_authority": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/formal_feature_bundle_v2/migration_authority.json",
+    "sha256": "0233c7c28d6aad73a40a7a96ea562caa088dc2ba0722a2f2732c74e51fce6531",
+    "feature_output_bundle_sha256": "f07e2eb05bdc15b13d81354a87a1e82fc189730a029615910878567b85e84f4e",
+    "migrated_radio_sha256": "eb50027c41fd50cf39b3be25bd0f0ec95588e8e56200c45ae2ea352b3a8edda0",
+    "migrated_dino_sha256": "15dfc5af92e0f9c05b11417d820c4286146c1742c8243b6bd31edaa79f9b301d",
+    "migrated_sam_sha256": "f9ef6192b9773b40e957a2ff89d8654e43e113fd6bdab2c568948f1c89b6761d"
+  },
+  "scene0062_manifests": {
+    "base": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/source_only_sam_structure_manifest_formal_bundle_v3.json",
+      "sha256": "6440d8faacc62129e703d665975095fb48789b5328f8e152e7a0af321fa38bc5"
+    },
+    "relative": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/source_only_sam_relative_manifest_formal_bundle_v3.json",
+      "sha256": "7d6a7fc1f9d502fd5afd25d84a089cc737d66913df9af5344bdd9e84c94a0ca0"
+    }
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/migrate_legacy_mpr_feature_bundle_cohort.py",
+    "sha256": "cdad890abb0b9edd9e20192a7c2e282fff4fb6fe45620cc69f3a1bd2677856fe",
+    "focused_tests_passed": 17
+  },
+  "future_scene_policy": "Apply this tensor-invariant current-contract completion only to immutable paper8 source cache cohorts that predate the later formal bundle fields; never synthesize or recompute feature tensors."
+}

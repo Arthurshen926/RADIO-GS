@@ -1,3 +1,5 @@
+import json
+
 import torch
 import pytest
 
@@ -56,6 +58,57 @@ def test_responsibility_global_rows_map_exactly_to_valid_canonical_subset(tmp_pa
     )
     assert assignments[7]["primitive_ids"].tolist() == [0, 1]
     assert assignments[7]["pixel_ids"].tolist() == [0, 2]
+
+
+def test_sharded_exact_authority_supplies_frame_contract_without_loading_hits(
+    tmp_path,
+) -> None:
+    full_xyz = torch.tensor(
+        [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]]
+    )
+    capability = tmp_path / "capability.pt"
+    torch.save({"xyz": full_xyz}, capability)
+    view_root = tmp_path / "authority.json.views"
+    view_root.mkdir()
+    torch.save({"large_hit_tensor_was_not_needed": True}, view_root / "view_00000.pt")
+    authority = tmp_path / "authority.json"
+    authority.write_text(
+        json.dumps(
+            {
+                "schema": "radio_gs.sparse_exact_marginal_responsibility_authority.v1",
+                "schema_version": 1,
+                "frame_indices": [7],
+                "metadata": {
+                    "selected_frame_indices": [7],
+                    "feature_height": 1,
+                    "feature_width": 3,
+                    "post_compositor_alpha_threshold": 0.0,
+                    "xyz_sha256": _sha256_tensor(full_xyz),
+                },
+                "views": [
+                    {
+                        "view_index": 0,
+                        "frame_index": 7,
+                        "relative_path": "authority.json.views/view_00000.pt",
+                        "sha256": "a" * 64,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    graph = {
+        "xyz": full_xyz[[0, 2]],
+        "global_rows": torch.tensor([0, 2]),
+        "metadata": {"capability_cache": str(capability)},
+    }
+    assignments, metadata = _load_responsibility_assignments(authority, graph)
+    assert assignments == {7: {"declared_by_exact_marginal_authority": True}}
+    assert metadata["alpha_threshold"] == 0.0
+    assert metadata["responsibility_storage"] == "sharded_exact_marginal_authority_v1"
+    assert metadata["relation_graph_identity"] == (
+        "global_gaussian_responsibility_to_explicit_valid_canonical_subset"
+    )
 
 
 def test_graph_provenance_accepts_explicit_modern_capability_contract() -> None:

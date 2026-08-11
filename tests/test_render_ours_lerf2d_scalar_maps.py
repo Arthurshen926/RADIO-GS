@@ -22,6 +22,9 @@ from radio_gs.scripts.materialize_lerf_multiscale_query_score_cache import (
     SHARED_AUTHORITY_CONTRACT,
     _tensor_sha256,
 )
+from radio_gs.scripts.materialize_lerf_multiscale_query_score_cache_fp32 import (
+    SHARED_AUTHORITY_CONTRACT as FP32_SHARED_AUTHORITY_CONTRACT,
+)
 from radio_gs.scripts import render_ours_lerf2d_scalar_maps as renderer
 
 
@@ -107,6 +110,11 @@ def _score_payload(
         "renderer_geometry_checkpoint_sha256": geometry_sha,
         "authority": {
             "contract": SHARED_AUTHORITY_CONTRACT,
+            "score_semantics": "raw_independent_normalized_cosine",
+            "score_formula": (
+                "l2_normalize(descriptor) @ l2_normalize(text_embedding).T"
+            ),
+            "probability_route": "",
             "query_scores_sha256": _tensor_sha256(scores),
             "scale_axis": scale_axis,
             "query_axis": {
@@ -323,6 +331,20 @@ def test_cache_rejects_calibration_and_invalid_row_drift(tmp_path: Path) -> None
         renderer.load_scene_query_scores(
             bindings["scene_a"], model=model, expected_query_ids=("red cup",)
         )
+
+
+def test_cache_authority_accepts_calibration_free_fp32_contract() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 1.0], [1.0, 0.0, 1.0]])
+    payload = _score_payload(xyz, geometry_sha="a" * 64)
+    payload["authority"]["contract"] = FP32_SHARED_AUTHORITY_CONTRACT
+
+    scales = renderer._validate_cache_authority(
+        payload,
+        expected_query_ids=("red cup",),
+        expected_renderer_geometry_sha256="a" * 64,
+    )
+
+    assert [scale["id"] for scale in scales] == ["0.2", "0.4", "0.7"]
 
 
 def test_full_cpu_synthetic_bundle_is_accepted_by_frozen_evaluator(

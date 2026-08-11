@@ -1,0 +1,122 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_relative_source_gate_result.v2",
+  "status": "all_source_gates_passed_frozen_benchmark_sentinel_authorized",
+  "scene_id": "scene0000_00",
+  "representation_contract": {
+    "persistent_semantic_feature": "canonical_radio_only",
+    "field_architecture_changed": false,
+    "official_sam_role": "mapping_time_relative_relation_teacher_only",
+    "source_rgb_at_query_or_evaluation_time": false,
+    "target_rgb_at_query_or_evaluation_time": false,
+    "sam_decoder_cache_mask_feature_or_triplet_at_query_time": false,
+    "teacher_tensor_saved_in_checkpoint": false,
+    "benchmark_query_gt_or_metric_opened_during_source_gate": false
+  },
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_scene0000_relative_v2_preregistration_20260810.json",
+    "sha256": "50247878dce06d73122dd6d2a77bcc6fa14202d66b7c38095cc4d84c869023a7"
+  },
+  "candidate": {
+    "checkpoint": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/canonical_radio_source_sam_relative_e5_seed0.pth",
+    "checkpoint_sha256": "d623ceea3ea13dad2c8ba27667c5942b3ab2b7af0b9648f0ae8e02304498604e",
+    "report_sha256": "f5d5289f3c49adaaf7fcc977340d53fee15022ce753ea2c0fb8aeb8538ab0d45",
+    "state_tensor_keys": [
+      "decoder.basis",
+      "decoder.log_scale",
+      "decoder.mean",
+      "fusion.base_projection.bias",
+      "fusion.base_projection.weight",
+      "fusion.gate.0.bias",
+      "fusion.gate.0.weight",
+      "fusion.network.0.bias",
+      "fusion.network.0.weight",
+      "fusion.network.2.bias",
+      "fusion.network.2.weight",
+      "local_codes",
+      "reliability"
+    ],
+    "persistent_teacher_feature_tensor_keys": []
+  },
+  "control": {
+    "raw_radio_mean_cosine": 0.9608365297317505,
+    "raw_radio_p05_cosine": 0.9245462417602539,
+    "dino_adaptor_mean_cosine": 0.9766802191734314,
+    "dino_adaptor_p05_cosine": 0.958669900894165,
+    "sam_adaptor_mean_cosine": 0.947316586971283,
+    "sam_adaptor_p05_cosine": 0.8961353898048401,
+    "global_same_mean_cosine": 0.9051440954208374,
+    "global_separate_mean_cosine": 0.7752244472503662,
+    "global_relation_gap": 0.1299196481704712,
+    "scale_triplet_positive_mean_cosine": 0.8911471366882324,
+    "scale_triplet_negative_mean_cosine": 0.7597509026527405,
+    "scale_triplet_gap": 0.13139624893665314,
+    "scale_triplet_violation_rate": 0.4107394218444824,
+    "scale_triplet_hinge_mean": 0.04433956369757652
+  },
+  "candidate_metrics": {
+    "raw_radio_mean_cosine": 0.9617710709571838,
+    "raw_radio_p05_cosine": 0.9261434674263,
+    "dino_adaptor_mean_cosine": 0.9773111343383789,
+    "dino_adaptor_p05_cosine": 0.959639847278595,
+    "sam_adaptor_mean_cosine": 0.948386013507843,
+    "sam_adaptor_p05_cosine": 0.8978179693222046,
+    "global_same_mean_cosine": 0.9053645133972168,
+    "global_separate_mean_cosine": 0.7742226123809814,
+    "global_relation_gap": 0.13114190101623535,
+    "scale_triplet_positive_mean_cosine": 0.8915939331054688,
+    "scale_triplet_negative_mean_cosine": 0.7590840458869934,
+    "scale_triplet_gap": 0.13250984251499176,
+    "scale_triplet_violation_rate": 0.40685537457466125,
+    "scale_triplet_hinge_mean": 0.04351498931646347
+  },
+  "deltas": {
+    "raw_radio_mean_cosine": 0.0009345412254333496,
+    "raw_radio_p05_cosine": 0.0015972256660461426,
+    "dino_adaptor_mean_cosine": 0.0006309151649475098,
+    "dino_adaptor_p05_cosine": 0.0009699463844299316,
+    "sam_adaptor_mean_cosine": 0.0010694265365600586,
+    "sam_adaptor_p05_cosine": 0.001682579517364502,
+    "global_same_mean_cosine": 0.00022041797637939453,
+    "global_separate_mean_cosine": -0.0010018348693847656,
+    "global_relation_gap": 0.0012222528457641602,
+    "scale_triplet_positive_mean_cosine": 0.0004467964172363281,
+    "scale_triplet_negative_mean_cosine": -0.0006668567657470703,
+    "scale_triplet_gap": 0.001113593578338623,
+    "scale_triplet_violation_rate": -0.003884047269821167,
+    "scale_triplet_hinge_mean": -0.0008245743811130524
+  },
+  "source_gate": {
+    "global_same_cosine_non_decrease": true,
+    "global_separate_cosine_non_increase": true,
+    "global_relation_gap_strict_improvement": true,
+    "scale_triplet_gap_strict_improvement": true,
+    "scale_triplet_violation_strict_decrease": true,
+    "raw_radio_preservation": true,
+    "official_dino_preservation": true,
+    "official_sam_adaptor_preservation": true,
+    "all_source_gates_passed": true,
+    "frozen_benchmark_sentinel_authorized": true
+  },
+  "causal_conclusion": {
+    "v1_failure_repaired": "The same-edge mean no longer decreases because nested masks are encoded as scale-matched relative order rather than unconditional equivalence.",
+    "boundary_effect": "Both global cross-boundary similarity and matched-triplet negative similarity decrease while same-region similarity increases.",
+    "representation_effect": "Raw RADIO, DINO readout capability, and SAM-adaptor readout capability all improve without persisting any teacher feature tensor.",
+    "scope_limit": "This is one source-scene mechanism gate, not a six-task accuracy result."
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "telemetry_sha256": "4cb782bc3a16202c07d8c0498a08ae38f98029cf5f07313fb8eac72706983c77",
+    "owner_audit_sha256": "971211271ad6eb5eef6ec5c3372b2a3867760d775ef57f31394fca2c268b60cd",
+    "maximum_temperature_c": 58,
+    "maximum_sampled_power_w": 156.66,
+    "soft_pause_triggered": false,
+    "hard_stop_triggered": false,
+    "cuda_release_verified": true
+  },
+  "post_outcome_actions": {
+    "gate_threshold_relaxed": false,
+    "teacher_weight_or_margin_changed": false,
+    "benchmark_metric_run_so_far": false,
+    "candidate_promoted_to_six_task_mainline": false
+  }
+}

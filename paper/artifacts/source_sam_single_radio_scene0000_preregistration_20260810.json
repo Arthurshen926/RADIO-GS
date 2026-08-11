@@ -1,0 +1,100 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_scene0000_preregistration.v1",
+  "status": "frozen_before_gpu_training_or_benchmark_metric",
+  "scene_id": "scene0000_00",
+  "scientific_question": "Can legal mapping-time official-SAM hierarchy improve instance-boundary relations inside the one persistent RADIO field without query-time RGB or a persistent SAM feature branch?",
+  "representation_contract": {
+    "persistent_semantic_feature": "canonical_radio_only",
+    "official_sam_role": "mapping_time_sparse_relation_teacher_only",
+    "source_rgb_at_mapping_time": true,
+    "source_rgb_at_query_time": false,
+    "target_rgb_at_query_time": false,
+    "sam_decoder_or_cache_at_query_time": false,
+    "teacher_tensor_saved_in_checkpoint": false,
+    "benchmark_query_gt_or_metric_opened": false
+  },
+  "immutable_inputs": {
+    "training_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/training_manifest.json",
+      "sha256": "e286ed2093ea38109cfef70639f666e8e95fe8dc6ac51bfb40e0041d6f75a8ac"
+    },
+    "control_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0000/canonical_mpr_v2_d256_l128_fusion.pth",
+      "sha256": "80a13c1a7d1405971424c825000f47d8a19aa32f5e64433c1bb0707febecd845"
+    },
+    "canonical_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0000/raw_radio_heldout4.pt",
+      "sha256": "10bcbb30fc5e3b1bc66d8546f398936290ddcc53bf5bdca7b566ed47d18fc5c5"
+    },
+    "official_dino_preservation_target": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0000/dino_v3_heldout4.pt",
+      "sha256": "efa2ab219700ab01aef6d1764939d77eda2b224c4ccd6793ab8f3fd80854161d"
+    },
+    "official_sam_adaptor_preservation_target": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0000/sam3_heldout4.pt",
+      "sha256": "499bc32736b0154794adbfdb201c38bf35ac2a7056bac5c450898f6f95ef9a21"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "feature_output_bundle_sha256": "1b56ee37ad05045c6b97bc24ee34dce59a06b84486abb0735a87f887af843fbc"
+  },
+  "teacher_summary": {
+    "official_sam_source_frames": 118,
+    "selected_relation_edges": 65536,
+    "same_edges": 59431,
+    "separate_edges": 6105,
+    "ambiguous_or_unobserved_edges": "abstain",
+    "lifting": "true_alpha_compositing_raster_adjoint",
+    "source_frame_inventory_sha256": "4a9f9742968abeb8c500a95450ef247ee229ff43a6ed0e3ebbc39ab3fd06c5ba",
+    "official_sam_build_authority_sha256": "b37e24745175c82ff5aebea08ba176278aae087515894222af52a10e47f38e38"
+  },
+  "training": {
+    "initialization": "exact_control_field",
+    "architecture_changed": false,
+    "epochs": 5,
+    "minimum_epochs": 5,
+    "batch_size": 1024,
+    "evaluation_batch_size": 8192,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0,
+    "raw_radio_weight": 1.0,
+    "official_dino_weight": 0.2,
+    "official_sam_adaptor_weight": 0.2,
+    "official_sam_structure_weight": 0.05,
+    "per_scene_or_per_task_tuning": false,
+    "number_of_training_runs": 1
+  },
+  "source_only_gates": {
+    "same_relation_axis_unchanged": true,
+    "sam_same_mean_cosine": "must_not_decrease",
+    "sam_separate_mean_cosine": "must_not_increase",
+    "sam_relation_gap": "must_strictly_improve",
+    "raw_radio_mean_cosine_max_regression": 0.005,
+    "raw_radio_p05_cosine_max_regression": 0.01,
+    "official_dino_mean_cosine_max_regression": 0.005,
+    "official_dino_p05_cosine_max_regression": 0.01,
+    "official_sam_adaptor_mean_cosine_max_regression": 0.005,
+    "official_sam_adaptor_p05_cosine_max_regression": 0.01,
+    "failure_action": "reject_before_any_six_task_benchmark_metric_and_do_not_tune"
+  },
+  "implementation": {
+    "source_structure": "e987a0b2244e030b95b92ae8f078c967575b49317439b6121435af1e423b3ef1",
+    "canonical_trainer": "340fae6a0ce4702a3390d22d82287b27414e2564e79a5c47c0da86e08471bf34"
+  },
+  "output": {
+    "checkpoint": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/canonical_radio_source_sam_structure_e5_seed0.pth",
+    "no_clobber": true
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  }
+}

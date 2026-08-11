@@ -1,0 +1,32 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf2d_fp32_renderer_correction.v1",
+  "status": "frozen_before_any_scalar_map_or_lerf2d_metric",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_rgb_free_benchmark_preregistration_20260811.json",
+    "sha256": "34ee52ce4e2f48e44286c28fdc81b5a7c9ef97f7a9e6e1f7f3364c640781a7ee"
+  },
+  "failed_attempt": {
+    "failure_stage": "cache_authority_validation_before_first_scalar_map",
+    "cause": "the frozen renderer admitted only the legacy FP16 authority identifier even though its numeric path already converts either cache dtype to FP32 before rasterization",
+    "output_bundle_published": false,
+    "metric_or_ground_truth_opened": false,
+    "query_scores_or_method_parameters_changed": false,
+    "gpu_max_sampled_temperature_c": 48,
+    "gpu_released": true
+  },
+  "correction": {
+    "scope": "fail_closed_consumer_contract_extension_only",
+    "legacy_authority_contract_retained": "radio_gs.lerf_multiscale_query_score_authority.v2",
+    "additional_authority_contract": "radio_gs.lerf_multiscale_query_score_fp32_authority.v4",
+    "shared_score_semantics_required": "raw_query_relevance_pre_occam_activation",
+    "calibration_free_constraints_unchanged": true,
+    "scale_query_geometry_hash_validation_unchanged": true,
+    "rasterization_dtype_unchanged": "torch.float32",
+    "threshold_or_scale_tuning_added": false,
+    "old_renderer_sha256": "93f2c4466e82559fc393d41bf78cab244d536cb0092b08cbeb0eddf50b012fcf",
+    "new_renderer_sha256": "d2969c75b92fb91c4186e74119c5eccb879eacafcf5ff3c8dcdbc790706d9bdc",
+    "test_sha256": "01888adedb515f69087489cc77b78b54dd72bc5c401d990d43d9bab436bee7c2",
+    "focused_tests": "29 passed"
+  },
+  "new_output_bundle": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/lerf2d_candidate_bundle_v2"
+}

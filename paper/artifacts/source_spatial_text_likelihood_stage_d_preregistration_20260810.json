@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_spatial_text_likelihood_stage_d_preregistration",
+  "status": "sealed_before_stage_d_source_shard_materialization_or_fit",
+  "method": {
+    "raw_evidence": "per-scale class cosine minus maximum frozen canonical-negative cosine, represented as legacy logit",
+    "query_independent_geometry": "canonical MPR region centroid from accepted region membership and canonical support-graph xyz",
+    "fixed_spatial_features": ["k10 neighbor mean raw logit", "k10 neighbor max raw logit", "center-minus-neighbor-mean contrast"],
+    "support_features": ["coverage", "reliability"],
+    "head": "scene-shared 6->12->1 bounded log-odds residual MLP; no scene or query parameters",
+    "maximum_absolute_log_odds_residual": 2.0,
+    "zero_residual_identity": "bitwise legacy probability",
+    "default_off_identity": "existing ScanNet exact and LERF evaluators unchanged unless explicitly opted in"
+  },
+  "fit_recipe": {
+    "fit_scenes": ["scene0001_00", "scene0002_00", "scene0005_00"],
+    "heldout_source_development_scene": "scene0003_00",
+    "optimizer": "Adam",
+    "seed": 17,
+    "epochs": 128,
+    "learning_rate": 0.02,
+    "weight_decay": 0.0001,
+    "local_relation_weight": 0.15,
+    "gpu": false,
+    "loss": "scene-class macro balanced BCE plus fixed-weight neighbor relation smooth-L1"
+  },
+  "source_fit_gates": {
+    "macro_balanced_bce_must_decrease": true,
+    "macro_positive_negative_probability_gap_must_increase": true,
+    "macro_neighbor_relation_loss_must_decrease": true,
+    "all_three_required_before_development_open": true
+  },
+  "development_protocol": {
+    "scene0003_semantics_used_only_after_source_fit_gate": true,
+    "one_shot": true,
+    "parameter_callback": false,
+    "same_three_metrics_must_improve": true,
+    "benchmark_metric": false
+  },
+  "fit_assets": {
+    "scene0001_00": {
+      "source_text_shard_sha256": "c03fb1f83418eedb4a883f36bbd2019c2a1dbd49e322a2b17e984c2d08be9a3c",
+      "accepted_mpr_sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8",
+      "support_graph_sha256": "040691ac254610b67a6e7269031dcaf7eb356e6a5bd6120b35f98493446b576c"
+    },
+    "scene0002_00": {
+      "source_text_shard_sha256": "1fee973c43c9700426a0b998e770886cd83a296563d4259dc0f8b00cf6c0eede",
+      "accepted_mpr_sha256": "93ea6dbe1cc13b134f338ee4e75207a935081a4edaafcd36eaa9071b15f45a89",
+      "support_graph_sha256": "6d0e5457a03de269a63facebf6d27a6acbd466c4962d548ca9948cb0b30a21c5"
+    },
+    "scene0005_00": {
+      "source_text_shard_sha256": "faf042a297a635d7d72a4125a6f933045ae210d9e58e936d2d193fd106c57741",
+      "accepted_mpr_sha256": "04741b32c0a97e25489cf867729d6f54420adf325e2a22c495e86d890a661e9e",
+      "support_graph_sha256": "b9bacfb4b58ee540c51e8b74df82d2e676707ce0b75da89b2977429e4ea03fd8"
+    }
+  },
+  "immutable_implementation": {
+    "module_sha256": "e2632c61ad1f980133a6e7b4eede4c25ef9e734fa018db6cec18cbcbe9c535ad",
+    "builder_sha256": "d4c8e327d9407240078e8d1f71aeedeba02ee2c81b74c47ad7df97a3a22a5e9d",
+    "trainer_sha256": "95386a6367edd8e161ca6c9e16b3eb5369c0b60a69ebe6a0acc301b1d1647e3e",
+    "tests_sha256": "415cedf7e99847e0f1307892f23c82714302608e6839ef300a5f1098edf07461",
+    "focused_tests": "21 passed"
+  },
+  "future_lerf_gate_if_development_passes": {
+    "pair": ["figurines", "waldo_kitchen"],
+    "all_predictions_sealed_before_metric": true,
+    "macro_delta_miou_strictly_positive": true,
+    "minimum_per_scene_delta_miou": -0.002,
+    "full4_only_after_pair_pass": true,
+    "threshold_or_formula_tuning": false
+  },
+  "access_disclosure": {
+    "historic_scene0003_development_semantics_exist_from_the_prior_head": true,
+    "stage_d_does_not_load_scene0003_before_new_source_fit_gate": true,
+    "lerf_metric_opened_for_stage_d_before_preregistration": false,
+    "benchmark_gt_used_for_fit": false
+  }
+}

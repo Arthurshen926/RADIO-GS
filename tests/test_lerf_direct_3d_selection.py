@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -82,7 +83,14 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     xyz_geometry_fingerprint,
     peak_normalize_query_scores,
     mask_to_sam3_box_prompt,
+    load_lerf_prediction_inventory,
+    write_lerf_prediction_receipt,
 )
+from radio_gs.scripts.score_lerf_sealed_prediction_batch import (
+    score_prediction_receipt,
+    validate_prediction_receipt,
+)
+import radio_gs.scripts.score_lerf_sealed_prediction_batch as sealed_lerf_scorer
 
 
 def test_direct_3d_cli_help_builds_without_duplicate_options():
@@ -148,6 +156,158 @@ def test_ours_multiscale_cli_is_explicitly_opt_in_to_frozen_vala_repo_protocol()
 
     assert result.returncode == 2
     assert "requires --protocol_preset vala_repo_3d" in result.stderr
+
+
+def test_target_rgb_sam3_preset_requires_pre_metric_prediction_receipt():
+    repo_root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [
+            sys.executable,
+            "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+            "--config",
+            "missing.yaml",
+            "--checkpoint",
+            "missing.pth",
+            "--scene",
+            "teatime",
+            "--protocol_preset",
+            "vala_paper_3d_target_rgb_sam3_box",
+            "--mask_refinement",
+            "none",
+        ],
+        cwd=repo_root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=30,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "requires --prediction_only --prediction_receipt and --prediction_inventory" in result.stderr
+
+
+def test_sanitized_lerf_prediction_inventory_rejects_coordinates(tmp_path: Path):
+    inventory = tmp_path / "inventory.json"
+    payload = {
+        "artifact_type": "lerf_sanitized_prediction_inventory_v1",
+        "scene": "teatime",
+        "categories": ["cup"],
+        "image_height": 2,
+        "image_width": 3,
+        "frames": [{"frame_id": 1, "categories": ["cup"]}],
+        "contains_polygon_coordinates": False,
+    }
+    inventory.write_text(json.dumps(payload), encoding="utf-8")
+    frames, categories, height, width = load_lerf_prediction_inventory(
+        inventory, expected_scene="teatime"
+    )
+    assert frames == {1: [{"category": "cup"}]}
+    assert categories == ["cup"]
+    assert (height, width) == (2, 3)
+
+    payload["contains_polygon_coordinates"] = True
+    inventory.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid sanitized"):
+        load_lerf_prediction_inventory(inventory, expected_scene="teatime")
+
+
+def test_lerf_prediction_receipt_is_complete_hash_bound_and_no_clobber(tmp_path: Path):
+    pred = tmp_path / "pred.png"
+    coarse = tmp_path / "coarse.png"
+    cv2 = pytest.importorskip("cv2")
+    assert cv2.imwrite(str(pred), np.array([[0, 255]], dtype=np.uint8))
+    assert cv2.imwrite(str(coarse), np.array([[255, 255]], dtype=np.uint8))
+    receipt_path = tmp_path / "receipt.json"
+    row = {
+        "frame_id": 2,
+        "category": "cup",
+        "prediction_path": str(pred),
+        "coarse_prediction_path": str(coarse),
+        "height": 1,
+        "width": 2,
+        "prediction_pixels": 1,
+        "coarse_prediction_pixels": 2,
+        "sam3_report": {"accepted": True},
+    }
+    output, digest = write_lerf_prediction_receipt(
+        receipt_path,
+        scene="teatime",
+        selection=SelectionSpec("score_threshold", 0.6),
+        protocol={
+            "capability_track": "target_rgb_assisted_official_sam3_box",
+            "target_annotation_coordinates_loaded": False,
+        },
+        predictions=[row],
+    )
+    validated = validate_prediction_receipt(output, expected_sha256=digest)
+    assert validated["prediction_count"] == 1
+    assert validated["target_metric_computed_before_seal"] is False
+
+    write_lerf_prediction_receipt(
+        receipt_path,
+        scene="teatime",
+        selection=SelectionSpec("score_threshold", 0.6),
+        protocol={
+            "capability_track": "target_rgb_assisted_official_sam3_box",
+            "target_annotation_coordinates_loaded": False,
+        },
+        predictions=[row],
+    )
+    row["category"] = "plate"
+    with pytest.raises(FileExistsError, match="refusing to overwrite"):
+        write_lerf_prediction_receipt(
+            receipt_path,
+            scene="teatime",
+            selection=SelectionSpec("score_threshold", 0.6),
+            protocol={
+                "capability_track": "target_rgb_assisted_official_sam3_box",
+                "target_annotation_coordinates_loaded": False,
+            },
+            predictions=[row],
+        )
+
+
+def test_sealed_lerf_scorer_propagates_nested_sam3_acceptance_to_buckets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    cv2 = pytest.importorskip("cv2")
+    pred = tmp_path / "pred.png"
+    coarse = tmp_path / "coarse.png"
+    assert cv2.imwrite(str(pred), np.array([[255, 0], [0, 0]], dtype=np.uint8))
+    assert cv2.imwrite(str(coarse), np.array([[255, 0], [0, 0]], dtype=np.uint8))
+    monkeypatch.setattr(
+        sealed_lerf_scorer,
+        "load_lerf_ovs_labels",
+        lambda _label_dir, _scene: ({1: [{"category": "cup"}]}, ["cup"], 2, 2),
+    )
+    monkeypatch.setattr(
+        sealed_lerf_scorer,
+        "build_gt_masks",
+        lambda _objects, _categories, _height, _width: {
+            "cup": np.array([[True, False], [False, False]])
+        },
+    )
+    result = score_prediction_receipt(
+        {
+            "scene": "teatime",
+            "predictions": [
+                {
+                    "frame_id": 1,
+                    "category": "cup",
+                    "prediction_path": str(pred),
+                    "coarse_prediction_path": str(coarse),
+                    "height": 2,
+                    "width": 2,
+                    "sam3_report": {"attempted": True, "accepted": True},
+                }
+            ],
+        },
+        label_dir=str(tmp_path),
+    )
+    assert result["query_details"][0]["sam3_attempted"] is True
+    assert result["query_details"][0]["sam3_accepted"] is True
+    assert result["initial_iou_buckets"]["gte_0p75"]["sam3_accept_rate"] == 1.0
 
 
 def test_render_rgb_refinement_frame_converts_rgb_tensor_to_bgr_uint8():

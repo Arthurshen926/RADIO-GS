@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-capability-likelihood-v2-frozen-development-one-shot-preregistration",
+  "created_at": "2026-08-10T16:20:00+08:00",
+  "status": "sealed_before_development_labels_opened",
+  "scene": {
+    "scene_id": "scene0003_00",
+    "partition": "development_validation",
+    "split_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_training_split_v1/scene_split.json",
+      "sha256": "ea08e071ed789b801c2a20bfa9c2878169c0cfafd7458e79f407332f41fec954"
+    }
+  },
+  "frozen_head": {
+    "path": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0000_v2/head_balanced_dice_v2.pt",
+    "sha256": "07ad2226ac2cee4e572cc4809ea0d1d6160f16fdfc1da2ff8281ff7f36f45924",
+    "fit_scene_ids": ["scene0000_00"],
+    "retrained_for_development": false,
+    "threshold_selected_on_development": false
+  },
+  "training_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/agile3d_capability_likelihood_v2_preregistration_20260810.json",
+    "sha256": "47e800b00b12ffee85199135f61762fedbdaa40a8326b68e6fc9f0692fb16323"
+  },
+  "query_independent_bundle": {
+    "path": "/root/RADIO-GS/local_ssd_results/agile3d_scene0003_gaussian_bundle_v1/scene0003_00.pt",
+    "sha256": "497157fab81eb5148d2d246415155610bcdc3153bae34cefe1a6a28f013cdcdd",
+    "labels_opened": false,
+    "query_or_clicks_opened": false
+  },
+  "integration": {
+    "fusion": "direct_registered_likelihood",
+    "semantics": "replace_capability_unary_preserve_world_click_hard_seeds",
+    "reason": "The learned head conditions on the same appearance and boundary observations as the historical cosine unary; adding or PoE-fusing both would double count one observation.",
+    "reported_binary_threshold": 0.5,
+    "threshold_tuning": "none",
+    "evaluator_sha256": "846ba44e731c977f26f6cf99b4f43685a862beff37b106d06b78080449e74d66",
+    "query_engine_sha256": "cdda52d166d861de5702d16f76b5a19d39f55fccaac821e2bc830fdb8b70eaaa",
+    "evidence_scorer_sha256": "ddb803184e7d3430faa83d0e281e3bc4df3cd28b29721ab884c4c3feddec85b2"
+  },
+  "fixed_protocol": {
+    "observation_contract": "query_independent_gaussian_bundle_v1",
+    "require_support_gate": true,
+    "readout_support_threshold": 0.01,
+    "minimum_support_fraction": 0.95,
+    "voxel_size_m": 0.05,
+    "evaluation_voxel_size_m": 0.05,
+    "click_seed_kernel": "native_gaussian",
+    "max_clicks": 10,
+    "click_workers": 2,
+    "readout_candidate_k": 64,
+    "seed_candidate_k": 64,
+    "seed_topk": 0,
+    "seed_temperature": 1.0,
+    "selection_mode": "seeded_component",
+    "solver_type": "confidence_random_walker",
+    "laplacian_weight": 1.0,
+    "cg_iterations": 64,
+    "support_threshold": 0.5,
+    "hard_seed_threshold": 0.2,
+    "world_point_prototype_mode": "per_click_local",
+    "world_point_prototype_weighting": "support_mass",
+    "score_chunk_size": 8192,
+    "official_capability_teacher_required": false,
+    "predictor_source": "sealed_scene0003_query_independent_primitive_bundle",
+    "development_object_id": 21,
+    "development_object_source": "sealed_scene_split.source_object_ids.scene0003_00"
+  },
+  "outputs": {
+    "baseline": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0003_dev_v2/baseline.json",
+    "frozen_v2": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0003_dev_v2/frozen_v2.json"
+  },
+  "execution_order": ["baseline", "frozen_v2"],
+  "decision_rule": "Report the one-shot causal A/B. If frozen_v2 declines, do not retune it on scene0003_00 and do not open any 312-scene test label.",
+  "label_free_preflight_adjustment": "The exact factorized field declares canonical-factorized-radio-v1 rather than canonical-full-observation-mpr-v1/v2/v3 and its feature source is project_raw rather than the optional native-official-extracted teacher. Both facts were detected before labels were opened. The frozen A/B therefore explicitly uses the already sealed query-independent Gaussian primitive bundle as its predictor source, validates that bundle against field/capability SHA, row geometry and coverage, and does not relabel or bypass the legacy MPR contract.",
+  "safety": {
+    "development_labels_opened_at_seal_time": false,
+    "test_labels_opened": false,
+    "full312_run": false,
+    "gpu": "physical_gpu0_only",
+    "thermal_guard_seconds": 60,
+    "pause_temperature_c": 82
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_odds_residual_transport_v4_frozen_result",
+  "status": "complete_preregistered_gate_failed_stop_untrained_mapping_formulas",
+  "preregistration": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_preregistration_20260810.json", "sha256": "859b0c8fb91008ee534649811d82733817f765832de95a5349deb428d549e62b"},
+  "implementation_correction": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_implementation_correction_20260810.json", "sha256": "72c62a3063c619cac4b5bcf90aaa72e46c341b9179ff4bf1b5c9df2011c8b812", "reason": "enforce mathematical residual-sign monotonicity at float32 storage precision; formula and all method parameters unchanged"},
+  "pre_metric_prediction_batch_seal": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_prediction_batch_seal_20260810.json", "sha256": "42c93294ec0643a43eb7eaa039405af35bce6a08e6e0397ecfce5ba9cc353b8f", "all_416_corrected_prediction_and_coarse_mask_hashes_replayed_before_first_v4_metric": true},
+  "method": {
+    "formula": "s_final = sigmoid(logit(s_legacy_final) + c * (logit(q) - logit(p_field_raw)))",
+    "fixed_logit_clip_epsilon": 0.000001,
+    "unchanged_after_transport": "0.6 threshold and selected-only-alpha projection",
+    "new_parameters_or_scene_settings": false,
+    "end_to_end_invariants": ["c=0 bitwise legacy", "q=p_field_raw bitwise legacy", "positive residual nondecreasing", "negative residual nonincreasing", "default-off bitwise legacy"]
+  },
+  "same_field_same_cache_causal_results": {
+    "figurines": {
+      "n": 56,
+      "legacy": {"miou": 0.44569653272628784, "acc025": 0.7678571428571429, "acc050": 0.5535714285714286, "boundary_f": 0.666334331035614, "trimap_iou": 0.42321401834487915},
+      "odds_residual_v4": {"miou": 0.4393329620361328, "acc025": 0.7857142857142857, "acc050": 0.5, "boundary_f": 0.6647974848747253, "trimap_iou": 0.4159142076969147},
+      "delta_v4_minus_legacy": {"miou": -0.006363570690155029, "acc025": 0.017857142857142794, "acc050": -0.0535714285714286, "boundary_f": -0.0015368461608886719, "trimap_iou": -0.0072998106479644775},
+      "v2_miou": 0.47560593485832214,
+      "v3_miou": 0.4261394143104553,
+      "v4_minus_v3_miou": 0.01319354772567749,
+      "candidate_report_sha256": "354f0fb1cf5101b79598f1e7837fce8e3f791700c8f564e894eb19cf83ca2429"
+    },
+    "ramen": {
+      "n": 71,
+      "legacy": {"miou": 0.38143566250801086, "acc025": 0.676056338028169, "acc050": 0.29577464788732394, "boundary_f": 0.6208915114402771, "trimap_iou": 0.3959977626800537},
+      "odds_residual_v4": {"miou": 0.3679557144641876, "acc025": 0.6338028169014085, "acc050": 0.29577464788732394, "boundary_f": 0.6106002330780029, "trimap_iou": 0.41599664092063904},
+      "delta_v4_minus_legacy": {"miou": -0.013479948043823242, "acc025": -0.04225352112676051, "acc050": 0.0, "boundary_f": -0.01029127836227417, "trimap_iou": 0.019998878240585327},
+      "v2_miou": 0.41509631276130676,
+      "v3_miou": 0.3641021251678467,
+      "v4_minus_v3_miou": 0.0038535892963409424,
+      "candidate_report_sha256": "2d692d117fdf317d4d87172f8f704f801b040849b2e8ed0cd02fec8f82f4dd1a"
+    },
+    "teatime": {
+      "n": 59,
+      "legacy": {"miou": 0.5256859064102173, "acc025": 0.8813559322033898, "acc050": 0.5084745762711864, "boundary_f": 0.7531660795211792, "trimap_iou": 0.37678709626197815},
+      "odds_residual_v4": {"miou": 0.5229907035827637, "acc025": 0.8813559322033898, "acc050": 0.4915254237288136, "boundary_f": 0.7454755902290344, "trimap_iou": 0.37991705536842346},
+      "delta_v4_minus_legacy": {"miou": -0.0026952028274536133, "acc025": 0.0, "acc050": -0.016949152542372836, "boundary_f": -0.007690489292144775, "trimap_iou": 0.0031299591064453125},
+      "v2_miou": 0.5265554785728455,
+      "v3_miou": 0.5224350094795227,
+      "v4_minus_v3_miou": 0.0005556941032409668,
+      "candidate_report_sha256": "367b0c71a3760ccb03d9e3b7e6cf16929a5d1d4dbc39f4e2fd7d0d275812a12b"
+    },
+    "waldo_kitchen": {
+      "n": 22,
+      "legacy": {"miou": 0.34231969714164734, "acc025": 0.6818181818181818, "acc050": 0.2727272727272727, "boundary_f": 0.4187788665294647, "trimap_iou": 0.2996499836444855},
+      "odds_residual_v4": {"miou": 0.34178426861763, "acc025": 0.6818181818181818, "acc050": 0.2727272727272727, "boundary_f": 0.4184868037700653, "trimap_iou": 0.2989008128643036},
+      "delta_v4_minus_legacy": {"miou": -0.000535428524017334, "acc025": 0.0, "acc050": 0.0, "boundary_f": -0.00029206275939941406, "trimap_iou": -0.0007491707801818848},
+      "v2_miou": 0.3156757652759552,
+      "v3_miou": 0.3402424156665802,
+      "v4_minus_v3_miou": 0.0015418529510498047,
+      "candidate_report_sha256": "c946185a51e7c0429a54919283dc7630a82f0645edd7219c71da801953637433"
+    },
+    "scene_macro": {
+      "legacy": {"miou": 0.42378444969654083, "acc025": 0.7517718987267208, "acc050": 0.40763698136430293, "boundary_f": 0.6147926971316338, "trimap_iou": 0.3739122152328491},
+      "odds_residual_v4": {"miou": 0.41801591217517853, "acc025": 0.7456728041593164, "acc050": 0.39000683608585257, "boundary_f": 0.609840027987957, "trimap_iou": 0.3776821792125702},
+      "delta_v4_minus_legacy": {"miou": -0.005768537521362305, "acc025": -0.006099094567404428, "acc050": -0.01763014527845036, "boundary_f": -0.004952669143676758, "trimap_iou": 0.0037699639797210693}
+    }
+  },
+  "registry_context": {
+    "baseline_A": "same compact field and raw caches through frozen legacy readout",
+    "baseline_A_macro_miou": 0.42378444969654083,
+    "baseline_B": "registry O2 teacher-sidecar-bypass exact row; paper best strict-like but not unified field",
+    "baseline_B_macro_miou": 0.4496018,
+    "v4_minus_B_miou": -0.03158588782482147,
+    "old_O2_figurines_near": 0.529,
+    "claim": "v4 does not exceed either baseline A or B"
+  },
+  "preregistered_gate": {
+    "scene_macro_delta_miou_strictly_positive": false,
+    "minimum_allowed_per_scene_delta_miou": -0.002,
+    "figurines_passed": false,
+    "ramen_passed": false,
+    "teatime_passed": false,
+    "waldo_kitchen_passed": true,
+    "overall_passed": false,
+    "action": "Stop untrained mapping-formula experiments. Do not expand Stage-B from v4. Move to source-trained spatial likelihood."
+  },
+  "causal_conclusion": {
+    "what_v4_fixed": "Compared with v3, the odds residual improves every scene and keeps waldo near legacy; it avoids absolute posterior/rank-score convex mixing and preserves the legacy cabinet support (cabinet 0.794274 legacy to 0.794925 v4).",
+    "what_remains": "The residual is still primitive-local and scale-collapsed while the legacy score was produced by scale-specific kNN and scene-wise rank normalization. Applying a source-trained semantic residual after that spatial readout cannot repair visibility/support omissions and can fragment fine object support around the fixed threshold.",
+    "evidence": "v4 remains below legacy in all four scene means; its macro trimap improves by 0.377pp while mIoU, Acc@.50, and boundary decline, consistent with boundary-local changes that do not recover object-level support.",
+    "next_stage": "Train a source-only spatial likelihood readout: aggregate positive/negative evidence and reliability on the primitive graph before probability calibration, supervise semantic relations on official ScanNet train scenes, preserve a zero-residual legacy identity, and freeze it before any unseen LERF metric. No further algebra-only mappings are justified."
+  },
+  "access_and_thermal_audit": {
+    "all_corrected_predictions_sealed_before_first_v4_metric": true,
+    "same_frozen_scorer_and_label_root": true,
+    "old_pre_correction_figurines_not_scored_or_mixed": true,
+    "parameter_callback_after_metric": false,
+    "physical_gpu": 1,
+    "maximum_temperature_celsius": 65,
+    "maximum_power_watts": 138.08,
+    "physical_gpu0_occupied_by_agile_and_not_touched": true
+  },
+  "validation": {"focused_tests_passed": 133, "json_validated": true}
+}

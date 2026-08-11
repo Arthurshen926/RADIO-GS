@@ -1,0 +1,160 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_rgb_free_benchmark_preregistration.v2",
+  "status": "frozen_before_v3_query_free_derivatives_or_query_scores_and_before_any_v3_lerf_metric",
+  "scene_id": "figurines",
+  "causal_question": "Does the source-only official-SAM triplet loss in frozen official DINO+SAM capability-relation space improve the unchanged compact single-RADIO field under the exact v2 RGB-free LERF readout?",
+  "source_gate_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_source_gate_result_20260811.json",
+    "sha256": "59dc35a246e7261689017fd77250d460811c89790e0ead4eafdb1a5d34b5bd77",
+    "required_status": "all_source_gates_passed_checkpoint_frozen_benchmark_materialization_authorized"
+  },
+  "ab_fields": {
+    "same_generation_control": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/canonical_radio_source_sam_relative_e5_seed0.pth",
+      "sha256": "4348c2c24743f552b3c24e2fd8dcf19eb101c28dad144208e996fbbc60b5e0f6",
+      "role": "v2_same_schedule_raw_radio_relation_control"
+    },
+    "candidate": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/canonical_radio_source_sam_capability_relative_e5_seed0.pth",
+      "sha256": "d38256ed91c4f373759355395bd8c8f6ddcd4b4f59018f9d27e53525a35f31b9",
+      "role": "v3_frozen_official_dino_sam_capability_relation"
+    },
+    "shared_factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b"
+    },
+    "only_changed_input": "field_checkpoint"
+  },
+  "fresh_same_generation_control_receipts": {
+    "query_score_batch_seal": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_query_score_batch_seal_20260811.json",
+      "sha256": "4ebe2e08afb59a09a835a8b4eac7eb3913e7b9041c0b20ef6ed90c2e95e05488"
+    },
+    "lerf3d_prediction_receipt": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_control_v2.receipt.json",
+      "sha256": "8fb98eb5a7211b40cd9d9f7e28028c1e362534187ee873c5e4f427cc65c08d0a"
+    },
+    "lerf3d_prediction_batch_seal": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_lerf3d_prediction_batch_seal_20260811.json",
+      "sha256": "e2eba6dba3eccd8041c6422cfc70247cff88ac8d0be060e707c52a0a991556bf"
+    },
+    "lerf2d_current_control_renderer_receipt": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/lerf2d_current_control_bundle_v1/renderer_receipt.json",
+      "sha256": "4c95af6afe51b29d29d49f495ea79783147d149f6ed38b6b8b5daa58ebead63a"
+    },
+    "lerf2d_current_control_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/lerf2d_current_control_bundle_v1/manifest.json",
+      "sha256": "ad0fae8e2da8bba81d4e2d890d0ee31baa4651cc180543797843c713d2dc7c69"
+    },
+    "lerf2d_current_control_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf2d_figurines_current_control_scalar_render_authority_20260811.json",
+      "sha256": "d16e8fe827821514b09092a431d33284200ef5edd59b9d1ea75dcdfe581e8c7b"
+    }
+  },
+  "candidate_derivatives": {
+    "root": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel",
+    "factorized_primitive_state": "factorized_primitive_state_v3.pt",
+    "official_dino_sam3_views": "official_dino_sam3_views_v3.pt",
+    "support_graph": "support_graph_v3_v2_isomorphic.pt",
+    "surface_region_descriptor": "descriptor_v3_v2_isomorphic.pt",
+    "surface_region_query_sidecar": "descriptor_v3_v2_isomorphic_query.pt",
+    "positive_fp32_scores": "positive_fp32.pt",
+    "negative_fp32_scores": "negative_fp32.pt",
+    "all_outputs_no_clobber": true,
+    "seal_before_metrics": true
+  },
+  "fixed_materialization_contract": {
+    "factorized_state": {
+      "chunk_size": 4096,
+      "schema": "factorized-v2"
+    },
+    "capability": {
+      "observation_contract": "canonical-factorized-radio-v1",
+      "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+      "formal_capability_cohort_authority_sha256": "8f490353a890101c00a9047c401d5cd6464dfd2c4bf6656696e5e26ad339f11a",
+      "batch_size": 2048
+    },
+    "support_graph": {
+      "neighbors": 16,
+      "spatial_scale": 2.0,
+      "appearance_temperature": 0.1,
+      "boundary_temperature": 0.1,
+      "normal_temperature": 0.2,
+      "surface_tangent_temperature": 0.2,
+      "surface_relation": "none",
+      "normal_neighbors": 24,
+      "normal_batch_size": 8192,
+      "normal_min_planarity": 0.0,
+      "surface_topology_min_affinity": 0.0,
+      "responsibility_or_covisibility": "disabled",
+      "affinity_dim": 128,
+      "hash_batch_size": 8192,
+      "capability_affinity_mode": "signed_hash",
+      "affinity_device": "cpu",
+      "affinity_chunk_size": 65536,
+      "topology_mode": "symmetric_union"
+    },
+    "surface_region": {
+      "region_radii_m": [0.25, 0.45, 0.7],
+      "graph_neighbors": 16,
+      "radio_batch_size": 4096,
+      "semantic_batch_size": 512,
+      "radio_feature_normalization": "legacy_raw",
+      "thermal_pacing_seconds_per_batch": 0.05,
+      "readout_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+    },
+    "query_scores": {
+      "positive_text_cache_sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b",
+      "canonical_negative_cache_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+      "dtype": "float32",
+      "chunk_size": 4096,
+      "normalization": "l2",
+      "formula": "normalized_descriptor_dot_normalized_text",
+      "threshold_or_scale_reduction_applied": false
+    }
+  },
+  "frozen_future_evaluation_contract": {
+    "lerf3d": {
+      "protocol_preset": "vala_repo_3d",
+      "score_threshold": 0.6,
+      "score_postprocess": "vala_knn_minmax",
+      "vala_knn_k": 10,
+      "scale_fusion": "peak_select",
+      "projection_mode": "selected_only_alpha",
+      "mask_refinement": "none",
+      "promotion_gate": {
+        "candidate_minus_same_generation_control_miou_min": 0.002,
+        "candidate_minus_control_boundary_f_min": -0.002,
+        "candidate_minus_control_trimap_iou_min": -0.002
+      }
+    },
+    "lerf2d": {
+      "protocol": "frozen_occam_langsplat_paper_exact_scalar_maps",
+      "same_generation_control_query_score_cache_sha256": "3366c96839fe392d6cc1f6d55939691787e095491581c63006f74e44862d4cac",
+      "promotion_gate": {
+        "candidate_minus_control_figurines_miou_min": 0.002,
+        "candidate_minus_control_figurines_loc_acc_min": 0.0
+      }
+    }
+  },
+  "implementation": {
+    "factorized_state_builder_sha256": "035663cd8e0d0222390c3d6d72d155db09aa09b9c811f6c3c6a882fbb1b3a208",
+    "capability_builder_sha256": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34",
+    "support_graph_builder_sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254",
+    "surface_region_builder_sha256": "490a0d801835d4d169c031c0386a823b6b2a09402bf4522bf666d20c0c71ecb0",
+    "score_materializer_sha256": "3ab6fcc5dbebf27a37de0f3d694626dd4d92ac71b748677d7a4ecd7dbbf1b4fd"
+  },
+  "access_and_execution_policy": {
+    "v2_lerf_outcome_used_to_choose_relation_space": true,
+    "used_to_choose_margin_weight_epochs_or_threshold": false,
+    "per_scene_or_query_metric_tuning": false,
+    "benchmark_images_opened_for_materialization": false,
+    "benchmark_annotations_masks_or_metrics_opened_for_materialization": false,
+    "query_time_source_rgb": false,
+    "query_time_target_rgb": false,
+    "query_time_official_sam": false,
+    "candidate_field_or_hyperparameters_may_change_after_preregistration": false,
+    "stop_after_all_derivatives_and_fp32_score_caches_are_hashed_and_sealed": true,
+    "metrics_authorized_in_this_execution": false
+  }
+}

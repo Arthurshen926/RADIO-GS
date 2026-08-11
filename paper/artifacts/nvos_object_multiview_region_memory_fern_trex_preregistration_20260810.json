@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_object_multiview_region_memory_fern_trex_preregistration_v1",
+  "status": "registered_after_source_only_coarse_seal_before_any_selected_source_rgb_sam3_or_target_prediction",
+  "baseline": {
+    "method": "frozen_hierarchical_trust_local_positive_full8_v2_graph_off",
+    "run_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/run_manifest.json",
+      "sha256": "bf34e7a370259e841067f0cd9e982ca9301892ba1877a12d48220d5f8dc65432"
+    },
+    "exact_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/full8_exact_results.json",
+      "sha256": "c2759a08ba769a36598b9614ac7e4b901b4322004424e075651cb91eb667ce21"
+    },
+    "fern_foreground_iou": 0.7350345861696804,
+    "trex_foreground_iou": 0.60547969614955,
+    "pair_macro_foreground_iou": 0.6702571411596152
+  },
+  "single_factor_change": {
+    "method": "source_only_object_multiview_region_memory_v1",
+    "reference_input": "legal official-SAM3 reference object completion plus unchanged positive and negative prompt anchors",
+    "source_views": "three deterministic non-reference training views per scene",
+    "source_rgb_capability": "fixed official-SAM3 normalized box proposal on sealed source RGB only",
+    "target_query_input": "sealed region membership and region-token carriers plus frozen canonical field only",
+    "target_rgb_mask_or_metric_input": false,
+    "scene_specific_parameters": false
+  },
+  "frozen_method": {
+    "core": {
+      "path": "/root/RADIO-GS/radio_gs/querying/multiview_region_memory.py",
+      "sha256": "54fa4383260f9eb912bfec5283d6f284ee2881ee97590d819558bcd901eaa245"
+    },
+    "source_view_selection": "top3 positive-anchor coverage times assignment reliability, reference and forbidden targets excluded, deterministic frame-id tie break",
+    "source_view_count_per_scene": 3,
+    "projection_carrier": "frozen raster_gaussian_top1 alpha_depth assignment",
+    "sam3_box_padding_pixels": 16,
+    "sam3_decoder_resolution": 1008,
+    "sam3_confidence_threshold": 0.0,
+    "sam3_minimum_projected_anchor_overlap": 0.05,
+    "candidate_selection": "maximum projected-anchor IoU; official score then candidate index only break exact overlap ties",
+    "proposal_evidence_domain": "projected-anchor padded box only",
+    "membership_probability": "weighted raster-adjoint Bernoulli mean",
+    "membership_confidence": "one minus exp of negative accumulated visible evidence mass",
+    "hard_anchor_policy": "positive and negative legal prompt anchors overwrite memory fusion bitwise",
+    "region_tokens": "one normalized proposal-weighted frozen-field token per accepted source view plus reference token",
+    "memory_and_field_fusion": "reliability-weighted Bernoulli evidence with memory reliability separate from field prior",
+    "graph_readout": "unchanged disabled unary_prior",
+    "target_threshold": 0.5
+  },
+  "frozen_implementations": {
+    "source_inventory_auditor": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/audit_nvos_multiview_region_memory_assets.py",
+      "sha256": "54e7dae5789d8c504e2f1ee344d5e8f003f1551b86256342d43e5ded8b1ac2df"
+    },
+    "coarse_producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_multiview_region_memory_coarse.py",
+      "sha256": "599ee9c3e9d49f3290cbee34d05119755b3fc40a61d3af32a6611ccf39813c60"
+    },
+    "source_sam3_bridge": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/refine_multiview_region_memory_official_sam3.py",
+      "sha256": "8542ca713372902d370eb05080e34e9b07c465818c09b332c1fa81d1eeac8f2a",
+      "official_env_preflight": "passed_after_leaf-import isolation; no selected source RGB or target asset opened"
+    },
+    "shared_fixed_box_selector": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/refine_lerf_coarse_receipt_official_sam3.py",
+      "sha256": "7f71898ee35fe8333ac952c49f7a24f99748b4173658cff158022bc00b7308d9"
+    },
+    "official_sam3_loader": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_sam3_foundation_cache.py",
+      "sha256": "6ebd001fdef7fef3b17cab8c33db9d6d7d91f23bf7f54c4bd263fb0687b2adde"
+    },
+    "official_sam3_runner": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_official_sam3_python.sh",
+      "sha256": "ea8262673c324ccdad9409a59761a647ff0c4aeabed1e14f09135fd72ed5e280"
+    },
+    "official_sam3_checkpoint": {
+      "path": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+      "sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"
+    }
+  },
+  "sealed_source_inventory": {
+    "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_a/source_inventory.json",
+    "sha256": "772baeee1c234bfdb93d3d8c62a64563c1b30a3f08b158b80e8f4208007a6ad6",
+    "target_rgb_content_opened_or_hashed": false,
+    "target_mask_or_metric_opened": false,
+    "assignment_index_to_rgb_authority": "RADIO frame_manifest numeric_then_exact order"
+  },
+  "sealed_coarse_predictions": {
+    "fern": {
+      "receipt": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_b/fern_coarse/coarse_receipt.json",
+      "receipt_sha256": "43442cc5a88e591a6f461c7e65f082f0970df63b03a5ce24f1e2061fbea20201",
+      "selection_identity_sha256": "af048196e99bd90bb8ab5a99edb48765f542988bb5fa5f7ab2b22275d0ed54bc",
+      "selected_source_frames": ["IMG_4044", "IMG_4043", "IMG_4037"],
+      "forbidden_target_frame": "IMG_4027",
+      "source_rgb_opened": false
+    },
+    "trex": {
+      "receipt": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_b/trex_coarse/coarse_receipt.json",
+      "receipt_sha256": "cda07d74e6990d2aa04a232c165f0847e1810b7014cb247073ef384156faaf82",
+      "selection_identity_sha256": "7c7548cc3cd9f5f45ceee101de91796f378985c866cf7ef15fdae98db5a23a19",
+      "selected_source_frames": ["DJI_20200223_163649_576", "DJI_20200223_163651_301", "DJI_20200223_163605_490"],
+      "forbidden_target_frame": "DJI_20200223_163619_411",
+      "source_rgb_opened": false
+    }
+  },
+  "source_only_materialization_gate": {
+    "require_all_six_view_receipts_sealed_before_target_access": true,
+    "required_sam3_accepted_views_per_scene": 3,
+    "minimum_overlap_per_accepted_view": 0.05,
+    "every_proposal_nonempty": true,
+    "primitive_membership_observed_rows_minimum": 1,
+    "positive_and_negative_hard_anchors_bitwise_equal": true,
+    "target_rgb_mask_or_metric_opened": false,
+    "failure": "stop before any target prediction and retain the frozen hierarchical mainline"
+  },
+  "staged_target_gate": {
+    "first_scene": "fern",
+    "fern_delta_minimum_to_authorize_trex": -0.002,
+    "pair_macro_delta_minimum_for_promotion": 0.005,
+    "per_scene_delta_minimum_for_promotion": -0.002,
+    "prediction_receipt_before_target_ground_truth": true,
+    "independent_scorer": true,
+    "target_metric_may_stop_later_scene_but_may_not_change_parameters": true,
+    "failure": "do not run full8 and do not replace strict NVOS mainline"
+  },
+  "unchanged_frozen_factors": {
+    "canonical_field": "official_dino_sam3_views compact field",
+    "source_completion_calibration": "all_trial_loo_hierarchical_local_positive_v2",
+    "registered_observation_fusion": "probability_mixture",
+    "registered_observation_confidence": "poisson_mass_coverage",
+    "prototype_count": 16,
+    "prototype_strategy": "spherical_mean_fps",
+    "prototype_temperature": 0.07,
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "exclusive_relative",
+    "score_render_resolution": "scaled_renderer",
+    "registered_graph": "disabled",
+    "readout": "unary_prior"
+  },
+  "validation": {
+    "focused_tests": "12 passed, 26 warnings",
+    "python_compile": "passed",
+    "real_coarse_receipts_sealed": true,
+    "real_source_rgb_opened": false,
+    "target_rgb_mask_or_metric_opened": false
+  },
+  "gpu": {
+    "physical_gpu": 1,
+    "source_sam3_launch_authorized_after_free_check": true,
+    "thermal_poll_interval_seconds": 60,
+    "pause_temperature_c": 82,
+    "resume_temperature_c": 78,
+    "parameters_may_not_change_after_source_sam3": true
+  }
+}

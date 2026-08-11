@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_typed_spatial_text_likelihood_stage_d2_source_loso_result",
+  "status": "failed_strict_per_fold_gate_stopped_before_fit3_or_lerf",
+  "authorities": {
+    "preregistration": {
+      "path": "paper/artifacts/source_typed_spatial_text_likelihood_stage_d2_preregistration_20260810.json",
+      "sha256": "58f1de28eca807353e265285aaa09b9fc04e4e57467ab1afbd7dbb9da64d279c"
+    },
+    "implementation_correction": {
+      "path": "paper/artifacts/source_typed_spatial_text_likelihood_stage_d2_implementation_correction_20260810.json",
+      "sha256": "6160facd39e459d42157eac195283115d83ea85e8dafbb6c25be4d43542d04c4"
+    },
+    "dataset_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_typed_spatial_text_likelihood_stage_d2/source_fit_dataset_manifest.v1.json",
+      "sha256": "15ca414712f8031e26e79573054ddca9260024cd110810fa35c84c05f109b178"
+    },
+    "loso_result": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_typed_spatial_text_likelihood_stage_d2/source_only_loso_result.v1.json",
+      "sha256": "62748c5254387b63b55d3e409d409ff637165554a1f31ffa043e48e4445a53c7"
+    }
+  },
+  "carrier": {
+    "edge_types": ["appearance", "boundary", "geometry"],
+    "covisibility_fabricated": false,
+    "region_edge_counts_per_type": {
+      "scene0001_00": 37706,
+      "scene0002_00": 38434,
+      "scene0005_00": 37278
+    },
+    "valid_semantic_rows": {
+      "scene0001_00": 2738,
+      "scene0002_00": 4037,
+      "scene0005_00": 3806
+    }
+  },
+  "fold_results": {
+    "scene0001_00": {
+      "balanced_bce": [0.5925829000771046, 0.5108509995043278],
+      "balanced_bce_delta": -0.0817319005727768,
+      "positive_negative_gap": [0.11344708874821663, 0.26254377886652946],
+      "positive_negative_gap_delta": 0.14909669011831284,
+      "typed_local_relation_loss": [0.0011042319238185883, 0.001055292203091085],
+      "typed_local_relation_loss_delta": -0.0000489397207275033,
+      "all_passed": true
+    },
+    "scene0002_00": {
+      "balanced_bce": [0.5852306246757507, 0.5295884549617768],
+      "balanced_bce_delta": -0.055642169713973955,
+      "positive_negative_gap": [0.12222811579704285, 0.25292600095272066],
+      "positive_negative_gap_delta": 0.13069788515567782,
+      "typed_local_relation_loss": [0.0019391020759940147, 0.0018014973029494286],
+      "typed_local_relation_loss_delta": -0.00013760477304458618,
+      "all_passed": true
+    },
+    "scene0005_00": {
+      "balanced_bce": [0.5868616302808126, 0.4281097501516342],
+      "balanced_bce_delta": -0.1587518801291784,
+      "positive_negative_gap": [0.1211500217517217, 0.3537601977586746],
+      "positive_negative_gap_delta": 0.23261017600695294,
+      "typed_local_relation_loss": [0.0010213976493105292, 0.0011448278091847897],
+      "typed_local_relation_loss_delta": 0.00012343015987426043,
+      "all_passed": false
+    }
+  },
+  "macro_deltas": {
+    "balanced_bce": -0.09870865013864305,
+    "positive_negative_gap": 0.1708015837603145,
+    "typed_local_relation_loss": -0.000021038111299276352,
+    "macro_signs_all_passed": true,
+    "strict_every_fold_all_passed": false
+  },
+  "causal_conclusion": "The typed MPR carrier transports semantic evidence substantially better than the centroid-k10 carrier and clears all three held-out gates in two of three scenes. It is not yet scene-robust: on scene0005 the shared residual gains class discrimination while damaging the typed local relation. The preregistered per-fold gate therefore rejects fit3 without weakening a threshold.",
+  "stopped_actions": {
+    "fit3_checkpoint_written": false,
+    "scene0003_opened": false,
+    "lerf_pair_predictions_generated": false,
+    "lerf_ground_truth_or_metric_opened": false,
+    "threshold_or_recipe_callback": false
+  }
+}

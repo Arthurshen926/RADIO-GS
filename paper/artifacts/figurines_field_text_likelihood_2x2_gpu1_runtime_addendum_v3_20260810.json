@@ -1,0 +1,43 @@
+{
+  "schema_version": 3,
+  "artifact_type": "figurines_field_by_text_mapping_2x2_gpu_runtime_addendum",
+  "status": "registered_after_gpu1_allocation_preflight_before_any_prediction_mask_or_ground_truth_metric",
+  "execution_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/figurines_field_text_likelihood_2x2_one_shot_execution_correction_v2_20260810.json",
+    "sha256": "04e2d97b5386da9698482248f1910a391ba5470c9444b087f50b66b0b8d65c82"
+  },
+  "cuda_failure_audit": {
+    "first_gpu1_runner_entered": true,
+    "torch_cuda_error": "804 forward compatibility was attempted on non supported HW",
+    "cause": "container default libcuda.so.1 resolved to userspace 580.105.08 while the host kernel module is 535.288.01",
+    "first_runner_used_gpu_kernel": false,
+    "first_runner_created_prediction_mask_or_receipt": false,
+    "first_runner_opened_lerf_ground_truth_or_metric": false,
+    "partial_empty_output_and_log": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/aborted_preflight_cuda804",
+    "partial_artifacts_deleted": false
+  },
+  "local_driver_shim": {
+    "directory": "/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime",
+    "libcuda_so_target": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "libcuda_so_target_sha256": "deb92bbc5e2990ded3ca2fd13103d346d2a8dee4374d7f9f64d996e420c0ec9d",
+    "system_library_symlink_modified": false,
+    "system_or_container_restarted": false,
+    "runtime_binding": "LD_LIBRARY_PATH=/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime:/root/miniconda3/envs/cybersim_agent/lib:${LD_LIBRARY_PATH:-}"
+  },
+  "gpu1_preflight": {
+    "CUDA_VISIBLE_DEVICES": "1",
+    "torch_version": "2.0.1+cu118",
+    "torch_cuda_is_available": true,
+    "visible_device_count": 1,
+    "one_element_cuda_allocation": true,
+    "logical_device": "cuda:0",
+    "device_name": "NVIDIA GeForce RTX 3090",
+    "allocation_released_before_experiment": true
+  },
+  "frozen_method_policy": {
+    "only_runtime_library_resolution_changed": true,
+    "field_text_head_raw_caches_threshold_knn_projection_graph_or_arm_order_changed": false,
+    "all_four_predictions_must_be_hash_sealed_before_first_ground_truth_open": true,
+    "scanNet_benchmark_metric_forbidden": true
+  }
+}

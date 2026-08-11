@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "artifact_type": "figurines_prior_preserving_text_likelihood_v2_execution_correction",
+  "status": "sealed_after_target_blind_cache_validation_before_prediction_or_new_metric",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/figurines_prior_preserving_text_likelihood_v2_preregistration_20260810.json",
+    "sha256": "0e13d258fbfcb7c23f3f521e447c33fb6044478af78c4d9f2022cfc22b37131c"
+  },
+  "reason": "Before prediction, expose the already validated cache mode/formula in evaluator receipts rather than recording the generic v1 mapping label. No tensor, score, threshold, projection, or method computation changed.",
+  "implementation": {
+    "adapter_before_receipt_metadata_addition_sha256": "b70e82a767916bd338eb1e8146f82110486698eabba8851bb7354fb298c98236",
+    "adapter_after_sha256": "569bf82a69398878ce4627b61d2ec7d47b0a748b08df395adfcb98596e9bf26b",
+    "evaluator_before_sha256": "95aa6169c3b29a4f24dd9552c3e057e1fb5aa2c54c551a7910b87f4920728a7d",
+    "evaluator_after_sha256": "c72b03ff0f2c21c7c2b59a4e9e2111854d97da525194739b501a6dda3b4f8903",
+    "only_changes": [
+      "validated cache dataclass exposes effective_probability_mode and formula",
+      "prediction receipt records that exact validated mode instead of a generic learned-q-c label"
+    ],
+    "effective_probability_tensor_changed": false,
+    "post_change_lerf_tests_passed": 126
+  },
+  "validated_caches": {
+    "control": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/control_source_text_likelihood_prior_preserving_v2.pt",
+      "sha256": "9d6fb08b19773e2e3133ea6d15a8c4eb27f8e1e2bcfb6a29164af683c08335ea",
+      "mode": "prior_preserving_mixture_v2",
+      "formula": "(1 - c) * field_prior + c * q",
+      "valid_effective_mean": 0.19157400727272034,
+      "valid_field_prior_mean": 0.3425080478191376
+    },
+    "stage_b": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/stage_b_source_text_likelihood_prior_preserving_v2.pt",
+      "sha256": "8edbbdd05c19060b74b231566ea03997eed1cd414c29e8431a9e16813ef69863",
+      "mode": "prior_preserving_mixture_v2",
+      "formula": "(1 - c) * field_prior + c * q",
+      "valid_effective_mean": 0.19104836881160736,
+      "valid_field_prior_mean": 0.3425319194793701
+    }
+  },
+  "access_audit": {
+    "cache_materialization_cuda_initialized": false,
+    "lerf_ground_truth_or_metric_opened_for_v2": false,
+    "target_rgb_or_mask_opened": false,
+    "head_q_c_field_threshold_knn_projection_or_graph_changed": false,
+    "prediction_may_start": true
+  }
+}

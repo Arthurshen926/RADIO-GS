@@ -1,0 +1,113 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_training_preregistration.v1",
+  "status": "frozen_before_candidate_field_training",
+  "objective": "Improve the persistent single-RADIO field with mapping-time official-SAM boundary/order supervision while keeping field architecture and every query-time interface unchanged and RGB-free.",
+  "scene_id": "figurines",
+  "representation_contract": {
+    "persistent_semantic_feature": "canonical_radio_only",
+    "field_architecture_changed": false,
+    "initialization": "exact_frozen_canonical_factorized_radio_control",
+    "official_sam_role": "mapping_time_scale_matched_relative_relation_teacher_only",
+    "source_rgb_at_mapping_time": true,
+    "source_or_target_rgb_at_query_or_evaluation_time": false,
+    "sam_mask_feature_relation_or_triplet_persisted_in_field": false
+  },
+  "authorities": {
+    "relation_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_relation_preregistration_20260811.json",
+      "sha256": "5b6e54b2bfb65ae28fce20e6fa95dcd60920525a2d671fdb0d53e13a9bc8af7d"
+    },
+    "relation_cache": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/scale_ordered_relation_raster_adjoint_fp32.pt",
+      "sha256": "6ac92e1df528d83bd1765c1c39ce7f87bbc50a098bc9c8e05e2467b6eaf9db46",
+      "source_frames_attempted": 120,
+      "source_frames_with_valid_3d_relation": 118,
+      "source_frames_abstained_no_metric_3d_support": [162, 277]
+    },
+    "base_structure_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/source_only_sam_structure_manifest.json",
+      "sha256": "cf515f9246b6c7dbc75a0ee37721fe3f4ae4c59a6727ca56306a94352a53ec5c"
+    },
+    "relative_structure_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/source_only_sam_relative_manifest.json",
+      "sha256": "e42ea41fca40bfddb87f776b11e8b3a4b1498010f78b60178f5f5db8c1c7eb81"
+    },
+    "control_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5"
+    },
+    "factorized_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "capability_cohort": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_figurines_exact_marginal_v3_capability_cohort_authority_20260805.json",
+      "sha256": "8f490353a890101c00a9047c401d5cd6464dfd2c4bf6656696e5e26ad339f11a",
+      "feature_output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3"
+    }
+  },
+  "training": {
+    "observation_contract": "canonical-factorized-radio-v1",
+    "capability_target_contract": "matched_exact_marginal",
+    "official_capability_loss": true,
+    "epochs": 5,
+    "minimum_epochs": 5,
+    "batch_size": 1024,
+    "evaluation_batch_size": 8192,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0,
+    "raw_radio_weight": 1.0,
+    "official_dino_weight": 0.2,
+    "official_sam_adaptor_weight": 0.2,
+    "official_sam_relative_weight": 0.05,
+    "relative_margin": 0.05,
+    "fusion_reliability": false,
+    "per_scene_or_per_task_tuning": false,
+    "runs": 1
+  },
+  "source_gate": {
+    "global_same_cosine_non_decrease": true,
+    "global_separate_cosine_non_increase": true,
+    "global_relation_gap_strict_improvement": true,
+    "scale_triplet_gap_strict_improvement": true,
+    "scale_triplet_violation_strict_decrease": true,
+    "raw_radio_mean_cosine_max_regression": 0.005,
+    "raw_radio_p05_cosine_max_regression": 0.01,
+    "official_capability_mean_cosine_max_regression": 0.005,
+    "official_capability_p05_cosine_max_regression": 0.01,
+    "failure_action": "reject_candidate_without_opening_benchmark_metric_or_tuning"
+  },
+  "benchmark_gate": {
+    "closed_during_source_training": true,
+    "candidate_predictions_sealed_before_first_label_open": true,
+    "lerf3d_and_lerf2d_evaluation_use_no_source_or_target_rgb": true,
+    "six_task_mainline_unchanged_until_joint_no_regression": true
+  },
+  "output": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/canonical_radio_source_sam_relative_e5_seed0.pth",
+    "no_clobber": true
+  },
+  "implementation": {
+    "trainer_sha256": "e4ab6dfb6eb9b6165464e5a8560abc3b27e12740b439150a6cd1fa2cddc1d885",
+    "relative_teacher_sha256": "1d24e02cd791170c89fd52dccda95d700e37e94f8a201263b4eb305925bff5cf"
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  },
+  "access_audit": {
+    "benchmark_query_opened": false,
+    "benchmark_labels_or_masks_opened": false,
+    "benchmark_predictions_or_metrics_opened": false
+  }
+}

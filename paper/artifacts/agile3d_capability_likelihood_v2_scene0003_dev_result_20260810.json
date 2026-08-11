@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-capability-likelihood-v2-scene0003-development-one-shot-result",
+  "created_at": "2026-08-10T16:30:00+08:00",
+  "status": "frozen_development_one_shot_complete_rejected_for_promotion",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/agile3d_capability_likelihood_v2_scene0003_dev_execution_authority_20260810.json",
+    "sha256": "bc71467cf2b8d2b36e7a30a370fc42d539ec7e3d0016ed38b38d7f63f3e2b4fc"
+  },
+  "scene": {
+    "scene_id": "scene0003_00",
+    "partition": "development_validation",
+    "object_id": 21,
+    "object_selection": "precommitted_source_object_ids entry in the sealed split",
+    "object_selected_from_metric_feedback": false
+  },
+  "baseline": {
+    "path": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0003_dev_v2/baseline.json",
+    "sha256": "0ee70e51eae58e24eb900fd764eae358f1554b487f09b8d82e83b73467cdcc67",
+    "iou": {
+      "1": 0.2902338376891334,
+      "2": 0.012740882306099698,
+      "3": 0.3417630057803468,
+      "5": 0.160676532769556,
+      "10": 0.35207612456747406,
+      "mean_1_to_10": 0.33261442609989894
+    },
+    "click10_minus_click1": 0.061842286878340647,
+    "monotonic_transition_fraction": 0.6666666666666666,
+    "regression_transition_fraction": 0.3333333333333333,
+    "maximum_regression_magnitude": 0.3043889694138501
+  },
+  "frozen_v2": {
+    "path": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0003_dev_v2/frozen_v2.json",
+    "sha256": "ec4ab4826c94f81fa3441110bacd0d7cbc6ab322dbfc730e3db195d46d746722",
+    "checkpoint_sha256": "07ad2226ac2cee4e572cc4809ea0d1d6160f16fdfc1da2ff8281ff7f36f45924",
+    "fusion": "direct_registered_likelihood",
+    "iou": {
+      "1": 0.056553128470936694,
+      "2": 0.24176356589147288,
+      "3": 0.2712250712250712,
+      "5": 0.2907758094074527,
+      "10": 0.3166441136671177,
+      "mean_1_to_10": 0.26916120077428923
+    },
+    "click10_minus_click1": 0.260090985196181,
+    "monotonic_transition_fraction": 0.8888888888888888,
+    "regression_transition_fraction": 0.1111111111111111,
+    "maximum_regression_magnitude": 0.0018558458273906786
+  },
+  "delta_frozen_v2_minus_baseline": {
+    "iou_at_1": -0.23368070921819672,
+    "iou_at_2": 0.22902268358537317,
+    "iou_at_3": -0.07053793455527557,
+    "iou_at_5": 0.13009927663789667,
+    "iou_at_10": -0.03543201090035636,
+    "mean_iou_1_to_10": -0.06345322532560971,
+    "click10_minus_click1_response": 0.19824869831784034,
+    "monotonic_transition_fraction": 0.2222222222222222,
+    "maximum_regression_magnitude": -0.3025331235864594
+  },
+  "causal_interpretation": {
+    "supported": [
+      "The learned two-capability likelihood transfers a much stronger directional click response: IoU rises by 0.2601 from click 1 to click 10 versus 0.0618 for the baseline.",
+      "The learned path is substantially more stable across corrective clicks: 8/9 transitions are non-regressing and its worst regression is 0.00186, versus 6/9 and 0.30439 for the baseline.",
+      "The same evidence is not double counted: learned q,c replaces the legacy appearance/boundary unary while hard spatial click seeds remain in the solver."
+    ],
+    "refuted": [
+      "The scene0000-only six-parameter checkpoint is not yet a generally calibrated replacement unary: it lowers IoU@1 by 0.2337, IoU@10 by 0.0354 and ten-step mean IoU by 0.0635 on the untouched development object."
+    ],
+    "diagnosis": "The fit objective was deliberately class-balanced and fit precision was only about 0.10 at recall about 0.85. On scene0003 the first prediction is therefore foreground-heavy; the subsequent nine clicks are all negative and improve the result smoothly. Capability affinity transfer and negative-click suppression work, but a one-scene prevalence-free absolute likelihood calibration does not transfer sufficiently.",
+    "next_method_change": "Do not tune scene0003. Train the same monotone generic head on multiple fit scenes/objects under the existing scene-disjoint split and add a query-independent scene prevalence/abstention calibration learned only from fit scenes, then repeat one frozen dev one-shot."
+  },
+  "promotion": {
+    "passed": false,
+    "full312_authorized": false,
+    "reason": "frozen development IoU@10 and mean trajectory IoU declined"
+  },
+  "verification": {
+    "focused_tests": 92,
+    "focused_tests_passed": 92,
+    "evaluator_sha256": "846ba44e731c977f26f6cf99b4f43685a862beff37b106d06b78080449e74d66",
+    "query_engine_sha256": "cdda52d166d861de5702d16f76b5a19d39f55fccaac821e2bc830fdb8b70eaaa",
+    "evidence_scorer_sha256": "ddb803184e7d3430faa83d0e281e3bc4df3cd28b29721ab884c4c3feddec85b2",
+    "gpu": "physical_gpu0",
+    "baseline_start_temperature_c": 46,
+    "frozen_v2_start_temperature_c": 47,
+    "thermal_pause_triggered": false
+  },
+  "safety": {
+    "development_labels_used_for_training": false,
+    "development_metrics_used_to_retrain_or_select_threshold": false,
+    "test_labels_opened": false,
+    "full312_run": false
+  }
+}

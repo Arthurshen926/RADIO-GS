@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "artifact_type": "frozen_one_shot_metric_execution_receipt",
+  "status": "registered_before_candidate_query_scores_or_metric_execution",
+  "scene_id": "figurines",
+  "purpose": "Compare the hash-bound Stage-B v2 field with its hash-bound control under the same accepted SurfaceRegion V2 plus VALA repository 3D protocol.",
+  "method_selection_closed": {
+    "stage_b_v2_result": {
+      "path": "paper/artifacts/canonical_field_stage_b_figurines_source_only_multiteacher_v2_results_20260810.json",
+      "sha256": "aa3be2b215afc9754979f42db78c3ced1cf1fce6137ff09178945363e6554fed"
+    },
+    "all_source_gates_passed": true,
+    "field_parameters_or_hyperparameters_may_change_after_this_receipt": false,
+    "metric_outcome_may_select_a_v2_parameter": false
+  },
+  "ab_fields": {
+    "control": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5"
+    },
+    "candidate": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_source_multiteacher_direction_only_d512_l512_v2.pth",
+      "sha256": "838a4fa2ff523ccb9835f701df1e39b261f54846c8a30e724d85031f31af9a10"
+    },
+    "shared_factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b"
+    }
+  },
+  "control_derivatives": {
+    "factorized_state_sha256": "1060d9e2bad4a3a1c1015ce1d84995b0b25ceb674b847eb93200ce8f66f3e3ca",
+    "capability_sha256": "e75398894bd1995356596d51ee3a4f8fe475ddc9f2cc9f3bd7195ee4edc7bad8",
+    "support_graph_sha256": "3d2fe90ed4f52c706cfb56c8d4f0fc2fe33e203573f4d70d4f5868e3967e8fda",
+    "descriptor_sha256": "739b4e5df2ff4310e22535e9194916780e7f2accbb3893c513788716cc08ee7b",
+    "positive_score_sha256": "ff6adc75c3c153b86dca43ab031603f12448ed479fee74ab0268a2c665936159",
+    "negative_score_sha256": "b046ef83436cdf34a5d22f219a59dcac7f60f399d4b08f6b57a6547b26d6fe3e"
+  },
+  "candidate_derivatives_planned": {
+    "root": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2",
+    "factorized_state": "factorized_primitive_state_v2.pt",
+    "capability": "official_dino_sam3_views_v2.pt",
+    "support_graph": "support_graph_accepted_v2_isomorphic.pt",
+    "descriptor": "descriptor_accepted_v2_isomorphic.pt",
+    "positive_score": "positive_fp32.pt",
+    "negative_score": "negative_fp32.pt",
+    "output_no_clobber": true
+  },
+  "frozen_readout_and_query": {
+    "readout": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+    },
+    "legacy_radio_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/surface_region_accepted_v2_legacy_radio_authority_20260805.json",
+      "sha256": "2d72ed54eef69378c665ddf83067838d79e42d6b72545d89aab12f95cb781948"
+    },
+    "positive_text": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_figurines_officialcanonical_prompt5.pt",
+      "sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b"
+    },
+    "negative_text": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "all_query_cache_sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d",
+    "summary_head_sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+  },
+  "frozen_evaluator": {
+    "protocol_preset": "vala_repo_3d",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax",
+    "vala_knn_k": 10,
+    "scale_fusion": "peak_select",
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": 0.0392156862745098,
+    "config_sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11",
+    "geometry_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+    "evaluator_sha256": "70863560844071fa3e6e5845b1095657a40852b81fdd6e0b8bad4ae8b24ccc8b",
+    "comparison": "same evaluator invocation for control and candidate; only positive and negative field-derived score-cache paths differ"
+  },
+  "implementation": {
+    "state_builder_sha256": "035663cd8e0d0222390c3d6d72d155db09aa09b9c811f6c3c6a882fbb1b3a208",
+    "capability_builder_sha256": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34",
+    "graph_builder_sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254",
+    "descriptor_builder_sha256": "490a0d801835d4d169c031c0386a823b6b2a09402bf4522bf666d20c0c71ecb0",
+    "score_materializer_sha256": "3ab6fcc5dbebf27a37de0f3d694626dd4d92ac71b748677d7a4ecd7dbbf1b4fd",
+    "thermal_guard_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+  },
+  "execution_policy": {
+    "single_frozen_metric_per_ab_arm": true,
+    "run_control_first": true,
+    "per_scene_or_per_query_tuning": false,
+    "target_rgb_or_gt_used_to_select_parameters": false,
+    "historical_control_metric_was_known_before_receipt": true,
+    "candidate_v2_was_frozen_before_metric_interface_audit": true,
+    "no_v2_parameter_changes_after_outcome": true,
+    "physical_gpu": 0,
+    "power_limit_watts": 300,
+    "poll_interval_seconds": 60,
+    "soft_pause_temperature_celsius": 82,
+    "resume_temperature_celsius": 78,
+    "hard_stop_temperature_celsius": 85
+  }
+}

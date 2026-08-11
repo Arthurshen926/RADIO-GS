@@ -1,0 +1,116 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_relative_scene0000_preregistration.v2",
+  "status": "frozen_before_gpu_training_or_benchmark_metric",
+  "scene_id": "scene0000_00",
+  "scientific_question": "Can scale-matched relative official-SAM ordering improve boundary separation without contracting nested part/object/context regions or changing the one-RADIO field?",
+  "representation_contract": {
+    "persistent_semantic_feature": "canonical_radio_only",
+    "field_architecture_changed": false,
+    "field_initialization": "exact_frozen_control_not_v1_candidate",
+    "official_sam_role": "mapping_time_relative_relation_teacher_only",
+    "source_rgb_at_mapping_time": true,
+    "source_rgb_at_query_or_evaluation_time": false,
+    "target_rgb_at_query_or_evaluation_time": false,
+    "sam_decoder_cache_mask_feature_or_triplet_at_query_time": false,
+    "teacher_tensor_saved_in_checkpoint": false,
+    "benchmark_query_gt_or_metric_opened": false
+  },
+  "immutable_inputs": {
+    "relative_training_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/training_manifest.json",
+      "sha256": "a7a5b0411092656a04fd011d8574057df206b17632d75fd2db3a19fe4dbd0b9e"
+    },
+    "base_v1_structure_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/training_manifest.json",
+      "sha256": "e286ed2093ea38109cfef70639f666e8e95fe8dc6ac51bfb40e0041d6f75a8ac"
+    },
+    "control_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0000/canonical_mpr_v2_d256_l128_fusion.pth",
+      "sha256": "80a13c1a7d1405971424c825000f47d8a19aa32f5e64433c1bb0707febecd845"
+    },
+    "canonical_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0000/raw_radio_heldout4.pt",
+      "sha256": "10bcbb30fc5e3b1bc66d8546f398936290ddcc53bf5bdca7b566ed47d18fc5c5"
+    },
+    "dino_preservation_target_sha256": "efa2ab219700ab01aef6d1764939d77eda2b224c4ccd6793ab8f3fd80854161d",
+    "sam_adaptor_preservation_target_sha256": "499bc32736b0154794adbfdb201c38bf35ac2a7056bac5c450898f6f95ef9a21",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "feature_output_bundle_sha256": "1b56ee37ad05045c6b97bc24ee34dce59a06b84486abb0735a87f887af843fbc"
+  },
+  "teacher": {
+    "official_sam_source_frames": 118,
+    "source_rgb_or_sam_rerun_for_v2": false,
+    "global_guard_edges": 65536,
+    "scale_matched_triplets": 20597,
+    "triplets_by_scale_bin": [15, 115, 624, 2606, 5010, 6801, 4624, 802],
+    "dominance_minimum": 0.3333333333333333,
+    "ranking_margin": 0.05,
+    "relative_order": "same_scale_positive_ahead_of_same_scale_cross_boundary_negative",
+    "already_ordered_gradient": "zero",
+    "no_harm_guard": "same_not_lower_than_control_and_separate_not_higher_than_control"
+  },
+  "control_source_metrics": {
+    "raw_radio_mean_cosine": 0.9608365297317505,
+    "raw_radio_p05_cosine": 0.9245462417602539,
+    "dino_adaptor_mean_cosine": 0.9766802191734314,
+    "dino_adaptor_p05_cosine": 0.958669900894165,
+    "sam_adaptor_mean_cosine": 0.947316586971283,
+    "sam_adaptor_p05_cosine": 0.8961353898048401,
+    "global_same_mean_cosine": 0.9051440954208374,
+    "global_separate_mean_cosine": 0.7752244472503662,
+    "global_relation_gap": 0.1299196481704712,
+    "scale_triplet_positive_mean_cosine": 0.8911471366882324,
+    "scale_triplet_negative_mean_cosine": 0.7597509026527405,
+    "scale_triplet_gap": 0.13139624893665314,
+    "scale_triplet_violation_rate": 0.4107394218444824,
+    "scale_triplet_hinge_mean": 0.04433956742286682
+  },
+  "training": {
+    "architecture_changed": false,
+    "epochs": 5,
+    "minimum_epochs": 5,
+    "batch_size": 1024,
+    "evaluation_batch_size": 8192,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0,
+    "raw_radio_weight": 1.0,
+    "official_dino_weight": 0.2,
+    "official_sam_adaptor_weight": 0.2,
+    "official_sam_relative_weight": 0.05,
+    "per_scene_or_per_task_tuning": false,
+    "number_of_training_runs": 1
+  },
+  "source_only_gates": {
+    "global_same_mean_cosine": "must_not_decrease",
+    "global_separate_mean_cosine": "must_not_increase",
+    "global_relation_gap": "must_strictly_improve",
+    "scale_triplet_gap": "must_strictly_improve",
+    "scale_triplet_violation_rate": "must_strictly_decrease",
+    "raw_radio_mean_cosine_max_regression": 0.005,
+    "raw_radio_p05_cosine_max_regression": 0.01,
+    "official_capability_mean_cosine_max_regression": 0.005,
+    "official_capability_p05_cosine_max_regression": 0.01,
+    "failure_action": "reject_before_any_six_task_benchmark_metric_and_do_not_tune"
+  },
+  "implementation": {
+    "relative_structure": "1d24e02cd791170c89fd52dccda95d700e37e94f8a201263b4eb305925bff5cf",
+    "base_structure_and_checkpoint_validator": "a1e1c4ce7239ddbd20801f220e2e3b78ce5873cc39f9257f30e8a62352322132",
+    "canonical_trainer": "e4ab6dfb6eb9b6165464e5a8560abc3b27e12740b439150a6cd1fa2cddc1d885",
+    "manifest_builder": "abf4353ea831c6fe9c67d917d25f920ae10d1736f2bc999c473956eb8febcfda",
+    "focused_tests": "30_passed"
+  },
+  "output": {
+    "checkpoint": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/canonical_radio_source_sam_relative_e5_seed0.pth",
+    "no_clobber": true
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  }
+}

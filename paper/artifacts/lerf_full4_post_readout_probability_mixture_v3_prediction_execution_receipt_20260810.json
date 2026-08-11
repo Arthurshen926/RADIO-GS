@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_probability_mixture_v3_prediction_execution_receipt",
+  "status": "sealed_before_any_v3_prediction_or_metric",
+  "preregistration": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_probability_mixture_v3_preregistration_20260810.json", "sha256": "aaf13a34c91045505bcb343290736d816ae8b6f96fe950dd5382682d1d436623"},
+  "runner": {"path": "/root/RADIO-GS/radio_gs/scripts/run_lerf_full4_post_readout_v3_prediction.sh", "sha256": "b906f9e06a5134f663301521f980c20a2dcc1b8e01caefaef2fd22267ae47155"},
+  "execution": {
+    "candidate_order": ["figurines", "ramen", "teatime", "waldo_kitchen"],
+    "all_four_receipts_sealed_before_first_v3_metric": true,
+    "physical_gpu": 0,
+    "logical_gpu": 0,
+    "driver_runtime": "/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime",
+    "power_limit_watts": 300,
+    "poll_interval_seconds": 60,
+    "soft_pause_temperature_celsius": 82,
+    "resume_temperature_celsius": 78,
+    "hard_stop_temperature_celsius": 85,
+    "one_fresh_guard_per_scene": true
+  },
+  "method_binding": {
+    "fusion_stage": "post_readout_prior_preserving_mixture_v3",
+    "final_formula": "(1-c)*field_probability_final+c*q",
+    "field_probability_final_includes_scale_select_knn10_minmax": true,
+    "normalization_after_mixture": false,
+    "threshold": 0.6,
+    "projection": "selected_only_alpha",
+    "new_training": false
+  },
+  "access_audit": {"target_rgb_opened": false, "target_polygon_coordinates_opened": false, "v3_metric_computed": false}
+}

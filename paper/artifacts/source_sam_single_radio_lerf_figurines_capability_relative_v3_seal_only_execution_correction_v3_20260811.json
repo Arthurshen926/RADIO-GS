@@ -1,0 +1,49 @@
+{
+  "schema": "radio_gs.lerf_rgb_free_seal_only_execution_correction.v1",
+  "status": "frozen_after_all_caches_materialized_and_before_cpu_only_reseal",
+  "scene_id": "figurines",
+  "parent_materialization_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_materialization_execution_correction_v2_20260811.json",
+    "sha256": "d4f5b8eb618fb55b8eef7e16b3b4f0026ce82f1687998c1a2f6732a9e3327565"
+  },
+  "failed_sealer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/seal_lerf_rgb_free_query_score_batch.py",
+    "sha256": "3ecc19780fe8fcc9556a5b834e4955d08854f31b900d766d0b5e749c4d10c753",
+    "exit_code": 1,
+    "failure": "required an explicit query_independent key absent from the exact SurfaceRegion descriptor sidecar",
+    "seal_output_written": false
+  },
+  "validation_only_fix": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/seal_lerf_rgb_free_query_score_batch.py",
+    "sha256": "7cf3cb3c0793604ffe89594240cf99b4f05e3dd50f2a0035d3b6f0d9a3e4d616",
+    "exact_descriptor_joint_alias": {
+      "query_set_invariant": true,
+      "text_queries_opened": false,
+      "construction": "canonical_radio_surface_region_readout_then_official_summary_head"
+    },
+    "not_a_relaxation": "all three exact fields are jointly required in addition to benchmark image/mask false and field SHA equality",
+    "tests": {
+      "path": "/root/RADIO-GS/tests/test_seal_lerf_rgb_free_query_score_batch.py",
+      "result": "4 passed",
+      "coverage": "alias-positive plus one fail-closed case for each altered joint field"
+    }
+  },
+  "completed_cache_sha256": {
+    "factorized_primitive_state_v3.pt": "3e761c4e66dead81b0fecf973abb4f8e8f61eec86cce4691ea59835cc7c8cbc5",
+    "official_dino_sam3_views_v3.pt": "a211cadd369fd6f01829132330b5a7fd2ea8cd142c706451e8dd4afeffc31462",
+    "support_graph_v3_v2_isomorphic.pt": "20dbb8a9e0d66fe8ca295e031abad4aaba91743edf3edcd8b88371835072770d",
+    "descriptor_v3_v2_isomorphic.pt": "3a605eb85f63d8b48237e3628c36d529db10d154d374ceca41194830078e81a0",
+    "descriptor_v3_v2_isomorphic_query.pt": "5c35fc331a974c0aefd80aad2f7182c86829729d687b3c19450b3eab35b536fd",
+    "positive_fp32.pt": "4e677a78a6a761c7385cade1e1b7d274780cd0543bead1cc072c6c802628546f",
+    "negative_fp32.pt": "77079e53a29bddafad0d5538c85f3f46d6962fb4497ee6ff49ff52f8b8ac1cc4"
+  },
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_annotations_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_rgb_or_sam_used": false,
+    "cache_rematerialization_authorized": false,
+    "cpu_only_hash_and_contract_reseal_authorized": true
+  }
+}

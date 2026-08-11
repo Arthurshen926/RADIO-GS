@@ -176,11 +176,53 @@ def raster_responsibility_membership(
 def _load_responsibility_assignments(
     path: Path, graph: dict,
 ) -> tuple[dict[int, dict], dict]:
-    payload = torch.load(path, map_location="cpu", weights_only=False)
-    metadata = dict(payload.get("metadata", {}))
-    assignments = payload.get("assignments")
-    if int(payload.get("schema_version", -1)) != 1 or not isinstance(assignments, list):
-        raise ValueError("responsibility cache must use the frozen schema-v1 assignment format")
+    sharded_exact = path.suffix.lower() == ".json"
+    if sharded_exact:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            payload.get("schema")
+            != "radio_gs.sparse_exact_marginal_responsibility_authority.v1"
+            or int(payload.get("schema_version", -1)) != 1
+            or not isinstance(payload.get("views"), list)
+        ):
+            raise ValueError("responsibility JSON is not a frozen exact-marginal authority")
+        metadata = dict(payload.get("metadata", {}))
+        frame_ids = [int(value) for value in payload.get("frame_indices", [])]
+        declared = [int(value) for value in metadata.get("selected_frame_indices", [])]
+        views = payload["views"]
+        if (
+            not frame_ids
+            or frame_ids != declared
+            or len(frame_ids) != len(views)
+            or len(frame_ids) != len(set(frame_ids))
+        ):
+            raise ValueError("exact-marginal authority frame axis differs")
+        for expected_index, (frame_id, view) in enumerate(zip(frame_ids, views)):
+            if (
+                not isinstance(view, dict)
+                or int(view.get("view_index", -1)) != expected_index
+                or int(view.get("frame_index", -1)) != frame_id
+                or len(str(view.get("sha256", ""))) != 64
+                or not (path.parent / str(view.get("relative_path", ""))).is_file()
+            ):
+                raise ValueError("exact-marginal authority view record differs")
+        # Raster-adjoint lifting needs the immutable frame/pose/raster
+        # contract, not the sparse hit tensors themselves.  Keeping only a
+        # declared-frame sentinel avoids reading hundreds of megabytes of
+        # sharded responsibilities before the exact renderer is invoked.
+        assignments: list[dict | None] = [None] * len(frame_ids)
+        metadata["selected_frame_indices"] = frame_ids
+        metadata["alpha_threshold"] = float(
+            metadata.get("post_compositor_alpha_threshold", 0.0)
+        )
+        metadata["responsibility_storage"] = "sharded_exact_marginal_authority_v1"
+    else:
+        payload = torch.load(path, map_location="cpu", weights_only=False)
+        metadata = dict(payload.get("metadata", {}))
+        assignments = payload.get("assignments")
+        if int(payload.get("schema_version", -1)) != 1 or not isinstance(assignments, list):
+            raise ValueError("responsibility cache must use the frozen schema-v1 assignment format")
+        frame_ids = metadata.get("selected_frame_indices")
     expected_xyz = _sha256_tensor(torch.as_tensor(graph["xyz"]))
     global_to_local = None
     identity = "direct_primitive_identity"
@@ -213,13 +255,15 @@ def _load_responsibility_assignments(
         global_to_local = torch.full((len(full_xyz),), -1, dtype=torch.long)
         global_to_local[global_rows] = torch.arange(len(global_rows), dtype=torch.long)
         identity = "global_gaussian_responsibility_to_explicit_valid_canonical_subset"
-    frame_ids = metadata.get("selected_frame_indices")
     if not isinstance(frame_ids, list) or len(frame_ids) != len(assignments):
         raise ValueError("responsibility cache frame identifiers do not align with assignments")
     if not {"feature_height", "feature_width"}.issubset(metadata):
         raise ValueError("responsibility cache lacks its frozen raster shape")
     result: dict[int, dict] = {}
     for frame_id, assignment in zip(frame_ids, assignments):
+        if sharded_exact:
+            result[int(frame_id)] = {"declared_by_exact_marginal_authority": True}
+            continue
         if not isinstance(assignment, dict):
             raise ValueError("malformed responsibility assignment")
         primitive_ids = assignment.get("primitive_ids", assignment.get("gaussian_ids"))
@@ -332,9 +376,17 @@ def _load_adjoint_context(
     height, width = int(metadata["feature_height"]), int(metadata["feature_width"])
     if (int(getattr(config, "feature_height", height)), int(getattr(config, "feature_width", width))) != (height, width):
         raise ValueError("raster_adjoint feature raster differs from frozen MPR sidecar")
+    configured_pose_file = str(getattr(config, "pose_file", "") or "")
+    pose_file = str(
+        getattr(args, "adjoint_pose_file_override", "") or configured_pose_file
+    )
+    if str(getattr(args, "adjoint_pose_file_override", "")):
+        override = Path(pose_file).expanduser()
+        if not override.is_file():
+            raise ValueError("raster_adjoint pose-file override is not readable")
     dataset = SimpleRadioDataset(
         str(getattr(config, "feature_dir")),
-        pose_file=str(getattr(config, "pose_file", "") or "") or None,
+        pose_file=pose_file or None,
         pose_dir=str(getattr(config, "pose_dir", "") or "") or None,
         feature_size=(height, width), split="train",
         dataset_type=str(getattr(config, "dataset_type", "lerf")),
@@ -355,6 +407,11 @@ def _load_adjoint_context(
         "raster_adjoint": raster_adjoint_registered_view_features,
         "provenance": {
             "config": str(config_path.resolve()), "checkpoint": str(checkpoint_path.resolve()),
+            "configured_pose_file": configured_pose_file,
+            "pose_file_override": (
+                str(Path(pose_file).expanduser().resolve())
+                if str(getattr(args, "adjoint_pose_file_override", "")) else ""
+            ),
             "xyz_sha256": _sha256_tensor(full_xyz),
             "gaussian_state_sha256": _gaussian_state_sha256(model),
             "pose_sha256": metadata["pose_sha256"],
@@ -723,6 +780,14 @@ def main() -> None:
     parser.add_argument(
         "--adjoint-checkpoint", default="",
         help="Frozen field checkpoint; defaults to the responsibility sidecar contract.",
+    )
+    parser.add_argument(
+        "--adjoint-pose-file-override", default="",
+        help=(
+            "Execution-only relocation for a missing pose file referenced by a "
+            "frozen config. The loaded poses must still exactly match the "
+            "responsibility sidecar pose SHA-256."
+        ),
     )
     parser.add_argument("--adjoint-device", default="cuda:0")
     parser.add_argument("--adjoint-channel-chunk-size", type=int, default=32)

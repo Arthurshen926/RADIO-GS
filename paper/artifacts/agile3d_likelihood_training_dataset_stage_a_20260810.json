@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d_monotone_query_likelihood_training_dataset_stage_a_v1",
+  "status": "split_builder_and_source_train_consumer_smoke_complete",
+  "contract": {
+    "path": "paper/artifacts/agile3d_monotone_likelihood_training_data_contract_20260810.json",
+    "sha256": "26bed8f83951560d7814d2e9196e04b274982a2058b08170d2f159f71c64cc40"
+  },
+  "scene_split": {
+    "path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_training_split_v1/scene_split.json",
+    "sha256": "ea08e071ed789b801c2a20bfa9c2878169c0cfafd7458e79f407332f41fec954",
+    "fit_scenes": 1080,
+    "development_validation_scenes": 120,
+    "test_scenes": 312,
+    "fit_ply_assets_present": 1080,
+    "development_ply_assets_present": 120,
+    "test_ply_assets_opened": 0,
+    "scene_disjoint": true
+  },
+  "implementation": {
+    "builder": {
+      "path": "radio_gs/benchmarks/agile3d_scannet40/build_likelihood_training_dataset.py",
+      "sha256": "61e218b94fb0000f2b7c349b3aad9c6cd5bf3bbe38a1a856b68f999e11ffd44f"
+    },
+    "consumer_smoke": {
+      "path": "radio_gs/scripts/smoke_train_query_likelihood_head.py",
+      "sha256": "1e37a3657928689e16d220255de1051feeed0d467b8f79e319064c4b940db279"
+    },
+    "formal_evaluator_modified": false,
+    "head_interface": "QueryLikelihoodInputs without an AGILE-specific learned feature schema"
+  },
+  "source_train_smoke": {
+    "scene_id": "scene0000_00",
+    "object_id": 67,
+    "partition": "fit",
+    "adapter": "released_5cm_point_identity_smoke_v1",
+    "dataset_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_point_smoke_scene0000_v1/dataset_manifest.json",
+      "sha256": "43168e96897214e7b6d5499644c97082075ac7bca91945a84460a84e53736057"
+    },
+    "training_shard": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_point_smoke_scene0000_v1/shards/scene0000_00.pt",
+      "sha256": "86e10cbc23927499c285eaa5c6753984fabab662e5c6e867b0386fa5eafbe199"
+    },
+    "primitive_rows": 53365,
+    "point_rows": 53365,
+    "trajectory_steps": 4,
+    "positive_clicks": 1,
+    "negative_clicks": 3,
+    "head_features": [
+      "positive_affinity",
+      "negative_affinity",
+      "prior_probability",
+      "coverage",
+      "reliability"
+    ]
+  },
+  "consumer_smoke": {
+    "receipt": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_point_smoke_scene0000_v1/consumer_smoke.json",
+      "sha256": "f49031282dcdbb68995f5a0ed5ae6e211387be3bb1c852625aedf5c76416f310"
+    },
+    "device": "cpu",
+    "cuda_initialized": false,
+    "trainable_parameters": 6,
+    "trajectory_examples": 4,
+    "initial_mean_bce": 0.6930339932441711,
+    "final_mean_bce": 0.4423328638076782,
+    "loss_decreased": true
+  },
+  "validation": {
+    "focused_tests": "8 passed in 4.54s",
+    "python_compile": "passed",
+    "test_labels_opened": false,
+    "existing_full312_trajectories_used": false,
+    "easy3d_predictions_or_metrics_used": false,
+    "full312_run": false
+  },
+  "readiness": {
+    "source_train_point_adapter_scenes_available_now": 1200,
+    "fit_scenes_available_now": 1080,
+    "development_scenes_available_now": 120,
+    "registered_production_gaussian_primitive_bundle_scenes": 0,
+    "production_blocker": "No sealed source-train canonical Gaussian primitive-bundle inventory has yet been materialized. The point-identity adapter proves the data/head interface but is not the paper candidate training domain.",
+    "next_sentinel": "Materialize one query-independent canonical primitive bundle for fit scene0000_00, then rerun the same builder with --primitive-bundle-root and train only the six-parameter head; evaluate calibration on source-train development scene0003_00 before any formal 312-scene run."
+  }
+}

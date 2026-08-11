@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_field_stage_b_source_only_gate_result",
+  "scene_id": "figurines",
+  "status": "source_gate_failed_benchmark_closed",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_field_stage_b_figurines_source_only_multiteacher_preregistration_20260810.json",
+    "sha256": "583949744310e5154776999cdd160cfb62470deb1ccf9c9a4f4b6c279ee854a1"
+  },
+  "output": {
+    "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_source_multiteacher_d512_l512_v1.pth",
+    "sha256": "6ed5977e55dc1b809f450b9b06ee82ac11e65b52677bdd22235bdb16c8bc01a5",
+    "report_sha256": "ee2f1255b748ce775b29f151b691dcb415b7db663471595a6a4d4ef0620214eb"
+  },
+  "source_descriptor": {
+    "control_mean_cosine": 0.9418514966964722,
+    "candidate_mean_cosine": 0.9570468068122864,
+    "mean_delta": 0.015195310115814209,
+    "control_p05_cosine": 0.7534876465797424,
+    "candidate_p05_cosine": 0.814228892326355,
+    "p05_delta": 0.06074124574661255
+  },
+  "source_relation": {
+    "control_mean_abs_error": 0.049441512674093246,
+    "candidate_mean_abs_error": 0.04376916587352753,
+    "mean_delta": -0.00567234680056572,
+    "control_p95_abs_error": 0.20551134645938873,
+    "candidate_p95_abs_error": 0.17800940573215485,
+    "p95_delta": -0.027501940727233887
+  },
+  "primary_and_capability": {
+    "raw_mean_cosine": 0.9931590557098389,
+    "raw_p05_cosine": 0.9849274754524231,
+    "mean_abs_log_amplitude_error": 0.0421871542930603,
+    "p95_abs_log_amplitude_error": 0.0696052834391594,
+    "dino_v3_mean_cosine": 0.9882902503013611,
+    "dino_v3_p05_cosine": 0.9693499207496643,
+    "sam3_mean_cosine": 0.9858605861663818,
+    "sam3_p05_cosine": 0.9663562774658203
+  },
+  "gate_results": {
+    "raw_radio_no_regression": true,
+    "gauge_no_regression": false,
+    "dino_sam_no_regression": true,
+    "descriptor_improvement": true,
+    "descriptor_tail_no_regression": true,
+    "semantic_relation_no_regression": true,
+    "scalar_authority_unchanged": true,
+    "source_support_unchanged": true,
+    "all_source_gates_passed": false,
+    "benchmark_gate_opened": false,
+    "benchmark_metric_read": false
+  },
+  "causal_diagnosis": {
+    "observed_conflict": "descriptor and relation improve while raw direction and DINO remain stable, but log-amplitude error increases",
+    "gradient_path": "the source SigLIP proxy consumed decoded raw RADIO directly, so its non-homogeneous projection could backpropagate a radial component through the shared decoder and local codes",
+    "required_fix": "make descriptor and relation gradients tangent to each decoded RADIO row by stop-gradient gauge reparameterization; retain the unchanged factorized amplitude loss as the only radial authority",
+    "gate_or_threshold_relaxed": false
+  },
+  "thermal": {
+    "telemetry": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/logs/figurines_source_multiteacher_gpu0.telemetry.csv",
+      "sha256": "6d0c9156d824ff5b7cccc700bb2238c570057aef7db25baa6e7433cc11a50663"
+    },
+    "owner_audit_sha256": "fa838815f425df243e77d5ba0c6eb5fc7f45e487baa990a28404826a2e15e9cf",
+    "maximum_temperature_celsius": 62,
+    "maximum_power_watts": 279.77,
+    "pause_or_abort_triggered": false
+  },
+  "access_audit": {
+    "benchmark_query_or_text_opened": false,
+    "benchmark_target_rgb_opened": false,
+    "benchmark_ground_truth_opened": false,
+    "benchmark_labels_or_masks_opened": false,
+    "benchmark_metrics_or_predictions_opened": false
+  }
+}

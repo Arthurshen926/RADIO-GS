@@ -1,0 +1,1674 @@
+{
+  "access_audit": {
+    "benchmark_labels_or_masks_opened": false,
+    "benchmark_predictions_or_metrics_opened": false,
+    "benchmark_query_opened": false,
+    "query_time_source_rgb_opened": false,
+    "query_time_target_rgb_opened": false,
+    "source_rgb_opened_during_mapping": true
+  },
+  "promotion_gate": {
+    "all_candidate_predictions_sealed_before_benchmark_labels_open": true,
+    "all_scene_source_gates_must_pass": true,
+    "paper8_exact_no_rgb_at_query_time": true,
+    "six_task_mainline_unchanged_until_joint_no_regression": true
+  },
+  "scene_inventory_authorities": [
+    {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/rollout_inventory.scene.json",
+      "sha256": "8ae2178a0af809490d452d3f7bbe82731f25f1117d095cbb6b900e68deaefff4"
+    },
+    {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/rollout_inventory.scene.json",
+      "sha256": "209e703d381ec4b8ec4f3a0514a81fdc612af3451036d3facf467e61f0863d17"
+    },
+    {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/rollout_inventory.scene.json",
+      "sha256": "53094ca6545376ad411f6c006d31fe04db2092408d9de65e76bb38278bec2bef"
+    },
+    {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/rollout_inventory.scene.json",
+      "sha256": "140fae6e57bfafe699c8020d831d5352b81378b9483773dfa9975343ce9bc3db"
+    },
+    {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/rollout_inventory.scene.json",
+      "sha256": "8ba528a0b87bce5bd8d7937177df9de29ce742c669ae08474a6c3d390be6007f"
+    },
+    {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/rollout_inventory.scene.json",
+      "sha256": "121dce12b81ac8422154d3cc44435527da3a3cb73b30138168abfb30a7b7888d"
+    },
+    {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/rollout_inventory.scene.json",
+      "sha256": "2fdc6a7dad4e4875d939be3088345cd7f69b145248fc7bd5ab031abebcafd755"
+    }
+  ],
+  "scenes": [
+    {
+      "access_audit": {
+        "benchmark_labels_or_masks_opened": false,
+        "benchmark_predictions_or_metrics_opened": false,
+        "benchmark_query_opened": false,
+        "held_out_rgb_excluded": true,
+        "mapping_source_rgb_declared": true
+      },
+      "control_field": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0062/canonical_mpr_v2_d256_l128_fusion.pth",
+        "sha256": "8d5d71d6e55d742ad48d059d5a14a899e850a9ee61ce27f16449014da1f41275"
+      },
+      "dino_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0062/dino_v3_heldout4.pt",
+        "sha256": "8c1271b801fc1c3a7af3c56415f49391b515892d3f91f543908288119f9d966d"
+      },
+      "excluded_frame_ids": [
+        0,
+        240,
+        480,
+        720
+      ],
+      "frozen_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0062_00.pt.receipt.json",
+        "sha256": "ba9ec12bcebf33312a62bfde4a10f13ceb37466f1aafa52dc8fca354955146b4"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/scannet_og_scene0062_00_v14/checkpoints/best.pth",
+        "sha256": "c2719bae156f91b84300e196d8e41f78f48f8266d942e0cc61721dbfbc238137"
+      },
+      "outputs": {
+        "base_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/source_only_sam_structure_manifest.json"
+        },
+        "candidate_field": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/canonical_radio_source_sam_relative_e5_seed0.pth"
+        },
+        "official_sam_build_authority": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/official_sam_build_authority.json"
+        },
+        "official_sam_inventory": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/official_sam_inventory.json"
+        },
+        "official_sam_mask_root": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/official_sam3_masks"
+        },
+        "relation_cache": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/scale_ordered_relation_raster_adjoint_fp32.pt"
+        },
+        "relative_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/source_only_sam_relative_manifest.json"
+        }
+      },
+      "raster_adjoint_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/scannet_scene0062_radio_official_grid.yaml",
+        "sha256": "e9a33f4e0ca433e1ab2737a598b7140988bc4b39c0a1452a1fb9c4f3808d6ac1"
+      },
+      "raw_radio_mpr_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0062/raw_radio_heldout4.pt",
+        "sha256": "627eb84684f046873d073da52a8a5981a1201b8328a3cd5f077c27ea7dab4573"
+      },
+      "responsibility_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0062/responsibility_heldout4.pt",
+        "sha256": "f2b921094a4771134a7566889c7ca6311735d164af9967c50800c11abea8a00c"
+      },
+      "sam_adaptor_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0062/sam3_heldout4.pt",
+        "sha256": "71ddb247b53e78d867afee3a9b38e1298ba22cfc1bc3e44454ca48aaa77c6e09"
+      },
+      "scene_id": "scene0062_00",
+      "source_frame_count": 33,
+      "source_frame_ids": [
+        20,
+        40,
+        60,
+        80,
+        100,
+        120,
+        140,
+        160,
+        180,
+        200,
+        220,
+        260,
+        280,
+        300,
+        320,
+        340,
+        360,
+        380,
+        400,
+        420,
+        440,
+        460,
+        500,
+        520,
+        540,
+        560,
+        580,
+        600,
+        620,
+        640,
+        660,
+        680,
+        700
+      ],
+      "source_frame_list": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/source_frames.txt",
+        "sha256": "30dd17076926385fad7857d3b01f45849593f86d95c1e1bcfc82e1e732eb65b1"
+      },
+      "source_rgb_paths": [
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/20.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/40.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/60.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/80.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/320.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/420.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/500.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/600.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/640.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/680.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/700.jpg"
+      ],
+      "source_rgb_root": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color",
+      "support_graph": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0062/v2_shared_support_graph_k16.pt",
+        "sha256": "357f6033448cd12885df0ab878f77b67745616d08ac04e8926fbd8b596d9e603"
+      }
+    },
+    {
+      "access_audit": {
+        "benchmark_labels_or_masks_opened": false,
+        "benchmark_predictions_or_metrics_opened": false,
+        "benchmark_query_opened": false,
+        "held_out_rgb_excluded": true,
+        "mapping_source_rgb_declared": true
+      },
+      "control_field": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0070/canonical_mpr_v2_d256_l128_fusion.pth",
+        "sha256": "042ef00f03e9d0b7869e0eed7b25dd2aeda4aa55f4e8d5e36598357eb76b9cef"
+      },
+      "dino_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0070/dino_v3_heldout4.pt",
+        "sha256": "d17caa1942e4b9ece5378c03d846da6b2dc2a626a2115716c6f735210c285263"
+      },
+      "excluded_frame_ids": [
+        260,
+        520,
+        800,
+        1060
+      ],
+      "frozen_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0070_00.pt.receipt.json",
+        "sha256": "384cae8dd9a0eea2343d3f4b03ebef6beb4f72ee0f0cb8a6559cbe8041022100"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/scannet_og_scene0070_00_v14_b1/checkpoints/best.pth",
+        "sha256": "2e083e662b8be14dcb5c02c58e3b34ea893294f82c9f583e1f1dad571e7437d1"
+      },
+      "outputs": {
+        "base_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/source_only_sam_structure_manifest.json"
+        },
+        "candidate_field": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/canonical_radio_source_sam_relative_e5_seed0.pth"
+        },
+        "official_sam_build_authority": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/official_sam_build_authority.json"
+        },
+        "official_sam_inventory": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/official_sam_inventory.json"
+        },
+        "official_sam_mask_root": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/official_sam3_masks"
+        },
+        "relation_cache": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/scale_ordered_relation_raster_adjoint_fp32.pt"
+        },
+        "relative_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/source_only_sam_relative_manifest.json"
+        }
+      },
+      "raster_adjoint_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/scannet_scene0070_canonical_mpr_v3_paper8.yaml",
+        "sha256": "76cca865732eb032225e55363698591f6ae3efe6cfab2c945c1693ae254d3a92"
+      },
+      "raw_radio_mpr_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0070/raw_radio_heldout4.pt",
+        "sha256": "ff9d92caf78d429cd2d9384c6fbddd5e768212e71ccf8fde04bacfc41bfbf9c9"
+      },
+      "responsibility_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0070/responsibility_heldout4.pt",
+        "sha256": "7952ea81e24069e5e375fee778c2412684e10c01880e374033ec480ea02d52d3"
+      },
+      "sam_adaptor_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0070/sam3_heldout4.pt",
+        "sha256": "357d2cec1f3fccf695d1a91af69062b29b68369b90c5c68c7618d916e4317476"
+      },
+      "scene_id": "scene0070_00",
+      "source_frame_count": 63,
+      "source_frame_ids": [
+        0,
+        20,
+        40,
+        60,
+        80,
+        100,
+        120,
+        140,
+        160,
+        180,
+        200,
+        220,
+        240,
+        280,
+        300,
+        320,
+        340,
+        360,
+        380,
+        400,
+        420,
+        440,
+        460,
+        480,
+        500,
+        540,
+        560,
+        580,
+        600,
+        620,
+        640,
+        660,
+        680,
+        700,
+        720,
+        740,
+        760,
+        780,
+        820,
+        840,
+        860,
+        880,
+        900,
+        920,
+        940,
+        960,
+        980,
+        1000,
+        1020,
+        1040,
+        1080,
+        1100,
+        1120,
+        1140,
+        1160,
+        1180,
+        1200,
+        1220,
+        1240,
+        1260,
+        1280,
+        1300,
+        1320
+      ],
+      "source_frame_list": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/source_frames.txt",
+        "sha256": "1210fba2bed61981c8520b16072d596927e271c2eb1a063f13dc88ba79f8cebb"
+      },
+      "source_rgb_paths": [
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/0.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/20.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/40.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/60.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/80.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/320.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/420.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/500.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/600.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/640.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/680.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/720.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/740.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/760.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/780.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/820.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/840.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/860.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/880.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/900.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/920.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/940.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/960.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1000.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1020.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1040.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1080.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1320.jpg"
+      ],
+      "source_rgb_root": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color",
+      "support_graph": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0070/v2_shared_support_graph_k16.pt",
+        "sha256": "0e2c3ff1e5a6268d945ac1e4838725f06f00c44ba4dafd09d2562fed3830d296"
+      }
+    },
+    {
+      "access_audit": {
+        "benchmark_labels_or_masks_opened": false,
+        "benchmark_predictions_or_metrics_opened": false,
+        "benchmark_query_opened": false,
+        "held_out_rgb_excluded": true,
+        "mapping_source_rgb_declared": true
+      },
+      "control_field": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0097/canonical_mpr_v2_d256_l128_fusion.pth",
+        "sha256": "48da1429b68bbb32e2ccd43c6afec216714a6d13b9a78b99b9d15b2531f3ec2c"
+      },
+      "dino_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0097/dino_v3_heldout4.pt",
+        "sha256": "e1b1d006366c94bbe8ba6fd1be1e6823a13d15b9d455c4e547f72ec0a8b1aa2e"
+      },
+      "excluded_frame_ids": [
+        140,
+        300,
+        440,
+        600
+      ],
+      "frozen_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0097_00.pt.receipt.json",
+        "sha256": "e5b11066e0e17961e422f94830981059dbfaf7bcaab4617b0b9f73b5c72d70b3"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/scannet_og_scene0097_00_v14/checkpoints/best.pth",
+        "sha256": "28e00ac88cf6cb1a8687d0ac44e9b3cc025910c24a7060a6850b6f62e669079c"
+      },
+      "outputs": {
+        "base_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/source_only_sam_structure_manifest.json"
+        },
+        "candidate_field": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/canonical_radio_source_sam_relative_e5_seed0.pth"
+        },
+        "official_sam_build_authority": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/official_sam_build_authority.json"
+        },
+        "official_sam_inventory": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/official_sam_inventory.json"
+        },
+        "official_sam_mask_root": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/official_sam3_masks"
+        },
+        "relation_cache": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/scale_ordered_relation_raster_adjoint_fp32.pt"
+        },
+        "relative_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/source_only_sam_relative_manifest.json"
+        }
+      },
+      "raster_adjoint_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/scannet_scene0097_canonical_mpr_v3_paper8.yaml",
+        "sha256": "aabc8d01da39aeafa40c287c8f9352a287bc4d92369bcbde5de7add8506ebe97"
+      },
+      "raw_radio_mpr_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0097/raw_radio_heldout4.pt",
+        "sha256": "904f8c48cb9ed30446d71118b7e3b45dad7701a954f8c6e4a3892f022e5ba29a"
+      },
+      "responsibility_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0097/responsibility_heldout4.pt",
+        "sha256": "33dca1588175e6b103247d5c35c29b3f0d88d7504adf3192fec5e6d2b8b1b66c"
+      },
+      "sam_adaptor_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0097/sam3_heldout4.pt",
+        "sha256": "c0e55ef113416149fbcdc3743f598880e460a80a7c830660d724a4df7985b63d"
+      },
+      "scene_id": "scene0097_00",
+      "source_frame_count": 34,
+      "source_frame_ids": [
+        0,
+        20,
+        40,
+        60,
+        80,
+        100,
+        120,
+        160,
+        180,
+        200,
+        220,
+        240,
+        260,
+        280,
+        320,
+        340,
+        360,
+        380,
+        400,
+        420,
+        460,
+        480,
+        500,
+        520,
+        540,
+        560,
+        580,
+        620,
+        640,
+        660,
+        680,
+        700,
+        720,
+        740
+      ],
+      "source_frame_list": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/source_frames.txt",
+        "sha256": "13949ae8b9792f1e0b6c20386e3e8c7a6b1e17ae49c7d27d1c09853e8fa3f3d4"
+      },
+      "source_rgb_paths": [
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/0.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/20.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/40.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/60.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/80.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/320.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/420.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/500.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/640.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/680.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/720.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color/740.jpg"
+      ],
+      "source_rgb_root": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/color",
+      "support_graph": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0097/v2_shared_support_graph_k16.pt",
+        "sha256": "3d338ad7c9582ce1dbb6cc5b444684cc5bc3f8bfe01c7e15ce8644bfa814d4ca"
+      }
+    },
+    {
+      "access_audit": {
+        "benchmark_labels_or_masks_opened": false,
+        "benchmark_predictions_or_metrics_opened": false,
+        "benchmark_query_opened": false,
+        "held_out_rgb_excluded": true,
+        "mapping_source_rgb_declared": true
+      },
+      "control_field": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0140/canonical_mpr_v2_d256_l128_fusion.pth",
+        "sha256": "6f02b81a136e851d5318f84db7ecd0e8135ada03d402638365ffd559e040846b"
+      },
+      "dino_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0140/dino_v3_heldout4.pt",
+        "sha256": "9629bcd660620bda68ebc52c13fc5dd3e8f5578fdf4165e243a7d12bd382cafc"
+      },
+      "excluded_frame_ids": [
+        0,
+        1420,
+        2860,
+        4280
+      ],
+      "frozen_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0140_00.pt.receipt.json",
+        "sha256": "33f26265cd48b27c616bb26871c58b6d68d60d4d68f53f8f50d28b2b31530b53"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/scannet_og_scene0140_00_v14/checkpoints/best.pth",
+        "sha256": "514d729ee7202924e747a555b930bb8528cae0f4df5850baf02d9def83af05ad"
+      },
+      "outputs": {
+        "base_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/source_only_sam_structure_manifest.json"
+        },
+        "candidate_field": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/canonical_radio_source_sam_relative_e5_seed0.pth"
+        },
+        "official_sam_build_authority": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/official_sam_build_authority.json"
+        },
+        "official_sam_inventory": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/official_sam_inventory.json"
+        },
+        "official_sam_mask_root": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/official_sam3_masks"
+        },
+        "relation_cache": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/scale_ordered_relation_raster_adjoint_fp32.pt"
+        },
+        "relative_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/source_only_sam_relative_manifest.json"
+        }
+      },
+      "raster_adjoint_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/scannet_scene0140_radio_official_grid.yaml",
+        "sha256": "b698216881357011a97026346f3c58923ce56c278498e3fd8f693e76ce51b00d"
+      },
+      "raw_radio_mpr_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0140/raw_radio_heldout4.pt",
+        "sha256": "b9efee4f8126d08766967464b5be1a483ed75b414f9143b06f9ae4d372d83a87"
+      },
+      "responsibility_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0140/responsibility_heldout4.pt",
+        "sha256": "19cb3eeb944823291598f35b2377892bc71957fc559cc7ea2b6c16b2d665cfcd"
+      },
+      "sam_adaptor_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0140/sam3_heldout4.pt",
+        "sha256": "7a7c889a6e778e69b3986d767f6b0449e19abf596165013f23e99a5adbf6f2df"
+      },
+      "scene_id": "scene0140_00",
+      "source_frame_count": 120,
+      "source_frame_ids": [
+        20,
+        60,
+        100,
+        120,
+        160,
+        200,
+        240,
+        260,
+        300,
+        340,
+        380,
+        400,
+        440,
+        480,
+        520,
+        540,
+        580,
+        620,
+        660,
+        700,
+        720,
+        760,
+        800,
+        840,
+        860,
+        900,
+        940,
+        980,
+        1000,
+        1040,
+        1080,
+        1120,
+        1140,
+        1180,
+        1220,
+        1260,
+        1300,
+        1320,
+        1360,
+        1400,
+        1460,
+        1480,
+        1520,
+        1560,
+        1600,
+        1620,
+        1660,
+        1700,
+        1740,
+        1760,
+        1800,
+        1840,
+        1880,
+        1920,
+        1940,
+        1980,
+        2020,
+        2060,
+        2080,
+        2120,
+        2160,
+        2200,
+        2220,
+        2260,
+        2300,
+        2340,
+        2360,
+        2400,
+        2440,
+        2480,
+        2520,
+        2540,
+        2580,
+        2620,
+        2660,
+        2680,
+        2720,
+        2760,
+        2800,
+        2820,
+        2880,
+        2920,
+        2960,
+        2980,
+        3020,
+        3060,
+        3100,
+        3140,
+        3160,
+        3200,
+        3240,
+        3280,
+        3300,
+        3340,
+        3380,
+        3420,
+        3440,
+        3480,
+        3520,
+        3560,
+        3580,
+        3620,
+        3660,
+        3700,
+        3740,
+        3760,
+        3800,
+        3840,
+        3880,
+        3900,
+        3940,
+        3980,
+        4020,
+        4040,
+        4080,
+        4120,
+        4160,
+        4180,
+        4220,
+        4260
+      ],
+      "source_frame_list": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/source_frames.txt",
+        "sha256": "31390362c53965e0dfda337740348421272a6940dfc6139bcf8fd42d1e0036dd"
+      },
+      "source_rgb_paths": [
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/20.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/60.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/720.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/760.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/800.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/840.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/860.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/900.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/940.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1000.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1040.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1080.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1320.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1600.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1740.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1760.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1800.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1840.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1880.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1920.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1940.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/1980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2020.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2060.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2080.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2680.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2720.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2760.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2800.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2820.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2880.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2920.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2960.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/2980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3020.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3060.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3420.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3740.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3760.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3800.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3840.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3880.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3900.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3940.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/3980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/4020.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/4040.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/4080.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/4120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/4160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/4180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/4220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color/4260.jpg"
+      ],
+      "source_rgb_root": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/color",
+      "support_graph": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/canonical_v2_validation/scannet_scene0140/v2_shared_support_graph_k16.pt",
+        "sha256": "fd27068c9d8a012975dd99d7ab286896b90e481c43b4501ceb64bcbb8608b002"
+      }
+    },
+    {
+      "access_audit": {
+        "benchmark_labels_or_masks_opened": false,
+        "benchmark_predictions_or_metrics_opened": false,
+        "benchmark_query_opened": false,
+        "held_out_rgb_excluded": true,
+        "mapping_source_rgb_declared": true
+      },
+      "control_field": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0347/canonical_mpr_v2_d256_l128_fusion.pth",
+        "sha256": "7d124c81d4fcebd4bcb4a79165e5b502eb6c2c097599a1e16f97ee5142b8c5cd"
+      },
+      "dino_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0347/dino_v3_heldout4.pt",
+        "sha256": "ed5c04cac3035e2d73f4dff75957f7d05d839d42dc206bd0eb191f224811f788"
+      },
+      "excluded_frame_ids": [
+        200,
+        420,
+        640,
+        860
+      ],
+      "frozen_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0347_00.pt.receipt.json",
+        "sha256": "597671d74850b2858cdded368e3fed3f4db7e464de2111c4f0e6e00ea1c950e2"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/scannet_og_scene0347_00_v14/checkpoints/best.pth",
+        "sha256": "d2b33c0ebabeba9e245c6fae358762a5e9c9172e964f8331890b2cc098564103"
+      },
+      "outputs": {
+        "base_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/source_only_sam_structure_manifest.json"
+        },
+        "candidate_field": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/canonical_radio_source_sam_relative_e5_seed0.pth"
+        },
+        "official_sam_build_authority": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/official_sam_build_authority.json"
+        },
+        "official_sam_inventory": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/official_sam_inventory.json"
+        },
+        "official_sam_mask_root": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/official_sam3_masks"
+        },
+        "relation_cache": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/scale_ordered_relation_raster_adjoint_fp32.pt"
+        },
+        "relative_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/source_only_sam_relative_manifest.json"
+        }
+      },
+      "raster_adjoint_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/scannet_scene0347_canonical_mpr_v3_paper8.yaml",
+        "sha256": "2a9de9c99bc629149d67d57e143a2e0cb721925aba3f39cd8898b51fbaf49090"
+      },
+      "raw_radio_mpr_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0347/raw_radio_heldout4.pt",
+        "sha256": "656349720f25b52b654d02e25361a184f15cbe56f26f338acd987e81089fd97e"
+      },
+      "responsibility_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0347/responsibility_heldout4.pt",
+        "sha256": "d8eeef28dd6760a6925877ef1f2c4554813b96c1a1cb939fffeb85c3e9e07bf8"
+      },
+      "sam_adaptor_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0347/sam3_heldout4.pt",
+        "sha256": "7e7fa2acb765e6df2b05afd6ef7d584dfe2da06fc35b86cab4fc6dea1cd0455f"
+      },
+      "scene_id": "scene0347_00",
+      "source_frame_count": 50,
+      "source_frame_ids": [
+        0,
+        20,
+        40,
+        60,
+        80,
+        100,
+        120,
+        140,
+        160,
+        180,
+        220,
+        240,
+        260,
+        280,
+        300,
+        320,
+        340,
+        360,
+        380,
+        400,
+        440,
+        460,
+        480,
+        500,
+        520,
+        540,
+        560,
+        580,
+        600,
+        620,
+        660,
+        680,
+        700,
+        720,
+        740,
+        760,
+        780,
+        800,
+        820,
+        840,
+        880,
+        900,
+        920,
+        940,
+        960,
+        980,
+        1000,
+        1020,
+        1040,
+        1060
+      ],
+      "source_frame_list": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/source_frames.txt",
+        "sha256": "db6a1b2d0f19d09fe981fe53e3f93f2bde6c8bf6867a81d7a326ccea8acece48"
+      },
+      "source_rgb_paths": [
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/0.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/20.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/40.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/60.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/80.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/320.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/500.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/600.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/680.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/720.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/740.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/760.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/780.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/800.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/820.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/840.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/880.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/900.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/920.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/940.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/960.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/1000.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/1020.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/1040.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color/1060.jpg"
+      ],
+      "source_rgb_root": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/color",
+      "support_graph": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0347/v2_shared_support_graph_k16.pt",
+        "sha256": "123e04bbb2c117ee9545dcdc9473ae63f6aeee3d73597248c685a942f1a6954d"
+      }
+    },
+    {
+      "access_audit": {
+        "benchmark_labels_or_masks_opened": false,
+        "benchmark_predictions_or_metrics_opened": false,
+        "benchmark_query_opened": false,
+        "held_out_rgb_excluded": true,
+        "mapping_source_rgb_declared": true
+      },
+      "control_field": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0400/canonical_mpr_v2_d256_l128_fusion.pth",
+        "sha256": "1ba7cd67a85792b4f75b7dbe6d429c59365df51f7ae09611134890240d964668"
+      },
+      "dino_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0400/dino_v3_heldout4.pt",
+        "sha256": "26572c4a39a24b10015b4b10077aab8a84e33156a7dbd2f8eb385fde628c7303"
+      },
+      "excluded_frame_ids": [
+        280,
+        520,
+        760,
+        1000
+      ],
+      "frozen_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0400_00.pt.receipt.json",
+        "sha256": "34cdedba643cd96dbe7822de6a9216ca50f11cb9e4a42c1b71d169cc6dc27173"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/scannet_og_scene0400_00_v67_dino_cv001_b2_s32768_ft20/checkpoints/best.pth",
+        "sha256": "e3bb13d1ea1e7baade004873e0db2f261b7a4c7eb2e56c6636e1e3ca11113db4"
+      },
+      "outputs": {
+        "base_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/source_only_sam_structure_manifest.json"
+        },
+        "candidate_field": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/canonical_radio_source_sam_relative_e5_seed0.pth"
+        },
+        "official_sam_build_authority": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/official_sam_build_authority.json"
+        },
+        "official_sam_inventory": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/official_sam_inventory.json"
+        },
+        "official_sam_mask_root": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/official_sam3_masks"
+        },
+        "relation_cache": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/scale_ordered_relation_raster_adjoint_fp32.pt"
+        },
+        "relative_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/source_only_sam_relative_manifest.json"
+        }
+      },
+      "raster_adjoint_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/scannet_scene0400_canonical_mpr_v3_paper8.yaml",
+        "sha256": "3ca1afe696294bb66ee360ceb496c809e651f671b8d02b65891f41ee34fffe20"
+      },
+      "raw_radio_mpr_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0400/raw_radio_heldout4.pt",
+        "sha256": "7aa5b8e262fa7a801ca4593af08dd949273e793acafcff393197c553d9764a2f"
+      },
+      "responsibility_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0400/responsibility_heldout4.pt",
+        "sha256": "96b6c97136f127446880678cb55dcbbd9420e734dcad5e47be1b783543263d0e"
+      },
+      "sam_adaptor_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0400/sam3_heldout4.pt",
+        "sha256": "d76452690047466c012f820bd4759ce94a045a4b7250889f585c120a27e21024"
+      },
+      "scene_id": "scene0400_00",
+      "source_frame_count": 57,
+      "source_frame_ids": [
+        0,
+        20,
+        40,
+        100,
+        120,
+        140,
+        160,
+        180,
+        200,
+        220,
+        240,
+        260,
+        300,
+        320,
+        340,
+        360,
+        380,
+        400,
+        420,
+        440,
+        460,
+        480,
+        500,
+        540,
+        560,
+        580,
+        600,
+        620,
+        640,
+        660,
+        680,
+        700,
+        720,
+        740,
+        780,
+        800,
+        820,
+        840,
+        860,
+        880,
+        900,
+        920,
+        940,
+        960,
+        980,
+        1020,
+        1040,
+        1060,
+        1080,
+        1100,
+        1120,
+        1140,
+        1160,
+        1180,
+        1200,
+        1220,
+        1240
+      ],
+      "source_frame_list": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/source_frames.txt",
+        "sha256": "fa0ed25a7f900ff66c31a7d7f3b2b277450ed033d7ed60e508e0374f494c4b9e"
+      },
+      "source_rgb_paths": [
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/0.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/20.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/40.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/320.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/420.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/500.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/600.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/640.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/680.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/720.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/740.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/780.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/800.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/820.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/840.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/860.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/880.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/900.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/920.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/940.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/960.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1020.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1040.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1060.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1080.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1240.jpg"
+      ],
+      "source_rgb_root": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color",
+      "support_graph": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0400/v2_shared_support_graph_k16.pt",
+        "sha256": "929ebb6d219e7c64d45f976c4dc170068843ca28a3a87ce616b5dd5154cdd4f6"
+      }
+    },
+    {
+      "access_audit": {
+        "benchmark_labels_or_masks_opened": false,
+        "benchmark_predictions_or_metrics_opened": false,
+        "benchmark_query_opened": false,
+        "held_out_rgb_excluded": true,
+        "mapping_source_rgb_declared": true
+      },
+      "control_field": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0590/canonical_mpr_v2_d256_l128_fusion.pth",
+        "sha256": "a614dc8e9d4fa587751ea6cad10fe4d57eafd08563cafc36c8838e7dfb64fcb5"
+      },
+      "dino_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0590/dino_v3_heldout4.pt",
+        "sha256": "f4af4b729ff563ffd2186058c5e2325cd17dd4b3176fcc6a69c5b50ec6c0e78c"
+      },
+      "excluded_frame_ids": [
+        540,
+        1080,
+        1620,
+        2160
+      ],
+      "frozen_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0590_00.pt.receipt.json",
+        "sha256": "4b88864a1110e3ea740d986817267c8567c09cd625fb62548af666853aed438f"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/scannet_og_scene0590_00_v14/checkpoints/best.pth",
+        "sha256": "f6aef423b88a5a13c9e58687448616a2bbbca03ad080c27ba2e212b78ead587b"
+      },
+      "outputs": {
+        "base_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/source_only_sam_structure_manifest.json"
+        },
+        "candidate_field": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/canonical_radio_source_sam_relative_e5_seed0.pth"
+        },
+        "official_sam_build_authority": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/official_sam_build_authority.json"
+        },
+        "official_sam_inventory": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/official_sam_inventory.json"
+        },
+        "official_sam_mask_root": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/official_sam3_masks"
+        },
+        "relation_cache": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/scale_ordered_relation_raster_adjoint_fp32.pt"
+        },
+        "relative_structure_manifest": {
+          "no_clobber": true,
+          "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/source_only_sam_relative_manifest.json"
+        }
+      },
+      "raster_adjoint_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/scannet_scene0590_canonical_mpr_v3_paper8.yaml",
+        "sha256": "c8c8d2347b3e8880ad5a6a759e2bf60d81ee739232a3c40eecf618e5f8bd3c78"
+      },
+      "raw_radio_mpr_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0590/raw_radio_heldout4.pt",
+        "sha256": "1c29c44383b0a659f1daca88b9c7da268c2203e838437167aebf66774b4b31cc"
+      },
+      "responsibility_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0590/responsibility_heldout4.pt",
+        "sha256": "5b85caf1849372b5b7b72a87aa4df3b3362b3b4d523aef8a5cec7b062ea9d874"
+      },
+      "sam_adaptor_capability_target": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0590/sam3_heldout4.pt",
+        "sha256": "363a44b0eda29c0ea01c3ea2d2abd55c8e767d7e608e56d0b1e0a2f90f9df5e2"
+      },
+      "scene_id": "scene0590_00",
+      "source_frame_count": 120,
+      "source_frame_ids": [
+        0,
+        20,
+        40,
+        60,
+        80,
+        100,
+        140,
+        160,
+        180,
+        200,
+        220,
+        240,
+        260,
+        280,
+        300,
+        320,
+        340,
+        380,
+        400,
+        420,
+        440,
+        460,
+        480,
+        500,
+        520,
+        560,
+        580,
+        600,
+        640,
+        660,
+        680,
+        700,
+        720,
+        740,
+        760,
+        780,
+        800,
+        820,
+        860,
+        880,
+        900,
+        920,
+        940,
+        960,
+        980,
+        1000,
+        1020,
+        1040,
+        1060,
+        1120,
+        1140,
+        1160,
+        1180,
+        1200,
+        1220,
+        1240,
+        1260,
+        1280,
+        1300,
+        1320,
+        1360,
+        1380,
+        1400,
+        1420,
+        1440,
+        1460,
+        1480,
+        1500,
+        1520,
+        1540,
+        1560,
+        1600,
+        1640,
+        1660,
+        1680,
+        1700,
+        1720,
+        1740,
+        1760,
+        1780,
+        1800,
+        1820,
+        1860,
+        1880,
+        1900,
+        1920,
+        1940,
+        1960,
+        1980,
+        2000,
+        2020,
+        2040,
+        2080,
+        2100,
+        2120,
+        2140,
+        2180,
+        2200,
+        2220,
+        2240,
+        2260,
+        2280,
+        2300,
+        2340,
+        2360,
+        2380,
+        2400,
+        2420,
+        2440,
+        2460,
+        2480,
+        2500,
+        2520,
+        2540,
+        2580,
+        2600,
+        2620,
+        2640,
+        2660,
+        2680
+      ],
+      "source_frame_list": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/source_frames.txt",
+        "sha256": "41ec501143a883b6fa3ee12ba4ec5578d62e729af503f4f1ba041db27c959d5f"
+      },
+      "source_rgb_paths": [
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/0.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/20.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/40.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/60.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/80.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/320.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/420.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/500.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/600.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/640.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/680.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/720.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/740.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/760.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/780.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/800.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/820.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/860.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/880.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/900.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/920.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/940.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/960.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1000.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1020.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1040.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1060.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1160.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1320.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1420.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1500.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1560.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1600.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1640.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1680.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1700.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1720.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1740.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1760.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1780.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1800.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1820.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1860.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1880.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1900.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1920.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1940.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1960.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/1980.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2000.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2020.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2040.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2080.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2100.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2120.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2140.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2180.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2200.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2220.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2240.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2260.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2280.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2300.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2340.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2360.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2380.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2400.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2420.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2440.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2460.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2480.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2500.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2520.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2540.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2580.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2600.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2620.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2640.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2660.jpg",
+        "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color/2680.jpg"
+      ],
+      "source_rgb_root": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/color",
+      "support_graph": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/canonical_v2_validation/scannet_scene0590/v2_shared_support_graph_k16.pt",
+        "sha256": "5b3d762076a6db3439c6496e3c16672fc27d3ecc62196ca66bbe47f9b5fa4ee6"
+      }
+    }
+  ],
+  "schema": "radio_gs.scannet_source_sam_paper8_rollout_inventory.v1",
+  "shared_method": {
+    "mapping_supervision": "official_sam3_scale_matched_relative_no_harm_v2",
+    "membership_lifting": "true_alpha_compositing_adjoint",
+    "official_sam_parameters": {
+      "duplicate_minimum_area_ratio": 0.9,
+      "grid_size": 12,
+      "maximum_area_fraction": 0.8,
+      "maximum_masks": 0,
+      "minimum_area_fraction": 0.001,
+      "minimum_quality": 0.7,
+      "nms_iou": 0.85,
+      "resolution": 1008
+    },
+    "per_scene_or_per_task_tuning": false,
+    "persistent_semantic_feature": "canonical_radio_only",
+    "relation_parameters": {
+      "inside_threshold": 0.8,
+      "minimum_primitives_per_mask": 3,
+      "minimum_stability": 0.0,
+      "outside_threshold": 0.2,
+      "scale_bins": 8,
+      "scale_maximum_radius_m": 4.0,
+      "scale_minimum_radius_m": 0.05,
+      "vote_storage_dtype": "float32"
+    }
+  },
+  "status": "frozen_before_source_sam_generation"
+}

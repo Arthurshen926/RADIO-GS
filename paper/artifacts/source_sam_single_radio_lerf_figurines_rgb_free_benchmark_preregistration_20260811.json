@@ -1,0 +1,89 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_rgb_free_benchmark_preregistration.v1",
+  "status": "frozen_before_candidate_query_scores_or_metrics",
+  "scene_id": "figurines",
+  "source_gate_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_source_gate_result_20260811.json",
+    "sha256": "f3850c3ae153a5b13f240e8b0ee05165665e11402406c00f5da5db8e69e04423",
+    "required_status": "all_source_gates_passed_frozen_rgb_free_benchmark_sentinel_authorized"
+  },
+  "ab_fields": {
+    "control": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5"
+    },
+    "candidate": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/canonical_radio_source_sam_relative_e5_seed0.pth",
+      "sha256": "4348c2c24743f552b3c24e2fd8dcf19eb101c28dad144208e996fbbc60b5e0f6"
+    },
+    "shared_factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b"
+    }
+  },
+  "candidate_derivatives": {
+    "root": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel",
+    "factorized_primitive_state": "factorized_primitive_state_v2.pt",
+    "official_dino_sam3_views": "official_dino_sam3_views_v2.pt",
+    "support_graph": "support_graph_accepted_v2_isomorphic.pt",
+    "surface_region_descriptor": "descriptor_accepted_v2_isomorphic.pt",
+    "positive_fp32_scores": "positive_fp32.pt",
+    "negative_fp32_scores": "negative_fp32.pt",
+    "all_outputs_no_clobber": true
+  },
+  "frozen_query_and_readout": {
+    "readout_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "positive_text_cache_sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b",
+    "canonical_negative_cache_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+    "region_radii_m": [0.25, 0.45, 0.7],
+    "graph_neighbors": 16,
+    "radio_feature_normalization": "legacy_raw",
+    "query_time_source_rgb": false,
+    "query_time_target_rgb": false,
+    "query_time_official_sam": false
+  },
+  "lerf3d": {
+    "protocol_preset": "vala_repo_3d",
+    "score_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax",
+    "vala_knn_k": 10,
+    "scale_fusion": "peak_select",
+    "projection_mode": "selected_only_alpha",
+    "mask_refinement": "none",
+    "control_replay_required": true,
+    "known_control_miou": 0.4443484842777252,
+    "promotion_gate": {
+      "candidate_minus_fresh_control_miou_min": 0.002,
+      "candidate_minus_control_boundary_f_min": -0.002,
+      "candidate_minus_control_trimap_iou_min": -0.002
+    }
+  },
+  "lerf2d": {
+    "protocol": "frozen_occam_langsplat_paper_exact_scalar_maps",
+    "control_query_score_cache_sha256": "3366c96839fe392d6cc1f6d55939691787e095491581c63006f74e44862d4cac",
+    "known_control_figurines_miou": 0.5520572905827846,
+    "known_control_figurines_loc_acc": 0.8571428571428571,
+    "promotion_gate": {
+      "candidate_minus_control_figurines_miou_min": 0.002,
+      "candidate_minus_control_figurines_loc_acc_min": 0.0
+    }
+  },
+  "implementation": {
+    "factorized_state_builder_sha256": "035663cd8e0d0222390c3d6d72d155db09aa09b9c811f6c3c6a882fbb1b3a208",
+    "capability_builder_sha256": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34",
+    "support_graph_builder_sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254",
+    "surface_region_builder_sha256": "490a0d801835d4d169c031c0386a823b6b2a09402bf4522bf666d20c0c71ecb0",
+    "score_materializer_sha256": "3ab6fcc5dbebf27a37de0f3d694626dd4d92ac71b748677d7a4ecd7dbbf1b4fd",
+    "lerf3d_evaluator_sha256": "e9e5988c2a37a90de7cee03f013097d5d98d53e15147811861403aed21342803",
+    "lerf2d_renderer_sha256": "93f2c4466e82559fc393d41bf78cab244d536cb0092b08cbeb0eddf50b012fcf",
+    "lerf2d_evaluator_sha256": "c8defc55609905d22b018c37e43db93e053b651eb5a5c1c970d5e737549e692d"
+  },
+  "execution_policy": {
+    "candidate_field_or_hyperparameters_may_change_after_receipt": false,
+    "candidate_query_scores_sealed_before_first_metric": true,
+    "single_frozen_metric_per_ab_arm": true,
+    "no_threshold_or_scale_sweep": true,
+    "per_scene_or_per_query_tuning": false,
+    "failure_action": "do_not_promote_or_expand; preserve_source_positive_candidate_for_diagnosis"
+  }
+}

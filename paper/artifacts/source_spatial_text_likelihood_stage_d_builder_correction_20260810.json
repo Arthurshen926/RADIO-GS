@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_spatial_text_likelihood_stage_d_builder_correction",
+  "status": "sealed_before_any_source_spatial_shard_was_written",
+  "original_preregistration": {"path": "/root/RADIO-GS/paper/artifacts/source_spatial_text_likelihood_stage_d_preregistration_20260810.json", "sha256": "c28232f4e8bd652801a36c51e551c82799dd27aac60424150a01881c0e388f88"},
+  "failure": "MPR uses -1 only in token_mask=false padding slots; the initial validator rejected padded storage before masking.",
+  "correction": "Allow negative or out-of-range region_rows only where token_mask=false, clamp only for safe gather, and retain the token mask in centroid reduction.",
+  "method_graph_geometry_or_training_recipe_changed": false,
+  "source_spatial_shard_written_before_correction": false,
+  "development_or_benchmark_labels_opened": false,
+  "corrected_builder_sha256": "c4d574450afeca28423c4612e8bb7520b7ef0d216339c468dd0fee035d603722",
+  "corrected_tests_sha256": "ecf8b106aacb34dc7322d14ce8cace33b807d520d7f185525736d80a749705db",
+  "focused_tests": "5 passed"
+}

@@ -1,0 +1,51 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_figurines_lerf3d_execution_correction.v1",
+  "status": "frozen_before_successful_control_or_candidate_execution",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_rgb_free_benchmark_preregistration_20260811.json",
+    "sha256": "34ee52ce4e2f48e44286c28fdc81b5a7c9ef97f7a9e6e1f7f3364c640781a7ee"
+  },
+  "failed_attempt": {
+    "time": "2026-08-11T16:13:23+08:00",
+    "failure_stage": "argparse_before_model_or_metric_loading",
+    "cause": "hyphenated option spellings were used for a CLI whose registered options use underscores",
+    "exit_code": 2,
+    "control_output_created": false,
+    "candidate_output_created": false,
+    "prediction_created": false,
+    "metric_or_ground_truth_opened": false,
+    "gpu_work_started": false,
+    "method_or_parameter_changed": false,
+    "preserved_evidence": [
+      "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/gpu0_lerf3d_control_owner.csv",
+      "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/gpu0_lerf3d_control_telemetry.csv",
+      "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/gpu1_lerf3d_candidate_owner.csv",
+      "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/gpu1_lerf3d_candidate_telemetry.csv"
+    ]
+  },
+  "correction": {
+    "scope": "execution_syntax_only",
+    "change": "replace each hyphenated long option by the evaluator's registered underscore spelling",
+    "new_control_output": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_control_v2",
+    "new_candidate_output": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_candidate_v2",
+    "protocol_preset": "vala_repo_3d",
+    "score_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax",
+    "vala_knn_k": 10,
+    "ours_scale_fusion": "peak_select",
+    "projection_mode": "selected_only_alpha",
+    "mask_refinement": "none",
+    "silhouette_threshold": 0.0392156862745098,
+    "chunk_size": 8192,
+    "query_time_source_rgb": false,
+    "query_time_target_rgb": false,
+    "query_time_official_sam": false
+  },
+  "thermal_policy": {
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "resume_c": 78,
+    "hard_abort_c": 85,
+    "power_limit_w": 300.5
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_object_multiview_region_memory_fern_trex_outcome_v1",
+  "status": "exact_pair_safe_positive_but_below_promotion_gate",
+  "method": "source_only_object_multiview_region_memory_v1",
+  "runtime_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_runtime_addendum_20260810.json",
+    "sha256": "3ad05caa37af78eb1831cd0dbc657c3225170b469e69ab5c3a1c07a1658aea45"
+  },
+  "scorer_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_scorer_correction_v2_20260810.json",
+    "sha256": "cb68babc162462d625b581008dbc0e0dd250eb98ab3c945f8fc7e38b42a97ade"
+  },
+  "sealed_predictions": {
+    "fern": {
+      "receipt_sha256": "39a29cc744a615776fabe9678824aca0fde3e54edbf314d0219a42b9d9b3a429",
+      "primitive_unary_sha256": "65fd7f7332424d05526ba13a4028d3f538b039d9bad606c6c44d6beee6a4f706"
+    },
+    "trex": {
+      "receipt_sha256": "ded0f28f0b676694500cfd3dc9ef0c8d807e0fd214c8e1da80d11b2df538c269",
+      "primitive_unary_sha256": "659c551af6b9e389c37f89b96b7c3b6f87aaf2134dcd5bf5bfcfcbcc4203e3f6"
+    }
+  },
+  "exact_result": {
+    "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_object_multiview_region_memory_fern_trex_v1/fern_trex_exact_result.json",
+    "sha256": "ac515daedb3ad0b1e4066a447e3ee36c658f5d41019afcffecafee0e703848dc",
+    "fern": {
+      "baseline_foreground_iou": 0.7350345861696804,
+      "foreground_iou": 0.737464791606189,
+      "delta_foreground_iou": 0.0024302054365086256
+    },
+    "trex": {
+      "baseline_foreground_iou": 0.60547969614955,
+      "foreground_iou": 0.6098734602138809,
+      "delta_foreground_iou": 0.004393764064330896
+    },
+    "pair": {
+      "baseline_scene_macro_foreground_iou": 0.6702571411596152,
+      "scene_macro_foreground_iou": 0.6736691259100349,
+      "delta_foreground_iou": 0.0034119847504197054
+    }
+  },
+  "preregistered_gate": {
+    "fern_minimum_delta": -0.002,
+    "pair_minimum_delta": 0.005,
+    "per_scene_minimum_delta": -0.002,
+    "fern_authorized_trex": true,
+    "per_scene_safety_passed": true,
+    "pair_promotion_passed": false,
+    "decision": "do_not_promote_to_strict_mainline; retain as a positive causal arm"
+  },
+  "causal_audit": {
+    "observed_values_confidence_and_unary_bitwise_equal": true,
+    "writes_only_base_abstained_and_memory_observed_rows": true,
+    "material_probability_write_mask_subset_of_valid_memory_authority": true,
+    "non_memory_0_5_decision_and_selected_bits_bitwise_equal": true,
+    "target_rgb_used": false,
+    "target_metric_used_to_fit_or_select_parameters": false
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "poll_seconds": 60,
+    "maximum_observed_temperature_c": 61,
+    "soft_pause_triggered": false,
+    "cuda_release_verified": true,
+    "fern_telemetry_sha256": "86c5c32091041150224f73a96ed8d5cd5a998cd383ee56eccfb8b3b8f6738191",
+    "fern_owner_audit_sha256": "c5424a90511b1287d4fda024197da8eb97b9a5643425156f1934327403c00722",
+    "trex_telemetry_sha256": "de168793282363851269075e0b6b22356a58fc57375dc5df508520fba128d2e2",
+    "trex_owner_audit_sha256": "2439b1311dbe1fd2eedefecdecd177945882a5972ab3d5d74c25e231d14efe60"
+  },
+  "validation": {
+    "focused_tests": "82 passed, 38 warnings",
+    "python_compile": "passed",
+    "all_requested_prediction_receipts_verified_before_pair_target_mask_open": true
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_scannet_paper8_exact_result.v1",
+  "status": "formal_candidate_passed_frozen_exact_paper8_gate",
+  "method": {
+    "persistent_semantic_feature": "canonical_radio_only",
+    "mapping_time_supervision": "legal_source_rgb_official_sam_query_free_relative_structure",
+    "evaluation_time_source_rgb": false,
+    "evaluation_time_target_rgb": false,
+    "evaluation_time_sam_or_external_vision_branch": false,
+    "per_scene_or_per_task_tuning": false
+  },
+  "source_gate_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_paper8_source_gate_result_20260810.json",
+    "sha256": "102f52fee4f125d1e112a3b0a97390582063e5ecfae67e3fb3804d092d3e95ed"
+  },
+  "prediction_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_scannet_paper8_prediction_preregistration_20260810.json",
+    "sha256": "23f5a3a4d424340c37559d47cb305695d553e987d47b7dcaa4b6b747523568b8"
+  },
+  "prediction_batch_seal": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_scannet_paper8_prediction_batch_seal_20260810.json",
+    "sha256": "915ec0ae83ff2e1253909c90ef10bbb8741e86d611612c2ac6475cee0f4ad99f",
+    "sealed_before_first_semantic_label_open": true
+  },
+  "evaluation": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scannet_ovs_evaluation_exact_v1/ours_scannet_gaussian_protocol_results.json",
+    "sha256": "9c7630de2f219935d5719fecb952af5355d596e13bd885025976febb61c4f7e9",
+    "protocol": "frozen_VALA_Gaussian_domain_paper8_exact"
+  },
+  "metrics": {
+    "split19": {
+      "miou": 0.3791758323814954,
+      "macc": 0.552898485558473,
+      "control_miou": 0.3786329623189025,
+      "control_macc": 0.5521891702607359,
+      "delta_miou": 0.0005428700625929039,
+      "delta_macc": 0.0007093152977371009
+    },
+    "split15": {
+      "miou": 0.4201516076524666,
+      "macc": 0.6049822093549182,
+      "control_miou": 0.41979414941029086,
+      "control_macc": 0.6044140413721429,
+      "delta_miou": 0.0003574582421757566,
+      "delta_macc": 0.0005681679827752584
+    },
+    "split10": {
+      "miou": 0.5245962310109544,
+      "macc": 0.6870403396213703,
+      "control_miou": 0.5234081172660365,
+      "control_macc": 0.6860258736952943,
+      "delta_miou": 0.0011881137449178958,
+      "delta_macc": 0.0010144659260760136
+    }
+  },
+  "promotion_gate": {
+    "each_split_miou_delta_at_least_minus_0p002": true,
+    "each_split_macc_delta_at_least_minus_0p002": true,
+    "mean_three_split_miou_delta_strictly_positive": true,
+    "passed": true
+  },
+  "per_scene_split19_delta": {
+    "scene0000_00": 0.004767163699729293,
+    "scene0062_00": 0.0015824713542511581,
+    "scene0070_00": 0.0011107110194201186,
+    "scene0097_00": -0.0005200134176171489,
+    "scene0140_00": -0.0011176228048064285,
+    "scene0347_00": -0.0011438094992571868,
+    "scene0400_00": -0.0006184120324790321,
+    "scene0590_00": 0.0002824721815021247
+  },
+  "thermal": {
+    "gpu0_max_temp_c": 62,
+    "gpu1_max_temp_c": 66,
+    "gpu0_max_sampled_power_w": 176.64,
+    "gpu1_max_sampled_power_w": 139.83,
+    "soft_pause_or_hard_stop": false
+  },
+  "conclusion": "Mapping-time official-SAM relational supervision transfers into the same single-RADIO field and produces a small but exact positive ScanNet OVS gain on all three frozen splits without any evaluation-time RGB branch."
+}

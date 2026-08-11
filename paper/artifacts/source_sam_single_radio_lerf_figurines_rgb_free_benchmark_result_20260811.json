@@ -1,0 +1,96 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_figurines_rgb_free_benchmark_result.v1",
+  "status": "source_positive_but_downstream_promotion_gates_failed",
+  "scene_id": "figurines",
+  "method_scope": "official SAM3 is used only on legal mapping-time source RGB to supervise one persistent RADIO field; query and evaluation use no source RGB, target RGB, or SAM sidecar",
+  "authorities": {
+    "source_gate": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_source_gate_result_20260811.json",
+      "sha256": "f3850c3ae153a5b13f240e8b0ee05165665e11402406c00f5da5db8e69e04423"
+    },
+    "benchmark_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_rgb_free_benchmark_preregistration_20260811.json",
+      "sha256": "34ee52ce4e2f48e44286c28fdc81b5a7c9ef97f7a9e6e1f7f3364c640781a7ee"
+    },
+    "lerf3d_prediction_batch_seal": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_lerf3d_prediction_batch_seal_20260811.json",
+      "sha256": "e2eba6dba3eccd8041c6422cfc70247cff88ac8d0be060e707c52a0a991556bf"
+    },
+    "lerf2d_renderer_correction": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf2d_fp32_renderer_correction_20260811.json",
+      "sha256": "c366173c16ae9a7fcded514dc839d271d9948073750413be00c35cf94bebf906"
+    }
+  },
+  "lerf3d_rgb_free_exact": {
+    "control_metric": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_control_v2.metric.json",
+      "sha256": "167e1dd5f3b28faed4ee0df1f1e411a409d68e9bba3f4ac908e24e24964fc698",
+      "miou": 0.44434770941734314,
+      "boundary_f": 0.6662379503250122,
+      "trimap_iou": 0.42230963706970215
+    },
+    "candidate_metric": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_candidate_v2.metric.json",
+      "sha256": "418e094adeb172fa8c3dd389b1602efa272ec34a4b70aaec59b5dc0be9e539b3",
+      "miou": 0.4438226521015167,
+      "boundary_f": 0.6652359962463379,
+      "trimap_iou": 0.4247017204761505
+    },
+    "candidate_minus_control": {
+      "miou": -0.00052505731582644,
+      "boundary_f": -0.0010019540786743,
+      "trimap_iou": 0.00239208340644835
+    },
+    "promotion_gate_passed": false,
+    "failed_gate": "candidate_minus_fresh_control_miou_min_0.002"
+  },
+  "lerf2d_rgb_free_exact": {
+    "causal_control": {
+      "description": "same current factorized field generation, same FP32 cache contract, renderer, geometry, cameras, and Occam readout",
+      "evaluation": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/lerf2d_current_control_evaluation_v1.json",
+      "sha256": "a696d09262b99e0a2cc93aa06943cf2c4ac896ae5f81404f1aaea2ad5b3613a2",
+      "figurines_miou": 0.5762614438842449,
+      "figurines_loc_acc": 0.875,
+      "full4_scene_macro_miou": 0.5234235657773157
+    },
+    "candidate": {
+      "evaluation": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/lerf2d_candidate_evaluation_v2.json",
+      "sha256": "a22aa5ae216536397efa0825e598fda92b90d1392eb26a3b3aebf7a2f6ff363d",
+      "figurines_miou": 0.577650297632707,
+      "figurines_loc_acc": 0.875,
+      "full4_scene_macro_miou": 0.5237707792144313
+    },
+    "candidate_minus_causal_control": {
+      "figurines_miou": 0.0013888537484621,
+      "figurines_loc_acc": 0.0,
+      "full4_scene_macro_miou": 0.0003472134371155
+    },
+    "promotion_gate_passed": false,
+    "failed_gate": "candidate_minus_current_control_figurines_miou_min_0.002",
+    "noncausal_legacy_public_control_context": {
+      "figurines_miou": 0.5520572905827846,
+      "figurines_loc_acc": 0.8571428571428571,
+      "candidate_minus_legacy_miou": 0.0255930070499224,
+      "candidate_minus_legacy_loc_acc": 0.0178571428571429,
+      "warning": "not attributed to source-SAM because the legacy control is an older field generation with 82603 rather than 96879 valid descriptor rows"
+    }
+  },
+  "causal_conclusion": {
+    "source_sam_signal_is_real": true,
+    "evidence": "source relation, raw-RADIO preservation, and ScanNet paper8 gates pass; LERF2D same-generation change is positive",
+    "magnitude": "too small and not task-consistent",
+    "failure_mode": "the current pairwise source-SAM relation objective changes local RADIO direction only weakly and is not aligned tightly enough with the frozen multiscale spatial readouts to improve both LERF2D and LERF3D",
+    "mainline_promoted": false,
+    "full4_source_sam_rollout_authorized": false,
+    "next_action": "retain the one-feature RADIO field and mapping-only SAM policy, but replace weak pairwise relation regularization with a stronger source-only boundary/region objective that is explicitly scale-aware and source-render-consistent before any new benchmark metric"
+  },
+  "safety": {
+    "query_time_source_rgb": false,
+    "query_time_target_rgb": false,
+    "query_time_official_sam": false,
+    "target_mask_used_for_prediction_or_selection": false,
+    "per_scene_or_per_query_tuning": false,
+    "max_sampled_gpu_temperature_c": 53,
+    "both_gpus_released": true
+  }
+}

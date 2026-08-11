@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_source_only_correspondence_completion_fern_trex_preregistration_v1",
+  "status": "registered_after_source_only_cpu_support_audit_before_candidate_target_prediction_or_target_error_support_diagnostic",
+  "baseline": {
+    "method": "frozen_hierarchical_trust_local_positive_full8_v2_graph_off",
+    "result_authority": "paper/artifacts/nvos_hierarchical_trust_local_positive_full8_exact_results_20260805.json",
+    "fern_foreground_iou": 0.7350345861696804,
+    "trex_foreground_iou": 0.60547969614955,
+    "pair_macro_foreground_iou": 0.6702571411596152
+  },
+  "single_factor_change": {
+    "method": "source_only_one_hop_signed_correspondence_completion_v1",
+    "implementation": "radio_gs/querying/source_only_correspondence_completion.py",
+    "implementation_sha256_at_registration": "461b8cb8713e1daed08ae36250bbc0f0827041dff766be3d852d56ae8f312107",
+    "write_domain": "only valid primitive rows with registered observation confidence exactly equal to zero",
+    "observed_row_policy": "values and confidence remain bitwise equal",
+    "positive_negative_anchor_policy": "frozen hard-seed threshold 0.20 and sign of registered signed observation",
+    "prototype_likelihood": "existing frozen DINO appearance plus SAM boundary positive/negative primitive prototypes",
+    "relation": "minimum of frozen typed DINO and SAM K16 edge affinities times source-training-view co-visibility Jaccard",
+    "topology": "one hop only; no harmonic or iterative diffusion",
+    "completion_probability": "normalized Bernoulli product of prototype likelihood and signed neighboring-anchor likelihood",
+    "completion_confidence": "anchor relation coverage times signed consensus times prototype/structure agreement times source-visible-view fraction",
+    "reliability_is_separate_from_probability": true,
+    "field_prior_is_separate_from_completion_likelihood": true,
+    "connected_selection": false,
+    "scene_specific_parameters": false,
+    "target_rgb_mask_or_metric_input": false
+  },
+  "unchanged_frozen_factors": {
+    "source_completion_hierarchy": "all_trial_loo_hierarchical_local_positive_v2",
+    "registered_observation_fusion": "probability_mixture",
+    "registered_observation_confidence": "poisson_mass_coverage",
+    "prototype_count": 16,
+    "prototype_strategy": "spherical_mean_fps",
+    "prototype_temperature": 0.07,
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "exclusive_relative",
+    "graph_readout": "disabled unary_prior",
+    "score_render_resolution": "scaled_renderer",
+    "target_threshold": 0.5
+  },
+  "source_only_assets": {
+    "fern": {
+      "typed_support_graph_sha256": "2d570d098e36dabb7fc82b06944f75def6ebc13598e97afce232f008cea34eeb",
+      "multiview_responsibility_sha256": "5fd6de5d4951b1112dd1308ddffa5098df0ed2eba6b5cfb019278ab147e607eb",
+      "base_unary_sha256": "d25221bad2f6ae7f6ed245c6a339b27a723c24a7390f03376f3a0e10ad29763b"
+    },
+    "trex": {
+      "typed_support_graph_sha256": "81fe44ee104008402295882178d8104c1b5a6dce146770f483b5e867dd9b8978",
+      "multiview_responsibility_sha256": "f6f370c2f9662ccbdabd59ec78122514a6b28d796f388ba5a91d63042cea71e9",
+      "base_unary_sha256": "3c9053c0239c8da78f5b032a2545e1923154879432d57120de7a9a1299275774"
+    }
+  },
+  "cpu_source_support_gate": {
+    "tests": "49 passed including focused completion/compiler/support-solver tests",
+    "fern": {
+      "valid_rows": 297200,
+      "observed_rows": 172843,
+      "abstained_rows": 124357,
+      "completed_rows": 4448,
+      "completed_abstain_fraction": 0.03576799054335502,
+      "observed_values_bitwise_equal": true,
+      "observed_confidence_bitwise_equal": true,
+      "observation_authority": "existing exact native front-to-back source-confidence seal; sealed base probability used only as anchor-sign proxy"
+    },
+    "trex": {
+      "valid_rows": 154586,
+      "observed_rows": 13450,
+      "abstained_rows": 141136,
+      "completed_rows": 13615,
+      "completed_abstain_fraction": 0.09646723727468541,
+      "observed_values_bitwise_equal": true,
+      "observed_confidence_bitwise_equal": true,
+      "observation_authority": "source-only 47x63 top1 MPR audit proxy; exact runtime adjoint remains required for prediction"
+    },
+    "decision": "candidate materially changes exact-abstain completion on both sentinels and passes no-harm invariants; authorize exact runtime implementation and receipt-first GPU1 sentinel"
+  },
+  "sentinel_gate": {
+    "scenes": [
+      "fern",
+      "trex"
+    ],
+    "pair_macro_iou_delta_minimum": 0.005,
+    "per_scene_iou_delta_minimum": -0.002,
+    "promotion": "expand to full8 only if both gates pass",
+    "failure": "retain frozen hierarchical mainline and record diagnostic only"
+  },
+  "protocol": {
+    "prediction_receipt_first": true,
+    "both_prediction_receipts_verified_before_target_ground_truth_open": true,
+    "same_numerical_unary_replay_required": true,
+    "physical_gpu": 1,
+    "target_parameter_selection_after_registration": false
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-capability-likelihood-v2-fit-result",
+  "status": "fit_gate_pass_development_not_opened",
+  "scope": {
+    "scene_id": "scene0000_00",
+    "partition": "fit",
+    "labels_opened": true,
+    "label_scope": "official_source_train_scene_only",
+    "development_labels_opened": false,
+    "test_labels_opened": false,
+    "full312_run": false
+  },
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/agile3d_capability_likelihood_v2_preregistration_20260810.json",
+    "sha256": "47e800b00b12ffee85199135f61762fedbdaa40a8326b68e6fc9f0692fb16323"
+  },
+  "implementation": {
+    "generic_head": {
+      "path": "/root/RADIO-GS/radio_gs/querying/query_likelihood_head.py",
+      "sha256": "385006c124f74987239f9f4fdeda26fc9776c9fefc123160bfa856b916be90b1",
+      "schema": "monotone-query-likelihood-multichannel-v2",
+      "backward_compatible_single_channel_checkpoint_load": true
+    },
+    "capability_builder": {
+      "path": "/root/RADIO-GS/radio_gs/benchmarks/agile3d_scannet40/build_capability_likelihood_training_dataset.py",
+      "sha256": "7cdb4164060dfccc9a9f8139173a526b80d4b4b1f81f12b69145965d61b06c34"
+    },
+    "balanced_trainer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_capability_query_likelihood_head.py",
+      "sha256": "f71a7abc44115dbdc7afd2aba5b3f95eb7c8b9c974dd67547dd20fd9376cfa9b"
+    },
+    "synthetic_tests": {
+      "path": "/root/RADIO-GS/tests/test_agile3d_capability_likelihood_v2.py",
+      "sha256": "ccf709746446e15b0a1a0807077514a6c4bd4dff770da47babd04276e4fd8186"
+    }
+  },
+  "data": {
+    "dataset_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0000_v2/dataset_manifest.json",
+      "sha256": "9793017f25c94fadf6967b5da71723217a152bc0665148222ef354af6fe02e33"
+    },
+    "shard": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0000_v2/shards/scene0000_00.pt",
+      "sha256": "654d601f63e4860f41d4a4ff8b1fce014d2f20d21f8a4e53cc1dadc7c5ae99c5"
+    },
+    "primitive_count": 63730,
+    "official_point_count": 53365,
+    "click_steps": 10,
+    "affinity_channels": [
+      "appearance",
+      "boundary"
+    ],
+    "appearance_dimension": 4096,
+    "boundary_dimension": 1024,
+    "calibration": "scene_centered_l2_cosine_to_click_gaussian_mixture_v1",
+    "appearance_scene_centroid_sha256": "e0e9e656df53c0d03b8562d1f69626bc4a812a1d59f05bac2c009d392bbfd7a0",
+    "boundary_scene_centroid_sha256": "fae3ee7c7e16cf7c6b98bc155f1652818d4775915f819a2ded1fd2c730f43830",
+    "scene_calibration_labels_used": false,
+    "scene_calibration_query_threshold_used": false,
+    "hard_spatial_seed_stored_for_solver": true,
+    "hard_spatial_seed_used_by_likelihood_head": false,
+    "coverage_contract": "capability_valid_times_query_independent_observation_support"
+  },
+  "checkpoint": {
+    "path": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0000_v2/head_balanced_dice_v2.pt",
+    "sha256": "07ad2226ac2cee4e572cc4809ea0d1d6160f16fdfc1da2ff8281ff7f36f45924",
+    "bytes": 3125,
+    "head_class": "MonotoneQueryLikelihoodHead",
+    "trainable_parameters": 10,
+    "no_clobber": true,
+    "weights_only_reload_passed": true
+  },
+  "receipt": {
+    "path": "/root/RADIO-GS/local_ssd_results/agile3d_capability_likelihood_scene0000_v2/head_balanced_dice_v2.receipt.json",
+    "sha256": "cafa9353381972d5495d205a8d0f1ccc50ce8ed1c4d1c5e346ebb541f1dd4ee7"
+  },
+  "synthetic_causal_gates": {
+    "far_same_appearance_global_positive_affinity": "pass",
+    "negative_click_suppresses_appearance_lookalike": "pass",
+    "one_percent_foreground_balanced_objective_no_background_collapse": "pass"
+  },
+  "fit_metrics": {
+    "reference_v1": {
+      "official_point_mean_iou_at_0.5": 0.01685393258426966,
+      "official_point_mean_precision_at_0.5": 1.0,
+      "official_point_mean_recall_at_0.5": 0.01685393258426966,
+      "click1_iou_at_0.5": 0.016853932584269662,
+      "click10_iou_at_0.5": 0.016853932584269662,
+      "click_response": 0.0
+    },
+    "v2": {
+      "official_point_mean_iou_at_0.5": 0.09707448611951452,
+      "official_point_mean_precision_at_0.5": 0.09911849838850215,
+      "official_point_mean_recall_at_0.5": 0.852808988764045,
+      "official_point_mean_f1_at_0.5": 0.17491564773410478,
+      "official_point_mean_bce": 0.19031000137329102,
+      "click1": {
+        "iou_at_0.5": 0.010509852987175477,
+        "precision_at_0.5": 0.010516431924882629,
+        "recall_at_0.5": 0.9438202247191011
+      },
+      "click2": {
+        "iou_at_0.5": 0.061149612719119444,
+        "precision_at_0.5": 0.061855670103092786,
+        "recall_at_0.5": 0.8426966292134831
+      },
+      "click5": {
+        "iou_at_0.5": 0.1085383502170767,
+        "precision_at_0.5": 0.11078286558345643,
+        "recall_at_0.5": 0.8426966292134831
+      },
+      "click10": {
+        "iou_at_0.5": 0.13850415512465375,
+        "precision_at_0.5": 0.14218009478672985,
+        "recall_at_0.5": 0.8426966292134831
+      },
+      "click10_minus_click1_iou": 0.12799430213747828
+    },
+    "absolute_mean_iou_gain_over_v1": 0.08022055353524486,
+    "relative_mean_iou_multiplier_over_v1": 5.759752843091197
+  },
+  "preregistered_gate": {
+    "required_mean_iou_strictly_greater_than": 0.02685393258426966,
+    "actual_mean_iou": 0.09707448611951452,
+    "mean_iou_pass": true,
+    "required_click10_minus_click1_strictly_greater_than": 0.005,
+    "actual_click10_minus_click1": 0.12799430213747828,
+    "click_response_pass": true,
+    "bce_only_gate": false,
+    "development_authorized_by_gate": true,
+    "development_executed": false
+  },
+  "causal_interpretation": {
+    "old_failure": "The spatial click kernel only marked a local neighborhood, while unweighted BCE on 0.33-percent foreground learned a background-dominant bias.",
+    "repair": "Click-local Gaussian mixtures now produce global appearance and boundary prototypes; negative clicks suppress capability lookalikes, while balanced BCE plus soft Dice prevents background collapse.",
+    "observed_response": "IoU increases sharply after the first negative click and then monotonically improves from 0.0611 at click 2 to 0.1385 at click 10, unlike the flat v1 response.",
+    "limitation": "This is an in-sample single-fit-scene sentinel. It establishes mechanism and implementation correctness, not cross-scene generalization or AGILE benchmark performance."
+  },
+  "verification": {
+    "focused_tests_passed": 22,
+    "focused_tests_failed": 0,
+    "old_single_channel_checkpoint_strict_load": true,
+    "new_multichannel_checkpoint_strict_load": true,
+    "python_device": "cpu",
+    "cuda_initialized": false,
+    "gpu1_used": false,
+    "development_labels_opened": false,
+    "test_labels_opened": false
+  }
+}

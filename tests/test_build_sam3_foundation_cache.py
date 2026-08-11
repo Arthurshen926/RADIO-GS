@@ -1,3 +1,5 @@
+import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -5,6 +7,7 @@ import torch
 
 from radio_gs.models.foundation_cache import load_foundation_cache
 from radio_gs.scripts.build_sam3_foundation_cache import (
+    _load_sam3_model,
     cast_sam3_model_for_inference,
     filter_images_by_frame_ids,
     frame_id_from_path,
@@ -182,3 +185,52 @@ def test_sam3_autocast_context_accepts_cpu_bfloat16():
         value = torch.ones(1)
 
     assert value.item() == 1.0
+
+
+def test_load_sam3_float32_can_build_on_cpu_before_unchanged_cuda_transfer(
+    monkeypatch,
+):
+    calls = []
+
+    class DummyModel:
+        def float(self):
+            calls.append(("float",))
+            return self
+
+        def to(self, *, device):
+            calls.append(("to", device))
+            return self
+
+    class DummyProcessor:
+        def __init__(self, model, *, device, confidence_threshold, resolution):
+            self.model = model
+            self.device = device
+            self.confidence_threshold = confidence_threshold
+            self.resolution = resolution
+
+    def dummy_builder(**kwargs):
+        calls.append(("build", kwargs["device"]))
+        return DummyModel()
+
+    sam3_module = types.ModuleType("sam3")
+    sam3_model_module = types.ModuleType("sam3.model")
+    processor_module = types.ModuleType("sam3.model.sam3_image_processor")
+    processor_module.Sam3Processor = DummyProcessor
+    builder_module = types.ModuleType("sam3.model_builder")
+    builder_module.build_sam3_image_model = dummy_builder
+    monkeypatch.setitem(sys.modules, "sam3", sam3_module)
+    monkeypatch.setitem(sys.modules, "sam3.model", sam3_model_module)
+    monkeypatch.setitem(sys.modules, "sam3.model.sam3_image_processor", processor_module)
+    monkeypatch.setitem(sys.modules, "sam3.model_builder", builder_module)
+
+    processor = _load_sam3_model(
+        checkpoint_path="checkpoint.pt",
+        device="cuda",
+        confidence_threshold=0.0,
+        dtype="float32",
+        resolution=1008,
+        build_on_cpu=True,
+    )
+
+    assert calls == [("build", "cpu"), ("float",), ("to", "cuda")]
+    assert processor.device == "cuda"

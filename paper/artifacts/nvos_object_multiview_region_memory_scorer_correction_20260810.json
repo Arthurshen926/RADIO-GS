@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_object_multiview_region_memory_scorer_correction_v1",
+  "status": "frozen_after_fern_prediction_before_first_target_ground_truth_open",
+  "base_runtime_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_runtime_addendum_20260810.json",
+    "sha256": "3ad05caa37af78eb1831cd0dbc657c3225170b469e69ab5c3a1c07a1658aea45"
+  },
+  "sealed_fern_prediction": {
+    "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_object_multiview_region_memory_fern_trex_v1/fern/pre_metric_prediction_receipt.json",
+    "sha256": "39a29cc744a615776fabe9678824aca0fde3e54edbf314d0219a42b9d9b3a429"
+  },
+  "failed_scorer_gate": {
+    "failure": "changed-row replay differs",
+    "logit_domain_materially_changed_rows": 63504,
+    "probability_domain_materially_changed_rows": 63488,
+    "root_cause": "the same absolute threshold was incorrectly required to preserve row counts across sigmoid",
+    "prediction_or_method_changed": false
+  },
+  "correction_contract": {
+    "logit_domain": "sealed hashed evaluator diagnostics; changes are constructed only on completed c==0 and memory-c-positive rows",
+    "probability_domain": "independent scorer requires abs probability delta above 1e-6 to be nonempty and a subset of valid memory-authorized rows",
+    "cross_domain_count_equality_required": false,
+    "observed_value_confidence_and_unary_bitwise_gates_preserved": true,
+    "positive_negative_anchor_bitwise_gate_preserved": true,
+    "target_rgb_mask_or_metric_used": false
+  },
+  "corrected_scorer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_object_region_memory.py",
+    "sha256": "9b91bbd50b67006eed6ba6facb575f56bb6afeefbc3a4c8377841ef060b3f1ca"
+  },
+  "focused_test": {
+    "path": "/root/RADIO-GS/tests/test_multiview_region_memory_pipeline.py",
+    "sha256": "3c9db4bce1f5d1d3d9d15d497188264c1ce32ba8db6388c28464c4071b43a667",
+    "boundary_case": "delta logit above 1e-6 while delta probability at or below 1e-6",
+    "suite_result": "80 passed, 38 warnings"
+  },
+  "target_ground_truth_opened_before_correction": false,
+  "prediction_receipt_recomputed": false,
+  "method_parameters_changed": false
+}

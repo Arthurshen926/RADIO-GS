@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-one-sided-density-ratio-v6-preregistration",
+  "status": "sealed_before_v6_training_or_source_metrics",
+  "design_provenance": {
+    "v5_source_result_used_for_design": true,
+    "v5_authority": "/root/RADIO-GS/paper/artifacts/agile3d_channel_density_ratio_v5_source_gate_result_20260810.json",
+    "v5_observation": "full subtraction of negative-click density ratio rewards generic dissimilarity and makes mass rise with negative clicks",
+    "development_scene0003": "forbidden until every source gate passes",
+    "test312": "sealed and forbidden"
+  },
+  "data_contract": {
+    "fit_scenes": ["scene0000_00", "scene0002_00", "scene0005_00"],
+    "development_scene": "scene0003_00",
+    "dataset_manifest_sha256": {
+      "scene0000_00": "69a12190da46313d83c0d451724655349a4c0e3b6241b715de77c27df86d0c85",
+      "scene0002_00": "d567369e8b67073f15943e97c3b8379ffaf15734c09b696124b23e3a3efc0d03",
+      "scene0005_00": "052cd8767f5b3ea8084071321e51544f9098f320e946ad4f754c4f5965416cfe"
+    },
+    "calibrator_training": "identical to v5: every unique positive click and deterministic source-only class rows",
+    "all_legal_objects_evaluated": true,
+    "development_or_test_labels_allowed": false
+  },
+  "mathematical_contract": {
+    "per_channel_ratio": "ell_c(s)=softplus(raw_slope_c)*s+intercept_c",
+    "positive_operator": "sum ell_c(s_positive)",
+    "negative_operator": "-sum relu(ell_c(s_negative))",
+    "unrelated_negative": "ell_c<=0 contributes exact zero",
+    "negative_lookalike": "ell_c>0 contributes strict suppression",
+    "negative_monotonicity": "adding a negative click cannot increase any primitive unary",
+    "aggregate_bias": "exact zero",
+    "empty_evidence": "ell=0 and q=0.5 exactly",
+    "training_posterior": "sigmoid(ell_c(s)+logit(pi_object)) with analytic prior removal at inference",
+    "direct_solver_compilation": "T*logit((1-c)*0.5+c*q)",
+    "hard_spatial_seed": "instance extent constraint only"
+  },
+  "training_recipe": {
+    "recipe_id": "capability-one-sided-channel-density-ratio-adam-seed0-e100-lr0.02-v6",
+    "seed": 0,
+    "optimizer": "Adam",
+    "epochs": 100,
+    "learning_rate": 0.02,
+    "weight_decay": 0.0,
+    "objective": "identical per-channel prevalence-weighted posterior BCE as v5",
+    "threshold_or_bin_sweep": false,
+    "early_stopping": false
+  },
+  "synthetic_gates": {
+    "negative_lookalike_strictly_decreases": true,
+    "unrelated_to_negative_strictly_unchanged": true,
+    "adding_negative_never_increases_any_unary": true,
+    "empty_evidence_neutral": true,
+    "exact_direct_solver_identity": true
+  },
+  "source_validation": {
+    "leave_one_scene_out": [
+      {"train": ["scene0002_00", "scene0005_00"], "heldout": "scene0000_00"},
+      {"train": ["scene0000_00", "scene0005_00"], "heldout": "scene0002_00"},
+      {"train": ["scene0000_00", "scene0002_00"], "heldout": "scene0005_00"}
+    ],
+    "required_gates": {
+      "loo_macro_mean_iou_gain_over_v2_strictly_greater_than": 0.02,
+      "loo_scenes_with_mean_iou_gain_over_v2_at_least": 2,
+      "loo_each_scene_click10_minus_click1_strictly_greater_than": 0.02,
+      "loo_macro_absolute_log_probability_mass_ratio_error_lower_than_v2": true,
+      "all_fit_mean_iou_gain_over_v2_strictly_greater_than": 0.02,
+      "all_fit_precision_gain_over_v2_strictly_greater_than": 0.02,
+      "all_fit_click10_minus_click1_strictly_greater_than": 0.05
+    },
+    "failure_action": "stop scalar-head family; do not open development or test"
+  },
+  "prohibited": {
+    "negative_dissimilarity_as_positive_evidence": true,
+    "scene_specific_calibration": true,
+    "bin_or_threshold_sweep": true,
+    "development_parameter_selection": true,
+    "test312_labels_or_metrics": true
+  }
+}

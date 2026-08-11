@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_odds_residual_transport_v4_preregistration",
+  "status": "sealed_before_any_v4_prediction_or_metric",
+  "hypothesis": "Transporting only the source-head log-odds residual relative to its exact raw field prior avoids convexly mixing an absolute posterior with the scene-relative legacy rank score while retaining the frozen scale/kNN/min-max spatial shaping.",
+  "frozen_method": {
+    "name": "post_readout_odds_residual_transport_v4",
+    "raw_evidence_residual": "delta = logit(q) - logit(p_field_raw)",
+    "legacy_readout": "s_legacy_final is computed by the unchanged canonical-negative scale selection, kNN10, and scene min-max path",
+    "final_score": "s_final = sigmoid(logit(s_legacy_final) + c * delta)",
+    "fixed_numerical_logit_clip_epsilon": 0.000001,
+    "epsilon_role": "fixed finite-logit guard only; not a tunable method parameter",
+    "absorbing_legacy_endpoints": "exact s_legacy_final values 0 and 1 are restored after finite-logit computation",
+    "after_transport": "unchanged 0.6 threshold and selected-only-alpha projection; no additional remap, kNN, normalization, graph, or refinement",
+    "trained_parameters": false,
+    "scene_or_query_specific_settings": false
+  },
+  "required_invariants": {
+    "c_equals_zero_is_bitwise_legacy": true,
+    "q_equals_p_field_raw_is_bitwise_legacy": true,
+    "positive_delta_cannot_decrease_nonendpoint_score": true,
+    "negative_delta_cannot_increase_nonendpoint_score": true,
+    "default_off_is_bitwise_legacy": true,
+    "malformed_axes_range_nonfinite_or_changed_epsilon_fail_closed": true
+  },
+  "immutable_implementation": {
+    "adapter": {"path": "/root/RADIO-GS/radio_gs/querying/lerf_source_text_likelihood.py", "sha256": "cbd5a28aaf1677544c4073ec60db6292ded6638ba6db1bf14a13ed46a1545bfd"},
+    "evaluator": {"path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py", "sha256": "e9e5988c2a37a90de7cee03f013097d5d98d53e15147811861403aed21342803"},
+    "adapter_tests": {"path": "/root/RADIO-GS/tests/test_lerf_source_text_likelihood.py", "sha256": "1d4938561ef193494b4ee56f1954914ac4eff9a2902df9f36c03fd13d83750ab"},
+    "focused_test_result": "132 passed"
+  },
+  "frozen_input_caches": {
+    "figurines": {"path": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/stage_b_source_text_likelihood_prior_preserving_v2.pt", "sha256": "8edbbdd05c19060b74b231566ea03997eed1cd414c29e8431a9e16813ef69863"},
+    "ramen": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/ramen_prior_preserving_v2.pt", "sha256": "f5177cce50cf43adb64466220d32c7c3e61ab2da4ad9aa1b6b0a0645f6b0a605"},
+    "teatime": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/teatime_prior_preserving_v2.pt", "sha256": "5e3b3d60aedc4b66717f974a58689382f6565c9b5457abf93b706e1830172f0d"},
+    "waldo_kitchen": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/waldo_kitchen_prior_preserving_v2.pt", "sha256": "92e5526559b734aa1ca38c36625650e72dae224651171368833a786f40e1a509"}
+  },
+  "execution_protocol": {
+    "physical_gpu": 0,
+    "thermal_guard": {"poll_seconds": 60, "soft_stop_celsius": 82, "resume_below_celsius": 78, "hard_stop_celsius": 85, "power_cap_watts": 300},
+    "prediction_order": ["figurines", "ramen", "teatime", "waldo_kitchen"],
+    "all_four_prediction_receipts_and_masks_sealed_before_first_v4_metric": true,
+    "then_score_all_four_once_with_same_frozen_scorer": true,
+    "reuse_existing_hash_bound_legacy_receipts_and_metrics": true,
+    "no_callback_to_formula_epsilon_confidence_threshold_or_field": true
+  },
+  "gate": {
+    "scene_macro_delta_miou_must_be_strictly_positive": true,
+    "minimum_allowed_per_scene_delta_miou": -0.002,
+    "baseline_A": "same compact field and raw caches through frozen legacy readout",
+    "baseline_B_context_only": "registry O2 teacher-sidecar-bypass exact macro 0.4496018",
+    "on_failure": "Stop formula experiments and do not expand Stage-B; move to source-trained spatial likelihood."
+  },
+  "access_disclosure": {
+    "prior_v1_v2_v3_lerf_metrics_were_already_open_before_this_continuation": true,
+    "v4_formula_was_fixed_by_the_parent_task_before_any_v4_prediction": true,
+    "v4_prediction_or_metric_opened_before_this_preregistration": false,
+    "new_training_or_parameter_selection_from_lerf_gt": false
+  }
+}

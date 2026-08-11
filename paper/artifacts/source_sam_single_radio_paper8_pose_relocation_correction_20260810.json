@@ -1,0 +1,33 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_paper8_pose_relocation_correction.v1",
+  "status": "frozen_before_first_successful_relation_cache",
+  "failure": {
+    "scene_id": "scene0062_00",
+    "stage": "raster_adjoint_context_preflight",
+    "reason": "frozen legacy config referenced missing relative dataset/scannet_og/scene0062_00/traj_w_c.txt",
+    "relation_cache_written": false,
+    "benchmark_query_gt_or_metric_opened": false
+  },
+  "correction": {
+    "kind": "execution_only_pose_file_relocation",
+    "new_cli": "--adjoint-pose-file-override",
+    "pose_tensor_must_match_frozen_responsibility_sha256": true,
+    "config_path_or_content_changed": false,
+    "geometry_checkpoint_changed": false,
+    "source_frame_axis_changed": false,
+    "official_sam_cache_changed": false,
+    "relation_math_or_threshold_changed": false
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_scannet_scale_ordered_relation_cache.py",
+    "sha256": "463470ead12c4ca5202c211a87f1512e460312efb1317927677be878a4c9373a"
+  },
+  "scene0062_pose_source": {
+    "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/traj_w_c.txt",
+    "sha256": "aa8341c920432597e3e1e53a0318378fe10b88c895b4b4c2db85ed71ae0bb407"
+  },
+  "tests": {
+    "focused_passed": 7,
+    "py_compile_passed": true
+  }
+}

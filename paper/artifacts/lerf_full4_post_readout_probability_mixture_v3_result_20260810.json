@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_probability_mixture_v3_frozen_result",
+  "status": "complete_preregistered_gate_failed_no_stage_b_expansion",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_probability_mixture_v3_preregistration_20260810.json",
+    "sha256": "aaf13a34c91045505bcb343290736d816ae8b6f96fe950dd5382682d1d436623"
+  },
+  "pre_metric_prediction_batch_seal": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_probability_mixture_v3_prediction_batch_seal_20260810.json",
+    "sha256": "f7456dca057b7ba6febd110df31fbd2c81a7a095f914c53c07db676cf02ccb78",
+    "all_416_prediction_and_coarse_masks_hash_replayed_before_first_v3_metric": true
+  },
+  "method": {
+    "name": "post_readout_prior_preserving_mixture_v3",
+    "formula": "p_final = (1 - c) * field_probability_final + c * q",
+    "fusion_boundary": "after frozen legacy scale selection, kNN, and min-max readout",
+    "after_fusion": "unchanged 0.6 threshold and selected-only-alpha projection; no additional remap or spatial normalization",
+    "identities": {
+      "c_equals_zero": "bitwise field_probability_final",
+      "c_equals_one": "q",
+      "only_positive_c_rows_can_change": true,
+      "default_off_is_bitwise_legacy": true
+    }
+  },
+  "same_field_same_cache_causal_results": {
+    "figurines": {
+      "n": 56,
+      "legacy": {"miou": 0.44569653272628784, "acc025": 0.7678571428571429, "acc050": 0.5535714285714286, "boundary_f": 0.666334331035614, "trimap_iou": 0.42321401834487915},
+      "post_readout_v3": {"miou": 0.4261394143104553, "acc025": 0.75, "acc050": 0.39285714285714285, "boundary_f": 0.6821197867393494, "trimap_iou": 0.3643398582935333},
+      "delta_v3_minus_legacy": {"miou": -0.01955711841583252, "acc025": -0.017857142857142905, "acc050": -0.16071428571428575, "boundary_f": 0.01578545570373535, "trimap_iou": -0.058874160051345825},
+      "prior_preserving_v2": {"miou": 0.47560593485832214, "acc025": 0.8214285714285714, "acc050": 0.48214285714285715, "boundary_f": 0.724780261516571, "trimap_iou": 0.36892515420913696},
+      "delta_v3_minus_v2_miou": -0.04946652054786682,
+      "legacy_report_sha256": "ce7d7910d2edcb596eba44019f96b059e4c187d0dfd0f292753b4e6c40a1fb42",
+      "candidate_report_sha256": "24b2b31bcb3fb866d377581380da57606297f1f7bf8aae1fbb382245d6d2e01e"
+    },
+    "ramen": {
+      "n": 71,
+      "legacy": {"miou": 0.38143566250801086, "acc025": 0.676056338028169, "acc050": 0.29577464788732394, "boundary_f": 0.6208915114402771, "trimap_iou": 0.3959977626800537},
+      "post_readout_v3": {"miou": 0.3641021251678467, "acc025": 0.6338028169014085, "acc050": 0.29577464788732394, "boundary_f": 0.6060565114021301, "trimap_iou": 0.41606569290161133},
+      "delta_v3_minus_legacy": {"miou": -0.017333537340164185, "acc025": -0.04225352112676051, "acc050": 0.0, "boundary_f": -0.014835000038146973, "trimap_iou": 0.020067930221557617},
+      "prior_preserving_v2": {"miou": 0.41509631276130676, "acc025": 0.6901408450704225, "acc050": 0.4647887323943662, "boundary_f": 0.6720982193946838, "trimap_iou": 0.41019293665885925},
+      "delta_v3_minus_v2_miou": -0.05099418759346008,
+      "legacy_report_sha256": "ed89dbc41c139a5519cd24c570cf14f441f3eb74a98f3aed14c59474bbeb45c8",
+      "candidate_report_sha256": "89197fb39a91424fdd6d56e0e4135bb7b1d423907fb464ddd33aa0866e934fd3"
+    },
+    "teatime": {
+      "n": 59,
+      "legacy": {"miou": 0.5256859064102173, "acc025": 0.8813559322033898, "acc050": 0.5084745762711864, "boundary_f": 0.7531660795211792, "trimap_iou": 0.37678709626197815},
+      "post_readout_v3": {"miou": 0.5224350094795227, "acc025": 0.8813559322033898, "acc050": 0.5084745762711864, "boundary_f": 0.7485763430595398, "trimap_iou": 0.3776148557662964},
+      "delta_v3_minus_legacy": {"miou": -0.00325089693069458, "acc025": 0.0, "acc050": 0.0, "boundary_f": -0.004589736461639404, "trimap_iou": 0.0008277595043182373},
+      "prior_preserving_v2": {"miou": 0.5265554785728455, "acc025": 0.9152542372881356, "acc050": 0.5423728813559322, "boundary_f": 0.7559869885444641, "trimap_iou": 0.3778148591518402},
+      "delta_v3_minus_v2_miou": -0.004120469093322754,
+      "legacy_report_sha256": "4010260b853643278469a6a6c2d1d6702229625b12dec89657207739b1bf42e0",
+      "candidate_report_sha256": "9538d6778f31f74c09eaa338bdde493cf2840ea5a38a645bf458136170266205"
+    },
+    "waldo_kitchen": {
+      "n": 22,
+      "legacy": {"miou": 0.34231969714164734, "acc025": 0.6818181818181818, "acc050": 0.2727272727272727, "boundary_f": 0.4187788665294647, "trimap_iou": 0.2996499836444855},
+      "post_readout_v3": {"miou": 0.3402424156665802, "acc025": 0.6818181818181818, "acc050": 0.2727272727272727, "boundary_f": 0.416576087474823, "trimap_iou": 0.29574424028396606},
+      "delta_v3_minus_legacy": {"miou": -0.0020772814750671387, "acc025": 0.0, "acc050": 0.0, "boundary_f": -0.0022027790546417236, "trimap_iou": -0.003905743360519409},
+      "prior_preserving_v2": {"miou": 0.3156757652759552, "acc025": 0.6818181818181818, "acc050": 0.22727272727272727, "boundary_f": 0.43589356541633606, "trimap_iou": 0.27846476435661316},
+      "delta_v3_minus_v2_miou": 0.024566650390625,
+      "legacy_report_sha256": "1525033d2280d0c64fbb4d8ace81b01b87e6766ee0196780916a0946f7153b1d",
+      "candidate_report_sha256": "52b3f59f1ebb5146693aa01938901e371eb4d57a96020b5f2bcde419a23bac52"
+    },
+    "scene_macro": {
+      "legacy": {"miou": 0.42378444969654083, "acc025": 0.7517718987267208, "acc050": 0.40763698136430293, "boundary_f": 0.6147926971316338, "trimap_iou": 0.3739122152328491},
+      "post_readout_v3": {"miou": 0.4132297411561012, "acc025": 0.736744232730745, "acc050": 0.3674584099357315, "boundary_f": 0.6133321821689606, "trimap_iou": 0.3634411618113518},
+      "delta_v3_minus_legacy": {"miou": -0.010554708540439606, "acc025": -0.015027665995975853, "acc050": -0.04017857142857144, "boundary_f": -0.0014605149626731873, "trimap_iou": -0.010471053421497345},
+      "prior_preserving_v2": {"miou": 0.4332333728671074, "acc025": 0.7771604589013278, "acc050": 0.4291442995414707, "boundary_f": 0.6471897587180138, "trimap_iou": 0.3588494285941124}
+    }
+  },
+  "registry_context": {
+    "baseline_A_definition": "same compact field and raw query caches through the frozen legacy readout; the causal baseline",
+    "baseline_A_scene_macro_miou": 0.42378444969654083,
+    "baseline_B_definition": "registry O2 teacher-sidecar-bypass exact row; current paper best strict-like result but not a unified compact-field result",
+    "baseline_B_scene_macro_miou": 0.4496018,
+    "v3_minus_baseline_B_miou": -0.03637205884389877,
+    "disclosure": "This v3 result neither exceeds baseline A nor baseline B. The old O2 figurines result remains near 0.529."
+  },
+  "preregistered_gate": {
+    "scene_macro_miou_improved": false,
+    "required_minimum_per_scene_delta_miou": -0.002,
+    "minimum_per_scene_delta_miou": -0.01955711841583252,
+    "figurines_passed_per_scene_gate": false,
+    "ramen_passed_per_scene_gate": false,
+    "teatime_passed_per_scene_gate": false,
+    "waldo_passed_per_scene_gate": false,
+    "waldo_missed_gate_by_absolute_miou": 0.00007728147506713866,
+    "overall_passed": false,
+    "action": "Stop. Do not tune confidence or threshold and do not expand Stage-B to the remaining scenes from this result."
+  },
+  "causal_diagnostic": {
+    "waldo_cabinet_control": {
+      "legacy_miou": 0.7942739129066467,
+      "prior_preserving_v2_miou": 0.2630293667316437,
+      "post_readout_v3_miou": 0.7942739129066467,
+      "legacy_and_v3_rendered_prediction_pixels": 77821,
+      "interpretation": "The post-readout placement exactly removes the global-minmax cabinet erosion observed in v2."
+    },
+    "v3_vs_v2_miou": {
+      "figurines": -0.04946652054786682,
+      "ramen": -0.05099418759346008,
+      "teatime": -0.004120469093322754,
+      "waldo_kitchen": 0.024566650390625
+    },
+    "remaining_failure": "field_probability_final is a scene-relative min-max rank score, whereas q is a ScanNet-source-calibrated posterior from raw affinities. Their convex combination satisfies algebraic identities but mixes non-commensurate quantities. Post-readout primitive-local q also bypasses the useful frozen spatial shaping that produced the figurines and ramen v2 gains.",
+    "first_principles_conclusion": "The next implementation should spatially aggregate raw likelihood evidence in logit/evidence space and only then calibrate a final probability, without scene-wise min-max, or learn a source-only monotone residual in a single calibrated final-score domain with an end-to-end c=0 identity. Threshold or scene-specific confidence tuning is not justified by this result."
+  },
+  "access_audit": {
+    "all_predictions_sealed_before_first_v3_metric": true,
+    "same_frozen_scorer_and_label_root": true,
+    "head_field_threshold_knn_projection_changed_after_metric": false,
+    "parameter_callback_after_outcome": false,
+    "stage_b_expansion_after_failed_gate": false
+  },
+  "thermal": {"physical_gpu": 0, "maximum_temperature_celsius": 57, "maximum_power_watts": 128.49, "pause_or_abort": false}
+}

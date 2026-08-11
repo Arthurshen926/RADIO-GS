@@ -139,19 +139,70 @@ class SoftSeedGroups:
 
 @dataclass(frozen=True)
 class PrimitiveUnaryEvidence:
-    """Bounded signed evidence already registered to primitive rows.
+    """Bounded observation likelihood already registered to primitive rows.
 
     ``values`` stores signed purity multiplied by observation confidence.
     ``confidence`` keeps that joint observation mass explicit so registered
     evidence can be fused in probability space without treating an
     unobserved row (zero) as an ambiguous 50/50 observation.  It may be
     omitted only for legacy additive use; probability fusion fails closed
-    without it.
+    without it.  The representation is registration-domain agnostic: camera
+    prompts and world-space interactions use the same ``c * (2q - 1)``
+    contract after their evidence has been aligned to primitive rows.
     """
 
     values: torch.Tensor
     source: str
     confidence: torch.Tensor | None = None
+
+    @classmethod
+    def from_probability(
+        cls,
+        foreground_probability: torch.Tensor,
+        *,
+        confidence: torch.Tensor,
+        source: str,
+    ) -> "PrimitiveUnaryEvidence":
+        """Encode a calibrated foreground likelihood without losing abstention.
+
+        ``q`` alone cannot distinguish an unobserved row from an ambiguous
+        observation.  Keeping confidence ``c`` explicit makes the neutral
+        element exact: ``c=0`` preserves the field prior during fusion.
+        """
+
+        probability = torch.as_tensor(foreground_probability).float().reshape(-1)
+        authority = torch.as_tensor(confidence).float().reshape(-1)
+        if probability.numel() == 0 or probability.shape != authority.shape:
+            raise ValueError(
+                "foreground probability and confidence must be aligned vectors"
+            )
+        if not bool(torch.isfinite(probability).all()) or not bool(
+            torch.isfinite(authority).all()
+        ):
+            raise ValueError("foreground probability and confidence must be finite")
+        if bool(((probability < 0) | (probability > 1)).any()):
+            raise ValueError("foreground probability must be in [0,1]")
+        if bool(((authority < 0) | (authority > 1)).any()):
+            raise ValueError("confidence must be in [0,1]")
+        return cls(
+            authority * (2.0 * probability - 1.0),
+            str(source),
+            confidence=authority,
+        )
+
+    @property
+    def foreground_probability(self) -> torch.Tensor:
+        """Recover ``q``; unobserved rows use the explicit neutral value 0.5."""
+
+        if self.confidence is None:
+            raise ValueError(
+                "foreground probability requires explicit observation confidence"
+            )
+        return torch.where(
+            self.confidence > 0,
+            0.5 * (1.0 + self.values / self.confidence.clamp_min(1e-30)),
+            torch.full_like(self.values, 0.5),
+        ).clamp(0.0, 1.0)
 
     def __post_init__(self) -> None:
         values = torch.as_tensor(self.values).float().reshape(-1)
@@ -221,12 +272,12 @@ class QuerySpec:
             raise ValueError("text queries are unregistered")
         if self.modality is QueryModality.REGISTERED_2D and self.registration is not RegistrationMode.CAMERA:
             raise ValueError("registered 2D queries require camera registration")
-        if (
-            self.primitive_unary_evidence is not None
-            and self.modality is not QueryModality.REGISTERED_2D
-        ):
+        if self.primitive_unary_evidence is not None and self.modality not in {
+            QueryModality.REGISTERED_2D,
+            QueryModality.WORLD_3D,
+        }:
             raise ValueError(
-                "primitive unary evidence is currently restricted to registered 2D queries"
+                "primitive unary evidence requires camera- or world-registered queries"
             )
         if self.modality is QueryModality.WORLD_3D and self.registration is not RegistrationMode.WORLD:
             raise ValueError("world 3D queries require world registration")

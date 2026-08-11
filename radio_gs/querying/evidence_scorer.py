@@ -62,6 +62,7 @@ class EvidenceScoringConfig:
             "probability_mixture",
             "hard_seed_anchored_probability",
             "hard_seed_anchor_only_probability",
+            "direct_registered_likelihood",
             "direct_raster_adjoint",
             "raster_adjoint_bernoulli_poe",
             "dual_registration_bernoulli_poe",
@@ -70,6 +71,7 @@ class EvidenceScoringConfig:
                 "registered_observation_fusion must be additive, "
                 "probability_mixture, hard_seed_anchored_probability, "
                 "hard_seed_anchor_only_probability, direct_raster_adjoint, "
+                "direct_registered_likelihood, "
                 "raster_adjoint_bernoulli_poe, or "
                 "dual_registration_bernoulli_poe"
             )
@@ -79,6 +81,7 @@ class EvidenceScoringConfig:
                 "probability_mixture",
                 "hard_seed_anchored_probability",
                 "hard_seed_anchor_only_probability",
+                "direct_registered_likelihood",
                 "direct_raster_adjoint",
                 "raster_adjoint_bernoulli_poe",
                 "dual_registration_bernoulli_poe",
@@ -1175,6 +1178,37 @@ def fuse_registered_observation_unary(
             fused_chunk,
         ).to(dtype=values.dtype)
     return output
+
+
+def compile_direct_registered_likelihood_unary(
+    observation: PrimitiveUnaryEvidence,
+    *,
+    unary_temperature: float,
+) -> torch.Tensor:
+    """Compile ``q,c`` to the solver's logit scale without a second link.
+
+    ``PrimitiveUnaryEvidence.values`` is ``c*(2q-1)``, not a logit.  A direct
+    likelihood replaces the absent field expert with the neutral probability
+    0.5, so its effective probability is
+    ``(1-c)*0.5+c*q = 0.5*(1+values)``.  The support solver subsequently
+    applies ``sigmoid(unary/T)``; therefore the only semantics-preserving unary
+    is ``T*logit(p_effective)``.
+    """
+
+    if observation.confidence is None:
+        raise ValueError("direct registered likelihood requires explicit confidence")
+    temperature = float(unary_temperature)
+    if not math.isfinite(temperature) or temperature <= 0:
+        raise ValueError("unary_temperature must be finite and positive")
+    signed = observation.values
+    probability = 0.5 * (1.0 + signed.double())
+    eps = float(torch.finfo(torch.float64).eps)
+    compiled = temperature * torch.logit(probability.clamp(eps, 1.0 - eps))
+    return torch.where(
+        signed == 0,
+        torch.zeros_like(signed),
+        compiled.to(dtype=signed.dtype),
+    )
 
 
 def _score_bank(

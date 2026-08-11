@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_disjoint_domain_composition_full8_prediction_batch_authority_v1",
+  "status": "all_eight_composed_predictions_sealed_before_new_six_target_scoring",
+  "scene_order": ["fern", "flower", "fortress", "horns_center", "horns_left", "leaves", "orchids", "trex"],
+  "new_prediction_scene_order": ["flower", "fortress", "horns_center", "horns_left", "leaves", "orchids"],
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_disjoint_domain_composition_full8_preregistration_20260810.json",
+    "sha256": "0069eae0307991322a4b29f2ad51a3c64bfc55cd7552595b842a4ed41725eb28"
+  },
+  "authorized_pair_exact_result": {
+    "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_fern_trex_v1/pair_exact_result.json",
+    "sha256": "adf2362fa9e2ebb78cd6bd9c5d49460e73bd499657746a00bbfd73745528a8e1"
+  },
+  "predictions": {
+    "fern": {
+      "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_fern_trex_v1/fern/pre_metric_prediction_receipt.json", "sha256": "7f477ea8aaee3967e7ae55a5a274ab77cc1cfa472561f989d14b8b891f5f87c2"},
+      "primitive_unary": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_fern_trex_v1/fern/primitive_unary.pt", "sha256": "2b4cb7b7302eb41ed878b4c9184e4ba6f22adce1da3d6ecfe277b5b7031f5ed8"},
+      "partition": {"observed_rows": 172843, "memory_rows": 63510, "abstained_rows": 60847, "hard_anchor_rows": 51317, "observed_mask_sha256": "992266f34dc8ae9daef181e04626d08af457a2f6ed6b6dc4daacb667df8e31ab"},
+      "reused_without_rerun": true
+    },
+    "flower": {
+      "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/flower/pre_metric_prediction_receipt.json", "sha256": "9a5a6fbd07f83e2d1edff83a0bce48eca095aeea7d9c5afeb037bb648b787a8e"},
+      "primitive_unary": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/flower/primitive_unary.pt", "sha256": "b65c5625f6163494ac1e5385284f2b39410ae6a6c67d6fedc604d60c85e55eb2"},
+      "partition": {"observed_rows": 65775, "memory_rows": 18573, "abstained_rows": 112853, "hard_anchor_rows": 32710, "observed_mask_sha256": "ac98311a902b28dc4440022f481abb47c01fc5804824bfde2d2460bfdbbde3f6", "partition_exhaustive": true, "partition_pairwise_disjoint": true, "same_row_double_counted": false, "observed_and_hard_anchor_unary_bitwise_preserved": true}
+    },
+    "fortress": {
+      "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/fortress/pre_metric_prediction_receipt.json", "sha256": "f851f76c09103595abf10884f7c320512b5c6840d8999c53bdcfca9ec0042f23"},
+      "primitive_unary": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/fortress/primitive_unary.pt", "sha256": "0ea6c919fc3e148d6dd1e9fa142665226056dbf304b5e509819321537756931d"},
+      "partition": {"observed_rows": 99803, "memory_rows": 15188, "abstained_rows": 90106, "hard_anchor_rows": 31562, "observed_mask_sha256": "3a73a0f6cb593a3e854e294224ec2426b9c2c0d02e7023e6706a6e94ad715761", "partition_exhaustive": true, "partition_pairwise_disjoint": true, "same_row_double_counted": false, "observed_and_hard_anchor_unary_bitwise_preserved": true}
+    },
+    "horns_center": {
+      "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/horns_center/pre_metric_prediction_receipt.json", "sha256": "5c0f5389174374e078f8ae4061d6b7ca6c5aa7bf306684c1e0e4af981ac10b01"},
+      "primitive_unary": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/horns_center/primitive_unary.pt", "sha256": "73ba4db79a2a7a50ff28bb65352f02342078b0bf1481e61ad13a0b9ae2f1cfb4"},
+      "partition": {"observed_rows": 78975, "memory_rows": 32677, "abstained_rows": 39248, "hard_anchor_rows": 28334, "observed_mask_sha256": "080a9fc866efaac4ddd59c64225628d9e06f9271188a2a0488bbb38c5f96f40a", "partition_exhaustive": true, "partition_pairwise_disjoint": true, "same_row_double_counted": false, "observed_and_hard_anchor_unary_bitwise_preserved": true}
+    },
+    "horns_left": {
+      "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/horns_left/pre_metric_prediction_receipt.json", "sha256": "8728a3cb4931a956e4cc9fc9e81c86f01b3b059572cb6449e25d0ee23cf72cb7"},
+      "primitive_unary": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/horns_left/primitive_unary.pt", "sha256": "c35221009c6a840d9d1d6d719dad69aaf0ab2c610a3481dc4c5873dee68efd7e"},
+      "partition": {"observed_rows": 147884, "memory_rows": 733, "abstained_rows": 9266, "hard_anchor_rows": 32834, "observed_mask_sha256": "240daf4ef3b412825a9a39c0e381569c76388c4852d9b8d8d35a08b074a82096", "partition_exhaustive": true, "partition_pairwise_disjoint": true, "same_row_double_counted": false, "observed_and_hard_anchor_unary_bitwise_preserved": true}
+    },
+    "leaves": {
+      "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/leaves/pre_metric_prediction_receipt.json", "sha256": "0f26349101cdc3171f75467f614349c5d1c7481e7a2b62ef670271d28edfc06b"},
+      "primitive_unary": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/leaves/primitive_unary.pt", "sha256": "f4b3b39e5ba643732eb5d2e19a11f99028dbef9a101646f9fa23868481e7a3f4"},
+      "partition": {"observed_rows": 26295, "memory_rows": 4207, "abstained_rows": 58705, "hard_anchor_rows": 17579, "observed_mask_sha256": "f7208c46b237bf1dda9b9165ec3040a59b48a05055ff69644d3c33342bdcc33d", "partition_exhaustive": true, "partition_pairwise_disjoint": true, "same_row_double_counted": false, "observed_and_hard_anchor_unary_bitwise_preserved": true}
+    },
+    "orchids": {
+      "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/orchids/pre_metric_prediction_receipt.json", "sha256": "4277a44eb415e02488761e9627129c36958f3f19ee09bc3d4e43a0a3115d8586"},
+      "primitive_unary": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/orchids/primitive_unary.pt", "sha256": "719e67d446866589b7343763781a9928844b5053246e315d55486d917133d9b5"},
+      "partition": {"observed_rows": 87642, "memory_rows": 57797, "abstained_rows": 148897, "hard_anchor_rows": 43520, "observed_mask_sha256": "33e44d254a0a661df4f5a11c9c622f0114e28c488cacc4c2e08a8c46dd6cac26", "partition_exhaustive": true, "partition_pairwise_disjoint": true, "same_row_double_counted": false, "observed_and_hard_anchor_unary_bitwise_preserved": true}
+    },
+    "trex": {
+      "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_fern_trex_v1/trex/pre_metric_prediction_receipt.json", "sha256": "feb6e762db8664d83a8cd34a0710d2a4f0b056396a38bad0740fa343f1e1f6b5"},
+      "primitive_unary": {"path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_fern_trex_v1/trex/primitive_unary.pt", "sha256": "b872d3781d455ab799b8e84cc53bc8952025e89b9490f726774001339d2b6b2f"},
+      "partition": {"observed_rows": 55663, "memory_rows": 58537, "abstained_rows": 40386, "hard_anchor_rows": 36423, "observed_mask_sha256": "8f9b5fcaa299df5102aa2fbc89382f98e19f09ba62658a48ca7cf9f367ba73fe"},
+      "reused_without_rerun": true
+    }
+  },
+  "frozen_implementation": {
+    "evaluator": {"path": "/root/RADIO-GS/radio_gs/scripts/eval_nvos_gaussian_first.py", "sha256": "c20d485b4249fbd0b3d7d03c2eb5695d0c60fd5fff85116d57642bfbeeda3086"},
+    "runner": {"path": "/root/RADIO-GS/radio_gs/scripts/run_nvos_disjoint_full8_prediction.py", "sha256": "25a0d4f688679d61d66b845f7e323eb46824fb05631a6328eb382630610f50d1"},
+    "scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_disjoint_full8.py", "sha256": "6d3ac6f4fbd17f2160e20700b00e0522d4ba9d62e930132fa85fdda5605b543f"}
+  },
+  "prediction_barrier": {
+    "all_eight_prediction_receipts_verified": true,
+    "all_eight_primitive_hashes_verified": true,
+    "all_six_new_score_map_hashes_verified": true,
+    "six_source_inventory_coarse_sam3_and_memory_chains_bound_by_preregistration": true,
+    "target_rgb_opened": false,
+    "new_six_target_masks_opened": false,
+    "new_six_target_metrics_opened": false,
+    "candidate_parameters_changed_after_preregistration": false
+  },
+  "thermal": {
+    "gpu0_static_scenes": ["flower", "horns_center", "leaves"],
+    "gpu1_static_scenes": ["fortress", "horns_left", "orchids"],
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_sampled_temperature_below_soft_pause": true,
+    "driver_failure": false
+  }
+}

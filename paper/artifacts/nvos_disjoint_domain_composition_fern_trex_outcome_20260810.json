@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_disjoint_domain_composition_fern_trex_outcome_v1",
+  "status": "exact_pair_passed_preregistered_promotion_gate_full8_asset_plan_authorized",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_disjoint_domain_composition_fern_trex_preregistration_20260810.json",
+    "sha256": "d25918ee9c266de0ef3ac8ded84a2ad87c9c513bbb3e09babf094a6ef9746275"
+  },
+  "execution_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_disjoint_domain_composition_gpu0_execution_correction_20260810.json",
+    "sha256": "1ac2ca03695c18f97acdfda971ec40cc0b412f6525d23f2284277633423382b4"
+  },
+  "scorer_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_disjoint_domain_composition_scorer_correction_20260810.json",
+    "sha256": "2bb58cf0beed082ccc13e6f161ab1ea69302ae505e0cfeb539e52266dc9635f1"
+  },
+  "exact_result": {
+    "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_fern_trex_v1/pair_exact_result.json",
+    "sha256": "adf2362fa9e2ebb78cd6bd9c5d49460e73bd499657746a00bbfd73745528a8e1",
+    "fern": {
+      "baseline_foreground_iou": 0.7350345861696804,
+      "foreground_iou": 0.7410597198748375,
+      "delta_foreground_iou": 0.006025133705157115
+    },
+    "trex": {
+      "baseline_foreground_iou": 0.60547969614955,
+      "foreground_iou": 0.6101344260704183,
+      "delta_foreground_iou": 0.00465472992086835
+    },
+    "pair": {
+      "baseline_scene_macro_foreground_iou": 0.6702571411596152,
+      "scene_macro_foreground_iou": 0.6755970729726279,
+      "delta_foreground_iou": 0.005339931813012733
+    }
+  },
+  "sealed_predictions": {
+    "fern": {
+      "receipt_sha256": "7f477ea8aaee3967e7ae55a5a274ab77cc1cfa472561f989d14b8b891f5f87c2",
+      "primitive_unary_sha256": "2b4cb7b7302eb41ed878b4c9184e4ba6f22adce1da3d6ecfe277b5b7031f5ed8",
+      "observed_rows": 172843,
+      "memory_rows": 63510,
+      "remaining_abstained_rows": 60847,
+      "hard_anchor_rows": 51317,
+      "observed_mask_sha256": "992266f34dc8ae9daef181e04626d08af457a2f6ed6b6dc4daacb667df8e31ab"
+    },
+    "trex": {
+      "receipt_sha256": "feb6e762db8664d83a8cd34a0710d2a4f0b056396a38bad0740fa343f1e1f6b5",
+      "primitive_unary_sha256": "b872d3781d455ab799b8e84cc53bc8952025e89b9490f726774001339d2b6b2f",
+      "observed_rows": 55663,
+      "memory_rows": 58537,
+      "remaining_abstained_rows": 40386,
+      "hard_anchor_rows": 36423,
+      "observed_mask_sha256": "8f9b5fcaa299df5102aa2fbc89382f98e19f09ba62658a48ca7cf9f367ba73fe"
+    }
+  },
+  "promotion_gate": {
+    "pair_macro_delta_minimum": 0.005,
+    "per_scene_delta_minimum": -0.002,
+    "pair_macro_pass": true,
+    "per_scene_pass": true,
+    "passed": true,
+    "margin_above_pair_gate": 0.000339931813012733
+  },
+  "causal_conclusion": {
+    "registered_query_likelihood_role": "calibrate strong original observed unary",
+    "object_region_memory_role": "complete only original abstentions with source-only instance evidence",
+    "composition_role": "domain partition, not probabilistic fusion",
+    "why_combination_is_consistent": "the two improvements intervene on disjoint error supports and therefore preserve each other's sufficient statistics",
+    "observed_and_memory_assignments_bitwise": true,
+    "partition_exhaustive_pairwise_disjoint_and_commutative": true,
+    "same_row_double_counting": false,
+    "historical_branch_decision_flips_at_0_5": 0,
+    "target_rgb_or_metric_used_for_prediction_or_selection": false
+  },
+  "full8_plan": {
+    "authorized_action": "plan and preregister source-memory asset production; do not silently extrapolate existing two-scene assets",
+    "existing_scenes": ["fern", "trex"],
+    "remaining_scenes": [
+      "flower",
+      "fortress",
+      "horns_center",
+      "horns_left",
+      "leaves",
+      "orchids"
+    ],
+    "fixed_recipe": {
+      "source_view_count": 3,
+      "view_selection": "coverage times query-independent assignment reliability",
+      "official_sam3_box_policy": "pad16 resolution1008 confidence0 minimum projected overlap0.05",
+      "query_likelihood_calibration": "balanced_reference_source_reconstruction_adam64_v1",
+      "composition": "registered_likelihood_object_memory_disjoint_v1",
+      "graph_readout_threshold": "disabled / unary_prior / 0.5",
+      "per_scene_or_target_tuning": false
+    },
+    "required_barriers": [
+      "seal target-excluding source inventory for all six remaining scenes",
+      "seal source SAM3 proposals and primitive memories before any full8 target scoring",
+      "seal all eight composed prediction receipts before first full8 target mask open",
+      "report full8 macro and every scene delta without subset selection"
+    ]
+  },
+  "validation": {
+    "focused_tests": "89 passed, 38 warnings",
+    "python_compile": "passed",
+    "all_pair_predictions_verified_before_first_pair_target_mask_open": true
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "maximum_sampled_temperature_c": 56,
+    "soft_pause_or_abort": false,
+    "driver_failure": false,
+    "fern_telemetry_sha256": "edeb00a7fcd8883227bd28abe0bdc143bfb8dcb4398b308b896130196d028b5c",
+    "trex_telemetry_sha256": "97a91f18c82a719da8d7f9fb90efedf3be5e3bb48fd89377d993f3a6bde08496"
+  }
+}

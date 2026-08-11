@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-signed-null-likelihood-ratio-v4-preregistration",
+  "status": "sealed_before_v4_head_training_or_v4_source_metrics",
+  "design_provenance": {
+    "v3_source_result_used_for_design": true,
+    "v3_authority": "/root/RADIO-GS/paper/artifacts/agile3d_capability_likelihood_ratio_v3_source_gate_result_20260810.json",
+    "v3_observation": "directional click response transferred, but (cosine+1)/2 made null cosine a positive additive LLR offset and produced foreground-heavy mass",
+    "development_scene0003_role": "forbidden until every v4 source gate passes",
+    "test312_role": "sealed and forbidden"
+  },
+  "scene_and_object_contract": {
+    "fit_scenes": ["scene0000_00", "scene0002_00", "scene0005_00"],
+    "development_scene": "scene0003_00",
+    "fit_manifests": [
+      {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_ratio_v3/datasets/scene0000_00/manifest.json",
+        "sha256": "69a12190da46313d83c0d451724655349a4c0e3b6241b715de77c27df86d0c85"
+      },
+      {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_ratio_v3/datasets/scene0002_00/manifest.json",
+        "sha256": "d567369e8b67073f15943e97c3b8379ffaf15734c09b696124b23e3a3efc0d03"
+      },
+      {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_ratio_v3/datasets/scene0005_00/manifest.json",
+        "sha256": "052cd8767f5b3ea8084071321e51544f9098f320e946ad4f754c4f5965416cfe"
+      }
+    ],
+    "all_legal_objects_materialized_and_evaluated": true,
+    "training_support_rule": "only objects with nonempty positive and negative primitive rows contribute class-conditional loss; every object remains in metrics",
+    "per_scene_or_per_object_tuning": false,
+    "development_labels_allowed": false,
+    "test_labels_allowed": false
+  },
+  "mathematical_contract": {
+    "stored_affinity": "a=(scene_centered_cosine+1)/2 in [0,1]",
+    "likelihood_coordinate": "s=2a-1=scene_centered_cosine in [-1,1]",
+    "positive_set_statistics": ["max(s_positive)", "mean(s_positive)"],
+    "negative_set_statistics": ["max(s_negative)", "mean(s_negative)"],
+    "raw_score": "ell=sum softplus(w_pos)*T(s_positive)-sum softplus(w_neg)*T(s_negative)",
+    "bias": "fixed exact zero buffer and not trainable",
+    "zero_evidence_neutrality": "empty observation sets or exact null cosine s=0 yield ell=0 and q=0.5 exactly",
+    "monotonicity": "increasing positive cosine cannot lower ell; increasing negative cosine cannot raise ell",
+    "dissimilarity_semantics": "negative signed cosine to a positive click is negative foreground evidence; negative signed cosine to a negative click is positive foreground evidence",
+    "training_posterior": "sigmoid(ell+logit(pi_object))",
+    "population_bce": "pi*mean_positive_BCE+(1-pi)*mean_negative_BCE over deterministic stratified rows",
+    "ranking": "mean softplus(-(ell_positive-ell_negative))",
+    "inference": "q=sigmoid(ell), c=coverage*reliability",
+    "direct_solver_compilation": "T*logit((1-c)*0.5+c*q), with exact sigmoid(unary/T) identity",
+    "hard_spatial_seed": "solver extent constraint only and never an instance likelihood feature"
+  },
+  "training_recipe": {
+    "recipe_id": "capability-signed-null-likelihood-ratio-bce-prior-correction-rank025-adam-seed0-e100-lr0.02-v4",
+    "seed": 0,
+    "optimizer": "Adam",
+    "epochs": 100,
+    "learning_rate": 0.02,
+    "weight_decay": 0.0,
+    "ranking_weight": 0.25,
+    "soft_dice_weight": 0.0,
+    "class_balanced_posterior_weight": 0.0,
+    "training_rows_per_class_per_example": 4096,
+    "inference_threshold": 0.5,
+    "threshold_selection": false,
+    "early_stopping": false
+  },
+  "synthetic_gates": {
+    "null_cosine_and_empty_evidence_exactly_neutral": true,
+    "far_same_capability_lookalike_positive": true,
+    "negative_click_suppresses_lookalike": true,
+    "exact_direct_solver_probability_identity": true
+  },
+  "source_validation": {
+    "leave_one_scene_out": [
+      {"train": ["scene0002_00", "scene0005_00"], "heldout": "scene0000_00"},
+      {"train": ["scene0000_00", "scene0005_00"], "heldout": "scene0002_00"},
+      {"train": ["scene0000_00", "scene0002_00"], "heldout": "scene0005_00"}
+    ],
+    "reference": "frozen v2 on identical all-object examples",
+    "required_gates": {
+      "loo_macro_mean_iou_gain_over_v2_strictly_greater_than": 0.02,
+      "loo_scenes_with_mean_iou_gain_over_v2_at_least": 2,
+      "loo_each_scene_click10_minus_click1_strictly_greater_than": 0.02,
+      "loo_macro_absolute_log_probability_mass_ratio_error_lower_than_v2": true,
+      "all_fit_mean_iou_gain_over_v2_strictly_greater_than": 0.02,
+      "all_fit_precision_gain_over_v2_strictly_greater_than": 0.02,
+      "all_fit_click10_minus_click1_strictly_greater_than": 0.05
+    },
+    "if_any_gate_fails": "do not open scene0003 development labels and do not run test312"
+  },
+  "reported_diagnostics": [
+    "IoU precision recall by click count",
+    "thresholded foreground fraction and probability foreground mass",
+    "target foreground fraction and absolute log probability-mass ratio error",
+    "click10-minus-click1 per object and scene",
+    "frozen v2 versus v4 on identical examples"
+  ],
+  "prohibited": {
+    "positive_excess_relu": true,
+    "trainable_bias": true,
+    "soft_dice": true,
+    "scene_specific_null_threshold": true,
+    "development_parameter_selection_before_source_gates": true,
+    "test312_labels_or_metrics": true
+  }
+}

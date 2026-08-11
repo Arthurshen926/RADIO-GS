@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_odds_residual_transport_v4_implementation_correction",
+  "status": "sealed_before_corrected_prediction_launch",
+  "original_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_preregistration_20260810.json",
+    "sha256": "859b0c8fb91008ee534649811d82733817f765832de95a5349deb428d549e62b"
+  },
+  "failure": {
+    "stage": "ramen prediction before prediction receipt",
+    "error": "negative odds residual increased the legacy score",
+    "cause": "A finite float32 logit/sigmoid round trip can move one ULP opposite the mathematical residual direction when c*delta is extremely small.",
+    "ramen_log": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_20260810/pred_ramen_v4.log", "sha256": "b5da354a7e41ccdae41f3ca88d41ad9552ddb8b09dc2331c3acd8029f9862cc7"},
+    "ramen_prediction_receipt_written": false,
+    "v4_metric_opened": false
+  },
+  "correction": {
+    "method_formula_changed": false,
+    "epsilon_changed": false,
+    "parameter_or_scene_setting_changed": false,
+    "storage_contract": "positive residual is clamped with max(transported, legacy); negative residual with min(transported, legacy), before exact identity restoration",
+    "corrected_adapter": {"path": "/root/RADIO-GS/radio_gs/querying/lerf_source_text_likelihood.py", "sha256": "2a4e393f1cbce5ca62bd772b6e783571fd1cdaa5fc947698fc870c50878bec30"},
+    "unchanged_evaluator": {"path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py", "sha256": "e9e5988c2a37a90de7cee03f013097d5d98d53e15147811861403aed21342803"},
+    "corrected_tests": {"path": "/root/RADIO-GS/tests/test_lerf_source_text_likelihood.py", "sha256": "65c178613ed6b02499282fe3a38d427951e9c1ed955edf68d7974d90f408c1a5"},
+    "focused_test_result": "133 passed"
+  },
+  "quarantine_and_restart": {
+    "old_figurines_receipt": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_20260810/pred_figurines_v4.receipt.json", "sha256": "7abb652a498781f699b2d5f4dc0bba9ea9f57042bc9ea96ba82ddee07453c9cf"},
+    "old_figurines_will_not_be_scored_or_mixed": true,
+    "corrected_output_root": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_corrected_20260810",
+    "restart_all_four_scenes_from_figurines": true,
+    "all_corrected_receipts_must_seal_before_metric": true
+  },
+  "access_disclosure": {
+    "target_metric_or_gt_opened_during_failure_diagnosis": false,
+    "correction_selected_from_target_outcome": false
+  }
+}

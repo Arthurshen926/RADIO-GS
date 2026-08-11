@@ -950,3 +950,94 @@ def test_registered_anchor_transport_fails_closed_without_authority():
     )
     with pytest.raises(ValueError, match="observation authority"):
         engine.execute(query, {})
+
+
+def test_world_registered_likelihood_uses_same_probability_fusion_and_transport():
+    graph, registered_query, _, solver = _registered_transport_fixture()
+    world_query = replace(
+        registered_query,
+        modality=QueryModality.WORLD_3D,
+        registration=RegistrationMode.WORLD,
+        primitive_unary_evidence=PrimitiveUnaryEvidence.from_probability(
+            torch.tensor([0.9, 0.7, 0.5, 0.1]),
+            confidence=torch.tensor([1.0, 0.5, 0.0, 1.0]),
+            source="learned_world_interaction_head_v1",
+        ),
+    )
+    result = CanonicalQueryEngine(
+        graph,
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="probability_mixture"
+        ),
+        solver_config=solver,
+        registered_2d_transport_policy="anchor_preserving_graph_proposal_v1",
+    ).execute(world_query, {})
+
+    assert result.registered_observation_transport_policy == (
+        "anchor_preserving_graph_probability_proposal_v1"
+    )
+    assert result.registered_observation_transport_diagnostics is not None
+    assert result.registered_observation_transport_diagnostics[
+        "fully_observed_rows"
+    ] == 2
+
+
+def test_direct_registered_likelihood_replaces_duplicate_capability_unary() -> None:
+    graph, registered_query, _, solver = _registered_transport_fixture()
+    evidence = PrimitiveUnaryEvidence.from_probability(
+        torch.tensor([0.9, 0.7, 0.4, 0.1]),
+        confidence=torch.tensor([1.0, 0.8, 0.5, 1.0]),
+        source="registered_capability_click_gaussian_mixture:v2",
+    )
+    query = replace(
+        registered_query,
+        modality=QueryModality.WORLD_3D,
+        registration=RegistrationMode.WORLD,
+        primitive_unary_evidence=evidence,
+    )
+    result = CanonicalQueryEngine(
+        graph,
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="direct_registered_likelihood"
+        ),
+        solver_config=solver,
+    ).execute(query, {})
+
+    expected_probability = 0.5 * (1.0 + evidence.values)
+    assert torch.allclose(
+        torch.sigmoid(result.unary / solver.unary_temperature),
+        expected_probability,
+        atol=1e-7,
+        rtol=0.0,
+    )
+    assert set(result.evidence_components) == {"registered_likelihood"}
+    assert not torch.equal(result.field_unary, result.unary)
+
+
+def test_direct_registered_likelihood_has_exact_probability_identity() -> None:
+    graph, registered_query, _, solver = _registered_transport_fixture()
+    probability = torch.tensor([0.99, 0.75, 0.40, 0.01])
+    confidence = torch.tensor([1.0, 0.8, 0.5, 0.0])
+    evidence = PrimitiveUnaryEvidence.from_probability(
+        probability,
+        confidence=confidence,
+        source="synthetic_likelihood_identity",
+    )
+    query = replace(
+        registered_query,
+        modality=QueryModality.WORLD_3D,
+        registration=RegistrationMode.WORLD,
+        primitive_unary_evidence=evidence,
+    )
+    result = CanonicalQueryEngine(
+        graph,
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="direct_registered_likelihood"
+        ),
+        solver_config=solver,
+    ).execute(query, {})
+    effective_probability = (1.0 - confidence) * 0.5 + confidence * probability
+    decoded = torch.sigmoid(result.unary / solver.unary_temperature)
+    assert torch.allclose(decoded, effective_probability, atol=1e-7, rtol=0.0)
+    legacy_double_link = torch.sigmoid(evidence.values / solver.unary_temperature)
+    assert float((legacy_double_link - effective_probability).abs().max()) > 0.05

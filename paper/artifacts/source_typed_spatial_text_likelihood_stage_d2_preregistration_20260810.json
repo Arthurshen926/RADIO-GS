@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_typed_spatial_text_likelihood_stage_d2_preregistration",
+  "status": "sealed_before_stage_d2_real_source_shard_materialization_or_loso_fit",
+  "causal_change": {
+    "removed_carrier": "centroid Euclidean k10",
+    "new_carrier": "same-scale fractional primitive-to-region M^T A_type M over the accepted MPR support graph",
+    "query_independent": true,
+    "primitive_membership_weight": "1 / number of containing canonical regions at that scale",
+    "region_self_edges_removed": true,
+    "per_receiver_normalization": "independent within each edge type",
+    "actual_edge_types_only": [
+      "appearance",
+      "boundary",
+      "geometry"
+    ],
+    "covisibility": "absent in all three bound support graphs and therefore not fabricated"
+  },
+  "spatial_features": {
+    "per_edge_type": [
+      "normalized weighted neighbor mean raw logit",
+      "maximum sign-safe affinity-interpolated message center + w_ij*(neighbor-center)",
+      "center-minus-normalized-neighbor-mean contrast"
+    ],
+    "support_features": [
+      "coverage",
+      "reliability"
+    ],
+    "head": "scene-shared 12->12->1 bounded log-odds residual MLP",
+    "input_dimension_expansion_reason": "one raw channel + exactly three statistics for each of the three actually present edge types + two frozen support channels",
+    "scene_or_query_parameters": false,
+    "maximum_absolute_log_odds_residual": 2.0,
+    "zero_residual_identity": "bitwise legacy probability",
+    "default_off_identity": "existing ScanNet exact and LERF evaluator defaults remain unchanged"
+  },
+  "source_protocol": {
+    "scenes": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0005_00"
+    ],
+    "scene0003_opened_for_stage_d2": false,
+    "three_fixed_loso_folds": [
+      {
+        "fit": ["scene0002_00", "scene0005_00"],
+        "heldout": "scene0001_00"
+      },
+      {
+        "fit": ["scene0001_00", "scene0005_00"],
+        "heldout": "scene0002_00"
+      },
+      {
+        "fit": ["scene0001_00", "scene0002_00"],
+        "heldout": "scene0005_00"
+      }
+    ],
+    "recipe": {
+      "seed": 17,
+      "optimizer": "Adam",
+      "epochs": 128,
+      "learning_rate": 0.02,
+      "weight_decay": 0.0001,
+      "loss": "equal mean of legacy-normalized scene-class balanced BCE and legacy-normalized typed-edge local-relation smooth-L1",
+      "gpu": false
+    },
+    "per_fold_required_gates": {
+      "balanced_bce_delta": "strictly negative",
+      "positive_negative_probability_gap_delta": "strictly positive",
+      "typed_local_relation_loss_delta": "strictly negative"
+    },
+    "macro_required_gates": "the same three strict signs and every fold must pass",
+    "fit3_permission": "only after all LOSO fold and macro gates pass"
+  },
+  "fit_assets": {
+    "scene0001_00": {
+      "source_text_shard_sha256": "c03fb1f83418eedb4a883f36bbd2019c2a1dbd49e322a2b17e984c2d08be9a3c",
+      "accepted_mpr_sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8",
+      "support_graph_sha256": "040691ac254610b67a6e7269031dcaf7eb356e6a5bd6120b35f98493446b576c"
+    },
+    "scene0002_00": {
+      "source_text_shard_sha256": "1fee973c43c9700426a0b998e770886cd83a296563d4259dc0f8b00cf6c0eede",
+      "accepted_mpr_sha256": "93ea6dbe1cc13b134f338ee4e75207a935081a4edaafcd36eaa9071b15f45a89",
+      "support_graph_sha256": "6d0e5457a03de269a63facebf6d27a6acbd466c4962d548ca9948cb0b30a21c5"
+    },
+    "scene0005_00": {
+      "source_text_shard_sha256": "faf042a297a635d7d72a4125a6f933045ae210d9e58e936d2d193fd106c57741",
+      "accepted_mpr_sha256": "04741b32c0a97e25489cf867729d6f54420adf325e2a22c495e86d890a661e9e",
+      "support_graph_sha256": "b9bacfb4b58ee540c51e8b74df82d2e676707ce0b75da89b2977429e4ea03fd8"
+    }
+  },
+  "immutable_implementation": {
+    "module_sha256": "fb6e6fea69f762a84bffb744672b682db524a70ad0a60792057777265584c17a",
+    "builder_sha256": "963585b29c47cc7f5298b2f2add34008f8b3128e303ccb073609237b082b8e36",
+    "trainer_sha256": "b34e065c76a3a32313f4bae7f850a37ca98d0264f5454d105fa50b6ffdc47f60",
+    "tests_sha256": "da40e5d9f9a71d3c1a4a759e0cf1aa98e80453aebe5db45687836de29efc67b7",
+    "focused_regression": "25 passed"
+  },
+  "future_lerf_gate_if_source_loso_passes": {
+    "pair": [
+      "figurines",
+      "waldo_kitchen"
+    ],
+    "all_predictions_sealed_before_ground_truth": true,
+    "macro_delta_miou_strictly_positive": true,
+    "minimum_per_scene_delta_miou": -0.002,
+    "full4_only_after_pair_pass": true,
+    "threshold_or_formula_tuning": false
+  },
+  "access_disclosure": {
+    "scene0003_not_reopened": true,
+    "lerf_queries_or_ground_truth_opened_for_stage_d2": false,
+    "benchmark_metrics_used_for_fit": false,
+    "per_scene_or_per_query_tuning": false
+  }
+}

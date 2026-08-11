@@ -50,6 +50,14 @@ from .query_spec import (
     SoftSeedGroups,
     SoftSeedSet,
 )
+from .query_likelihood_head import (
+    MonotoneLikelihoodRatioHead,
+    MonotoneChannelDensityRatioHead,
+    MonotoneOneSidedDensityRatioHead,
+    MonotoneSignedLikelihoodRatioHead,
+    MonotoneQueryLikelihoodHead,
+    QueryLikelihoodInputs,
+)
 from .support_solver import (
     PrimitiveSupportGraph,
     SupportGraphConfig,
@@ -80,10 +88,16 @@ __all__ = [
     "CanonicalQueryEngine",
     "PrimitiveSupportGraph",
     "PrimitiveUnaryEvidence",
+    "MonotoneLikelihoodRatioHead",
+    "MonotoneChannelDensityRatioHead",
+    "MonotoneOneSidedDensityRatioHead",
+    "MonotoneSignedLikelihoodRatioHead",
+    "MonotoneQueryLikelihoodHead",
     "PrototypeSet",
     "QueryIntent",
     "QueryModality",
     "QueryResult",
+    "QueryLikelihoodInputs",
     "SceneSpaceCalibration",
     "deterministic_sample_rows",
     "fit_scene_space_calibration",

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_probability_mixture_v3_preregistration",
+  "status": "sealed_before_any_v3_prediction_or_metric",
+  "single_causal_change": "Move frozen q,c fusion after legacy scale-select, kNN10, and scene-wise min-max so the final c=0 unary remains bitwise legacy.",
+  "method": {
+    "legacy_field_probability_final": "canonical-negative probability -> frozen scale peak-select -> valid-domain kNN10 -> per-query scene min-max -> released 2x-minus-1 clip",
+    "final_formula": "p_final=(1-c)*field_probability_final+c*q",
+    "after_final_formula": ["fixed score threshold 0.6", "selected_only_alpha projection"],
+    "forbidden_after_final_formula": ["scene-wise remap", "spatial normalization", "kNN smoothing", "parameter or threshold tuning"],
+    "new_trainable_parameters": 0,
+    "head_or_field_changed": false
+  },
+  "hard_contract_tests": {
+    "c_zero_final_score_bitwise_legacy": true,
+    "c_one_final_score_bitwise_q": true,
+    "only_c_positive_rows_may_change": true,
+    "option_absent_default_path_bitwise_legacy": true,
+    "fusion_stage_and_cache_sha_bound_in_prediction_receipt": true,
+    "focused_regression": "130 passed"
+  },
+  "implementation": {
+    "adapter": {"path": "/root/RADIO-GS/radio_gs/querying/lerf_source_text_likelihood.py", "sha256": "10eeb5d805bf3543e8f4305be0e43df6b57459f59407276bad201200f38c6aa9"},
+    "evaluator": {"path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py", "sha256": "b89cad76e753874293b0f23606026d82a91fb4067f903edd615fcd25d39a77c9"},
+    "tests": {"path": "/root/RADIO-GS/tests/test_lerf_source_text_likelihood.py", "sha256": "2b275f97db679f04c3e84343e6e33559f6d4c92dbf723cfde2dcce5fcd8939fc"},
+    "default_off_cli": "--ours_source_text_likelihood_post_readout_cache"
+  },
+  "frozen_scene_inputs": {
+    "figurines": {
+      "field_arm": "stage_b_v2",
+      "q_c_cache": {"path": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/stage_b_source_text_likelihood_prior_preserving_v2.pt", "sha256": "8edbbdd05c19060b74b231566ea03997eed1cd414c29e8431a9e16813ef69863"},
+      "legacy_receipt": {"path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_stage_b_v2_legacy.receipt.json", "sha256": "5a0048117aeeebaeb58412ad6e5eaa6e324b8a3ebad50ac69bfd0fc8a2249fc5"},
+      "legacy_metric_sha256": "ce7d7910d2edcb596eba44019f96b059e4c187d0dfd0f292753b4e6c40a1fb42"
+    },
+    "ramen": {
+      "field_arm": "compact_control",
+      "q_c_cache": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/ramen_prior_preserving_v2.pt", "sha256": "f5177cce50cf43adb64466220d32c7c3e61ab2da4ad9aa1b6b0a0645f6b0a605"},
+      "legacy_receipt": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_ramen_legacy.receipt.json", "sha256": "6001df751fe775b6531072d2f6b0279a35822c7d844d1b3af24ba765a210db6b"},
+      "legacy_metric_sha256": "ed89dbc41c139a5519cd24c570cf14f441f3eb74a98f3aed14c59474bbeb45c8"
+    },
+    "teatime": {
+      "field_arm": "compact_control",
+      "q_c_cache": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/teatime_prior_preserving_v2.pt", "sha256": "5e3b3d60aedc4b66717f974a58689382f6565c9b5457abf93b706e1830172f0d"},
+      "legacy_receipt": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_teatime_legacy.receipt.json", "sha256": "bd02fd40aebb23b9069c58ab63fe3a93c4aa3f7ea91f4cbf1cba519d2fba88e1"},
+      "legacy_metric_sha256": "4010260b853643278469a6a6c2d1d6702229625b12dec89657207739b1bf42e0"
+    },
+    "waldo_kitchen": {
+      "field_arm": "compact_control",
+      "q_c_cache": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/waldo_kitchen_prior_preserving_v2.pt", "sha256": "92e5526559b734aa1ca38c36625650e72dae224651171368833a786f40e1a509"},
+      "legacy_receipt": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_waldo_kitchen_legacy.receipt.json", "sha256": "aefcb73e9fe27263f73bfaaae09f91e396760a2e8446ce9d07aa8e7ec78f3755"},
+      "legacy_metric_sha256": "1525033d2280d0c64fbb4d8ace81b01b87e6766ee0196780916a0946f7153b1d"
+    }
+  },
+  "execution": {
+    "candidate_order": ["figurines", "ramen", "teatime", "waldo_kitchen"],
+    "all_four_candidate_prediction_receipts_sealed_before_first_v3_score": true,
+    "reuse_legacy_predictions_and_metrics_without_reexecution": true,
+    "physical_gpu": 0,
+    "power_limit_watts": 300,
+    "poll_interval_seconds": 60,
+    "soft_pause_temperature_celsius": 82,
+    "resume_temperature_celsius": 78,
+    "hard_stop_temperature_celsius": 85,
+    "local_ssd_only_for_new_artifacts": true
+  },
+  "success_gate": {
+    "scene_macro_candidate_minus_legacy_miou_must_be_positive": true,
+    "minimum_allowed_per_scene_candidate_minus_legacy_miou": -0.002,
+    "waldo_kitchen_must_pass_per_scene_gate": true,
+    "if_fail": "stop without training remaining Stage-B fields",
+    "if_pass": "return decision to parent before any remaining Stage-B training"
+  },
+  "access_audit": {
+    "legacy_metrics_known_before_v3_but_method_fully_preregistered": true,
+    "v3_prediction_may_open_target_rgb": false,
+    "v3_prediction_may_open_target_polygon_coordinates": false,
+    "parameter_callback_after_v3_metrics": false
+  },
+  "storage_root": "/root/RADIO-GS/local_ssd_results/lerf_full4_post_readout_v3_20260810"
+}

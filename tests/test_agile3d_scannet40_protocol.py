@@ -524,6 +524,7 @@ def test_canonical_field_predictor_uses_standard_world_query_without_observation
     assert report["observation_lift"] == "none"
     assert report["labels_opened"] is False
     assert report["primitive_reliability_applied"] is False
+    assert report["query_likelihood"] == {"enabled": False}
 
 
 def test_canonical_field_click_constraint_survives_readout_support_gate() -> None:

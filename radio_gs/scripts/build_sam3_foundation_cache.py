@@ -236,6 +236,7 @@ def _load_sam3_model(
     dtype: str,
     resolution: int,
     point_only: bool = False,
+    build_on_cpu: bool = False,
 ):
     from sam3.model.sam3_image_processor import Sam3Processor
     from sam3.model_builder import build_sam3_image_model
@@ -250,7 +251,7 @@ def _load_sam3_model(
     # then transfer the unchanged official model to CUDA.
     build_device = (
         "cpu"
-        if device == "cuda" and target_dtype != torch.float32
+        if device == "cuda" and (target_dtype != torch.float32 or build_on_cpu)
         else device
     )
     model = build_sam3_image_model(

@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_prior_preserving_text_likelihood_v2_frozen_result",
+  "status": "complete_generalization_gate_failed_no_stage_b_expansion",
+  "preregistration": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_prior_preserving_text_likelihood_v2_preregistration_20260810.json", "sha256": "843517902b5094803475192d386c437be255a19271d118bba01ba4f872fbe90b"},
+  "pre_metric_prediction_batch_seal": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_prior_preserving_text_likelihood_v2_prediction_batch_seal_20260810.json", "sha256": "08ddd022ac89929f81074bf6b0a03811c7e66a7a3705edb5b00ed616e1281ffa", "all_304_prediction_and_coarse_masks_validated_before_first_metric": true},
+  "same_cache_causal_results": {
+    "ramen": {
+      "n": 71,
+      "legacy": {"miou": 0.38143566250801086, "acc025": 0.676056338028169, "acc050": 0.29577464788732394, "boundary_f": 0.6208915114402771, "trimap_iou": 0.3959977626800537},
+      "prior_preserving_v2": {"miou": 0.41509631276130676, "acc025": 0.6901408450704225, "acc050": 0.4647887323943662, "boundary_f": 0.6720982193946838, "trimap_iou": 0.41019293665885925},
+      "delta": {"miou": 0.0336606502532959, "acc025": 0.014084507042253502, "acc050": 0.16901408450704225, "boundary_f": 0.05120670795440674, "trimap_iou": 0.014195173978805542},
+      "legacy_report_sha256": "ed89dbc41c139a5519cd24c570cf14f441f3eb74a98f3aed14c59474bbeb45c8",
+      "candidate_report_sha256": "655d9700377102c01e8764a1474af8a94582abda870afc38e5d358b7992a44f7"
+    },
+    "teatime": {
+      "n": 59,
+      "legacy": {"miou": 0.5256859064102173, "acc025": 0.8813559322033898, "acc050": 0.5084745762711864, "boundary_f": 0.7531660795211792, "trimap_iou": 0.37678709626197815},
+      "prior_preserving_v2": {"miou": 0.5265554785728455, "acc025": 0.9152542372881356, "acc050": 0.5423728813559322, "boundary_f": 0.7559869885444641, "trimap_iou": 0.3778148591518402},
+      "delta": {"miou": 0.0008695721626281738, "acc025": 0.03389830508474578, "acc050": 0.03389830508474578, "boundary_f": 0.002820909023284912, "trimap_iou": 0.0010277628898620605},
+      "legacy_report_sha256": "4010260b853643278469a6a6c2d1d6702229625b12dec89657207739b1bf42e0",
+      "candidate_report_sha256": "c694fc37f04ec85fb3b70f7c79c9dd02d68388d54c2bb1052e9c640f070b8f67"
+    },
+    "waldo_kitchen": {
+      "n": 22,
+      "legacy": {"miou": 0.34231969714164734, "acc025": 0.6818181818181818, "acc050": 0.2727272727272727, "boundary_f": 0.4187788665294647, "trimap_iou": 0.2996499836444855},
+      "prior_preserving_v2": {"miou": 0.3156757652759552, "acc025": 0.6818181818181818, "acc050": 0.22727272727272727, "boundary_f": 0.43589356541633606, "trimap_iou": 0.27846476435661316},
+      "delta": {"miou": -0.02664393186569214, "acc025": 0.0, "acc050": -0.04545454545454544, "boundary_f": 0.017114698886871338, "trimap_iou": -0.021185219287872314},
+      "legacy_report_sha256": "1525033d2280d0c64fbb4d8ace81b01b87e6766ee0196780916a0946f7153b1d",
+      "candidate_report_sha256": "ae37bc6f6c4b92102e49079d7ef9a0c6392976a93371c209c63102925b23774a"
+    },
+    "scene_macro_three_new_scenes": {
+      "legacy": {"miou": 0.4164804220199585, "acc025": 0.7464101506832469, "acc050": 0.3589921656285944, "boundary_f": 0.5976121524969736, "trimap_iou": 0.3574782808621724},
+      "prior_preserving_v2": {"miou": 0.41910918553670246, "acc025": 0.7624044213922466, "acc050": 0.4114781136743419, "boundary_f": 0.6213262577851614, "trimap_iou": 0.3554908533891042},
+      "delta": {"miou": 0.002628763516743978, "acc025": 0.015994270708999763, "acc050": 0.05248594804574753, "boundary_f": 0.023714105288187664, "trimap_iou": -0.0019874274730682373}
+    }
+  },
+  "full4_registry_context": {
+    "baseline_A_definition": "same compact-field and raw positive/negative caches with legacy fixed canonical-negative mapping; primary causal baseline",
+    "baseline_A_scene_macro": {"miou": 0.42344724386930466, "acc025": 0.7517718987267209, "acc050": 0.40763698136430293, "boundary_f": 0.6147686019539833, "trimap_iou": 0.37368611991405487},
+    "mapping_only_control_field_full4": {"miou": 0.43082670122385025, "acc025": 0.7726961731870421, "acc050": 0.4291442995414707, "boundary_f": 0.6420865580439568, "trimap_iou": 0.3606654033064842, "delta_miou_vs_A": 0.007379457354545593},
+    "current_joint_stage_b_figurines_only_full4": {"miou": 0.4332333728671074, "acc025": 0.7771604589013278, "acc050": 0.4291442995414707, "boundary_f": 0.6471897587180138, "trimap_iou": 0.3588494285941124, "delta_miou_vs_A": 0.009786128997802734},
+    "baseline_B_definition": "registry O2 teacher-sidecar-bypass exact row; paper best strict-like but not unified-field",
+    "baseline_B_scene_macro_miou": 0.4496018,
+    "mapping_only_minus_B_miou": -0.018775098776149746,
+    "current_joint_minus_B_miou": -0.016368427132892605,
+    "figurines_disclosure": "The current compact/unified path improves figurines from 0.4443477 legacy control to 0.4756059 joint Stage-B+v2, but remains below the old O2 figurines result near 0.529; it is not an O2-best claim."
+  },
+  "preregistered_gate": {
+    "scene_macro_miou_improved": true,
+    "minimum_per_scene_delta_miou": -0.02664393186569214,
+    "required_minimum_per_scene_delta_miou": -0.002,
+    "no_scene_regression_gate_passed": false,
+    "overall_passed": false,
+    "action": "Do not expand Stage-B training to ramen, teatime, or waldo from this result. Diagnose the likelihood/readout composition first."
+  },
+  "read_only_granularity_diagnostic": {
+    "dominant_waldo_failure": {
+      "query": "cabinet",
+      "query_miou": "0.794274 -> 0.263029",
+      "rendered_prediction_pixels": "77821 -> 23049",
+      "boundary_f": "0.338334 -> 0.427499",
+      "trimap_iou": "0.241357 -> 0.0",
+      "legacy_selected_primitives": 5236,
+      "candidate_selected_primitives": 4608,
+      "lost_primitives": 772,
+      "gained_primitives": 144
+    },
+    "cabinet_transition_authority": {
+      "retained_mean_c": 0.04274358972907066,
+      "lost_mean_c": 0.01546248234808445,
+      "gained_mean_c": 0.09906819462776184,
+      "retained_mean_coverage": 0.11055897921323776,
+      "lost_mean_coverage": 0.04320700094103813,
+      "gained_mean_coverage": 0.2379050850868225
+    },
+    "scale_axis_not_primary_cause": "The frozen O2 raw score scales are effectively repeated for cabinet and legacy selects scale 0.25. Only knife and red cup change to 0.7 by numerical peak ties; the cabinet failure is not a cross-scale-selection failure.",
+    "causal_mechanism": "The pointwise v2 mixture preserves field_prior at c=0 before readout, but the downstream scene-wise VALA min-max is globally coupled. High-c/high-coverage core rows receive larger q boosts, raise the per-query peak/range, and thereby push low-c low-coverage object support below the unchanged 0.6 threshold even where its local prior was nearly preserved. Thus the local prior-preserving identity is not end-to-end prior preserving after global min-max.",
+    "next_first_principles_fix": "Move the calibrated q,c fusion boundary after the frozen legacy kNN/min-max field readout, or replace the second scene-wise min-max with a probability-aware spatial readout. The required invariant is end-to-end: c=0 must leave the final field unary bitwise unchanged, not merely the pre-minmax tensor. This must be source-gated and preregistered before another target metric."
+  },
+  "access_audit": {
+    "all_predictions_sealed_before_first_metric": true,
+    "same_frozen_scorer_and_label_root": true,
+    "head_field_threshold_knn_projection_changed_after_metric": false,
+    "parameter_callback_after_outcome": false,
+    "duplicate_status_note": "While the original six-report batch was still running after its tool handle yielded, one redundant ramen-v2 scorer was accidentally started. It validated the same sealed receipt, then failed closed at no-clobber because the official report already existed. No artifact was overwritten and no result influenced any parameter.",
+    "stage_b_expansion_after_failed_gate": false
+  },
+  "thermal": {"physical_gpu": 0, "maximum_temperature_celsius": 58, "maximum_power_watts": 128.56, "pause_or_abort": false}
+}

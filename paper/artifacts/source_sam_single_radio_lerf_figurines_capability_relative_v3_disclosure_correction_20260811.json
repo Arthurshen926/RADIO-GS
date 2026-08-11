@@ -1,0 +1,39 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_capability_relative_v3_disclosure_correction.v1",
+  "status": "sealed_before_control_metric_evaluation_or_gpu_training",
+  "correction": {
+    "old_preregistration_sha256": "3a2d19b092fd4a10c25baba8aa4cc44c18967695f715b637b95ba7ac1fccbe5a",
+    "new_preregistration_sha256": "afe986beac3647b15b5ffa286518929957ea94104b806215d88858fd127bd1da",
+    "old_inaccurate_field": "new_lerf_benchmark_result_used_to_choose_v3=false",
+    "new_honest_fields": {
+      "v2_lerf_outcome_used_to_choose_relation_space": true,
+      "used_to_choose_margin_weight_epochs_or_threshold": false,
+      "per_scene_or_query_metric_tuning": false
+    }
+  },
+  "concurrent_manifest_disclosure": {
+    "draft_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/source_only_sam_capability_relative_manifest.v3.json",
+    "draft_sha256": "a2ea46527974e202f218788b31c5fd693e3eac245c07912a6d25540f151082d0",
+    "materialized_before_correction_message_was_processed": true,
+    "contains_only_deterministic_contract_and_hash_bound_source_authorities": true,
+    "control_field_evaluated": false,
+    "gpu_started": false,
+    "candidate_checkpoint_written": false,
+    "benchmark_reopened": false,
+    "status": "superseded_do_not_use"
+  },
+  "immutable_method_values": {
+    "epochs": 5,
+    "learning_rate": 0.0002,
+    "loss_weight": 0.05,
+    "margin": 0.05,
+    "source_gate_thresholds_changed": false,
+    "implementation_changed": false,
+    "implementation_hashes": {
+      "capability_relative_module_sha256": "5ee4c3ea9b38830d60594b7bd24ac24c26e24d7a364973f9ef83341f31c1b827",
+      "manifest_builder_sha256": "500911b3a8cfeb269afbe541fd6842a8df5f568b40dc2a02c83c7e8ec12c60ee",
+      "trainer_sha256": "6d2b2ec6a2e3e73a3f26336ce0356c9929518976d48a7f758dc3c3824e5bb4ac",
+      "tests_sha256": "7de3f745005d31de5cfff2d54f04dae9a7d2995872d561f0cd43f5aca65ea5e1"
+    }
+  }
+}

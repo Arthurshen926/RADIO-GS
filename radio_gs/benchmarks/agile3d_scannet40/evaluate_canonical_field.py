@@ -33,7 +33,11 @@ from radio_gs.querying.query_compilers import (
     continuous_gaussian_readout,
 )
 from radio_gs.querying.query_engine import CanonicalQueryEngine
-from radio_gs.querying.query_spec import SelectionMode
+from radio_gs.querying.query_likelihood_head import (
+    MonotoneQueryLikelihoodHead,
+    QueryLikelihoodInputs,
+)
+from radio_gs.querying.query_spec import PrimitiveUnaryEvidence, SelectionMode
 from radio_gs.querying.support_solver import PrimitiveSupportGraph, SupportSolverConfig
 from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import _build_hybrid_model
 
@@ -42,6 +46,7 @@ from .frozen_full312_contract import (
     source_contract_bindings_sha256,
 )
 from .protocol import (
+    Agile3DObject,
     Click,
     aggregate_official_metrics,
     evaluate_interactive_predictions,
@@ -58,14 +63,162 @@ from .protocol import (
 # opened; it is not a class/object-specific threshold.
 FULL_OBSERVATION_MIN_MEANINGFUL_SUPPORT = 1e-2
 FULL_OBSERVATION_DIAGNOSTIC_CONTRACT = "scannet_full_observation_diagnostic_v1"
+SEALED_PRIMITIVE_BUNDLE_CONTRACT = "query_independent_gaussian_bundle_v1"
 FULL_OBSERVATION_SUPPORT_CONTRACTS = frozenset(
     {
         "scannet_full_observation_pilot",
         "scannet_full_observation_v1",
         "scannet_full_observation_pfpr_queryheldout_v1",
         FULL_OBSERVATION_DIAGNOSTIC_CONTRACT,
+        SEALED_PRIMITIVE_BUNDLE_CONTRACT,
     }
 )
+
+LIKELIHOOD_CHECKPOINT_SCHEMA = "monotone-query-likelihood-head-checkpoint-v2"
+LIKELIHOOD_CHANNELS = ("appearance", "boundary")
+LIKELIHOOD_FUSION = "direct_registered_likelihood"
+
+
+def _load_frozen_likelihood_head(
+    checkpoint_path: Path,
+    *,
+    expected_sha256: str,
+    preregistration_path: Path,
+) -> tuple[MonotoneQueryLikelihoodHead, dict[str, object]]:
+    """Load one sealed generic head before any development labels are opened."""
+
+    actual_sha256 = _sha256(checkpoint_path)
+    if not expected_sha256 or actual_sha256 != str(expected_sha256):
+        raise ValueError("likelihood checkpoint SHA-256 does not match the sealed CLI")
+    prereg_sha256 = _sha256(preregistration_path)
+    payload = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+    if (
+        payload.get("artifact_type") != LIKELIHOOD_CHECKPOINT_SCHEMA
+        or payload.get("head_class") != "MonotoneQueryLikelihoodHead"
+        or payload.get("head_schema_version")
+        != "monotone-query-likelihood-multichannel-v2"
+        or payload.get("affinity_channels") != list(LIKELIHOOD_CHANNELS)
+        or payload.get("preregistration_sha256") != prereg_sha256
+    ):
+        raise ValueError("likelihood checkpoint contract differs from the sealed v2 head")
+    safety = payload.get("safety", {})
+    if (
+        safety.get("label_scope") != "official_source_train_scene_only"
+        or safety.get("development_labels_opened") is not False
+        or safety.get("test_labels_opened") is not False
+        or safety.get("full312_evaluation_run") is not False
+    ):
+        raise PermissionError("likelihood checkpoint crosses the frozen source-train boundary")
+    head = MonotoneQueryLikelihoodHead(
+        affinity_channel_count=len(LIKELIHOOD_CHANNELS)
+    ).cpu()
+    head.load_state_dict(payload["state_dict"], strict=True)
+    head.eval()
+    return head, {
+        "enabled": True,
+        "checkpoint": str(checkpoint_path.resolve()),
+        "checkpoint_sha256": actual_sha256,
+        "preregistration": str(preregistration_path.resolve()),
+        "preregistration_sha256": prereg_sha256,
+        "head_schema_version": str(payload["head_schema_version"]),
+        "affinity_channels": list(LIKELIHOOD_CHANNELS),
+        "source_scene_ids": list(payload.get("source_scene_ids", [])),
+        "fusion": LIKELIHOOD_FUSION,
+        "fusion_semantics": (
+            "replace_capability_unary_preserve_world_click_hard_seeds; "
+            "PoE is forbidden because the head consumes the same appearance/boundary evidence"
+        ),
+        "loaded_before_development_labels": True,
+    }
+
+
+def _scene_capability_centroid(
+    features: torch.Tensor, *, chunk_size: int = 2048
+) -> torch.Tensor:
+    """Match the query-free float64 scene calibration used to build fit data."""
+
+    bank = torch.as_tensor(features).cpu()
+    centroid = torch.zeros(bank.shape[1], dtype=torch.float64)
+    for start in range(0, len(bank), int(chunk_size)):
+        rows = F.normalize(bank[start : start + int(chunk_size)].float(), dim=1, eps=1e-8)
+        centroid += rows.double().sum(dim=0)
+    return (centroid / len(bank)).float()
+
+
+def _load_likelihood_primitive_bundle(
+    bundle_path: Path,
+    *,
+    scene_id: str,
+    expected_field_sha256: str,
+    expected_capability_sha256: str,
+    official_xyz: np.ndarray,
+    gaussian_xyz: torch.Tensor,
+    gaussian_covariance: torch.Tensor,
+    gaussian_opacity: torch.Tensor,
+) -> tuple[dict[str, torch.Tensor], dict[str, object]]:
+    """Validate and retain only the small runtime tensors from a sealed bundle."""
+
+    bundle_sha256 = _sha256(bundle_path)
+    payload = torch.load(bundle_path, map_location="cpu", weights_only=True)
+    if (
+        payload.get("artifact_type")
+        != "agile3d-canonical-gaussian-primitive-bundle-v1"
+        or payload.get("scene_id") != str(scene_id)
+    ):
+        raise ValueError("likelihood primitive bundle identity differs")
+    safety = payload.get("safety", {})
+    required_safety = {
+        "query_independent": True,
+        "object_id_used": False,
+        "clicks_opened": False,
+        "gt_labels_opened": False,
+        "test_labels_opened": False,
+        "point_as_primitive_used": False,
+    }
+    for key, expected in required_safety.items():
+        if safety.get(key) is not expected:
+            raise PermissionError(f"likelihood primitive bundle violates {key}")
+    source_assets = dict(payload.get("provenance", {})).get("source_assets", {})
+    if (
+        dict(source_assets.get("field_checkpoint", {})).get("sha256")
+        != expected_field_sha256
+        or dict(source_assets.get("capability_cache", {})).get("sha256")
+        != expected_capability_sha256
+    ):
+        raise ValueError("likelihood bundle is not bound to this canonical field")
+    bundle_xyz = torch.as_tensor(payload["primitive_xyz"]).float()
+    bundle_covariance = torch.as_tensor(payload["primitive_covariance"]).float()
+    bundle_opacity = torch.as_tensor(payload["primitive_opacity"]).float().reshape(-1)
+    bundle_official_xyz = torch.as_tensor(payload["official_point_xyz"]).float()
+    runtime_xyz = torch.as_tensor(gaussian_xyz).detach().float().cpu()
+    runtime_covariance = torch.as_tensor(gaussian_covariance).detach().float().cpu()
+    runtime_opacity = torch.as_tensor(gaussian_opacity).detach().float().cpu().reshape(-1)
+    official = torch.from_numpy(np.ascontiguousarray(official_xyz)).float()
+    if (
+        bundle_xyz.shape != runtime_xyz.shape
+        or not torch.allclose(bundle_xyz, runtime_xyz, atol=1e-6, rtol=0.0)
+        or bundle_covariance.shape != runtime_covariance.shape
+        or not torch.allclose(bundle_covariance, runtime_covariance, atol=1e-6, rtol=0.0)
+        or bundle_opacity.shape != runtime_opacity.shape
+        or not torch.allclose(bundle_opacity, runtime_opacity, atol=1e-6, rtol=0.0)
+        or bundle_official_xyz.shape != official.shape
+        or not torch.allclose(bundle_official_xyz, official, atol=1e-6, rtol=0.0)
+    ):
+        raise ValueError("likelihood bundle geometry/official point rows differ")
+    runtime = {
+        "prior_probability": torch.as_tensor(payload["prior_probability"]).float(),
+        "coverage": torch.as_tensor(payload["coverage"]).float(),
+        "reliability": torch.as_tensor(payload["reliability"]).float(),
+        "point_candidate_indices": torch.as_tensor(
+            payload["point_candidate_indices"]
+        ).long(),
+    }
+    return runtime, {
+        "primitive_bundle": str(bundle_path.resolve()),
+        "primitive_bundle_sha256": bundle_sha256,
+        "primitive_bundle_query_independent": True,
+        "primitive_bundle_labels_opened": False,
+    }
 
 
 def validate_observation_contract(
@@ -91,6 +244,7 @@ def validate_observation_contract(
         "dense_overlap_pilot",
         "dense_pfpr_queryheldout_pilot",
         "dense_agile_all_observations_pilot",
+        SEALED_PRIMITIVE_BUNDLE_CONTRACT,
         *full_observation_contracts,
     }:
         raise ValueError("unsupported AGILE3D observation contract")
@@ -121,6 +275,8 @@ def validate_observation_contract(
             raise ValueError(
                 f"{contract} requires matching source-contract version"
             )
+    if contract == SEALED_PRIMITIVE_BUNDLE_CONTRACT and not bool(require_support_gate):
+        raise ValueError("query-independent Gaussian bundle evaluation requires support gate")
     # Named pilot protocols must likewise fail closed on an accidentally
     # reused field.  The legacy dense-overlap pilot predates explicit source
     # declarations and remains readable only under its historic name.
@@ -475,6 +631,13 @@ class CanonicalFieldPointPredictor:
         negative_spatial_steps: int = 4,
         negative_spatial_decay: float = 0.8,
         node_reliability: torch.Tensor | None = None,
+        likelihood_head: MonotoneQueryLikelihoodHead | None = None,
+        likelihood_prior_probability: torch.Tensor | None = None,
+        likelihood_coverage: torch.Tensor | None = None,
+        likelihood_reliability: torch.Tensor | None = None,
+        likelihood_point_candidate_indices: torch.Tensor | None = None,
+        likelihood_scene_centroids: Mapping[str, torch.Tensor] | None = None,
+        likelihood_bundle_report: Mapping[str, object] | None = None,
         point_readout_constraint: str = "none",
         selection_mode: SelectionMode | str = SelectionMode.SEEDED_COMPONENT,
     ) -> None:
@@ -591,6 +754,9 @@ class CanonicalFieldPointPredictor:
                 negative_spatial_mode=str(negative_spatial_mode),
                 negative_spatial_steps=int(negative_spatial_steps),
                 negative_spatial_decay=float(negative_spatial_decay),
+                registered_observation_fusion=(
+                    LIKELIHOOD_FUSION if likelihood_head is not None else "additive"
+                ),
             ),
             solver_config=solver_config,
             graph_policy=str(graph_policy),
@@ -607,6 +773,73 @@ class CanonicalFieldPointPredictor:
             self.official_xyz,
             count=int(readout_candidate_k),
         ).to(self.device)
+        self.likelihood_head = (
+            likelihood_head.to(self.device).eval()
+            if likelihood_head is not None
+            else None
+        )
+        self.likelihood_bundle_report = dict(likelihood_bundle_report or {})
+        self.likelihood_centered_features: dict[str, torch.Tensor] = {}
+        if self.likelihood_head is not None:
+            required = (
+                likelihood_prior_probability,
+                likelihood_coverage,
+                likelihood_reliability,
+                likelihood_point_candidate_indices,
+                likelihood_scene_centroids,
+            )
+            if any(value is None for value in required):
+                raise ValueError("likelihood opt-in requires its complete sealed bundle")
+            self.likelihood_prior_probability = torch.as_tensor(
+                likelihood_prior_probability, device=self.device
+            ).float().reshape(-1)
+            self.likelihood_coverage = torch.as_tensor(
+                likelihood_coverage, device=self.device
+            ).float().reshape(-1)
+            self.likelihood_reliability = torch.as_tensor(
+                likelihood_reliability, device=self.device
+            ).float().reshape(-1)
+            if not all(
+                value.shape == (count,)
+                for value in (
+                    self.likelihood_prior_probability,
+                    self.likelihood_coverage,
+                    self.likelihood_reliability,
+                )
+            ):
+                raise ValueError("likelihood prior/coverage/reliability must align")
+            self.likelihood_point_candidate_indices = torch.as_tensor(
+                likelihood_point_candidate_indices,
+                device=self.device,
+                dtype=torch.long,
+            )
+            if (
+                self.likelihood_point_candidate_indices.ndim != 2
+                or self.likelihood_point_candidate_indices.shape[0] != len(self.official_xyz)
+                or bool((self.likelihood_point_candidate_indices < 0).any())
+                or bool((self.likelihood_point_candidate_indices >= count).any())
+            ):
+                raise ValueError("likelihood point candidates do not align")
+            for name in LIKELIHOOD_CHANNELS:
+                centroid = torch.as_tensor(
+                    likelihood_scene_centroids[name], device=self.device
+                ).float()
+                bank = self.feature_banks[name]
+                if centroid.shape != (bank.shape[1],):
+                    raise ValueError(f"{name} likelihood centroid does not align")
+                centered = torch.empty_like(bank, dtype=torch.float16)
+                for start in range(0, count, int(score_chunk_size)):
+                    stop = min(start + int(score_chunk_size), count)
+                    centered[start:stop] = F.normalize(
+                        bank[start:stop] - centroid[None], dim=1, eps=1e-8
+                    ).half()
+                self.likelihood_centered_features[name] = centered
+            self.likelihood_scene_centroids = {
+                name: torch.as_tensor(
+                    likelihood_scene_centroids[name], device=self.device
+                ).float()
+                for name in LIKELIHOOD_CHANNELS
+            }
         probe = torch.ones(count, dtype=torch.float32, device=self.device)
         _values, support = continuous_gaussian_readout(
             self.gaussian_xyz,
@@ -719,6 +952,23 @@ class CanonicalFieldPointPredictor:
             "primitive_reliability_applied": bool(
                 self.primitive_reliability_applied
             ),
+            "query_likelihood": (
+                {
+                    "enabled": True,
+                    "head_schema_version": str(self.likelihood_head.schema_version),
+                    "affinity_channels": list(LIKELIHOOD_CHANNELS),
+                    "affinity_calibration": (
+                        "scene_centered_l2_cosine_to_click_gaussian_mixture_v1"
+                    ),
+                    "registered_observation_fusion": LIKELIHOOD_FUSION,
+                    "capability_unary_policy": "replace",
+                    "hard_spatial_click_seeds_preserved": True,
+                    "appearance_boundary_double_counted": False,
+                    **self.likelihood_bundle_report,
+                }
+                if self.likelihood_head is not None
+                else {"enabled": False}
+            ),
             "continuous_support_fraction": float(self.readout_valid.float().mean()),
             "labels_opened": False,
         }
@@ -754,6 +1004,68 @@ class CanonicalFieldPointPredictor:
             if negative_indices
             else None
         )
+        primitive_unary_evidence: PrimitiveUnaryEvidence | None = None
+        if self.likelihood_head is not None:
+            click_indices = torch.cat((positive_index_tensor, negative_index_tensor))
+            candidates = self.likelihood_point_candidate_indices.index_select(
+                0, click_indices
+            )
+            click_xyz = point_tensor.index_select(0, click_indices)
+            delta = self.gaussian_xyz[candidates] - click_xyz[:, None, :]
+            precision = self.gaussian_precision[candidates]
+            mahalanobis = torch.einsum(
+                "qki,qkij,qkj->qk", delta, precision, delta
+            )
+            mixture = (
+                torch.exp(-0.5 * mahalanobis).clamp_min(0)
+                * self.gaussian_opacity[candidates]
+            )
+            support = mixture.sum(dim=1, keepdim=True)
+            if bool((support <= 0).any()):
+                raise ValueError("a released click has no Gaussian mixture support")
+            mixture = mixture / support
+            channel_affinities = []
+            for name in LIKELIHOOD_CHANNELS:
+                prototype = (
+                    self.feature_banks[name][candidates] * mixture[..., None]
+                ).sum(dim=1)
+                prototype = F.normalize(
+                    prototype - self.likelihood_scene_centroids[name][None],
+                    dim=1,
+                    eps=1e-8,
+                )
+                centered = self.likelihood_centered_features[name]
+                primitive_count = int(self.gaussian_xyz.shape[0])
+                affinity = torch.empty(
+                    (primitive_count, len(click_indices)),
+                    device=self.device,
+                    dtype=torch.float32,
+                )
+                for start in range(
+                    0,
+                    primitive_count,
+                    int(self.engine.scoring_config.score_chunk_size),
+                ):
+                    stop = min(
+                        start + int(self.engine.scoring_config.score_chunk_size),
+                        primitive_count,
+                    )
+                    cosine = centered[start:stop].float() @ prototype.T
+                    affinity[start:stop] = ((cosine + 1.0) * 0.5).clamp(0, 1)
+                channel_affinities.append(affinity)
+            all_affinity = torch.stack(channel_affinities, dim=-1)
+            positive_count = len(positive_indices)
+            observations = QueryLikelihoodInputs(
+                positive_affinity=all_affinity[:, :positive_count],
+                negative_affinity=all_affinity[:, positive_count:],
+                prior_probability=self.likelihood_prior_probability,
+                coverage=self.likelihood_coverage,
+                reliability=self.likelihood_reliability,
+            )
+            primitive_unary_evidence = self.likelihood_head(
+                observations,
+                source="registered_capability_click_gaussian_mixture",
+            )
         query = compile_world_3d_query(
             self.gaussian_xyz,
             self.gaussian_covariance,
@@ -774,6 +1086,7 @@ class CanonicalFieldPointPredictor:
             seed_topk=self.seed_topk,
             seed_temperature=self.seed_temperature,
             selection_mode=self.selection_mode,
+            primitive_unary_evidence=primitive_unary_evidence,
         )
         result = self.engine.execute(
             query, self.feature_banks, feature_signatures=self.feature_signatures
@@ -1250,6 +1563,9 @@ def _load_scene_predictor(
     capability_cache_name: str = "official_dino_sam3_views.pt",
     support_graph_name: str = "shared_support_graph_k16.pt",
     reliability_cache_name: str = "",
+    predictor_primitive_bundle: Path | None = None,
+    likelihood_head: MonotoneQueryLikelihoodHead | None = None,
+    likelihood_primitive_bundle: Path | None = None,
 ) -> tuple[CanonicalFieldPointPredictor, dict[str, object]]:
     field_path = _scene_artifact(
         scene_dir, field_checkpoint_name, role="field checkpoint name"
@@ -1278,16 +1594,21 @@ def _load_scene_predictor(
     observation_source = observation_source_from_render_contract(
         Path(str(mpr_metadata.get("config", "")))
     )
-    validate_full_observation_mpr_contract(
-        observation_contract,
-        mpr_metadata,
-        expected_source_contract_sha256=str(
-            observation_source["field_source_contract_sha256"]
-        ),
-        expected_source_contract_version=str(
-            observation_source["field_source_contract_version"]
-        ),
-    )
+    if predictor_primitive_bundle is None:
+        validate_full_observation_mpr_contract(
+            observation_contract,
+            mpr_metadata,
+            expected_source_contract_sha256=str(
+                observation_source["field_source_contract_sha256"]
+            ),
+            expected_source_contract_version=str(
+                observation_source["field_source_contract_version"]
+            ),
+        )
+    elif str(observation_contract) != SEALED_PRIMITIVE_BUNDLE_CONTRACT:
+        raise ValueError(
+            "sealed predictor bundle requires its explicit observation contract"
+        )
     field_hash = _sha256(field_path)
     bank = load_canonical_capability_bank(
         capability_path, expected_field_checkpoint_sha256=field_hash
@@ -1311,15 +1632,150 @@ def _load_scene_predictor(
         if reliability_path is not None
         else None
     )
-    gaussian_xyz, covariance, precision, opacity, cache_reused = _load_scene_geometry(
-        scene_dir,
-        bank_xyz=bank.xyz,
-        valid_rows=bank.global_rows,
-        expected_field_sha256=field_hash,
-        cache_path=geometry_cache_root / f"{scene_dir.name}.pt",
-        device=device,
-    )
-    feature_banks = bank.valid_feature_banks()
+    predictor_bundle_payload: Mapping[str, object] | None = None
+    predictor_bundle_report: dict[str, object] = {}
+    if predictor_primitive_bundle is not None:
+        if not predictor_primitive_bundle.is_file():
+            raise FileNotFoundError("sealed predictor primitive bundle is missing")
+        payload = torch.load(
+            predictor_primitive_bundle, map_location="cpu", weights_only=True
+        )
+        if (
+            payload.get("artifact_type")
+            != "agile3d-canonical-gaussian-primitive-bundle-v1"
+            or payload.get("scene_id") != scene_dir.name
+        ):
+            raise ValueError("sealed predictor bundle identity differs")
+        safety = payload.get("safety", {})
+        required_safety = {
+            "query_independent": True,
+            "object_id_used": False,
+            "clicks_opened": False,
+            "gt_labels_opened": False,
+            "test_labels_opened": False,
+            "point_as_primitive_used": False,
+        }
+        for key, expected in required_safety.items():
+            if safety.get(key) is not expected:
+                raise PermissionError(f"sealed predictor bundle violates {key}")
+        source_assets = dict(payload.get("provenance", {})).get(
+            "source_assets", {}
+        )
+        if (
+            dict(source_assets.get("field_checkpoint", {})).get("sha256")
+            != field_hash
+            or dict(source_assets.get("capability_cache", {})).get("sha256")
+            != _sha256(capability_path)
+        ):
+            raise ValueError("sealed predictor bundle authority differs from field")
+        global_rows = torch.as_tensor(payload["global_rows"]).long()
+        xyz_cpu = torch.as_tensor(payload["primitive_xyz"]).float()
+        covariance_cpu = torch.as_tensor(payload["primitive_covariance"]).float()
+        opacity_cpu = torch.as_tensor(payload["primitive_opacity"]).float().reshape(-1)
+        official_cpu = torch.as_tensor(payload["official_point_xyz"]).float()
+        expected_xyz = bank.xyz[bank.global_rows].float()
+        official_tensor = torch.from_numpy(np.ascontiguousarray(official_xyz)).float()
+        if (
+            not torch.equal(global_rows, bank.global_rows.long())
+            or xyz_cpu.shape != expected_xyz.shape
+            or not torch.allclose(xyz_cpu, expected_xyz, atol=1e-6, rtol=0.0)
+            or covariance_cpu.shape != (len(xyz_cpu), 3, 3)
+            or opacity_cpu.shape != (len(xyz_cpu),)
+            or official_cpu.shape != official_tensor.shape
+            or not torch.allclose(official_cpu, official_tensor, atol=1e-6, rtol=0.0)
+        ):
+            raise ValueError("sealed predictor bundle row/geometry contract differs")
+        coverage = torch.as_tensor(payload["coverage"]).float().reshape(-1)
+        reliability = torch.as_tensor(payload["reliability"]).float().reshape(-1)
+        if (
+            coverage.shape != (len(xyz_cpu),)
+            or reliability.shape != coverage.shape
+            or not bool(torch.isfinite(coverage).all())
+            or not bool(torch.isfinite(reliability).all())
+            or bool(((coverage < 0) | (coverage > 1)).any())
+            or bool(((reliability < 0) | (reliability > 1)).any())
+        ):
+            raise ValueError("sealed predictor bundle coverage/reliability differs")
+        gaussian_xyz = xyz_cpu.to(device)
+        covariance = covariance_cpu.to(device)
+        identity = torch.eye(3, device=device, dtype=covariance.dtype)
+        precision = torch.linalg.pinv(covariance + 1e-6 * identity)
+        opacity = opacity_cpu.to(device)
+        feature_banks = {
+            name: torch.as_tensor(payload[name]) for name in LIKELIHOOD_CHANNELS
+        }
+        predictor_bundle_payload = payload
+        cache_reused = False
+        predictor_bundle_report = {
+            "predictor_source": SEALED_PRIMITIVE_BUNDLE_CONTRACT,
+            "predictor_primitive_bundle": str(predictor_primitive_bundle.resolve()),
+            "predictor_primitive_bundle_sha256": _sha256(
+                predictor_primitive_bundle
+            ),
+            "predictor_bundle_mean_coverage": float(coverage.mean()),
+            "predictor_bundle_mean_reliability": float(reliability.mean()),
+            "predictor_bundle_labels_opened": False,
+        }
+    else:
+        gaussian_xyz, covariance, precision, opacity, cache_reused = _load_scene_geometry(
+            scene_dir,
+            bank_xyz=bank.xyz,
+            valid_rows=bank.global_rows,
+            expected_field_sha256=field_hash,
+            cache_path=geometry_cache_root / f"{scene_dir.name}.pt",
+            device=device,
+        )
+        feature_banks = bank.valid_feature_banks()
+    likelihood_runtime: dict[str, torch.Tensor] = {}
+    likelihood_bundle_report: dict[str, object] = {}
+    likelihood_centroids: dict[str, torch.Tensor] = {}
+    if likelihood_head is not None:
+        if likelihood_primitive_bundle is None or not likelihood_primitive_bundle.is_file():
+            raise FileNotFoundError("likelihood opt-in requires a sealed scene bundle")
+        if (
+            predictor_bundle_payload is not None
+            and likelihood_primitive_bundle.resolve()
+            == predictor_primitive_bundle.resolve()
+        ):
+            likelihood_runtime = {
+                "prior_probability": torch.as_tensor(
+                    predictor_bundle_payload["prior_probability"]
+                ).float(),
+                "coverage": torch.as_tensor(
+                    predictor_bundle_payload["coverage"]
+                ).float(),
+                "reliability": torch.as_tensor(
+                    predictor_bundle_payload["reliability"]
+                ).float(),
+                "point_candidate_indices": torch.as_tensor(
+                    predictor_bundle_payload["point_candidate_indices"]
+                ).long(),
+            }
+            likelihood_bundle_report = {
+                "primitive_bundle": str(likelihood_primitive_bundle.resolve()),
+                "primitive_bundle_sha256": predictor_bundle_report[
+                    "predictor_primitive_bundle_sha256"
+                ],
+                "primitive_bundle_query_independent": True,
+                "primitive_bundle_labels_opened": False,
+            }
+        else:
+            likelihood_runtime, likelihood_bundle_report = (
+                _load_likelihood_primitive_bundle(
+                    likelihood_primitive_bundle,
+                    scene_id=scene_dir.name,
+                    expected_field_sha256=field_hash,
+                    expected_capability_sha256=_sha256(capability_path),
+                    official_xyz=official_xyz,
+                    gaussian_xyz=gaussian_xyz,
+                    gaussian_covariance=covariance,
+                    gaussian_opacity=opacity,
+                )
+            )
+        likelihood_centroids = {
+            name: _scene_capability_centroid(feature_banks[name])
+            for name in LIKELIHOOD_CHANNELS
+        }
     predictor = CanonicalFieldPointPredictor(
         gaussian_xyz=gaussian_xyz,
         gaussian_covariance=covariance,
@@ -1361,6 +1817,15 @@ def _load_scene_predictor(
             if primitive_reliability is not None
             else None
         ),
+        likelihood_head=likelihood_head,
+        likelihood_prior_probability=likelihood_runtime.get("prior_probability"),
+        likelihood_coverage=likelihood_runtime.get("coverage"),
+        likelihood_reliability=likelihood_runtime.get("reliability"),
+        likelihood_point_candidate_indices=likelihood_runtime.get(
+            "point_candidate_indices"
+        ),
+        likelihood_scene_centroids=likelihood_centroids or None,
+        likelihood_bundle_report=likelihood_bundle_report,
     )
     return predictor, {
         "field_checkpoint": str(field_path.resolve()),
@@ -1403,6 +1868,8 @@ def _load_scene_predictor(
         **observation_source,
         "geometry_cache": str((geometry_cache_root / f"{scene_dir.name}.pt").resolve()),
         "geometry_cache_reused": bool(cache_reused),
+        **predictor_bundle_report,
+        **likelihood_bundle_report,
     }
 
 
@@ -1414,6 +1881,55 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
     geometry_cache_root = Path(args.geometry_cache_root)
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     source_contract = str(args.observation_contract)
+    predictor_bundle_root_arg = str(
+        getattr(args, "primitive_bundle_root", "")
+    ).strip()
+    predictor_bundle_root = (
+        Path(predictor_bundle_root_arg) if predictor_bundle_root_arg else None
+    )
+    if source_contract == SEALED_PRIMITIVE_BUNDLE_CONTRACT:
+        if predictor_bundle_root is None or not predictor_bundle_root.is_dir():
+            raise FileNotFoundError(
+                "query-independent Gaussian bundle contract requires --primitive-bundle-root"
+            )
+    elif predictor_bundle_root is not None:
+        raise ValueError(
+            "--primitive-bundle-root requires query_independent_gaussian_bundle_v1"
+        )
+    likelihood_checkpoint_arg = str(
+        getattr(args, "likelihood_checkpoint", "")
+    ).strip()
+    likelihood_bundle_root_arg = str(
+        getattr(args, "likelihood_primitive_bundle_root", "")
+    ).strip()
+    likelihood_preregistration_arg = str(
+        getattr(args, "likelihood_preregistration", "")
+    ).strip()
+    likelihood_expected_sha256 = str(
+        getattr(args, "likelihood_checkpoint_sha256", "")
+    ).strip()
+    likelihood_values = (
+        likelihood_checkpoint_arg,
+        likelihood_bundle_root_arg,
+        likelihood_preregistration_arg,
+        likelihood_expected_sha256,
+    )
+    if any(likelihood_values) and not all(likelihood_values):
+        raise ValueError(
+            "likelihood opt-in requires checkpoint, SHA-256, preregistration, and bundle root"
+        )
+    likelihood_head: MonotoneQueryLikelihoodHead | None = None
+    likelihood_report: dict[str, object] = {"enabled": False}
+    likelihood_bundle_root: Path | None = None
+    if all(likelihood_values):
+        likelihood_head, likelihood_report = _load_frozen_likelihood_head(
+            Path(likelihood_checkpoint_arg),
+            expected_sha256=likelihood_expected_sha256,
+            preregistration_path=Path(likelihood_preregistration_arg),
+        )
+        likelihood_bundle_root = Path(likelihood_bundle_root_arg)
+        if not likelihood_bundle_root.is_dir():
+            raise FileNotFoundError("likelihood primitive bundle root does not exist")
     require_support_gate = bool(args.require_support_gate)
     diagnostic_no_support_gate = bool(
         getattr(args, "diagnostic_no_support_gate", False)
@@ -1455,6 +1971,37 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
         selected_scenes = sorted(field_scenes & geometry_scenes)
     if not selected_scenes:
         raise ValueError("no AGILE3D scenes selected")
+    development_split_arg = str(
+        getattr(args, "development_split_manifest", "")
+    ).strip()
+    development_split_sha256 = str(
+        getattr(args, "development_split_manifest_sha256", "")
+    ).strip()
+    development_object_id = int(getattr(args, "development_object_id", 0))
+    development_mode = bool(development_split_arg)
+    if development_mode:
+        split_path = Path(development_split_arg)
+        if _sha256(split_path) != development_split_sha256:
+            raise ValueError("development split manifest SHA-256 differs")
+        split = json.loads(split_path.read_text(encoding="utf-8"))
+        partitions = split.get("partitions", {})
+        source_object_ids = split.get("source_object_ids", {})
+        if (
+            split.get("artifact_type")
+            != "agile3d-likelihood-scene-split-v1"
+            or len(selected_scenes) != 1
+            or selected_scenes[0]
+            not in partitions.get("development_validation", [])
+            or selected_scenes[0] in partitions.get("test", [])
+            or int(source_object_ids.get(selected_scenes[0], -1))
+            != development_object_id
+            or split.get("safety", {}).get("test_ply_labels_opened") is not False
+        ):
+            raise PermissionError("development one-shot split/object contract differs")
+    elif development_split_sha256 or development_object_id:
+        raise ValueError(
+            "development object opt-in requires manifest, SHA-256, and nonzero object id"
+        )
     # ``getattr`` preserves the programmatic evaluator API used by historic
     # support-only callers; CLI invocations always receive the explicit flags.
     object_shard_count = int(getattr(args, "object_shard_count", 1))
@@ -1558,6 +2105,17 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
             capability_cache_name=str(args.capability_cache_name),
             support_graph_name=str(args.support_graph_name),
             reliability_cache_name=str(args.reliability_cache_name),
+            predictor_primitive_bundle=(
+                predictor_bundle_root / f"{scene_id}.pt"
+                if predictor_bundle_root is not None
+                else None
+            ),
+            likelihood_head=likelihood_head,
+            likelihood_primitive_bundle=(
+                likelihood_bundle_root / f"{scene_id}.pt"
+                if likelihood_bundle_root is not None
+                else None
+            ),
         )
         validate_observation_contract(
             source_contract,
@@ -1643,7 +2201,17 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
 
     # Only after every selected field is accepted do we open the evaluator's
     # instance list and label values to run the released interaction protocol.
-    all_objects = load_official_object_list(benchmark_root)
+    all_objects = (
+        [
+            Agile3DObject(
+                selected_scenes[0],
+                development_object_id,
+                f"development_object_{development_object_id}",
+            )
+        ]
+        if development_mode
+        else load_official_object_list(benchmark_root)
+    )
     full_selected_objects = [
         item for item in all_objects if item.scene_id in preflight_support
     ]
@@ -1846,6 +2414,25 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
                 args.require_official_extracted_capability_teachers
             ),
             "labels_opened_during_field_or_support_audit": False,
+            "query_likelihood": likelihood_report,
+            "object_inventory": (
+                "sealed_scene_disjoint_development_object"
+                if development_mode
+                else "official_agile3d_single_object_list"
+            ),
+            "development_split_manifest": (
+                str(Path(development_split_arg).resolve())
+                if development_mode
+                else ""
+            ),
+            "development_split_manifest_sha256": (
+                development_split_sha256 if development_mode else ""
+            ),
+            "predictor_primitive_bundle_root": (
+                str(predictor_bundle_root.resolve())
+                if predictor_bundle_root is not None
+                else ""
+            ),
         },
         "scene_support": scene_support,
         "metrics": aggregate_official_metrics(
@@ -1913,7 +2500,42 @@ def main() -> None:
             "its feature-evidence shrinkage never changes hard click seeds"
         ),
     )
+    parser.add_argument(
+        "--likelihood-checkpoint",
+        default="",
+        help=(
+            "default-off generic MonotoneQueryLikelihoodHead checkpoint; "
+            "requires all likelihood sealing arguments"
+        ),
+    )
+    parser.add_argument("--likelihood-checkpoint-sha256", default="")
+    parser.add_argument("--likelihood-preregistration", default="")
+    parser.add_argument(
+        "--likelihood-primitive-bundle-root",
+        default="",
+        help="query-independent per-scene Gaussian bundles named <scene>.pt",
+    )
+    parser.add_argument(
+        "--primitive-bundle-root",
+        default="",
+        help=(
+            "default-off predictor source of sealed query-independent per-scene "
+            "Gaussian bundles; requires its explicit observation contract"
+        ),
+    )
     parser.add_argument("--scene-names", default="")
+    parser.add_argument(
+        "--development-split-manifest",
+        default="",
+        help="sealed scene-disjoint source split for a non-test development one-shot",
+    )
+    parser.add_argument("--development-split-manifest-sha256", default="")
+    parser.add_argument(
+        "--development-object-id",
+        type=int,
+        default=0,
+        help="precommitted object id from the sealed development split",
+    )
     parser.add_argument(
         "--object-shard-index",
         type=int,
@@ -1957,6 +2579,7 @@ def main() -> None:
             "scannet_full_observation_pilot",
             "scannet_full_observation_v1",
             FULL_OBSERVATION_DIAGNOSTIC_CONTRACT,
+            SEALED_PRIMITIVE_BUNDLE_CONTRACT,
         ),
         required=True,
     )

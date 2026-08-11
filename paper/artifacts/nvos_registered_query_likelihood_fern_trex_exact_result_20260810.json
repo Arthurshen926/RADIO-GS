@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_registered_query_likelihood_fern_trex_exact_result_v1",
+  "status": "pair_prediction_barrier_and_exact_scoring_complete_candidate_rejected",
+  "lineage": {
+    "preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_registered_query_likelihood_fern_trex_preregistration_20260810.json",
+      "sha256": "97f9b00939b6fd7730706653c7a529d24e8088d43e287e31ed0e3bfe92231756"
+    },
+    "receipt_diagnostics_addendum": {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_registered_query_likelihood_receipt_diagnostics_addendum_20260810.json",
+      "sha256": "b8a10e4ce36cd589fe4fc24d5f8bd2662d43e35a6b83307858004f1daaab8cd2"
+    },
+    "exact_result": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_registered_query_likelihood_fern_trex_v2/pair_exact_result.json",
+      "sha256": "fed1ac106f5364e87919cd24fa48e6e63356d4237274c396c36b00e3d1e23ed0"
+    }
+  },
+  "implementation": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_nvos_gaussian_first.py",
+      "sha256": "cf32630395647c4b4d646df96d07453a75b08d659aba65fab664c774b673705f"
+    },
+    "likelihood_head": {
+      "path": "/root/RADIO-GS/radio_gs/querying/query_likelihood_head.py",
+      "sha256": "385006c124f74987239f9f4fdeda26fc9776c9fefc123160bfa856b916be90b1"
+    },
+    "scorer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_registered_query_likelihood.py",
+      "sha256": "e04999c86394343c41aeee458d4b426f06b5c2bcc8977ef5620f892e7596f8d6"
+    }
+  },
+  "sealed_predictions": {
+    "fern": {
+      "receipt_sha256": "548f9a7faeb4d89fef8e0f911e604ebe09c6563ad35c191f441f72ed567364c8",
+      "primitive_unary_sha256": "ebdfc0e2c764636efcdc77acc9df0489e4f3afec04569f8197a24bbfcdd968cc"
+    },
+    "trex": {
+      "receipt_sha256": "8842c2d9fb799453d397d586b1573cdce368f236259eb061970ae18ae83cda68",
+      "primitive_unary_sha256": "e2c5d6a528709ecbef0fd97870d24f70fa5e539051bf88dcfacbf90944234d0c"
+    },
+    "both_verified_before_first_pair_target_mask_open": true
+  },
+  "source_only_causal_audit": {
+    "fern": {
+      "balanced_bce": [0.03200241178274155, 0.0008275043219327927],
+      "positive_probability": 0.9989734888076782,
+      "negative_probability": 0.0004066318506374955,
+      "observed_rows": 172843,
+      "abstained_rows": 124357,
+      "changed_observed_unary_rows": 170966,
+      "mean_absolute_unary_delta_observed": 0.13573968410491943
+    },
+    "trex": {
+      "balanced_bce": [0.08983167260885239, 0.015400641597807407],
+      "positive_probability": 0.9906267523765564,
+      "negative_probability": 0.007583268918097019,
+      "observed_rows": 55663,
+      "abstained_rows": 98923,
+      "changed_observed_unary_rows": 53493,
+      "mean_absolute_unary_delta_observed": 0.0944652408361435
+    },
+    "both_passed_before_target_scoring": true
+  },
+  "exact_metrics": {
+    "fern": {
+      "base_iou": 0.7350345861696804,
+      "candidate_iou": 0.7386224771931486,
+      "delta": 0.003587891023468126
+    },
+    "trex": {
+      "base_iou": 0.6054796961495501,
+      "candidate_iou": 0.6057245161926581,
+      "delta": 0.0002448200431079961
+    },
+    "pair_macro": {
+      "base_iou": 0.6702571411596152,
+      "candidate_iou": 0.6721734966929034,
+      "delta": 0.001916355533288172
+    }
+  },
+  "promotion_gate": {
+    "pair_macro_delta_minimum": 0.005,
+    "per_scene_delta_minimum": -0.002,
+    "pair_macro_pass": false,
+    "per_scene_safety_pass": true,
+    "passed": false,
+    "full8_authorized": false
+  },
+  "scientific_conclusion": "The registered adapter is causally active and source reconstruction is well fit without target leakage, but the frozen hierarchical q,c mixture was already close to the sufficient-statistic interface. Query-conditioned scalar calibration only suppresses a small subset of positive mass: fern improves 0.36 points and trex 0.02 points, so the pair gain of 0.19 points fails the preregistered 0.5-point gate. Do not replace the strict NVOS mainline or run full8. The remaining bottleneck is source-to-target completion/canonical correspondence, not another scalar likelihood remapping.",
+  "validation": {
+    "focused_tests": "64 passed, 2 warnings",
+    "python_compile": "passed",
+    "target_rgb_used": false,
+    "target_metric_used_for_calibration_or_parameter_selection": false
+  },
+  "gpu": {
+    "physical_gpu": 1,
+    "maximum_sampled_temperature_c": 59,
+    "thermal_pause_or_abort": false,
+    "driver_failure": false
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_capability_relative_v3_source_gate_result.v1",
+  "status": "all_source_gates_passed_checkpoint_sealed_benchmark_not_run",
+  "authorities": {
+    "preregistration": {
+      "path": "paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_preregistration_20260811.json",
+      "sha256": "afe986beac3647b15b5ffa286518929957ea94104b806215d88858fd127bd1da"
+    },
+    "disclosure_correction": {
+      "path": "paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_disclosure_correction_20260811.json",
+      "sha256": "350cbcb42641af6db25c51534630e8247e56528a365fc7dac799a6fc3738783e"
+    },
+    "execution_receipt": {
+      "path": "paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_execution_receipt_20260811.json",
+      "sha256": "ccea8408e85f269e85aed4ee979bc6e9115c966023b79997e47df8208b5c9ab0"
+    },
+    "manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/source_only_sam_capability_relative_manifest.v3.1.json",
+      "sha256": "a2ea46527974e202f218788b31c5fd693e3eac245c07912a6d25540f151082d0"
+    },
+    "checkpoint": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/canonical_radio_source_sam_capability_relative_e5_seed0.pth",
+      "sha256": "d38256ed91c4f373759355395bd8c8f6ddcd4b4f59018f9d27e53525a35f31b9"
+    },
+    "report": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/canonical_radio_source_sam_capability_relative_e5_seed0.pth.json",
+      "sha256": "473c6bce6fe1b2c6090ca29d02dfb055b6bda7b80f14f87e3fdcab98da40159b"
+    },
+    "training_log_sha256": "6553823ddf403d0955797446a373555f31488227bf3968fef971d62d0fcdbcae",
+    "telemetry_sha256": "305dae5dc78503879c149724d7f56b5bb6b90f12a06958daf02b64a0a9eb4387"
+  },
+  "architecture_audit": {
+    "control_architecture_equal": true,
+    "state_dict_key_order_equal": true,
+    "state_dict_tensor_shapes_equal": true,
+    "state_dict_tensor_count": 11,
+    "sam_dino_teacher_mask_or_adaptor_state_keys": [],
+    "teacher_payload_saved": false,
+    "persistent_semantic_feature": "canonical_radio_only",
+    "query_time_rgb_or_adaptor_added": false
+  },
+  "source_metrics": {
+    "global_capability_relation": {
+      "same_mean_control": 0.9364265203475952,
+      "same_mean_candidate": 0.9368084669113159,
+      "same_delta": 0.0003819465637207031,
+      "separate_mean_control": 0.8740769624710083,
+      "separate_mean_candidate": 0.8727999925613403,
+      "separate_delta": -0.0012769699096679688,
+      "gap_control": 0.062349557876586914,
+      "gap_candidate": 0.06400847434997559,
+      "gap_delta": 0.0016589164733886719
+    },
+    "capability_triplets": {
+      "count": 53225,
+      "gap_control": 0.04741630703210831,
+      "gap_candidate": 0.048934634774923325,
+      "gap_delta": 0.0015183277428150177,
+      "violation_rate_control": 0.5765335559844971,
+      "violation_rate_candidate": 0.5683419704437256,
+      "violation_rate_delta": -0.008191585540771484,
+      "hinge_control": 0.0358666367828846,
+      "hinge_candidate": 0.03467446565628052,
+      "hinge_delta": -0.0011921711266040802
+    },
+    "raw_radio_no_regression": {
+      "mean_cosine_control": 0.9935972690582275,
+      "mean_cosine_candidate": 0.9938568472862244,
+      "mean_delta": 0.00025957822799682617,
+      "p05_cosine_control": 0.9861637353897095,
+      "p05_cosine_candidate": 0.9866377711296082,
+      "p05_delta": 0.00047403573989868164,
+      "passed": true
+    },
+    "official_capability_no_regression": {
+      "dino_v3_target_mean_cosine": [0.9881994128227234, 0.9881942868232727],
+      "dino_v3_target_p05_cosine": [0.9691436886787415, 0.9690884947776794],
+      "sam3_target_mean_cosine": [0.9861958026885986, 0.9863439798355103],
+      "sam3_target_p05_cosine": [0.9674181342124939, 0.967363715171814],
+      "all_four_passed": true
+    }
+  },
+  "source_gate_decision": {
+    "same_relation_axis": true,
+    "global_capability_same_relation_non_decrease": true,
+    "global_capability_separate_relation_non_increase": true,
+    "global_capability_relation_gap_strict_improvement": true,
+    "capability_triplet_gap_strict_improvement": true,
+    "capability_triplet_violation_strict_decrease": true,
+    "raw_radio_preservation": true,
+    "official_capability_preservation": true,
+    "all_structure_gates_passed": true,
+    "all_source_gates_passed": true,
+    "checkpoint_seal_allowed": true,
+    "benchmark_gate_opened": false
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "maximum_observed_temperature_c": 62,
+    "maximum_observed_power_w": 280.15,
+    "maximum_observed_memory_mib": 3840,
+    "soft_pause_triggered": false,
+    "hard_stop_triggered": false,
+    "final_gpu_state": "42C_1MiB_idle"
+  },
+  "causal_conclusion": "On the same sealed official-SAM triplet axis and unchanged five-epoch recipe, moving the source loss from raw RADIO cosine to the frozen official DINOv3+SAM3 geometric-mean relation improves both global and scale-matched capability relations while preserving raw RADIO and official capability reconstruction. This validates the relation-space mismatch diagnosis at source-gate level only; no benchmark claim is made.",
+  "access_audit": {
+    "v2_lerf_outcome_used_to_choose_relation_space": true,
+    "used_to_choose_margin_weight_epochs_or_threshold": false,
+    "per_scene_or_query_metric_tuning": false,
+    "benchmark_reopened_after_training": false,
+    "benchmark_query_or_ground_truth_opened": false,
+    "benchmark_metric_run": false
+  },
+  "regression_tests": "33 passed"
+}

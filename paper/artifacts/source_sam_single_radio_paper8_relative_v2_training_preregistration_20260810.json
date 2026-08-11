@@ -1,0 +1,98 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_paper8_relative_v2_training_preregistration.v1",
+  "status": "frozen_before_first_paper8_extension_training_run",
+  "objective": "Extend the passed scene0000 scale-matched relative/no-harm official-SAM teacher to every remaining ScanNet paper8 scene without changing the one-RADIO field architecture or using RGB at query/evaluation time.",
+  "rollout_inventory": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_paper8_rollout_inventory_20260810.json",
+    "sha256": "1f724349da55099a8ba99ab13d94c446fba4b3c6518bd0c020b74fed409f978c"
+  },
+  "passed_mechanism_sentinel": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_scene0000_relative_v2_source_gate_result_20260810.json",
+    "status_required": "all_source_gates_passed_frozen_benchmark_sentinel_authorized"
+  },
+  "scene_axis": [
+    "scene0062_00",
+    "scene0070_00",
+    "scene0097_00",
+    "scene0140_00",
+    "scene0347_00",
+    "scene0400_00",
+    "scene0590_00"
+  ],
+  "representation_contract": {
+    "persistent_semantic_feature": "canonical_radio_only",
+    "field_architecture_changed": false,
+    "initialization": "each_scene_exact_frozen_canonical_mpr_v3_control",
+    "official_sam_role": "mapping_time_relative_relation_teacher_only",
+    "source_rgb_at_mapping_time": true,
+    "source_or_target_rgb_at_query_or_evaluation_time": false,
+    "sam_mask_feature_relation_or_triplet_persisted_in_field": false
+  },
+  "training": {
+    "observation_contract": "canonical-mpr-v1",
+    "coefficient_dim": 256,
+    "local_dim": 128,
+    "primitive_fusion": true,
+    "official_capability_loss": true,
+    "capability_target_contract": "matched_top1",
+    "epochs": 5,
+    "minimum_epochs": 5,
+    "batch_size": 1024,
+    "evaluation_batch_size": 8192,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0,
+    "raw_radio_weight": 1.0,
+    "official_dino_weight": 0.2,
+    "official_sam_adaptor_weight": 0.2,
+    "official_sam_relative_weight": 0.05,
+    "relative_margin": 0.05,
+    "per_scene_or_per_task_tuning": false,
+    "runs_per_scene": 1
+  },
+  "source_gate": {
+    "every_scene_must_pass_every_gate": true,
+    "global_same_cosine_non_decrease": true,
+    "global_separate_cosine_non_increase": true,
+    "global_relation_gap_strict_improvement": true,
+    "scale_triplet_gap_strict_improvement": true,
+    "scale_triplet_violation_strict_decrease": true,
+    "raw_radio_mean_cosine_max_regression": 0.005,
+    "raw_radio_p05_cosine_max_regression": 0.01,
+    "official_capability_mean_cosine_max_regression": 0.005,
+    "official_capability_p05_cosine_max_regression": 0.01,
+    "failure_action": "reject_collective_paper8_candidate_without_opening_benchmark_metric_or_tuning"
+  },
+  "benchmark_gate": {
+    "closed_during_all_source_training": true,
+    "all_eight_candidate_score_caches_sealed_before_first_label_open": true,
+    "paper8_exact_evaluation_uses_no_source_or_target_rgb": true,
+    "six_task_mainline_unchanged_until_six_task_joint_no_regression": true
+  },
+  "outputs": {
+    "root": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2",
+    "per_scene_checkpoint_name": "canonical_radio_source_sam_relative_e5_seed0.pth",
+    "no_clobber": true
+  },
+  "implementation": {
+    "trainer_sha256": "e4ab6dfb6eb9b6165464e5a8560abc3b27e12740b439150a6cd1fa2cddc1d885",
+    "relative_teacher_sha256": "1d24e02cd791170c89fd52dccda95d700e37e94f8a201263b4eb305925bff5cf",
+    "base_teacher_and_checkpoint_validator_sha256": "a1e1c4ce7239ddbd20801f220e2e3b78ce5873cc39f9257f30e8a62352322132",
+    "base_manifest_builder_sha256": "3eb878ea6d7e9bdc3a284526125fa8f1e6bc919013d68cceee1ee2f9e0ac882d",
+    "relative_manifest_builder_sha256": "abf4353ea831c6fe9c67d917d25f920ae10d1736f2bc999c473956eb8febcfda"
+  },
+  "thermal": {
+    "physical_gpus": [0, 1],
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  },
+  "access_audit": {
+    "benchmark_query_opened": false,
+    "benchmark_labels_or_masks_opened": false,
+    "benchmark_predictions_or_metrics_opened": false
+  }
+}

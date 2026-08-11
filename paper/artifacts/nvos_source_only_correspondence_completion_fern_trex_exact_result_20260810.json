@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_source_only_correspondence_completion_fern_trex_exact_result_v1",
+  "status": "staged_safety_gate_complete_candidate_rejected",
+  "lineage": {
+    "preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_source_only_correspondence_completion_fern_trex_preregistration_20260810.json",
+      "sha256": "f1b4490b1deaee1ce89dc89dc502788fe605b98abaa29f64d23c14e8ba3228ee"
+    },
+    "base_run_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/run_manifest.json",
+      "sha256": "bf34e7a370259e841067f0cd9e982ca9301892ba1877a12d48220d5f8dc65432"
+    },
+    "base_exact_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/full8_exact_results.json",
+      "sha256": "c2759a08ba769a36598b9614ac7e4b901b4322004424e075651cb91eb667ce21"
+    },
+    "candidate_pair_exact_result": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_source_only_correspondence_completion_fern_trex_v2/pair_exact_result.json",
+      "sha256": "32af58728bc8c5bafc92c2aa75786d359b8c12bcf820293185ef76be7b1a31a0"
+    }
+  },
+  "implementation": {
+    "completion_module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/source_only_correspondence_completion.py",
+      "sha256": "461b8cb8713e1daed08ae36250bbc0f0827041dff766be3d852d56ae8f312107"
+    },
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_nvos_gaussian_first.py",
+      "sha256": "d1aae08efb998bb8ffb47f50ee4d7390b0f88c5c634038e7757ec3592667b515"
+    },
+    "independent_scorer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_source_only_correspondence.py",
+      "sha256": "716631a3847172cd82fff03b3d4499db0087974047ba83ef4bb0a6038cdc0472"
+    },
+    "method": "source_only_one_hop_signed_correspondence_completion_v1",
+    "single_factor": "complete only exact-abstain primitive rows before the unchanged registered-observation probability-mixture fusion",
+    "target_rgb_used": false,
+    "target_ground_truth_or_metric_used_to_fit_or_select_parameters": false
+  },
+  "sealed_predictions": {
+    "fern": {
+      "receipt": "/root/radio_gs_local_cache/optimization_20260810/nvos_source_only_correspondence_completion_fern_trex_v2/fern/pre_metric_prediction_receipt.json",
+      "receipt_sha256": "9a4a60dbf1dc8694b04a7d8046c0af16d37d9192c6451ba9c4581f6abe2053c2",
+      "primitive_unary_sha256": "6d9a5f7348f47e1c6e1211f31519f95203e8afd2a3e83ebc3997206d266e3bc1",
+      "score_tensor_sha256": "43e188622609e1dffaa0fc981d96c4736996b600f4e83ea78c5c73a253df2d7b"
+    },
+    "trex": {
+      "receipt": "/root/radio_gs_local_cache/optimization_20260810/nvos_source_only_correspondence_completion_fern_trex_v2/trex/pre_metric_prediction_receipt.json",
+      "receipt_sha256": "54d0d99a6252428d7f3fec8365077a664de28e1060a20d8134c6c75f0af0dabe",
+      "primitive_unary_sha256": "e4ef842165f7282b4cb7070ab202ce3981e086b0b87896f1c241b3e109782b70",
+      "score_tensor_sha256": "648d67ffcd9c318f18a5e592bf8a0854f2d8a857a86fe388663239f656b3e04b"
+    }
+  },
+  "prediction_and_scoring_barrier_disclosure": {
+    "global_pair_prediction_barrier_before_any_target_ground_truth_open": false,
+    "reason": "The parent explicitly required a staged fern safety gate: score fern after sealing its receipt and authorize trex only when fern delta is at least -0.2 percentage points.",
+    "fern_safety_gate_passed_before_trex_prediction": true,
+    "completion_parameters_or_recipe_changed_after_fern_score": false,
+    "within_final_pair_scorer_both_receipts_verified_before_first_target_mask_open": true,
+    "claim_boundary": "This is a preregistered method-development sentinel with an explicitly staged per-scene safety gate, not an untouched simultaneous pair batch. The staged score only controlled whether trex would run and did not select or change method parameters."
+  },
+  "causal_invariants": {
+    "write_domain": "registered observation confidence exactly equal to zero",
+    "observed_probability_and_confidence_bitwise_unchanged": true,
+    "positive_and_negative_anchors_supported": true,
+    "field_prior_separate_from_completion_likelihood": true,
+    "completion_probability_separate_from_reliability": true,
+    "one_hop_only": true,
+    "graph_solver_and_readout_unchanged": true,
+    "scene_specific_parameters": false,
+    "fern": {
+      "num_nodes": 297200,
+      "observed_rows": 172843,
+      "abstained_rows": 124357,
+      "completed_rows": 5215,
+      "completed_fraction_of_abstained_rows": 0.04193571732994524,
+      "completed_confidence_sum": 131.85122680664062,
+      "mean_completed_confidence": 0.02528307321316215,
+      "completed_mean_absolute_probability_shift": 0.13402274250984192,
+      "materially_changed_rows_vs_base": 4930,
+      "maximum_primitive_probability_delta_vs_base": 0.08963274955749512,
+      "observed_unary_bitwise_equal": true
+    },
+    "trex": {
+      "num_nodes": 154586,
+      "observed_rows": 55663,
+      "abstained_rows": 98923,
+      "completed_rows": 5751,
+      "completed_fraction_of_abstained_rows": 0.05813612607785854,
+      "completed_confidence_sum": 107.11829376220703,
+      "mean_completed_confidence": 0.018626029170962795,
+      "completed_mean_absolute_probability_shift": 0.14903709292411804,
+      "materially_changed_rows_vs_base": 5366,
+      "maximum_primitive_probability_delta_vs_base": 0.10684049129486084,
+      "observed_unary_bitwise_equal": true
+    }
+  },
+  "exact_metrics": {
+    "fern": {
+      "base_iou": 0.7350345861696804,
+      "candidate_iou": 0.735002219718323,
+      "delta": -0.00003236645135740179,
+      "delta_percentage_points": -0.003236645135740179
+    },
+    "trex": {
+      "base_iou": 0.60547969614955,
+      "candidate_iou": 0.6054004880244486,
+      "delta": -0.0000792081251014265,
+      "delta_percentage_points": -0.00792081251014265
+    },
+    "pair_macro": {
+      "base_iou": 0.6702571411596152,
+      "candidate_iou": 0.6702013538713858,
+      "delta": -0.000055787288229414145,
+      "delta_percentage_points": -0.0055787288229414145
+    }
+  },
+  "promotion_gate": {
+    "pair_macro_delta_minimum": 0.005,
+    "per_scene_delta_minimum": -0.002,
+    "pair_macro_pass": false,
+    "per_scene_safety_pass": true,
+    "passed": false,
+    "full8_authorized": false,
+    "strict_hierarchical_mainline_changed": false
+  },
+  "post_registration_error_support_diagnostic": {
+    "used_for_parameter_selection": false,
+    "fern": {
+      "false_negative_fraction_of_ground_truth_approximate": 0.0818,
+      "false_positive_fraction_of_prediction_approximate": 0.2135
+    },
+    "trex": {
+      "false_negative_fraction_of_ground_truth_approximate": 0.1342,
+      "false_positive_fraction_of_prediction_approximate": 0.3318
+    },
+    "interpretation": "The remaining error is not dominated by missing positive coverage. False-positive and boundary support is already larger than the missing-target fraction, so indiscriminate positive propagation is causally misaligned."
+  },
+  "scientific_conclusion": "The candidate is genuinely active and structurally safe: it changes thousands of previously abstaining primitive rows while leaving every observed unary bitwise unchanged. Nevertheless, fern changes by -0.0032 points, trex by -0.0079 points, and the pair by -0.0056 points. The tiny completed confidence mass and neutral target effect show that one-hop canonical KNN adjacency plus source-view co-visibility is not an instance-level cross-view correspondence signal. This rejects further local graph or scalar threshold tuning as the primary route. A stronger query-independent multiview region/correspondence asset with explicit instance boundary consistency is required before attempting another NVOS completion candidate.",
+  "validation": {
+    "focused_tests": "109 passed, 2 warnings",
+    "python_compile": "passed",
+    "json_and_hash_validation": "passed",
+    "full8_run": false
+  },
+  "gpu": {
+    "physical_gpu": 1,
+    "thermal_poll_interval_seconds": 60,
+    "pause_temperature_c": 82,
+    "resume_temperature_c": 78,
+    "maximum_sampled_temperature_c": 48,
+    "thermal_pause_or_abort": false,
+    "driver_failure": false
+  }
+}

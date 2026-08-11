@@ -1,0 +1,65 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_scannet_ovs_sentinel_preregistration.v1",
+  "status": "frozen_after_source_gates_before_semantic_prediction_or_label_access",
+  "scene_id": "scene0000_00",
+  "task": "ScanNet OVS text-query semantic segmentation",
+  "protocol": "frozen VALA Gaussian-domain custom-single-scene exact",
+  "scientific_question": "Does source-only official-SAM relative structure preserve or improve the frozen source-free semantic readout on the same canonical RADIO field?",
+  "access_contract": {
+    "mapping_time_source_rgb_used": true,
+    "evaluation_time_source_rgb_used": false,
+    "evaluation_time_target_rgb_used": false,
+    "evaluation_time_sam_decoder_cache_mask_or_feature_used": false,
+    "query_input": "frozen_split19_text_embedding_bank",
+    "prediction_materialized_before_label_ply_opened": true,
+    "per_scene_or_per_task_tuning": false
+  },
+  "source_gate_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_scene0000_relative_v2_source_gate_result_20260810.json",
+    "sha256": "208c713fdb8755e9c7c17ff11b0fb726f18f619bd2a04d585cda439a19ddb5f1"
+  },
+  "control": {
+    "semantic_score_cache_sha256": "3e99771de237b0f88d999fde3fcf5714bd6f54e090f6d053610645f92790b4d5",
+    "field_checkpoint_sha256": "80a13c1a7d1405971424c825000f47d8a19aa32f5e64433c1bb0707febecd845",
+    "split19": {"miou": 0.2689807912087902, "macc": 0.47557282741725476},
+    "split15": {"miou": 0.2924011330144089, "macc": 0.5121553526031974},
+    "split10": {"miou": 0.36009162596502886, "macc": 0.5413000859348476}
+  },
+  "candidate_field": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/canonical_radio_source_sam_relative_e5_seed0.pth",
+    "sha256": "d623ceea3ea13dad2c8ba27667c5942b3ab2b7af0b9648f0ae8e02304498604e"
+  },
+  "frozen_readout": {
+    "geometry_checkpoint_sha256": "d5ce0a13264ee2bb5a638a2eab6c51cd8a81e87ec1b03d8a70b956c1d08c40fa",
+    "support_graph_sha256": "d48bf2f30bed661230da34a2b3ae387eda1f5b1aeea83c39567931e437c8c084",
+    "surface_region_readout_sha256": "06c1d9c3bfaf674de54fa1167aa2d156e183e0a751c87d0e7c09733928464b5b",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "query_bank_sha256": "d40b0781001e236ab77d8a5fc8d1fee2e30cefe614c0b6e9884ffae70c737b9f",
+    "canonical_mainline_sha256": "3d6d36ab91ef3b2c406a6fad02bc9bf085a680690f84e35896751d414d57dbae",
+    "canonical_method_freeze_sha256": "9ea6fc8d79ee11ae2ccb3b6ef738580983cae406f586db61833182780587c009",
+    "evaluation_protocol_freeze_sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916",
+    "materializer_sha256": "d4c64a96ce447c51e3a189766f02fac8dc93cfda10f67aec79437acb30332ec2",
+    "evaluator_sha256": "721a55b2022a122f4b0cee35453326ff0d0c28a8a86263cb0b1c6adce4a2e3d6",
+    "threshold_or_calibration_change": false
+  },
+  "prediction_output": {
+    "score_cache": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/scannet_ovs_sentinel/scene0000_00.pt",
+    "receipt": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/scannet_ovs_sentinel/scene0000_00.pt.receipt.json",
+    "no_clobber": true
+  },
+  "evaluation_output": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/scannet_ovs_sentinel/evaluation",
+  "promotion_gate": {
+    "each_split_miou_delta_minimum": -0.002,
+    "each_split_macc_delta_minimum": -0.002,
+    "mean_three_split_miou_delta": "must_be_strictly_positive",
+    "failure_action": "do_not_expand_to_other_scenes_or_six_task_benchmarks"
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  }
+}

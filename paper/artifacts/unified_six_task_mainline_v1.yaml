@@ -1,0 +1,286 @@
+schema_version: 1
+name: unified-six-task-mainline-v1
+status: development_candidate
+declared_at: 2026-08-10
+
+claim_boundary:
+  unified_paper_claim_eligible: false
+  reason: >-
+    The current best rows have mixed field and query-interface lineage.  This
+    registry separates strict reusable-field evidence, target-RGB-assisted
+    evidence, legacy/task-specific bypasses, and external reproductions until
+    one factorized compact field passes all six promotion gates.
+
+capability_tracks:
+  strict_reusable_field:
+    target_rgb_at_query_time: false
+    target_gt_visible_to_method: false
+  target_rgb_assisted:
+    target_rgb_at_query_time: true
+    target_gt_visible_to_method: false
+  oracle_diagnostic:
+    target_gt_visible_to_method: true
+    paper_primary_eligible: false
+  external_reproduction:
+    ours_method_claim: false
+
+shared_architecture_target:
+  scene_memory: factorized_compact_canonical_gaussian_field
+  primitive_state:
+    - semantic_direction
+    - log_amplitude
+    - directional_dispersion
+    - amplitude_uncertainty
+    - observation_evidence
+    - visibility_purity
+    - multiscale_region_tokens
+  evidence_adapters:
+    text: [lerf2d, lerf3d, scannet_ovs]
+    registered_2d: [nvos, spin9]
+    world_3d_click: [agile3d]
+    optional_target_rgb_proposal: [lerf2d, lerf3d, nvos, spin9]
+  query_likelihood:
+    schema: monotone-query-likelihood-v1
+    implementation: radio_gs/querying/query_likelihood_head.py
+    output_contract: primitive_foreground_probability_q_plus_observation_confidence_c
+    invariants:
+      - permutation_invariant_observation_sets
+      - monotone_positive_and_negative_evidence
+      - exact_zero_confidence_abstention
+    status: interface_implemented_training_pending
+  inference: authority_preserving_reliability_calibrated_primitive_posterior
+  output_operators:
+    native_2d_raster: [lerf2d, nvos, spin9]
+    gaussian_selection_render: [lerf3d]
+    point_or_gaussian_readout: [scannet_ovs, agile3d]
+
+tasks:
+  lerf2d:
+    current_rows:
+      - id: canonical_surface_region_v2_exact
+        track: strict_reusable_field
+        paper_role: current_exact
+        field_lineage: field_decode_only
+        target_rgb_visible_to_method: false
+        authority: paper/artifacts/ours_lerf2d_scalar_render_authority_20260802.json
+        exact_result: /mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf2d_ours_native_multiscale_scalar_maps_v1/evaluation.json
+        metrics:
+          scene_macro_miou: 0.5173733739798727
+          scene_macro_locacc: 0.8296907794998031
+          query_micro_miou: 0.543260657076294
+          query_micro_locacc: 0.8653846153846154
+      - id: legacy_hybrid_feature_sam3_boundary
+        track: target_rgb_assisted
+        paper_role: historical_enhanced_reference
+        field_lineage: legacy_field_plus_task_head
+        target_rgb_visible_to_method: true
+        authority: paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json
+        metrics:
+          scene_macro_miou: 0.588944
+          scene_macro_locacc: 0.859831
+      - id: current_field_target_rgb_grabcut_boundary_v1
+        track: target_rgb_assisted
+        paper_role: stage_a_exact_candidate
+        field_lineage: field_plus_task_sidecar
+        target_rgb_visible_to_method: true
+        authority: paper/artifacts/lerf2d_current_field_boundary_readout_stage_a_20260810.json
+        metrics:
+          scene_macro_miou: 0.5293730706254167
+          scene_macro_locacc: 0.8296907794998031
+          query_micro_miou: 0.5569066170798636
+          query_micro_locacc: 0.8653846153846154
+      - id: current_field_target_rgb_official_sam3_box_pad16_full4
+        track: target_rgb_assisted
+        paper_role: exact_capability_row
+        field_lineage: field_plus_task_sidecar
+        target_rgb_visible_to_method: true
+        target_gt_visible_to_method: false
+        authority: paper/artifacts/lerf2d_current_field_official_sam3_box_full4_exact_result_20260810.json
+        metrics:
+          scene_macro_miou: 0.6062946157319415
+          scene_macro_locacc: 0.8296907794998031
+          query_micro_miou: 0.6261542157017702
+          query_micro_locacc: 0.8653846153846154
+        receipt_policy: coarse_and_final_prediction_batches_sealed_before_target_gt
+        fixed_global_policy: official_sam3_box_pad16_resolution1008_conf0_min_coarse_iou0p05
+    promotion_target:
+      metric: scene_macro_miou
+      minimum: 0.6362004352868187
+      reference: paper/artifacts/occamlgs_lerf2d_strict_reproduction_20260801.md
+    unified_gate:
+      passed: false
+      reason: exact compact-field mIoU remains below the frozen OccamLGS reproduction
+
+  lerf3d:
+    current_rows:
+      - id: o2_valid_domain_knn10
+        track: strict_reusable_field
+        paper_role: current_exact
+        field_lineage: teacher_sidecar_bypass
+        target_rgb_visible_to_method: false
+        authority: paper/artifacts/lerf_valid_domain_knn_o2_full4_result_20260809.json
+        metrics:
+          scene_macro_miou: 0.44960178434848785
+          scene_macro_acc025: 0.7900641522478475
+          scene_macro_acc050: 0.4146792348854297
+      - id: o2_target_rgb_official_sam3_box_pad16_full4
+        track: target_rgb_assisted
+        paper_role: exact_capability_row
+        field_lineage: field_plus_task_sidecar
+        base_field_lineage: teacher_sidecar_bypass
+        target_rgb_visible_to_method: true
+        target_gt_visible_to_method: false
+        authority: paper/artifacts/lerf3d_target_rgb_sam3_box_o2_full4_exact_result_20260810.json
+        metrics:
+          scene_macro_miou: 0.6055661886930466
+          scene_macro_acc025: 0.7884889266260118
+          scene_macro_acc050: 0.6360024554104287
+          scene_macro_boundary_f: 0.7207227498292923
+          scene_macro_trimap_iou: 0.43930409103631973
+        receipt_policy: sealed_prediction_batch_before_target_mask_rasterization_and_metric
+        fixed_global_policy: official_sam3_box_pad16_resolution1008_conf0_min_coarse_iou0p05
+    promotion_target:
+      metric: scene_macro_miou
+      minimum: 0.5412488773209907
+      reference: paper/artifacts/vala_lerf3d_protocol_reproduction_20260801.md
+    unified_gate:
+      passed: false
+      reason: >-
+        The target-RGB-assisted capability row exceeds frozen VALA, but the
+        strict reusable-field row still bypasses the compact field and remains
+        below frozen VALA.
+
+  scannet_ovs:
+    current_rows:
+      - id: canonical_mpr_v3_gaussian_semantic_exact
+        track: strict_reusable_field
+        paper_role: current_exact
+        field_lineage: field_decode_only
+        target_rgb_visible_to_method: false
+        authority: paper/artifacts/scannet_canonical_mpr_v3_gaussian_semantic_result_authority_20260802.json
+        metrics:
+          split19_miou: 0.3786329623189025
+          split19_macc: 0.5521891702607359
+          split15_miou: 0.41979414941029086
+          split15_macc: 0.6044140413721429
+          split10_miou: 0.5234081172660365
+          split10_macc: 0.6860258736952943
+    promotion_target:
+      metric: no_regression_all_splits
+      minimums:
+        split19_miou: 0.3786329623189025
+        split15_miou: 0.41979414941029086
+        split10_miou: 0.5234081172660365
+      reference: paper/artifacts/scannet_canonical_mpr_v3_gaussian_semantic_result_authority_20260802.json
+    unified_gate:
+      passed: true
+      reason: exact compact-field row exceeds the frozen VALA reproduction on all mIoU splits
+
+  nvos:
+    current_rows:
+      - id: hierarchical_trust_local_positive_full8
+        track: strict_reusable_field
+        paper_role: current_exact
+        field_lineage: field_plus_task_sidecar
+        target_rgb_visible_to_method: false
+        authority: paper/artifacts/nvos_hierarchical_trust_local_positive_full8_exact_results_20260805.json
+        metrics:
+          macro_iou: 0.7477712404198159
+      - id: registered_likelihood_object_memory_disjoint_full8
+        track: strict_reusable_field
+        paper_role: exact_candidate
+        field_lineage: field_plus_task_sidecar
+        task_sidecar_kind: source_only_object_memory
+        target_rgb_visible_to_method: false
+        target_gt_visible_to_method: false
+        source_rgb_visible_during_memory_materialization: true
+        authority: paper/artifacts/nvos_disjoint_domain_composition_full8_outcome_20260810.json
+        metrics:
+          macro_iou: 0.7506627337110667
+          delta_vs_frozen_current: 0.002891493291250824
+          delta_vs_reference_0p749: 0.0016627337110667328
+        receipt_policy: all_eight_prediction_receipts_bound_before_first_new_six_target_mask_open
+        fixed_global_policy: registered_query_likelihood_observed_plus_top3_source_sam3_memory_c0_only_disjoint
+        numeric_promotion_target_passed: true
+    rejected_diagnostics:
+      - id: prompt_native_fern_trex_stage_a
+        authority: paper/artifacts/nvos_prompt_native_stage_a_fern_trex_results_20260810.json
+        pair_macro_delta_iou: -0.1384378307632612
+        full8_started: false
+      - id: valid_support_normalization_fern_trex_stage_a
+        authority: paper/artifacts/nvos_valid_support_stage_a_fern_trex_results_20260810.json
+        pair_macro_delta_iou: -0.0031074101156780554
+        full8_started: false
+    promotion_target:
+      metric: macro_iou
+      minimum: 0.749
+      assisted_minimum: 0.9125768502741802
+      reference: paper/artifacts/evaluation_protocol_audit_summary_20260731.md
+    unified_gate:
+      passed: false
+      reason: >-
+        The disjoint-domain exact candidate now exceeds the 0.749 numeric
+        target without target RGB or target metric input, but its source-only
+        object-memory materialization remains a task sidecar rather than a
+        shared factorized compact-field capability.
+
+  spin9:
+    current_rows:
+      - id: reference_selected_unified_interface
+        track: target_rgb_assisted
+        paper_role: current_exact
+        field_lineage: field_plus_task_sidecar
+        target_rgb_visible_to_method: true
+        authority: paper/artifacts/spin_reference_selected_query_interface_full9_exact_result_20260810.json
+        metrics:
+          macro_foreground_iou: 0.9484146824995366
+          canonical_branch_macro_iou: 0.8771615046217027
+          target_rgb_sam_branch_macro_iou: 0.9469571218061046
+    promotion_target:
+      metric: macro_foreground_iou
+      minimum: 0.9484146824995366
+      reference: paper/artifacts/spin_reference_selected_query_interface_full9_exact_result_20260810.json
+    unified_gate:
+      passed: false
+      reason: six of nine scenes use the target-RGB SAM sidecar instead of field-only inference
+
+  agile3d:
+    current_rows:
+      - id: canonical_dense20_cellseed_pilot
+        track: strict_reusable_field
+        paper_role: development_pilot
+        field_lineage: field_decode_only
+        target_rgb_visible_to_method: false
+        authority: output/agile3d_scannet40/canonical_dense20_cellseed_v1/results.json
+        metrics:
+          iou_at_1: 0.37201539907768333
+          iou_at_2: 0.32646683581839164
+          iou_at_3: 0.3441959820494261
+          iou_at_5: 0.42565480891903273
+          iou_at_10: 0.558011130033998
+    external_reference:
+      id: easy3d_official_checkpoint_full312
+      track: external_reproduction
+      field_lineage: external_checkpoint_reproduction
+      authority: paper/artifacts/easy3d_agile3d_protocol_audit_20260731.md
+      metrics:
+        iou_at_1: 0.697136671023463
+        iou_at_2: 0.7601352226829643
+        iou_at_3: 0.7859416889098002
+        iou_at_5: 0.8099510345918428
+        iou_at_10: 0.8303839027824663
+    promotion_target:
+      metric: within_three_points_of_easy3d_full312
+      maximum_gap: 0.03
+      reference: paper/artifacts/easy3d_agile3d_protocol_audit_20260731.md
+    unified_gate:
+      passed: false
+      reason: current canonical result is only a 20-scene pilot and lacks learned click fusion
+
+promotion_policy:
+  require_all_tasks_passed: true
+  allow_oracle_primary: false
+  require_field_decode_only_for_strict_text_rows: true
+  require_prediction_receipt_before_target_gt: true
+  require_exact_frozen_protocol: true
+  require_latest_baseline_refresh_before_submission: true

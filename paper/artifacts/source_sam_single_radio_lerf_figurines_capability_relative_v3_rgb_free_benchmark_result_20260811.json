@@ -1,0 +1,143 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_capability_relative_v3_rgb_free_benchmark_result.v1",
+  "status": "source_gates_passed_but_rgb_free_lerf_promotion_failed",
+  "scene_id": "figurines",
+  "method_scope": "official SAM3 and frozen official DINO/SAM adaptors are used only on legal mapping-time source observations to supervise one persistent RADIO field; evaluation and query inference use no source RGB, target RGB, official-SAM runtime branch, or proposal sidecar",
+  "authorities": {
+    "source_gate": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_source_gate_result_20260811.json",
+      "sha256": "59dc35a246e7261689017fd77250d460811c89790e0ead4eafdb1a5d34b5bd77"
+    },
+    "benchmark_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_rgb_free_benchmark_preregistration_20260811.json",
+      "sha256": "979ea3ace8168618ef2c40ecd68fdc3531736a1932e89354db142384801f95c2"
+    },
+    "query_score_batch_seal": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_query_score_batch_seal_20260811.json",
+      "sha256": "b2dd38844a6962679b3e613317d86eabc93f033061b9db3394f3cb36bb612ab1"
+    },
+    "prediction_batch_seal": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_prediction_batch_seal_20260811.json",
+      "sha256": "67d210985245bd7bc4742be21d31a739063954e1f5ab0031e9fec7c196a730f3"
+    },
+    "benchmark_execution_correction": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_benchmark_execution_correction_20260811.json",
+      "sha256": "a768be433b2c7bf0605d88ce81cf399da5bf4efbb4307804cc69af0ddc25c4f4"
+    }
+  },
+  "field": {
+    "checkpoint": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/canonical_radio_source_sam_capability_relative_e5_seed0.pth",
+    "checkpoint_sha256": "d38256ed91c4f373759355395bd8c8f6ddcd4b4f59018f9d27e53525a35f31b9",
+    "persistent_semantic_feature": "canonical_radio_only",
+    "state_dict_tensor_count": 11,
+    "teacher_payload_saved": false,
+    "sam_dino_mask_or_adaptor_state_keys": [],
+    "architecture_changed_from_control": false
+  },
+  "source_gate_summary": {
+    "capability_relation_gap_delta": 0.0016589164733886719,
+    "triplet_gap_delta": 0.0015183277428150177,
+    "triplet_violation_rate_delta": -0.008191585540771484,
+    "raw_radio_mean_cosine_delta": 0.00025957822799682617,
+    "raw_radio_p05_cosine_delta": 0.00047403573989868164,
+    "official_capability_no_regression": true,
+    "all_source_gates_passed": true
+  },
+  "control_lineage_audit": {
+    "status": "preregistered_control_description_and_bound_receipts_are_inconsistent",
+    "discovered_after_metric_opened": true,
+    "declared_control_field": {
+      "role": "v2_same_schedule_raw_radio_relation_control",
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/canonical_radio_source_sam_relative_e5_seed0.pth",
+      "sha256": "4348c2c24743f552b3c24e2fd8dcf19eb101c28dad144208e996fbbc60b5e0f6"
+    },
+    "actually_bound_fresh_control": {
+      "role": "base_current_factorized_field",
+      "lerf3d_receipt_sha256": "8fb98eb5a7211b40cd9d9f7e28028c1e362534187ee873c5e4f427cc65c08d0a",
+      "positive_score_cache_sha256": "ff6adc75c3c153b86dca43ab031603f12448ed479fee74ab0268a2c665936159",
+      "negative_score_cache_sha256": "b046ef83436cdf34a5d22f219a59dcac7f60f399d4b08f6b57a6547b26d6fe3e",
+      "lerf2d_control_authority_sha256": "d16e8fe827821514b09092a431d33284200ef5edd59b9d1ea75dcdfe581e8c7b"
+    },
+    "policy": "do not retroactively relabel the preregistered arm; report both the actually bound base-control comparison and the already sealed v2 same-schedule contextual comparison",
+    "effect_on_decision": "none: v3 misses the minimum mIoU gain against both comparators"
+  },
+  "lerf3d_rgb_free_exact": {
+    "candidate_metric": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/lerf3d_metric_v1.json",
+      "sha256": "6dc5106a9619bc013f482ec63e4314d72fb85dd914fb7c47254a7acb3f4fee1e",
+      "miou": 0.4439474940299988,
+      "boundary_f": 0.6650242209434509,
+      "trimap_iou": 0.4238864779472351,
+      "acc025": 0.75,
+      "acc050": 0.5535714285714286,
+      "queries": 56
+    },
+    "versus_v2_same_schedule_context": {
+      "v2_metric_sha256": "418e094adeb172fa8c3dd389b1602efa272ec34a4b70aaec59b5dc0be9e539b3",
+      "v2_miou": 0.4438226521015167,
+      "candidate_minus_v2_miou": 0.00012484192848205566,
+      "candidate_minus_v2_boundary_f": -0.0002117753028869629,
+      "candidate_minus_v2_trimap_iou": -0.0008152425289154053,
+      "comparison_role": "lineage-correct contextual comparison; v2 outcome was known before v3 relation-space selection"
+    },
+    "versus_actually_bound_base_control": {
+      "base_metric_sha256": "167e1dd5f3b28faed4ee0df1f1e411a409d68e9bba3f4ac908e24e24964fc698",
+      "base_miou": 0.44434770941734314,
+      "candidate_minus_base_miou": -0.00040021538734436035,
+      "candidate_minus_base_boundary_f": -0.0012137293815612793,
+      "candidate_minus_base_trimap_iou": 0.001576840877532959
+    },
+    "required_miou_gain": 0.002,
+    "promotion_gate_passed": false
+  },
+  "lerf2d_rgb_free_exact": {
+    "candidate_metric": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/lerf2d_metric_v1.json",
+      "sha256": "06a5e0852d7afc9e78fcc5748d634663685f0140476378ce4443ebe4311e8ec4",
+      "figurines_miou": 0.5779480817062514,
+      "figurines_loc_acc": 0.875,
+      "mixed_full4_scene_macro_miou": 0.5238452252328174,
+      "mixed_full4_scene_macro_loc_acc": 0.8341550652140888
+    },
+    "versus_v2_same_schedule_context": {
+      "v2_metric_sha256": "a22aa5ae216536397efa0825e598fda92b90d1392eb26a3b3aebf7a2f6ff363d",
+      "v2_figurines_miou": 0.577650297632707,
+      "candidate_minus_v2_figurines_miou": 0.0002977840735444166,
+      "candidate_minus_v2_figurines_loc_acc": 0.0,
+      "candidate_minus_v2_mixed_full4_scene_macro_miou": 0.00007444601838610398,
+      "comparison_role": "lineage-correct contextual comparison; v2 outcome was known before v3 relation-space selection"
+    },
+    "versus_actually_bound_base_control": {
+      "base_metric_sha256": "a696d09262b99e0a2cc93aa06943cf2c4ac896ae5f81404f1aaea2ad5b3613a2",
+      "base_figurines_miou": 0.5762614438842449,
+      "candidate_minus_base_figurines_miou": 0.0016866378220064736,
+      "candidate_minus_base_figurines_loc_acc": 0.0,
+      "candidate_minus_base_mixed_full4_scene_macro_miou": 0.0004216594555017008
+    },
+    "required_figurines_miou_gain": 0.002,
+    "promotion_gate_passed": false,
+    "full4_scope_warning": "only figurines uses the v3 field; ramen, teatime, and waldo_kitchen remain frozen control rows, so the full4 number is contextual rather than a v3 full4 rollout"
+  },
+  "causal_conclusion": {
+    "relation_space_mismatch_diagnosis_supported": true,
+    "evidence": "the same official-SAM triplets improve strongly in frozen capability space and v3 is slightly above v2 on both LERF mIoU readouts",
+    "benchmark_effect_magnitude": "near-neutral",
+    "main_failure": "pairwise local mask-relation supervision survives field training but is strongly attenuated by the fixed SurfaceRegion scale pooling, query scoring, and spatial readout; it does not supply a source-render-consistent object-region or boundary objective",
+    "mainline_promoted": false,
+    "full4_field_rollout_authorized": false,
+    "six_task_freeze_authorized": false,
+    "next_action": "retain one persistent RADIO field and mapping-only official-SAM supervision, but train the RADIO field with a source-render-consistent multi-view region and boundary objective whose gradients are evaluated after the same multiscale spatial readout used downstream"
+  },
+  "safety": {
+    "query_time_source_rgb": false,
+    "query_time_target_rgb": false,
+    "query_time_official_sam": false,
+    "runtime_sam_clip_dino_feature_branch": false,
+    "target_mask_used_for_prediction_or_selection": false,
+    "per_scene_or_per_query_tuning": false,
+    "predictions_and_scalar_maps_sealed_before_metrics": true,
+    "gpu0_max_sampled_temperature_c": 52,
+    "gpu1_max_sampled_temperature_c": 48,
+    "both_gpus_released": true
+  }
+}

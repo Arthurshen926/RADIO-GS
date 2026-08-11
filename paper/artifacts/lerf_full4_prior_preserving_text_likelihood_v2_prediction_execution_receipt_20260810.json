@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_prior_preserving_text_likelihood_v2_prediction_execution_receipt",
+  "status": "sealed_before_any_new_full4_prediction_or_metric",
+  "preregistration": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_prior_preserving_text_likelihood_v2_preregistration_20260810.json", "sha256": "843517902b5094803475192d386c437be255a19271d118bba01ba4f872fbe90b"},
+  "runner": {"path": "/root/RADIO-GS/radio_gs/scripts/run_lerf_full4_prior_preserving_v2_prediction.sh", "sha256": "ad85f571dcf4117e5e47d09d70d44ca5eaa22eef48ae567827c49519be41ef5a"},
+  "candidate_caches": {
+    "ramen": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/ramen_prior_preserving_v2.pt", "sha256": "f5177cce50cf43adb64466220d32c7c3e61ab2da4ad9aa1b6b0a0645f6b0a605"},
+    "teatime": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/teatime_prior_preserving_v2.pt", "sha256": "5e3b3d60aedc4b66717f974a58689382f6565c9b5457abf93b706e1830172f0d"},
+    "waldo_kitchen": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/waldo_kitchen_prior_preserving_v2.pt", "sha256": "92e5526559b734aa1ca38c36625650e72dae224651171368833a786f40e1a509"}
+  },
+  "execution": {
+    "arm_order": ["ramen:legacy", "ramen:v2", "teatime:legacy", "teatime:v2", "waldo_kitchen:legacy", "waldo_kitchen:v2"],
+    "all_six_receipts_and_prediction_files_hash_sealed_before_first_metric": true,
+    "physical_gpu": 0,
+    "logical_gpu": 0,
+    "driver_runtime": "/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime",
+    "cuda_preflight_passed": true,
+    "power_limit_watts": 300,
+    "poll_interval_seconds": 60,
+    "soft_pause_temperature_celsius": 82,
+    "resume_temperature_celsius": 78,
+    "hard_stop_temperature_celsius": 85,
+    "one_fresh_thermal_guard_per_arm": true
+  },
+  "frozen_method": {
+    "head_q_c_field_prior_threshold_knn_projection_may_change": false,
+    "legacy_and_v2_share_positive_negative_cache_and_renderer_per_scene": true,
+    "new_training": false,
+    "no_parameter_callback": true
+  },
+  "access_audit": {
+    "target_rgb_opened": false,
+    "target_polygon_or_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

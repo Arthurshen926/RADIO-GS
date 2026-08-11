@@ -1,0 +1,48 @@
+{
+  "schema_version": 2,
+  "artifact_type": "figurines_field_by_text_mapping_2x2_execution_correction",
+  "status": "registered_before_any_four_arm_prediction_or_lerf_ground_truth_metric",
+  "supersedes_execution_device_only": {
+    "path": "/root/RADIO-GS/paper/artifacts/figurines_field_text_likelihood_2x2_one_shot_execution_receipt_20260810.json",
+    "sha256": "f17d98b1aa9c2b31cca49eee3920f855bd36a6c25eee157646d254f96ab8c0bc"
+  },
+  "reason": {
+    "gpu0_prelaunch_guard_exit_code": 86,
+    "gpu0_physical_uuid": "GPU-c343c114-0407-0fd3-7de3-9f46030bf309",
+    "foreign_owner_pid": 1817891,
+    "foreign_owner_process_visible_inside_container": false,
+    "foreign_owner_memory_mib": 4386,
+    "foreign_owner_was_killed_or_interrupted": false,
+    "any_experiment_python_or_gpu_kernel_launched_before_correction": false,
+    "any_arm_prediction_or_receipt_created_before_correction": false,
+    "lerf_ground_truth_or_metric_opened_before_correction": false
+  },
+  "corrected_execution_device": {
+    "physical_gpu": 1,
+    "physical_uuid": "GPU-0eac2c76-4004-49eb-bc0c-a9a30aec041a",
+    "power_limit_watts": 300,
+    "poll_interval_seconds": 60,
+    "soft_pause_temperature_celsius": 82,
+    "resume_temperature_celsius": 78,
+    "hard_stop_temperature_celsius": 85
+  },
+  "implementation_addendum": {
+    "old_evaluator_sha256": "6ac342590b175bbadb49f70f2baa3bb9393b4a375a790053432e2cef9dfabb44",
+    "new_evaluator_sha256": "95aa6169c3b29a4f24dd9552c3e057e1fb5aa2c54c551a7910b87f4920728a7d",
+    "only_change_after_v1_receipt": "strict prediction receipts now hash-bind positive raw score cache, canonical-negative raw score cache, optional source-text-likelihood cache, and selected mapping name",
+    "score_projection_threshold_graph_or_mask_math_changed": false,
+    "post_addendum_default_regression": "124 LERF focused tests passed"
+  },
+  "frozen_factors_and_order": {
+    "arms": [
+      "control_legacy",
+      "control_learned",
+      "stage_b_v2_legacy",
+      "stage_b_v2_learned"
+    ],
+    "raw_score_likelihood_head_threshold_knn_projection_graph": "unchanged_from_v1_receipt",
+    "all_four_predictions_must_be_hash_sealed_before_first_ground_truth_open": true,
+    "head_or_field_may_change_after_outcome": false,
+    "scanNet_benchmark_metric_forbidden": true
+  }
+}

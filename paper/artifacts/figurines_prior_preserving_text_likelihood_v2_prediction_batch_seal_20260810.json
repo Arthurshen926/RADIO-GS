@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "artifact_type": "figurines_prior_preserving_text_likelihood_v2_pre_metric_prediction_batch_seal",
+  "status": "both_candidate_prediction_batches_hash_validated_before_first_new_ground_truth_open",
+  "prediction_execution_receipt": {"path": "/root/RADIO-GS/paper/artifacts/figurines_prior_preserving_text_likelihood_v2_prediction_execution_receipt_20260810.json", "sha256": "34a3f41ba890c5c6a107c2f5feaa94fb5ab8fdb2de43370f5b5f0b956efb282e"},
+  "prediction_receipts": {
+    "control": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/pred_control_prior_preserving_v2.receipt.json",
+      "sha256": "f6f8c12f71fac9606781ca60ea791a83b71f80122e7113b36f0a77386756564a",
+      "prediction_count": 56,
+      "text_mapping": "prior_preserving_mixture_v2",
+      "likelihood_cache_sha256": "9d6fb08b19773e2e3133ea6d15a8c4eb27f8e1e2bcfb6a29164af683c08335ea"
+    },
+    "stage_b": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/pred_stage_b_prior_preserving_v2.receipt.json",
+      "sha256": "e2b3279d177a293ddd23a168e6ac9e828ea39e31423412f44c1b06a54580a44f",
+      "prediction_count": 56,
+      "text_mapping": "prior_preserving_mixture_v2",
+      "likelihood_cache_sha256": "8edbbdd05c19060b74b231566ea03997eed1cd414c29e8431a9e16813ef69863"
+    }
+  },
+  "validation": {
+    "all_112_prediction_and_coarse_mask_hashes_replayed": true,
+    "strict_feature_field_receipt": true,
+    "target_rgb_opened": false,
+    "target_annotation_coordinates_loaded": false,
+    "target_mask_rasterized_before_seal": false,
+    "target_metric_computed_before_seal": false,
+    "lerf_ground_truth_loader_called": false
+  },
+  "frozen_metric": {
+    "scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_lerf_sealed_prediction_batch.py", "sha256": "9e99174b4c219e9db80bb571993a379406c028d8ccee14ecba105154f23c4475"},
+    "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+    "same_scorer_and_label_root_for_both_arms": true,
+    "score_control_then_stage_b_once": true,
+    "no_parameter_callback": true
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "maximum_temperature_celsius": 60,
+    "maximum_power_watts": 130.79,
+    "pause_or_abort": false,
+    "cuda_release_verified_after_each_arm": true
+  }
+}

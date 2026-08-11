@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_typed_spatial_text_likelihood_stage_d2_implementation_correction",
+  "status": "sealed_after_fail_closed_builder_validation_and_before_any_stage_d2_shard_or_fit",
+  "bound_preregistration": {
+    "path": "paper/artifacts/source_typed_spatial_text_likelihood_stage_d2_preregistration_20260810.json",
+    "sha256": "58f1de28eca807353e265285aaa09b9fc04e4e57467ab1afbd7dbb9da64d279c"
+  },
+  "failure": {
+    "stage": "in-memory post-build immutable shard validation",
+    "message": "typed spatial channel changed: appearance.edge_weight",
+    "shards_written": 0,
+    "training_started": false,
+    "scene0003_opened": false,
+    "lerf_ground_truth_or_metric_opened": false
+  },
+  "correction": {
+    "scope": "normalization validator only",
+    "old_behavior": "renormalized an already receiver-normalized float32 edge tensor, introducing sub-ulp hash drift when a receiver sum was 0.99999994",
+    "new_behavior": "when all active receiver sums are within the pre-existing 2e-6 normalization tolerance, preserve the input edge weights bit-for-bit; otherwise perform the same normalization",
+    "method_or_recipe_changed": false,
+    "threshold_or_gate_changed": false,
+    "new_module_sha256": "35cbec6a54d74bcb35651a13b7001727c10cd244f8d692d1ef28326c4bd88247",
+    "focused_regression": "25 passed"
+  },
+  "access_disclosure": {
+    "only_already_authorized_source_fit_inputs_loaded": true,
+    "benchmark_prediction_or_metric_used": false,
+    "per_scene_or_per_query_tuning": false
+  }
+}

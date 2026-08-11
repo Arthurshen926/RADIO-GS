@@ -67,6 +67,44 @@ from radio_gs.training.factorized_radio_loss import (
     FACTORIZED_RADIO_RELIABILITY_POLICY_LEGACY,
     FACTORIZED_RADIO_RELIABILITY_POLICY_MATCHED_EXACT_MARGINAL_VISIBILITY_SAFE,
 )
+from radio_gs.training.source_only_multiteacher import (
+    SOURCE_DESCRIPTOR_WEIGHT,
+    SOURCE_RELATION_BATCH_SIZE,
+    SOURCE_RELATION_WEIGHT,
+    FrozenPrimitiveSiglipProxy,
+    evaluate_source_only_gates,
+    load_source_only_multiteacher_bundle,
+    primitive_source_descriptor_loss,
+    source_descriptor_metrics,
+    source_relation_batch_loss,
+    source_relation_metrics,
+)
+from radio_gs.training.source_only_sam_structure import (
+    SAM_STRUCTURE_BATCH_SIZE,
+    SAM_STRUCTURE_WEIGHT,
+    evaluate_source_sam_structure_gates,
+    load_source_only_sam_structure_bundle,
+    source_sam_structure_batch_loss,
+    source_sam_structure_metrics,
+    validate_single_radio_checkpoint_payload,
+)
+from radio_gs.training.source_only_sam_relative_structure import (
+    SAM_RELATIVE_GUARD_BATCH_SIZE,
+    SAM_RELATIVE_TRIPLET_BATCH_SIZE,
+    evaluate_source_sam_relative_full_gates,
+    evaluate_source_sam_relative_gates,
+    load_source_only_sam_relative_bundle,
+    source_sam_relative_batch_loss,
+    source_sam_relative_metrics,
+)
+from radio_gs.training.source_only_sam_capability_relative_structure import (
+    evaluate_source_sam_capability_relative_full_gates,
+    evaluate_source_sam_capability_relative_gates,
+    load_source_only_sam_capability_relative_bundle,
+    source_sam_capability_pair_metrics,
+    source_sam_capability_relative_batch_loss,
+    source_sam_capability_relative_metrics,
+)
 from radio_gs.utils.immutable_artifacts import (
     load_json_object,
     load_torch_mapping,
@@ -2032,6 +2070,9 @@ def train(args: argparse.Namespace) -> dict:
             "path": str(initial_path.resolve()),
             "sha256": sha256_file(initial_path),
             "source_final_metrics": initial_payload.get("final_metrics", {}),
+            "source_final_capability_metrics": initial_payload.get(
+                "final_capability_metrics", {}
+            ),
             "source_capability_target_mode": initial_payload.get(
                 "capability_target_mode", "legacy_or_unspecified"
             ),
@@ -2156,6 +2197,256 @@ def train(args: argparse.Namespace) -> dict:
             args.radio_checkpoint,
             expected_sha256=radio_hash,
         ).to(device)
+    source_multiteacher = None
+    source_descriptor_projector = None
+    control_source_multiteacher_metrics: dict[str, float] = {}
+    source_manifest_path = str(
+        getattr(args, "source_only_multiteacher_manifest", "")
+    ).strip()
+    source_manifest_expected_sha256 = str(
+        getattr(
+            args,
+            "expected_source_only_multiteacher_manifest_sha256",
+            "",
+        )
+    ).strip()
+    if source_manifest_path:
+        if not factorized_mode or factorized_target is None:
+            raise ValueError(
+                "source-only multiteacher distillation requires "
+                "canonical-factorized-radio-v1"
+            )
+        if not str(args.initial_field_checkpoint).strip() or re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(args.expected_initial_field_checkpoint_sha256),
+        ) is None:
+            raise ValueError(
+                "source-only multiteacher distillation requires one hash-bound "
+                "control field initialization"
+            )
+        if re.fullmatch(r"[0-9a-f]{64}", source_manifest_expected_sha256) is None:
+            raise ValueError(
+                "source-only multiteacher manifest requires a caller SHA-256"
+            )
+        source_multiteacher = load_source_only_multiteacher_bundle(
+            source_manifest_path,
+            expected_sha256=source_manifest_expected_sha256,
+            expected_xyz=factorized_target.xyz,
+            expected_valid=factorized_target.valid,
+            expected_factorized_radio_cache_sha256=mpr_cache_sha256,
+            expected_field_checkpoint_sha256=str(
+                args.expected_initial_field_checkpoint_sha256
+            ),
+            expected_radio_checkpoint_sha256=radio_hash,
+        )
+        source_descriptor_projector = FrozenPrimitiveSiglipProxy.from_radio_checkpoint(
+            args.radio_checkpoint, expected_sha256=radio_hash
+        ).to(device)
+        field.eval()
+        control_source_multiteacher_metrics.update(
+            source_descriptor_metrics(
+                field,
+                projector=source_descriptor_projector,
+                teacher=source_multiteacher.primitive,
+                rows=valid_rows,
+                batch_size=int(args.eval_batch_size),
+            )
+        )
+        control_source_multiteacher_metrics.update(
+            source_relation_metrics(
+                field,
+                projector=source_descriptor_projector,
+                teacher=source_multiteacher.primitive,
+                relation=source_multiteacher.relation,
+            )
+        )
+    source_sam_structure = None
+    source_sam_training_teacher = None
+    control_source_sam_metrics: dict[str, float] = {}
+    source_sam_manifest_path = str(
+        getattr(args, "source_only_sam_structure_manifest", "")
+    ).strip()
+    source_sam_manifest_expected_sha256 = str(
+        getattr(
+            args,
+            "expected_source_only_sam_structure_manifest_sha256",
+            "",
+        )
+    ).strip()
+    if source_sam_manifest_path:
+        if not str(args.initial_field_checkpoint).strip() or re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(args.expected_initial_field_checkpoint_sha256),
+        ) is None:
+            raise ValueError(
+                "source-only official-SAM structure supervision requires one "
+                "hash-bound control field initialization"
+            )
+        if re.fullmatch(r"[0-9a-f]{64}", source_sam_manifest_expected_sha256) is None:
+            raise ValueError(
+                "source-only official-SAM structure manifest requires a caller SHA-256"
+            )
+        source_sam_structure = load_source_only_sam_structure_bundle(
+            source_sam_manifest_path,
+            expected_sha256=source_sam_manifest_expected_sha256,
+            expected_xyz=(
+                factorized_target.xyz
+                if factorized_target is not None
+                else torch.as_tensor(cache["xyz"]).float().cpu()
+            ),
+            expected_valid=(
+                factorized_target.valid
+                if factorized_target is not None
+                else torch.as_tensor(cache["valid"]).bool().cpu()
+            ),
+            expected_canonical_radio_cache_sha256=mpr_cache_sha256,
+            expected_field_checkpoint_sha256=str(
+                args.expected_initial_field_checkpoint_sha256
+            ),
+        )
+        field.eval()
+        control_source_sam_metrics = source_sam_structure_metrics(
+            field, teacher=source_sam_structure.teacher
+        )
+    source_sam_relative = None
+    source_sam_relative_training_teacher = None
+    control_source_sam_relative_pair_metrics: dict[str, float] = {}
+    control_source_sam_relative_metrics: dict[str, float] = {}
+    source_sam_relative_manifest_path = str(
+        getattr(args, "source_only_sam_relative_structure_manifest", "")
+    ).strip()
+    source_sam_relative_expected_sha256 = str(
+        getattr(
+            args,
+            "expected_source_only_sam_relative_structure_manifest_sha256",
+            "",
+        )
+    ).strip()
+    if source_sam_relative_manifest_path:
+        if not str(args.initial_field_checkpoint).strip() or re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(args.expected_initial_field_checkpoint_sha256),
+        ) is None:
+            raise ValueError(
+                "source-only official-SAM relative supervision requires one "
+                "hash-bound control field initialization"
+            )
+        if re.fullmatch(r"[0-9a-f]{64}", source_sam_relative_expected_sha256) is None:
+            raise ValueError(
+                "source-only official-SAM relative manifest requires a caller SHA-256"
+            )
+        source_sam_relative = load_source_only_sam_relative_bundle(
+            source_sam_relative_manifest_path,
+            expected_sha256=source_sam_relative_expected_sha256,
+            expected_xyz=(
+                factorized_target.xyz
+                if factorized_target is not None
+                else torch.as_tensor(cache["xyz"]).float().cpu()
+            ),
+            expected_valid=(
+                factorized_target.valid
+                if factorized_target is not None
+                else torch.as_tensor(cache["valid"]).bool().cpu()
+            ),
+            expected_canonical_radio_cache_sha256=mpr_cache_sha256,
+            expected_field_checkpoint_sha256=str(
+                args.expected_initial_field_checkpoint_sha256
+            ),
+            control_field=field,
+        )
+        field.eval()
+        control_source_sam_relative_pair_metrics = source_sam_structure_metrics(
+            field, teacher=source_sam_relative.teacher.pair_teacher
+        )
+        control_source_sam_relative_metrics = source_sam_relative_metrics(
+            field, teacher=source_sam_relative.teacher
+        )
+    source_sam_capability_relative = None
+    source_sam_capability_relative_training_teacher = None
+    control_source_sam_capability_pair_metrics: dict[str, float] = {}
+    control_source_sam_capability_relative_metrics: dict[str, float] = {}
+    source_sam_capability_relative_manifest_path = str(
+        getattr(
+            args,
+            "source_only_sam_capability_relative_structure_manifest",
+            "",
+        )
+    ).strip()
+    source_sam_capability_relative_expected_sha256 = str(
+        getattr(
+            args,
+            "expected_source_only_sam_capability_relative_structure_manifest_sha256",
+            "",
+        )
+    ).strip()
+    if source_sam_capability_relative_manifest_path:
+        if official_views is None:
+            raise ValueError(
+                "source-only SAM capability-relative supervision requires frozen "
+                "official DINOv3 and SAM3 adaptors"
+            )
+        if not str(args.initial_field_checkpoint).strip() or re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(args.expected_initial_field_checkpoint_sha256),
+        ) is None:
+            raise ValueError(
+                "source-only SAM capability-relative supervision requires one "
+                "hash-bound control field initialization"
+            )
+        if re.fullmatch(
+            r"[0-9a-f]{64}",
+            source_sam_capability_relative_expected_sha256,
+        ) is None:
+            raise ValueError(
+                "source-only SAM capability-relative manifest requires a caller SHA-256"
+            )
+        source_sam_capability_relative = (
+            load_source_only_sam_capability_relative_bundle(
+                source_sam_capability_relative_manifest_path,
+                expected_sha256=(
+                    source_sam_capability_relative_expected_sha256
+                ),
+                expected_xyz=(
+                    factorized_target.xyz
+                    if factorized_target is not None
+                    else torch.as_tensor(cache["xyz"]).float().cpu()
+                ),
+                expected_valid=(
+                    factorized_target.valid
+                    if factorized_target is not None
+                    else torch.as_tensor(cache["valid"]).bool().cpu()
+                ),
+                expected_canonical_radio_cache_sha256=mpr_cache_sha256,
+                expected_field_checkpoint_sha256=str(
+                    args.expected_initial_field_checkpoint_sha256
+                ),
+                control_field=field,
+                official_views=official_views,
+            )
+        )
+        field.eval()
+        control_source_sam_capability_pair_metrics = (
+            source_sam_capability_pair_metrics(
+                field,
+                official_views=official_views,
+                teacher=source_sam_capability_relative.teacher,
+            )
+        )
+        control_source_sam_capability_relative_metrics = (
+            source_sam_capability_relative_metrics(
+                field,
+                official_views=official_views,
+                teacher=source_sam_capability_relative.teacher,
+            )
+        )
+        # Reuse the report's stable pair/triplet slots while keeping the v3
+        # capability-relation metric names explicit inside those mappings.
+        control_source_sam_relative_pair_metrics = dict(
+            control_source_sam_capability_pair_metrics
+        )
+        control_source_sam_relative_metrics = dict(
+            control_source_sam_capability_relative_metrics
+        )
     factorized_reliability_policy = _factorized_loss_reliability_policy(
         factorized_target,
         capability_target_contract=capability_target_contract,
@@ -2209,6 +2500,95 @@ def train(args: argparse.Namespace) -> dict:
             keep.sum()
         )
         relation_provenance["validation_rows_used_by_relation"] = False
+    if source_sam_structure is not None:
+        training_mask = torch.zeros(consensus_num_rows, dtype=torch.bool)
+        training_mask[training_rows] = True
+        source_sam_keep = training_mask[
+            source_sam_structure.teacher.global_edge_index
+        ].all(dim=0)
+        if not bool(source_sam_keep.any()):
+            raise ValueError(
+                "source-only official-SAM structure has no training-only edges"
+            )
+        source_sam_training_teacher = source_sam_structure.teacher.subset(
+            source_sam_keep
+        )
+        if (
+            not bool(source_sam_training_teacher.same_relation.any())
+            or not bool((~source_sam_training_teacher.same_relation).any())
+        ):
+            raise ValueError(
+                "source-only official-SAM training split requires both relation classes"
+            )
+    if source_sam_relative is not None:
+        training_mask = torch.zeros(consensus_num_rows, dtype=torch.bool)
+        training_mask[training_rows] = True
+        relative_pair_keep = training_mask[
+            source_sam_relative.teacher.pair_teacher.global_edge_index
+        ].all(dim=0)
+        relative_triplet_keep = training_mask[
+            source_sam_relative.teacher.triplet_index
+        ].all(dim=0)
+        if not bool(relative_pair_keep.any()) or not bool(relative_triplet_keep.any()):
+            raise ValueError(
+                "source-only official-SAM relative teacher has no training-only support"
+            )
+        source_sam_relative_training_teacher = (
+            source_sam_relative.teacher.training_subset(
+                pair_keep=relative_pair_keep,
+                triplet_keep=relative_triplet_keep,
+            )
+        )
+        if (
+            not bool(
+                source_sam_relative_training_teacher.pair_teacher.same_relation.any()
+            )
+            or not bool(
+                (~source_sam_relative_training_teacher.pair_teacher.same_relation).any()
+            )
+        ):
+            raise ValueError(
+                "source-only official-SAM relative guard requires both relation classes"
+            )
+    if source_sam_capability_relative is not None:
+        training_mask = torch.zeros(consensus_num_rows, dtype=torch.bool)
+        training_mask[training_rows] = True
+        capability_pair_keep = training_mask[
+            source_sam_capability_relative.teacher.pair_teacher.global_edge_index
+        ].all(dim=0)
+        capability_triplet_keep = training_mask[
+            source_sam_capability_relative.teacher.triplet_index
+        ].all(dim=0)
+        if not bool(capability_pair_keep.any()) or not bool(
+            capability_triplet_keep.any()
+        ):
+            raise ValueError(
+                "source-only official-SAM capability-relative teacher has no "
+                "training-only support"
+            )
+        source_sam_capability_relative_training_teacher = (
+            source_sam_capability_relative.teacher.training_subset(
+                pair_keep=capability_pair_keep,
+                triplet_keep=capability_triplet_keep,
+            )
+        )
+        if (
+            not bool(
+                source_sam_capability_relative_training_teacher.pair_teacher.same_relation.any()
+            )
+            or not bool(
+                (~source_sam_capability_relative_training_teacher.pair_teacher.same_relation).any()
+            )
+        ):
+            raise ValueError(
+                "source-only official-SAM capability-relative guard requires both "
+                "relation classes"
+            )
+    active_source_sam_relative_training_teacher = (
+        source_sam_capability_relative_training_teacher
+        if source_sam_capability_relative_training_teacher is not None
+        else source_sam_relative_training_teacher
+    )
     optimizer = torch.optim.AdamW(
         [parameter for parameter in field.parameters() if parameter.requires_grad],
         lr=float(args.learning_rate),
@@ -2221,6 +2601,10 @@ def train(args: argparse.Namespace) -> dict:
         ]
         totals: list[float] = []
         relation_totals: list[float] = []
+        source_descriptor_totals: list[float] = []
+        source_relation_totals: list[float] = []
+        source_sam_structure_totals: list[float] = []
+        source_sam_relative_totals: list[float] = []
         relation_order = (
             torch.randperm(
                 relation_cache["teacher_margin"].numel(), generator=generator
@@ -2228,10 +2612,60 @@ def train(args: argparse.Namespace) -> dict:
             if relation_cache is not None
             else torch.empty(0, dtype=torch.long)
         )
+        source_relation_order = (
+            torch.randperm(
+                source_multiteacher.relation.num_edges, generator=generator
+            )
+            if source_multiteacher is not None
+            else torch.empty(0, dtype=torch.long)
+        )
+        source_sam_order = (
+            torch.randperm(
+                source_sam_training_teacher.num_edges, generator=generator
+            )
+            if source_sam_training_teacher is not None
+            else torch.empty(0, dtype=torch.long)
+        )
+        source_sam_relative_triplet_order = (
+            torch.randperm(
+                active_source_sam_relative_training_teacher.num_triplets,
+                generator=generator,
+            )
+            if active_source_sam_relative_training_teacher is not None
+            else torch.empty(0, dtype=torch.long)
+        )
+        source_sam_relative_guard_order = (
+            torch.randperm(
+                active_source_sam_relative_training_teacher.pair_teacher.num_edges,
+                generator=generator,
+            )
+            if active_source_sam_relative_training_teacher is not None
+            else torch.empty(0, dtype=torch.long)
+        )
         epoch_batches = max(
             1,
             (epoch_order.numel() + int(args.batch_size) - 1) // int(args.batch_size),
         )
+        if source_sam_order.numel():
+            source_sam_order = source_sam_order[
+                : min(
+                    int(source_sam_order.numel()),
+                    epoch_batches * SAM_STRUCTURE_BATCH_SIZE,
+                )
+            ]
+        if source_sam_relative_triplet_order.numel():
+            source_sam_relative_triplet_order = source_sam_relative_triplet_order[
+                : min(
+                    int(source_sam_relative_triplet_order.numel()),
+                    epoch_batches * SAM_RELATIVE_TRIPLET_BATCH_SIZE,
+                )
+            ]
+            source_sam_relative_guard_order = source_sam_relative_guard_order[
+                : min(
+                    int(source_sam_relative_guard_order.numel()),
+                    epoch_batches * SAM_RELATIVE_GUARD_BATCH_SIZE,
+                )
+            ]
         field.train()
         for batch_index, start in enumerate(
             range(0, epoch_order.numel(), int(args.batch_size))
@@ -2249,6 +2683,115 @@ def train(args: argparse.Namespace) -> dict:
                 factorized_reliability_policy=factorized_reliability_policy,
                 config=loss_config,
             )
+            if source_multiteacher is not None:
+                assert source_descriptor_projector is not None
+                source_descriptor_loss, _source_stats = (
+                    primitive_source_descriptor_loss(
+                        field.radio_features(rows),
+                        rows.detach().cpu(),
+                        projector=source_descriptor_projector,
+                        teacher=source_multiteacher.primitive,
+                    )
+                )
+                loss = loss + SOURCE_DESCRIPTOR_WEIGHT * source_descriptor_loss
+                source_descriptor_totals.append(
+                    float(source_descriptor_loss.detach())
+                )
+                relation_start = batch_index * SOURCE_RELATION_BATCH_SIZE
+                relation_stop = min(
+                    relation_start + SOURCE_RELATION_BATCH_SIZE,
+                    int(source_relation_order.numel()),
+                )
+                selected_source_edges = source_relation_order[
+                    relation_start:relation_stop
+                ]
+                if selected_source_edges.numel():
+                    source_relation_loss = source_relation_batch_loss(
+                        field,
+                        projector=source_descriptor_projector,
+                        teacher=source_multiteacher.primitive,
+                        relation=source_multiteacher.relation,
+                        edge_indices=selected_source_edges,
+                    )
+                    loss = loss + SOURCE_RELATION_WEIGHT * source_relation_loss
+                    source_relation_totals.append(
+                        float(source_relation_loss.detach())
+                    )
+            if source_sam_training_teacher is not None:
+                sam_start = batch_index * source_sam_order.numel() // epoch_batches
+                sam_stop = (
+                    (batch_index + 1) * source_sam_order.numel() // epoch_batches
+                )
+                selected_sam_edges = source_sam_order[sam_start:sam_stop]
+                if selected_sam_edges.numel():
+                    source_sam_loss, _source_sam_stats = (
+                        source_sam_structure_batch_loss(
+                            field,
+                            teacher=source_sam_training_teacher,
+                            edge_indices=selected_sam_edges,
+                        )
+                    )
+                    loss = loss + SAM_STRUCTURE_WEIGHT * source_sam_loss
+                    source_sam_structure_totals.append(
+                        float(source_sam_loss.detach())
+                    )
+            if active_source_sam_relative_training_teacher is not None:
+                relative_triplet_start = (
+                    batch_index
+                    * source_sam_relative_triplet_order.numel()
+                    // epoch_batches
+                )
+                relative_triplet_stop = (
+                    (batch_index + 1)
+                    * source_sam_relative_triplet_order.numel()
+                    // epoch_batches
+                )
+                relative_guard_start = (
+                    batch_index
+                    * source_sam_relative_guard_order.numel()
+                    // epoch_batches
+                )
+                relative_guard_stop = (
+                    (batch_index + 1)
+                    * source_sam_relative_guard_order.numel()
+                    // epoch_batches
+                )
+                selected_relative_triplets = source_sam_relative_triplet_order[
+                    relative_triplet_start:relative_triplet_stop
+                ]
+                selected_relative_guards = source_sam_relative_guard_order[
+                    relative_guard_start:relative_guard_stop
+                ]
+                if (
+                    selected_relative_triplets.numel()
+                    and selected_relative_guards.numel()
+                ):
+                    if source_sam_capability_relative_training_teacher is not None:
+                        assert official_views is not None
+                        source_sam_relative_loss, _source_sam_relative_stats = (
+                            source_sam_capability_relative_batch_loss(
+                                field,
+                                official_views=official_views,
+                                teacher=(
+                                    source_sam_capability_relative_training_teacher
+                                ),
+                                triplet_indices=selected_relative_triplets,
+                                guard_edge_indices=selected_relative_guards,
+                            )
+                        )
+                    else:
+                        source_sam_relative_loss, _source_sam_relative_stats = (
+                            source_sam_relative_batch_loss(
+                                field,
+                                teacher=source_sam_relative_training_teacher,
+                                triplet_indices=selected_relative_triplets,
+                                guard_edge_indices=selected_relative_guards,
+                            )
+                        )
+                    loss = loss + SAM_STRUCTURE_WEIGHT * source_sam_relative_loss
+                    source_sam_relative_totals.append(
+                        float(source_sam_relative_loss.detach())
+                    )
             if relation_cache is not None:
                 relation_start = batch_index * relation_order.numel() // epoch_batches
                 relation_stop = (
@@ -2289,11 +2832,44 @@ def train(args: argparse.Namespace) -> dict:
                     int(args.eval_batch_size),
                 )
             )
+        if source_multiteacher is not None:
+            assert source_descriptor_projector is not None
+            validation.update(
+                source_descriptor_metrics(
+                    field,
+                    projector=source_descriptor_projector,
+                    teacher=source_multiteacher.primitive,
+                    rows=validation_rows,
+                    batch_size=int(args.eval_batch_size),
+                )
+            )
         record = {
             "epoch": epoch + 1,
             "loss": sum(totals) / max(1, len(totals)),
             "relation_ranking_loss": (
                 sum(relation_totals) / len(relation_totals) if relation_totals else 0.0
+            ),
+            "source_descriptor_loss": (
+                sum(source_descriptor_totals) / len(source_descriptor_totals)
+                if source_descriptor_totals
+                else 0.0
+            ),
+            "source_relation_loss": (
+                sum(source_relation_totals) / len(source_relation_totals)
+                if source_relation_totals
+                else 0.0
+            ),
+            "source_sam_structure_loss": (
+                sum(source_sam_structure_totals)
+                / len(source_sam_structure_totals)
+                if source_sam_structure_totals
+                else 0.0
+            ),
+            "source_sam_relative_loss": (
+                sum(source_sam_relative_totals)
+                / len(source_sam_relative_totals)
+                if source_sam_relative_totals
+                else 0.0
             ),
             **validation,
         }
@@ -2330,6 +2906,110 @@ def train(args: argparse.Namespace) -> dict:
         if official_views is not None and capability_targets
         else {}
     )
+    final_source_multiteacher_metrics: dict[str, float] = {}
+    if source_multiteacher is not None:
+        assert source_descriptor_projector is not None
+        final_source_multiteacher_metrics.update(
+            source_descriptor_metrics(
+                field,
+                projector=source_descriptor_projector,
+                teacher=source_multiteacher.primitive,
+                rows=valid_rows,
+                batch_size=int(args.eval_batch_size),
+            )
+        )
+    source_gate_decision: dict = {}
+    if source_multiteacher is not None:
+        final_source_multiteacher_metrics.update(
+            source_relation_metrics(
+                field,
+                projector=source_descriptor_projector,
+                teacher=source_multiteacher.primitive,
+                relation=source_multiteacher.relation,
+            )
+        )
+        source_gate_decision = evaluate_source_only_gates(
+            manifest=source_multiteacher.manifest,
+            control_source_metrics=control_source_multiteacher_metrics,
+            candidate_primary_metrics=final_metrics,
+            candidate_capability_metrics=final_capability_metrics,
+            candidate_source_metrics=final_source_multiteacher_metrics,
+            primitive_state_summary=source_multiteacher.primitive_state_summary,
+        )
+    final_source_sam_metrics: dict[str, float] = {}
+    source_sam_gate_decision: dict[str, object] = {}
+    if source_sam_structure is not None:
+        final_source_sam_metrics = source_sam_structure_metrics(
+            field, teacher=source_sam_structure.teacher
+        )
+        source_sam_gate_decision = evaluate_source_sam_structure_gates(
+            control=control_source_sam_metrics,
+            candidate=final_source_sam_metrics,
+        )
+    final_source_sam_relative_pair_metrics: dict[str, float] = {}
+    final_source_sam_relative_metrics: dict[str, float] = {}
+    source_sam_relative_gate_decision: dict[str, object] = {}
+    if source_sam_relative is not None:
+        final_source_sam_relative_pair_metrics = source_sam_structure_metrics(
+            field, teacher=source_sam_relative.teacher.pair_teacher
+        )
+        final_source_sam_relative_metrics = source_sam_relative_metrics(
+            field, teacher=source_sam_relative.teacher
+        )
+        source_sam_relative_structure_decision = evaluate_source_sam_relative_gates(
+            control_pair=control_source_sam_relative_pair_metrics,
+            candidate_pair=final_source_sam_relative_pair_metrics,
+            control_relative=control_source_sam_relative_metrics,
+            candidate_relative=final_source_sam_relative_metrics,
+        )
+        source_sam_relative_gate_decision = (
+            evaluate_source_sam_relative_full_gates(
+                manifest=source_sam_relative.manifest,
+                control_primary=initial_field_provenance["source_final_metrics"],
+                candidate_primary=final_metrics,
+                control_capability=initial_field_provenance[
+                    "source_final_capability_metrics"
+                ],
+                candidate_capability=final_capability_metrics,
+                structure_decision=source_sam_relative_structure_decision,
+            )
+        )
+    elif source_sam_capability_relative is not None:
+        assert official_views is not None
+        final_source_sam_relative_pair_metrics = (
+            source_sam_capability_pair_metrics(
+                field,
+                official_views=official_views,
+                teacher=source_sam_capability_relative.teacher,
+            )
+        )
+        final_source_sam_relative_metrics = (
+            source_sam_capability_relative_metrics(
+                field,
+                official_views=official_views,
+                teacher=source_sam_capability_relative.teacher,
+            )
+        )
+        source_sam_relative_structure_decision = (
+            evaluate_source_sam_capability_relative_gates(
+                control_pair=control_source_sam_relative_pair_metrics,
+                candidate_pair=final_source_sam_relative_pair_metrics,
+                control_relative=control_source_sam_relative_metrics,
+                candidate_relative=final_source_sam_relative_metrics,
+            )
+        )
+        source_sam_relative_gate_decision = (
+            evaluate_source_sam_capability_relative_full_gates(
+                manifest=source_sam_capability_relative.manifest,
+                control_primary=initial_field_provenance["source_final_metrics"],
+                candidate_primary=final_metrics,
+                control_capability=initial_field_provenance[
+                    "source_final_capability_metrics"
+                ],
+                candidate_capability=final_capability_metrics,
+                structure_decision=source_sam_relative_structure_decision,
+            )
+        )
     field.cpu()
     output.parent.mkdir(parents=True, exist_ok=True)
     architecture = {
@@ -2366,6 +3046,11 @@ def train(args: argparse.Namespace) -> dict:
         ).encode("utf-8")
     ).hexdigest()
     basis_conditioning = validate_basis_conditioning(field.decoder.basis).to_dict()
+    active_source_sam_relative_bundle = (
+        source_sam_capability_relative
+        if source_sam_capability_relative is not None
+        else source_sam_relative
+    )
     payload = {
         "architecture": architecture,
         "state_dict": field.state_dict(),
@@ -2415,6 +3100,114 @@ def train(args: argparse.Namespace) -> dict:
         "history": history,
         "final_metrics": final_metrics,
         "final_capability_metrics": final_capability_metrics,
+        "source_only_multiteacher": (
+            {
+                "manifest": {
+                    "path": str(source_multiteacher.manifest_source),
+                    "sha256": source_multiteacher.manifest_sha256,
+                },
+                "primitive_descriptor_teacher": {
+                    "path": str(source_multiteacher.primitive.source),
+                    "sha256": source_multiteacher.primitive.sha256,
+                },
+                "primitive_state": source_multiteacher.primitive_state_summary,
+                "relation_edges": source_multiteacher.relation.num_edges,
+                "descriptor_weight": SOURCE_DESCRIPTOR_WEIGHT,
+                "relation_weight": SOURCE_RELATION_WEIGHT,
+                "query_free": True,
+                "source_only": True,
+            }
+            if source_multiteacher is not None
+            else {}
+        ),
+        "source_only_sam_structure": (
+            {
+                "manifest": {
+                    "path": str(source_sam_structure.manifest_source),
+                    "sha256": source_sam_structure.manifest_sha256,
+                },
+                "relation_cache": {
+                    "path": str(
+                        source_sam_structure.teacher.relation_cache_source
+                    ),
+                    "sha256": (
+                        source_sam_structure.teacher.relation_cache_sha256
+                    ),
+                },
+                "relation_edges": source_sam_structure.teacher.num_edges,
+                "loss_weight": SAM_STRUCTURE_WEIGHT,
+                "persistent_semantic_feature": "canonical_radio_only",
+                "teacher_payload_saved": False,
+                "query_time_source_rgb": False,
+                "query_time_target_rgb": False,
+            }
+            if source_sam_structure is not None
+            else {}
+        ),
+        "source_only_sam_relative_structure": (
+            {
+                "manifest": {
+                    "path": str(active_source_sam_relative_bundle.manifest_source),
+                    "sha256": active_source_sam_relative_bundle.manifest_sha256,
+                },
+                **(
+                    {
+                        "base_relative_manifest": dict(
+                            source_sam_capability_relative.manifest[
+                                "base_relative_manifest"
+                            ]
+                        ),
+                        "official_adaptor_checkpoint": dict(
+                            source_sam_capability_relative.manifest[
+                                "official_adaptor_checkpoint"
+                            ]
+                        ),
+                        "relation_space": "official_dino_sam_geometric_mean_v3",
+                    }
+                    if source_sam_capability_relative is not None
+                    else {
+                        "base_structure_manifest": dict(
+                            source_sam_relative.manifest[
+                                "base_structure_manifest"
+                            ]
+                        ),
+                        "relation_space": "raw_radio_cosine_v2",
+                    }
+                ),
+                "relation_cache": {
+                    "path": str(
+                        active_source_sam_relative_bundle.teacher.pair_teacher.relation_cache_source
+                    ),
+                    "sha256": (
+                        active_source_sam_relative_bundle.teacher.pair_teacher.relation_cache_sha256
+                    ),
+                },
+                "relation_edges": active_source_sam_relative_bundle.teacher.pair_teacher.num_edges,
+                "scale_matched_triplets": active_source_sam_relative_bundle.teacher.num_triplets,
+                "loss_weight": SAM_STRUCTURE_WEIGHT,
+                "persistent_semantic_feature": "canonical_radio_only",
+                "teacher_payload_saved": False,
+                "query_time_source_rgb": False,
+                "query_time_target_rgb": False,
+            }
+            if active_source_sam_relative_bundle is not None
+            else {}
+        ),
+        "final_source_multiteacher_metrics": final_source_multiteacher_metrics,
+        "control_source_multiteacher_metrics": control_source_multiteacher_metrics,
+        "source_gate_decision": source_gate_decision,
+        "final_source_sam_structure_metrics": final_source_sam_metrics,
+        "control_source_sam_structure_metrics": control_source_sam_metrics,
+        "source_sam_structure_gate_decision": source_sam_gate_decision,
+        "final_source_sam_relative_pair_metrics": (
+            final_source_sam_relative_pair_metrics
+        ),
+        "control_source_sam_relative_pair_metrics": (
+            control_source_sam_relative_pair_metrics
+        ),
+        "final_source_sam_relative_metrics": final_source_sam_relative_metrics,
+        "control_source_sam_relative_metrics": control_source_sam_relative_metrics,
+        "source_sam_relative_gate_decision": source_sam_relative_gate_decision,
         "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
@@ -2480,6 +3273,7 @@ def train(args: argparse.Namespace) -> dict:
                 "reliability": consensus.reliability.half(),
             }
         )
+    validate_single_radio_checkpoint_payload(payload)
     write_torch_noclobber(output, payload)
     report = {
         "output": str(output),
@@ -2493,6 +3287,26 @@ def train(args: argparse.Namespace) -> dict:
         "initial_field_checkpoint": initial_field_provenance,
         "final_metrics": final_metrics,
         "final_capability_metrics": final_capability_metrics,
+        "final_source_multiteacher_metrics": final_source_multiteacher_metrics,
+        "control_source_multiteacher_metrics": control_source_multiteacher_metrics,
+        "source_gate_decision": source_gate_decision,
+        "source_only_multiteacher": payload["source_only_multiteacher"],
+        "source_only_sam_structure": payload["source_only_sam_structure"],
+        "source_only_sam_relative_structure": payload[
+            "source_only_sam_relative_structure"
+        ],
+        "final_source_sam_structure_metrics": final_source_sam_metrics,
+        "control_source_sam_structure_metrics": control_source_sam_metrics,
+        "source_sam_structure_gate_decision": source_sam_gate_decision,
+        "final_source_sam_relative_pair_metrics": (
+            final_source_sam_relative_pair_metrics
+        ),
+        "control_source_sam_relative_pair_metrics": (
+            control_source_sam_relative_pair_metrics
+        ),
+        "final_source_sam_relative_metrics": final_source_sam_relative_metrics,
+        "control_source_sam_relative_metrics": control_source_sam_relative_metrics,
+        "source_sam_relative_gate_decision": source_sam_relative_gate_decision,
         "capability_target_mode": payload["capability_target_mode"],
         "capability_target_contract": capability_target_contract,
         "capability_reliability_policy": capability_reliability_policy,
@@ -2566,6 +3380,59 @@ def main() -> None:
         "--expected-initial-field-checkpoint-sha256",
         default="",
         help="Caller-trusted SHA-256 for --initial-field-checkpoint.",
+    )
+    parser.add_argument(
+        "--source-only-multiteacher-manifest",
+        default="",
+        help=(
+            "Optional immutable Stage-B manifest adding query-free primitive "
+            "descriptor and local semantic-relation teachers."
+        ),
+    )
+    parser.add_argument(
+        "--expected-source-only-multiteacher-manifest-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the Stage-B manifest.",
+    )
+    parser.add_argument(
+        "--source-only-sam-structure-manifest",
+        default="",
+        help=(
+            "Optional immutable mapping-time official-SAM relation manifest. "
+            "It supervises only the existing RADIO direction and is absent "
+            "from the query-time field checkpoint."
+        ),
+    )
+    parser.add_argument(
+        "--expected-source-only-sam-structure-manifest-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the source-only SAM structure manifest.",
+    )
+    parser.add_argument(
+        "--source-only-sam-relative-structure-manifest",
+        default="",
+        help=(
+            "Optional immutable v2 manifest compiling legal source official-SAM "
+            "relations into scale-matched no-harm RADIO ordering supervision."
+        ),
+    )
+    parser.add_argument(
+        "--expected-source-only-sam-relative-structure-manifest-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the v2 source-only SAM manifest.",
+    )
+    parser.add_argument(
+        "--source-only-sam-capability-relative-structure-manifest",
+        default="",
+        help=(
+            "Optional immutable v3 manifest applying the same source-only SAM "
+            "triplets after frozen official DINOv3/SAM3 adaptors."
+        ),
+    )
+    parser.add_argument(
+        "--expected-source-only-sam-capability-relative-structure-manifest-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the v3 capability-relative manifest.",
     )
     parser.add_argument("--radio-version", default="c-radio_v4-h")
     parser.add_argument("--device", default="cuda:0")
@@ -2776,6 +3643,89 @@ def main() -> None:
         parser.error("--fusion-residual-blocks requires --primitive-fusion")
     if args.min_epochs <= 0 or args.min_epochs > args.epochs:
         parser.error("--min-epochs must lie in [1, --epochs]")
+    source_multiteacher_pair = (
+        args.source_only_multiteacher_manifest,
+        args.expected_source_only_multiteacher_manifest_sha256,
+    )
+    if any(source_multiteacher_pair) and not all(source_multiteacher_pair):
+        parser.error(
+            "Stage-B source-only multiteacher manifest path and SHA-256 "
+            "are both required"
+        )
+    if any(source_multiteacher_pair) and args.observation_contract != (
+        CANONICAL_FACTORIZED_RADIO_CONTRACT_NAME
+    ):
+        parser.error(
+            "Stage-B source-only multiteacher distillation requires "
+            "--observation-contract canonical-factorized-radio-v1"
+        )
+    source_sam_structure_pair = (
+        args.source_only_sam_structure_manifest,
+        args.expected_source_only_sam_structure_manifest_sha256,
+    )
+    if any(source_sam_structure_pair) and not all(source_sam_structure_pair):
+        parser.error(
+            "source-only SAM structure manifest path and SHA-256 are both required"
+        )
+    if any(source_sam_structure_pair) and args.observation_contract in {
+        "compatible-legacy",
+        "unchecked",
+    }:
+        parser.error(
+            "source-only SAM structure supervision requires a strict canonical "
+            "observation contract"
+        )
+    source_sam_relative_pair = (
+        args.source_only_sam_relative_structure_manifest,
+        args.expected_source_only_sam_relative_structure_manifest_sha256,
+    )
+    if any(source_sam_relative_pair) and not all(source_sam_relative_pair):
+        parser.error(
+            "source-only SAM relative manifest path and SHA-256 are both required"
+        )
+    if any(source_sam_structure_pair) and any(source_sam_relative_pair):
+        parser.error(
+            "v1 absolute and v2 relative source-only SAM objectives are mutually exclusive"
+        )
+    if any(source_sam_relative_pair) and args.observation_contract in {
+        "compatible-legacy",
+        "unchecked",
+    }:
+        parser.error(
+            "source-only SAM relative supervision requires a strict canonical "
+            "observation contract"
+        )
+    source_sam_capability_relative_pair = (
+        args.source_only_sam_capability_relative_structure_manifest,
+        args.expected_source_only_sam_capability_relative_structure_manifest_sha256,
+    )
+    if any(source_sam_capability_relative_pair) and not all(
+        source_sam_capability_relative_pair
+    ):
+        parser.error(
+            "source-only SAM capability-relative manifest path and SHA-256 are "
+            "both required"
+        )
+    if any(source_sam_capability_relative_pair) and (
+        any(source_sam_structure_pair) or any(source_sam_relative_pair)
+    ):
+        parser.error(
+            "v3 capability-relative and earlier source-only SAM objectives are "
+            "mutually exclusive"
+        )
+    if any(source_sam_capability_relative_pair) and args.observation_contract in {
+        "compatible-legacy",
+        "unchecked",
+    }:
+        parser.error(
+            "source-only SAM capability-relative supervision requires a strict "
+            "canonical observation contract"
+        )
+    if any(source_sam_capability_relative_pair) and not args.official_capability_loss:
+        parser.error(
+            "source-only SAM capability-relative supervision requires "
+            "--official-capability-loss"
+        )
     if args.capability_target_contract != CAPABILITY_TARGET_CONTRACT_FIELD_A and (
         args.capability_observation_reference_mpr_cache
         or args.expected_capability_observation_reference_mpr_cache_sha256

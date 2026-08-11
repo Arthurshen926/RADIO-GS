@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_registered_query_likelihood_receipt_diagnostics_addendum_v1",
+  "status": "registered_before_v2_prediction_rerun_or_any_target_scoring",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_registered_query_likelihood_fern_trex_preregistration_20260810.json",
+    "sha256": "97f9b00939b6fd7730706653c7a529d24e8088d43e287e31ed0e3bfe92231756"
+  },
+  "abandoned_unscored_diagnostic": {
+    "scene_id": "fern",
+    "root": "/root/radio_gs_local_cache/optimization_20260810/nvos_registered_query_likelihood_fern_trex_v1/fern",
+    "prediction_receipt_sha256": "b04b4556748e83d02815196eb8833ddc77f97febbf90499bcf27a79a1b081111",
+    "reason": "the prediction was valid and target-blind but the receipt omitted source-reconstruction and unary-delta diagnostics required by the preregistered causal gate",
+    "target_mask_or_metric_opened": false,
+    "eligible_for_scoring": false
+  },
+  "implementation_only_change": {
+    "description": "persist the already-computed registered_query_likelihood diagnostics into both primitive compiler contract and prediction method contract",
+    "prediction_numerics_changed": false,
+    "calibration_recipe_changed": false,
+    "renderer_graph_readout_or_threshold_changed": false,
+    "new_evaluator_sha256": "cf32630395647c4b4d646df96d07453a75b08d659aba65fab664c774b673705f",
+    "likelihood_head_sha256": "385006c124f74987239f9f4fdeda26fc9776c9fefc123160bfa856b916be90b1"
+  },
+  "v2_prediction_root": "/root/radio_gs_local_cache/optimization_20260810/nvos_registered_query_likelihood_fern_trex_v2",
+  "barrier": "both v2 receipts and all bound score/unary hashes must verify before first target-mask open",
+  "promotion_gate_unchanged": {
+    "pair_macro_iou_delta_minimum": 0.005,
+    "per_scene_iou_delta_minimum": -0.002
+  }
+}

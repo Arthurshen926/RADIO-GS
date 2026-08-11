@@ -54,6 +54,9 @@ from radio_gs.scripts.materialize_lerf_multiscale_query_score_cache import (
     SHARED_AUTHORITY_CONTRACT,
     _tensor_sha256,
 )
+from radio_gs.scripts.materialize_lerf_multiscale_query_score_cache_fp32 import (
+    SHARED_AUTHORITY_CONTRACT as FP32_SHARED_AUTHORITY_CONTRACT,
+)
 from radio_gs.utils.immutable_artifacts import (
     canonical_json_sha256,
     file_record,
@@ -401,7 +404,10 @@ def _validate_cache_authority(
     expected_renderer_geometry_sha256: str,
 ) -> list[dict[str, Any]]:
     authority = _require_mapping(payload.get("authority"), label="cache.authority")
-    if authority.get("contract") != SHARED_AUTHORITY_CONTRACT:
+    if authority.get("contract") not in {
+        SHARED_AUTHORITY_CONTRACT,
+        FP32_SHARED_AUTHORITY_CONTRACT,
+    }:
         raise ScalarMapRenderError("query-score cache shared authority differs")
     if authority.get("query_scores_sha256") != _tensor_sha256(payload["query_scores"]):
         raise ScalarMapRenderError("query-score tensor SHA-256 differs from authority")

@@ -1,0 +1,60 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_capability_relative_v3_execution_receipt.v1",
+  "status": "sealed_before_source_only_gpu_launch",
+  "preregistration": {
+    "path": "paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_preregistration_20260811.json",
+    "sha256": "afe986beac3647b15b5ffa286518929957ea94104b806215d88858fd127bd1da"
+  },
+  "disclosure_correction": {
+    "path": "paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_disclosure_correction_20260811.json",
+    "sha256": "350cbcb42641af6db25c51534630e8247e56528a365fc7dac799a6fc3738783e"
+  },
+  "manifest": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/source_only_sam_capability_relative_manifest.v3.1.json",
+    "sha256": "a2ea46527974e202f218788b31c5fd693e3eac245c07912a6d25540f151082d0"
+  },
+  "runner": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_figurines_source_sam_capability_relative_v3_gpu0.sh",
+    "sha256": "d987b3125c3694f39bee60a733edd7759b2217f04190c067551b1fef528809b8",
+    "command": "bash /root/RADIO-GS/radio_gs/scripts/run_figurines_source_sam_capability_relative_v3_gpu0.sh"
+  },
+  "launch_contract": {
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "device_inside_scope": "cuda:0",
+    "driver_runtime_shim": "/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime",
+    "preflight": "torch.cuda available, one-element allocation passed, RTX3090",
+    "prelaunch_gpu_state": {
+      "temperature_c": 41,
+      "memory_mib": 1,
+      "utilization_percent": 0,
+      "power_limit_w": 300.0
+    },
+    "thermal_poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  },
+  "fixed_training": {
+    "epochs": 5,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.00001,
+    "margin": 0.05,
+    "loss_weight": 0.05,
+    "candidate_initialization_sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5",
+    "v2_candidate_initialization_used": false
+  },
+  "output": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/canonical_radio_source_sam_capability_relative_e5_seed0.pth",
+    "report": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/canonical_radio_source_sam_capability_relative_e5_seed0.pth.json",
+    "log": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/canonical_radio_source_sam_capability_relative_e5_seed0.train.log",
+    "telemetry": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/canonical_radio_source_sam_capability_relative_e5_seed0.telemetry.csv",
+    "no_clobber": true
+  },
+  "benchmark_gate": {
+    "queries_or_ground_truth_opened": false,
+    "metric_run_after_source_gate": false,
+    "this_stage_stops_after_checkpoint_authority_if_passed": true
+  }
+}

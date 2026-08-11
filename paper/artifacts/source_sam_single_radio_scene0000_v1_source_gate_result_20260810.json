@@ -1,0 +1,87 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_source_gate_result.v1",
+  "status": "source_gate_failed_benchmark_gate_closed",
+  "scene_id": "scene0000_00",
+  "representation_contract": {
+    "persistent_semantic_feature": "canonical_radio_only",
+    "official_sam_role": "mapping_time_sparse_relation_teacher_only",
+    "source_rgb_at_mapping_time": true,
+    "source_rgb_at_query_or_evaluation_time": false,
+    "target_rgb_at_query_or_evaluation_time": false,
+    "sam_decoder_cache_mask_or_feature_at_query_time": false,
+    "teacher_tensor_saved_in_checkpoint": false,
+    "benchmark_query_gt_or_metric_opened": false
+  },
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_scene0000_preregistration_20260810.json",
+    "sha256": "653413dccdc77639dd99b15e162a1d06a6ff3d679923119d131f6600fc68a4fe"
+  },
+  "control": {
+    "checkpoint_sha256": "80a13c1a7d1405971424c825000f47d8a19aa32f5e64433c1bb0707febecd845",
+    "raw_radio_mean_cosine": 0.9608365297317505,
+    "raw_radio_p05_cosine": 0.9245462417602539,
+    "dino_adaptor_mean_cosine": 0.9766802191734314,
+    "dino_adaptor_p05_cosine": 0.958669900894165,
+    "sam_adaptor_mean_cosine": 0.947316586971283,
+    "sam_adaptor_p05_cosine": 0.8961353898048401,
+    "sam_same_mean_cosine": 0.9051440954208374,
+    "sam_separate_mean_cosine": 0.7752244472503662,
+    "sam_relation_gap": 0.1299196481704712
+  },
+  "candidate": {
+    "checkpoint": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/canonical_radio_source_sam_structure_e5_seed0.pth",
+    "checkpoint_sha256": "ec610c8dbdd8aed308fc8d11ec6caa027c1ab43804bdc693efed4d6dbb0c39bb",
+    "report_sha256": "710f2de9f4a5990864016373c7bdae708e961041d0dac26fed7a674263a69232",
+    "raw_radio_mean_cosine": 0.9615958333015442,
+    "raw_radio_p05_cosine": 0.9259628057479858,
+    "dino_adaptor_mean_cosine": 0.9771647453308105,
+    "dino_adaptor_p05_cosine": 0.9593209624290466,
+    "sam_adaptor_mean_cosine": 0.9484333395957947,
+    "sam_adaptor_p05_cosine": 0.8981285691261292,
+    "sam_same_mean_cosine": 0.9050671458244324,
+    "sam_separate_mean_cosine": 0.763652503490448,
+    "sam_relation_gap": 0.14141464233398438
+  },
+  "deltas": {
+    "raw_radio_mean_cosine": 0.0007593035697937012,
+    "raw_radio_p05_cosine": 0.0014165639877319336,
+    "dino_adaptor_mean_cosine": 0.0004845261573791504,
+    "dino_adaptor_p05_cosine": 0.0006510615348815918,
+    "sam_adaptor_mean_cosine": 0.0011167526245117188,
+    "sam_adaptor_p05_cosine": 0.0019931793212890625,
+    "sam_same_mean_cosine": -0.0000769495964050293,
+    "sam_separate_mean_cosine": -0.011571943759918213,
+    "sam_relation_gap": 0.011494994163513184
+  },
+  "source_gate": {
+    "same_relation_axis_unchanged": true,
+    "raw_radio_preservation": true,
+    "dino_adaptor_preservation": true,
+    "sam_adaptor_preservation": true,
+    "sam_same_cosine_non_decrease": false,
+    "sam_separate_cosine_non_increase": true,
+    "sam_relation_gap_strict_improvement": true,
+    "all_source_gates_passed": false,
+    "six_task_benchmark_gate_opened": false
+  },
+  "causal_conclusion": {
+    "supported": "Mapping-time official SAM teaches the single RADIO field a substantially clearer cross-boundary relation while preserving raw RADIO and frozen adaptor capabilities.",
+    "rejected": "Uniformly contracting every pair inside a SAM mask is harmless to the multiscale RADIO semantic geometry.",
+    "next_registered_change": "Replace unconditional same-mask contraction with scale-matched relative ordering plus control-relative no-harm constraints; do not change the field architecture, teacher weight, query interface, or benchmark protocol."
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "telemetry_sha256": "ede9de6f88f1b7caeef85d0822b5b7f797d7bc807c3895a2a9f538902e668232",
+    "maximum_temperature_c": 58,
+    "maximum_sampled_power_w": 158.98,
+    "soft_pause_triggered": false,
+    "hard_stop_triggered": false,
+    "cuda_release_verified": true
+  },
+  "post_outcome_actions": {
+    "gate_threshold_relaxed": false,
+    "teacher_weight_changed": false,
+    "six_task_benchmark_metric_run": false,
+    "candidate_promoted": false
+  }
+}

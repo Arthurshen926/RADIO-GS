@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf2d_current_field_official_sam3_box_full4_exact_result",
+  "status": "complete_positive_full4",
+  "benchmark": "LERF-2D",
+  "capability_track": "target_rgb_assisted_official_sam3_box",
+  "strict_mainline_eligible": false,
+  "target_rgb_visible_to_method": true,
+  "target_gt_visible_to_method": false,
+  "method": "current frozen three-scale scalar field + exact Occam 30/7 threshold-0.5 coarse mask + official SAM3 box boundary",
+  "protocol": {
+    "freeze_id": "evaluation_protocols_20260801_v1",
+    "protocol_freeze_sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916",
+    "score_manifest": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf2d_ours_native_multiscale_scalar_maps_v1/manifest.json", "sha256": "cf90415031620fcadb120a8fef05c6b9a008f9d76836b860b6660e62125b5f4f"},
+    "rgb_root_authority": {"path": "/root/RADIO-GS/paper/artifacts/lerf2d_target_rgb_root_authority_20260810.json", "sha256": "386a2ae693cac427e6afc8b9aba2adee3afd35ef958860687c4406936dfb6b59"},
+    "coarse_activation_kernel": 30,
+    "coarse_mask_threshold": 0.5,
+    "coarse_smooth_kernel": 7,
+    "sam3_box_padding_pixels": 16,
+    "sam3_resolution": 1008,
+    "sam3_confidence_threshold": 0.0,
+    "sam3_min_initial_iou": 0.05,
+    "candidate_selector": "maximum IoU with sealed coarse prediction; official SAM3 score tie-break only",
+    "parameter_scope": "one fixed global policy for all four scenes; no target metric or scene-specific selection",
+    "two_process_boundary": "CPU coarse producer seals masks before target RGB; isolated official-SAM3 producer reads only coarse masks plus authorized target RGB; independent scorer validates every hash before opening annotation JSON"
+  },
+  "full4_scene_macro": {
+    "initial_miou": 0.5173733738211227,
+    "miou": 0.6062946157319415,
+    "delta_miou": 0.08892124191081885,
+    "loc_acc": 0.8296907794998031,
+    "scenes": 4
+  },
+  "query_micro": {
+    "initial_miou": 0.5432606569766102,
+    "miou": 0.6261542157017702,
+    "delta_miou": 0.08289355872516002,
+    "loc_acc": 0.8653846153846154,
+    "queries": 208
+  },
+  "scene_results": {
+    "figurines": {"initial_miou": 0.552057291736089, "miou": 0.6328672305051095, "delta_miou": 0.08080993876902054, "loc_acc": 0.8571428571428571, "queries": 56},
+    "ramen": {"initial_miou": 0.5694034126093499, "miou": 0.676430662318371, "delta_miou": 0.10702724970902111, "loc_acc": 0.8591549295774648, "queries": 71},
+    "teatime": {"initial_miou": 0.5621255302159712, "miou": 0.6006368213725255, "delta_miou": 0.03851129115655427, "loc_acc": 0.9661016949152542, "queries": 59},
+    "waldo_kitchen": {"initial_miou": 0.38590726072308107, "miou": 0.5152437487317603, "delta_miou": 0.1293364880086792, "loc_acc": 0.6363636363636364, "queries": 22}
+  },
+  "sealed_artifacts": {
+    "coarse_prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/lerf2d_official_sam3_box_full4_v1/coarse/coarse_prediction_receipt.json", "sha256": "dbb47d5221bea42668551505f5621e5b4e166bd2be3a49c31b2731d7aa0e7d10"},
+    "prediction_receipt": {"path": "/root/radio_gs_local_cache/optimization_20260810/lerf2d_official_sam3_box_full4_v1/final/prediction_receipt.json", "sha256": "dc06aad39889c3a0cfbb8d6235ff55e6f42a9e3e33da4b63cb8c91ac1cac0c1d"},
+    "metric": {"path": "/root/radio_gs_local_cache/optimization_20260810/lerf2d_official_sam3_box_full4_v1/evaluation.json", "sha256": "3cd9b401f1d9155d5a67b1ce5fcf0c162aa9461c0e083a74ae1dd3aaf8654b54"}
+  },
+  "audit": {
+    "prediction_count": 208,
+    "sam3_attempt_count": 208,
+    "sam3_accept_count": 208,
+    "all_scene_miou_deltas_positive": true,
+    "coarse_receipt_sealed_before_target_rgb": true,
+    "final_receipt_sealed_before_annotation_or_metric_access": true,
+    "candidate_selected_with_gt": false,
+    "scorer_opened_target_rgb": false,
+    "localization_unchanged_from_frozen_scalar_readout": true,
+    "fixed_policy_identical_on_all_scenes": true,
+    "gpu_physical_index": 1,
+    "maximum_sampled_gpu1_temperature_c": 66,
+    "maximum_sampled_gpu1_memory_mib": 8978,
+    "thermal_poll_seconds": 60,
+    "thermal_soft_pause_c": 82,
+    "thermal_resume_c": 78,
+    "thermal_hard_stop_c": 85
+  },
+  "implementation": {
+    "coarse_producer": {"path": "radio_gs/scripts/materialize_lerf2d_coarse_prediction_receipt.py", "sha256": "385642ac527778c408d712415614745e6e8c4f2a818411e63686a5b668342616"},
+    "official_sam3_bridge": {"path": "radio_gs/scripts/refine_lerf2d_coarse_receipt_official_sam3.py", "sha256": "b065077e45147195bd25ee223a76cb1961db7211c1971e671a72426e9cc0659b"},
+    "scorer": {"path": "radio_gs/scripts/score_lerf2d_official_sam3_box_receipt.py", "sha256": "80b5a86ae3100bbc767356da9fe3601d4d103145230d771b7486c8de2c8be00b"},
+    "official_sam3_source_commit": "46957e47805eaa273f4aa7bbbd25a88bca9108ce",
+    "official_sam3_checkpoint": {"path": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt", "sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"},
+    "torch_abi_isolation": "coarse/scorer use cybersim_agent; official SAM3 uses easy3d with FP32 official weights loaded on CPU then transferred unchanged to GPU and BF16 autocast"
+  },
+  "comparison": {
+    "current_exact_scene_macro_miou": 0.5173733739798727,
+    "previous_target_rgb_grabcut_scene_macro_miou": 0.5293730706254167,
+    "historical_feature_only_sam3_scene_macro_miou": 0.588944466161357,
+    "frozen_occamlgs_reproduction_scene_macro_miou": 0.6362004352868187,
+    "candidate_minus_previous_grabcut": 0.0769215451065248,
+    "candidate_minus_historical_feature_only_sam3": 0.01735014957058456,
+    "candidate_gap_to_occamlgs": -0.029905819554877145
+  },
+  "decision": {
+    "sentinel_gate": {"required_pair_delta_miou": 0.02, "observed_pair_delta_miou": 0.09391859423902083, "maximum_allowed_single_scene_regression": 0.002, "observed_minimum_single_scene_delta": 0.08080993876902054, "passed": true},
+    "promote_target_rgb_assisted_capability_row": true,
+    "promote_to_strict_reusable_field_mainline": false,
+    "reason": "The fixed global target-RGB boundary operator gives a large, positive four-scene recovery and surpasses the historical feature-only SAM3 row, but still consumes target RGB and does not close the remaining strict compact-field semantic gap to OccamLGS."
+  }
+}

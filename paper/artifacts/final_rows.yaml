@@ -8,6 +8,13 @@ tracks:
   t1_lerf_rendered_view_ovs:
     task_name: LERF-OVS rendered-view open-vocabulary segmentation/localization
     source_json: paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json
+    implementation_source_of_truth:
+      source_json: paper/artifacts/lerf2d_current_field_boundary_readout_stage_a_20260810.json
+      current_mainline_row: radio_gs_current_compact_surface_region_v2_exact
+      current_rgb_boundary_row: radio_gs_current_compact_surface_region_v2_target_rgb_grabcut_v1
+      best_legacy_paper_row: ctfgs_rendered
+      caveat: The best legacy paper row uses the historical hybrid/HCD feature path
+        plus a feature-only SAM3 head. It is not the current compact-field exact result.
     protocol:
       scenes:
       - figurines
@@ -57,6 +64,28 @@ tracks:
             acc: 0.8181818181818182
         reproduced_local: true
         promoted: true
+        lineage_status: legacy_feature_path_not_current_compact_field
+      radio_gs_current_compact_surface_region_v2_exact:
+        source: frozen current compact-field exact scalar-map evaluation
+        source_json: paper/artifacts/lerf2d_current_field_boundary_readout_stage_a_20260810.json
+        locacc: 0.8296907794998031
+        miou: 0.5173733739798727
+        uses_current_compact_field: true
+        uses_target_rgb: false
+        current_mainline: true
+        promoted: false
+      radio_gs_current_compact_surface_region_v2_target_rgb_grabcut_v1:
+        source: sealed target-RGB-assisted boundary readout from the same frozen current scalar maps
+        source_json: paper/artifacts/lerf2d_current_field_boundary_readout_stage_a_20260810.json
+        locacc: 0.8296907794998031
+        miou: 0.5293730706254167
+        uses_current_compact_field: true
+        uses_target_rgb: true
+        candidate_selected_with_gt: false
+        current_mainline_candidate: true
+        promoted: false
+        caveat: Fixed v1 admission gates accepted all 208 proposals; this is an exact
+          Stage-A result, not yet a validated discriminative selection policy.
       ctfgs_rendered_peak_component_core:
         source: peak-component core readout before feature-only SAM3 boundary refinement
         locacc: 0.8598

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_spatial_text_likelihood_stage_d_fit_initialization_correction",
+  "status": "sealed_before_corrected_fit_and_before_development_open",
+  "preregistration_sha256": "c28232f4e8bd652801a36c51e551c82799dd27aac60424150a01881c0e388f88",
+  "builder_correction_sha256": "6abba5ac5219b145a8ca941206454fa3243597aa49eff0f37c171d0eed5828cf",
+  "failed_fit": {
+    "checkpoint_written": false,
+    "receipt_written": false,
+    "source_gates": {"balanced_bce_improved": false, "positive_negative_gap_improved": false, "local_relation_improved": false},
+    "development_labels_opened": false,
+    "cause": "Exact-zero residual initialization selected the bitwise identity branch everywhere and therefore correctly produced zero parameter gradient."
+  },
+  "correction": {
+    "training_initial_output_weight": "deterministic seed17 Gaussian times 0.02",
+    "training_initial_output_bias": 0.0,
+    "architecture_loss_epochs_learning_rate_bounds_graph_and_data_changed": false,
+    "zero_residual_identity_changed": false,
+    "default_off_identity_test": "all parameters explicitly zero gives residual=0 and bitwise legacy probability"
+  },
+  "corrected_module_sha256": "8036f368ba6345f8158101a38e4ac938d8ae82a603b68bb11b622ee25cb77b7f",
+  "corrected_tests_sha256": "ac58e9a2eea396611a38d9d5ef025e3b7c2125983166ef06c69a79aa593d0685",
+  "dataset_manifest_sha256": "c971a8c170dc219d5fe6337d28ffa888e052d569c0eaaf5ce9a9f8abd45c3c9a",
+  "focused_tests": "5 passed",
+  "target_or_development_outcome_used": false
+}

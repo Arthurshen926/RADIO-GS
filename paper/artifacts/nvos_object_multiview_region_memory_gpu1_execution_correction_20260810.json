@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_object_multiview_region_memory_gpu1_execution_correction_v1",
+  "status": "frozen_after_pre_model_cuda_abi_failure_before_source_rgb_decode_sam3_or_target_access",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_fern_trex_preregistration_20260810.json",
+    "sha256": "12cc595374520dd756fdb206b921cd5186f2aed1151bc7fe10b68d0610b33dc8"
+  },
+  "failed_attempt": {
+    "stage": "fern_source_sam3_before_model_construction_completed",
+    "exit_code": 1,
+    "log": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_b/logs/fern_source_sam3.log",
+      "sha256": "1c236b496fbf4b6de27cf998152a6048ff047fcc20de16f725c38222423e1b05"
+    },
+    "failure": "cudaGetDeviceCount error 804: forward compatibility attempted on unsupported hardware",
+    "proposal_masks_written": 0,
+    "prediction_receipts_written": 0,
+    "source_rgb_decoded": false,
+    "official_sam3_inference_executed": false,
+    "target_rgb_mask_or_metric_opened": false
+  },
+  "root_cause": {
+    "loaded_libcuda_symlink": "/usr/lib/x86_64-linux-gnu/libcuda.so.580.105.08",
+    "loaded_libcuda_sha256": "df9183549feb062f4195e6cf130e0ef372de4a59e59dbe51554ad8c3c5b167db",
+    "kernel_driver_reported_by_nvidia_smi": "535.288.01",
+    "matching_user_driver_library": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "matching_user_driver_library_sha256": "deb92bbc5e2990ded3ca2fd13103d346d2a8dee4374d7f9f64d996e420c0ec9d"
+  },
+  "execution_only_correction": {
+    "environment": "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "torch_cuda_smoke": "passed_on_physical_GPU1_via_CUDA_VISIBLE_DEVICES_1",
+    "method_parameters_changed": false,
+    "selected_views_changed": false,
+    "sam3_checkpoint_changed": false,
+    "coarse_receipts_changed": false
+  },
+  "thermal_guard": {
+    "physical_gpu": 1,
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  }
+}

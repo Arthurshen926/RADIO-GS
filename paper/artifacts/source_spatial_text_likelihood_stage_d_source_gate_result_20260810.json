@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_spatial_text_likelihood_stage_d_source_gate_result",
+  "status": "all_source_fit_gates_passed_development_open_authorized_once",
+  "fit_scenes": ["scene0001_00", "scene0002_00", "scene0005_00"],
+  "checkpoint": {"path": "/root/RADIO-GS/local_ssd_results/source_spatial_text_likelihood_stage_d/source_spatial_head.fit3.v1.pt", "sha256": "97950c8e4b71e16e9c0317445bae20668a6abe822ffac8c5aa854f08975f816c", "state_dict_sha256": "5731a3e4d888a081b782ad6d08c2850f632fce5f4bc3be075effca552b49cd17"},
+  "fit_receipt": {"path": "/root/RADIO-GS/local_ssd_results/source_spatial_text_likelihood_stage_d/source_spatial_head.fit3.v1.receipt.json", "sha256": "f06c66434e0def8b10bbce3067912d5e85616fcde61dd022289fe09132e30cb9"},
+  "source_macro": {
+    "legacy_balanced_bce": 0.5880891345441341,
+    "learned_balanced_bce": 0.4880680553615093,
+    "balanced_bce_delta": -0.10002107918262482,
+    "legacy_positive_negative_gap": 0.11903158326943715,
+    "learned_positive_negative_gap": 0.28695296371976536,
+    "positive_negative_gap_delta": 0.16792138045032823,
+    "legacy_local_relation_loss": 0.001208522803305338,
+    "learned_local_relation_loss": 0.0011796336038969457,
+    "local_relation_loss_delta": -0.000028889199408392184,
+    "present_scene_class_count": 24
+  },
+  "gate": {"balanced_bce_improved": true, "positive_negative_gap_improved": true, "local_relation_improved": true, "all_passed": true},
+  "heldout_development": {
+    "scene": "scene0003_00",
+    "one_shot_authorized": true,
+    "parameter_callback_allowed": false,
+    "evaluator_sha256": "a73e16334a4b88045e6d175807de406d0539bc8575453e4ee8f3f360ff67df1a"
+  },
+  "access": {"development_labels_opened_by_stage_d_fit": false, "benchmark_metric_run": false, "lerf_metric_run": false, "cuda_initialized": false}
+}

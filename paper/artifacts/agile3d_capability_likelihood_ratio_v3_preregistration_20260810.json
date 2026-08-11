@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-capability-likelihood-ratio-v3-preregistration",
+  "created_at": "2026-08-10T16:42:00+08:00",
+  "status": "sealed_before_v3_model_training_or_metrics_with_audited_pre_metric_clarifications",
+  "revision_history": [
+    {
+      "stage": "initial",
+      "timing": "before v3 fit bundles, labels, datasets, model training, or metrics",
+      "content": "fixed scenes, all-object inventory, LLR method, recipe constants, LOO gates"
+    },
+    {
+      "stage": "sampling-math-clarification",
+      "timing": "after label-free scene0002/scene0005 bundle materialization but before any v3 fit label opening or dataset generation",
+      "content": "made the equal-class stratified BCE estimator explicitly reweight strata by true prevalence; no method constant changed"
+    },
+    {
+      "stage": "mass-diagnostic-clarification",
+      "timing": "after scene0000 fit shard generation began but before any v3 head training or source metric computation",
+      "content": "defined foreground mass as mean inferred probability and fixed epsilon=1e-8; no training method, threshold, or gate changed"
+    },
+    {
+      "stage": "zero-primitive-support-clarification",
+      "timing": "after scene0000 all-object shard materialization exposed one official object with zero registered primitive positives, but before any v3 head training or source metric computation",
+      "content": "retain every legal official object in materialization and evaluation; omit only undefined BCE/ranking training examples having no positive or no negative primitive target, with the omitted inventory reported; no metric object is omitted"
+    },
+    {
+      "stage": "exact-solver-link-clarification",
+      "timing": "after all fit shard materialization but before any v3 head training or source metric computation",
+      "content": "direct registered likelihood is compiled as T*logit((1-c)*0.5+c*q) before the solver, replacing the lossy c*(2q-1)-then-sigmoid double link; no learned parameter, threshold, or scene-specific choice was added"
+    }
+  ],
+  "design_provenance": {
+    "v2_development_result_used_for_method_design": true,
+    "v2_development_authority": "/root/RADIO-GS/paper/artifacts/agile3d_capability_likelihood_v2_scene0003_dev_result_20260810.json",
+    "v2_observation": "directional click response transferred, but class-balanced-plus-Dice posterior was foreground-heavy and absolute calibration declined",
+    "v3_development_role": "development iteration only after all source gates pass",
+    "test312_role": "sealed and forbidden"
+  },
+  "scene_split": {
+    "manifest": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_training_split_v1/scene_split.json",
+    "sha256": "ea08e071ed789b801c2a20bfa9c2878169c0cfafd7458e79f407332f41fec954",
+    "fit_scenes": ["scene0000_00", "scene0002_00", "scene0005_00"],
+    "development_scene": "scene0003_00",
+    "fit_and_development_scene_disjoint": true,
+    "test_scene_count": 312
+  },
+  "object_contract": {
+    "fit_labels_allowed": true,
+    "legal_object_definition": "every positive instance id present in the official 5cm first-occurrence quantized fit-scene labels with at least one foreground and one background point",
+    "object_subselection": "none",
+    "training_support_rule": "all objects are stored and evaluated; a scene/object contributes to the primitive LLR loss iff its fixed official point-to-primitive mapping yields at least one positive and one negative primitive, because class-conditional BCE/ranking is otherwise undefined",
+    "per_scene_or_per_object_parameter_tuning": false,
+    "click_simulator": "fixed nearest-signed source trajectory, ten prefixes, one worker",
+    "test_labels_allowed": false
+  },
+  "evidence_contract": {
+    "channels": ["appearance", "boundary"],
+    "click_prototype": "opacity_times_native_Gaussian_kernel_mixture_over_frozen_K64_official_point_candidates",
+    "affinity": "scene_centered_l2_cosine_to_click_Gaussian_mixture_v1",
+    "coverage": "capability_valid_times_query_independent_observation_support",
+    "hard_spatial_click_kernel": "solver_seed_only",
+    "spatial_kernel_used_as_instance_likelihood": false,
+    "direct_solver_unary": "T*logit((1-c)*0.5+c*q), so solver sigmoid(unary/T) exactly recovers the confidence-conditioned likelihood",
+    "source_gate_readout": "raw q=sigmoid(ell) through the fixed continuous Gaussian readout; no graph or hard-seed extent is credited to the head-only source gate"
+  },
+  "mathematical_contract": {
+    "head": "generic monotone two-channel signed log-likelihood-ratio head",
+    "raw_score": "ell_theta=b+sum_{c,s} softplus(w_pos[c,s])*T_pos[c,s]-sum_{c,s} softplus(w_neg[c,s])*T_neg[c,s]",
+    "set_statistics_s": ["maximum", "mean"],
+    "monotonicity": "d ell / d positive affinity >=0 and d ell / d negative affinity <=0",
+    "training_object_prevalence": "pi_e=mean(y_e) for each scene/object example",
+    "posterior_used_only_in_training": "p_e=sigmoid(ell_theta+logit(pi_e))",
+    "analytic_class_prior_correction": "ell_theta=logit(p_e)-logit(pi_e); inference never reuses pi_e",
+    "inference": "q=sigmoid(ell_theta), c=coverage*reliability, PrimitiveUnaryEvidence(q,c)",
+    "bias_semantics": "b is the class-conditional likelihood normalization after analytic prevalence separation, not an empirical foreground-prior intercept",
+    "ranking_loss": "mean softplus(-(ell_positive-ell_negative)) over deterministic equal-count positive/negative pairs",
+    "why_prior_invariant": "both ell_positive-ell_negative and logit(p_e)-logit(pi_e) are invariant to fit object prevalence",
+    "why_no_dice": "Dice directly rewards foreground mass and is not a proper probability calibration loss"
+  },
+  "training_recipe": {
+    "recipe_id": "capability-likelihood-ratio-bce-prior-correction-rank025-adam-seed0-e100-lr0.02-v3",
+    "seed": 0,
+    "optimizer": "Adam",
+    "epochs": 100,
+    "learning_rate": 0.02,
+    "weight_decay": 0.0,
+    "posterior_bce": "pi_e*mean_positive[-log sigmoid(ell+logit(pi_e))]+(1-pi_e)*mean_negative[-log(1-sigmoid(ell+logit(pi_e)))]",
+    "posterior_bce_sampling_semantics": "prevalence-weighted stratified estimator of ordinary per-primitive BCE; class strata are sampled equally only for variance reduction and are reweighted by their true population prevalence, never by 0.5/0.5 class-balanced weights",
+    "ranking_weight": 0.25,
+    "soft_dice_weight": 0.0,
+    "class_balanced_bce_weight": 0.0,
+    "deterministic_training_rows_per_class_per_example": 4096,
+    "training_row_selection": "lowest stable SHA256(scene_id,object_id,click_count,primitive_row) keys independently per class",
+    "reported_inference_threshold": 0.5,
+    "threshold_selection": false,
+    "early_stopping": false
+  },
+  "source_validation": {
+    "leave_one_scene_out": [
+      {"train": ["scene0002_00", "scene0005_00"], "heldout": "scene0000_00"},
+      {"train": ["scene0000_00", "scene0005_00"], "heldout": "scene0002_00"},
+      {"train": ["scene0000_00", "scene0002_00"], "heldout": "scene0005_00"}
+    ],
+    "reference": "the frozen v2 checkpoint replayed on exactly the same heldout source examples",
+    "required_gates": {
+      "loo_macro_mean_iou_gain_over_v2_strictly_greater_than": 0.02,
+      "loo_scenes_with_mean_iou_gain_over_v2_at_least": 2,
+      "loo_each_scene_click10_minus_click1_strictly_greater_than": 0.02,
+      "loo_macro_absolute_log_foreground_mass_ratio_error_lower_than_v2": true,
+      "all_fit_multi_object_mean_iou_gain_over_v2_strictly_greater_than": 0.02,
+      "all_fit_multi_object_precision_gain_over_v2_strictly_greater_than": 0.02,
+      "all_fit_click10_minus_click1_strictly_greater_than": 0.05
+    },
+    "if_any_gate_fails": "do not open scene0003 development labels and do not run test312"
+  },
+  "reported_diagnostics": [
+    "IoU precision recall, thresholded foreground fraction, and probability foreground mass by click count",
+    "target foreground fraction and absolute log probability-mass-to-target-mass ratio, with epsilon 1e-8",
+    "click10-minus-click1",
+    "per-object and per-scene macro rows",
+    "v2 versus v3 under identical source examples"
+  ],
+  "prohibited": {
+    "soft_dice": true,
+    "class_balanced_posterior_as_inference_probability": true,
+    "per_scene_thresholds": true,
+    "development_parameter_selection_before_source_gates": true,
+    "test312_labels_or_metrics": true,
+    "point_as_primitive": true
+  }
+}

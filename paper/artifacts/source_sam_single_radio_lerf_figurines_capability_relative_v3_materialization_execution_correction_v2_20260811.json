@@ -1,0 +1,71 @@
+{
+  "schema": "radio_gs.lerf_rgb_free_materialization_execution_correction.v1",
+  "status": "frozen_after_fail_closed_and_before_versioned_descriptor_continuation",
+  "scene_id": "figurines",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_rgb_free_benchmark_preregistration_20260811.json",
+    "sha256": "979ea3ace8168618ef2c40ecd68fdc3531736a1932e89354db142384801f95c2"
+  },
+  "failed_execution": {
+    "runner": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_figurines_capability_relative_v3_rgb_free_materialization_gpu0.sh",
+      "sha256": "a7e52a91463d8c446091c0cf1a3152afddbb30fec962fbad46f129f9b874b827"
+    },
+    "exit_code": 1,
+    "failed_stage": "surface_region_pre_descriptor_deployment_authority_validation",
+    "error": "legacy SurfaceRegion V2 RADIO authority differs",
+    "root_cause": "execution command omitted the exact-v2 legacy readout RADIO deployment authority arguments",
+    "method_or_hyperparameter_changed": false,
+    "descriptor_written": false,
+    "positive_score_written": false,
+    "negative_score_written": false,
+    "benchmark_metric_opened": false
+  },
+  "proof_exact_v2_already_used_authority": {
+    "v2_resume_contract": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/resume_descriptor/contract.json",
+      "sha256": "70fdc772c9b9acfdca60e716d2181e2f8fa863b6b2c023e6d6296ce4356d5f5a",
+      "recorded_input_key": "inputs.readout_legacy_radio_authority"
+    },
+    "authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/surface_region_accepted_v2_legacy_radio_authority_20260805.json",
+      "sha256": "2d72ed54eef69378c665ddf83067838d79e42d6b72545d89aab12f95cb781948"
+    },
+    "correction_scope": "restore_omitted_execution_only_authority_binding"
+  },
+  "immutable_partial_derivatives_reused_by_sha": {
+    "factorized_primitive_state": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/factorized_primitive_state_v3.pt",
+      "sha256": "3e761c4e66dead81b0fecf973abb4f8e8f61eec86cce4691ea59835cc7c8cbc5"
+    },
+    "official_dino_sam3_views": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/official_dino_sam3_views_v3.pt",
+      "sha256": "a211cadd369fd6f01829132330b5a7fd2ea8cd142c706451e8dd4afeffc31462"
+    },
+    "support_graph": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/support_graph_v3_v2_isomorphic.pt",
+      "sha256": "20dbb8a9e0d66fe8ca295e031abad4aaba91743edf3edcd8b88371835072770d"
+    }
+  },
+  "continuation": {
+    "runner": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/continue_figurines_capability_relative_v3_rgb_free_materialization_gpu0_v2.sh",
+      "sha256": "0b5338cfbb42642e907f69401e3a548c004090470c137cae567119644c046087"
+    },
+    "descriptor_resume_directory": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/resume_descriptor_v2",
+    "log": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/materialization_continuation_v2.log",
+    "telemetry": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/gpu0_telemetry_continuation_v2.csv",
+    "all_new_outputs_no_clobber": true,
+    "sealer_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/seal_lerf_rgb_free_query_score_batch.py",
+      "sha256": "3ecc19780fe8fcc9556a5b834e4955d08854f31b900d766d0b5e749c4d10c753"
+    }
+  },
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_annotations_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_rgb_or_sam_used": false
+  }
+}

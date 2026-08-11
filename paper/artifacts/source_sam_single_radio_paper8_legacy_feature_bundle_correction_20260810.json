@@ -1,0 +1,36 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_paper8_legacy_feature_bundle_correction.v1",
+  "status": "frozen_before_first_successful_legacy_scene_training",
+  "trigger": {
+    "scene_id": "scene0062_00",
+    "stage": "strict_mpr_preflight",
+    "reason": "early paper8 raw/DINO/SAM caches predate feature_output_bundle_sha256",
+    "candidate_checkpoint_written": false,
+    "benchmark_query_gt_or_metric_opened": false
+  },
+  "correction": {
+    "kind": "metadata_only_formal_feature_bundle_migration",
+    "observation_contract_after_correction": "canonical-mpr-v1",
+    "compatible_legacy_mode_used": false,
+    "raw_dino_sam_xyz_valid_view_count_reliability_checked_equal": true,
+    "raw_dino_sam_shared_responsibility_checked_equal": true,
+    "source_tensor_values_changed": false,
+    "field_architecture_or_loss_changed": false,
+    "training_hyperparameters_changed": false
+  },
+  "scene0062_migration_authority": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/formal_feature_bundle/migration_authority.json",
+    "sha256": "44838f4388bf4c0503fda8c5d3acdde38cb11d11fb442a6ce68ae36ffe3b8420",
+    "feature_output_bundle_sha256": "76d3f24faebb7a14eb2ace4590c380e258ab36f43bf23da5b82447bf8d66e5df"
+  },
+  "scene0062_relative_manifest": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/source_only_sam_relative_manifest_formal_bundle_v2.json",
+    "sha256": "a3186b954a38cb026d26d6729b4cd70b711a0129824d280ebbf5c5072d2bf751"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/migrate_legacy_mpr_feature_bundle_cohort.py",
+    "sha256": "9b17221686562491969784defa5718e74a5eacdd8a7a16ddad656dd6e79c0868",
+    "focused_tests_passed": 17
+  },
+  "future_scene_policy": "Apply the same tensor-invariant migration only when an immutable paper8 source cache lacks the later feature-bundle field; never synthesize or recompute feature tensors."
+}

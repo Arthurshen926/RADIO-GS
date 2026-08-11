@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "artifact_type": "frozen_one_shot_metric_ab_result",
+  "status": "complete_no_parameter_change_after_outcome",
+  "scene_id": "figurines",
+  "execution_receipt": {
+    "path": "paper/artifacts/canonical_field_stage_b_figurines_lerf3d_one_shot_ab_execution_receipt_20260810.json",
+    "sha256": "a315e3cfd65d8c67a742401fdb30bd2641d01cdc850ce694adcb90f06741953f"
+  },
+  "source_gate_authority": {
+    "path": "paper/artifacts/canonical_field_stage_b_figurines_source_only_multiteacher_v2_results_20260810.json",
+    "sha256": "aa3be2b215afc9754979f42db78c3ced1cf1fce6137ff09178945363e6554fed",
+    "all_eight_source_gates_passed_before_metric": true
+  },
+  "fields": {
+    "control": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5"
+    },
+    "candidate": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_source_multiteacher_direction_only_d512_l512_v2.pth",
+      "sha256": "838a4fa2ff523ccb9835f701df1e39b261f54846c8a30e724d85031f31af9a10"
+    }
+  },
+  "candidate_fresh_derivatives": {
+    "factorized_primitive_state": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/factorized_primitive_state_v2.pt",
+      "sha256": "646bc644e2aa19da83db17a930fa6a9ab468b5a9947bcd6d8f9f8da3f38ebedc"
+    },
+    "official_dino_sam3_views": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/official_dino_sam3_views_v2.pt",
+      "sha256": "cd71227a6abf254dde925a789553fcaf9ae226fdc07d0f1adc990895a73734ff"
+    },
+    "support_graph": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/support_graph_accepted_v2_isomorphic.pt",
+      "sha256": "2592de2d3132b645d83c6ca143ef8ff9e4c055f379a7c63f47ede7222ef70051"
+    },
+    "surface_region_descriptor": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/descriptor_accepted_v2_isomorphic.pt",
+      "sha256": "7aa0d8e0884d3792f7edf82aabb249ad6e15ea0ae85f40868b314fed1ddcd342",
+      "valid_primitives": 96879,
+      "text_queries_opened": false,
+      "benchmark_images_opened": false,
+      "benchmark_masks_opened": false
+    },
+    "positive_fp32_scores": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/positive_fp32.pt",
+      "sha256": "60a9847a7f5378287be2aa075357a19218a06f6dfb4b1b2fc1a6cbcf8ed2770f",
+      "shape": [168791, 3, 21]
+    },
+    "negative_fp32_scores": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/negative_fp32.pt",
+      "sha256": "56eda6cffe50ce99e274fde36c059e24786770662aea8efcbdc3b56d34a787c5",
+      "shape": [168791, 3, 4]
+    }
+  },
+  "frozen_evaluator": {
+    "source": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "sha256_before_control_and_candidate": "70863560844071fa3e6e5845b1095657a40852b81fdd6e0b8bad4ae8b24ccc8b",
+    "protocol_preset": "vala_repo_3d",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax",
+    "vala_knn_k": 10,
+    "scale_fusion": "peak_select",
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": 0.0392156862745098,
+    "alpha_binarization": "png_uint8_gt10",
+    "only_ab_difference": "positive_and_negative_field_derived_score_cache_paths"
+  },
+  "metric_results": {
+    "control": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/eval_control/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "00ba43bc3fde1be08570f935d9972925410eee83f584dd1694d60818b095029a",
+      "miou": 0.4443484842777252,
+      "acc025": 0.7678571428571429,
+      "acc050": 0.5535714285714286,
+      "boundary_f": 0.666241466999054,
+      "trimap_iou": 0.42230963706970215,
+      "n": 56,
+      "matches_historical_control": true
+    },
+    "candidate": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/eval_candidate/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "2c3f5bb7fe806a000f7aac0544e97552e772d1d2a9e392e0947051e36263f7ce",
+      "miou": 0.44569727778434753,
+      "acc025": 0.7678571428571429,
+      "acc050": 0.5535714285714286,
+      "boundary_f": 0.6663375496864319,
+      "trimap_iou": 0.42321401834487915,
+      "n": 56
+    },
+    "candidate_minus_control": {
+      "miou": 0.0013487935066223145,
+      "miou_percentage_points": 0.13487935066223145,
+      "acc025": 0.0,
+      "acc050": 0.0,
+      "boundary_f": 0.00009608268737792969,
+      "trimap_iou": 0.000904381275177002
+    }
+  },
+  "thermal": {
+    "policy": {
+      "physical_gpu": 0,
+      "power_limit_watts": 300,
+      "poll_interval_seconds": 60,
+      "soft_pause_temperature_celsius": 82,
+      "resume_temperature_celsius": 78,
+      "hard_stop_temperature_celsius": 85
+    },
+    "descriptor": {
+      "max_temperature_celsius": 60,
+      "max_power_watts": 157.83,
+      "pause_or_abort": false,
+      "telemetry_sha256": "646db0e2bb6c2b66949fbf78b80504a89670e2a524f4d1179ce4636d973209d7"
+    },
+    "control_metric": {
+      "max_temperature_celsius": 54,
+      "max_power_watts": 124.69,
+      "pause_or_abort": false,
+      "telemetry_sha256": "a87005c2c6ce22666b0c371c0e31f255a0854d72b578305ac6412881f15c242d"
+    },
+    "candidate_metric": {
+      "max_temperature_celsius": 56,
+      "max_power_watts": 126.1,
+      "pause_or_abort": false,
+      "telemetry_sha256": "9e06a8cd4b704605c177e1ba11ee75c36c70a9e731a7326f1067bab8c3e535e7"
+    }
+  },
+  "access_audit": {
+    "candidate_field_or_hyperparameters_changed_after_receipt": false,
+    "target_rgb_or_ground_truth_used_for_training_or_parameter_selection": false,
+    "benchmark_metric_runs_after_receipt": 2,
+    "benchmark_metric_run_semantics": "one_control_replay_then_one_candidate_evaluation",
+    "additional_metric_or_parameter_sweep": false
+  },
+  "interpretation": {
+    "result_direction": "positive_but_small",
+    "source_only_improvement_transfers_to_strict_reusable_field_metric": true,
+    "primary_conclusion": "Direction-only source distillation is causally compatible with the canonical field and yields a real frozen LERF3D gain, but the gain is too small to explain or close the remaining LERF3D gap.",
+    "parameter_action_after_outcome": "none"
+  }
+}

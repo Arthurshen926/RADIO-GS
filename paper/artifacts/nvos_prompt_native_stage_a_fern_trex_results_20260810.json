@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_prompt_native_stage_a_fern_trex_result_authority_v1",
+  "status": "sentinel_gate_failed_no_full8_expansion",
+  "single_factor_contract": {
+    "baseline": "frozen hierarchical-trust local-positive full8 v2",
+    "method_change": "score_render_resolution: scaled_renderer -> prompt_native",
+    "unchanged_method_factors": "verified from sealed prediction receipts",
+    "execution_only_changes": [
+      "physical GPU 1 -> GPU 0",
+      "output paths moved to local SSD"
+    ],
+    "target_rgb_used": false,
+    "target_mask_used_before_both_prediction_receipts_were_sealed": false
+  },
+  "authority": {
+    "stage_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/nvos_prompt_native_stage_a_fern_trex_v1/stage_a_manifest.json",
+      "sha256": "8d9a0ee6869e77db9349735b4a105703c106d9081bb156f7a5196fb564c5865b"
+    },
+    "exact_results": {
+      "path": "/root/RADIO-GS/local_ssd_results/nvos_prompt_native_stage_a_fern_trex_v1/exact_results_v2.json",
+      "sha256": "dfd1cf062ecd68214fde9fb7c1dd5e8c95b3b1e7b74fc48473aa449d1353ce55"
+    },
+    "scorer": {
+      "path": "radio_gs/scripts/nvos_prompt_native_stage_a.py",
+      "sha256": "4ac84dff1955278c2ad9aa4c0eee1ac034cc5511f51d6f06006d0cffc7a98fad"
+    },
+    "frozen_evaluator_sha256": "f7d8a8f36fb6318f30b49e7654d52cb446bb7858e235edef8887f5e754f246d0",
+    "fern_prediction_receipt_sha256": "7737c97fe6cf72a32dd793b33cdad1c733ce93e880459c46a9c8774d847e74a3",
+    "trex_prediction_receipt_sha256": "3eacb77efa747c7ba138fcc1a126c9809d381b02862ccabd5f31c15908eac20a"
+  },
+  "exact_results": {
+    "fern": {
+      "baseline_iou": 0.7350345861696804,
+      "candidate_iou": 0.4954509326671613,
+      "delta_iou": -0.23958365350251914,
+      "baseline_pixel_accuracy": 0.9045169385194479,
+      "candidate_pixel_accuracy": 0.8494453766550938
+    },
+    "trex": {
+      "baseline_iou": 0.60547969614955,
+      "candidate_iou": 0.5681876881350021,
+      "delta_iou": -0.037292008014547906,
+      "baseline_pixel_accuracy": 0.9306841081292077,
+      "candidate_pixel_accuracy": 0.9455696177236274
+    },
+    "pair_macro": {
+      "baseline_iou": 0.6702571411596152,
+      "candidate_iou": 0.5318193104010817,
+      "delta_iou": -0.13843783075853355,
+      "candidate_pixel_accuracy": 0.8975074971893606
+    }
+  },
+  "safety_and_replay": {
+    "both_receipts_verified_before_first_target_ground_truth_open": true,
+    "candidate_score_shapes_equal_native_prompt_shape": true,
+    "native_shape": [
+      756,
+      1008
+    ],
+    "primitive_unary_bit_exact_to_base": false,
+    "primitive_unary_numerically_equivalent_to_base": true,
+    "maximum_fern_unary_absolute_difference": 4.76837158203125e-07,
+    "mean_fern_unary_absolute_difference": 4.721032453858243e-09,
+    "maximum_trex_unary_absolute_difference": 4.76837158203125e-07,
+    "mean_trex_unary_absolute_difference": 3.1159126390178926e-09,
+    "unary_tolerance_fixed_before_target_ground_truth_open": true,
+    "python_compile": "passed",
+    "physical_gpu": 0,
+    "maximum_observed_boundary_temperature_c": 48,
+    "thermal_pause_or_abort": false
+  },
+  "decision": {
+    "registered_pair_macro_delta_minimum": 0.005,
+    "registered_per_scene_delta_minimum": -0.002,
+    "pair_macro_gate_passed": false,
+    "per_scene_safety_gate_passed": false,
+    "promote": false,
+    "full8_started": false,
+    "registry_policy": "record as a rejected diagnostic only; retain scaled_renderer for the frozen NVOS row",
+    "mechanistic_conclusion": "Direct native-resolution scalar compositing changes the effective splat support and threshold topology. The frozen low-resolution render followed by bilinear evaluation resize supplies material smoothing/calibration; native shape correctness alone does not imply a better binary readout."
+  }
+}

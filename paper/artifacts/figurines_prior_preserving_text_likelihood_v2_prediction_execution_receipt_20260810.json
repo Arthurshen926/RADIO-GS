@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "artifact_type": "figurines_prior_preserving_text_likelihood_v2_prediction_execution_receipt",
+  "status": "sealed_before_either_v2_prediction_or_new_metric",
+  "preregistration": {"path": "/root/RADIO-GS/paper/artifacts/figurines_prior_preserving_text_likelihood_v2_preregistration_20260810.json", "sha256": "0e13d258fbfcb7c23f3f521e447c33fb6044478af78c4d9f2022cfc22b37131c"},
+  "implementation_correction": {"path": "/root/RADIO-GS/paper/artifacts/figurines_prior_preserving_text_likelihood_v2_execution_correction_20260810.json", "sha256": "d01305e0cfa4f4313ce07f3d1917c52170808a171fc05546e7e671bdcee3ef33"},
+  "runner": {"path": "/root/RADIO-GS/radio_gs/scripts/run_figurines_prior_preserving_v2_prediction.sh", "sha256": "03b18c1997191c898d7c9cab2bf3d17f19d049a931e6b2f5bc842ba68bf8c0c7"},
+  "arms": {
+    "control": {
+      "likelihood_cache_sha256": "9d6fb08b19773e2e3133ea6d15a8c4eb27f8e1e2bcfb6a29164af683c08335ea",
+      "planned_receipt": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/pred_control_prior_preserving_v2.receipt.json"
+    },
+    "stage_b": {
+      "likelihood_cache_sha256": "8edbbdd05c19060b74b231566ea03997eed1cd414c29e8431a9e16813ef69863",
+      "planned_receipt": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/pred_stage_b_prior_preserving_v2.receipt.json"
+    }
+  },
+  "execution": {
+    "order": ["control", "stage_b"],
+    "one_fresh_guard_per_arm": true,
+    "reason_for_separate_guards": "container-invisible CUDA host PIDs are bound once by each exclusive singleton guard",
+    "physical_gpu": 1,
+    "power_limit_watts": 300,
+    "poll_interval_seconds": 60,
+    "soft_pause_temperature_celsius": 82,
+    "resume_temperature_celsius": 78,
+    "hard_stop_temperature_celsius": 85,
+    "all_predictions_sealed_before_first_new_ground_truth_open": true,
+    "head_q_c_field_threshold_knn_projection_graph_may_change": false,
+    "lerf_ground_truth_or_metric_opened_for_v2": false
+  }
+}

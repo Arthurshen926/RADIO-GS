@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_prior_preserving_text_likelihood_v2_pre_metric_prediction_batch_seal",
+  "status": "all_six_same_cache_predictions_hash_validated_before_first_new_metric",
+  "prediction_execution_receipt": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_prior_preserving_text_likelihood_v2_prediction_execution_receipt_20260810.json", "sha256": "9c0169753b938746f29a9825a64cf648a248b7613432e0d8a2fecb7a15ed4fc8"},
+  "prediction_receipts": {
+    "ramen_legacy": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_ramen_legacy.receipt.json", "sha256": "6001df751fe775b6531072d2f6b0279a35822c7d844d1b3af24ba765a210db6b", "prediction_count": 71, "text_mapping": "legacy_fixed_canonical_negative_margin"},
+    "ramen_v2": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_ramen_v2.receipt.json", "sha256": "0988774be9447aea2f31bc41005fc9566a43c3f7aa015911bbab0f34b67a7b56", "prediction_count": 71, "text_mapping": "prior_preserving_mixture_v2"},
+    "teatime_legacy": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_teatime_legacy.receipt.json", "sha256": "bd02fd40aebb23b9069c58ab63fe3a93c4aa3f7ea91f4cbf1cba519d2fba88e1", "prediction_count": 59, "text_mapping": "legacy_fixed_canonical_negative_margin"},
+    "teatime_v2": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_teatime_v2.receipt.json", "sha256": "addd4356ffabb6ebb8c386a4f0ff6468224790152a53a66abcdf1235228cfcff", "prediction_count": 59, "text_mapping": "prior_preserving_mixture_v2"},
+    "waldo_kitchen_legacy": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_waldo_kitchen_legacy.receipt.json", "sha256": "aefcb73e9fe27263f73bfaaae09f91e396760a2e8446ce9d07aa8e7ec78f3755", "prediction_count": 22, "text_mapping": "legacy_fixed_canonical_negative_margin"},
+    "waldo_kitchen_v2": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810/pred_waldo_kitchen_v2.receipt.json", "sha256": "a2ac1f2afc3c9cad59557ee019e361a2c5b22ddb45000ca9a8d0033093fc8c8f", "prediction_count": 22, "text_mapping": "prior_preserving_mixture_v2"}
+  },
+  "validation": {
+    "all_304_prediction_and_coarse_mask_hashes_replayed": true,
+    "strict_feature_field_receipt": true,
+    "legacy_and_v2_protocol_equal_except_text_mapping_and_likelihood_cache": true,
+    "target_rgb_opened": false,
+    "target_annotation_coordinates_loaded": false,
+    "target_mask_rasterized_before_seal": false,
+    "target_metric_computed_before_seal": false,
+    "lerf_ground_truth_loader_called": false
+  },
+  "frozen_metric": {
+    "scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_lerf_sealed_prediction_batch.py", "sha256": "9e99174b4c219e9db80bb571993a379406c028d8ccee14ecba105154f23c4475"},
+    "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+    "score_all_six_once_with_same_scorer": true,
+    "no_parameter_callback": true
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "maximum_temperature_celsius": 58,
+    "maximum_power_watts": 128.56,
+    "pause_or_abort": false,
+    "cuda_release_verified_after_each_arm": true
+  }
+}

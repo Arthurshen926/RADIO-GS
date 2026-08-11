@@ -1,0 +1,68 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_scannet_paper8_prediction_preregistration.v1",
+  "status": "frozen_after_all_source_gates_before_semantic_prediction_or_label_access",
+  "scientific_question": "Does mapping-time source-RGB official-SAM supervision improve the frozen RGB-free ScanNet OVS readout while the persistent field remains RADIO-only?",
+  "source_gate_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_paper8_source_gate_result_20260810.json",
+    "sha256": "102f52fee4f125d1e112a3b0a97390582063e5ecfae67e3fb3804d092d3e95ed"
+  },
+  "rollout_inventory": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_paper8_rollout_inventory_20260810.json",
+    "sha256": "1f724349da55099a8ba99ab13d94c446fba4b3c6518bd0c020b74fed409f978c"
+  },
+  "access_contract": {
+    "mapping_time_source_rgb_used": true,
+    "evaluation_time_source_rgb_used": false,
+    "evaluation_time_target_rgb_used": false,
+    "evaluation_time_sam_mask_feature_or_decoder_used": false,
+    "persistent_semantic_feature": "canonical_radio_only",
+    "query_input": "frozen_split19_text_embedding_bank",
+    "all_eight_predictions_sealed_before_first_semantic_label_open": true,
+    "per_scene_or_per_task_tuning": false
+  },
+  "frozen_readout": {
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_ours_scannet_gaussian_semantic_score_cache.py",
+      "sha256": "d4c64a96ce447c51e3a189766f02fac8dc93cfda10f67aec79437acb30332ec2"
+    },
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_ours_scannet_vala_gaussian_protocol.py",
+      "sha256": "721a55b2022a122f4b0cee35453326ff0d0c28a8a86263cb0b1c6adce4a2e3d6"
+    },
+    "surface_region_readout": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/global_3d_readout/surface_region_readout_h128.pth",
+      "sha256": "06c1d9c3bfaf674de54fa1167aa2d156e183e0a751c87d0e7c09733928464b5b"
+    },
+    "query_bank": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_scannet_og_text_embeddings_exact_split19.pt",
+      "sha256": "d40b0781001e236ab77d8a5fc8d1fee2e30cefe614c0b6e9884ffae70c737b9f"
+    },
+    "canonical_mainline_sha256": "3d6d36ab91ef3b2c406a6fad02bc9bf085a680690f84e35896751d414d57dbae",
+    "canonical_method_freeze_sha256": "9ea6fc8d79ee11ae2ccb3b6ef738580983cae406f586db61833182780587c009",
+    "evaluation_protocol_freeze_sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916"
+  },
+  "prediction_output": {
+    "root": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scannet_ovs_predictions",
+    "score_pattern": "{scene_id}.pt",
+    "receipt_pattern": "{scene_id}.pt.receipt.json",
+    "no_clobber": true
+  },
+  "comparison": {
+    "control_authority": "/root/RADIO-GS/paper/artifacts/scannet_canonical_mpr_v3_gaussian_semantic_result_authority_20260802.json",
+    "control_split19_miou": 0.3786329623189025,
+    "control_split15_miou": 0.41979414941029086,
+    "control_split10_miou": 0.5234081172660365,
+    "promotion_gate": {
+      "each_split_miou_delta_minimum": -0.002,
+      "each_split_macc_delta_minimum": -0.002,
+      "mean_three_split_miou_delta": "must_be_strictly_positive"
+    }
+  },
+  "thermal": {
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  }
+}

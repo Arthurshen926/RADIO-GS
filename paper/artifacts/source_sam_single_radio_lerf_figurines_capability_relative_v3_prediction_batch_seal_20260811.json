@@ -1,0 +1,57 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_capability_relative_v3_prediction_batch_seal.v1",
+  "status": "sealed_before_first_v3_lerf3d_or_lerf2d_metric",
+  "scene_id": "figurines",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_rgb_free_benchmark_preregistration_20260811.json",
+    "sha256": "979ea3ace8168618ef2c40ecd68fdc3531736a1932e89354db142384801f95c2"
+  },
+  "execution_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_benchmark_execution_correction_20260811.json",
+    "sha256": "a768be433b2c7bf0605d88ce81cf399da5bf4efbb4307804cc69af0ddc25c4f4"
+  },
+  "query_score_batch_seal": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_query_score_batch_seal_20260811.json",
+    "sha256": "b2dd38844a6962679b3e613317d86eabc93f033061b9db3394f3cb36bb612ab1"
+  },
+  "lerf3d": {
+    "fresh_same_generation_control_receipt": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_control_v2.receipt.json",
+      "sha256": "8fb98eb5a7211b40cd9d9f7e28028c1e362534187ee873c5e4f427cc65c08d0a"
+    },
+    "candidate_receipt": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines/rgb_free_benchmark_sentinel/lerf3d_prediction_v1.receipt.json",
+      "sha256": "720e1ac58d69e68cfeacfad3a5e3e48f8c8c1fb1ef51a954db32af02ca4d8088"
+    },
+    "candidate_prediction_manifest_sha256": "16ae6d827de993829a89052e9f2366ae776edf416860592472e4d398e0e1d4c0",
+    "prediction_count_per_arm": 56,
+    "mask_refinement": "none",
+    "projection_mode": "selected_only_alpha",
+    "target_rgb_opened": false,
+    "target_mask_rasterized_before_seal": false,
+    "metric_computed_before_seal": false
+  },
+  "lerf2d": {
+    "fresh_same_generation_control_manifest_sha256": "ad0fae8e2da8bba81d4e2d890d0ee31baa4651cc180543797843c713d2dc7c69",
+    "fresh_same_generation_control_renderer_receipt_sha256": "4c95af6afe51b29d29d49f495ea79783147d149f6ed38b6b8b5daa58ebead63a",
+    "candidate_manifest_sha256": "365057ff3255fa8e1fa156fada3bc6b895f68a56a5686d8e9e628a52ad411813",
+    "candidate_renderer_receipt_sha256": "43e1158ccd6ce0d6eecde1c4c03be708ee5e809715d29ac05e10006e4d5efe45",
+    "frames": 22,
+    "queries": 208,
+    "scalar_maps_complete_before_metric": true
+  },
+  "shared_access_contract": {
+    "query_time_source_rgb": false,
+    "query_time_target_rgb": false,
+    "query_time_official_sam": false,
+    "target_gt_used_for_prediction_or_selection": false,
+    "threshold_scale_or_field_changed_after_preregistration": false
+  },
+  "thermal": {
+    "gpu0_lerf2d_max_sampled_temperature_c": 52,
+    "gpu1_lerf3d_max_sampled_temperature_c": 48,
+    "soft_pause_triggered": false,
+    "hard_abort_triggered": false,
+    "both_gpus_released": true
+  }
+}

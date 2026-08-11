@@ -13,6 +13,7 @@ from .anchor_preserving_transport import (
     apply_anchor_preserving_probability_proposal,
 )
 from .evidence_scorer import (
+    compile_direct_registered_likelihood_unary,
     EvidenceScoringConfig,
     fuse_registered_observation_unary,
     score_query_evidence,
@@ -52,6 +53,20 @@ class QueryResult:
     negative_spatial_mode: str = "none"
     registered_2d_transport_policy: str = "legacy_graph_solver_final"
     registered_2d_transport_diagnostics: Mapping[str, object] | None = None
+
+    @property
+    def registered_observation_transport_policy(self) -> str:
+        """Registration-domain-neutral alias for the legacy result field."""
+
+        return self.registered_2d_transport_policy
+
+    @property
+    def registered_observation_transport_diagnostics(
+        self,
+    ) -> Mapping[str, object] | None:
+        """Registration-domain-neutral alias for the legacy result field."""
+
+        return self.registered_2d_transport_diagnostics
 
     @property
     def selected_probabilities(self) -> torch.Tensor:
@@ -304,10 +319,7 @@ class CanonicalQueryEngine:
         # observation is fused.  This explicit interface lets protocol audits
         # verify the field expert independently from the query observation.
         field_unary = unary
-        if (
-            query.modality is QueryModality.REGISTERED_2D
-            and query.primitive_unary_evidence is not None
-        ):
+        if query.primitive_unary_evidence is not None:
             # A registered prompt is direct scene evidence.  Add it after
             # query-independent field-reliability shrinkage so a low-confidence
             # feature row cannot erase an observed scribble/full-mask unary.
@@ -319,6 +331,24 @@ class CanonicalQueryEngine:
                     "registered prompt unary does not align with support graph"
                 )
             if (
+                scoring_config.registered_observation_fusion
+                == "direct_registered_likelihood"
+            ):
+                if query.primitive_unary_evidence.confidence is None:
+                    raise ValueError(
+                        "direct registered likelihood requires explicit confidence"
+                    )
+                # The registered likelihood is already the complete calibrated
+                # capability observation.  Re-scoring the same prototypes and
+                # multiplying/adding them here would count appearance and
+                # boundary evidence twice.  Hard click seed groups remain on
+                # QuerySpec and are still enforced by the support solver.
+                unary = compile_direct_registered_likelihood_unary(
+                    query.primitive_unary_evidence,
+                    unary_temperature=self.solver_config.unary_temperature,
+                ).to(device=prompt_unary.device, dtype=prompt_unary.dtype)
+                components = {"registered_likelihood": unary}
+            elif (
                 scoring_config.registered_observation_fusion
                 == "direct_raster_adjoint"
             ):
@@ -517,7 +547,6 @@ class CanonicalQueryEngine:
         transport_enabled = (
             self.registered_2d_transport_policy
             == "anchor_preserving_graph_proposal_v1"
-            and query.modality is QueryModality.REGISTERED_2D
             and query.primitive_unary_evidence is not None
         )
         transport_policy = "legacy_graph_solver_final"

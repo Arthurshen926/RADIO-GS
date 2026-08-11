@@ -1,0 +1,51 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_figurines_lerf3d_prediction_batch_seal.v1",
+  "status": "sealed_before_first_ground_truth_metric_for_either_arm",
+  "scene_id": "figurines",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_rgb_free_benchmark_preregistration_20260811.json",
+    "sha256": "34ee52ce4e2f48e44286c28fdc81b5a7c9ef97f7a9e6e1f7f3364c640781a7ee"
+  },
+  "execution_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_lerf3d_execution_correction_20260811.json",
+    "sha256": "e684c80f2009e2016523969ad64166a862f921812774950c0f5c24e327d633cc"
+  },
+  "arms": {
+    "control": {
+      "prediction_receipt": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_control_v2.receipt.json",
+      "prediction_receipt_sha256": "8fb98eb5a7211b40cd9d9f7e28028c1e362534187ee873c5e4f427cc65c08d0a",
+      "prediction_manifest": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_control_v2/figurines/lerf_direct_3d_selection_results.json",
+      "prediction_manifest_sha256": "775c226443f0bfe5594daf681d5308d890862025235c8e5ff220e6b1be2e5089",
+      "prediction_count": 56,
+      "positive_score_sha256": "ff6adc75c3c153b86dca43ab031603f12448ed479fee74ab0268a2c665936159",
+      "negative_score_sha256": "b046ef83436cdf34a5d22f219a59dcac7f60f399d4b08f6b57a6547b26d6fe3e"
+    },
+    "source_sam_single_radio_candidate": {
+      "prediction_receipt": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_candidate_v2.receipt.json",
+      "prediction_receipt_sha256": "24d1f169fabdd203afbedadb947574ab768048f6c8793186d7df68db0ec54888",
+      "prediction_manifest": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/eval_candidate_v2/figurines/lerf_direct_3d_selection_results.json",
+      "prediction_manifest_sha256": "9644b7c1abd4842313f77e4483ff73534eaaab84345ca35e9acefe63fe3fc0a8",
+      "prediction_count": 56,
+      "positive_score_sha256": "75b92f454d9723e45012bc7147e30a5ba26c55d3e95015300ad9c8f662d89d15",
+      "negative_score_sha256": "63faf3dfac9c0f9ad033a99747ba42e5ced010704d54c27c9b05a9f61e734ec0"
+    }
+  },
+  "shared_protocol": {
+    "protocol_preset": "vala_repo_3d",
+    "prediction_count_per_arm": 56,
+    "mask_refinement": "none",
+    "projection_mode": "selected_only_alpha",
+    "query_time_source_rgb": false,
+    "query_time_target_rgb": false,
+    "query_time_official_sam": false,
+    "target_mask_rasterized_before_seal": false,
+    "target_metric_computed_before_seal": false
+  },
+  "thermal_summary": {
+    "gpu0_control_max_sampled_temperature_c": 52,
+    "gpu1_candidate_max_sampled_temperature_c": 49,
+    "soft_pause_triggered": false,
+    "hard_abort_triggered": false,
+    "both_gpus_released": true
+  }
+}

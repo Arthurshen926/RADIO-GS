@@ -1,0 +1,39 @@
+{
+  "schema_version": 4,
+  "artifact_type": "figurines_field_by_text_mapping_2x2_fourth_arm_continuation",
+  "status": "registered_after_three_prediction_receipts_before_fourth_prediction_or_any_ground_truth_metric",
+  "gpu_runtime_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/figurines_field_text_likelihood_2x2_gpu1_runtime_addendum_v3_20260810.json",
+    "sha256": "f28ca4f7244d225a5a0c21e43802977d8b709acf01ce7e0f650990633b74dd8a"
+  },
+  "sealed_arms": {
+    "control_legacy": {"receipt_sha256": "92aa5b2c3f3e8d7b38285a5608ca0637cbc3ccf3d9fb74beb89dd9bbf3301afc", "prediction_count": 56, "validated_without_ground_truth": true},
+    "control_learned": {"receipt_sha256": "4622d72db6234e20c6011fa3f8e9c01ee85b1b4cf0f21c43a86cda9492bf2691", "prediction_count": 56, "validated_without_ground_truth": true},
+    "stage_b_v2_legacy": {"receipt_sha256": "5a0048117aeeebaeb58412ad6e5eaa6e324b8a3ebad50ac69bfd0fc8a2249fc5", "prediction_count": 56, "validated_without_ground_truth": true}
+  },
+  "continuation_reason": {
+    "thermal_guard_exit_code": 86,
+    "guarded_process_group": 359117,
+    "first_invisible_host_cuda_pid_bound": 1822150,
+    "later_sequential_arm_host_cuda_pid": 1823443,
+    "diagnosis": "exclusive singleton guard correctly rejected the new invisible host PID even though it was the next sequential child in the same runner",
+    "temperature_or_pcie_failure": false,
+    "fourth_arm_created_prediction_mask_or_receipt": false,
+    "lerf_ground_truth_or_metric_opened": false,
+    "partial_empty_output_and_log": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/aborted_guard_sequential_host_pid",
+    "partial_artifacts_deleted": false
+  },
+  "fourth_arm": {
+    "name": "stage_b_v2_learned",
+    "execution": "one fresh physical-GPU1 thermal-guard invocation so its one CUDA PID is bound atomically",
+    "positive_score_cache_sha256": "60a9847a7f5378287be2aa075357a19218a06f6dfb4b1b2fc1a6cbcf8ed2770f",
+    "negative_score_cache_sha256": "56eda6cffe50ce99e274fde36c059e24786770662aea8efcbdc3b56d34a787c5",
+    "learned_likelihood_cache_sha256": "215dac7c2bb071c5182be89cc921311fc0d8ad77987c38a1d1cae527c9df8496",
+    "method_or_evaluator_parameter_changed": false
+  },
+  "gate": {
+    "all_four_predictions_must_be_hash_sealed_before_first_ground_truth_open": true,
+    "three_existing_receipts_may_not_be_regenerated": true,
+    "scanNet_benchmark_metric_forbidden": true
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_disjoint_domain_composition_fern_trex_preregistration_v1",
+  "status": "frozen_after_input_authority_and_cpu_tests_before_composed_prediction_or_target_scoring",
+  "scene_order": ["fern", "trex"],
+  "method": {
+    "mode": "registered_likelihood_object_memory_disjoint_v1",
+    "original_observed_domain": "base registered observation c>0; learned query-likelihood unary only",
+    "memory_domain": "base registered observation c==0 and sealed memory c>0; object-memory unary only",
+    "remaining_domain": "base c==0 and memory c==0; learned branch abstaining field prior",
+    "hard_anchor_precedence": "hard anchors are required to be a subset of original c>0 and retain learned-observed unary bitwise",
+    "probability_average_or_product_of_experts": false,
+    "same_row_double_counting": false,
+    "graph": "disabled zero-edge",
+    "readout": "unary_prior",
+    "pixel_threshold": 0.5,
+    "target_rgb_mask_or_metric_used": false,
+    "scene_specific_parameter_selection": false
+  },
+  "frozen_base": {
+    "run_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/run_manifest.json",
+      "sha256": "bf34e7a370259e841067f0cd9e982ca9301892ba1877a12d48220d5f8dc65432"
+    },
+    "exact_results": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/full8_exact_results.json",
+      "sha256": "c2759a08ba769a36598b9614ac7e4b901b4322004424e075651cb91eb667ce21"
+    },
+    "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9"
+  },
+  "sealed_inputs": {
+    "fern": {
+      "base_prediction_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/fern/pre_metric_prediction_receipt.json",
+        "sha256": "8ec0cee097f6d39407cc9feb65d3c51db6ef79530425c4d504c7fe66ad72906c"
+      },
+      "base_primitive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/fern/primitive_unary.pt",
+        "sha256": "d25221bad2f6ae7f6ed245c6a339b27a723c24a7390f03376f3a0e10ad29763b"
+      },
+      "likelihood_prediction_receipt": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_registered_query_likelihood_fern_trex_v2/fern/pre_metric_prediction_receipt.json",
+        "sha256": "548f9a7faeb4d89fef8e0f911e604ebe09c6563ad35c191f441f72ed567364c8"
+      },
+      "likelihood_primitive": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_registered_query_likelihood_fern_trex_v2/fern/primitive_unary.pt",
+        "sha256": "ebdfc0e2c764636efcdc77acc9df0489e4f3afec04569f8197a24bbfcdd968cc"
+      },
+      "memory_prediction_receipt": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_object_multiview_region_memory_fern_trex_v1/fern/pre_metric_prediction_receipt.json",
+        "sha256": "39a29cc744a615776fabe9678824aca0fde3e54edbf314d0219a42b9d9b3a429"
+      },
+      "memory_primitive": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_object_multiview_region_memory_fern_trex_v1/fern/primitive_unary.pt",
+        "sha256": "65fd7f7332424d05526ba13a4028d3f538b039d9bad606c6c44d6beee6a4f706"
+      },
+      "memory_asset": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_c/fern/memory.pt",
+        "sha256": "f77d2e77ee30bec7d11c4a9160cce2b2d32038c503db736e9fe626229536f3c2"
+      },
+      "field_sha256": "f19dfdcc09e7b5b0033c7c24abbc192e021921703e7b88d050145b4de0c6ca3e",
+      "capability_cache_sha256": "e2ae42289efa7d49c9ef1fb684e860a7703d6a77758e3847c903e038cc2f845f",
+      "valid_rows": 297200,
+      "original_observed_rows": 172843,
+      "original_abstained_rows": 124357
+    },
+    "trex": {
+      "base_prediction_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/trex/pre_metric_prediction_receipt.json",
+        "sha256": "f3c1173b86fdce608073123eff891c455de42b0b0d091f0d500fc7aeb7e565a0"
+      },
+      "base_primitive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/trex/primitive_unary.pt",
+        "sha256": "3c9053c0239c8da78f5b032a2545e1923154879432d57120de7a9a1299275774"
+      },
+      "likelihood_prediction_receipt": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_registered_query_likelihood_fern_trex_v2/trex/pre_metric_prediction_receipt.json",
+        "sha256": "8842c2d9fb799453d397d586b1573cdce368f236259eb061970ae18ae83cda68"
+      },
+      "likelihood_primitive": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_registered_query_likelihood_fern_trex_v2/trex/primitive_unary.pt",
+        "sha256": "e2c5d6a528709ecbef0fd97870d24f70fa5e539051bf88dcfacbf90944234d0c"
+      },
+      "memory_prediction_receipt": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_object_multiview_region_memory_fern_trex_v1/trex/pre_metric_prediction_receipt.json",
+        "sha256": "ded0f28f0b676694500cfd3dc9ef0c8d807e0fd214c8e1da80d11b2df538c269"
+      },
+      "memory_primitive": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_object_multiview_region_memory_fern_trex_v1/trex/primitive_unary.pt",
+        "sha256": "659c551af6b9e389c37f89b96b7c3b6f87aaf2134dcd5bf5bfcfcbcc4203e3f6"
+      },
+      "memory_asset": {
+        "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_c/trex/memory.pt",
+        "sha256": "98e18757d0d125342ba82681a7b2772c8b6dc227a75285e90771abd362bfb052"
+      },
+      "field_sha256": "408d3bb5d2ce08f943586417fe4b2245888c75f72b5bfc789efb970f4d55d8f7",
+      "capability_cache_sha256": "d245fe7f18a0fb258ce4d77400f5fa223107c18d4a273ac58bdcc795d336f8ee",
+      "valid_rows": 154586,
+      "original_observed_rows": 55663,
+      "original_abstained_rows": 98923
+    }
+  },
+  "input_authority_audit": {
+    "base_primitive_protocol_field_capability_valid_and_global_rows_equal_across_inputs": true,
+    "graph_disabled_and_readout_equal_across_inputs": true,
+    "query_likelihood_observed_counts_equal_memory_original_observed_counts": true,
+    "runtime_must_export_exact_observed_mask_and_match_both_input_counts": true,
+    "partition_masks_must_be_hashed_and_stored_before_target_ground_truth": true
+  },
+  "frozen_implementation": {
+    "composition": {
+      "path": "/root/RADIO-GS/radio_gs/querying/disjoint_domain_composition.py",
+      "sha256": "8981b3b5c6bb2314ff946e48d4e634d4acc167b060a50e56d51a73343812c165"
+    },
+    "query_likelihood_head": {
+      "path": "/root/RADIO-GS/radio_gs/querying/query_likelihood_head.py",
+      "sha256": "6bb7f82ba8c7c0ee042b9a9521a751a67e4f085639430b428e9717160beafd9c"
+    },
+    "region_memory_runtime": {
+      "path": "/root/RADIO-GS/radio_gs/querying/multiview_region_memory_runtime.py",
+      "sha256": "a43478f11506dc8f75f73a337224634648555760073b89b3ecd36c536f14b1a2"
+    },
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_nvos_gaussian_first.py",
+      "sha256": "c20d485b4249fbd0b3d7d03c2eb5695d0c60fd5fff85116d57642bfbeeda3086"
+    },
+    "runner": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_nvos_disjoint_domain_composition_prediction.py",
+      "sha256": "df19cfa7922bf81467955c7ebdda70dedf74ca854045036e52ce68bf9e852f8f"
+    },
+    "scorer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_disjoint_domain_composition.py",
+      "sha256": "65a47873182edb3b1264b8eeb882d07101f9494946fc858ef78f6f3cb3a40da7"
+    }
+  },
+  "prediction_barrier": {
+    "output_root": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_fern_trex_v1",
+    "both_scene_predictions_must_be_sealed_before_first_target_mask_open": true,
+    "no_clobber": true
+  },
+  "promotion_gate": {
+    "pair_macro_iou_delta_minimum": 0.005,
+    "per_scene_iou_delta_minimum": -0.002,
+    "full8_source_memory_authorized_only_if_both_pass": true
+  },
+  "planned_execution": {
+    "initial_physical_gpu": 1,
+    "thermal_poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  },
+  "validation": {
+    "focused_tests": "71 passed, 3 warnings",
+    "python_compile": "passed",
+    "evaluator_help": "passed",
+    "target_rgb_mask_or_metric_opened": false
+  }
+}

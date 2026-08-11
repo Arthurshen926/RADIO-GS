@@ -1,0 +1,52 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_gpu_execution_correction.v1",
+  "status": "frozen_before_resumed_official_sam_generation",
+  "scene_id": "figurines",
+  "rollout_inventory": {
+    "path": "paper/artifacts/source_sam_single_radio_lerf_figurines_rollout_inventory_20260810.json",
+    "sha256": "1a4fc88f209a10149143a69125d7540bd75fb2256944c921db540116be49c7e2"
+  },
+  "failed_execution": {
+    "reason": "container_pid_namespace_reported_sam_child_host_pid_as_foreign_owner",
+    "gpu0_exit_code": 86,
+    "gpu1_exit_code": 86,
+    "thermal_or_cuda_failure": false,
+    "maximum_sampled_temperature_c": {
+      "gpu0": 59,
+      "gpu1": 63
+    },
+    "completed_cache_count": 16,
+    "completed_cache_count_per_gpu": {
+      "gpu0": 8,
+      "gpu1": 8
+    },
+    "generation_manifest_written": false
+  },
+  "correction": {
+    "guard_owner_pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "existing_cache_policy": "load_validate_source_query_free_metadata_and_include_in_resumed_manifest",
+    "method_or_teacher_parameters_changed": false,
+    "source_frame_axis_changed": false,
+    "output_cache_overwrite_allowed": false,
+    "resumed_manifest_names": [
+      "manifest_gpu0_v2.json",
+      "manifest_gpu1_v2.json"
+    ]
+  },
+  "implementation": {
+    "automatic_mask_builder_sha256": "42592d6fe3e3b2fe722a7853842db622d3c535ff7e2f93d2a08675895440010b",
+    "thermal_guard_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+  },
+  "thermal_policy": {
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  },
+  "access_audit": {
+    "benchmark_query_gt_or_metric_opened": false,
+    "evaluation_rgb_opened": false,
+    "method_selected_from_benchmark_outcome": false
+  }
+}

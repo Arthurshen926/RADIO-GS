@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_odds_residual_transport_v4_prediction_execution_receipt",
+  "status": "sealed_before_prediction_launch",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_preregistration_20260810.json",
+    "sha256": "859b0c8fb91008ee534649811d82733817f765832de95a5349deb428d549e62b"
+  },
+  "implementation": {
+    "adapter_sha256": "cbd5a28aaf1677544c4073ec60db6292ded6638ba6db1bf14a13ed46a1545bfd",
+    "evaluator_sha256": "e9e5988c2a37a90de7cee03f013097d5d98d53e15147811861403aed21342803",
+    "runner": {"path": "/root/RADIO-GS/radio_gs/scripts/run_lerf_full4_odds_residual_v4_prediction.sh", "sha256": "687fb711a884c3e5629b05478c89fb9e76f3df2b90e6f021223e37361e64cdf4"},
+    "focused_tests": "132 passed",
+    "text_mapping": "post_readout_odds_residual_transport_v4",
+    "fixed_logit_clip_epsilon": 0.000001
+  },
+  "execution": {
+    "prediction_order": ["figurines", "ramen", "teatime", "waldo_kitchen"],
+    "output_root": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_20260810",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-c343c114-0407-0fd3-7de3-9f46030bf309",
+    "preflight": {"temperature_celsius": 47, "power_watts": 25.12, "memory_used_mib": 1, "foreign_compute_process": false},
+    "runtime_shim": "/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime",
+    "thermal_guard": {"poll_seconds": 60, "soft_stop_celsius": 82, "resume_below_celsius": 78, "hard_stop_celsius": 85, "power_cap_watts": 300},
+    "all_four_receipts_must_be_hash_sealed_before_metric": true,
+    "no_clobber": true
+  },
+  "metric_after_batch_seal": {
+    "scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_lerf_sealed_prediction_batch.py", "sha256": "9e99174b4c219e9db80bb571993a379406c028d8ccee14ecba105154f23c4475"},
+    "reuse_existing_legacy_metrics": true,
+    "score_each_v4_candidate_once": true,
+    "parameter_callback": false
+  },
+  "access_at_seal": {
+    "v4_prediction_opened": false,
+    "v4_metric_opened": false,
+    "formula_or_parameter_changed_after_preregistration": false
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_field_stage_b_source_only_gate_result",
+  "scene_id": "figurines",
+  "status": "all_source_gates_passed_benchmark_not_executed",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_field_stage_b_figurines_source_only_multiteacher_v2_preregistration_20260810.json",
+    "sha256": "7068fddc40bd94698621e889b11868122a1f5f205de1bf3ac09b9d954d29e846"
+  },
+  "failed_predecessor": {
+    "path": "paper/artifacts/canonical_field_stage_b_figurines_source_only_multiteacher_v1_results_20260810.json",
+    "sha256": "5a992fcdbe9328a547732127ff6f6627bd5543e09ae8a2bc06e5ed7ba36359f4",
+    "only_failed_gate": "gauge_no_regression"
+  },
+  "output": {
+    "path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_source_multiteacher_direction_only_d512_l512_v2.pth",
+    "sha256": "838a4fa2ff523ccb9835f701df1e39b261f54846c8a30e724d85031f31af9a10",
+    "report_sha256": "1570b33992402f95278bac1120bfb0944f5828fa7ea0d0eccbdc2e33147a5a63"
+  },
+  "method_change": {
+    "name": "source_direction_only_radio",
+    "formula": "x_over_l2_norm_times_stop_gradient_l2_norm",
+    "forward_teacher_interface_changed": false,
+    "source_loss_radial_gauge_gradient": 0,
+    "primary_factorized_amplitude_authority_changed": false,
+    "gate_or_threshold_relaxed": false
+  },
+  "source_descriptor": {
+    "control_mean_cosine": 0.9418514966964722,
+    "candidate_mean_cosine": 0.956691324710846,
+    "mean_delta": 0.01483982801437378,
+    "control_p05_cosine": 0.7534876465797424,
+    "candidate_p05_cosine": 0.812526285648346,
+    "p05_delta": 0.059038639068603516
+  },
+  "source_relation": {
+    "control_mean_abs_error": 0.049441512674093246,
+    "candidate_mean_abs_error": 0.043771516531705856,
+    "mean_delta": -0.00566999614238739,
+    "control_p95_abs_error": 0.20551134645938873,
+    "candidate_p95_abs_error": 0.17817507684230804,
+    "p95_delta": -0.02733626961708069
+  },
+  "primary_and_capability": {
+    "raw_mean_cosine": 0.9930950403213501,
+    "raw_p05_cosine": 0.9847855567932129,
+    "mean_abs_log_amplitude_error": 0.02452963776886463,
+    "p95_abs_log_amplitude_error": 0.05232220143079758,
+    "dino_v3_mean_cosine": 0.9880558252334595,
+    "dino_v3_p05_cosine": 0.9688705205917358,
+    "sam3_mean_cosine": 0.9857025146484375,
+    "sam3_p05_cosine": 0.9660496115684509
+  },
+  "causal_ablation": {
+    "v1_mean_abs_log_amplitude_error": 0.0421871542930603,
+    "v2_mean_abs_log_amplitude_error": 0.02452963776886463,
+    "v1_p95_abs_log_amplitude_error": 0.0696052834391594,
+    "v2_p95_abs_log_amplitude_error": 0.05232220143079758,
+    "v1_source_descriptor_mean_delta": 0.015195310115814209,
+    "v2_source_descriptor_mean_delta": 0.01483982801437378,
+    "conclusion": "removing only the source radial gradient preserves nearly all descriptor and relation gain while restoring gauge"
+  },
+  "gate_results": {
+    "raw_radio_no_regression": true,
+    "gauge_no_regression": true,
+    "dino_sam_no_regression": true,
+    "descriptor_improvement": true,
+    "descriptor_tail_no_regression": true,
+    "semantic_relation_no_regression": true,
+    "scalar_authority_unchanged": true,
+    "source_support_unchanged": true,
+    "all_source_gates_passed": true,
+    "benchmark_gate_opened": true,
+    "benchmark_metric_read": false
+  },
+  "thermal": {
+    "telemetry": {
+      "path": "/root/radio_gs_local_cache/stage_b_20260810/logs/figurines_source_multiteacher_direction_only_gpu0.telemetry.csv",
+      "sha256": "e1a7d15e1f09195968d5aaf36f312ae110a40c0b3f4cb0e1080e32a60ffb19cb"
+    },
+    "owner_audit_sha256": "c4857a0ca870ddca7202039af11d768f50fd78b0a29b1bdf6169e9742c77348f",
+    "maximum_temperature_celsius": 60,
+    "maximum_power_watts": 135.2,
+    "pause_or_abort_triggered": false
+  },
+  "access_audit": {
+    "benchmark_query_or_text_opened": false,
+    "benchmark_target_rgb_opened": false,
+    "benchmark_ground_truth_opened": false,
+    "benchmark_labels_or_masks_opened": false,
+    "benchmark_metrics_or_predictions_opened": false
+  }
+}

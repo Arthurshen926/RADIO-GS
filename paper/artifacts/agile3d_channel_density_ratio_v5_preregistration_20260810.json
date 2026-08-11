@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-channel-density-ratio-v5-preregistration",
+  "status": "sealed_before_v5_training_or_v5_source_metrics",
+  "design_provenance": {
+    "v4_source_result_used_for_design": true,
+    "v4_authority": "/root/RADIO-GS/paper/artifacts/agile3d_signed_null_likelihood_ratio_v4_source_gate_result_20260810.json",
+    "observation": "algebraic zero-centering gives empty evidence neutrality but not the class-conditional null likelihood ratio of actual click-conditioned cosine distributions",
+    "development_scene0003": "forbidden until every source gate passes",
+    "test312": "sealed and forbidden"
+  },
+  "data_contract": {
+    "fit_scenes": ["scene0000_00", "scene0002_00", "scene0005_00"],
+    "development_scene": "scene0003_00",
+    "dataset_manifests": [
+      {"path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_ratio_v3/datasets/scene0000_00/manifest.json", "sha256": "69a12190da46313d83c0d451724655349a4c0e3b6241b715de77c27df86d0c85"},
+      {"path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_ratio_v3/datasets/scene0002_00/manifest.json", "sha256": "d567369e8b67073f15943e97c3b8379ffaf15734c09b696124b23e3a3efc0d03"},
+      {"path": "/root/RADIO-GS/local_ssd_results/agile3d_likelihood_ratio_v3/datasets/scene0005_00/manifest.json", "sha256": "052cd8767f5b3ea8084071321e51544f9098f320e946ad4f754c4f5965416cfe"}
+    ],
+    "calibration_examples": "every unique positive click prototype from every class-conditionally supported fit object; deterministic final-prefix 4096 positive and 4096 negative primitive rows",
+    "negative_clicks_used_to_fit_calibrator": false,
+    "reason_negative_clicks_are_not_calibration_labels": "the complement of one target object is heterogeneous and cannot be treated as one clicked instance class",
+    "all_legal_objects_evaluated": true,
+    "per_scene_or_per_object_calibration": false,
+    "development_or_test_labels_allowed": false
+  },
+  "mathematical_contract": {
+    "signed_cosine": "s=2a-1",
+    "per_channel_density_ratio": "ell_c(s)=softplus(raw_slope_c)*s+intercept_c",
+    "slope_constraint": "nonnegative, so higher click similarity never lowers same-instance likelihood",
+    "training_posterior": "sigmoid(ell_c(s)+logit(pi_object))",
+    "analytic_prior_removal": "inference uses ell_c(s) without pi_object",
+    "positive_click_aggregation": "sum ell_c(s) over observations and channels",
+    "negative_click_aggregation": "subtract ell_c(s) over observations and channels",
+    "aggregate_bias": "exact zero and absent from the parameterization",
+    "empty_evidence": "empty positive and negative sets sum to ell=0 and q=0.5 exactly",
+    "learned_null_midpoint": "-intercept_c/softplus(raw_slope_c), global per channel inside each source-training fold",
+    "direct_solver_compilation": "T*logit((1-c)*0.5+c*q)",
+    "hard_spatial_seed": "extent constraint only"
+  },
+  "training_recipe": {
+    "recipe_id": "capability-channel-density-ratio-adam-seed0-e100-lr0.02-v5",
+    "seed": 0,
+    "optimizer": "Adam",
+    "epochs": 100,
+    "learning_rate": 0.02,
+    "weight_decay": 0.0,
+    "objective": "mean over channels of prevalence-weighted stratified ordinary posterior BCE",
+    "ranking_weight": 0.0,
+    "soft_dice_weight": 0.0,
+    "threshold_selection": false,
+    "binning": false,
+    "early_stopping": false
+  },
+  "synthetic_gates": {
+    "source_posterior_fit_learns_negative_null_ratio_and_positive_match_ratio": true,
+    "empty_observations_exact_zero_ratio": true,
+    "positive_similarity_monotonic": true,
+    "negative_click_suppresses": true,
+    "exact_direct_solver_identity": true
+  },
+  "source_validation": {
+    "leave_one_scene_out": [
+      {"train": ["scene0002_00", "scene0005_00"], "heldout": "scene0000_00"},
+      {"train": ["scene0000_00", "scene0005_00"], "heldout": "scene0002_00"},
+      {"train": ["scene0000_00", "scene0002_00"], "heldout": "scene0005_00"}
+    ],
+    "required_gates": {
+      "loo_macro_mean_iou_gain_over_v2_strictly_greater_than": 0.02,
+      "loo_scenes_with_mean_iou_gain_over_v2_at_least": 2,
+      "loo_each_scene_click10_minus_click1_strictly_greater_than": 0.02,
+      "loo_macro_absolute_log_probability_mass_ratio_error_lower_than_v2": true,
+      "all_fit_mean_iou_gain_over_v2_strictly_greater_than": 0.02,
+      "all_fit_precision_gain_over_v2_strictly_greater_than": 0.02,
+      "all_fit_click10_minus_click1_strictly_greater_than": 0.05
+    },
+    "failure_action": "stop without opening scene0003 or test312"
+  },
+  "prohibited": {
+    "bin_or_threshold_sweep": true,
+    "scene_specific_calibrator": true,
+    "aggregate_trainable_bias": true,
+    "development_parameter_selection": true,
+    "test312_labels_or_metrics": true
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "artifact_type": "figurines_field_by_text_mapping_2x2_one_shot_execution_receipt",
+  "status": "sealed_before_any_new_lerf_prediction_or_ground_truth_metric",
+  "scene_id": "figurines",
+  "causal_question": "factorize the Stage-B direction-only field effect from the frozen source-trained text-likelihood mapping effect under one unchanged VALA direct-3D protocol",
+  "factors": {
+    "field": [
+      "hash_bound_control_c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5",
+      "stage_b_v2_838a4fa2ff523ccb9835f701df1e39b261f54846c8a30e724d85031f31af9a10"
+    ],
+    "text_mapping": [
+      "legacy_sigmoid_10_positive_minus_max_canonical_negative",
+      "source_fit_monotone_q_c_state_0179836d3493d8ef8a2b51529d9e334afd530df732199358fce10b2ec50fe60a"
+    ]
+  },
+  "source_gate_authorities": {
+    "fit3": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_text_likelihood_authority/source_fit_gates.fit3.v1.json",
+      "sha256": "7690aafe3f816804212af89c99038bccaf44ad0101200dc359b2d81f29d6be34"
+    },
+    "held_out_scene0003": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_text_likelihood_authority/scene0003_00.development_result.v1.json",
+      "sha256": "b26227140b46d3310da6f96a21793fe21ed766b8eb73576180d3e546c6b0d411",
+      "parameters_changed_after_dev": false
+    }
+  },
+  "frozen_head": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_text_likelihood_authority/source_text_likelihood_head.fit3.v1.pt",
+    "sha256": "7d3c90cb9f17e4ea85defa1593e53e03d1b369a9d714f32691e613f372a83e5b",
+    "state_sha256": "0179836d3493d8ef8a2b51529d9e334afd530df732199358fce10b2ec50fe60a",
+    "fit_scenes": ["scene0001_00", "scene0002_00", "scene0005_00"],
+    "figurines_used_for_fit_or_dev": false
+  },
+  "arms": {
+    "control_legacy": {
+      "positive_score_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/figurines_positive_fp32.pt", "sha256": "ff6adc75c3c153b86dca43ab031603f12448ed479fee74ab0268a2c665936159"},
+      "negative_score_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/figurines_negative_fp32.pt", "sha256": "b046ef83436cdf34a5d22f219a59dcac7f60f399d4b08f6b57a6547b26d6fe3e"},
+      "learned_likelihood_cache": null,
+      "prediction_root": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_control_legacy",
+      "prediction_receipt": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_control_legacy.receipt.json"
+    },
+    "control_learned": {
+      "positive_score_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/figurines_positive_fp32.pt", "sha256": "ff6adc75c3c153b86dca43ab031603f12448ed479fee74ab0268a2c665936159"},
+      "negative_score_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/figurines_negative_fp32.pt", "sha256": "b046ef83436cdf34a5d22f219a59dcac7f60f399d4b08f6b57a6547b26d6fe3e"},
+      "learned_likelihood_cache": {"path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/control_source_text_likelihood.pt", "sha256": "2ed768f0bae97276ef1348d63bcf5fa196b5242ffe5877e69c2db8eacd2f9692"},
+      "prediction_root": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_control_learned",
+      "prediction_receipt": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_control_learned.receipt.json"
+    },
+    "stage_b_v2_legacy": {
+      "positive_score_cache": {"path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/positive_fp32.pt", "sha256": "60a9847a7f5378287be2aa075357a19218a06f6dfb4b1b2fc1a6cbcf8ed2770f"},
+      "negative_score_cache": {"path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/negative_fp32.pt", "sha256": "56eda6cffe50ce99e274fde36c059e24786770662aea8efcbdc3b56d34a787c5"},
+      "learned_likelihood_cache": null,
+      "prediction_root": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_stage_b_v2_legacy",
+      "prediction_receipt": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_stage_b_v2_legacy.receipt.json"
+    },
+    "stage_b_v2_learned": {
+      "positive_score_cache": {"path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/positive_fp32.pt", "sha256": "60a9847a7f5378287be2aa075357a19218a06f6dfb4b1b2fc1a6cbcf8ed2770f"},
+      "negative_score_cache": {"path": "/root/radio_gs_local_cache/stage_b_20260810/figurines_lerf3d_one_shot_v2/negative_fp32.pt", "sha256": "56eda6cffe50ce99e274fde36c059e24786770662aea8efcbdc3b56d34a787c5"},
+      "learned_likelihood_cache": {"path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/stage_b_v2_source_text_likelihood.pt", "sha256": "215dac7c2bb071c5182be89cc921311fc0d8ad77987c38a1d1cae527c9df8496"},
+      "prediction_root": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_stage_b_v2_learned",
+      "prediction_receipt": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/pred_stage_b_v2_learned.receipt.json"
+    }
+  },
+  "frozen_prediction_interface": {
+    "config": {"path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml", "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"},
+    "renderer_checkpoint": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth", "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"},
+    "summary_head": {"path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth", "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"},
+    "positive_text": {"path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt", "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"},
+    "canonical_negative_text": {"path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt", "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"},
+    "sanitized_prediction_inventory": {"path": "/root/radio_gs_local_cache/optimization_20260810/lerf_target_rgb_sam3_box_o2_full4_v1/figurines/sanitized_prediction_inventory.json", "sha256": "5d4945bb72244f6ff696a5f6f198679a73b0e8e1d8f6823cbccf5c0b543f584e"},
+    "protocol_preset": "vala_repo_3d",
+    "selection_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax_k10",
+    "projection": "selected_only_alpha_png_uint8_gt10",
+    "graph_or_connected_selection": false,
+    "target_rgb_opened_for_prediction": false,
+    "target_mask_coordinates_opened_for_prediction": false
+  },
+  "implementation": {
+    "evaluator": {"path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py", "sha256": "6ac342590b175bbadb49f70f2baa3bb9393b4a375a790053432e2cef9dfabb44"},
+    "likelihood_adapter": {"path": "/root/RADIO-GS/radio_gs/querying/lerf_source_text_likelihood.py", "sha256": "7c6033b8ae6ffd28fe118ada27908caeba011fdf7c7a7ba49efc0474cebb7d6d"},
+    "likelihood_materializer": {"path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_likelihood_cache.py", "sha256": "c7dd55689e380399293d8fd69ce3731bd84bcdd637392e3b933b5cf695f0035f"},
+    "sealed_scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_lerf_sealed_prediction_batch.py", "sha256": "9e99174b4c219e9db80bb571993a379406c028d8ccee14ecba105154f23c4475"},
+    "thermal_guard": {"path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh", "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"},
+    "default_regression": "132 focused tests passed, including bitwise equality of the no-opt-in mapping to canonical_negative_relevancy_query_scores"
+  },
+  "execution_policy": {
+    "physical_gpu": 0,
+    "power_limit_watts": 300,
+    "poll_interval_seconds": 60,
+    "soft_pause_temperature_celsius": 82,
+    "resume_temperature_celsius": 78,
+    "hard_stop_temperature_celsius": 85,
+    "all_four_prediction_batches_must_be_hash_sealed_before_first_ground_truth_open": true,
+    "scorer_and_label_root_identical_for_all_four_arms": true,
+    "head_field_threshold_projection_or_graph_may_change_after_this_receipt": false,
+    "scanNet_benchmark_metric_forbidden_this_round": true,
+    "lerf_ground_truth_or_metric_opened_before_receipt": false
+  }
+}

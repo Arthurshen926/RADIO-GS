@@ -1,0 +1,122 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_capability_relative_v3_preregistration.v1",
+  "status": "corrected_and_sealed_before_control_metrics_or_training; deterministic_manifest_draft_a2ea4652_was_materialized_concurrently_and_is_superseded",
+  "objective": "Apply the already-sealed official-SAM mask triplet axis in the frozen official DINOv3+SAM3 capability-relation space while preserving one persistent canonical RADIO field.",
+  "scene_id": "figurines",
+  "single_causal_change": {
+    "v2_relation_space": "raw RADIO cosine",
+    "v3_relation_space": "geometric mean of clamp((1+DINO cosine)/2,0,1) and clamp((1+SAM3 cosine)/2,0,1)",
+    "student_input": "tangent-only RADIO with detached forward norm",
+    "official_adaptors": "frozen",
+    "triplet_axis_changed": false,
+    "triplet_weights_changed": false,
+    "margin_changed": false,
+    "guard_balance_changed": false
+  },
+  "representation_contract": {
+    "canonical_gaussian_field_architecture_changed": false,
+    "checkpoint_state_dict": "single canonical RADIO field only",
+    "official_dino_or_sam_feature_persisted": false,
+    "mask_relation_or_triplet_persisted_as_field_state": false,
+    "query_or_evaluation_rgb": false,
+    "query_time_sam_or_dino_runtime": false
+  },
+  "authorities": {
+    "v2_relative_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/source_only_sam_relative_manifest.json",
+      "sha256": "e42ea41fca40bfddb87f776b11e8b3a4b1498010f78b60178f5f5db8c1c7eb81"
+    },
+    "sealed_relation_cache": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/scale_ordered_relation_raster_adjoint_fp32.pt",
+      "sha256": "6ac92e1df528d83bd1765c1c39ce7f87bbc50a098bc9c8e05e2467b6eaf9db46"
+    },
+    "control_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5"
+    },
+    "factorized_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "dino_exact_marginal": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/dino_v3_matched_exact_marginal.pt",
+      "sha256": "dd2c3623a206e0bdf04615c8086cbda29556e170af019f5b298cc5a5346b8067"
+    },
+    "sam3_exact_marginal": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/sam3_matched_exact_marginal.pt",
+      "sha256": "8a6a5d289e04f4b3e4587eca7085a67f617ef17d01ff55934ca73952c66fdb33"
+    },
+    "capability_cohort": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_figurines_exact_marginal_v3_capability_cohort_authority_20260805.json",
+      "sha256": "8f490353a890101c00a9047c401d5cd6464dfd2c4bf6656696e5e26ad339f11a"
+    }
+  },
+  "frozen_training": {
+    "observation_contract": "canonical-factorized-radio-v1",
+    "capability_target_contract": "matched_exact_marginal",
+    "epochs": 5,
+    "minimum_epochs": 5,
+    "batch_size": 1024,
+    "evaluation_batch_size": 8192,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0,
+    "raw_radio_weight": 1.0,
+    "official_dino_weight": 0.2,
+    "official_sam_adaptor_weight": 0.2,
+    "official_sam_capability_relative_weight": 0.05,
+    "relative_margin": 0.05,
+    "fusion_reliability": false,
+    "runs": 1,
+    "per_scene_or_per_task_tuning": false
+  },
+  "source_gates": {
+    "global_capability_same_relation_non_decrease": true,
+    "global_capability_separate_relation_non_increase": true,
+    "global_capability_relation_gap_strict_improvement": true,
+    "capability_triplet_gap_strict_improvement": true,
+    "capability_triplet_violation_strict_decrease": true,
+    "raw_radio_mean_cosine_max_regression": 0.005,
+    "raw_radio_p05_cosine_max_regression": 0.01,
+    "official_capability_mean_cosine_max_regression": 0.005,
+    "official_capability_p05_cosine_max_regression": 0.01,
+    "failure_action": "reject_candidate_without_opening_benchmark_metric_or_tuning",
+    "pass_action": "seal_checkpoint_and_authority_then_stop_without_benchmark"
+  },
+  "output": {
+    "root": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_capability_relative_v3/figurines",
+    "checkpoint_name": "canonical_radio_source_sam_capability_relative_e5_seed0.pth",
+    "no_clobber": true
+  },
+  "implementation": {
+    "contract_sha256": "14cb9dc2718bf56e652481c0988486c8050f2d5da30b888f6f95a39c7aa335f5",
+    "capability_relative_module_sha256": "5ee4c3ea9b38830d60594b7bd24ac24c26e24d7a364973f9ef83341f31c1b827",
+    "manifest_builder_sha256": "500911b3a8cfeb269afbe541fd6842a8df5f568b40dc2a02c83c7e8ec12c60ee",
+    "trainer_sha256": "6d2b2ec6a2e3e73a3f26336ce0356c9929518976d48a7f758dc3c3824e5bb4ac",
+    "tests_sha256": "7de3f745005d31de5cfff2d54f04dae9a7d2995872d561f0cd43f5aca65ea5e1",
+    "focused_tests": "33 passed"
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5,
+    "driver_runtime_shim": "/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime"
+  },
+  "access_audit": {
+    "v2_lerf_outcome_used_to_choose_relation_space": true,
+    "used_to_choose_margin_weight_epochs_or_threshold": false,
+    "per_scene_or_query_metric_tuning": false,
+    "benchmark_query_opened": false,
+    "benchmark_labels_or_masks_opened": false,
+    "benchmark_predictions_or_metrics_opened": false,
+    "benchmark_run_authorized_in_this_stage": false
+  }
+}

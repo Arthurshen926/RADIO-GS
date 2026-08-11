@@ -1,0 +1,36 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_gpu_execution_correction.v2",
+  "status": "frozen_before_second_resumed_official_sam_generation",
+  "scene_id": "figurines",
+  "supersedes": {
+    "path": "paper/artifacts/source_sam_single_radio_lerf_figurines_gpu_execution_correction_20260810.json",
+    "reason": "first resume correctly rejected a provenance comparison between a numeric symlink alias and its resolved original LERF image path"
+  },
+  "failed_resume": {
+    "failure_stage": "existing_cache_provenance_validation_after_model_load_before_new_frame_generation",
+    "completed_cache_count_before_and_after": 16,
+    "generation_manifest_written": false,
+    "thermal_or_cuda_failure": false,
+    "benchmark_query_gt_metric_opened": false
+  },
+  "correction": {
+    "cache_image_identity": "resolved_decoder_image_path_must_equal_resolved_numeric_alias_target",
+    "frame_identity": "numeric_cache_basename_bound_by_frozen_source_split_authority",
+    "guard_owner_pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "method_or_teacher_parameters_changed": false,
+    "source_frame_axis_changed": false,
+    "existing_cache_overwrite_allowed": false
+  },
+  "implementation": {
+    "automatic_mask_builder_sha256": "12fd6b598d6c44e622dc97d6e545e0a84de20df73aec1c94401e180b73746182",
+    "lerf_generation_sealer_sha256": "2254b93aad78a65d40892f383e331f741cd27c0309d8b2553f402440f2dfb79e",
+    "generic_source_sam_authority_sha256": "e03369ddea802c15f95454130dd1596ec49f867743e37676d07e00d6fe42e39b"
+  },
+  "thermal_policy": {
+    "poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  }
+}

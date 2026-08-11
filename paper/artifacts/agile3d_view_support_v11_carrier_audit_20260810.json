@@ -1,0 +1,134 @@
+{
+  "schema_version": 11,
+  "artifact_type": "agile3d-view-support-v11-carrier-audit",
+  "scope": {
+    "fit_scenes": [
+      "scene0000_00",
+      "scene0002_00",
+      "scene0005_00"
+    ],
+    "edge_training_run": false,
+    "trajectory_run": false,
+    "development_scene_opened": false,
+    "test312_run": false
+  },
+  "authority_findings": {
+    "training_view_primitive_responsibility": "present for all three fit scenes",
+    "precomputed_primitive_view_incidence": "absent; deterministically derived from positive accepted responsibility hits",
+    "source_rgb": "paths and per-frame SHA records are sealed in each RADIO frame manifest; RGB bytes were not opened for this audit or carrier",
+    "per_view_radio": "present as sealed raw RADIO backbone feature tensors and frame manifests",
+    "per_view_projected_dino_or_sam_boundary": "not present as a sealed primitive-by-view tensor; only the post-lifting primitive capability aggregate is present",
+    "mpr_per_view_statistics": "responsibility hits and weights are present; primitive feature directions are aggregate-only"
+  },
+  "source_feature_manifests": {
+    "scene0000_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/feature_bundles/scene0000_00/frame_manifest.json",
+      "sha256": "0c4694bdaef5823a78a23932749ba7a5f6a46c4a4072dcbb301035beff31eb1d",
+      "num_frames": 279,
+      "raw_radio_grid": [60, 81],
+      "adaptors_persisted_per_view": []
+    },
+    "scene0002_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/radio_features/scene0002_00/frame_manifest.json",
+      "sha256": "18a32360c8f7da761fdc4bbaeea98ba844935840d2a5055d1b666b8cd3a9e9b5",
+      "num_frames": 240,
+      "raw_radio_grid": [15, 20],
+      "adaptors_persisted_per_view": []
+    },
+    "scene0005_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/radio_features/scene0005_00/frame_manifest.json",
+      "sha256": "d05f5d5912267204fbb2e381da421f31c665209a9f0b64a348147abe3ba3f4a1",
+      "num_frames": 240,
+      "raw_radio_grid": [15, 20],
+      "adaptors_persisted_per_view": []
+    }
+  },
+  "materialized_carriers": {
+    "scene0000_00": {
+      "responsibility_semantics": "raster_gaussian_top1 alpha_depth",
+      "responsibility_authority_sha256": "21383499778f2ceba79ddbc55c76fab028977e0b62c799af26ce6d74ce5c5576",
+      "artifact": {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_view_support_v11/scene0000_00.view_support_v11.pt",
+        "sha256": "c8ce0588147e0ac51dc3b6a8a5854ffb588dcf0f7e3ea347f6a6841025da4f2b"
+      },
+      "receipt": {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_view_support_v11/scene0000_00.view_support_v11.receipt.json",
+        "sha256": "91dcf6a7ab485f1a891b2c628ae98c856d866ee0e6be9365ac896dbbbe482472"
+      },
+      "primitive_count": 63730,
+      "view_count": 120,
+      "support_nnz": 490789,
+      "unique_edge_count": 582843,
+      "mean_edge_jaccard": 0.764298,
+      "median_edge_jaccard": 0.833496,
+      "mean_edge_overlap_coefficient": 0.966445
+    },
+    "scene0002_00": {
+      "responsibility_semantics": "exact_front_to_back_sparse_marginal",
+      "responsibility_authority_sha256": "6765db28f57fc32f0cb301b49fcf0699b8e13f2db1558bf18bf7d64189a08927",
+      "view_sidecars_individually_sha_verified": 120,
+      "artifact": {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_view_support_v11/scene0002_00.view_support_v11.pt",
+        "sha256": "b114c5a4e6be93bdc2c77a4f96360983fcbbd2c40cef8208b30079f2440ff3f3"
+      },
+      "receipt": {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_view_support_v11/scene0002_00.view_support_v11.receipt.json",
+        "sha256": "297c60a1056d601a1ac6c0d29bce69a2d737340de2d51e9cc86b87e5bcb68244"
+      },
+      "primitive_count": 198116,
+      "view_count": 120,
+      "support_nnz": 3464465,
+      "unique_edge_count": 1839138,
+      "mean_edge_jaccard": 0.874195,
+      "median_edge_jaccard": 0.950195,
+      "mean_edge_overlap_coefficient": 0.984685
+    },
+    "scene0005_00": {
+      "responsibility_semantics": "exact_front_to_back_sparse_marginal",
+      "responsibility_authority_sha256": "08601f1a3c74be06c2f2ff7e9d179edc693e1e1c9fb58268aacd7ea554f06050",
+      "view_sidecars_individually_sha_verified": 120,
+      "artifact": {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_view_support_v11/scene0005_00.view_support_v11.pt",
+        "sha256": "e9ab251513540f513d11e045ee1130560e374ed8f24acd3a04ef3052a7518880"
+      },
+      "receipt": {
+        "path": "/root/RADIO-GS/local_ssd_results/agile3d_view_support_v11/scene0005_00.view_support_v11.receipt.json",
+        "sha256": "3743b345f490e5b2092bf2c1fcedbd7ca5ce5798b3c48e73f8ec2fc3965cdbd7"
+      },
+      "primitive_count": 195387,
+      "view_count": 120,
+      "support_nnz": 5042717,
+      "unique_edge_count": 1820151,
+      "mean_edge_jaccard": 0.880618,
+      "median_edge_jaccard": 0.959961,
+      "mean_edge_overlap_coefficient": 0.985029
+    }
+  },
+  "causal_audit": {
+    "carrier_is_available": true,
+    "semantic_mismatch": "scene0000 uses frontmost top1 incidence whereas scene0002 and scene0005 use all accepted exact-marginal hits",
+    "saturation": "on exact-marginal scenes, local candidate-edge median Jaccard is 0.95-0.96 and median overlap coefficient is 1.0",
+    "conclusion": "The authority is valid for a v11 feasibility feature, but binary any-positive co-visibility is both cross-scene heterogeneous and locally saturated. It should not be presented as a resolved instance-edge carrier or used to justify a test run. A uniform exact-marginal scene0000 authority and/or renderer-derived responsibility-mass profile would be needed before a strong scene-shared claim."
+  },
+  "verification": {
+    "command": "/root/miniconda3/envs/cybersim_agent/bin/python -m pytest -q tests/test_agile3d_view_support_carrier_v11.py",
+    "result": "3 passed",
+    "covered": [
+      "duplicate-hit invariance and compact global-row mapping",
+      "CSR shape and deterministic row-major order",
+      "exact Jaccard and bidirectional conditional overlap",
+      "strict zero relation for unobserved endpoints"
+    ]
+  },
+  "safety": {
+    "query_independent": true,
+    "labels_opened": false,
+    "clicks_opened": false,
+    "masks_opened": false,
+    "source_rgb_opened": false,
+    "development_labels_opened": false,
+    "test_labels_opened": false,
+    "test312_run": false,
+    "gpu_used": false
+  }
+}

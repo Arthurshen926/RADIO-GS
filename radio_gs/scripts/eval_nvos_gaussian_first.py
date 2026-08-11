@@ -47,6 +47,7 @@ from radio_gs.querying.evidence_scorer import (
     registered_observation_effective_confidence,
     registered_raster_adjoint_observation,
     registered_seed_observation,
+    fuse_registered_observation_unary,
 )
 from radio_gs.querying.query_compilers import compile_registered_primitive_seeds
 from radio_gs.querying.query_specific_propagation_cv import (
@@ -101,9 +102,30 @@ from radio_gs.querying.nvos_local_positive_completion import (
 from radio_gs.querying.sam3_reference_completion import (
     probability_preserving_entropy_observation,
 )
+from radio_gs.querying.source_only_correspondence_completion import (
+    method_contract as source_only_correspondence_method_contract,
+    source_only_one_hop_correspondence_completion,
+)
+from radio_gs.querying.multiview_region_memory_runtime import (
+    RUNTIME_MODE as OBJECT_MULTIVIEW_REGION_MEMORY,
+    augment_query_with_region_tokens,
+    complete_abstaining_observation,
+    load_region_memory,
+)
+from radio_gs.querying.multiview_region_memory import (
+    method_contract as object_region_memory_method_contract,
+)
+from radio_gs.querying.disjoint_domain_composition import (
+    MODE as DISJOINT_DOMAIN_COMPOSITION,
+    compose_disjoint_domain_unary,
+)
 from radio_gs.querying.query_spec import (
     PrimitiveUnaryEvidence,
     SelectionMode,
+)
+from radio_gs.querying.query_likelihood_head import (
+    fit_registered_2d_source_reconstruction_head,
+    registered_2d_likelihood_inputs,
 )
 from radio_gs.querying.support_solver import SupportSolverConfig
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
@@ -154,6 +176,12 @@ _PROBABILITY_PRESERVING_SOURCE_UNARY = (
 _SOURCE_COMPLETION_LOO_CALIBRATION = SOURCE_COMPLETION_LOO_METHOD
 _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION = (
     "all_trial_loo_hierarchical_local_positive_v2"
+)
+_REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION = (
+    "balanced_reference_source_reconstruction_v1"
+)
+_SOURCE_ONLY_CORRESPONDENCE_COMPLETION = (
+    "source_only_one_hop_signed_correspondence_completion_v1"
 )
 
 
@@ -393,6 +421,252 @@ def _validate_source_completion_unary_args(args: argparse.Namespace) -> None:
         )
 
 
+def _validate_source_only_correspondence_args(args: argparse.Namespace) -> None:
+    mode = str(getattr(args, "source_only_correspondence_completion", "none"))
+    assets = {
+        "source_correspondence_support_graph": str(
+            getattr(args, "source_correspondence_support_graph", "")
+        ).strip(),
+        "source_correspondence_support_graph_sha256": str(
+            getattr(args, "source_correspondence_support_graph_sha256", "")
+        ).strip(),
+        "source_multiview_responsibility_cache": str(
+            getattr(args, "source_multiview_responsibility_cache", "")
+        ).strip(),
+        "source_multiview_responsibility_cache_sha256": str(
+            getattr(args, "source_multiview_responsibility_cache_sha256", "")
+        ).strip(),
+    }
+    if mode == "none":
+        dangling = [
+            f"--{name.replace('_', '-')}" for name, value in assets.items() if value
+        ]
+        if dangling:
+            raise ValueError(
+                "source correspondence assets require "
+                f"--source-only-correspondence-completion {_SOURCE_ONLY_CORRESPONDENCE_COMPLETION}: "
+                + ", ".join(dangling)
+            )
+        return
+    requirements = {
+        "--support-mode canonical_support": str(args.support_mode)
+        == "canonical_support",
+        "--disable-registered-graph": bool(args.disable_registered_graph),
+        "--registered-readout-stage unary_prior": str(args.registered_readout_stage)
+        == "unary_prior",
+        "--registered-observation-fusion probability_mixture": str(
+            args.registered_observation_fusion
+        )
+        == "probability_mixture",
+        "--registered-query-likelihood-calibration none": str(
+            args.registered_query_likelihood_calibration
+        )
+        == "none",
+        "--registered-forward-unary none": str(args.registered_forward_unary)
+        == "none",
+        "--query-conditioned-diffusion-kernel none": str(
+            args.query_conditioned_diffusion_kernel
+        )
+        == "none",
+        "--negative-spatial-mode none": str(args.negative_spatial_mode) == "none",
+        "--require-asset-hashes": bool(args.require_asset_hashes),
+        **{
+            f"--{name.replace('_', '-')}": bool(value)
+            for name, value in assets.items()
+        },
+    }
+    for name in (
+        "source_correspondence_support_graph_sha256",
+        "source_multiview_responsibility_cache_sha256",
+    ):
+        digest = assets[name]
+        requirements[f"--{name.replace('_', '-')} valid SHA256"] = (
+            len(digest) == 64
+            and all(character in "0123456789abcdef" for character in digest)
+        )
+    failed = [name for name, satisfied in requirements.items() if not satisfied]
+    if failed:
+        raise ValueError(
+            f"{_SOURCE_ONLY_CORRESPONDENCE_COMPLETION} requires "
+            + ", ".join(failed)
+        )
+
+
+def _validate_object_multiview_region_memory_args(
+    args: argparse.Namespace,
+) -> None:
+    mode = str(getattr(args, "object_multiview_region_memory", "none"))
+    composition = str(
+        getattr(args, "registered_disjoint_domain_composition", "none")
+    )
+    path = str(getattr(args, "object_region_memory", "")).strip()
+    digest = str(getattr(args, "object_region_memory_sha256", "")).strip()
+    if mode == "none":
+        dangling = [
+            name
+            for name, value in (
+                ("--object-region-memory", path),
+                ("--object-region-memory-sha256", digest),
+            )
+            if value
+        ]
+        if dangling:
+            raise ValueError(
+                "object region-memory assets require "
+                f"--object-multiview-region-memory {OBJECT_MULTIVIEW_REGION_MEMORY}: "
+                + ", ".join(dangling)
+            )
+        return
+    requirements = {
+        "registered object region-memory mode": mode
+        == OBJECT_MULTIVIEW_REGION_MEMORY,
+        "--support-mode canonical_support": str(args.support_mode)
+        == "canonical_support",
+        "--disable-registered-graph": bool(args.disable_registered_graph),
+        "--registered-readout-stage unary_prior": str(args.registered_readout_stage)
+        == "unary_prior",
+        "--registered-observation-fusion probability_mixture": str(
+            args.registered_observation_fusion
+        )
+        == "probability_mixture",
+        "registered query-likelihood composition policy": (
+            str(args.registered_query_likelihood_calibration) == "none"
+            if composition == "none"
+            else (
+                composition == DISJOINT_DOMAIN_COMPOSITION
+                and str(args.registered_query_likelihood_calibration)
+                == _REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION
+            )
+        ),
+        "--registered-forward-unary none": str(args.registered_forward_unary)
+        == "none",
+        "--source-only-correspondence-completion none": str(
+            args.source_only_correspondence_completion
+        )
+        == "none",
+        "--query-conditioned-diffusion-kernel none": str(
+            args.query_conditioned_diffusion_kernel
+        )
+        == "none",
+        "--negative-spatial-mode none": str(args.negative_spatial_mode) == "none",
+        "--require-asset-hashes": bool(args.require_asset_hashes),
+        "--object-region-memory": bool(path),
+        "--object-region-memory-sha256 valid SHA256": len(digest) == 64
+        and all(character in "0123456789abcdef" for character in digest),
+    }
+    failed = [name for name, satisfied in requirements.items() if not satisfied]
+    if failed:
+        raise ValueError(
+            f"{OBJECT_MULTIVIEW_REGION_MEMORY} requires "
+            + ", ".join(failed)
+        )
+
+
+def _validate_registered_disjoint_domain_composition_args(
+    args: argparse.Namespace,
+) -> None:
+    mode = str(
+        getattr(args, "registered_disjoint_domain_composition", "none")
+    )
+    if mode == "none":
+        return
+    checks = {
+        "registered disjoint-domain mode": mode == DISJOINT_DOMAIN_COMPOSITION,
+        "registered query-likelihood source reconstruction": str(
+            args.registered_query_likelihood_calibration
+        )
+        == _REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION,
+        "object multiview region-memory": str(
+            args.object_multiview_region_memory
+        )
+        == OBJECT_MULTIVIEW_REGION_MEMORY,
+        "graph disabled": bool(args.disable_registered_graph),
+        "unary-prior readout": str(args.registered_readout_stage)
+        == "unary_prior",
+        "probability-mixture observation": str(
+            args.registered_observation_fusion
+        )
+        == "probability_mixture",
+        "fixed 0.5 support threshold": float(args.solver_support_threshold)
+        == 0.5,
+        "no registered forward unary": str(args.registered_forward_unary)
+        == "none",
+        "no source correspondence completion": str(
+            args.source_only_correspondence_completion
+        )
+        == "none",
+    }
+    failed = [name for name, accepted in checks.items() if not accepted]
+    if failed:
+        raise ValueError(
+            "registered disjoint-domain composition requires "
+            + ", ".join(failed)
+        )
+
+
+def _registered_query_likelihood_contract(
+    args: argparse.Namespace,
+) -> dict[str, object] | None:
+    mode = str(
+        getattr(args, "registered_query_likelihood_calibration", "none")
+    )
+    if mode == "none":
+        return None
+    if mode != _REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION:
+        raise ValueError(f"unknown registered query likelihood mode {mode!r}")
+    return {
+        "mode": mode,
+        "head": "MonotoneQueryLikelihoodHead:monotone-query-likelihood-v1",
+        "adapter": (
+            "registered q from positive/negative exact-adjoint support; "
+            "coverage from explicit registered confidence; query-independent "
+            "field reliability separate"
+        ),
+        "field_prior": "frozen prototype field probability before prompt fusion",
+        "calibration": (
+            "fixed equal-sign raster-adjoint BCE on legal reference prompt only"
+        ),
+        "unobserved_policy": "coverage=0_exact_abstention",
+        "fusion": "(1-coverage*reliability)*field_prior+coverage*reliability*q_head",
+        "target_rgb_mask_or_metric_used": False,
+        "parameter_sweep": False,
+    }
+
+
+def _validate_registered_query_likelihood_args(args: argparse.Namespace) -> None:
+    if _registered_query_likelihood_contract(args) is None:
+        return
+    checks = {
+        "--support-mode canonical_support": str(args.support_mode)
+        == "canonical_support",
+        "--prompt-registration-mode raster_adjoint": str(
+            args.prompt_registration_mode
+        )
+        == "raster_adjoint",
+        "--registered-observation-fusion probability_mixture": str(
+            args.registered_observation_fusion
+        )
+        == "probability_mixture",
+        "--registered-seed-construction joint_signed": str(
+            args.registered_seed_construction
+        )
+        == "joint_signed",
+        "--registered-forward-unary none": str(args.registered_forward_unary)
+        == "none",
+        "--registered-readout-stage unary_prior": str(
+            args.registered_readout_stage
+        )
+        == "unary_prior",
+        "--disable-registered-graph": bool(args.disable_registered_graph),
+    }
+    failed = [name for name, accepted in checks.items() if not accepted]
+    if failed:
+        raise ValueError(
+            "registered query likelihood source reconstruction requires "
+            + ", ".join(failed)
+        )
+
+
 def _load_probability_preserving_source_completion(
     args: argparse.Namespace,
     *,
@@ -527,6 +801,7 @@ def _write_primitive_unary_artifact(
     valid: torch.Tensor,
     primitive_unary_probability: torch.Tensor,
     compiler_contract: Mapping[str, object],
+    disjoint_partition: Mapping[str, torch.Tensor] | None = None,
 ) -> Path:
     """Persist the pre-render primitive unary before target GT is opened."""
 
@@ -544,6 +819,36 @@ def _write_primitive_unary_artifact(
         ((unary_cpu < 0) | (unary_cpu > 1)).any()
     ):
         raise ValueError("primitive unary probabilities must be finite and in [0,1]")
+    partition_payload: dict[str, object] | None = None
+    if disjoint_partition is not None:
+        required = {
+            "observed_rows",
+            "memory_rows",
+            "abstained_rows",
+            "hard_anchor_rows",
+        }
+        if set(disjoint_partition) != required:
+            raise ValueError("disjoint partition tensor fields differ")
+        partition_tensors = {
+            name: torch.as_tensor(disjoint_partition[name])
+            .detach()
+            .bool()
+            .cpu()
+            .reshape(-1)
+            .contiguous()
+            for name in sorted(required)
+        }
+        if any(value.shape != (int(valid_cpu.sum()),) for value in partition_tensors.values()):
+            raise ValueError("disjoint partition must align with valid rows")
+        partition_payload = {
+            "mode": DISJOINT_DOMAIN_COMPOSITION,
+            "global_rows": torch.where(valid_cpu)[0],
+            **partition_tensors,
+            "tensor_sha256": {
+                name: tensor_sha256(value)
+                for name, value in partition_tensors.items()
+            },
+        }
     output = Path(path).expanduser().resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     torch.save(
@@ -561,6 +866,11 @@ def _write_primitive_unary_artifact(
             "valid_rows": torch.where(valid_cpu)[0],
             "primitive_unary_probability": unary_cpu,
             "compiler_contract": dict(compiler_contract),
+            **(
+                {"disjoint_domain_partition": partition_payload}
+                if partition_payload is not None
+                else {}
+            ),
             "written_before_target_ground_truth_open": True,
             "target_rgb_opened": False,
             "target_mask_opened": False,
@@ -2111,6 +2421,103 @@ def _file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _float32_rows_sha256(values: torch.Tensor) -> str:
+    array = (
+        torch.as_tensor(values)
+        .detach()
+        .float()
+        .cpu()
+        .contiguous()
+        .numpy()
+        .astype("<f4", copy=False)
+    )
+    return hashlib.sha256(array.tobytes()).hexdigest()
+
+
+def _load_source_multiview_observations(
+    path: str | Path,
+    *,
+    expected_sha256: str,
+    capability_bank: CanonicalCapabilityBank,
+    geometry_xyz: torch.Tensor,
+    config_path: Path,
+    checkpoint_path: Path,
+    expected_source_view_count: int,
+) -> tuple[torch.Tensor, dict[str, object]]:
+    """Load the frozen query-independent training-view visibility authority."""
+
+    cache_path = Path(path).expanduser().resolve()
+    actual_sha256 = _verify_declared_sha256(
+        cache_path,
+        expected_sha256,
+        label="source multiview responsibility cache",
+    )
+    payload = torch.load(cache_path, map_location="cpu", weights_only=True)
+    metadata = payload.get("metadata", {}) if isinstance(payload, Mapping) else {}
+    assignments = payload.get("assignments") if isinstance(payload, Mapping) else None
+    count = int(capability_bank.num_gaussians)
+    if (
+        not isinstance(payload, Mapping)
+        or payload.get("schema_version") != 1
+        or not isinstance(metadata, Mapping)
+        or not isinstance(assignments, list)
+        or metadata.get("schema_version") != 1
+        or metadata.get("assignment_mode") != "raster_gaussian_top1"
+        or metadata.get("registration_weight_mode") != "alpha_depth"
+        or metadata.get("benchmark_images_opened") is not False
+        or metadata.get("benchmark_masks_opened") is not False
+        or metadata.get("text_queries_opened") is not False
+        or Path(str(metadata.get("config", ""))).expanduser().resolve()
+        != config_path.resolve()
+        or Path(str(metadata.get("checkpoint", ""))).expanduser().resolve()
+        != checkpoint_path.resolve()
+        or len(assignments) != int(expected_source_view_count)
+        or list(metadata.get("selected_dataset_indices", []))
+        != list(range(len(assignments)))
+        or list(metadata.get("selected_frame_indices", []))
+        != list(range(len(assignments)))
+        or str(metadata.get("xyz_sha256", ""))
+        != _float32_rows_sha256(geometry_xyz)
+    ):
+        raise ValueError("source multiview responsibility authority differs")
+    visibility = torch.zeros((count, len(assignments)), dtype=torch.bool)
+    for view_index, assignment in enumerate(assignments):
+        if not isinstance(assignment, Mapping) or set(assignment) != {
+            "gaussian_ids",
+            "pixel_ids",
+            "weights",
+        }:
+            raise ValueError("source multiview assignment schema differs")
+        gaussian_ids = torch.as_tensor(assignment["gaussian_ids"]).long().reshape(-1)
+        pixel_ids = torch.as_tensor(assignment["pixel_ids"]).long().reshape(-1)
+        weights = torch.as_tensor(assignment["weights"]).float().reshape(-1)
+        if (
+            gaussian_ids.shape != pixel_ids.shape
+            or gaussian_ids.shape != weights.shape
+            or not bool(torch.isfinite(weights).all())
+            or bool((weights < 0).any())
+            or (
+                gaussian_ids.numel()
+                and (int(gaussian_ids.min()) < 0 or int(gaussian_ids.max()) >= count)
+            )
+        ):
+            raise ValueError("source multiview assignment tensors are malformed")
+        visibility[gaussian_ids[weights > 0].unique(), view_index] = True
+    compact = visibility[capability_bank.global_rows].contiguous()
+    if not bool(compact.any(dim=1).all()):
+        raise ValueError("capability-valid row lacks all source-view observations")
+    return compact, {
+        "path": str(cache_path),
+        "sha256": actual_sha256,
+        "source_view_count": int(compact.shape[1]),
+        "visible_valid_rows": int(compact.any(dim=1).sum()),
+        "mean_visible_view_fraction": float(compact.float().mean()),
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_opened": False,
+    }
+
+
 def _registered_forward_unary_contract(
     args: argparse.Namespace,
 ) -> dict[str, object] | None:
@@ -2965,6 +3372,102 @@ def _execute_registered_forward_beta(
     return result, field_result, forward_observation, diagnostics
 
 
+def _execute_registered_query_likelihood(
+    engine: CanonicalQueryEngine,
+    query,
+    feature_banks: Mapping[str, torch.Tensor],
+    feature_signatures,
+    *,
+    observation: PrimitiveUnaryEvidence,
+    positive_reference_mass: torch.Tensor,
+    negative_reference_mass: torch.Tensor,
+    primitive_reliability: torch.Tensor | None,
+    unary_temperature: float,
+):
+    """Calibrate one registered observation without target-view access."""
+
+    field_query = replace(query, primitive_unary_evidence=None)
+    field_result = engine.execute(
+        field_query,
+        feature_banks,
+        feature_signatures=feature_signatures,
+    )
+    field_prior = torch.sigmoid(
+        field_result.unary.detach().float().cpu() / float(unary_temperature)
+    )
+    inputs = registered_2d_likelihood_inputs(
+        observation,
+        prior_probability=field_prior,
+        reliability=(
+            None
+            if primitive_reliability is None
+            else torch.as_tensor(primitive_reliability).detach().float().cpu()
+        ),
+    )
+    head, calibration = fit_registered_2d_source_reconstruction_head(
+        inputs,
+        positive_reference_mass=torch.as_tensor(
+            positive_reference_mass
+        ).detach().float().cpu(),
+        negative_reference_mass=torch.as_tensor(
+            negative_reference_mass
+        ).detach().float().cpu(),
+    )
+    with torch.no_grad():
+        calibrated_observation = head(
+            inputs, source="registered_2d_reference_calibrated"
+        )
+    result = engine.execute(
+        replace(field_query, primitive_unary_evidence=calibrated_observation),
+        feature_banks,
+        feature_signatures=feature_signatures,
+    )
+    baseline_unary = fuse_registered_observation_unary(
+        field_result.unary,
+        observation,
+        unary_temperature=float(unary_temperature),
+        chunk_size=engine.scoring_config.score_chunk_size,
+    )
+    changed = (result.unary.detach().cpu() - baseline_unary.detach().cpu()).abs()
+    observed = calibrated_observation.confidence > 0
+    unobserved = ~observed
+    if bool(unobserved.any()) and not torch.allclose(
+        result.unary.detach().cpu()[unobserved],
+        field_result.unary.detach().cpu()[unobserved],
+        atol=1e-6,
+        rtol=0.0,
+    ):
+        raise RuntimeError("registered query likelihood violated abstention")
+    changed_rows = changed > 1e-6
+    if not bool((changed_rows & observed).any()):
+        raise RuntimeError("registered query likelihood did not change observed unary")
+    diagnostics = {
+        "contract": _registered_query_likelihood_contract(
+            argparse.Namespace(
+                registered_query_likelihood_calibration=(
+                    _REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION
+                )
+            )
+        ),
+        "source_reconstruction": calibration,
+        "primitive_rows": int(changed.numel()),
+        "observed_rows": int(observed.sum()),
+        "abstained_rows": int(unobserved.sum()),
+        "changed_observed_unary_rows": int((changed_rows & observed).sum()),
+        "mean_absolute_unary_delta_observed": float(changed[observed].mean()),
+        "maximum_absolute_unary_delta": float(changed.max()),
+        "field_reliability_source": (
+            "canonical_query_independent_reliability"
+            if primitive_reliability is not None
+            else "identity_one_no_reliability_cache"
+        ),
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_opened": False,
+    }
+    return result, field_result, calibrated_observation, diagnostics
+
+
 def _declared_prompt_asset_hashes(
     manifest: Mapping[str, object],
     scene: Mapping[str, object],
@@ -3273,6 +3776,16 @@ def _candidate_method_manifest_contract(
         observation_fusion
     )
     source_completion_unary = _source_completion_unary_contract(args)
+    registered_query_likelihood = _registered_query_likelihood_contract(args)
+    source_correspondence_mode = str(
+        getattr(args, "source_only_correspondence_completion", "none")
+    )
+    object_region_memory_mode = str(
+        getattr(args, "object_multiview_region_memory", "none")
+    )
+    disjoint_composition_mode = str(
+        getattr(args, "registered_disjoint_domain_composition", "none")
+    )
     return {
         "support_mode": str(args.support_mode),
         "region_space": str(args.region_space),
@@ -3299,6 +3812,84 @@ def _candidate_method_manifest_contract(
         **(
             {"source_completion_unary": source_completion_unary}
             if source_completion_unary is not None
+            else {}
+        ),
+        **(
+            {"registered_query_likelihood": registered_query_likelihood}
+            if registered_query_likelihood is not None
+            else {}
+        ),
+        **(
+            {
+                "source_only_correspondence_completion": {
+                    "mode": source_correspondence_mode,
+                    "contract": source_only_correspondence_method_contract(),
+                    "support_graph": str(
+                        getattr(args, "source_correspondence_support_graph", "")
+                    ),
+                    "support_graph_sha256": str(
+                        getattr(
+                            args,
+                            "source_correspondence_support_graph_sha256",
+                            "",
+                        )
+                    ),
+                    "source_multiview_responsibility_cache": str(
+                        getattr(args, "source_multiview_responsibility_cache", "")
+                    ),
+                    "source_multiview_responsibility_cache_sha256": str(
+                        getattr(
+                            args,
+                            "source_multiview_responsibility_cache_sha256",
+                            "",
+                        )
+                    ),
+                }
+            }
+            if source_correspondence_mode != "none"
+            else {}
+        ),
+        **(
+            {
+                "object_multiview_region_memory": {
+                    "mode": object_region_memory_mode,
+                    "contract": object_region_memory_method_contract(),
+                    "asset": str(getattr(args, "object_region_memory", "")),
+                    "asset_sha256": str(
+                        getattr(args, "object_region_memory_sha256", "")
+                    ),
+                    "write_domain": (
+                        "base_registered_observation_confidence_exactly_zero_"
+                        "and_memory_confidence_positive"
+                    ),
+                    "base_observed_rows": "bitwise_preserved",
+                    "source_token_raw_weight": (
+                        "view_assignment_reliability_divided_by_fixed_view_count"
+                    ),
+                }
+            }
+            if object_region_memory_mode != "none"
+            else {}
+        ),
+        **(
+            {
+                "registered_disjoint_domain_composition": {
+                    "mode": disjoint_composition_mode,
+                    "observed_domain": (
+                        "original_registered_observation_confidence_positive_"
+                        "learned_query_likelihood_only"
+                    ),
+                    "memory_domain": (
+                        "original_registered_observation_confidence_zero_and_"
+                        "memory_confidence_positive_only"
+                    ),
+                    "remaining_domain": "learned_branch_abstaining_field_prior",
+                    "hard_anchor_precedence": "learned_observed_branch_bitwise",
+                    "probability_average_or_product_of_experts": False,
+                    "same_row_double_counting": False,
+                }
+            }
+            if disjoint_composition_mode != "none"
             else {}
         ),
         "registered_seed_unary_weight": float(
@@ -3806,6 +4397,10 @@ def _screen_region_map(
 def run(args: argparse.Namespace) -> dict:
     _validate_registered_forward_unary_args(args)
     _validate_source_completion_unary_args(args)
+    _validate_source_only_correspondence_args(args)
+    _validate_object_multiview_region_memory_args(args)
+    _validate_registered_query_likelihood_args(args)
+    _validate_registered_disjoint_domain_composition_args(args)
     registered_forward_contract = _registered_forward_unary_contract(args)
     device = torch.device(args.device)
     manifest_path = Path(args.manifest).resolve()
@@ -3908,6 +4503,10 @@ def run(args: argparse.Namespace) -> dict:
     capability_bank = None
     support_graph = None
     primitive_reliability = None
+    source_correspondence_graph: PrimitiveSupportGraph | None = None
+    source_multiview_observations: torch.Tensor | None = None
+    source_correspondence_asset_evidence: dict[str, object] | None = None
+    object_region_memory = None
     source_observation_footprint_bundle: (
         tuple[Path, str, SourceFootprintFoldAuthority] | None
     ) = None
@@ -3987,6 +4586,58 @@ def run(args: argparse.Namespace) -> dict:
             geometry_xyz, capability_bank.xyz, atol=1e-6, rtol=0.0
         ):
             raise ValueError("canonical capability geometry does not match renderer geometry")
+        source_correspondence_mode = str(
+            getattr(args, "source_only_correspondence_completion", "none")
+        )
+        if source_correspondence_mode != "none":
+            correspondence_graph_path = Path(
+                args.source_correspondence_support_graph
+            ).expanduser().resolve()
+            correspondence_graph_sha256 = _verify_declared_sha256(
+                correspondence_graph_path,
+                args.source_correspondence_support_graph_sha256,
+                label="source correspondence support graph",
+            )
+            source_correspondence_graph = load_canonical_support_graph(
+                correspondence_graph_path,
+                capability_bank,
+            )
+            source_multiview_observations, multiview_evidence = (
+                _load_source_multiview_observations(
+                    args.source_multiview_responsibility_cache,
+                    expected_sha256=args.source_multiview_responsibility_cache_sha256,
+                    capability_bank=capability_bank,
+                    geometry_xyz=geometry_xyz,
+                    config_path=config_path,
+                    checkpoint_path=checkpoint_path,
+                    expected_source_view_count=len(scene["training_frames"]),
+                )
+            )
+            source_correspondence_asset_evidence = {
+                "mode": source_correspondence_mode,
+                "method_contract": source_only_correspondence_method_contract(),
+                "support_graph": {
+                    "path": str(correspondence_graph_path),
+                    "sha256": correspondence_graph_sha256,
+                    "edge_channels": sorted(source_correspondence_graph.edge_channels),
+                    "num_nodes": int(source_correspondence_graph.num_nodes),
+                    "num_edges": int(source_correspondence_graph.edge_index.shape[1]),
+                },
+                "source_multiview_responsibility": multiview_evidence,
+            }
+        object_region_memory_mode = str(
+            getattr(args, "object_multiview_region_memory", "none")
+        )
+        if object_region_memory_mode != "none":
+            object_region_memory = load_region_memory(
+                args.object_region_memory,
+                expected_sha256=args.object_region_memory_sha256,
+                scene_id=str(args.scene_id),
+                capability_path=args.canonical_capability_cache,
+                capability_sha256=None,
+                global_rows=capability_bank.global_rows,
+                num_gaussians=capability_bank.num_gaussians,
+            )
         source_observation_footprint_bundle = (
             _load_source_observation_footprint_authority(
                 args,
@@ -4172,6 +4823,7 @@ def run(args: argparse.Namespace) -> dict:
     support_view_count = 1
     prediction_threshold = 0.0
     canonical_stage_gaussian_scores: dict[str, torch.Tensor] | None = None
+    disjoint_composition = None
     registered_prompt_cycle_gaussian_scores: dict[str, torch.Tensor] | None = None
     registered_prompt_evidence: dict[str, object] | None = None
     source_observation_oof_authority: SourceObservationOOFFold | None = None
@@ -5114,12 +5766,341 @@ def run(args: argparse.Namespace) -> dict:
                 ),
             )
             forward_unary_contract = _registered_forward_unary_contract(args)
-            if forward_unary_contract is None:
+            likelihood_contract = _registered_query_likelihood_contract(args)
+            if likelihood_contract is not None:
+                (
+                    result,
+                    _field_result,
+                    _calibrated_observation,
+                    likelihood_diagnostics,
+                ) = _execute_registered_query_likelihood(
+                    engine,
+                    query,
+                    feature_banks,
+                    capability_bank.signatures,
+                    observation=valid_observation,
+                    positive_reference_mass=raw_positive_mass[
+                        valid_rows_device
+                    ],
+                    negative_reference_mass=raw_negative_mass[
+                        valid_rows_device
+                    ],
+                    primitive_reliability=(
+                        primitive_reliability.valid_confidence()
+                        if primitive_reliability is not None
+                        else None
+                    ),
+                    unary_temperature=float(args.solver_unary_temperature),
+                )
+                registered_prompt_evidence["registered_query_likelihood"] = (
+                    likelihood_diagnostics
+                )
+                if str(
+                    getattr(
+                        args,
+                        "registered_disjoint_domain_composition",
+                        "none",
+                    )
+                ) != "none":
+                    if object_region_memory is None:
+                        raise RuntimeError(
+                            "disjoint-domain composition lacks region memory"
+                        )
+                    augmented_query, token_diagnostics = (
+                        augment_query_with_region_tokens(
+                            query,
+                            feature_banks,
+                            object_region_memory,
+                            chunk_size=min(int(args.score_chunk_size), 8192),
+                        )
+                    )
+                    augmented_result = engine.execute(
+                        augmented_query,
+                        feature_banks,
+                        feature_signatures=capability_bank.signatures,
+                    )
+                    (
+                        completed_observation,
+                        changed_rows_cpu,
+                        memory_diagnostics,
+                    ) = complete_abstaining_observation(
+                        valid_observation,
+                        object_region_memory,
+                    )
+                    memory_unary = fuse_registered_observation_unary(
+                        augmented_result.field_unary,
+                        completed_observation,
+                        unary_temperature=float(args.solver_unary_temperature),
+                        chunk_size=int(args.score_chunk_size),
+                    )
+                    base_confidence = valid_observation.confidence
+                    assert base_confidence is not None
+                    hard_anchor_mask = (
+                        raw_positive_mass[valid_rows_device] > 0
+                    ) | (raw_negative_mass[valid_rows_device] > 0)
+                    disjoint_composition = compose_disjoint_domain_unary(
+                        result.unary,
+                        memory_unary,
+                        original_observation_confidence=base_confidence,
+                        memory_confidence=object_region_memory.confidence,
+                        hard_anchor_mask=hard_anchor_mask,
+                    )
+                    if not (
+                        torch.equal(
+                            disjoint_composition.memory_rows,
+                            changed_rows_cpu,
+                        )
+                        and int(disjoint_composition.diagnostics["observed_rows"])
+                        == int(likelihood_diagnostics["observed_rows"])
+                        == int(memory_diagnostics.base_observed_rows)
+                    ):
+                        raise RuntimeError(
+                            "disjoint-domain input observation masks differ"
+                        )
+                    learned_unary = result.unary
+                    result = replace(
+                        result,
+                        unary=disjoint_composition.unary,
+                        evidence_components={
+                            **result.evidence_components,
+                            "object_multiview_region_memory": (
+                                disjoint_composition.unary - learned_unary
+                            ),
+                        },
+                    )
+                    registered_prompt_evidence[
+                        "object_multiview_region_memory"
+                    ] = {
+                        **object_region_memory.evidence,
+                        "token_diagnostics": token_diagnostics,
+                        "diagnostics": {
+                            "num_nodes": memory_diagnostics.num_nodes,
+                            "base_observed_rows": (
+                                memory_diagnostics.base_observed_rows
+                            ),
+                            "base_abstained_rows": (
+                                memory_diagnostics.base_abstained_rows
+                            ),
+                            "memory_observed_rows": (
+                                memory_diagnostics.memory_observed_rows
+                            ),
+                            "completed_rows": memory_diagnostics.completed_rows,
+                            "completed_positive_rows": (
+                                memory_diagnostics.completed_positive_rows
+                            ),
+                            "completed_negative_rows": (
+                                memory_diagnostics.completed_negative_rows
+                            ),
+                            "completed_confidence_sum": (
+                                memory_diagnostics.completed_confidence_sum
+                            ),
+                            "observed_values_bitwise_equal": (
+                                memory_diagnostics.observed_values_bitwise_equal
+                            ),
+                            "observed_confidence_bitwise_equal": (
+                                memory_diagnostics.observed_confidence_bitwise_equal
+                            ),
+                            "observed_unary_bitwise_equal_to_likelihood": True,
+                            "materially_changed_memory_rows": int(
+                                (
+                                    (disjoint_composition.unary - learned_unary).abs()
+                                    > 1e-6
+                                ).sum()
+                            ),
+                            "maximum_memory_unary_delta": float(
+                                (disjoint_composition.unary - learned_unary).abs().max()
+                            ),
+                        },
+                    }
+                    registered_prompt_evidence[
+                        "registered_disjoint_domain_composition"
+                    ] = disjoint_composition.diagnostics
+            elif forward_unary_contract is None:
                 result = engine.execute(
                     query,
                     feature_banks,
                     feature_signatures=capability_bank.signatures,
                 )
+                if object_region_memory is not None:
+                    augmented_query, token_diagnostics = (
+                        augment_query_with_region_tokens(
+                            query,
+                            feature_banks,
+                            object_region_memory,
+                            chunk_size=min(int(args.score_chunk_size), 8192),
+                        )
+                    )
+                    augmented_result = engine.execute(
+                        augmented_query,
+                        feature_banks,
+                        feature_signatures=capability_bank.signatures,
+                    )
+                    (
+                        completed_observation,
+                        changed_rows_cpu,
+                        memory_diagnostics,
+                    ) = complete_abstaining_observation(
+                        valid_observation,
+                        object_region_memory,
+                    )
+                    memory_unary = fuse_registered_observation_unary(
+                        augmented_result.field_unary,
+                        completed_observation,
+                        unary_temperature=float(args.solver_unary_temperature),
+                        chunk_size=int(args.score_chunk_size),
+                    )
+                    changed_rows = changed_rows_cpu.to(device)
+                    base_unary = result.unary
+                    completed_unary = base_unary.clone()
+                    completed_unary[changed_rows] = memory_unary[changed_rows]
+                    base_confidence = valid_observation.confidence
+                    assert base_confidence is not None
+                    base_observed = base_confidence.to(device) > 0
+                    if not torch.equal(
+                        completed_unary[base_observed],
+                        base_unary[base_observed],
+                    ):
+                        raise RuntimeError(
+                            "object region memory changed a base-observed unary"
+                        )
+                    result = replace(
+                        result,
+                        unary=completed_unary,
+                        evidence_components={
+                            **result.evidence_components,
+                            "object_multiview_region_memory": (
+                                completed_unary - base_unary
+                            ),
+                        },
+                    )
+                    registered_prompt_evidence[
+                        "object_multiview_region_memory"
+                    ] = {
+                        **object_region_memory.evidence,
+                        "token_diagnostics": token_diagnostics,
+                        "diagnostics": {
+                            "num_nodes": memory_diagnostics.num_nodes,
+                            "base_observed_rows": (
+                                memory_diagnostics.base_observed_rows
+                            ),
+                            "base_abstained_rows": (
+                                memory_diagnostics.base_abstained_rows
+                            ),
+                            "memory_observed_rows": (
+                                memory_diagnostics.memory_observed_rows
+                            ),
+                            "completed_rows": memory_diagnostics.completed_rows,
+                            "completed_positive_rows": (
+                                memory_diagnostics.completed_positive_rows
+                            ),
+                            "completed_negative_rows": (
+                                memory_diagnostics.completed_negative_rows
+                            ),
+                            "completed_confidence_sum": (
+                                memory_diagnostics.completed_confidence_sum
+                            ),
+                            "observed_values_bitwise_equal": (
+                                memory_diagnostics.observed_values_bitwise_equal
+                            ),
+                            "observed_confidence_bitwise_equal": (
+                                memory_diagnostics.observed_confidence_bitwise_equal
+                            ),
+                            "observed_unary_bitwise_equal": True,
+                            "materially_changed_rows": int(
+                                (
+                                    (completed_unary - base_unary).abs()
+                                    > 1e-6
+                                ).sum()
+                            ),
+                            "maximum_unary_delta": float(
+                                (completed_unary - base_unary).abs().max()
+                            ),
+                        },
+                    }
+                source_correspondence_mode = str(
+                    getattr(
+                        args,
+                        "source_only_correspondence_completion",
+                        "none",
+                    )
+                )
+                if source_correspondence_mode != "none":
+                    if (
+                        source_correspondence_graph is None
+                        or source_multiview_observations is None
+                        or source_correspondence_asset_evidence is None
+                    ):
+                        raise RuntimeError(
+                            "source correspondence assets were not loaded"
+                        )
+                    prototype_probability = torch.sigmoid(
+                        result.field_unary
+                        / float(args.solver_unary_temperature)
+                    )
+                    completed_observation, completion_diagnostics = (
+                        source_only_one_hop_correspondence_completion(
+                            source_correspondence_graph.to(device),
+                            valid_observation,
+                            prototype_probability,
+                            source_multiview_observations,
+                            hard_seed_threshold=float(args.hard_seed_threshold),
+                            query_independent_reliability=(
+                                primitive_reliability.valid_confidence()
+                                if primitive_reliability is not None
+                                else None
+                            ),
+                        )
+                    )
+                    completed_unary = fuse_registered_observation_unary(
+                        result.field_unary,
+                        completed_observation,
+                        unary_temperature=float(args.solver_unary_temperature),
+                        chunk_size=int(args.score_chunk_size),
+                    )
+                    original_confidence = valid_observation.confidence
+                    assert original_confidence is not None
+                    observed_rows = original_confidence.to(device) > 0
+                    if not torch.equal(
+                        completed_unary[observed_rows],
+                        result.unary[observed_rows],
+                    ):
+                        raise RuntimeError(
+                            "source correspondence changed an observed unary"
+                        )
+                    result = replace(
+                        result,
+                        unary=completed_unary,
+                        evidence_components={
+                            **result.evidence_components,
+                            "source_only_correspondence_completion": (
+                                completed_unary - result.unary
+                            ),
+                        },
+                    )
+                    registered_prompt_evidence[
+                        "source_only_correspondence_completion"
+                    ] = {
+                        **source_correspondence_asset_evidence,
+                        "diagnostics": {
+                            "num_nodes": completion_diagnostics.num_nodes,
+                            "observed_rows": completion_diagnostics.observed_rows,
+                            "positive_anchor_rows": (
+                                completion_diagnostics.positive_anchor_rows
+                            ),
+                            "negative_anchor_rows": (
+                                completion_diagnostics.negative_anchor_rows
+                            ),
+                            "abstained_rows": completion_diagnostics.abstained_rows,
+                            "completed_rows": completion_diagnostics.completed_rows,
+                            "completed_confidence_sum": (
+                                completion_diagnostics.completed_confidence_sum
+                            ),
+                            "completed_mean_absolute_probability_shift": (
+                                completion_diagnostics.completed_mean_absolute_probability_shift
+                            ),
+                            "observed_unary_bitwise_equal": True,
+                        },
+                    }
             else:
                 exact_hits = rasterize_single_view_contributions(
                     model,
@@ -5953,7 +6934,66 @@ def run(args: argparse.Namespace) -> dict:
                     and "source_completion_unary" in registered_prompt_evidence
                     else {}
                 ),
+                **(
+                    {
+                        "registered_query_likelihood": registered_prompt_evidence[
+                            "registered_query_likelihood"
+                        ]
+                    }
+                    if registered_prompt_evidence is not None
+                    and "registered_query_likelihood" in registered_prompt_evidence
+                    else {}
+                ),
+                **(
+                    {
+                        "source_only_correspondence_completion": (
+                            registered_prompt_evidence[
+                                "source_only_correspondence_completion"
+                            ]
+                        )
+                    }
+                    if registered_prompt_evidence is not None
+                    and "source_only_correspondence_completion"
+                    in registered_prompt_evidence
+                    else {}
+                ),
+                **(
+                    {
+                        "object_multiview_region_memory": (
+                            registered_prompt_evidence[
+                                "object_multiview_region_memory"
+                            ]
+                        )
+                    }
+                    if registered_prompt_evidence is not None
+                    and "object_multiview_region_memory"
+                    in registered_prompt_evidence
+                    else {}
+                ),
+                **(
+                    {
+                        "registered_disjoint_domain_composition": (
+                            registered_prompt_evidence[
+                                "registered_disjoint_domain_composition"
+                            ]
+                        )
+                    }
+                    if registered_prompt_evidence is not None
+                    and "registered_disjoint_domain_composition"
+                    in registered_prompt_evidence
+                    else {}
+                ),
             },
+            disjoint_partition=(
+                {
+                    "observed_rows": disjoint_composition.observed_rows,
+                    "memory_rows": disjoint_composition.memory_rows,
+                    "abstained_rows": disjoint_composition.abstained_rows,
+                    "hard_anchor_rows": disjoint_composition.hard_anchor_rows,
+                }
+                if disjoint_composition is not None
+                else None
+            ),
         )
         primitive_unary_path = str(unary_artifact)
         primitive_unary_sha256 = _file_sha256(unary_artifact)
@@ -6419,6 +7459,13 @@ def run(args: argparse.Namespace) -> dict:
                     for name, value in sorted(vars(args).items())
                 },
                 "source_completion_unary": source_completion_evidence,
+                "registered_query_likelihood": (
+                    registered_prompt_evidence.get(
+                        "registered_query_likelihood"
+                    )
+                    if registered_prompt_evidence is not None
+                    else None
+                ),
                 "primitive_unary_artifact": (
                     {
                         "path": primitive_unary_path,
@@ -6945,6 +7992,38 @@ def run(args: argparse.Namespace) -> dict:
                 str(Path(args.canonical_reliability_cache).resolve())
                 if str(args.canonical_reliability_cache).strip()
                 else ""
+            ),
+            "source_correspondence_support_graph": (
+                str(Path(args.source_correspondence_support_graph).resolve())
+                if str(args.source_correspondence_support_graph).strip()
+                else ""
+            ),
+            "source_multiview_responsibility_cache": (
+                str(Path(args.source_multiview_responsibility_cache).resolve())
+                if str(args.source_multiview_responsibility_cache).strip()
+                else ""
+            ),
+            "source_correspondence_target_rgb_mask_or_metric_opened": (
+                False
+                if str(args.source_only_correspondence_completion) != "none"
+                else None
+            ),
+            "object_multiview_region_memory": (
+                str(
+                    Path(
+                        getattr(args, "object_region_memory", "")
+                    ).resolve()
+                )
+                if str(getattr(args, "object_region_memory", "")).strip()
+                else ""
+            ),
+            "object_multiview_region_memory_target_rgb_mask_or_metric_opened": (
+                False
+                if str(
+                    getattr(args, "object_multiview_region_memory", "none")
+                )
+                != "none"
+                else None
             ),
             "diagnostic_graph_affinity_override": (
                 str(Path(args.diagnostic_graph_affinity_override).resolve())
@@ -7506,6 +8585,45 @@ def main() -> None:
         "--source-completion-calibration-gate-sha256", default=""
     )
     parser.add_argument(
+        "--source-only-correspondence-completion",
+        choices=("none", _SOURCE_ONLY_CORRESPONDENCE_COMPLETION),
+        default="none",
+        help=(
+            "Complete only exact-abstain primitive rows by one-hop signed "
+            "DINO/SAM/source-covisibility correspondence; observed source "
+            "evidence remains bitwise unchanged."
+        ),
+    )
+    parser.add_argument("--source-correspondence-support-graph", default="")
+    parser.add_argument(
+        "--source-correspondence-support-graph-sha256", default=""
+    )
+    parser.add_argument("--source-multiview-responsibility-cache", default="")
+    parser.add_argument(
+        "--source-multiview-responsibility-cache-sha256", default=""
+    )
+    parser.add_argument(
+        "--object-multiview-region-memory",
+        choices=("none", OBJECT_MULTIVIEW_REGION_MEMORY),
+        default="none",
+        help=(
+            "Complete only exact base abstentions with one sealed source-only "
+            "object region memory and three reliability-weighted region tokens."
+        ),
+    )
+    parser.add_argument("--object-region-memory", default="")
+    parser.add_argument("--object-region-memory-sha256", default="")
+    parser.add_argument(
+        "--registered-disjoint-domain-composition",
+        choices=("none", DISJOINT_DOMAIN_COMPOSITION),
+        default="none",
+        help=(
+            "Compose source-calibrated registered likelihood on original c>0 "
+            "rows with object region-memory only on original c==0 rows. The "
+            "assignment domains are exhaustive and never probabilistically fused."
+        ),
+    )
+    parser.add_argument(
         "--prediction-receipt-output",
         default="",
         help=(
@@ -7760,6 +8878,19 @@ def main() -> None:
             "Diagnostic new-method unary from an exact registered-view forward "
             "likelihood E-step. It is authority-bound but non-exact for frozen "
             "strict-unseen scoring; none preserves the historical evaluator path."
+        ),
+    )
+    parser.add_argument(
+        "--registered-query-likelihood-calibration",
+        choices=(
+            "none",
+            _REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION,
+        ),
+        default="none",
+        help=(
+            "Fit the shared six-parameter monotone likelihood head only on "
+            "the legal reference prompt's signed raster-adjoint masses, then "
+            "apply it before the frozen probability-mixture unary."
         ),
     )
     parser.add_argument(

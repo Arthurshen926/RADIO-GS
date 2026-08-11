@@ -1,0 +1,961 @@
+{
+  "access_audit": {
+    "benchmark_query_gt_metric_opened": false,
+    "evaluation_frames_excluded": true,
+    "query_time_source_or_target_rgb_allowed": false,
+    "source_rgb_opened_during_mapping": true
+  },
+  "authorities": {
+    "adjoint_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "canonical_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b"
+    },
+    "control_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5"
+    },
+    "dino_capability_target": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/dino_v3_matched_exact_marginal.pt",
+      "sha256": "dd2c3623a206e0bdf04615c8086cbda29556e170af019f5b298cc5a5346b8067"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "radio_frame_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/figurines/frame_manifest.json",
+      "sha256": "3db488c92f81289fb66c4d27a312d37dd0fb0fca5c271f8744721528f50eaaf9"
+    },
+    "responsibility": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/exact_marginal_responsibility_authority.json",
+      "sha256": "5bff25c917a1fe9c973b4d201502f07836117e1d313756263ddb533e83834fd4"
+    },
+    "sam_adaptor_capability_target": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/sam3_matched_exact_marginal.pt",
+      "sha256": "8a6a5d289e04f4b3e4587eca7085a67f617ef17d01ff55934ca73952c66fdb33"
+    },
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/figurines_support_graph_accepted_v2_isomorphic.pt",
+      "sha256": "3d2fe90ed4f52c706cfb56c8d4f0fc2fe33e203573f4d70d4f5868e3967e8fda"
+    }
+  },
+  "excluded_evaluation_frame_ids": [
+    41,
+    105,
+    152,
+    195
+  ],
+  "outputs": {
+    "base_structure_manifest": {
+      "no_clobber": true,
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/source_only_sam_structure_manifest.json"
+    },
+    "candidate_field": {
+      "no_clobber": true,
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/canonical_radio_source_sam_relative_e5_seed0.pth"
+    },
+    "official_sam_build_authority": {
+      "no_clobber": true,
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/official_sam_build_authority.json"
+    },
+    "official_sam_inventory": {
+      "no_clobber": true,
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/official_sam_inventory.json"
+    },
+    "official_sam_mask_root": {
+      "no_clobber": true,
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/official_sam3_masks/manifest.json"
+    },
+    "relation_cache": {
+      "no_clobber": true,
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/scale_ordered_relation_raster_adjoint_fp32.pt"
+    },
+    "relative_structure_manifest": {
+      "no_clobber": true,
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/source_only_sam_relative_manifest.json"
+    }
+  },
+  "scene_id": "figurines",
+  "schema": "radio_gs.lerf_source_sam_rollout_inventory.v1",
+  "shared_method": {
+    "mapping_supervision": "official_sam3_scale_matched_relative_no_harm_v2",
+    "membership_lifting": "true_alpha_compositing_adjoint",
+    "official_sam_parameters": {
+      "duplicate_minimum_area_ratio": 0.9,
+      "grid_size": 12,
+      "maximum_area_fraction": 0.8,
+      "maximum_masks": 0,
+      "minimum_area_fraction": 0.001,
+      "minimum_quality": 0.7,
+      "nms_iou": 0.85,
+      "resolution": 1008
+    },
+    "per_scene_or_per_task_tuning": false,
+    "persistent_semantic_feature": "canonical_radio_only",
+    "relation_parameters": {
+      "inside_threshold": 0.8,
+      "minimum_primitives_per_mask": 3,
+      "minimum_stability": 0.0,
+      "outside_threshold": 0.2,
+      "scale_bins": 8,
+      "scale_maximum_radius_m": 4.0,
+      "scale_minimum_radius_m": 0.05,
+      "vote_storage_dtype": "float32"
+    }
+  },
+  "source_frame_count": 120,
+  "source_frame_ids": [
+    1,
+    3,
+    6,
+    8,
+    11,
+    13,
+    16,
+    18,
+    21,
+    23,
+    26,
+    28,
+    31,
+    33,
+    36,
+    38,
+    42,
+    44,
+    46,
+    49,
+    51,
+    54,
+    56,
+    59,
+    61,
+    64,
+    66,
+    69,
+    71,
+    74,
+    76,
+    79,
+    81,
+    84,
+    86,
+    88,
+    91,
+    93,
+    96,
+    98,
+    101,
+    103,
+    107,
+    109,
+    112,
+    114,
+    117,
+    119,
+    122,
+    124,
+    127,
+    129,
+    131,
+    134,
+    136,
+    139,
+    141,
+    144,
+    146,
+    149,
+    151,
+    155,
+    157,
+    160,
+    162,
+    165,
+    167,
+    170,
+    172,
+    174,
+    177,
+    179,
+    182,
+    184,
+    187,
+    189,
+    192,
+    194,
+    198,
+    200,
+    203,
+    205,
+    208,
+    210,
+    213,
+    215,
+    217,
+    220,
+    222,
+    225,
+    227,
+    230,
+    232,
+    235,
+    237,
+    240,
+    242,
+    245,
+    247,
+    250,
+    252,
+    255,
+    257,
+    259,
+    262,
+    264,
+    267,
+    269,
+    272,
+    274,
+    277,
+    279,
+    282,
+    284,
+    287,
+    289,
+    292,
+    296,
+    299,
+    301
+  ],
+  "source_frame_list": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/source_frames.txt",
+    "sha256": "a125a20981cd5154b757d02b42492fa8933b5a4c0371ae4600047a87726cc50f"
+  },
+  "source_frames": [
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/1.jpg",
+      "frame_id": 1,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00001.jpg",
+      "sha256": "8f7df7ccea69e7058e6f59d6d500507cacc2ec82c8d9c84fbedb3bf930e80095"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/3.jpg",
+      "frame_id": 3,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00003.jpg",
+      "sha256": "285ffcca8c763e6860ab9fc212f850ef25703f9a4e4c77a8690405a3cf85781a"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/6.jpg",
+      "frame_id": 6,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00006.jpg",
+      "sha256": "663607ee8761eefcbbbfe3ea45f497d24d2ee22a6921242cf91f7e492ad9d2bf"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/8.jpg",
+      "frame_id": 8,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00008.jpg",
+      "sha256": "44327818208a136b1e9ab8703685689e171f0af6fffd32f6a7797f99381bc27c"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/11.jpg",
+      "frame_id": 11,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00011.jpg",
+      "sha256": "8d1d581c4803122007312613ad5a713ae93538743e02f58f234628b35f403fe8"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/13.jpg",
+      "frame_id": 13,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00013.jpg",
+      "sha256": "6de040bc7f0f092c0d8528c0446c34b15c4cc4c18cd0b80383862dcef0ac72d8"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/16.jpg",
+      "frame_id": 16,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00016.jpg",
+      "sha256": "75b851e7c834fc157ef35d13c2e4fe8ca8853be1049b80a6d7f24b51f88b1e75"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/18.jpg",
+      "frame_id": 18,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00018.jpg",
+      "sha256": "14744a8238ccbab575259749c18b8efd422a7717735c74f8ea2223478e4232c1"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/21.jpg",
+      "frame_id": 21,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00021.jpg",
+      "sha256": "87daeb4bde72d81a50a780ba21df61e71e7358ade0036ca8050252bc39d9f6e1"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/23.jpg",
+      "frame_id": 23,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00023.jpg",
+      "sha256": "4518ddfa2173f304cc70989178607db4650e274d5603c7dc1aed6a319eb94b04"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/26.jpg",
+      "frame_id": 26,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00026.jpg",
+      "sha256": "424e71bbf3d8e4c0fdc451278c1c23c11c119d662b0b8e51acf84b1ddd66e924"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/28.jpg",
+      "frame_id": 28,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00028.jpg",
+      "sha256": "8a230198239c21ae0292997190ecc46fddc2755bdd09e39cfbf524640c23c10a"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/31.jpg",
+      "frame_id": 31,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00031.jpg",
+      "sha256": "825bca3b2b861e3f88ccd25722fb093d3bc76d951a4bc850fdff644707ffbc6b"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/33.jpg",
+      "frame_id": 33,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00033.jpg",
+      "sha256": "50ea3db7eb3f011cd104f24edfcb6201248098a27a61e9807cc8b0e38bce5b97"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/36.jpg",
+      "frame_id": 36,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00036.jpg",
+      "sha256": "7c71908ed2650426687a46f443b96c794472b5922eaa3e62abb5ea3891367f2d"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/38.jpg",
+      "frame_id": 38,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00038.jpg",
+      "sha256": "ab4c56de2047af38539d085ebe88cf84525de03747fbe86259e441dae3754dd5"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/42.jpg",
+      "frame_id": 42,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00042.jpg",
+      "sha256": "7f04ac0331b03265c77831efc3c1182b615471e643b40eb1a54533da8a618b98"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/44.jpg",
+      "frame_id": 44,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00044.jpg",
+      "sha256": "4af6e99250475ffd8260e5d6a121d99fcbf4984099f8fada760214995e09f0ad"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/46.jpg",
+      "frame_id": 46,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00046.jpg",
+      "sha256": "589aead24baeece08fb77ccc572892d6300e31840eb79ba5a62897724eb8d9f2"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/49.jpg",
+      "frame_id": 49,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00049.jpg",
+      "sha256": "448e8f29ffb8e3bc4b8305543fc02baa974ea147fe1cecb19987371332fb35f3"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/51.jpg",
+      "frame_id": 51,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00051.jpg",
+      "sha256": "c4c9ed5b2a604aed3a5fec25db37b35e4dfe589cfb394a93474deb9c4d4cc500"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/54.jpg",
+      "frame_id": 54,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00054.jpg",
+      "sha256": "fafa66c0c6429155f866ef7eafa7114d4d05adca0a8bb102ac8b1c1e4feef425"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/56.jpg",
+      "frame_id": 56,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00056.jpg",
+      "sha256": "db8f75f45cbf8c95791c18239b4d04cf80adf2dcca69d4242114772136246680"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/59.jpg",
+      "frame_id": 59,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00059.jpg",
+      "sha256": "5fde7643707e0b880153c126b701514868a31f6fc1c705694470f919342d5911"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/61.jpg",
+      "frame_id": 61,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00061.jpg",
+      "sha256": "40a102c5e4adb2a556ef8b0c77cafaa4cfd914dea8474250b38a37832e5d89a3"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/64.jpg",
+      "frame_id": 64,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00064.jpg",
+      "sha256": "8055eeee3dbf6815a278de5234f26a33b2675bfacaa4623663f93c87436724be"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/66.jpg",
+      "frame_id": 66,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00066.jpg",
+      "sha256": "ac3204b88f4403b78533e3d3ff3651a7fcc576fc81a1ce27f1a1fcce6f36d6b8"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/69.jpg",
+      "frame_id": 69,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00069.jpg",
+      "sha256": "0b4a85ae719d686e98fc31fb7885662fbc870d601ae685477c0b40cb6e6e2343"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/71.jpg",
+      "frame_id": 71,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00071.jpg",
+      "sha256": "ed2c89999fa38f3eb025a19aa5bc1fbe72746558d34d52be2fd9234c5de49ef2"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/74.jpg",
+      "frame_id": 74,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00074.jpg",
+      "sha256": "3e7f1cac4453b683b332f208da6553bd380ddc66a600d31f74d231ed2619de3b"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/76.jpg",
+      "frame_id": 76,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00076.jpg",
+      "sha256": "287c088f0e472371383a0828ce64728cbb9f4cad542aaf5b0f03b4a0341f8415"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/79.jpg",
+      "frame_id": 79,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00079.jpg",
+      "sha256": "75a0bdc134bf31e124553920919da93d10fcb41a3f16b446457b46cb1571e421"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/81.jpg",
+      "frame_id": 81,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00081.jpg",
+      "sha256": "7dcbf8bc2f2afc5aa653baf69918172902e87e0e85604a91bb9a981f648ce1e0"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/84.jpg",
+      "frame_id": 84,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00084.jpg",
+      "sha256": "c812cd1ae67034de4b324d8bd0b82f0cd89db6cf49731934dddf26435a8e4101"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/86.jpg",
+      "frame_id": 86,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00086.jpg",
+      "sha256": "1bd47bffb3e2d5d1fae7057dcd83bc1f6bcfcee1e6a2e9b1c035684b4884fd9a"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/88.jpg",
+      "frame_id": 88,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00088.jpg",
+      "sha256": "38327afbcf766bf4aadc6b9f6b2a32055b144dae257798fd53e04da9e9640a3a"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/91.jpg",
+      "frame_id": 91,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00091.jpg",
+      "sha256": "d2f78356cd4133981c8c7b08a9f1e6a47edb57e570d5933a2617a9aeace6a956"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/93.jpg",
+      "frame_id": 93,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00093.jpg",
+      "sha256": "a19464188b38c363575a3b23bd3a4bdfae5e8fd90d5905e234c26f03c4bca902"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/96.jpg",
+      "frame_id": 96,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00096.jpg",
+      "sha256": "bfadf15f7cef70a8da0ab1a0f4ff1538aab9736aa72f0db6d933c32e579a41aa"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/98.jpg",
+      "frame_id": 98,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00098.jpg",
+      "sha256": "f7393548312e37974cecee9ab96d084926934421248ef254093e713fbfad2e3e"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/101.jpg",
+      "frame_id": 101,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00101.jpg",
+      "sha256": "f49690b8cb4644fc6b0d7ee5374f939336b1f206a7f876e522ef17634e1edcf8"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/103.jpg",
+      "frame_id": 103,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00103.jpg",
+      "sha256": "e22cb5626f02113631b3232cae589a50782a649a6536fb8ac52058e4ea183dcf"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/107.jpg",
+      "frame_id": 107,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00107.jpg",
+      "sha256": "fb0aaa356ffc94cff2768bae966efaecaef845c97c20b308a2b5d5dee71b5ffe"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/109.jpg",
+      "frame_id": 109,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00109.jpg",
+      "sha256": "0714f121735aad186d2767b9e7673e3eff4f1ef49455fc590e0971ea6e45b48b"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/112.jpg",
+      "frame_id": 112,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00112.jpg",
+      "sha256": "1e25d6913b631b44b87619af434004379f4a1c6fc9b45f1aa2ea19845ad99479"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/114.jpg",
+      "frame_id": 114,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00114.jpg",
+      "sha256": "84e0e0808a13671b6fc08502a7b26567fc53e3d613d2cc3c7a4fad519ee78389"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/117.jpg",
+      "frame_id": 117,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00117.jpg",
+      "sha256": "203a145ff939c15d1d3d2b1344fde08c7b24141e4f9350297efea2107d573103"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/119.jpg",
+      "frame_id": 119,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00119.jpg",
+      "sha256": "fcf95d0caf388d5a44db6e6c6ecc42ffd72ad8e541ebf1214b3faa00f2b764bc"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/122.jpg",
+      "frame_id": 122,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00122.jpg",
+      "sha256": "333a74029823ed99e1afab03232301dfa32c766e8e1a176bbae2726b66a3fb28"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/124.jpg",
+      "frame_id": 124,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00124.jpg",
+      "sha256": "e88611b680324caa479726b68eaa894a0b2dc13638ce80cbf190b11a8a6cb627"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/127.jpg",
+      "frame_id": 127,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00127.jpg",
+      "sha256": "7bcf6fc34759fa2241e93e8f95b0d9aec022425b2836693dd09dbd6a3b38b60f"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/129.jpg",
+      "frame_id": 129,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00129.jpg",
+      "sha256": "baa65b85373c9faa25f05d23bea62664f9e202d293a0cc340285a12328dd0bf7"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/131.jpg",
+      "frame_id": 131,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00131.jpg",
+      "sha256": "40a3cfe9b9c5b04b0059506a9730a20260233d573edf7e2c18bfe85fbcdce547"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/134.jpg",
+      "frame_id": 134,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00134.jpg",
+      "sha256": "e5a1c2b10ba44550d3109d07cc8d0761831c3103c0c9618f3778f19ffb1c51c9"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/136.jpg",
+      "frame_id": 136,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00136.jpg",
+      "sha256": "fcb43b3b808a633cf4350be0ee250fe99b4952fa1440090ce7ba96d48671239e"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/139.jpg",
+      "frame_id": 139,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00139.jpg",
+      "sha256": "2fea9f6e42c1e73cba045713ad1a2e84fa09efdc4b796f20f11a17d8ca5b6aa0"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/141.jpg",
+      "frame_id": 141,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00141.jpg",
+      "sha256": "65d3ff753975e0c4b5fb894503a4580b0b111e8b9d09bbf79c84064a509a8785"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/144.jpg",
+      "frame_id": 144,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00144.jpg",
+      "sha256": "9e7038cf382300bce413b6afbcf42a2393ab2838f1799eac4a86ea68ee03b1a8"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/146.jpg",
+      "frame_id": 146,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00146.jpg",
+      "sha256": "af7edd10a9ea6f44c78bf3da9a3e12897cd532069fa963634f61cbeb4f8c8e69"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/149.jpg",
+      "frame_id": 149,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00149.jpg",
+      "sha256": "2c5681db3e99a6929aaf3ebd7614ffea534a51c38ad03da15ad2ea60328772ee"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/151.jpg",
+      "frame_id": 151,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00151.jpg",
+      "sha256": "f8d575ba2a1f2bb804ccdef1d80547147dbef6b6954f37429c7e49c5a0095a57"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/155.jpg",
+      "frame_id": 155,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00155.jpg",
+      "sha256": "7f8ab708c5c587df7700beee96890807f68b2586e157cefeaa92b0e9a44a11f6"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/157.jpg",
+      "frame_id": 157,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00157.jpg",
+      "sha256": "ad7eed13f6d438da5d50886e79a4b02a22998d9392057ceff5a5c89525c37dd0"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/160.jpg",
+      "frame_id": 160,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00160.jpg",
+      "sha256": "cc3fc954fdf107ec552845cf2bbb59a75126ad932dd47f15492b8d14c0942f41"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/162.jpg",
+      "frame_id": 162,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00162.jpg",
+      "sha256": "2353b4db99d2ae84d192ba72b9b8c619472baa9244a30809f665f38c5f933dbe"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/165.jpg",
+      "frame_id": 165,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00165.jpg",
+      "sha256": "60df698e11eeed600414115dbf4bf43323b95739b30d19f9ec22919c4cdb1ba9"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/167.jpg",
+      "frame_id": 167,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00167.jpg",
+      "sha256": "f31804e813541e02581528a6943cb93e671d255d9f8896982d9a4209c315015f"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/170.jpg",
+      "frame_id": 170,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00170.jpg",
+      "sha256": "dd8226938f727a367ae845be019f7cea563cb9399b4b92953d752dc496eacb40"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/172.jpg",
+      "frame_id": 172,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00172.jpg",
+      "sha256": "c3cd1bb279d99bc655c7af8fe9457f038be23cb8609607f52087a576dfa65f3e"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/174.jpg",
+      "frame_id": 174,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00174.jpg",
+      "sha256": "6058360592530b57f7a4b4be461d266936c6f2d33a624bc7f7e5b2c89f201094"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/177.jpg",
+      "frame_id": 177,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00177.jpg",
+      "sha256": "26f0b931b62081730ee64c0954800fa714213a2f8159853271cda3109f1f60fc"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/179.jpg",
+      "frame_id": 179,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00179.jpg",
+      "sha256": "4d6ecd41cd3185877452d852fd51fb5d73b37cd4c00aa0be1aa409a7b02a6643"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/182.jpg",
+      "frame_id": 182,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00182.jpg",
+      "sha256": "97b3117814986a3b21b8e7a018a4ed9fc2722e9dc87e4d985c7c6bcfa78d7085"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/184.jpg",
+      "frame_id": 184,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00184.jpg",
+      "sha256": "894ae9458f96b05e3b1af98a2685b58bb76afd96046544cd659178343c019f6f"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/187.jpg",
+      "frame_id": 187,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00187.jpg",
+      "sha256": "1ba145702f302cf3f74584124c35d26144d076270d6030df52ee7267e2c5a9fb"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/189.jpg",
+      "frame_id": 189,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00189.jpg",
+      "sha256": "0528d884b90856d666f53c491eff72d6d8c99b6e799575c4a8a9a6759295b1d2"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/192.jpg",
+      "frame_id": 192,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00192.jpg",
+      "sha256": "72097eaeda49e50038268df3b2f9548a1d44b7cc1d4faf9cc48e4c05fa573ed3"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/194.jpg",
+      "frame_id": 194,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00194.jpg",
+      "sha256": "f8807b292324baf79551cb4d7ed093f4aa122e890fc09ddf9ec465c7b355084f"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/198.jpg",
+      "frame_id": 198,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00198.jpg",
+      "sha256": "91b847227216ea20d3a086e204659aa248ca0e3162f42b242a67bec63fde4680"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/200.jpg",
+      "frame_id": 200,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00200.jpg",
+      "sha256": "b62ecfc946aacf78bddc23d583be466f80f55c31108c77a1577ca97de6180d3e"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/203.jpg",
+      "frame_id": 203,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00203.jpg",
+      "sha256": "c7103912e2c9ba7465cecfd245aa82afec40e69f92a59747730a80dc7c225201"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/205.jpg",
+      "frame_id": 205,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00205.jpg",
+      "sha256": "86a9c639e74b3f32763be58e4dbf3c604ac5169b2536c61f24f089db7ec33044"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/208.jpg",
+      "frame_id": 208,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00208.jpg",
+      "sha256": "85c84d009b5a927dcef65039fd65eb6fcecb174895b816685cfb2d2e3e78e3cd"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/210.jpg",
+      "frame_id": 210,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00210.jpg",
+      "sha256": "b678446b7635b056e278163a6e6b2ca6b273f06da3a6874f388418ed0c17f9cf"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/213.jpg",
+      "frame_id": 213,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00213.jpg",
+      "sha256": "9429f11a3834ad3ef74083a339f01ea35aa8bdc13024b82414e75d82e86e5ea7"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/215.jpg",
+      "frame_id": 215,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00215.jpg",
+      "sha256": "169b835553e35048dec1643a8d43b79fd2eef878037748f3b7a02d4257d5c808"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/217.jpg",
+      "frame_id": 217,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00217.jpg",
+      "sha256": "80ceddf4ad06da378215dc3412852ee31b96284d0a425261f6624e95962b4811"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/220.jpg",
+      "frame_id": 220,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00220.jpg",
+      "sha256": "bd3f109ec62fd87c9c3a3c8badf4edaa3d7e187e00e3e9997e261ee9d4259717"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/222.jpg",
+      "frame_id": 222,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00222.jpg",
+      "sha256": "4310e66f9b43220734724680043372b015f99bb59182dd1a73a4d42aa6f27f36"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/225.jpg",
+      "frame_id": 225,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00225.jpg",
+      "sha256": "5e89b561d680fd37ff2962deb413b29d13c1e12e0171ab8c1f41d577bb22ad04"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/227.jpg",
+      "frame_id": 227,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00227.jpg",
+      "sha256": "4b7f578b226cc4de2b7b49635daaec4742799976f8321e36df32512251de5f05"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/230.jpg",
+      "frame_id": 230,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00230.jpg",
+      "sha256": "9b0c2993c803e03b05b75f3f137b90613d395d4fee6956ef6f6f2186014a67b0"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/232.jpg",
+      "frame_id": 232,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00232.jpg",
+      "sha256": "25adc834841ac47aa52f3258a3b57dd2646925afae5c9fa172b7d5a8a1d47089"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/235.jpg",
+      "frame_id": 235,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00235.jpg",
+      "sha256": "23d85771e3a37dc19c0245586310840820743e5cd9f0e902ede27cfe7358d35c"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/237.jpg",
+      "frame_id": 237,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00237.jpg",
+      "sha256": "53d03daf6da9cb0f583a5191c68aab11be1b1dd68b5585c99acb9b89c739749a"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/240.jpg",
+      "frame_id": 240,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00240.jpg",
+      "sha256": "d590ea68427535e92812f287724a763ff16cfb0373d0c0f1a283b5923e8f295e"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/242.jpg",
+      "frame_id": 242,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00242.jpg",
+      "sha256": "c33bf719330eea3952385d249b022a02889b56db69a6b3aeadd7521143b601a9"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/245.jpg",
+      "frame_id": 245,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00245.jpg",
+      "sha256": "5fcee098f7468fc7abe245d9e3eb46c445bc59a92ab1bcbf7b4d48bd4c773ee6"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/247.jpg",
+      "frame_id": 247,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00247.jpg",
+      "sha256": "0247d7516e0ee659a4c44785f8e62613a630dbdc74a9cb1b7b1a082cc8451ee7"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/250.jpg",
+      "frame_id": 250,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00250.jpg",
+      "sha256": "26fd669d5f4108fd01cb6716abbace7391bf6ab760a1e0eed23e8aeed76c108f"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/252.jpg",
+      "frame_id": 252,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00252.jpg",
+      "sha256": "ae97360697dd561bf4a057676c37c25c9134fe14f2a610f9a64eb37d776c4add"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/255.jpg",
+      "frame_id": 255,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00255.jpg",
+      "sha256": "e67cf1120311dddbbedf27c6e77b161a6fdbc7d11185c86de84ac536e6c00ce4"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/257.jpg",
+      "frame_id": 257,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00257.jpg",
+      "sha256": "23510c4b0e04e1f81787ad93b91dd0e4d1760143e4e5e54ee6bcffc9ac198309"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/259.jpg",
+      "frame_id": 259,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00259.jpg",
+      "sha256": "12173f2eea0398305644d1d3a50ee56bca2bc5c6d7201e4746afd7fc333cbd26"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/262.jpg",
+      "frame_id": 262,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00262.jpg",
+      "sha256": "f18b8340de249e9d8281dce9e0735cf8ebac171d1dfa5ffc1f2eb4d8206d270a"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/264.jpg",
+      "frame_id": 264,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00264.jpg",
+      "sha256": "781fd2a6e5155da86ef7cf3eedcea7eb477380162718b6d8a48624948791c37a"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/267.jpg",
+      "frame_id": 267,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00267.jpg",
+      "sha256": "03f60c4cfe8aadceecd3e2e710eab377e80d6b3c4d17170f5982202f559dd6bd"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/269.jpg",
+      "frame_id": 269,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00269.jpg",
+      "sha256": "5bbf121ca9002fd7cca5b7c3d9d0de42927b2c895fc0bf5d2254484df5afefba"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/272.jpg",
+      "frame_id": 272,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00272.jpg",
+      "sha256": "63878943670c3ee8ffd60a89521731a3a06b71e75587899a49246c9423620411"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/274.jpg",
+      "frame_id": 274,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00274.jpg",
+      "sha256": "262c617da3e4e6e825d8d697a8c6455a7c8ab09a0efb143c831eb57d00cc4e3f"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/277.jpg",
+      "frame_id": 277,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00277.jpg",
+      "sha256": "90eb2acaf2c16f3c4490334f84083c12e3db0a15ff9a98214258a9a1b37ef984"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/279.jpg",
+      "frame_id": 279,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00279.jpg",
+      "sha256": "dad55ae94440bb2d81c5262c1ccb83de5b0e2067a56128b9935beae78bcf5562"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/282.jpg",
+      "frame_id": 282,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00282.jpg",
+      "sha256": "590c09592403a48179c73ae5bb830a5c18ea32a97f2536446bc39b00d1c7c7f3"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/284.jpg",
+      "frame_id": 284,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00284.jpg",
+      "sha256": "c64834aa275899fad9bbf8bc27b3b1271dc11dc2f7306fd659b2ba7b7f6bd021"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/287.jpg",
+      "frame_id": 287,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00287.jpg",
+      "sha256": "41a144840941883e85c3bfb9c51c1a5f4cf481833e18056e021817c68a6a652e"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/289.jpg",
+      "frame_id": 289,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00289.jpg",
+      "sha256": "28a665ad77c1c10d2414fc2731de5c32b9620e351fbae86531afcfacd868aef7"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/292.jpg",
+      "frame_id": 292,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00292.jpg",
+      "sha256": "cdf57c72b193fce1e19f062e21e67332bb6b7539c084786ec7c61b95f8296a85"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/296.jpg",
+      "frame_id": 296,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00296.jpg",
+      "sha256": "5eb4b70b927790039f100cd1aa5850513b03f9f8a21a6173bd245b5476a37b7b"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/299.jpg",
+      "frame_id": 299,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00299.jpg",
+      "sha256": "56726c98bed22ce6032327bbec8274c10383b87a788282ce4af06153bb08fba0"
+    },
+    {
+      "alias_path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric/301.jpg",
+      "frame_id": 301,
+      "original_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00301.jpg",
+      "sha256": "33bffbd8cf8143f9422bf99ae4d354d52117a702e22334c1868b6d13e9005a96"
+    }
+  ],
+  "source_rgb_alias_root": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/mapping_source_rgb_numeric",
+  "status": "frozen_before_source_sam_generation"
+}

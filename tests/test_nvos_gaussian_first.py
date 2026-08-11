@@ -19,12 +19,15 @@ from radio_gs.querying.reliability_fusion import (
 from radio_gs.scripts.eval_nvos_gaussian_first import (
     _FROZEN_LEGACY_PROTOTYPE_ALPHA_THRESHOLD,
     _PROBABILITY_PRESERVING_SOURCE_UNARY,
+    _REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION,
+    _SOURCE_ONLY_CORRESPONDENCE_COMPLETION,
     _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION,
     _apply_hierarchical_source_completion_trust,
     _dataset_protocol_contract,
     _joint_signed_observation_seeds,
     _load_training_poses,
     _registered_solver_masses,
+    _registered_query_likelihood_contract,
     _prompt_cycle_fixed_ranking,
     _prompt_cycle_reconstruction_metrics,
     _probability_preserving_registration_maps,
@@ -39,12 +42,176 @@ from radio_gs.scripts.eval_nvos_gaussian_first import (
     _source_completion_unary_contract,
     _validate_direct_raster_adjoint_args,
     _validate_hard_seed_anchor_only_probability_args,
+    _validate_object_multiview_region_memory_args,
+    _validate_registered_disjoint_domain_composition_args,
     _validate_registered_prototype_seed_construction_args,
+    _validate_registered_query_likelihood_args,
     _validate_registered_reference_threshold_calibration_args,
     _validate_source_completion_unary_args,
+    _validate_source_only_correspondence_args,
     _valid_normalized_score_map,
     _weighted_spherical_prototypes,
 )
+
+
+def _source_correspondence_args(**updates: object) -> Namespace:
+    values = {
+        "source_only_correspondence_completion": (
+            _SOURCE_ONLY_CORRESPONDENCE_COMPLETION
+        ),
+        "source_correspondence_support_graph": "/frozen/graph.pt",
+        "source_correspondence_support_graph_sha256": "a" * 64,
+        "source_multiview_responsibility_cache": "/frozen/views.pt",
+        "source_multiview_responsibility_cache_sha256": "b" * 64,
+        "support_mode": "canonical_support",
+        "disable_registered_graph": True,
+        "registered_readout_stage": "unary_prior",
+        "registered_observation_fusion": "probability_mixture",
+        "registered_query_likelihood_calibration": "none",
+        "registered_forward_unary": "none",
+        "query_conditioned_diffusion_kernel": "none",
+        "negative_spatial_mode": "none",
+        "require_asset_hashes": True,
+    }
+    values.update(updates)
+    return Namespace(**values)
+
+
+def test_source_correspondence_contract_requires_frozen_unary_only_path() -> None:
+    _validate_source_only_correspondence_args(_source_correspondence_args())
+    with pytest.raises(ValueError, match="disable-registered-graph"):
+        _validate_source_only_correspondence_args(
+            _source_correspondence_args(disable_registered_graph=False)
+        )
+    with pytest.raises(ValueError, match="valid SHA256"):
+        _validate_source_only_correspondence_args(
+            _source_correspondence_args(
+                source_multiview_responsibility_cache_sha256="bad"
+            )
+        )
+
+
+def test_source_correspondence_assets_rejected_when_mode_is_disabled() -> None:
+    with pytest.raises(ValueError, match="assets require"):
+        _validate_source_only_correspondence_args(
+            _source_correspondence_args(
+                source_only_correspondence_completion="none"
+            )
+        )
+
+
+def _object_region_memory_args(**updates: object) -> Namespace:
+    values = {
+        "object_multiview_region_memory": (
+            nvos_eval.OBJECT_MULTIVIEW_REGION_MEMORY
+        ),
+        "object_region_memory": "/frozen/memory.pt",
+        "object_region_memory_sha256": "c" * 64,
+        "support_mode": "canonical_support",
+        "disable_registered_graph": True,
+        "registered_readout_stage": "unary_prior",
+        "registered_observation_fusion": "probability_mixture",
+        "registered_query_likelihood_calibration": "none",
+        "registered_forward_unary": "none",
+        "source_only_correspondence_completion": "none",
+        "query_conditioned_diffusion_kernel": "none",
+        "negative_spatial_mode": "none",
+        "require_asset_hashes": True,
+    }
+    values.update(updates)
+    return Namespace(**values)
+
+
+def test_object_region_memory_requires_frozen_unary_only_path() -> None:
+    _validate_object_multiview_region_memory_args(_object_region_memory_args())
+    with pytest.raises(ValueError, match="source-only-correspondence"):
+        _validate_object_multiview_region_memory_args(
+            _object_region_memory_args(
+                source_only_correspondence_completion=(
+                    _SOURCE_ONLY_CORRESPONDENCE_COMPLETION
+                )
+            )
+        )
+    with pytest.raises(ValueError, match="valid SHA256"):
+        _validate_object_multiview_region_memory_args(
+            _object_region_memory_args(object_region_memory_sha256="bad")
+        )
+
+
+def test_object_region_memory_assets_rejected_when_mode_is_disabled() -> None:
+    with pytest.raises(ValueError, match="assets require"):
+        _validate_object_multiview_region_memory_args(
+            _object_region_memory_args(object_multiview_region_memory="none")
+        )
+
+
+def _disjoint_composition_args(**updates: object) -> Namespace:
+    values = vars(_object_region_memory_args()).copy()
+    values.update(
+        {
+            "registered_disjoint_domain_composition": (
+                nvos_eval.DISJOINT_DOMAIN_COMPOSITION
+            ),
+            "registered_query_likelihood_calibration": (
+                _REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION
+            ),
+            "solver_support_threshold": 0.5,
+        }
+    )
+    values.update(updates)
+    return Namespace(**values)
+
+
+def test_disjoint_composition_requires_both_frozen_inputs_and_threshold():
+    args = _disjoint_composition_args()
+    _validate_object_multiview_region_memory_args(args)
+    _validate_registered_disjoint_domain_composition_args(args)
+    with pytest.raises(ValueError, match="fixed 0.5"):
+        _validate_registered_disjoint_domain_composition_args(
+            _disjoint_composition_args(solver_support_threshold=0.4)
+        )
+    with pytest.raises(ValueError, match="object multiview"):
+        _validate_registered_disjoint_domain_composition_args(
+            _disjoint_composition_args(object_multiview_region_memory="none")
+        )
+
+
+def _registered_likelihood_args(**updates: object) -> Namespace:
+    values = {
+        "registered_query_likelihood_calibration": (
+            _REGISTERED_QUERY_LIKELIHOOD_SOURCE_RECONSTRUCTION
+        ),
+        "support_mode": "canonical_support",
+        "prompt_registration_mode": "raster_adjoint",
+        "registered_observation_fusion": "probability_mixture",
+        "registered_seed_construction": "joint_signed",
+        "registered_forward_unary": "none",
+        "registered_readout_stage": "unary_prior",
+        "disable_registered_graph": True,
+    }
+    values.update(updates)
+    return Namespace(**values)
+
+
+def test_registered_query_likelihood_contract_is_source_only_and_fixed() -> None:
+    args = _registered_likelihood_args()
+    _validate_registered_query_likelihood_args(args)
+    contract = _registered_query_likelihood_contract(args)
+    assert contract is not None
+    assert contract["target_rgb_mask_or_metric_used"] is False
+    assert contract["parameter_sweep"] is False
+    assert contract["unobserved_policy"] == "coverage=0_exact_abstention"
+
+
+def test_registered_query_likelihood_rejects_graph_or_nonprobability_fusion() -> None:
+    with pytest.raises(ValueError, match="probability_mixture"):
+        _validate_registered_query_likelihood_args(
+            _registered_likelihood_args(registered_observation_fusion="additive")
+        )
+    with pytest.raises(ValueError, match="disable-registered-graph"):
+        _validate_registered_query_likelihood_args(
+            _registered_likelihood_args(disable_registered_graph=False)
+        )
 
 
 def test_training_pose_loader_filters_target_view_overlap(tmp_path) -> None:

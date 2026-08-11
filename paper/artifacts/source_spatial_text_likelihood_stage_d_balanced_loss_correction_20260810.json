@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_spatial_text_likelihood_stage_d_balanced_loss_correction",
+  "status": "sealed_before_balanced_source_fit_and_before_development_open",
+  "previous_correction_sha256": "3e376dc3484816ccc6287d8f75375f8bfaeb9d24046463cc27c09f81a0af74ab",
+  "dimension_normalized_fit_audit": {
+    "checkpoint_written": false,
+    "development_labels_opened": false,
+    "balanced_bce_delta": -0.15889087381462258,
+    "positive_negative_gap_delta": 0.2581137095888456,
+    "legacy_local_relation_loss": 0.001208522803305338,
+    "learned_local_relation_loss": 0.0013764930578569572,
+    "local_relation_loss_delta": 0.0001679702545516193
+  },
+  "correction": {
+    "objective": "0.5 * (macro_BCE / stop_gradient(legacy_macro_BCE) + mean_scene(local_relation / stop_gradient(legacy_local_relation)))",
+    "reason": "equal dimensionless multi-objective balancing; no arbitrary task-specific coefficient",
+    "architecture_data_graph_epochs_learning_rate_changed": false,
+    "source_fit_labels_only": true,
+    "development_or_benchmark_outcome_used": false
+  },
+  "corrected_trainer_sha256": "14ce76f648b9d190a47f2fc5c1846cb0eac0e3419d32f6618c92db33e0d47489"
+}

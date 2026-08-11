@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-capability-likelihood-v2-preregistration",
+  "status": "frozen_before_v2_scene0000_shard_or_metrics",
+  "fit_scope": {
+    "scene_id": "scene0000_00",
+    "partition": "fit",
+    "development_labels_allowed": false,
+    "test_labels_allowed": false,
+    "full312_allowed": false
+  },
+  "evidence_contract": {
+    "channels": [
+      "appearance",
+      "boundary"
+    ],
+    "channel_order_fixed": true,
+    "click_prototype": "opacity_times_Gaussian_kernel_mixture_over_frozen_K64_official_point_candidates",
+    "scene_calibration": "scene_centered_l2_cosine_to_click_gaussian_mixture_v1",
+    "scene_calibration_uses_labels": false,
+    "scene_calibration_uses_queries_or_clicks": false,
+    "scene_thresholds": "none",
+    "spatial_click_kernel": "hard_solver_seed_only",
+    "spatial_kernel_used_as_instance_likelihood": false,
+    "coverage": "capability_valid_times_query_independent_observation_support"
+  },
+  "head_contract": {
+    "class": "MonotoneQueryLikelihoodHead",
+    "schema": "monotone-query-likelihood-multichannel-v2",
+    "affinity_channel_count": 2,
+    "positive_and_negative_statistics_per_channel": [
+      "maximum",
+      "mean"
+    ],
+    "nonnegative_weight_parameterization": "softplus",
+    "modality_specific_head": false
+  },
+  "training_recipe": {
+    "recipe_id": "capability-likelihood-balanced-bce-dice-adam-seed0-e200-lr0.05-v2",
+    "seed": 0,
+    "optimizer": "Adam",
+    "epochs": 200,
+    "learning_rate": 0.05,
+    "step_weighting": "arithmetic_mean_equal_weight_per_click_step",
+    "balanced_bce": "0.5*mean_positive(-log(q))+0.5*mean_negative(-log(1-q))",
+    "soft_dice": "1-(2*sum(q*y)+1)/(sum(q)+sum(y)+1)",
+    "balanced_bce_weight": 1.0,
+    "soft_dice_weight": 1.0,
+    "gradient_updates_per_epoch": 1,
+    "shuffle": false,
+    "early_stopping": false,
+    "threshold_selection": false,
+    "reported_binary_threshold": 0.5
+  },
+  "synthetic_gates": {
+    "far_same_appearance_gets_positive_likelihood": true,
+    "negative_click_suppresses_appearance_lookalike": true,
+    "one_percent_positive_target_does_not_collapse_all_background": true
+  },
+  "fit_sentinel_gate": {
+    "reference_real_gaussian_official_point_mean_iou": 0.01685393258426966,
+    "minimum_absolute_iou_gain": 0.01,
+    "required_mean_iou_strictly_greater_than": 0.02685393258426966,
+    "required_click10_iou_minus_click1_iou_strictly_greater_than": 0.005,
+    "bce_alone_can_pass": false,
+    "if_gate_fails": "do_not_open_development_or_test_labels"
+  },
+  "prohibited": {
+    "per_scene_threshold_tuning": true,
+    "target_mask_as_capability_calibration": true,
+    "development_scene_parameter_selection": true,
+    "test_label_training": true,
+    "point_as_primitive": true
+  }
+}

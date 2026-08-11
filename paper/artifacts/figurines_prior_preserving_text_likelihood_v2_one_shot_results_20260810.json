@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "artifact_type": "figurines_prior_preserving_text_likelihood_v2_frozen_one_shot_result",
+  "status": "complete_success_gate_passed_without_parameter_callback",
+  "preregistration": {"path": "/root/RADIO-GS/paper/artifacts/figurines_prior_preserving_text_likelihood_v2_preregistration_20260810.json", "sha256": "0e13d258fbfcb7c23f3f521e447c33fb6044478af78c4d9f2022cfc22b37131c"},
+  "pre_metric_prediction_batch_seal": {"path": "/root/RADIO-GS/paper/artifacts/figurines_prior_preserving_text_likelihood_v2_prediction_batch_seal_20260810.json", "sha256": "f0201b1ac64f5ad1259656e804b7d2e0e291a1127daddb60c6752eafd2003816", "all_112_predictions_sealed_before_first_new_ground_truth_open": true},
+  "method": {
+    "effective_probability": "(1 - c) * field_prior + c * q",
+    "identity_c0": "field_prior bitwise",
+    "identity_c1": "q bitwise",
+    "changed_from_v1": "confidence fallback only",
+    "unchanged": ["source-trained head", "q", "c", "field", "raw positive scores", "raw canonical-negative scores", "primitive threshold 0.6", "VALA kNN 10", "peak-select", "selected-only-alpha projection", "graph disabled"]
+  },
+  "candidate_metrics": {
+    "control_prior_preserving_v2": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/metric_control_prior_preserving_v2.json",
+      "sha256": "71206e426e13bccaff4f380ec4072c1a65ab88348a0b61bbabfddb10cdf1d5af",
+      "miou": 0.4659792482852936,
+      "acc025": 0.8035714285714286,
+      "acc050": 0.48214285714285715,
+      "boundary_f": 0.704367458820343,
+      "trimap_iou": 0.37618905305862427,
+      "n": 56,
+      "total_prediction_pixels": 931415
+    },
+    "stage_b_prior_preserving_v2": {
+      "path": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810/metric_stage_b_prior_preserving_v2.json",
+      "sha256": "1df8f843e3d7795e93a553ec2924c1d402aacd60fded6547376e1cda4c134de8",
+      "miou": 0.47560593485832214,
+      "acc025": 0.8214285714285714,
+      "acc050": 0.48214285714285715,
+      "boundary_f": 0.724780261516571,
+      "trimap_iou": 0.36892515420913696,
+      "n": 56,
+      "total_prediction_pixels": 1005242
+    }
+  },
+  "frozen_comparisons": {
+    "stage_b_v2_minus_stage_b_v1": {
+      "miou": 0.010572820901870728,
+      "miou_percentage_points": 1.0572820901870728,
+      "acc025": 0.017857142857142794,
+      "acc050": 0.01785714285714285,
+      "boundary_f": 0.0230410099029541,
+      "trimap_iou": 0.006768554449081421,
+      "prediction_pixels": -136437
+    },
+    "control_v2_minus_control_v1": {
+      "miou": 0.012732386589050293,
+      "miou_percentage_points": 1.2732386589050293,
+      "acc025": 0.0357142857142857,
+      "acc050": 0.0357142857142857,
+      "boundary_f": 0.01670628786087036,
+      "trimap_iou": 0.007967501878738403,
+      "prediction_pixels": -39046
+    },
+    "stage_b_v2_minus_stage_b_legacy": {
+      "miou": 0.029909402132034302,
+      "miou_percentage_points": 2.9909402132034302,
+      "acc025": 0.05357142857142849,
+      "acc050": -0.07142857142857145,
+      "boundary_f": 0.05844593048095703,
+      "trimap_iou": -0.05428886413574219,
+      "prediction_pixels": -785555
+    },
+    "stage_b_v2_minus_original_control_legacy": {
+      "miou": 0.031258225440979004,
+      "miou_percentage_points": 3.1258225440979004,
+      "acc025": 0.05357142857142849,
+      "acc050": -0.07142857142857145,
+      "boundary_f": 0.05854231119155884,
+      "trimap_iou": -0.053384482860565186
+    },
+    "stage_b_field_effect_under_prior_preserving_v2": {
+      "miou": 0.009626686573028564,
+      "miou_percentage_points": 0.9626686573028564,
+      "boundary_f": 0.020412802696228027
+    }
+  },
+  "success_gate": {
+    "miou_gt_stage_b_v1": true,
+    "acc050_gt_stage_b_v1": true,
+    "trimap_iou_gt_stage_b_v1": true,
+    "all_required": true,
+    "passed": true,
+    "threshold_or_confidence_tuning_after_outcome": false
+  },
+  "query_level_read_only_diagnostic": {
+    "stage_b_v2_vs_stage_b_v1": {"improved": 24, "degraded": 24, "unchanged": 8},
+    "largest_recovered_failure_family": "spatula",
+    "examples": [
+      {"frame_id": 41, "query": "spatula", "v1_iou": 0.05561901760743688, "v2_iou": 0.39106145251396646, "v1_pixels": 74090, "v2_pixels": 11372},
+      {"frame_id": 195, "query": "spatula", "v1_iou": 0.12462779335665347, "v2_iou": 0.45904005774088774, "v1_pixels": 30088, "v2_pixels": 7358},
+      {"frame_id": 152, "query": "porcelain hand", "v1_iou": 0.10958015885881019, "v2_iou": 0.1431064572425829}
+    ],
+    "remaining_losses": [
+      {"frame_id": 195, "query": "rubber duck with buoy", "v1_iou": 0.4553980370774264, "v2_iou": 0.36283877692842254},
+      {"frame_id": 152, "query": "toy cat statue", "v1_iou": 0.8036479373240298, "v2_iou": 0.7171188841669391}
+    ],
+    "used_for_parameter_selection": false
+  },
+  "causal_conclusion": {
+    "supported": true,
+    "statement": "Low-confidence text calibration must abstain to the existing direct field posterior, not to an uninformative 0.5. The prior-preserving identity improves both fields independently and simultaneously raises Stage-B mIoU, Acc@0.50, trimap IoU, and boundary F relative to v1 without modifying q, c, the field, or downstream protocol.",
+    "nonlinearity_note": "The gain is not a uniform mask expansion: after unchanged kNN/min-max and thresholding, v2 reduces total Stage-B prediction mass by 136,437 pixels while recovering field-supported rankings such as spatula. This rules out a trivial foreground-bias explanation.",
+    "remaining_gap": "Acc@0.50 and trimap remain below the legacy mapping despite being alleviated relative to v1; pirate-hat and some fine instances are unchanged or still over-shrunk. The next fix should address source granularity coverage rather than tune c or the LERF threshold."
+  },
+  "access_audit": {
+    "predictions_sealed_before_ground_truth": true,
+    "same_frozen_scorer_and_label_root": true,
+    "head_field_or_protocol_changed_after_metric": false,
+    "scanNet_benchmark_metric_run": false
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "maximum_temperature_celsius": 60,
+    "maximum_power_watts": 130.79,
+    "pause_or_abort": false,
+    "cuda_release_verified_after_each_arm": true
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "artifact_type": "figurines_prior_preserving_text_likelihood_v2_preregistration",
+  "status": "sealed_after_identity_tests_before_v2_cache_prediction_or_new_metric",
+  "causal_hypothesis": "The v1 q,c adapter abstains to 0.5 even though a frozen direct field_prior already exists. At low c this erases valid fine-grained field support before the unchanged 0.6 primitive threshold. Falling back exactly to field_prior should retain those rows without changing q, c, the head, field, threshold, kNN, projection, or graph.",
+  "contracts": {
+    "v1_retained": {
+      "schema": "radio_gs.lerf_source_text_query_likelihood_cache.v1",
+      "effective_probability": "0.5 + c * (q - 0.5)",
+      "control_cache": {"path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/control_source_text_likelihood.pt", "sha256": "2ed768f0bae97276ef1348d63bcf5fa196b5242ffe5877e69c2db8eacd2f9692"},
+      "stage_b_v2_cache": {"path": "/root/RADIO-GS/local_ssd_results/figurines_field_text_likelihood_2x2_20260810/stage_b_v2_source_text_likelihood.pt", "sha256": "215dac7c2bb071c5182be89cc921311fc0d8ad77987c38a1d1cae527c9df8496"},
+      "existing_cache_validation_after_v2_code": true
+    },
+    "candidate_v2": {
+      "schema": "radio_gs.lerf_source_text_query_likelihood_cache.v2",
+      "effective_probability_mode": "prior_preserving_mixture_v2",
+      "effective_probability": "(1 - c) * field_prior + c * q",
+      "field_prior": "max_scale sigmoid(10 * (positive_cosine - max_canonical_negative_cosine_same_scale))",
+      "identity_c0": "effective is bitwise field_prior",
+      "identity_c1": "effective is bitwise q",
+      "range": "[0,1] convex mixture",
+      "field_prior_channel_hash_required": true
+    }
+  },
+  "identity_gate": {
+    "focused_tests_passed": 134,
+    "c0_prior_bitwise_identity": true,
+    "c1_q_bitwise_identity": true,
+    "shape_and_range_validation": true,
+    "field_prior_hash_mutation_rejected": true,
+    "source_artifact_hash_mutation_rejected": true,
+    "v1_existing_cache_replay_passed": true
+  },
+  "implementation": {
+    "adapter": {"path": "/root/RADIO-GS/radio_gs/querying/lerf_source_text_likelihood.py", "sha256": "b70e82a767916bd338eb1e8146f82110486698eabba8851bb7354fb298c98236"},
+    "materializer": {"path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_likelihood_cache.py", "sha256": "ff36e4f0628f7a6f686aef8c762ab2392acc4e11dd97bbd09e1a3b1a3b2dad33"},
+    "evaluator": {"path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py", "sha256": "95aa6169c3b29a4f24dd9552c3e057e1fb5aa2c54c551a7910b87f4920728a7d"},
+    "sealed_scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_lerf_sealed_prediction_batch.py", "sha256": "9e99174b4c219e9db80bb571993a379406c028d8ccee14ecba105154f23c4475"},
+    "identity_tests": {"path": "/root/RADIO-GS/tests/test_lerf_source_text_likelihood.py", "sha256": "e9cf7146f8bc6340abade0eaa039df46bae1e545625bfee7e847a545f8557eca"}
+  },
+  "planned_target_blind_outputs": {
+    "root": "/root/RADIO-GS/local_ssd_results/figurines_prior_preserving_text_likelihood_v2_20260810",
+    "control_cache": "control_source_text_likelihood_prior_preserving_v2.pt",
+    "stage_b_cache": "stage_b_source_text_likelihood_prior_preserving_v2.pt",
+    "control_prediction_receipt": "pred_control_prior_preserving_v2.receipt.json",
+    "stage_b_prediction_receipt": "pred_stage_b_prior_preserving_v2.receipt.json",
+    "all_predictions_sealed_before_first_new_ground_truth_open": true
+  },
+  "frozen_comparison_authority": {
+    "previous_2x2_result": {"path": "/root/RADIO-GS/paper/artifacts/figurines_field_text_likelihood_2x2_one_shot_results_20260810.json", "sha256": "29f058611e07ab81cb3c1e9f7daf84fa3faf838919f7c050cc381e53cb505328"},
+    "stage_b_v1": {"miou": 0.4650331139564514, "acc050": 0.4642857142857143, "trimap_iou": 0.36215659976005554},
+    "stage_b_legacy": {"miou": 0.44569653272628784, "acc050": 0.5535714285714286, "trimap_iou": 0.42321401834487915},
+    "control_v1": {"miou": 0.4532468616962433, "acc050": 0.44642857142857145, "trimap_iou": 0.36822155117988586},
+    "control_legacy": {"miou": 0.44434770941734314, "acc050": 0.5535714285714286, "trimap_iou": 0.42230963706970215}
+  },
+  "success_gate": {
+    "primary_arm": "stage_b_prior_preserving_v2",
+    "requires_all": [
+      "miou > 0.4650331139564514",
+      "acc050 > 0.4642857142857143",
+      "trimap_iou > 0.36215659976005554"
+    ],
+    "interpretation": "v2 must improve mIoU while strictly alleviating both v1 high-IoU and trimap regressions",
+    "if_gate_fails": "stop this confidence-compilation branch without tuning c, threshold, field, head, query, or scene",
+    "control_arm_role": "same frozen causal check, not a parameter selector"
+  },
+  "execution_policy": {
+    "prediction_order": ["control_prior_preserving_v2", "stage_b_prior_preserving_v2"],
+    "physical_gpu": 1,
+    "driver_runtime": "/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime",
+    "poll_interval_seconds": 60,
+    "soft_pause_temperature_celsius": 82,
+    "resume_temperature_celsius": 78,
+    "hard_stop_temperature_celsius": 85,
+    "power_limit_watts": 300,
+    "per_scene_or_per_query_tuning": false,
+    "scanNet_benchmark_metric_forbidden": true,
+    "lerf_ground_truth_or_metric_opened_for_v2_before_preregistration": false
+  }
+}

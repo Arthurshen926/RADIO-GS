@@ -1,0 +1,404 @@
+{
+  "all_source_gates_passed": true,
+  "evaluation_contract": {
+    "benchmark_labels_or_metrics_opened_by_this_sealer": false,
+    "sam_or_other_external_vision_branch": false,
+    "source_rgb": false,
+    "target_rgb": false
+  },
+  "mapping_supervision": "legal_source_rgb_official_sam_query_free",
+  "next_gate": "seal_all_eight_rgb_free_predictions_before_first_semantic_label_open",
+  "persistent_semantic_feature": "canonical_radio_only",
+  "scenes": [
+    {
+      "checkpoint": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/canonical_radio_source_sam_relative_e5_seed0.pth",
+        "sha256": "d623ceea3ea13dad2c8ba27667c5942b3ab2b7af0b9648f0ae8e02304498604e"
+      },
+      "deltas": {
+        "dino_mean_cosine": 0.0006309151649475098,
+        "global_relation_gap": 0.0012222528457641602,
+        "raw_mean_cosine": 0.0009345412254333496,
+        "raw_p05_cosine": 0.0015972256660461426,
+        "sam_mean_cosine": 0.0010694265365600586,
+        "scale_triplet_gap": 0.001113593578338623,
+        "scale_triplet_violation_rate": -0.003884047269821167
+      },
+      "scene_id": "scene0000_00",
+      "source_gates": {
+        "all_source_gates_passed": true,
+        "all_structure_gates_passed": true,
+        "benchmark_gate_opened": true,
+        "global_pair_gates": {
+          "all_structure_gates_passed": true,
+          "benchmark_gate_opened": true,
+          "sam_relation_gap_strict_improvement": true,
+          "sam_same_cosine_non_decrease": true,
+          "sam_separate_cosine_non_increase": true,
+          "same_relation_axis": true
+        },
+        "official_capability_checks": {
+          "dino_v3_target_mean_cosine": true,
+          "dino_v3_target_p05_cosine": true,
+          "sam3_target_mean_cosine": true,
+          "sam3_target_p05_cosine": true
+        },
+        "official_capability_preservation": true,
+        "raw_radio_preservation": true,
+        "same_triplet_axis": true,
+        "scale_triplet_gap_strict_improvement": true,
+        "scale_triplet_violation_strict_decrease": true
+      },
+      "source_manifest": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/training_manifest.json",
+        "sha256": "a7a5b0411092656a04fd011d8574057df206b17632d75fd2db3a19fe4dbd0b9e"
+      },
+      "training_report": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_v2/scene0000_00/relative_v2/canonical_radio_source_sam_relative_e5_seed0.pth.json",
+        "sha256": "f5d5289f3c49adaaf7fcc977340d53fee15022ce753ea2c0fb8aeb8538ab0d45"
+      }
+    },
+    {
+      "checkpoint": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/canonical_radio_source_sam_relative_e5_seed0.pth",
+        "sha256": "fccd35babef654db3a3e4edcd453bd108ad323840c0af1483e0e29cfab01855f"
+      },
+      "deltas": {
+        "dino_mean_cosine": 0.00044864416122436523,
+        "global_relation_gap": 0.0013265013694763184,
+        "raw_mean_cosine": 0.000501096248626709,
+        "raw_p05_cosine": 0.001013040542602539,
+        "sam_mean_cosine": 0.0005586147308349609,
+        "scale_triplet_gap": 0.0014667212963104248,
+        "scale_triplet_violation_rate": -0.005285978317260742
+      },
+      "scene_id": "scene0062_00",
+      "source_gates": {
+        "all_source_gates_passed": true,
+        "all_structure_gates_passed": true,
+        "benchmark_gate_opened": true,
+        "global_pair_gates": {
+          "all_structure_gates_passed": true,
+          "benchmark_gate_opened": true,
+          "sam_relation_gap_strict_improvement": true,
+          "sam_same_cosine_non_decrease": true,
+          "sam_separate_cosine_non_increase": true,
+          "same_relation_axis": true
+        },
+        "official_capability_checks": {
+          "dino_v3_target_mean_cosine": true,
+          "dino_v3_target_p05_cosine": true,
+          "sam3_target_mean_cosine": true,
+          "sam3_target_p05_cosine": true
+        },
+        "official_capability_preservation": true,
+        "raw_radio_preservation": true,
+        "same_triplet_axis": true,
+        "scale_triplet_gap_strict_improvement": true,
+        "scale_triplet_violation_strict_decrease": true
+      },
+      "source_manifest": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/source_only_sam_relative_manifest_formal_bundle_v3.json",
+        "sha256": "7d6a7fc1f9d502fd5afd25d84a089cc737d66913df9af5344bdd9e84c94a0ca0"
+      },
+      "training_report": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0062_00/canonical_radio_source_sam_relative_e5_seed0.pth.json",
+        "sha256": "cc7c0b0878d1273be68bfca66ed51f80e1c0d03e3f9697e53d6f2a113ceadde5"
+      }
+    },
+    {
+      "checkpoint": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/canonical_radio_source_sam_relative_e5_seed0.pth",
+        "sha256": "2c63ec701546e498625b130a845f093ead70c77940ed885c6cdabdaa7b695993"
+      },
+      "deltas": {
+        "dino_mean_cosine": 0.0005403757095336914,
+        "global_relation_gap": 0.0010950565338134766,
+        "raw_mean_cosine": 0.0006985068321228027,
+        "raw_p05_cosine": 0.001397848129272461,
+        "sam_mean_cosine": 0.0008867979049682617,
+        "scale_triplet_gap": 0.001407712697982788,
+        "scale_triplet_violation_rate": -0.006348073482513428
+      },
+      "scene_id": "scene0070_00",
+      "source_gates": {
+        "all_source_gates_passed": true,
+        "all_structure_gates_passed": true,
+        "benchmark_gate_opened": true,
+        "global_pair_gates": {
+          "all_structure_gates_passed": true,
+          "benchmark_gate_opened": true,
+          "sam_relation_gap_strict_improvement": true,
+          "sam_same_cosine_non_decrease": true,
+          "sam_separate_cosine_non_increase": true,
+          "same_relation_axis": true
+        },
+        "official_capability_checks": {
+          "dino_v3_target_mean_cosine": true,
+          "dino_v3_target_p05_cosine": true,
+          "sam3_target_mean_cosine": true,
+          "sam3_target_p05_cosine": true
+        },
+        "official_capability_preservation": true,
+        "raw_radio_preservation": true,
+        "same_triplet_axis": true,
+        "scale_triplet_gap_strict_improvement": true,
+        "scale_triplet_violation_strict_decrease": true
+      },
+      "source_manifest": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/source_only_sam_relative_manifest.json",
+        "sha256": "33bf64d72fe265665ed436b40dd1bb38720dd8e1c587923a7df901bd6a744100"
+      },
+      "training_report": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0070_00/canonical_radio_source_sam_relative_e5_seed0.pth.json",
+        "sha256": "ef91183478692dd3a24ec54861ef7320a9d1b045a2a91605088a88a3ae9df1b5"
+      }
+    },
+    {
+      "checkpoint": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/canonical_radio_source_sam_relative_e5_seed0.pth",
+        "sha256": "b4e5945b33c0b4e463cf52cfd65759909128d65ae411bfe9454126760ffdde3a"
+      },
+      "deltas": {
+        "dino_mean_cosine": 0.0002830624580383301,
+        "global_relation_gap": 0.0014672279357910156,
+        "raw_mean_cosine": 0.0006440877914428711,
+        "raw_p05_cosine": 0.0011203289031982422,
+        "sam_mean_cosine": 0.0006865262985229492,
+        "scale_triplet_gap": 0.001624077558517456,
+        "scale_triplet_violation_rate": -0.0069901347160339355
+      },
+      "scene_id": "scene0097_00",
+      "source_gates": {
+        "all_source_gates_passed": true,
+        "all_structure_gates_passed": true,
+        "benchmark_gate_opened": true,
+        "global_pair_gates": {
+          "all_structure_gates_passed": true,
+          "benchmark_gate_opened": true,
+          "sam_relation_gap_strict_improvement": true,
+          "sam_same_cosine_non_decrease": true,
+          "sam_separate_cosine_non_increase": true,
+          "same_relation_axis": true
+        },
+        "official_capability_checks": {
+          "dino_v3_target_mean_cosine": true,
+          "dino_v3_target_p05_cosine": true,
+          "sam3_target_mean_cosine": true,
+          "sam3_target_p05_cosine": true
+        },
+        "official_capability_preservation": true,
+        "raw_radio_preservation": true,
+        "same_triplet_axis": true,
+        "scale_triplet_gap_strict_improvement": true,
+        "scale_triplet_violation_strict_decrease": true
+      },
+      "source_manifest": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/source_only_sam_relative_manifest.json",
+        "sha256": "4ae95ddb2b3d2fac95f6ae9362f7af03974ea8691e04264a6345f9ff9552dd33"
+      },
+      "training_report": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0097_00/canonical_radio_source_sam_relative_e5_seed0.pth.json",
+        "sha256": "ac84e0a0b55a8288140a4225b18631f47b54f3d40064aeb3396a36962dfe643b"
+      }
+    },
+    {
+      "checkpoint": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/canonical_radio_source_sam_relative_e5_seed0.pth",
+        "sha256": "32049a9b61142fe438193ad24e9ec12685d0b52aa34866d3d5fdd898456dba1f"
+      },
+      "deltas": {
+        "dino_mean_cosine": 7.480382919311523e-05,
+        "global_relation_gap": 0.0014232993125915527,
+        "raw_mean_cosine": 0.00045669078826904297,
+        "raw_p05_cosine": 0.000889897346496582,
+        "sam_mean_cosine": 0.00033587217330932617,
+        "scale_triplet_gap": 0.001231752336025238,
+        "scale_triplet_violation_rate": -0.0074310302734375
+      },
+      "scene_id": "scene0140_00",
+      "source_gates": {
+        "all_source_gates_passed": true,
+        "all_structure_gates_passed": true,
+        "benchmark_gate_opened": true,
+        "global_pair_gates": {
+          "all_structure_gates_passed": true,
+          "benchmark_gate_opened": true,
+          "sam_relation_gap_strict_improvement": true,
+          "sam_same_cosine_non_decrease": true,
+          "sam_separate_cosine_non_increase": true,
+          "same_relation_axis": true
+        },
+        "official_capability_checks": {
+          "dino_v3_target_mean_cosine": true,
+          "dino_v3_target_p05_cosine": true,
+          "sam3_target_mean_cosine": true,
+          "sam3_target_p05_cosine": true
+        },
+        "official_capability_preservation": true,
+        "raw_radio_preservation": true,
+        "same_triplet_axis": true,
+        "scale_triplet_gap_strict_improvement": true,
+        "scale_triplet_violation_strict_decrease": true
+      },
+      "source_manifest": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/source_only_sam_relative_manifest_formal_bundle_v2.json",
+        "sha256": "4175beb2d6f653c69c64b17dd499e7f951585efde28fb3590fdec6ab71df5944"
+      },
+      "training_report": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0140_00/canonical_radio_source_sam_relative_e5_seed0.pth.json",
+        "sha256": "32ac02d151f12594b605d046a89ba2ebec4425d127b6a0be91b5e832ec658841"
+      }
+    },
+    {
+      "checkpoint": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/canonical_radio_source_sam_relative_e5_seed0.pth",
+        "sha256": "23492186851d9b891bd0c9c5c5f87c65c59922f323b6156574caa813383df884"
+      },
+      "deltas": {
+        "dino_mean_cosine": 0.0005549788475036621,
+        "global_relation_gap": 0.0014922022819519043,
+        "raw_mean_cosine": 0.0010628104209899902,
+        "raw_p05_cosine": 0.0020588040351867676,
+        "sam_mean_cosine": 0.0018745660781860352,
+        "scale_triplet_gap": 0.0014211982488632202,
+        "scale_triplet_violation_rate": -0.006217837333679199
+      },
+      "scene_id": "scene0347_00",
+      "source_gates": {
+        "all_source_gates_passed": true,
+        "all_structure_gates_passed": true,
+        "benchmark_gate_opened": true,
+        "global_pair_gates": {
+          "all_structure_gates_passed": true,
+          "benchmark_gate_opened": true,
+          "sam_relation_gap_strict_improvement": true,
+          "sam_same_cosine_non_decrease": true,
+          "sam_separate_cosine_non_increase": true,
+          "same_relation_axis": true
+        },
+        "official_capability_checks": {
+          "dino_v3_target_mean_cosine": true,
+          "dino_v3_target_p05_cosine": true,
+          "sam3_target_mean_cosine": true,
+          "sam3_target_p05_cosine": true
+        },
+        "official_capability_preservation": true,
+        "raw_radio_preservation": true,
+        "same_triplet_axis": true,
+        "scale_triplet_gap_strict_improvement": true,
+        "scale_triplet_violation_strict_decrease": true
+      },
+      "source_manifest": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/source_only_sam_relative_manifest.json",
+        "sha256": "92be855d41e059cc606e3b6bc669430fa92245b136ae315c41ed5069f64b6ceb"
+      },
+      "training_report": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0347_00/canonical_radio_source_sam_relative_e5_seed0.pth.json",
+        "sha256": "ee77d28c365f6eda4634a31b9bbed5f576ba1ffc1ac368e1209b382b1292ad82"
+      }
+    },
+    {
+      "checkpoint": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/canonical_radio_source_sam_relative_e5_seed0.pth",
+        "sha256": "3863fe41ad5fbb02aa81bd7e2e4382b4c1c0f1c4d6a3d005afd2eadf8b38944a"
+      },
+      "deltas": {
+        "dino_mean_cosine": 0.00023245811462402344,
+        "global_relation_gap": 0.0014595389366149902,
+        "raw_mean_cosine": 0.00047463178634643555,
+        "raw_p05_cosine": 0.0008355975151062012,
+        "sam_mean_cosine": 0.0004890561103820801,
+        "scale_triplet_gap": 0.0011421889066696167,
+        "scale_triplet_violation_rate": -0.00674360990524292
+      },
+      "scene_id": "scene0400_00",
+      "source_gates": {
+        "all_source_gates_passed": true,
+        "all_structure_gates_passed": true,
+        "benchmark_gate_opened": true,
+        "global_pair_gates": {
+          "all_structure_gates_passed": true,
+          "benchmark_gate_opened": true,
+          "sam_relation_gap_strict_improvement": true,
+          "sam_same_cosine_non_decrease": true,
+          "sam_separate_cosine_non_increase": true,
+          "same_relation_axis": true
+        },
+        "official_capability_checks": {
+          "dino_v3_target_mean_cosine": true,
+          "dino_v3_target_p05_cosine": true,
+          "sam3_target_mean_cosine": true,
+          "sam3_target_p05_cosine": true
+        },
+        "official_capability_preservation": true,
+        "raw_radio_preservation": true,
+        "same_triplet_axis": true,
+        "scale_triplet_gap_strict_improvement": true,
+        "scale_triplet_violation_strict_decrease": true
+      },
+      "source_manifest": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/source_only_sam_relative_manifest.json",
+        "sha256": "28dde9a6125a94222d909a42c1c080fc7167f4093ccf52585dbc835ced9dcce8"
+      },
+      "training_report": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0400_00/canonical_radio_source_sam_relative_e5_seed0.pth.json",
+        "sha256": "0383b769e242c38990333d80ad019333d2cfeb22fecdf0ef69687fc439a99c4a"
+      }
+    },
+    {
+      "checkpoint": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/canonical_radio_source_sam_relative_e5_seed0.pth",
+        "sha256": "df8b945666373625183abbc1cb0be9340b68cebde6b98a9a3873b9922e6148cd"
+      },
+      "deltas": {
+        "dino_mean_cosine": 0.00027930736541748047,
+        "global_relation_gap": 0.0014355778694152832,
+        "raw_mean_cosine": 0.0004513263702392578,
+        "raw_p05_cosine": 0.0008676648139953613,
+        "sam_mean_cosine": 0.0007088780403137207,
+        "scale_triplet_gap": 0.0014202669262886047,
+        "scale_triplet_violation_rate": -0.008790731430053711
+      },
+      "scene_id": "scene0590_00",
+      "source_gates": {
+        "all_source_gates_passed": true,
+        "all_structure_gates_passed": true,
+        "benchmark_gate_opened": true,
+        "global_pair_gates": {
+          "all_structure_gates_passed": true,
+          "benchmark_gate_opened": true,
+          "sam_relation_gap_strict_improvement": true,
+          "sam_same_cosine_non_decrease": true,
+          "sam_separate_cosine_non_increase": true,
+          "same_relation_axis": true
+        },
+        "official_capability_checks": {
+          "dino_v3_target_mean_cosine": true,
+          "dino_v3_target_p05_cosine": true,
+          "sam3_target_mean_cosine": true,
+          "sam3_target_p05_cosine": true
+        },
+        "official_capability_preservation": true,
+        "raw_radio_preservation": true,
+        "same_triplet_axis": true,
+        "scale_triplet_gap_strict_improvement": true,
+        "scale_triplet_violation_strict_decrease": true
+      },
+      "source_manifest": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/source_only_sam_relative_manifest.json",
+        "sha256": "ea1384f6a8c8eb471cc71ecad2d2d85b2e7a6397a1fea9728c30133f1a01a4a8"
+      },
+      "training_report": {
+        "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2/scene0590_00/canonical_radio_source_sam_relative_e5_seed0.pth.json",
+        "sha256": "d3c7f1bacef4ed97a22bf22aa41253b16066a8fa5da9185a98258a9539c7fa0e"
+      }
+    }
+  ],
+  "schema": "radio_gs.source_sam_single_radio_paper8_source_gate_seal.v1",
+  "status": "all_eight_source_gates_passed_benchmark_gate_opened",
+  "training_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_paper8_relative_v2_training_preregistration_20260810.json",
+    "sha256": "a9dfb2d65a3f8bf722bc69b128f3270ed6200697a2a72949acb22c8cb3e5e392"
+  }
+}

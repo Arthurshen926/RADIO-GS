@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_odds_residual_transport_v4_prediction_execution_correction",
+  "status": "sealed_before_corrected_prediction_launch",
+  "supersedes_execution_receipt": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_prediction_execution_receipt_20260810.json",
+    "sha256": "f5331075ec59cf80e4c919c472c935ac39f892e9e97d1705785c5127cac877b6"
+  },
+  "implementation_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_implementation_correction_20260810.json",
+    "sha256": "72c62a3063c619cac4b5bcf90aaa72e46c341b9179ff4bf1b5c9df2011c8b812"
+  },
+  "corrected_runner": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_lerf_full4_odds_residual_v4_prediction.sh",
+    "sha256": "b8f807117144f758a99d04750dc0e3fedd24c214d45b46b2a3e635df51dbc610"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "gpu_uuid": "GPU-0eac2c76-4004-49eb-bc0c-a9a30aec041a",
+    "prelaunch_temperature_celsius": 48,
+    "prelaunch_power_watts": 32.09,
+    "prelaunch_memory_mib": 1,
+    "reason_for_gpu_change": "physical GPU0 became occupied by the authorized AGILE v9 source-training process after the first failed v4 attempt",
+    "gpu0_process_will_not_be_interrupted": true,
+    "runtime_shim": "/root/RADIO-GS/local_ssd_results/nvidia_driver_535_runtime",
+    "thermal_guard": {"poll_seconds": 60, "soft_stop_celsius": 82, "resume_below_celsius": 78, "hard_stop_celsius": 85, "power_cap_watts": 300},
+    "prediction_order": ["figurines", "ramen", "teatime", "waldo_kitchen"],
+    "corrected_output_root": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_corrected_20260810",
+    "all_four_scenes_restarted": true,
+    "all_four_receipts_sealed_before_metric": true
+  },
+  "unchanged": {
+    "method_formula": true,
+    "field_head_raw_caches": true,
+    "threshold_projection_and_spatial_readout": true,
+    "scene_order": true,
+    "gate": true,
+    "parameter_callback": false
+  }
+}

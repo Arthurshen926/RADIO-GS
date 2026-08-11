@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_object_multiview_region_memory_stage_a_audit_v1",
+  "status": "contract_and_source_inventory_passed_gpu_not_started",
+  "scientific_scope": {
+    "problem": "The rejected one-hop completion had only local canonical adjacency, not object-level cross-view correspondence.",
+    "candidate": "Build a source-only object memory by projecting a legal reference object anchor into training views, extracting fixed-box official SAM3 proposals from source RGB, and lifting those proposals back into primitive membership and region tokens.",
+    "strict_query_boundary": "Target inference reads only the sealed primitive region memory, sealed region tokens, and frozen canonical field. It must not open target RGB, target masks, or target metrics.",
+    "benchmark_generality": "The core accepts both positive-negative scribbles and a reference binary full mask, so the same method can serve NVOS and SPIn without a benchmark-specific operator."
+  },
+  "implementation": {
+    "core_contract": {
+      "path": "/root/RADIO-GS/radio_gs/querying/multiview_region_memory.py",
+      "sha256": "54fa4383260f9eb912bfec5283d6f284ee2881ee97590d819558bcd901eaa245"
+    },
+    "source_inventory_auditor": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/audit_nvos_multiview_region_memory_assets.py",
+      "sha256": "54e7dae5789d8c504e2f1ee344d5e8f003f1551b86256342d43e5ded8b1ac2df"
+    },
+    "tests": {
+      "path": "/root/RADIO-GS/tests/test_multiview_region_memory.py",
+      "sha256": "2eedc57bd6c4fe6e0418f55531e35841e54502cbaae4a4308f6e0549c3e46811"
+    }
+  },
+  "fixed_method_contract": {
+    "reference_anchor": "official source/reference object mask with legal positive and negative prompt anchors retained",
+    "projection_carrier": "existing frozen query-independent raster_gaussian_top1 alpha_depth source-view responsibility",
+    "source_view_count": 3,
+    "source_view_selection": "exclude reference and every forbidden target identity, then take top 3 by positive-anchor coverage times assignment reliability; deterministic frame-id tie break",
+    "sam3_box_policy": {
+      "padding_pixels": 16,
+      "decoder_resolution": 1008,
+      "confidence_threshold": 0.0,
+      "minimum_projected_anchor_overlap": 0.05,
+      "candidate_selection": "maximum overlap with projected anchor; official score then candidate index only break overlap ties"
+    },
+    "proposal_evidence_domain": "the projected-anchor padded box, not the entire image",
+    "primitive_membership_probability": "weighted raster-adjoint Bernoulli mean",
+    "primitive_membership_confidence": "one minus exp of negative accumulated visible evidence mass",
+    "probability_and_confidence_separate": true,
+    "hard_anchor_policy": "legal positive and negative reference anchors overwrite pooled memory bitwise",
+    "region_token_set": "one normalized positive-proposal-weighted canonical field token per accepted source view plus the reference token",
+    "target_rgb_gt_or_metric_used": false,
+    "scene_specific_parameters": false
+  },
+  "source_inventory": {
+    "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_a/source_inventory.json",
+    "sha256": "772baeee1c234bfdb93d3d8c62a64563c1b30a3f08b158b80e8f4208007a6ad6",
+    "bytes": 44514,
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "target_rgb_content_opened_or_hashed": false,
+    "target_mask_or_metric_opened": false,
+    "gpu_used": false
+  },
+  "scene_assets": {
+    "fern": {
+      "legal_source_rgb_views": 19,
+      "source_rgb_total_bytes": 115461888,
+      "source_rgb_inventory_sha256": "7f2e62245b32e34ef61779d3fee069dad5fcae8dee526c2af6c0ded07b824df2",
+      "reference_frame_id": "IMG_4038",
+      "reference_assignment_view_index": 11,
+      "forbidden_target_frame_id": "IMG_4027",
+      "feature_grid_hw": [47, 62],
+      "responsibility": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/fern/responsibility.pt",
+        "sha256": "5fd6de5d4951b1112dd1308ddffa5098df0ed2eba6b5cfb019278ab147e607eb",
+        "bytes": 38957655,
+        "assignment_rows": 3245171
+      },
+      "reference_object_mask": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/nvos_official_sam3_reference_completion_v1/masks/fern.pt",
+        "sha256": "9ca7256983ac61229f5d28d61bc30e7a895a6a9083fd325ac6d87ac6362e49e8",
+        "receipt_sha256": "1b9d38c53a14da0dbda0e7ddd429b3b11c6f4a232e88e3d5795acebab223d53a"
+      },
+      "source_only_projection_smoke": {
+        "status": "three_non_reference_views_have_material_anchor_support",
+        "provisional_top3_frame_ids": ["IMG_4043", "IMG_4042", "IMG_4031"],
+        "claim_boundary": "Planning smoke from the frozen binary reference completion and assignment carrier. Final frame identities must be sealed by the unchanged registered coarse producer before SAM3 and cannot be hard-coded from this diagnostic."
+      }
+    },
+    "trex": {
+      "legal_source_rgb_views": 54,
+      "source_rgb_total_bytes": 323158690,
+      "source_rgb_inventory_sha256": "48354dc2fd7210935c83da2e17a532952ef5e44cd41ccad05ccd24e5a3b9cb33",
+      "reference_frame_id": "DJI_20200223_163607_906",
+      "reference_assignment_view_index": 48,
+      "forbidden_target_frame_id": "DJI_20200223_163619_411",
+      "feature_grid_hw": [47, 63],
+      "responsibility": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/trex/responsibility.pt",
+        "sha256": "f6f370c2f9662ccbdabd59ec78122514a6b28d796f388ba5a91d63042cea71e9",
+        "bytes": 46737209,
+        "assignment_rows": 3891218
+      },
+      "reference_object_mask": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/masks/trex.pt",
+        "sha256": "8ec90e6755d7c9f8ac5e90e2eff1851f6b2947876b1a7892155c0d40085de322",
+        "receipt_sha256": "ddf711dcc3ff2fafc40ec864dbcc9f5ed0bb478401e76395cf6bfe65663f766c"
+      },
+      "source_only_projection_smoke": {
+        "status": "three_non_reference_views_have_material_anchor_support",
+        "provisional_top3_frame_ids": ["DJI_20200223_163649_576", "DJI_20200223_163651_301", "DJI_20200223_163605_490"],
+        "claim_boundary": "Planning smoke from the frozen binary reference completion and assignment carrier. Final frame identities must be sealed by the unchanged registered coarse producer before SAM3 and cannot be hard-coded from this diagnostic."
+      }
+    }
+  },
+  "mapping_bug_prevented": {
+    "finding": "Responsibility assignment indices are dataset-local RADIO frame indices, not manifest training-list positions.",
+    "fern": "The two orders happen to agree after target exclusion.",
+    "trex": "The orders materially differ: manifest training frames are lexicographic, while RADIO uses numeric_then_exact. For example assignment view 0 is DJI_20200223_163553_010, not the first manifest training row DJI_20200223_163548_810.",
+    "fix": "The sealed inventory uses RADIO frame_manifest as the only assignment-index-to-RGB order authority, then verifies its unordered source set exactly equals the strict manifest training set and its excluded image set exactly equals the target set.",
+    "test": "A synthetic mismatched-order case passes with correct frame_manifest mapping; injecting a target filename into the source sequence fails before the target file exists or can be opened."
+  },
+  "official_sam3_reuse": {
+    "isolated_runner": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_official_sam3_python.sh",
+      "sha256": "ea8262673c324ccdad9409a59761a647ff0c4aeabed1e14f09135fd72ed5e280"
+    },
+    "loader": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_sam3_foundation_cache.py",
+      "sha256": "6ebd001fdef7fef3b17cab8c33db9d6d7d91f23bf7f54c4bd263fb0687b2adde"
+    },
+    "checkpoint": {
+      "path": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+      "sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+      "bytes": 3450062241,
+      "authority": "paper/artifacts/nvos_published_compatible_reference_completion_audit_20260803.json"
+    },
+    "reuse_boundary": "Reuse the official loader, autocast, normalized cxcywh box call, and overlap/official-score selector. Do not reuse LERF target-RGB receipt schemas or evaluator logic."
+  },
+  "cost_estimate": {
+    "selected_source_images": 6,
+    "existing_source_rgb_inventory_bytes": 438620578,
+    "existing_responsibility_bytes": 85694864,
+    "new_native_exact_responsibility_exports": 0,
+    "avoided_exact_w_disk": "approximately 7-9 GB for six native-resolution views",
+    "expected_new_output_disk": "less than 50 MB for six coarse/proposal masks, receipts, q/c tensors, and region tokens",
+    "local_ssd_free_at_audit": "173 GiB",
+    "official_sam3_materialization_wall_clock": "approximately 2-5 minutes on GPU1 including cold load for six source images",
+    "subsequent_two_scene_exact_prediction_and_scoring": "approximately 5-10 minutes",
+    "serial_total_after_approval": "approximately 8-15 minutes",
+    "estimate_status": "planning estimate, not a measurement"
+  },
+  "validation": {
+    "focused_tests": "9 passed, 1 warning",
+    "python_compile": "passed",
+    "real_fern_trex_source_inventory": "passed",
+    "real_target_exclusion": "passed",
+    "gpu_started": false
+  },
+  "next_gate": {
+    "gpu1_authorized": false,
+    "required_before_launch": "Implement and test the no-clobber coarse receipt plus official-SAM3 source-only bridge against this sealed inventory; then preregister the exact producer hashes and sentinel metric gate."
+  }
+}

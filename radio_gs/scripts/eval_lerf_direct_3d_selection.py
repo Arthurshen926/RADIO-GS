@@ -77,6 +77,17 @@ from radio_gs.evaluation.openclip_readout import (
     load_or_generate_openclip_prompt_ensemble_embeddings,
 )
 from radio_gs.querying.unified_query import cosine_relevancy_torch
+from radio_gs.querying.lerf_source_text_likelihood import (
+    POST_READOUT_ODDS_RESIDUAL_EPS_V4,
+    POST_READOUT_ODDS_RESIDUAL_FORMULA_V4,
+    POST_READOUT_ODDS_RESIDUAL_TRANSPORT_V4,
+    POST_READOUT_PRIOR_PRESERVING_FORMULA_V3,
+    POST_READOUT_PRIOR_PRESERVING_MIXTURE_V3,
+    PRIOR_PRESERVING_MIXTURE_V2,
+    compile_post_readout_odds_residual,
+    compile_post_readout_probability,
+    load_lerf_source_text_likelihood_cache,
+)
 from radio_gs.interfaces.capability_cache import (
     load_canonical_primitive_reliability,
 )
@@ -117,6 +128,11 @@ OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT = (
 )
 OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT = (
     "radio_gs.lerf_multiscale_query_score_authority.v2"
+)
+VALA_STRICT_PROTOCOL_PRESETS = frozenset({"vala_paper_3d", "vala_repo_3d"})
+VALA_TARGET_RGB_SAM3_BOX_PRESET = "vala_paper_3d_target_rgb_sam3_box"
+VALA_BASE_PROTOCOL_PRESETS = frozenset(
+    {*VALA_STRICT_PROTOCOL_PRESETS, VALA_TARGET_RGB_SAM3_BOX_PRESET}
 )
 OURS_MULTISCALE_QUERY_SCORE_FP32_CACHE_VERSION = 4
 OURS_MULTISCALE_QUERY_SCORE_FP32_CACHE_CONTRACT = (
@@ -3694,6 +3710,36 @@ def canonical_negative_relevancy_query_scores(
     return torch.sigmoid((positives - hardest_negative) * float(logit_scale))
 
 
+def source_text_mapping_query_scores(
+    positive_scores: torch.Tensor,
+    negative_scores: torch.Tensor,
+    *,
+    logit_scale: float,
+    learned_effective_probability: Optional[torch.Tensor] = None,
+) -> torch.Tensor:
+    """Select the mapping while preserving the fixed-margin default exactly."""
+
+    legacy = canonical_negative_relevancy_query_scores(
+        positive_scores,
+        negative_scores,
+        logit_scale=logit_scale,
+    )
+    if learned_effective_probability is None:
+        return legacy
+    learned = torch.as_tensor(learned_effective_probability).detach().cpu().float()
+    expected = (int(legacy.shape[0]), int(legacy.shape[2]))
+    if tuple(learned.shape) != expected:
+        raise ValueError(
+            f"learned source text likelihood must be [N,Q] {expected}, "
+            f"got {tuple(learned.shape)}"
+        )
+    if not bool(torch.isfinite(learned).all()) or bool(
+        ((learned < 0) | (learned > 1)).any()
+    ):
+        raise ValueError("learned source text likelihood must lie in [0,1]")
+    return learned[:, None, :].expand(-1, int(legacy.shape[1]), -1).contiguous()
+
+
 def load_directional_mixture_weights(
     path: Path,
     *,
@@ -4740,6 +4786,7 @@ def build_lerf_dataset_for_scene(
     *,
     feature_height: int,
     feature_width: int,
+    annotation_dir_override: Optional[str] = None,
 ) -> LERFDataset:
     scene_root = resolve_lerf_scene_root(scene, getattr(config, "scene_root", ""))
     feat_dir = Path(getattr(config, "feature_dir", "") or "") if getattr(config, "feature_dir", "") else Path()
@@ -4748,7 +4795,11 @@ def build_lerf_dataset_for_scene(
     return LERFDataset(
         scene_root=str(scene_root),
         feature_dir=str(feat_dir),
-        annotation_dir=str(Path(label_dir) / scene),
+        annotation_dir=(
+            str(Path(label_dir) / scene)
+            if annotation_dir_override is None
+            else str(annotation_dir_override)
+        ),
         feature_height=feature_height,
         feature_width=feature_width,
         allow_empty_features=True,
@@ -4757,7 +4808,136 @@ def build_lerf_dataset_for_scene(
 
 def save_pred_mask(path: Path, mask: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    cv2.imwrite(str(path), (mask.astype(np.uint8) * 255))
+    if not cv2.imwrite(str(path), (mask.astype(np.uint8) * 255)):
+        raise OSError(f"Failed to write prediction mask: {path}")
+
+
+def write_lerf_prediction_receipt(
+    path: str | Path,
+    *,
+    scene: str,
+    selection: SelectionSpec,
+    protocol: Mapping[str, Any],
+    predictions: Sequence[Mapping[str, Any]],
+) -> Tuple[Path, str]:
+    """Seal a complete LERF prediction batch before any mask metric is run."""
+    if not predictions:
+        raise ValueError("prediction receipt requires at least one prediction")
+    normalized: List[Dict[str, Any]] = []
+    identities = set()
+    for row in predictions:
+        frame_id = int(row["frame_id"])
+        category = str(row["category"])
+        identity = (frame_id, category)
+        if identity in identities:
+            raise ValueError(f"duplicate sealed prediction identity: {identity}")
+        identities.add(identity)
+        pred_path = Path(str(row["prediction_path"])).expanduser().resolve()
+        coarse_path = Path(str(row["coarse_prediction_path"])).expanduser().resolve()
+        if not pred_path.is_file() or not coarse_path.is_file():
+            raise FileNotFoundError(f"prediction mask missing before seal: {identity}")
+        normalized.append(
+            {
+                "frame_id": frame_id,
+                "category": category,
+                "prediction_path": str(pred_path),
+                "prediction_sha256": sha256_file(pred_path),
+                "coarse_prediction_path": str(coarse_path),
+                "coarse_prediction_sha256": sha256_file(coarse_path),
+                "height": int(row["height"]),
+                "width": int(row["width"]),
+                "prediction_pixels": int(row["prediction_pixels"]),
+                "coarse_prediction_pixels": int(row["coarse_prediction_pixels"]),
+                "sam3_report": dict(row.get("sam3_report", {})),
+            }
+        )
+    normalized.sort(key=lambda row: (row["frame_id"], row["category"]))
+    strict_pre_metric = protocol.get("capability_track") == "strict_feature_field_mainline"
+    payload = {
+        "schema_version": 1,
+        "artifact_type": (
+            "lerf_o2_coarse_pre_sam3_prediction_receipt_v1"
+            if protocol.get("prediction_stage") == "coarse_o2_before_sam3_bridge"
+            else "lerf_strict_feature_field_pre_metric_prediction_receipt_v1"
+            if strict_pre_metric
+            else "lerf_target_rgb_assisted_pre_metric_prediction_receipt_v1"
+        ),
+        "status": (
+            "coarse_prediction_sealed_before_target_rgb_sam3_and_metric"
+            if protocol.get("prediction_stage") == "coarse_o2_before_sam3_bridge"
+            else "sealed_before_target_mask_rasterization_and_metric"
+        ),
+        "scene": str(scene),
+        "selection": {"mode": selection.mode, "value": float(selection.value), "tag": selection.tag},
+        "protocol": dict(protocol),
+        "predictions": normalized,
+        "prediction_count": len(normalized),
+        "target_rgb_opened": bool(
+            protocol.get(
+                "target_rgb_opened",
+                not strict_pre_metric
+                and protocol.get("prediction_stage")
+                != "coarse_o2_before_sam3_bridge",
+            )
+        ),
+        "target_annotation_inventory_opened": True,
+        "target_annotation_coordinates_loaded": bool(
+            protocol.get("target_annotation_coordinates_loaded", True)
+        ),
+        "target_mask_rasterized_before_seal": False,
+        "target_metric_computed_before_seal": False,
+    }
+    encoded = (json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n").encode(
+        "utf-8"
+    )
+    output = Path(path).expanduser().resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if output.exists():
+        if output.read_bytes() != encoded:
+            raise FileExistsError(f"refusing to overwrite different prediction receipt: {output}")
+    else:
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        if temporary.exists():
+            raise FileExistsError(f"stale prediction receipt temporary exists: {temporary}")
+        temporary.write_bytes(encoded)
+        temporary.replace(output)
+    return output, hashlib.sha256(encoded).hexdigest()
+
+
+def load_lerf_prediction_inventory(
+    path: str | Path,
+    *,
+    expected_scene: str,
+) -> Tuple[Dict[int, List[dict]], List[str], int, int]:
+    """Load only frozen frame/category/shape metadata, never polygon coordinates."""
+    inventory_path = Path(path).expanduser().resolve()
+    payload = json.loads(inventory_path.read_text(encoding="utf-8"))
+    if (
+        payload.get("artifact_type") != "lerf_sanitized_prediction_inventory_v1"
+        or payload.get("scene") != expected_scene
+        or payload.get("contains_polygon_coordinates") is not False
+    ):
+        raise ValueError("invalid sanitized LERF prediction inventory")
+    categories = [str(value) for value in payload.get("categories", [])]
+    if not categories or len(categories) != len(set(categories)):
+        raise ValueError("sanitized LERF inventory categories are malformed")
+    frame_annotations: Dict[int, List[dict]] = {}
+    for row in payload.get("frames", []):
+        frame_id = int(row["frame_id"])
+        active_categories = [str(value) for value in row.get("categories", [])]
+        if frame_id in frame_annotations or any(value not in categories for value in active_categories):
+            raise ValueError("sanitized LERF inventory frame/category rows are malformed")
+        frame_annotations[frame_id] = [
+            {"category": category} for category in active_categories
+        ]
+    if not frame_annotations:
+        raise ValueError("sanitized LERF prediction inventory has no frames")
+    return (
+        frame_annotations,
+        categories,
+        int(payload["image_height"]),
+        int(payload["image_width"]),
+    )
 
 
 def save_float_heatmap(path: Path, value: np.ndarray) -> None:
@@ -5924,6 +6104,9 @@ class Sam3BoxMaskRefiner:
             resolution,
             allow_unsafe=False,
         )
+        self.checkpoint_path = str(Path(checkpoint_path).expanduser().resolve())
+        self.resolution = int(resolved_resolution)
+        self.confidence_threshold = float(confidence_threshold)
         # Official SAM3 normalizes ``cuda:<index>`` to ``cuda`` internally.
         # Select the requested process-local device first so model.cuda() does
         # not silently place every parallel evaluator on GPU 0.
@@ -6485,8 +6668,20 @@ def evaluate_selection_spec(
     output_dir: Path,
     save_masks: bool,
     save_geometry_maps: bool,
+    prediction_only: bool,
+    prediction_receipt_path: str,
+    prediction_receipt_protocol: Mapping[str, Any],
     device: torch.device,
 ) -> Dict:
+    if prediction_only:
+        if not save_masks:
+            raise ValueError("prediction-only evaluation requires save_masks=True")
+        if not prediction_receipt_path:
+            raise ValueError("prediction-only evaluation requires a prediction receipt path")
+        if save_geometry_maps:
+            raise ValueError("prediction-only evaluation forbids metric-aware geometry maps")
+        if sam3_prompt_mask_head_oracle_prompt != "none":
+            raise ValueError("prediction-only evaluation forbids target-mask oracle prompts")
     validate_scalar_posterior_projection(
         projection_mode,
         spec,
@@ -6600,6 +6795,7 @@ def evaluate_selection_spec(
     per_category_trimap: Dict[str, List[float]] = {cat: [] for cat in scene_categories}
     per_frame: Dict[str, Dict[str, float]] = {}
     query_details: List[Dict[str, float | int | str]] = []
+    sealed_predictions: List[Dict[str, Any]] = []
 
     for frame_id, frame_objects in tqdm(
         sorted(frame_annotations.items()),
@@ -6656,7 +6852,11 @@ def evaluate_selection_spec(
                     / f"frame_{frame_id:05d}_{map_name}.png",
                     map_value,
                 )
-        gt_masks = build_gt_masks(frame_objects, scene_categories, img_h, img_w)
+        gt_masks = (
+            None
+            if prediction_only
+            else build_gt_masks(frame_objects, scene_categories, img_h, img_w)
+        )
         rgb_for_refinement = None
         sam3_state = None
         sam3_adaptor_state = None
@@ -6700,8 +6900,8 @@ def evaluate_selection_spec(
             if cat not in per_category:
                 continue
             cat_idx = scene_categories.index(cat)
-            gt = gt_masks[cat]
-            if gt.sum() == 0:
+            gt = None if gt_masks is None else gt_masks[cat]
+            if gt is not None and gt.sum() == 0:
                 continue
             if projection_mode == "selected_only_alpha":
                 subset_proxy = GaussianSubsetAlphaProxy(model, selected[:, cat_idx])
@@ -6737,6 +6937,7 @@ def evaluate_selection_spec(
             prompt_heatmap = score_heatmaps[cat_idx] if score_heatmaps is not None else silhouette[cat_idx]
             component_guard_report: Optional[Dict[str, float | int | bool]] = None
             if mask_refinement == "sam3_prompt_mask_head":
+                assert gt is not None
                 prompt_initial_pred = build_direct3d_prompt_initial_mask(
                     pred,
                     prompt_heatmap,
@@ -7021,6 +7222,43 @@ def evaluate_selection_spec(
                     "box_prompt_xyxy_pixels": None,
                     "oracle_prompt_mode": sam3_prompt_mask_head_oracle_prompt,
                 }
+            if prediction_only:
+                safe_category = cat.replace("/", "_")
+                prediction_path = (
+                    output_dir
+                    / "pred_masks"
+                    / spec.tag
+                    / scene
+                    / f"frame_{frame_id:05d}_{safe_category}.png"
+                )
+                coarse_prediction_path = (
+                    output_dir
+                    / "coarse_pred_masks"
+                    / spec.tag
+                    / scene
+                    / f"frame_{frame_id:05d}_{safe_category}.png"
+                )
+                save_pred_mask(prediction_path, pred)
+                save_pred_mask(coarse_prediction_path, initial_pred)
+                if sam3_report is not None:
+                    sam3_reports.append(sam3_report)
+                sealed_predictions.append(
+                    {
+                        "frame_id": int(frame_id),
+                        "category": cat,
+                        "prediction_path": str(prediction_path),
+                        "coarse_prediction_path": str(coarse_prediction_path),
+                        "height": int(pred.shape[0]),
+                        "width": int(pred.shape[1]),
+                        "prediction_pixels": int(np.asarray(pred, dtype=bool).sum()),
+                        "coarse_prediction_pixels": int(
+                            np.asarray(initial_pred, dtype=bool).sum()
+                        ),
+                        "sam3_report": dict(sam3_report or {}),
+                    }
+                )
+                continue
+            assert gt is not None
             initial_overlap = mask_overlap_stats(initial_pred, gt)
             initial_iou = float(initial_overlap["iou"])
             initial_boundary_f = boundary_f_score(initial_pred, gt)
@@ -7157,6 +7395,35 @@ def evaluate_selection_spec(
                 save_pred_mask(mask_path, pred)
         per_frame[f"frame_{frame_id:05d}"] = frame_scores
 
+    if prediction_only:
+        receipt_path, receipt_sha256 = write_lerf_prediction_receipt(
+            prediction_receipt_path,
+            scene=scene,
+            selection=spec,
+            protocol=prediction_receipt_protocol,
+            predictions=sealed_predictions,
+        )
+        sam3_attempt_count = sum(
+            1 for report in sam3_reports if bool(report.get("attempted", True))
+        )
+        sam3_accept_count = sum(
+            1 for report in sam3_reports if bool(report.get("accepted", False))
+        )
+        return {
+            "status": "prediction_batch_sealed_before_metric",
+            "selection_mode": spec.mode,
+            "selection_value": float(spec.value),
+            "selection_tag": spec.tag,
+            "prediction_count": len(sealed_predictions),
+            "prediction_receipt": str(receipt_path),
+            "prediction_receipt_sha256": receipt_sha256,
+            "sam3_attempt_count": sam3_attempt_count,
+            "sam3_accept_count": sam3_accept_count,
+            "sam3_accept_rate": float(sam3_accept_count / max(sam3_attempt_count, 1)),
+            "target_mask_rasterized": False,
+            "target_metric_computed": False,
+        }
+
     if not ious:
         raise RuntimeError(
             f"Zero-sample Direct3D evaluation for scene={scene!r}, selection={spec.tag!r}. "
@@ -7287,6 +7554,7 @@ def evaluate_selection_spec(
 def evaluate_scene(
     *,
     scene: str,
+    protocol_preset: str,
     config_path: str,
     checkpoint_path: str,
     label_dir: str,
@@ -7304,6 +7572,9 @@ def evaluate_scene(
     external_query_score_cache_path: Optional[str],
     ours_multiscale_query_score_cache_path: Optional[str],
     ours_multiscale_negative_score_cache_path: Optional[str],
+    ours_source_text_likelihood_cache_path: Optional[str],
+    ours_source_text_likelihood_post_readout_cache_path: Optional[str],
+    ours_source_text_likelihood_odds_residual_cache_path: Optional[str],
     ours_secondary_multiscale_query_score_cache_path: Optional[str],
     ours_secondary_multiscale_negative_score_cache_path: Optional[str],
     ours_directional_mixture_cache_path: Optional[str],
@@ -7434,10 +7705,21 @@ def evaluate_scene(
     official_frames_only: bool,
     save_masks: bool,
     save_geometry_maps: bool,
+    prediction_only: bool,
+    prediction_receipt_path: str,
+    prediction_inventory_path: str,
     device: torch.device,
 ) -> Dict:
     print(f"\n{'=' * 72}\nLERF direct 3D object selection: {scene}\n{'=' * 72}")
-    frame_annotations, scene_categories, img_h, img_w = load_lerf_ovs_labels(label_dir, scene)
+    if prediction_only:
+        frame_annotations, scene_categories, img_h, img_w = load_lerf_prediction_inventory(
+            prediction_inventory_path,
+            expected_scene=scene,
+        )
+    else:
+        frame_annotations, scene_categories, img_h, img_w = load_lerf_ovs_labels(
+            label_dir, scene
+        )
     if official_frames_only:
         official = set(OPEN_GAUSSIAN_LERF_FRAMES.get(scene, []))
         frame_annotations = {
@@ -7596,12 +7878,21 @@ def evaluate_scene(
         if use_point_summary_adapter and point_summary_adapter_valid_mask_mode == "opacity":
             point_summary_adapter_valid_mask = opacity_confidence > 0
 
+    annotation_dir_override = None
+    if prediction_only:
+        # LERFDataset otherwise discovers and parses raw polygon annotations.
+        # An existing empty directory explicitly disables that auto-discovery
+        # while retaining the exact scene poses needed by the renderer.
+        sanitized_annotation_dir = output_dir / "_prediction_only_no_annotations"
+        sanitized_annotation_dir.mkdir(parents=True, exist_ok=True)
+        annotation_dir_override = str(sanitized_annotation_dir)
     dataset = build_lerf_dataset_for_scene(
         scene,
         config,
         label_dir,
         feature_height=img_h,
         feature_width=img_w,
+        annotation_dir_override=annotation_dir_override,
     )
     missing_pose_frames = sorted(set(frame_annotations) - set(dataset.pose_by_frame_idx))
     if missing_pose_frames:
@@ -7956,6 +8247,9 @@ def evaluate_scene(
         negative_cache: Optional[OursMultiscaleQueryScoreCache] = None
         mixture_info: Optional[dict[str, object]] = None
         reliability_info: Optional[dict[str, object]] = None
+        source_text_likelihood_info: Optional[dict[str, object]] = None
+        post_readout_source_text_likelihood = None
+        post_readout_source_text_likelihood_mode = ""
         if ours_multiscale_negative_score_cache_path:
             negative_path = Path(ours_multiscale_negative_score_cache_path)
             print(f"  loading Ours canonical-negative scores: {negative_path}")
@@ -8081,10 +8375,114 @@ def evaluate_scene(
                 )
             else:
                 mixture_info = None
-                readout_input_scores = canonical_negative_relevancy_query_scores(
+                learned_effective_probability = None
+                likelihood_cache_path = (
+                    ours_source_text_likelihood_cache_path
+                    or ours_source_text_likelihood_post_readout_cache_path
+                    or ours_source_text_likelihood_odds_residual_cache_path
+                )
+                if likelihood_cache_path:
+                    likelihood_path = Path(likelihood_cache_path)
+                    print(
+                        "  loading frozen source-trained text likelihood: "
+                        f"{likelihood_path}"
+                    )
+                    likelihood_cache = load_lerf_source_text_likelihood_cache(
+                        likelihood_path,
+                        expected_xyz=model.get_xyz().detach().cpu(),
+                        expected_valid=cache.valid,
+                        expected_query_ids=scene_categories,
+                        expected_positive_score_cache=external_path,
+                        expected_negative_score_cache=negative_path,
+                        expected_renderer_geometry_checkpoint_sha256=sha256_file(
+                            checkpoint_path
+                        ),
+                    )
+                    if (
+                        likelihood_cache.field_checkpoint_sha256
+                        != cache.field_checkpoint_sha256
+                    ):
+                        raise ValueError(
+                            "source text likelihood cache field checkpoint differs"
+                        )
+                    learned_effective_probability = (
+                        likelihood_cache.effective_probability
+                    )
+                    source_text_likelihood_info = {
+                        "path": str(likelihood_path.expanduser().resolve()),
+                        "sha256": sha256_file(likelihood_path),
+                        "head_state_sha256": likelihood_cache.head_state_sha256,
+                        "q_mean_valid": float(
+                            likelihood_cache.q[cache.valid].mean()
+                        ),
+                        "c_mean_valid": float(
+                            likelihood_cache.c[cache.valid].mean()
+                        ),
+                        "effective_probability_mean_valid": float(
+                            likelihood_cache.effective_probability[cache.valid].mean()
+                        ),
+                        "effective_probability_mode": (
+                            likelihood_cache.effective_probability_mode
+                        ),
+                        "effective_probability_formula": (
+                            likelihood_cache.effective_probability_formula
+                        ),
+                    }
+                    if (
+                        ours_source_text_likelihood_post_readout_cache_path
+                        or ours_source_text_likelihood_odds_residual_cache_path
+                    ):
+                        if (
+                            likelihood_cache.effective_probability_mode
+                            != PRIOR_PRESERVING_MIXTURE_V2
+                            or likelihood_cache.field_prior_probability is None
+                        ):
+                            raise ValueError(
+                                "post-readout routes require a sealed prior-preserving v2 q,c/raw-prior cache"
+                            )
+                        learned_effective_probability = None
+                        post_readout_source_text_likelihood = likelihood_cache
+                        if ours_source_text_likelihood_odds_residual_cache_path:
+                            post_readout_source_text_likelihood_mode = (
+                                POST_READOUT_ODDS_RESIDUAL_TRANSPORT_V4
+                            )
+                            source_text_likelihood_info.update(
+                                {
+                                    "fusion_stage": POST_READOUT_ODDS_RESIDUAL_TRANSPORT_V4,
+                                    "final_probability_formula": (
+                                        POST_READOUT_ODDS_RESIDUAL_FORMULA_V4
+                                    ),
+                                    "fixed_logit_clip_epsilon": (
+                                        POST_READOUT_ODDS_RESIDUAL_EPS_V4
+                                    ),
+                                    "transported_quantity": (
+                                        "logit(q)-logit(p_field_raw)"
+                                    ),
+                                    "additional_scene_or_spatial_normalization": False,
+                                }
+                            )
+                        else:
+                            post_readout_source_text_likelihood_mode = (
+                                POST_READOUT_PRIOR_PRESERVING_MIXTURE_V3
+                            )
+                            source_text_likelihood_info.update(
+                                {
+                                    "fusion_stage": POST_READOUT_PRIOR_PRESERVING_MIXTURE_V3,
+                                    "final_probability_formula": (
+                                        POST_READOUT_PRIOR_PRESERVING_FORMULA_V3
+                                    ),
+                                    "additional_scene_or_spatial_normalization": False,
+                                }
+                            )
+                    else:
+                        source_text_likelihood_info["fusion_stage"] = (
+                            "pre_readout_prior_preserving_mixture_v2"
+                        )
+                readout_input_scores = source_text_mapping_query_scores(
                     cache.query_scores,
                     negative_cache.query_scores,
                     logit_scale=softmax_temperature,
+                    learned_effective_probability=learned_effective_probability,
                 )
             if ours_primitive_reliability_cache_path:
                 reliability_path = Path(ours_primitive_reliability_cache_path)
@@ -8140,6 +8538,33 @@ def evaluate_scene(
             scale_fusion=ours_scale_fusion,
         )
         scores = readout.scores
+        if post_readout_source_text_likelihood is not None:
+            field_probability_final = scores
+            if (
+                post_readout_source_text_likelihood_mode
+                == POST_READOUT_ODDS_RESIDUAL_TRANSPORT_V4
+            ):
+                assert (
+                    post_readout_source_text_likelihood.field_prior_probability
+                    is not None
+                )
+                scores = compile_post_readout_odds_residual(
+                    field_probability_final,
+                    post_readout_source_text_likelihood.q,
+                    post_readout_source_text_likelihood.field_prior_probability,
+                    post_readout_source_text_likelihood.c,
+                )
+            else:
+                scores = compile_post_readout_probability(
+                    field_probability_final,
+                    post_readout_source_text_likelihood.q,
+                    post_readout_source_text_likelihood.c,
+                )
+            if not torch.equal(
+                scores[post_readout_source_text_likelihood.c == 0],
+                field_probability_final[post_readout_source_text_likelihood.c == 0],
+            ):
+                raise RuntimeError("post-readout final c=0 identity changed")
         score_valid_mask = cache.valid
         ours_multiscale_vala_applied = True
         selected_scale_indices = [
@@ -8208,6 +8633,7 @@ def evaluate_scene(
             ),
             "directional_probability_mixture": mixture_info,
             "primitive_reliability_tempering": reliability_info,
+            "source_text_likelihood": source_text_likelihood_info,
             "xyz_sha256": cache.xyz_sha256,
             "field_checkpoint_sha256": cache.field_checkpoint_sha256,
             "readout_checkpoint_sha256": cache.readout_checkpoint_sha256,
@@ -8535,6 +8961,12 @@ def evaluate_scene(
 
     scene_results: Dict[str, Dict] = {}
     for spec in selection_specs:
+        receipt_path_for_spec = str(prediction_receipt_path)
+        if prediction_only and len(selection_specs) != 1:
+            receipt_base = Path(prediction_receipt_path)
+            receipt_path_for_spec = str(
+                receipt_base.with_name(f"{receipt_base.stem}_{spec.tag}{receipt_base.suffix}")
+            )
         scene_results[spec.tag] = evaluate_selection_spec(
             scene=scene,
             scene_categories=scene_categories,
@@ -8588,15 +9020,150 @@ def evaluate_scene(
             output_dir=output_dir,
             save_masks=save_masks,
             save_geometry_maps=save_geometry_maps,
+            prediction_only=prediction_only,
+            prediction_receipt_path=receipt_path_for_spec,
+            prediction_receipt_protocol={
+                "protocol_preset": protocol_preset,
+                "capability_track": (
+                    "target_rgb_assisted_official_sam3_box"
+                    if protocol_preset == VALA_TARGET_RGB_SAM3_BOX_PRESET
+                    else "strict_feature_field_mainline"
+                ),
+                "prediction_stage": (
+                    "coarse_o2_before_sam3_bridge"
+                    if protocol_preset == VALA_TARGET_RGB_SAM3_BOX_PRESET
+                    else "strict_feature_field_before_metric"
+                ),
+                "strict_mainline_eligible": bool(
+                    protocol_preset != VALA_TARGET_RGB_SAM3_BOX_PRESET
+                ),
+                "target_rgb_opened": False,
+                "sanitized_prediction_inventory": str(
+                    Path(prediction_inventory_path).expanduser().resolve()
+                ),
+                "sanitized_prediction_inventory_sha256": sha256_file_if_exists(
+                    prediction_inventory_path
+                ),
+                "target_annotation_coordinates_loaded": False,
+                "projection_mode": projection_mode,
+                "alpha_binarization": alpha_binarization,
+                "primitive_score_threshold": float(spec.value),
+                "mask_refinement": mask_refinement,
+                "rgb_refinement_source": rgb_refinement_source,
+                "sam3_box_padding": int(sam3_box_padding),
+                "sam3_resolution": int(sam3_resolution),
+                "sam3_confidence_threshold": float(sam3_confidence_threshold),
+                "sam3_min_initial_iou": float(sam3_min_initial_iou),
+                "config": str(Path(config_path).expanduser().resolve()),
+                "config_sha256": sha256_file_if_exists(config_path),
+                "renderer_checkpoint": str(Path(checkpoint_path).expanduser().resolve()),
+                "renderer_checkpoint_sha256": sha256_file_if_exists(checkpoint_path),
+                "external_query_score_cache": str(external_query_score_cache_path),
+                "external_query_score_cache_sha256": sha256_file_if_exists(
+                    external_query_score_cache_path
+                )
+                if external_query_score_cache_path
+                else "",
+                "ours_multiscale_query_score_cache": str(
+                    Path(ours_multiscale_query_score_cache_path).expanduser().resolve()
+                )
+                if ours_multiscale_query_score_cache_path
+                else "",
+                "ours_multiscale_query_score_cache_sha256": sha256_file_if_exists(
+                    ours_multiscale_query_score_cache_path
+                )
+                if ours_multiscale_query_score_cache_path
+                else "",
+                "ours_multiscale_negative_score_cache": str(
+                    Path(ours_multiscale_negative_score_cache_path).expanduser().resolve()
+                )
+                if ours_multiscale_negative_score_cache_path
+                else "",
+                "ours_multiscale_negative_score_cache_sha256": sha256_file_if_exists(
+                    ours_multiscale_negative_score_cache_path
+                )
+                if ours_multiscale_negative_score_cache_path
+                else "",
+                "ours_source_text_likelihood_cache": str(
+                    Path(ours_source_text_likelihood_cache_path).expanduser().resolve()
+                )
+                if ours_source_text_likelihood_cache_path
+                else "",
+                "ours_source_text_likelihood_cache_sha256": sha256_file_if_exists(
+                    ours_source_text_likelihood_cache_path
+                )
+                if ours_source_text_likelihood_cache_path
+                else "",
+                "ours_source_text_likelihood_post_readout_cache": str(
+                    Path(
+                        ours_source_text_likelihood_post_readout_cache_path
+                    ).expanduser().resolve()
+                )
+                if ours_source_text_likelihood_post_readout_cache_path
+                else "",
+                "ours_source_text_likelihood_post_readout_cache_sha256": (
+                    sha256_file_if_exists(
+                        ours_source_text_likelihood_post_readout_cache_path
+                    )
+                    if ours_source_text_likelihood_post_readout_cache_path
+                    else ""
+                ),
+                "ours_source_text_likelihood_odds_residual_cache": str(
+                    Path(
+                        ours_source_text_likelihood_odds_residual_cache_path
+                    ).expanduser().resolve()
+                )
+                if ours_source_text_likelihood_odds_residual_cache_path
+                else "",
+                "ours_source_text_likelihood_odds_residual_cache_sha256": (
+                    sha256_file_if_exists(
+                        ours_source_text_likelihood_odds_residual_cache_path
+                    )
+                    if ours_source_text_likelihood_odds_residual_cache_path
+                    else ""
+                ),
+                "text_mapping": (
+                    str(
+                        registration_stats.get("source_text_likelihood", {}).get(
+                            "effective_probability_mode",
+                            "frozen_source_train_monotone_q_c",
+                        )
+                    )
+                    if ours_source_text_likelihood_cache_path
+                    else (
+                        POST_READOUT_ODDS_RESIDUAL_TRANSPORT_V4
+                        if ours_source_text_likelihood_odds_residual_cache_path
+                        else (
+                            POST_READOUT_PRIOR_PRESERVING_MIXTURE_V3
+                            if ours_source_text_likelihood_post_readout_cache_path
+                            else "legacy_fixed_canonical_negative_margin"
+                        )
+                    )
+                ),
+                "sam3_checkpoint": str(Path(sam3_checkpoint_path).expanduser().resolve()),
+                "sam3_checkpoint_sha256": sha256_file_if_exists(sam3_checkpoint_path),
+                "evaluator": str(Path(__file__).resolve()),
+                "evaluator_sha256": sha256_file(__file__),
+            },
             device=device,
         )
         m = scene_results[spec.tag]
-        print(
-            f"  {spec.tag:<14} mIoU={m['miou']:.4f} "
-            f"Acc@0.25={m['acc025']:.4f} Acc@0.50={m['acc050']:.4f} n={m['n']}"
-        )
+        if prediction_only:
+            print(
+                f"  {spec.tag:<14} sealed {m['prediction_count']} predictions "
+                f"before metric: {m['prediction_receipt']}"
+            )
+        else:
+            print(
+                f"  {spec.tag:<14} mIoU={m['miou']:.4f} "
+                f"Acc@0.25={m['acc025']:.4f} Acc@0.50={m['acc050']:.4f} n={m['n']}"
+            )
 
-    best_tag = max(scene_results, key=lambda tag: scene_results[tag]["miou"])
+    best_tag = (
+        None
+        if prediction_only
+        else max(scene_results, key=lambda tag: scene_results[tag]["miou"])
+    )
     return {
         "scene": scene,
         "config": config_path,
@@ -8617,6 +9184,7 @@ def evaluate_scene(
         "checkpoint_contract": getattr(config, "checkpoint_contract", {}),
         "results": scene_results,
         "best_by_miou": best_tag,
+        "prediction_only": bool(prediction_only),
     }
 
 
@@ -8655,6 +9223,20 @@ def write_scene_report(output_dir: Path, scene: str, report: Dict) -> None:
     rows.append("- Protocol: OpenGaussian-style direct 3D primitive selection; rendering is used only for mask evaluation.")
     rows.append("- Query location: 3D Gaussian primitives.")
     protocol = report.get("protocol", {})
+    if bool(report.get("scene", {}).get("prediction_only", False)):
+        rows.append("- Status: predictions sealed before target-mask rasterization and metric computation.")
+        rows.append("- Capability track: target-RGB-assisted official SAM3 box; excluded from the strict mainline.")
+        rows.append("")
+        rows.append("| Selection | Predictions | Receipt | SHA256 |")
+        rows.append("|---|---:|---|---|")
+        for tag, result in report["scene"]["results"].items():
+            rows.append(
+                f"| {tag} | {int(result['prediction_count'])} | "
+                f"`{result['prediction_receipt']}` | `{result['prediction_receipt_sha256']}` |"
+            )
+        (scene_dir / "summary.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
+        print(f"wrote {out_json}")
+        return
     rows.append(f"- Feature source: {protocol.get('feature_source', 'pre-refiner RADIO-GS Gaussian-center decoded features')}.")
     rows.append(f"- Score source: `{protocol.get('score_source', 'direct')}`.")
     registration = report.get("scene", {}).get("registration", {})
@@ -8745,9 +9327,12 @@ def main() -> None:
     parser.add_argument("--scene", required=True, choices=list(LERF_OVS_SCENES), help="LERF scene")
     parser.add_argument(
         "--protocol_preset",
-        choices=["none", "vala_paper_3d", "vala_repo_3d"],
+        choices=["none", *sorted(VALA_BASE_PROTOCOL_PRESETS)],
         default="none",
-        help="Frozen non-swept protocol preset matching VALA's released 3D readout",
+        help=(
+            "Frozen non-swept protocol preset. The target_rgb_sam3_box preset is "
+            "an explicitly separate RGB-assisted capability track, not the strict mainline."
+        ),
     )
     parser.add_argument("--label_dir", default=DEFAULT_LABEL_DIR, help="LERF-OVS label root")
     parser.add_argument("--output_dir", default="output/radio_gs/lerf_direct_3d_selection", help="Output root")
@@ -8783,6 +9368,30 @@ def main() -> None:
         help=(
             "Optional immutable raw-cosine cache for the frozen canonical "
             "negative prompts, paired row-for-row with Ours positive scores"
+        ),
+    )
+    parser.add_argument(
+        "--ours_source_text_likelihood_cache",
+        default="",
+        help=(
+            "Default-off frozen source-trained q,c mapping paired with the "
+            "positive and canonical-negative FP32 score caches"
+        ),
+    )
+    parser.add_argument(
+        "--ours_source_text_likelihood_post_readout_cache",
+        default="",
+        help=(
+            "Default-off v3 route: consume q,c only after the frozen legacy "
+            "scale-select/kNN/min-max field probability, with no later remap"
+        ),
+    )
+    parser.add_argument(
+        "--ours_source_text_likelihood_odds_residual_cache",
+        default="",
+        help=(
+            "Default-off v4 route: transport only the frozen source-head odds "
+            "residual after the legacy scale-select/kNN/min-max readout"
         ),
     )
     parser.add_argument(
@@ -9091,13 +9700,28 @@ def main() -> None:
     parser.add_argument("--all_labeled_frames", action="store_true", help="Use all local labels instead of OpenGaussian official frames")
     parser.add_argument("--save_masks", action="store_true", help="Save rendered binary prediction masks")
     parser.add_argument(
+        "--prediction_only",
+        action="store_true",
+        help="Materialize and seal predictions without rasterizing target masks or computing metrics",
+    )
+    parser.add_argument(
+        "--prediction_receipt",
+        default="",
+        help="Immutable pre-metric receipt written by --prediction_only",
+    )
+    parser.add_argument(
+        "--prediction_inventory",
+        default="",
+        help="Sanitized frame/category/shape inventory used by prediction-only mode",
+    )
+    parser.add_argument(
         "--save_geometry_maps",
         action="store_true",
         help="Save alpha/depth discontinuity maps and per-query boundary-alignment overlays",
     )
     parser.add_argument("--gpu", type=int, default=0, help="GPU id")
     args = parser.parse_args()
-    if args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"}:
+    if args.protocol_preset in VALA_BASE_PROTOCOL_PRESETS:
         # Freeze the VALA paper-level 3D protocol after our primitive features
         # are produced.  The repo diagnostic additionally enables its kNN,
         # min-max, and 2x-1 score remapping. No value is selected from LERF GT.
@@ -9143,19 +9767,62 @@ def main() -> None:
             args.canonical_embedding_cache = (
                 f"checkpoints/{args.text_encoder}_lerf_negative_embeddings.pt"
             )
+    if args.protocol_preset == VALA_TARGET_RGB_SAM3_BOX_PRESET:
+        # This is a distinct target-RGB-assisted capability track.  The fixed
+        # pad16 policy was selected by the pre-existing cross-scene global SAM3
+        # study, not by any metric from the current O2 sentinel.
+        # The legacy gsplat renderer and official SAM3 use separate Torch ABIs.
+        # This process seals coarse O2 masks; the audited SAM3-only bridge then
+        # consumes only those masks and target RGB on the same fixed policy.
+        args.mask_refinement = "none"
+        args.rgb_refinement_source = "dataset_frame"
+        args.sam3_confidence_threshold = 0.0
+        args.sam3_resolution = 1008
+        args.sam3_amp_dtype = "auto"
+        args.sam3_box_padding = 16
+        args.sam3_min_initial_iou = 0.05
+        args.sam3_box_min_heatmap_mean_ratio = 0.0
+        args.sam3_box_min_heatmap_mass_ratio = 0.0
+        args.sam3_box_require_peak_in_refined = False
+        args.sam3_refinement_geometry_gate = False
+        args.save_masks = True
+        if (
+            not args.prediction_only
+            or not args.prediction_receipt
+            or not args.prediction_inventory
+        ):
+            parser.error(
+                f"{VALA_TARGET_RGB_SAM3_BOX_PRESET} requires --prediction_only "
+                "--prediction_receipt and --prediction_inventory; run the official "
+                "SAM3 bridge and score the final sealed batch separately"
+            )
+    elif args.prediction_only:
+        if args.protocol_preset not in VALA_STRICT_PROTOCOL_PRESETS:
+            parser.error(
+                "--prediction_only requires a frozen VALA protocol preset"
+            )
+        if (
+            not args.prediction_receipt
+            or not args.prediction_inventory
+            or not args.save_masks
+        ):
+            parser.error(
+                "strict --prediction_only requires --save_masks "
+                "--prediction_receipt and --prediction_inventory"
+            )
     if args.scalar_posterior_projection and args.selected_membership_posterior_projection:
         parser.error(
             "--scalar_posterior_projection and "
             "--selected_membership_posterior_projection are mutually exclusive"
         )
     if args.scalar_posterior_projection:
-        if args.protocol_preset not in {"vala_paper_3d", "vala_repo_3d"}:
+        if args.protocol_preset not in VALA_STRICT_PROTOCOL_PRESETS:
             parser.error(
                 "--scalar_posterior_projection requires a frozen VALA protocol preset"
             )
         args.projection_mode = "scalar_posterior"
     if args.selected_membership_posterior_projection:
-        if args.protocol_preset not in {"vala_paper_3d", "vala_repo_3d"}:
+        if args.protocol_preset not in VALA_STRICT_PROTOCOL_PRESETS:
             parser.error(
                 "--selected_membership_posterior_projection requires a frozen "
                 "VALA protocol preset"
@@ -9204,6 +9871,42 @@ def main() -> None:
                 "canonical-negative relevancy cannot be combined with "
                 "hard-sibling margin"
             )
+        likelihood_cache_args = [
+            value
+            for value in (
+                args.ours_source_text_likelihood_cache,
+                args.ours_source_text_likelihood_post_readout_cache,
+                args.ours_source_text_likelihood_odds_residual_cache,
+            )
+            if value
+        ]
+        if len(likelihood_cache_args) > 1:
+            parser.error(
+                "source text likelihood routes are mutually exclusive"
+            )
+        if likelihood_cache_args:
+            if not args.ours_multiscale_negative_score_cache:
+                parser.error(
+                    "source text likelihood requires the paired "
+                    "--ours_multiscale_negative_score_cache"
+                )
+            learned_conflicts = [
+                name
+                for name, value in (
+                    ("--ours_secondary_multiscale_query_score_cache", args.ours_secondary_multiscale_query_score_cache),
+                    ("--ours_secondary_multiscale_negative_score_cache", args.ours_secondary_multiscale_negative_score_cache),
+                    ("--ours_directional_mixture_cache", args.ours_directional_mixture_cache),
+                    ("--ours_primitive_reliability_cache", args.ours_primitive_reliability_cache),
+                )
+                if value
+            ]
+            if args.ours_query_contrast != "none":
+                learned_conflicts.append("--ours_query_contrast")
+            if learned_conflicts:
+                parser.error(
+                    "--ours_source_text_likelihood_cache cannot be recalibrated "
+                    "or mixed with " + ", ".join(learned_conflicts)
+                )
         if (
             args.ours_query_contrast == "entropy_gated_listwise"
             and not args.ours_multiscale_negative_score_cache
@@ -9251,6 +9954,15 @@ def main() -> None:
             "--ours_multiscale_negative_score_cache requires "
             "--ours_multiscale_query_score_cache"
         )
+    elif (
+        args.ours_source_text_likelihood_cache
+        or args.ours_source_text_likelihood_post_readout_cache
+        or args.ours_source_text_likelihood_odds_residual_cache
+    ):
+        parser.error(
+            "source text likelihood requires "
+            "--ours_multiscale_query_score_cache"
+        )
     elif args.ours_scale_fusion != "peak_select":
         parser.error(
             "--ours_scale_fusion requires --ours_multiscale_query_score_cache"
@@ -9261,7 +9973,7 @@ def main() -> None:
     prompt_templates = parse_prompt_templates(args.prompt_templates)
     specs = build_selection_specs(args)
     device = torch.device(f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu")
-    if args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"}:
+    if args.protocol_preset in VALA_BASE_PROTOCOL_PRESETS:
         if not args.text_embedding_cache or not args.canonical_embedding_cache:
             parser.error(
                 f"{args.protocol_preset} requires explicit frozen query and negative caches"
@@ -9273,7 +9985,15 @@ def main() -> None:
             )
         if Path(args.text_embedding_cache).resolve() == Path(args.canonical_embedding_cache).resolve():
             parser.error("Query and canonical-negative caches must be separate files")
-        _, frozen_categories, _, _ = load_lerf_ovs_labels(args.label_dir, args.scene)
+        if args.prediction_only:
+            _, frozen_categories, _, _ = load_lerf_prediction_inventory(
+                args.prediction_inventory,
+                expected_scene=args.scene,
+            )
+        else:
+            _, frozen_categories, _, _ = load_lerf_ovs_labels(
+                args.label_dir, args.scene
+            )
         encoder_model = (
             args.openclip_model if args.text_encoder == "openclip" else _SIGLIP2_MODEL_NAME
         )
@@ -9359,6 +10079,7 @@ def main() -> None:
     t0 = time.time()
     scene_report = evaluate_scene(
         scene=args.scene,
+        protocol_preset=args.protocol_preset,
         config_path=args.config,
         checkpoint_path=args.checkpoint,
         label_dir=args.label_dir,
@@ -9379,6 +10100,15 @@ def main() -> None:
         ),
         ours_multiscale_negative_score_cache_path=(
             args.ours_multiscale_negative_score_cache or None
+        ),
+        ours_source_text_likelihood_cache_path=(
+            args.ours_source_text_likelihood_cache or None
+        ),
+        ours_source_text_likelihood_post_readout_cache_path=(
+            args.ours_source_text_likelihood_post_readout_cache or None
+        ),
+        ours_source_text_likelihood_odds_residual_cache_path=(
+            args.ours_source_text_likelihood_odds_residual_cache or None
         ),
         ours_secondary_multiscale_query_score_cache_path=(
             args.ours_secondary_multiscale_query_score_cache or None
@@ -9452,7 +10182,7 @@ def main() -> None:
         point_summary_adapter_blend_alpha=args.point_summary_adapter_blend_alpha,
         point_summary_adapter_valid_mask_mode=args.point_summary_adapter_valid_mask_mode,
         strict_direct_head_consistency=args.strict_direct_head_consistency,
-        strict_checkpoint_contract=args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"},
+        strict_checkpoint_contract=args.protocol_preset in VALA_BASE_PROTOCOL_PRESETS,
         direct_primitive_confidence_mode=args.direct_primitive_confidence_mode,
         direct_primitive_confidence_blend=args.direct_primitive_confidence_blend,
         direct_primitive_opacity_threshold=args.direct_primitive_opacity_threshold,
@@ -9520,6 +10250,9 @@ def main() -> None:
         official_frames_only=not args.all_labeled_frames,
         save_masks=args.save_masks,
         save_geometry_maps=args.save_geometry_maps,
+        prediction_only=args.prediction_only,
+        prediction_receipt_path=args.prediction_receipt,
+        prediction_inventory_path=args.prediction_inventory,
         device=device,
     )
     report = {
@@ -9530,16 +10263,30 @@ def main() -> None:
                 "Frozen Ours three-level primitive scores with VALA direct-3D readout"
                 if args.ours_multiscale_query_score_cache
                 else (
-                    "VALA-compatible released-code post-score/projection protocol (single-level GaussFM)"
-                    if args.protocol_preset == "vala_repo_3d"
+                    "O2 plus official SAM3 box target-RGB-assisted capability track"
+                    if args.protocol_preset == VALA_TARGET_RGB_SAM3_BOX_PRESET
                     else (
-                        "VALA-compatible paper-level LERF-OVS direct 3D protocol (single-level GaussFM)"
-                        if args.protocol_preset == "vala_paper_3d"
-                        else "OpenGaussian-style LERF-OVS direct 3D object selection"
+                        "VALA-compatible released-code post-score/projection protocol (single-level GaussFM)"
+                        if args.protocol_preset == "vala_repo_3d"
+                        else (
+                            "VALA-compatible paper-level LERF-OVS direct 3D protocol (single-level GaussFM)"
+                            if args.protocol_preset == "vala_paper_3d"
+                            else "OpenGaussian-style LERF-OVS direct 3D object selection"
+                        )
                     )
                 )
             ),
             "protocol_preset": args.protocol_preset,
+            "capability_track": (
+                "target_rgb_assisted_official_sam3_box"
+                if args.protocol_preset == VALA_TARGET_RGB_SAM3_BOX_PRESET
+                else "strict_feature_field_mainline"
+            ),
+            "strict_mainline_eligible": bool(
+                args.protocol_preset != VALA_TARGET_RGB_SAM3_BOX_PRESET
+            ),
+            "prediction_only": bool(args.prediction_only),
+            "prediction_receipt": args.prediction_receipt,
             "feature_level_count": 3 if args.ours_multiscale_query_score_cache else 1,
             "level_selection": (
                 (
@@ -9641,7 +10388,9 @@ def main() -> None:
                 else ""
             ),
             "vala_repo_effective_pre_remap_threshold": (
-                0.8 if args.protocol_preset == "vala_repo_3d" else None
+                0.8
+                if args.protocol_preset == "vala_repo_3d"
+                else None
             ),
             "proposal_smoothing": args.proposal_smoothing,
             "proposal_voxel_size": float(args.proposal_voxel_size),
@@ -9724,7 +10473,7 @@ def main() -> None:
                     if args.projection_mode == "selected_membership_posterior"
                     else (
                         "VALA released compute_lerf_iou.py PNG threshold 10/255"
-                        if args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"}
+                        if args.protocol_preset in VALA_BASE_PROTOCOL_PRESETS
                         else "evaluator argument"
                     )
                 )
@@ -9833,6 +10582,25 @@ def main() -> None:
             "ours_multiscale_negative_score_cache_sha256": (
                 sha256_file_if_exists(args.ours_multiscale_negative_score_cache)
                 if args.ours_multiscale_negative_score_cache
+                else ""
+            ),
+            "ours_source_text_likelihood_cache_sha256": (
+                sha256_file_if_exists(args.ours_source_text_likelihood_cache)
+                if args.ours_source_text_likelihood_cache
+                else ""
+            ),
+            "ours_source_text_likelihood_post_readout_cache_sha256": (
+                sha256_file_if_exists(
+                    args.ours_source_text_likelihood_post_readout_cache
+                )
+                if args.ours_source_text_likelihood_post_readout_cache
+                else ""
+            ),
+            "ours_source_text_likelihood_odds_residual_cache_sha256": (
+                sha256_file_if_exists(
+                    args.ours_source_text_likelihood_odds_residual_cache
+                )
+                if args.ours_source_text_likelihood_odds_residual_cache
                 else ""
             ),
             "ours_secondary_multiscale_query_score_cache_sha256": (

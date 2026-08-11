@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_object_multiview_region_memory_runtime_addendum_v1",
+  "status": "frozen_after_source_only_memory_gate_before_fern_target_prediction",
+  "materialization_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_materialization_authority_20260810.json",
+    "sha256": "a137e7341f5fa15e72e9e29a9ccbf8f8ac49bbdf06c8e8037c286e535e454be7"
+  },
+  "sealed_memories": {
+    "fern": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_c/fern/memory.pt",
+      "sha256": "f77d2e77ee30bec7d11c4a9160cce2b2d32038c503db736e9fe626229536f3c2",
+      "receipt": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_c/fern/memory_receipt.json",
+      "receipt_sha256": "e6fba1f04b3dcb80f7d9ced548c865b44a2dc90f714417df11df9c22d991c145",
+      "valid_rows": 297200,
+      "memory_observed_rows": 188476,
+      "memory_positive_rows": 101021,
+      "memory_negative_rows": 87455,
+      "memory_confidence_sum": 2456.01708984375
+    },
+    "trex": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_c/trex/memory.pt",
+      "sha256": "98e18757d0d125342ba82681a7b2772c8b6dc227a75285e90771abd362bfb052",
+      "receipt": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_c/trex/memory_receipt.json",
+      "receipt_sha256": "c1025cc5f51ebc06d04de23a2c8784d9922a3af90905b710cd7e29115ca8539d",
+      "valid_rows": 154586,
+      "memory_observed_rows": 100167,
+      "memory_positive_rows": 26313,
+      "memory_negative_rows": 73854,
+      "memory_confidence_sum": 2344.707763671875
+    }
+  },
+  "base_predictions": {
+    "fern": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/fern/pre_metric_prediction_receipt.json",
+      "sha256": "8ec0cee097f6d39407cc9feb65d3c51db6ef79530425c4d504c7fe66ad72906c",
+      "foreground_iou": 0.7350345861696804
+    },
+    "trex": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/trex/pre_metric_prediction_receipt.json",
+      "sha256": "f3c1173b86fdce608073123eff891c455de42b0b0d091f0d500fc7aeb7e565a0",
+      "foreground_iou": 0.60547969614955
+    }
+  },
+  "frozen_implementations": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_nvos_gaussian_first.py",
+      "sha256": "71aa2ab71a9b8c28c97cf0463357d0d705843ce361381300fdc60daa38cdd957"
+    },
+    "runtime_adapter": {
+      "path": "/root/RADIO-GS/radio_gs/querying/multiview_region_memory_runtime.py",
+      "sha256": "a43478f11506dc8f75f73a337224634648555760073b89b3ecd36c536f14b1a2"
+    },
+    "prediction_runner": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_nvos_object_region_memory_prediction.py",
+      "sha256": "579789ab89155d44884c3fe444b35e83b57276f45eb6153b435909fe3c3def9e"
+    },
+    "independent_scorer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_object_region_memory.py",
+      "sha256": "cb4c5a74dff691c7ff8da2022605b9d83e1882a62d600659e6e294f5ea7cc11b"
+    }
+  },
+  "causal_contract": {
+    "changed_rows": "base observation confidence exactly zero and memory confidence positive",
+    "unchanged_rows": "all remaining rows retain frozen base unary bitwise",
+    "positive_negative_hard_anchors": "bitwise preserved because all base-observed rows are immutable",
+    "field_prior": "frozen DINO appearance plus SAM boundary with three source-object tokens",
+    "source_token_raw_weight": "view assignment reliability divided by fixed view count three",
+    "memory_probability": "proposal membership q",
+    "memory_reliability": "raster-adjoint evidence confidence c kept separate",
+    "graph_and_readout": "unchanged graph-disabled unary_prior",
+    "target_rgb_mask_or_metric_input": false,
+    "scene_specific_parameters": false
+  },
+  "staged_gate": {
+    "first_scene": "fern",
+    "fern_delta_minimum_to_authorize_trex": -0.002,
+    "pair_macro_delta_minimum_for_promotion": 0.005,
+    "per_scene_delta_minimum_for_promotion": -0.002,
+    "parameters_may_not_change_after_fern_score": true,
+    "prediction_receipt_before_ground_truth": true,
+    "independent_scorer": true
+  },
+  "validation": {
+    "focused_tests": "80 passed, 38 warnings",
+    "python_compile": "passed",
+    "evaluator_help_preflight": "passed",
+    "target_rgb_mask_or_metric_opened": false
+  },
+  "gpu": {
+    "physical_gpu": 1,
+    "cuda_execution_correction": {
+      "authority": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_gpu1_execution_correction_20260810.json",
+      "authority_sha256": "e28b28fc28403369bff902ca51231270049d08d208d747822fcb55f30de9072d",
+      "environment": "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+      "method_parameters_changed": false
+    },
+    "thermal_poll_seconds": 60,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  }
+}

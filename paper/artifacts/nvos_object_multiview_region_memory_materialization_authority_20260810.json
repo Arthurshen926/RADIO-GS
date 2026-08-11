@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_object_multiview_region_memory_materialization_authority_v1",
+  "status": "frozen_after_all_six_source_proposals_before_primitive_memory_or_target_prediction",
+  "upstream": {
+    "preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_fern_trex_preregistration_20260810.json",
+      "sha256": "12cc595374520dd756fdb206b921cd5186f2aed1151bc7fe10b68d0610b33dc8"
+    },
+    "execution_correction": {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_gpu1_execution_correction_20260810.json",
+      "sha256": "e28b28fc28403369bff902ca51231270049d08d208d747822fcb55f30de9072d"
+    },
+    "fern_source_sam3_receipt": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_b/fern_sam3/source_sam3_receipt.json",
+      "sha256": "2195dedcfef77b29a135f133e14fb0513a09bfc25220f290fdcdf7070c2b2e99"
+    },
+    "trex_source_sam3_receipt": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_multiview_region_memory_stage_b/trex_sam3/source_sam3_receipt.json",
+      "sha256": "64cc5bb6bb87b226152e5ed8acd23444050ffe5b4454e77924d99dc3adab33ce"
+    }
+  },
+  "source_only_gate": {
+    "all_six_view_receipts_hash_verified": true,
+    "fern_accepted_views": 3,
+    "trex_accepted_views": 3,
+    "every_overlap_at_least_0p05": true,
+    "every_proposal_nonempty": true,
+    "candidate_selected_with_gt": false,
+    "target_rgb_mask_or_metric_opened": false
+  },
+  "implementations": {
+    "core": {
+      "path": "/root/RADIO-GS/radio_gs/querying/multiview_region_memory.py",
+      "sha256": "54fa4383260f9eb912bfec5283d6f284ee2881ee97590d819558bcd901eaa245"
+    },
+    "primitive_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_multiview_region_memory.py",
+      "sha256": "1438d8f5e58016c0d867e4286182579842a9ca62cc2a4629fb35025dc642a4ea"
+    },
+    "tests": [
+      {
+        "path": "/root/RADIO-GS/tests/test_multiview_region_memory.py",
+        "sha256": "9d17fd2066bb4a17889d4030844cc294c641bcbcb009b969bcf63c5f52d64a60"
+      },
+      {
+        "path": "/root/RADIO-GS/tests/test_multiview_region_memory_pipeline.py",
+        "sha256": "2df472e6cd9554faa58e00e84c6a29a8d33537d27db2f716216d5a23cfdc0cbe"
+      }
+    ]
+  },
+  "frozen_primitive_memory": {
+    "proposal_domain": "SAM3 proposal intersected with its already-padded normalized box at deterministic feature-cell centres",
+    "view_weight": "coarse assignment_reliability",
+    "membership_probability": "weighted raster-adjoint Bernoulli mean",
+    "membership_confidence": "one_minus_exp_negative_visible_evidence_mass",
+    "token_carrier": "per-view positive raster-adjoint mass compacted to the frozen capability-valid row order",
+    "separate_probability_confidence": true,
+    "target_input": false
+  },
+  "frozen_runtime_fusion": {
+    "write_domain": "base registered observation confidence exactly zero and sealed region-memory confidence positive",
+    "all_base_observed_rows": "bitwise preserved",
+    "positive_negative_hard_anchors": "bitwise preserved as a subset of base observed rows",
+    "region_token_construction": "one normalized positive-mass-weighted appearance token and boundary token per accepted source view",
+    "region_token_raw_weight": "view_assignment_reliability divided by fixed source_view_count_3",
+    "reference_prototype_raw_weights": "unchanged frozen weights summing to one",
+    "combined_prototype_weights": "concatenate reference raw weights and source raw weights then normalize once",
+    "changed_row_unary": "unchanged probability_mixture of augmented field prior and region-memory q,c",
+    "unchanged_row_unary": "bitwise frozen base unary",
+    "graph": "disabled",
+    "readout": "unary_prior",
+    "target_rgb_input": false,
+    "scene_specific_parameters": false
+  },
+  "staged_target_gate": {
+    "first_scene": "fern",
+    "fern_delta_minimum_to_authorize_trex": -0.002,
+    "pair_macro_delta_minimum_for_promotion": 0.005,
+    "per_scene_delta_minimum_for_promotion": -0.002,
+    "prediction_receipt_before_ground_truth": true,
+    "parameters_may_not_change_after_fern_score": true
+  },
+  "validation": {
+    "focused_tests": "14 passed, 36 warnings",
+    "python_compile": "passed",
+    "target_opened": false
+  }
+}

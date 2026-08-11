@@ -1,0 +1,62 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_query_score_batch_seal.v1",
+  "status": "candidate_query_scores_sealed_before_first_metric",
+  "scene_id": "figurines",
+  "benchmark_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_rgb_free_benchmark_preregistration_20260811.json",
+    "sha256": "34ee52ce4e2f48e44286c28fdc81b5a7c9ef97f7a9e6e1f7f3364c640781a7ee"
+  },
+  "candidate_field": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/canonical_radio_source_sam_relative_e5_seed0.pth",
+    "sha256": "4348c2c24743f552b3c24e2fd8dcf19eb101c28dad144208e996fbbc60b5e0f6"
+  },
+  "query_free_derivatives": {
+    "factorized_primitive_state": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/factorized_primitive_state_v2.pt",
+      "sha256": "317081ae1817a173f91dcc9be71d3188ca8625384d50608388b21b5976fd3879"
+    },
+    "official_dino_sam3_views": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/official_dino_sam3_views_v2.pt",
+      "sha256": "be0713007fa5388bae072f98d66fa577b73904c01d373a1eaf785d1ba492e010"
+    },
+    "support_graph": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/support_graph_accepted_v2_isomorphic.pt",
+      "sha256": "c9da515b06677b10d305ea8b2d528fe42620027fc45c974c701f97b53a70062b"
+    },
+    "surface_region_descriptor": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/descriptor_accepted_v2_isomorphic.pt",
+      "sha256": "9e0b401c0037172fc784f8a90088025a79fb36c78e48acda9a2b9daf1e22f06b"
+    }
+  },
+  "sealed_query_scores": {
+    "positive": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/positive_fp32.pt",
+      "sha256": "75b92f454d9723e45012bc7147e30a5ba26c55d3e95015300ad9c8f662d89d15",
+      "shape": [168791, 3, 21]
+    },
+    "canonical_negative": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/rgb_free_benchmark_sentinel/negative_fp32.pt",
+      "sha256": "63faf3dfac9c0f9ad033a99747ba42e5ced010704d54c27c9b05a9f61e734ec0",
+      "shape": [168791, 3, 4]
+    }
+  },
+  "contract": {
+    "score_semantics": "raw_independent_normalized_cosine",
+    "scale_ids": ["0.25", "0.45", "0.7"],
+    "threshold_applied": false,
+    "scale_reduction_applied": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false,
+    "query_time_source_rgb_opened": false,
+    "query_time_target_rgb_opened": false,
+    "query_time_sam_opened": false
+  },
+  "thermal": {
+    "maximum_temperature_c": 55,
+    "maximum_power_w": 156.78,
+    "maximum_memory_mib": 3420,
+    "paused_or_aborted": false,
+    "cuda_release_verified": true
+  }
+}

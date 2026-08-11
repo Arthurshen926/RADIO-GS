@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_disjoint_domain_composition_full8_outcome_v1",
+  "status": "exact_full8_passed_numeric_promotion_target",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_disjoint_domain_composition_full8_preregistration_20260810.json",
+    "sha256": "0069eae0307991322a4b29f2ad51a3c64bfc55cd7552595b842a4ed41725eb28"
+  },
+  "prediction_batch_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_disjoint_domain_composition_full8_prediction_batch_authority_20260810.json",
+    "sha256": "3adcc7a089d76c4b15bf85bcd0fe628c2d9a3bc6657d72cece0d94f5dca20bb3"
+  },
+  "exact_result": {
+    "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_disjoint_domain_composition_full8_v1/full8_exact_result.json",
+    "sha256": "f96844d2e2d940d57760ba40b204d26caf9e3267a75dd08f1b9c13a18136c73d"
+  },
+  "aggregate": {
+    "baseline_scene_macro_foreground_iou": 0.7477712404198159,
+    "scene_macro_foreground_iou": 0.7506627337110667,
+    "delta_foreground_iou": 0.002891493291250824,
+    "reference_foreground_iou": 0.749,
+    "delta_to_reference_foreground_iou": 0.0016627337110667328,
+    "numeric_promotion_target_passed": true
+  },
+  "per_scene": {
+    "fern": {"baseline": 0.7350345861696804, "candidate": 0.7410597198748375, "delta": 0.006025133705157115},
+    "flower": {"baseline": 0.8234007862831759, "candidate": 0.8327009814177123, "delta": 0.009300195134536393},
+    "fortress": {"baseline": 0.8796406837615116, "candidate": 0.8798857918551305, "delta": 0.0002451080936188843},
+    "horns_center": {"baseline": 0.7928185438661809, "candidate": 0.7959108266144811, "delta": 0.0030922827483002013},
+    "horns_left": {"baseline": 0.7663050940546479, "candidate": 0.7682309959623617, "delta": 0.0019259019077138007},
+    "leaves": {"baseline": 0.6866184536347656, "candidate": 0.6861724577818455, "delta": -0.00044599585292004473},
+    "orchids": {"baseline": 0.6928720794390146, "candidate": 0.6912066701117473, "delta": -0.001665409327267331},
+    "trex": {"baseline": 0.60547969614955, "candidate": 0.6101344260704183, "delta": 0.00465472992086835}
+  },
+  "causal_conclusion": {
+    "registered_query_likelihood_role": "recalibrate only the original registered observation domain",
+    "object_multiview_region_memory_role": "complete only original c==0 rows from target-excluding source RGB proposals",
+    "composition_role": "exhaustive disjoint assignment rather than probability fusion",
+    "all_eight_partitions_exhaustive_pairwise_disjoint_and_no_double_count": true,
+    "observed_and_hard_anchor_unary_bitwise_preserved": true,
+    "graph_readout_threshold_changed": false,
+    "scene_specific_parameters": false,
+    "target_rgb_or_metric_used_for_prediction_or_selection": false,
+    "interpretation": "the full8 gain confirms that calibrated observed evidence and source-only object completion address complementary error supports; residual leaves/orchids regressions indicate correspondence coverage remains imperfect but stayed inside the preregistered safety bound"
+  },
+  "safety": {
+    "fern_trex_predictions_reused_without_rerun": true,
+    "six_new_source_sam3_and_memory_assets_sealed_before_composed_prediction": true,
+    "all_eight_prediction_receipts_bound_before_first_new_six_target_mask_open": true,
+    "target_rgb_used": false,
+    "target_metric_used_to_fit_or_select_parameters": false,
+    "no_clobber": true
+  },
+  "validation": {
+    "focused_tests": "24 passed, 1 warning",
+    "python_compile": "passed",
+    "six_new_score_map_hashes_verified_before_first_new_target_mask_open": true,
+    "all_scene_exact_protocol": "cv2.INTER_LINEAR then threshold probability >= 0.5"
+  },
+  "thermal": {
+    "gpu0_scenes": ["flower", "horns_center", "leaves"],
+    "gpu1_scenes": ["fortress", "horns_left", "orchids"],
+    "gpu0_maximum_sampled_temperature_c": 55,
+    "gpu1_maximum_sampled_temperature_c": 59,
+    "soft_pause_c": 82,
+    "soft_resume_c": 78,
+    "hard_stop_c": 85,
+    "soft_pause_or_abort": false,
+    "driver_failure": false
+  }
+}

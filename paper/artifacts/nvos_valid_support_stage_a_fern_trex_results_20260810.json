@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_valid_support_stage_a_fern_trex_result_authority_v1",
+  "status": "sentinel_gate_failed_no_full8_expansion",
+  "single_factor_contract": {
+    "baseline": "frozen hierarchical-trust local-positive full8 v2",
+    "method_change": "valid_support_normalization: false -> true",
+    "score_render_resolution": "scaled_renderer",
+    "coverage_power": 0.0,
+    "candidate_pixel_formula": "sum(w*v*p)/sum(w*v)",
+    "unchanged_method_factors": "verified from sealed prediction receipts",
+    "execution_only_changes": [
+      "physical GPU 1 -> GPU 0",
+      "output paths moved to local SSD"
+    ],
+    "target_rgb_used": false,
+    "target_mask_used_before_both_prediction_receipts_were_sealed": false
+  },
+  "implementation_audit": {
+    "evaluator": "radio_gs/scripts/eval_nvos_gaussian_first.py",
+    "evaluator_sha256": "f7d8a8f36fb6318f30b49e7654d52cb446bb7858e235edef8887f5e754f246d0",
+    "primitive_unary_export_precedes_valid_support_construction": true,
+    "valid_support_is_consumed_only_by_scalar_score_rendering": true,
+    "changes_geometry_alpha_or_primitive_unary": false,
+    "base_pixel_formula": "sum(w*p)/sum(w)",
+    "candidate_pixel_formula": "sum(w*v*p)/sum(w*v)"
+  },
+  "authority": {
+    "stage_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/nvos_valid_support_stage_a_fern_trex_v1/stage_a_manifest.json",
+      "sha256": "250003251d3563ef9f0f377a1390b2a97a25a0c951691fb3ad45a6e1b1132070"
+    },
+    "exact_results": {
+      "path": "/root/RADIO-GS/local_ssd_results/nvos_valid_support_stage_a_fern_trex_v1/exact_results.json",
+      "sha256": "874027f926f74ca1cb817b9d9cb773ad42ef188966987cda4640b019cc920a10"
+    },
+    "scorer": {
+      "path": "radio_gs/scripts/nvos_valid_support_stage_a.py",
+      "sha256": "0e08931d09e77757d3052746a719feda6f59266820a9cddd040cd093c40563df"
+    },
+    "fern_prediction_receipt_sha256": "79c5abed1b7863d81f67341009aee52046bce121e3735cc2af83f4fd68854fd2",
+    "trex_prediction_receipt_sha256": "0ebc518f69c5081eb51190672390e57afae24ddbb97089142d5eac81490d6fea"
+  },
+  "exact_results": {
+    "fern": {
+      "baseline_iou": 0.7350345861696804,
+      "candidate_iou": 0.7334911032135881,
+      "delta_iou": -0.0015434829560923014,
+      "baseline_pixel_accuracy": 0.9045169385194479,
+      "candidate_pixel_accuracy": 0.9035972413283414,
+      "score_shape": [
+        47,
+        62
+      ]
+    },
+    "trex": {
+      "baseline_iou": 0.60547969614955,
+      "candidate_iou": 0.6008083588742861,
+      "delta_iou": -0.00467133727526392,
+      "baseline_pixel_accuracy": 0.9306841081292077,
+      "candidate_pixel_accuracy": 0.9289559652030033,
+      "score_shape": [
+        47,
+        63
+      ]
+    },
+    "pair_macro": {
+      "baseline_iou": 0.6702571411596152,
+      "candidate_iou": 0.6671497310439372,
+      "delta_iou": -0.0031074101156780554,
+      "candidate_pixel_accuracy": 0.9162766032656724
+    }
+  },
+  "safety_and_replay": {
+    "both_receipts_verified_before_first_target_ground_truth_open": true,
+    "candidate_score_shapes_equal_frozen_scaled_renderer_shapes": true,
+    "primitive_unary_bit_exact_to_base": false,
+    "primitive_unary_numerically_equivalent_to_base": true,
+    "maximum_fern_unary_absolute_difference": 5.960464477539062e-07,
+    "mean_fern_unary_absolute_difference": 4.959106014723602e-09,
+    "maximum_trex_unary_absolute_difference": 4.76837158203125e-07,
+    "mean_trex_unary_absolute_difference": 5.807829772663808e-09,
+    "maximum_allowed_unary_difference": 1e-06,
+    "unary_tolerance_finalized_before_target_ground_truth_open": true,
+    "unit_tests": "2 passed, 54 deselected",
+    "python_compile": "passed",
+    "physical_gpu": 0,
+    "maximum_observed_temperature_c": 55,
+    "thermal_pause_or_abort": false
+  },
+  "decision": {
+    "registered_pair_macro_delta_minimum": 0.005,
+    "registered_per_scene_delta_minimum": -0.002,
+    "pair_macro_gate_passed": false,
+    "per_scene_safety_gate_passed": false,
+    "promote": false,
+    "full8_started": false,
+    "registry_policy": "record as a rejected diagnostic only; retain unconditioned scaled_renderer for the frozen NVOS row",
+    "mechanistic_conclusion": "Capability-invalid compositing mass is not the current scalar-readout bottleneck. Removing it from the denominator slightly expands or recalibrates foreground scores but does not improve exact IoU on either sentinel and is unsafe on trex under the registered gate."
+  }
+}

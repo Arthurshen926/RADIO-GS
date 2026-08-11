@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-one-sided-density-ratio-v6-source-gate-result",
+  "status": "fail_source_gates_stop_scalar_head_family",
+  "scope": {
+    "fit_scenes": ["scene0000_00", "scene0002_00", "scene0005_00"],
+    "development_scene0003_opened": false,
+    "test312_opened_or_run": false
+  },
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/agile3d_one_sided_density_ratio_v6_preregistration_20260810.json",
+    "sha256": "436702c9116186517a3f8ae7b7eb3a0f16d3d90756405547579b28fb5dfe9b79"
+  },
+  "authority": {
+    "receipt": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_one_sided_density_ratio_v6/source_gate_receipt.json",
+      "sha256": "a2c3ea6845eafcd4674d00415c005ef73213017c593b2bc4dd398d0edf3b5a02"
+    },
+    "all_fit_checkpoint_sha256": "296f5aea618bb37bc0c65141b14e8389c214f021bc84ad3d05f738e426124bbe",
+    "loo_checkpoint_sha256": {
+      "scene0000_00": "ceed9b63aa456b05bc19462049c0da72c00235adceec9b7a22f02a7fa0e3b8b5",
+      "scene0002_00": "ec513b1e3974c7d623608b298c1bc1d91dc96782fda5ff93e96caf0f31daa54d",
+      "scene0005_00": "d4325e731121256cc91fb4ec52a6e2ac8ac649d57e74e98dcf970098a00139d1"
+    }
+  },
+  "leave_one_scene_out": {
+    "scene0000_00": {
+      "v2_iou": 0.15021407142996163,
+      "v6_iou": 0.0694646282786151,
+      "gain": -0.08074944315134653,
+      "v6_precision": 0.08885218175115035,
+      "v6_recall": 0.6434698835921607,
+      "v6_probability_mass": 0.26489480180082037,
+      "target_mass": 0.014245739529420163,
+      "v6_click_response": 0.060247168460983734
+    },
+    "scene0002_00": {
+      "v2_iou": 0.13900545494405894,
+      "v6_iou": 0.06820669217478685,
+      "gain": -0.07079876276927209,
+      "v6_precision": 0.08301886219296795,
+      "v6_recall": 0.7498078589165152,
+      "v6_probability_mass": 0.25156300777835505,
+      "target_mass": 0.012038076228470475,
+      "v6_click_response": 0.07263867027134802
+    },
+    "scene0005_00": {
+      "v2_iou": 0.2933390664623472,
+      "v6_iou": 0.20777627193631792,
+      "gain": -0.08556279452602927,
+      "v6_precision": 0.2667187557712887,
+      "v6_recall": 0.6934801012701673,
+      "v6_probability_mass": 0.24854682618204285,
+      "target_mass": 0.056493794086717945,
+      "v6_click_response": 0.10096389048049523
+    },
+    "macro_iou_gain": -0.07903700014888264,
+    "scenes_with_iou_gain_over_0.02": 0
+  },
+  "all_fit": {
+    "v2_iou": 0.1941861976121226,
+    "v6_iou": 0.11516597210164688,
+    "v2_precision": 0.24447627618469703,
+    "v6_precision": 0.14627601692144945,
+    "v2_recall": 0.747303664482922,
+    "v6_recall": 0.6955938750438463,
+    "v2_probability_mass": 0.15881319965366208,
+    "v6_probability_mass": 0.25500598963395377,
+    "target_mass": 0.027592536614869528,
+    "v6_click1_iou": 0.07166920420823526,
+    "v6_click10_iou": 0.14957474575084898,
+    "v6_click1_probability_mass": 0.438783416612012,
+    "v6_click10_probability_mass": 0.13976385071543482,
+    "v6_click_response": 0.0779055415426137
+  },
+  "gate": {
+    "click_response_pass": true,
+    "iou_pass": false,
+    "precision_pass": false,
+    "mass_error_pass": false,
+    "development_authorized": false
+  },
+  "causal_conclusion": {
+    "operator_repair_validated": "One-sided negative suppression reverses the v5 pathology: all-fit mass decreases from 0.439 at click1 to 0.140 at click10, IoU rises from 0.0717 to 0.1496, and every held-out scene has positive click response.",
+    "remaining_gap": "Even after correct negative-click causality, scalar per-channel click similarity is substantially below v2 in IoU and precision on every held-out scene. Early positive-only evidence is spatially broad and no scalar channel transform can infer which similar primitives belong to the clicked instance.",
+    "family_decision": "Stop the scalar-head family. Further scalar thresholds, bins, biases, or per-scene calibration would tune symptoms rather than recover instance structure.",
+    "next_structural_head": "Use a seed-conditioned structured likelihood head over the primitive graph: node inputs should contain calibrated positive density ratios and one-sided negative suppression; hard positive/negative Gaussian seeds are exact constraints; graph messages propagate only within boundary/reliability-supported edges; a monotone residual gate may change extent but must preserve clicked-node signs and exact q/c anchors. Train scene-disjoint on source trajectories with per-step structured IoU/BCE, then gate by LOSO before development."
+  },
+  "verification": {
+    "focused_tests": "98 passed",
+    "gpu0_released": true
+  }
+}

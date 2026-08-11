@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_odds_residual_transport_v4_pre_metric_prediction_batch_seal",
+  "status": "all_four_corrected_v4_prediction_batches_hash_validated_before_first_v4_metric",
+  "execution_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_prediction_execution_correction_20260810.json",
+    "sha256": "5bda9292c5de05bc0747c09be2476a651b78e2579428a2175d406948229a690b"
+  },
+  "prediction_receipts": {
+    "figurines": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_corrected_20260810/pred_figurines_v4.receipt.json", "sha256": "906262c41c0d55b30c854dae77319d1bd0db9eb888c541bc95343d6fbb97adf3", "prediction_count": 56},
+    "ramen": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_corrected_20260810/pred_ramen_v4.receipt.json", "sha256": "bb1cfa577a0302e723760c23dedaad365a75ddae357adb05778f962797dc440a", "prediction_count": 71},
+    "teatime": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_corrected_20260810/pred_teatime_v4.receipt.json", "sha256": "650327e412a2cc66acc8d535cdaf68681a3e8d797523e40488af314f9550301d", "prediction_count": 59},
+    "waldo_kitchen": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_odds_residual_v4_corrected_20260810/pred_waldo_kitchen_v4.receipt.json", "sha256": "89fa34a59cc63840a9c70128142db467a746e8773ac85840d24dee8bafa0edb1", "prediction_count": 22}
+  },
+  "validation": {
+    "all_416_prediction_and_coarse_mask_hashes_replayed": true,
+    "all_receipts_strict_feature_field": true,
+    "all_receipts_text_mapping": "post_readout_odds_residual_transport_v4",
+    "all_receipts_bind_q_c_raw_prior_cache_sha": true,
+    "all_receipts_bind_evaluator_sha": "e9e5988c2a37a90de7cee03f013097d5d98d53e15147811861403aed21342803",
+    "threshold": 0.6,
+    "projection": "selected_only_alpha",
+    "target_rgb_opened": false,
+    "target_annotation_coordinates_loaded": false,
+    "target_mask_rasterized_before_seal": false,
+    "target_metric_computed_before_seal": false,
+    "old_pre_correction_figurines_receipt_quarantined": true
+  },
+  "frozen_metric": {
+    "scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_lerf_sealed_prediction_batch.py", "sha256": "9e99174b4c219e9db80bb571993a379406c028d8ccee14ecba105154f23c4475"},
+    "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+    "score_all_four_corrected_candidates_once": true,
+    "reuse_sealed_legacy_metrics": true,
+    "no_parameter_callback": true
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "maximum_temperature_celsius": 65,
+    "maximum_power_watts": 138.08,
+    "pause_or_abort": false,
+    "cuda_release_verified_after_each_scene": true,
+    "physical_gpu0_occupied_by_agile_and_not_touched": true
+  }
+}

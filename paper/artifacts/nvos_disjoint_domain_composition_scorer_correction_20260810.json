@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_disjoint_domain_composition_scorer_correction_v1",
+  "status": "frozen_after_both_predictions_before_first_target_ground_truth_open",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_disjoint_domain_composition_fern_trex_preregistration_20260810.json",
+    "sha256": "d25918ee9c266de0ef3ac8ded84a2ad87c9c513bbb3e09babf094a6ef9746275"
+  },
+  "sealed_predictions": {
+    "fern": {
+      "receipt_sha256": "7f477ea8aaee3967e7ae55a5a274ab77cc1cfa472561f989d14b8b891f5f87c2",
+      "primitive_unary_sha256": "2b4cb7b7302eb41ed878b4c9184e4ba6f22adce1da3d6ecfe277b5b7031f5ed8",
+      "observed_mask_sha256": "992266f34dc8ae9daef181e04626d08af457a2f6ed6b6dc4daacb667df8e31ab",
+      "memory_mask_sha256": "9537082d7b8f098e95b4cfd35b359dc90d3bed5399fd4457e6b19ef0f937bab9",
+      "maximum_historical_likelihood_probability_drift": 0.0015003681182861328,
+      "maximum_historical_memory_probability_drift": 7.152557373046875e-7,
+      "observed_or_memory_decision_flips_at_0_5": 0
+    },
+    "trex": {
+      "receipt_sha256": "feb6e762db8664d83a8cd34a0710d2a4f0b056396a38bad0740fa343f1e1f6b5",
+      "primitive_unary_sha256": "b872d3781d455ab799b8e84cc53bc8952025e89b9490f726774001339d2b6b2f",
+      "observed_mask_sha256": "8f9b5fcaa299df5102aa2fbc89382f98e19f09ba62658a48ca7cf9f367ba73fe",
+      "memory_mask_sha256": "fa39cbf577d7d04b340924537eaa361e34c4a4736f62188410713070b72571f7",
+      "maximum_historical_likelihood_probability_drift": 0.0005922913551330566,
+      "maximum_historical_memory_probability_drift": 3.5762786865234375e-7,
+      "observed_or_memory_decision_flips_at_0_5": 0
+    }
+  },
+  "correction_contract": {
+    "external_historical_replay_fail_safe_envelope": 0.005,
+    "envelope_use": "authority verification only; never used by prediction, likelihood calibration, unary composition, rendering, thresholding, or scoring",
+    "actual_maximum_must_be_reported": true,
+    "observed_and_memory_partition_decision_flips_at_0_5_must_equal_zero": true,
+    "current_run_partition_anchor_and_branch_assignments_must_be_bitwise": true,
+    "partition_must_be_exhaustive_and_pairwise_disjoint": true,
+    "matched_control_required_if_envelope_or_decision_gate_fails": true
+  },
+  "original_scorer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_disjoint_domain_composition.py",
+    "sha256": "65a47873182edb3b1264b8eeb882d07101f9494946fc858ef78f6f3cb3a40da7"
+  },
+  "corrected_scorer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_disjoint_domain_composition.py",
+    "sha256": "2dea258a4138add8fc0f40a8d8c2cf8d9f83983770d64b4541713332461e30ed"
+  },
+  "validation": {
+    "focused_tests": "89 passed, 38 warnings",
+    "python_compile": "passed"
+  },
+  "target_ground_truth_opened_before_correction": false,
+  "prediction_receipts_recomputed": false,
+  "method_parameters_changed": false
+}

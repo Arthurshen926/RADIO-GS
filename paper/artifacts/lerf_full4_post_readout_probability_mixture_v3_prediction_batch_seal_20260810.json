@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_post_readout_probability_mixture_v3_pre_metric_prediction_batch_seal",
+  "status": "all_four_v3_prediction_batches_hash_validated_before_first_v3_metric",
+  "prediction_execution_receipt": {"path": "/root/RADIO-GS/paper/artifacts/lerf_full4_post_readout_probability_mixture_v3_prediction_execution_receipt_20260810.json", "sha256": "76b592ed0b1b495529d775d3fff3324914a606964eaa76f6091448e109811bf2"},
+  "prediction_receipts": {
+    "figurines": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_post_readout_v3_20260810/pred_figurines_v3.receipt.json", "sha256": "72c074e0747f98ec978a248c302111e4db7662a8f12b7c50c3388ae36e0e1bcc", "prediction_count": 56},
+    "ramen": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_post_readout_v3_20260810/pred_ramen_v3.receipt.json", "sha256": "102c3b0eb26e4f9f27bf565e4a111276b758b27584fdbc83796747a03bc98fcc", "prediction_count": 71},
+    "teatime": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_post_readout_v3_20260810/pred_teatime_v3.receipt.json", "sha256": "065a6ec6fde083b3cba4d0a2209b8bfa64ec9ec2126aa0ac47a2586729cf0f9a", "prediction_count": 59},
+    "waldo_kitchen": {"path": "/root/RADIO-GS/local_ssd_results/lerf_full4_post_readout_v3_20260810/pred_waldo_kitchen_v3.receipt.json", "sha256": "bf308b9f4b1a6ae2bd5b8355ec302c3c50570aec7d0d5696a98156f1e2c409bf", "prediction_count": 22}
+  },
+  "validation": {
+    "all_416_prediction_and_coarse_mask_hashes_replayed": true,
+    "all_receipts_strict_feature_field": true,
+    "all_receipts_text_mapping": "post_readout_prior_preserving_mixture_v3",
+    "all_receipts_bind_q_c_cache_sha": true,
+    "all_receipts_bind_evaluator_sha": true,
+    "target_rgb_opened": false,
+    "target_annotation_coordinates_loaded": false,
+    "target_mask_rasterized_before_seal": false,
+    "target_metric_computed_before_seal": false
+  },
+  "frozen_metric": {
+    "scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_lerf_sealed_prediction_batch.py", "sha256": "9e99174b4c219e9db80bb571993a379406c028d8ccee14ecba105154f23c4475"},
+    "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+    "score_all_four_candidates_once": true,
+    "reuse_sealed_legacy_metrics": true,
+    "no_parameter_callback": true
+  },
+  "thermal": {"physical_gpu": 0, "maximum_temperature_celsius": 57, "maximum_power_watts": 128.49, "pause_or_abort": false, "cuda_release_verified_after_each_scene": true}
+}

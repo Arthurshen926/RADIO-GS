@@ -1,0 +1,80 @@
+{
+  "schema": "radio_gs.source_sam_single_radio_lerf_source_gate_result.v1",
+  "status": "all_source_gates_passed_frozen_rgb_free_benchmark_sentinel_authorized",
+  "scene_id": "figurines",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_sam_single_radio_lerf_figurines_training_preregistration_20260811.json",
+    "sha256": "7be91bfaa6ae9675b2238566a615750611acdd9cd56eb145a012ad4435f55f81"
+  },
+  "candidate_field": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_lerf_v1/figurines/canonical_radio_source_sam_relative_e5_seed0.pth",
+    "sha256": "4348c2c24743f552b3c24e2fd8dcf19eb101c28dad144208e996fbbc60b5e0f6",
+    "report_sha256": "617048a66e99dbcf75aa2c6fa75d6ce03d552d35c5b512eb241d7985226b108c",
+    "persistent_semantic_feature": "canonical_radio_only",
+    "teacher_payload_saved": false
+  },
+  "relation_source": {
+    "legal_source_frames_attempted": 120,
+    "frames_with_valid_3d_relation": 118,
+    "frames_abstained_no_metric_3d_support": [162, 277],
+    "relation_edges_used": 65536,
+    "scale_matched_triplets": 53225
+  },
+  "control_to_candidate": {
+    "global_relation": {
+      "same_mean_cosine": [0.8320841789245605, 0.8329323530197144],
+      "separate_mean_cosine": [0.6605860590934753, 0.6589059829711914],
+      "gap": [0.1714981198310852, 0.17402637004852295]
+    },
+    "scale_matched_triplet": {
+      "positive_mean_cosine": [0.8458888530731201, 0.8472282886505127],
+      "negative_mean_cosine": [0.7178047299385071, 0.7175722718238831],
+      "gap": [0.12808413803577423, 0.12965607643127441],
+      "violation_rate": [0.42431187629699707, 0.4197651445865631]
+    },
+    "raw_radio": {
+      "mean_cosine": [0.9935972690582275, 0.993854284286499],
+      "p05_cosine": [0.9861637353897095, 0.9866297841072083],
+      "mean_abs_log_amplitude_error": [0.02478753961622715, 0.025410283356904984]
+    },
+    "official_capability": {
+      "dino_v3_mean_cosine": [0.9881994128227234, 0.9881941080093384],
+      "dino_v3_p05_cosine": [0.9691436886787415, 0.9690948128700256],
+      "sam3_mean_cosine": [0.9861958026885986, 0.9863554239273071],
+      "sam3_p05_cosine": [0.9674181342124939, 0.9673622250556946]
+    }
+  },
+  "source_gate_decision": {
+    "global_same_cosine_non_decrease": true,
+    "global_separate_cosine_non_increase": true,
+    "global_relation_gap_strict_improvement": true,
+    "scale_triplet_gap_strict_improvement": true,
+    "scale_triplet_violation_strict_decrease": true,
+    "raw_radio_preservation": true,
+    "official_capability_preservation": true,
+    "all_source_gates_passed": true,
+    "benchmark_gate_opened": true
+  },
+  "query_time_contract": {
+    "source_rgb": false,
+    "target_rgb": false,
+    "official_sam": false,
+    "sam_masks_or_features": false,
+    "relation_teacher": false
+  },
+  "thermal": {
+    "physical_gpu": 0,
+    "samples": 4,
+    "maximum_temperature_c": 60,
+    "maximum_power_w": 272.98,
+    "maximum_memory_mib": 3010,
+    "paused": false,
+    "hard_abort": false,
+    "cuda_release_verified": true
+  },
+  "access_audit": {
+    "benchmark_query_opened_before_source_gate": false,
+    "benchmark_labels_or_masks_opened_before_source_gate": false,
+    "benchmark_predictions_or_metrics_opened_before_source_gate": false
+  }
+}

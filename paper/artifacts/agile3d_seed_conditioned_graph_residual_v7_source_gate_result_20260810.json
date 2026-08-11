@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d-seed-conditioned-graph-residual-v7-source-gate-result",
+  "status": "source_gate_failed_stop_before_development",
+  "scope": {
+    "fit_scenes": ["scene0000_00", "scene0002_00", "scene0005_00"],
+    "development_scene0003_opened": false,
+    "test312_opened": false,
+    "all_legal_source_objects_evaluated": true,
+    "point_as_primitive_used": false
+  },
+  "authority": {
+    "preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/agile3d_seed_conditioned_graph_residual_v7_preregistration_20260810.json",
+      "sha256": "b54496b0d462c2dc3e7bd13bf37ef2db3163b403f38eb688e803341de895886c"
+    },
+    "source_receipt": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_seed_conditioned_graph_residual_v7/training/source_gate_receipt.json",
+      "sha256": "b4ba02f4a8e7b06a23cfef13f7c8b7e60c4e730ff62d99e874a0ed646e898a41"
+    },
+    "all_fit_checkpoint": {
+      "path": "/root/RADIO-GS/local_ssd_results/agile3d_seed_conditioned_graph_residual_v7/training/all_fit_scene0000_0002_0005.pt",
+      "sha256": "ff63d2ea86ad010708892f5c44d174c3457f9bf3b10b127e9e6d6cf8786cbe11"
+    },
+    "loo_checkpoint_sha256": {
+      "scene0000_00": "606fa1b93f262016e4840eaa1077322c5d1b0e6c3190f390f65c4f6e7f8f02d4",
+      "scene0002_00": "9800769f77c8847929ef65912d6f8c2434a4f6bac527dd138191575f4196fa50",
+      "scene0005_00": "c517ac6ffab46542d45a1f515f67e258c3f6714232225c7f1c94fd9a32095c1f"
+    },
+    "typed_graph_receipt_sha256": {
+      "scene0000_00": "53710597b14a37f2d5ff0c841a2af8f5bd91cfa06026960c6d2a8bd2bd5ee13f",
+      "scene0002_00": "bf97385975e26835f7e5936ce32e814db94e245ef23a1e827ac3a900ede7a619",
+      "scene0005_00": "a889faac7176c1c58f00c30323a3f5e5d422e2d0a74c1f6c4d0d33c9f8368f62"
+    },
+    "hop_cache_manifest_sha256": {
+      "scene0000_00": "01c0208328c3cf2c9b7ac796270d7a086aba29f801d47a673805cc3d9544cda5",
+      "scene0002_00": "758d0e79fd775f8fa9859296f6e606b91c37ae9c335eba8d72fb6dee92f61ab3",
+      "scene0005_00": "5ae88445ab3877bef2715d32101ded4ef716a62b06983885f19c0da346245041"
+    }
+  },
+  "synthetic_verification": {
+    "focused_tests_passed": 56,
+    "disconnected_instance_no_leakage": true,
+    "boundary_cut": true,
+    "negative_lookalike_suppression": true,
+    "negative_seed_monotonicity": true,
+    "anchor_bitwise_identity": true,
+    "default_off_bitwise_regression": true
+  },
+  "leave_one_scene_out": {
+    "scene0000_00": {
+      "v2_iou": 0.15021407142996163,
+      "v7_iou": 0.07198565090789258,
+      "iou_gain": -0.07822842052206905,
+      "v2_precision": 0.18759634639860642,
+      "v7_precision": 0.09602029851662836,
+      "precision_gain": -0.09157604788197806,
+      "v7_probability_mass": 0.2649232585594725,
+      "target_mass": 0.014245739529420163,
+      "v7_click_response": 0.06712911684348445
+    },
+    "scene0002_00": {
+      "v2_iou": 0.13900545494405894,
+      "v7_iou": 0.06861982978406243,
+      "iou_gain": -0.07038562515999651,
+      "v2_precision": 0.1606790030720308,
+      "v7_precision": 0.08372760543822712,
+      "precision_gain": -0.07695139763380368,
+      "v7_probability_mass": 0.2515639947674104,
+      "target_mass": 0.012038076228470475,
+      "v7_click_response": 0.075379680118623
+    },
+    "scene0005_00": {
+      "v2_iou": 0.2933390664623472,
+      "v7_iou": 0.20801608461445986,
+      "iou_gain": -0.08532298184788734,
+      "v2_precision": 0.3851534790834538,
+      "v7_precision": 0.2690736398654814,
+      "precision_gain": -0.11607983921797238,
+      "v7_probability_mass": 0.24856282630387475,
+      "target_mass": 0.056493794086717945,
+      "v7_click_response": 0.10195963521071724
+    },
+    "macro_iou_gain": -0.07797900917665096,
+    "macro_precision_gain": -0.0948690949112514,
+    "macro_absolute_log_mass_error_gain": -0.4725819794763538,
+    "each_scene_click_response_positive": true
+  },
+  "all_fit": {
+    "v2_iou": 0.1941861976121226,
+    "v7_iou": 0.11621724457270877,
+    "iou_gain": -0.07796895303941384,
+    "v2_precision": 0.24447627618469703,
+    "v7_precision": 0.14964564984995457,
+    "precision_gain": -0.09483062633474246,
+    "v2_recall": 0.747303664482922,
+    "v7_recall": 0.6984534237054102,
+    "v2_probability_mass": 0.15881319965366208,
+    "v7_probability_mass": 0.2550211101799899,
+    "target_mass": 0.027592536614869528,
+    "absolute_log_mass_error_gain": -0.47256424203451575,
+    "v7_click_response": 0.08149495523485004,
+    "learned_residual_gate": 3.4513447284698486,
+    "learned_hop_weights_0_to_4": [0.02102801762521267, 0.8465353846549988, 0.0979863852262497, 0.014878696762025356, 0.019571539014577866]
+  },
+  "comparison_to_v6": {
+    "v6_iou": 0.11516597210164688,
+    "v7_iou": 0.11621724457270877,
+    "iou_gain": 0.00105127247106189,
+    "v6_precision": 0.14627601692144945,
+    "v7_precision": 0.14964564984995457,
+    "precision_gain": 0.00336963292850512,
+    "v6_probability_mass": 0.25500598963395377,
+    "v7_probability_mass": 0.2550211101799899,
+    "mass_change": 0.00001512054603613
+  },
+  "gate": {
+    "macro_iou_over_v2": false,
+    "macro_precision_over_v2": false,
+    "mass_error_below_v2": false,
+    "click_response_positive": true,
+    "passed": false,
+    "development_authorized": false
+  },
+  "causal_conclusion": {
+    "what_worked": "the structured operator is causally well behaved: it preserves disconnected components and boundaries, negative seeds are monotone suppressive, anchors are exact, and every source scene has positive click response",
+    "what_failed": "the additive bounded graph residual only changes nodes reached by seed diffusion; it cannot neutralize the broad foreground posterior already produced by the v6 local unary on unrelated zero-contrast nodes",
+    "evidence": "training drove the residual gate to 3.45 and concentrated 84.65 percent of propagation weight on one hop, yet foreground mass stayed numerically equal to v6 while IoU improved only 0.00105",
+    "next_structural_direction": "replace additive correction around the foreground-heavy v6 posterior with a seed-conditioned extent likelihood or absorbing graph partition whose neutral/unreached state abstains rather than inheriting q_v6; retain exact anchors and monotone negative constraints",
+    "forbidden_next_action": "do not evaluate scene0003 or test312 from this failed source gate"
+  },
+  "verification": {
+    "gpu_used": "physical GPU0 only",
+    "maximum_observed_temperature_celsius": 58,
+    "gpu_released_after_run": true,
+    "development_labels_opened": false,
+    "test_labels_opened": false,
+    "test312_run": false
+  }
+}

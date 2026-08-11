@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_full4_prior_preserving_text_likelihood_v2_preregistration",
+  "status": "sealed_before_new_q_c_caches_predictions_or_metrics",
+  "objective": "Test whether the frozen ScanNet-source text likelihood and prior-preserving probability mixture generalize from figurines to the three untouched LERF scenes without new training or scene/query tuning.",
+  "candidate_contract": {
+    "head_checkpoint": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_text_likelihood_authority/source_text_likelihood_head.fit3.v1.pt",
+      "sha256": "7d3c90cb9f17e4ea85defa1593e53e03d1b369a9d714f32691e613f372a83e5b",
+      "state_sha256": "0179836d3493d8ef8a2b51529d9e334afd530df732199358fce10b2ec50fe60a"
+    },
+    "effective_probability_mode": "prior_preserving_mixture_v2",
+    "effective_probability_formula": "(1-c)*field_prior+c*q",
+    "legacy_schema_v1_field_bridge": {
+      "coverage": "frozen_field_reliability_column_0",
+      "agreement": "frozen_field_reliability_column_1",
+      "visibility_purity": "exact_zero_because_no_exact_marginal_purity_authority_exists",
+      "reliability": "mean(agreement,coverage,zero_unknown_purity)",
+      "descriptor_or_field_decoding_changed": false
+    },
+    "new_trainable_parameters": 0,
+    "per_scene_or_per_query_parameters": false
+  },
+  "implementation": {
+    "adapter": {"path": "/root/RADIO-GS/radio_gs/querying/lerf_source_text_likelihood.py", "sha256": "e83d8587f1341d5e8bafd9c91f0342c1282ca6f69a8b42724ffba7f0c633d972"},
+    "materializer": {"path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_likelihood_cache.py", "sha256": "f103064df10e4eaa58d9b2ae518e170b6d46db492fb09def4be71f26b7dfb002"},
+    "evaluator": {"path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py", "sha256": "c72b03ff0f2c21c7c2b59a4e9e2111854d97da525194739b501a6dda3b4f8903"},
+    "sealed_prediction_scorer": {"path": "/root/RADIO-GS/radio_gs/scripts/score_lerf_sealed_prediction_batch.py", "sha256": "9e99174b4c219e9db80bb571993a379406c028d8ccee14ecba105154f23c4475"},
+    "focused_default_regression": "128 passed"
+  },
+  "scenes": {
+    "ramen": {
+      "positive_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o2_positive.pt", "sha256": "bc20f3f41ff88184daaf5502f3202407f81b66e735d8caf1a2571ea046827d11"},
+      "negative_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o2_negative.pt", "sha256": "3ff8f01ac286d636ae6772592cf119abc9d46112d5a21d853149c9a582b78635"},
+      "canonical_field": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/ramen_canonical_radio_fusion_d256_l128_nohash_mpr40_caploss_renderft256_seed0.pth", "sha256": "c7a930c3e8fc83a9a1484e198fc02928f8de97ca010b83b0f6a79edeb4610c4e"},
+      "renderer_checkpoint_sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d",
+      "prediction_inventory_sha256": "e79859e9fa3ac1ce2d033d716c5be2a9d1fd4a082620f38a42a92176b8a4861e"
+    },
+    "teatime": {
+      "positive_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_frozen_text_rebind_v1/teatime_o2/teatime_o2_positive.pt", "sha256": "1d8fb0052d40e59bf0cb34ee6b2396e82e1048997988383e462d1d7a8a2de126"},
+      "negative_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_frozen_text_rebind_v1/teatime_o2/teatime_o2_negative.pt", "sha256": "3e8459631c52e89516b0ace3f10db48d877498b43a8d0cf787397a8db60244c9"},
+      "canonical_field": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/teatime_compact_d256_l128_primary_frozen_adjoint16_fallback_caploss_seed0.pth", "sha256": "02a3b8d90c8d240830b54fc086f4a196581c0a201aebc67f4736cd418b0fa41c"},
+      "renderer_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+      "prediction_inventory_sha256": "74b9b033e9e0380a0f92f471dc5e579a19eb88815f4233a90ed223e14ddfef6b"
+    },
+    "waldo_kitchen": {
+      "positive_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o2_positive.pt", "sha256": "b03cb8feb2d243d2b3e7852ada422b27fd88fb4eedeb0ebbac94143ed5bc6264"},
+      "negative_cache": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o2_negative.pt", "sha256": "873c03ad24c57e107d400a672db8fedc8e34f92d1a2d61cfe88d1b9faa35e73d"},
+      "canonical_field": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/waldo_kitchen_compact_d256_l128_primary_frozen_adjoint16_fallback_caploss_seed0.pth", "sha256": "3f5a8892c47985f1f4312f104e110b9f57b76ba6b95801906a0bb230b61c8861"},
+      "renderer_checkpoint_sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+      "prediction_inventory_sha256": "5a0026faf9cd9f57cbdf0ad69d6e0025fcefa477ce67582abeb928b807e83d0c"
+    }
+  },
+  "frozen_evaluation": {
+    "arms_per_scene": ["same_cache_legacy_fixed_margin", "same_cache_prior_preserving_v2"],
+    "protocol_preset": "vala_repo_3d",
+    "score_threshold": 0.6,
+    "valid_domain_knn_k": 10,
+    "scale_fusion": "peak_select",
+    "projection_mode": "selected_only_alpha",
+    "mask_refinement": "none",
+    "all_six_prediction_receipts_sealed_before_first_metric": true,
+    "metrics": ["mIoU", "Acc@0.25", "Acc@0.50", "boundary_f", "trimap_iou"]
+  },
+  "success_gate": {
+    "scene_macro_candidate_minus_legacy_miou_must_be_positive": true,
+    "minimum_allowed_per_scene_candidate_minus_legacy_miou": -0.002,
+    "threshold_or_head_callback_after_results": false,
+    "if_pass": "allow Stage-B source-only field training for remaining scenes",
+    "if_fail": "stop Stage-B expansion and diagnose granularity generalization"
+  },
+  "access_audit": {
+    "inventories_preexisted_and_expose_only_frame_category_axes_not_polygons": true,
+    "candidate_cache_or_prediction_opened_target_rgb": false,
+    "candidate_cache_or_prediction_opened_target_masks_or_polygon_coordinates": false,
+    "new_target_metric_opened_before_all_six_predictions_sealed": false
+  },
+  "storage_root": "/root/RADIO-GS/local_ssd_results/lerf_full4_prior_preserving_v2_20260810"
+}

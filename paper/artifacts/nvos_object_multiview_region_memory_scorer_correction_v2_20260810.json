@@ -1,0 +1,64 @@
+{
+  "schema_version": 2,
+  "artifact_type": "nvos_object_multiview_region_memory_scorer_correction_v2",
+  "status": "frozen_after_trex_prediction_before_first_trex_target_ground_truth_open",
+  "base_runtime_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_runtime_addendum_20260810.json",
+    "sha256": "3ad05caa37af78eb1831cd0dbc657c3225170b469e69ab5c3a1c07a1658aea45"
+  },
+  "superseded_scorer_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_object_multiview_region_memory_scorer_correction_20260810.json",
+    "sha256": "75f5f3bb74fce51ff238575a3f56af719ef00318850d33483a2efd64ee3b3ae6",
+    "reason": "v1 correctly separated logit and probability thresholds but did not model bounded historical replay drift"
+  },
+  "sealed_predictions": {
+    "fern": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_object_multiview_region_memory_fern_trex_v1/fern/pre_metric_prediction_receipt.json",
+      "sha256": "39a29cc744a615776fabe9678824aca0fde3e54edbf314d0219a42b9d9b3a429"
+    },
+    "trex": {
+      "path": "/root/radio_gs_local_cache/optimization_20260810/nvos_object_multiview_region_memory_fern_trex_v1/trex/pre_metric_prediction_receipt.json",
+      "sha256": "ded0f28f0b676694500cfd3dc9ef0c8d807e0fd214c8e1da80d11b2df538c269"
+    }
+  },
+  "trex_historical_replay_audit": {
+    "valid_non_memory_rows": 54419,
+    "rows_with_abs_probability_delta_above_1e_6": 966,
+    "maximum_abs_probability_delta_outside_memory": 0.0001218058168888092,
+    "primitive_decision_flips_at_probability_0_5": 0,
+    "selected_bit_flips": 0,
+    "readout": "unary_prior",
+    "graph_disabled": true,
+    "connected_selection_applied": false
+  },
+  "correction_contract": {
+    "historical_replay_numerical_envelope": 0.001,
+    "envelope_use": "authority audit only; never used by prediction, rendering, thresholding, scoring, or parameter selection",
+    "final_material_probability_write_mask": "absolute candidate-versus-historical-base probability delta above 0.001",
+    "final_material_write_mask_must_be_subset_of_valid_memory_authorized_rows": true,
+    "non_memory_probability_decision_at_0_5_must_be_bitwise_equal": true,
+    "selected_bit_invariant": "identical to probability-at-0.5 because the frozen readout is graph-disabled unary_prior",
+    "same_run_logit_write_domain": "sealed hashed evaluator writes only completed base-c-equals-zero and memory-c-positive rows",
+    "observed_value_confidence_and_unary_bitwise_gates_preserved": true,
+    "target_rgb_mask_or_metric_used": false
+  },
+  "corrected_scorer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_object_region_memory.py",
+    "sha256": "c474c168803fde7b085aa70071b3b43f7807e06e8638bf98305e4463db481215"
+  },
+  "focused_test": {
+    "path": "/root/RADIO-GS/tests/test_multiview_region_memory_pipeline.py",
+    "sha256": "632f062afc08507b95d929a88490443ece0bfe997772e5e9afecec28c722a184",
+    "coverage": [
+      "logit delta above 1e-6 with probability delta at or below 1e-6",
+      "sub-envelope non-memory drift without decision flip is accepted",
+      "sub-envelope non-memory decision flip is rejected",
+      "material non-memory write is rejected"
+    ],
+    "suite_result": "82 passed, 38 warnings"
+  },
+  "target_ground_truth_opened_before_correction": false,
+  "trex_target_ground_truth_opened_before_correction": false,
+  "candidate_prediction_receipts_recomputed": false,
+  "method_parameters_changed": false
+}

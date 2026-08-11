@@ -258,6 +258,23 @@ def run(args: argparse.Namespace) -> dict:
     for image_path in image_paths:
         output = output_root / f"{image_path.stem}.pt"
         if output.exists() and args.skip_existing:
+            existing = torch.load(output, map_location="cpu", weights_only=False)
+            metadata = existing.get("metadata")
+            scores = torch.as_tensor(existing.get("scores"))
+            if (
+                not isinstance(metadata, dict)
+                or metadata.get("source")
+                != "official_sam3_interactive_grid_multimask_hierarchy"
+                or metadata.get("official_decoder") is not True
+                or metadata.get("query_free") is not True
+                or Path(str(metadata.get("image", ""))).resolve()
+                != image_path.resolve()
+            ):
+                raise ValueError(f"existing official-SAM cache differs: {output}")
+            reports.append({
+                "image": str(image_path), "output": str(output),
+                "masks": int(scores.numel()), "reused_after_validation": True,
+            })
             continue
         image = Image.open(image_path).convert("RGB")
         payload = automatic_masks(processor, image, args)
@@ -284,8 +301,14 @@ def run(args: argparse.Namespace) -> dict:
         torch.save(payload, output)
         reports.append({"image": str(image_path), "output": str(output),
                         "masks": int(payload["scores"].numel())})
+    manifest_name = str(getattr(args, "manifest_name", "manifest.json"))
+    if Path(manifest_name).name != manifest_name or not manifest_name.endswith(".json"):
+        raise ValueError("manifest-name must be one JSON basename")
     report = {"output_root": str(output_root.resolve()), "images": reports}
-    (output_root / "manifest.json").write_text(json.dumps(report, indent=2))
+    manifest_path = output_root / manifest_name
+    if manifest_path.exists():
+        raise FileExistsError(f"official-SAM generation manifest exists: {manifest_path}")
+    manifest_path.write_text(json.dumps(report, indent=2))
     return report
 
 
@@ -298,6 +321,10 @@ def main() -> None:
         help="Optional deterministic subset of frame stems for a scene split.",
     )
     parser.add_argument("--output-root", required=True)
+    parser.add_argument(
+        "--manifest-name", default="manifest.json",
+        help="Versioned basename for disjoint multi-GPU generation shards.",
+    )
     parser.add_argument("--checkpoint-path", default="checkpoints/sam3_modelscope/sam3.pt")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--dtype", choices=("float32", "bfloat16"), default="bfloat16")

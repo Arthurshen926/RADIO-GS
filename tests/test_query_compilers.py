@@ -151,6 +151,33 @@ def test_world_point_hard_seed_topk_keeps_continuous_descriptor_support() -> Non
     assert query.metadata["seed_topk"] == 1
 
 
+def test_world_point_query_accepts_shared_primitive_likelihood_contract() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0]])
+    covariance = torch.eye(3).repeat(2, 1, 1) * 0.001
+    features = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+    observation = PrimitiveUnaryEvidence.from_probability(
+        torch.tensor([0.9, 0.2]),
+        confidence=torch.tensor([1.0, 0.5]),
+        source="learned_world_interaction_head_v1",
+    )
+
+    query = compile_world_3d_query(
+        xyz,
+        covariance,
+        xyz[:1],
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=_signature("dino", 2),
+        boundary_signature=_signature("sam3", 2),
+        primitive_unary_evidence=observation,
+    )
+
+    assert query.primitive_unary_evidence is observation
+    torch.testing.assert_close(
+        observation.foreground_probability, torch.tensor([0.9, 0.2])
+    )
+
+
 def test_world_point_query_preserves_per_click_seed_groups_for_signed_readout() -> None:
     xyz = torch.tensor(
         [[0.0, 0.0, 0.0], [0.02, 0.0, 0.0], [1.0, 0.0, 0.0]]

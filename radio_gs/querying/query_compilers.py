@@ -703,6 +703,7 @@ def compile_world_3d_query(
     world_point_max_prototypes: int = 0,
     world_point_prototype_weighting: str = "support_mass",
     selection_mode: SelectionMode | str = SelectionMode.SEEDED_COMPONENT,
+    primitive_unary_evidence: PrimitiveUnaryEvidence | None = None,
 ) -> QuerySpec:
     positive_matrix = world_point_soft_seed_matrix(
         gaussian_xyz,
@@ -858,6 +859,7 @@ def compile_world_3d_query(
             if negative_spatial_groups is not None
             else None
         ),
+        primitive_unary_evidence=primitive_unary_evidence,
         selection_mode=SelectionMode(selection_mode),
         field_signature=appearance_signature,
         metadata={

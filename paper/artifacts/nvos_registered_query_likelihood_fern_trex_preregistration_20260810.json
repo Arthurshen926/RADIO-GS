@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_registered_query_likelihood_fern_trex_preregistration_v1",
+  "status": "registered_after_cpu_tests_before_candidate_prediction_or_target_scoring",
+  "scene_order": ["fern", "trex"],
+  "single_method_factor": {
+    "base": "hierarchical_trust_local_positive_v2 direct q,c probability mixture",
+    "candidate": "same q,c through MonotoneQueryLikelihoodHead calibrated on legal reference signed raster-adjoint reconstruction",
+    "fixed_calibration": "balanced_reference_source_reconstruction_v1",
+    "all_renderer_graph_readout_and_pixel_threshold_settings_frozen": true,
+    "target_rgb_mask_or_metric_used_for_calibration": false,
+    "per_scene_or_target_parameter_selection": false
+  },
+  "frozen_authority": {
+    "benchmark_manifest": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+      "sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea"
+    },
+    "base_run_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/run_manifest.json",
+      "sha256": "bf34e7a370259e841067f0cd9e982ca9301892ba1877a12d48220d5f8dc65432"
+    },
+    "base_exact_results": {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_hierarchical_trust_local_positive_full8_exact_results_20260805.json",
+      "sha256": "240f4978146869f210e0c2ce2677763927bb6e111aad271602322a06c1ec21da"
+    },
+    "evaluator_sha256": "1ac5f215d86d9d5c56f03ed365f463f871ebffd95da625afb34f05473cbf5313",
+    "likelihood_head_sha256": "385006c124f74987239f9f4fdeda26fc9776c9fefc123160bfa856b916be90b1"
+  },
+  "prediction_barrier": {
+    "output_root": "/root/radio_gs_local_cache/optimization_20260810/nvos_registered_query_likelihood_fern_trex_v1",
+    "prediction_only": true,
+    "both_receipts_must_be_sealed_and_verified_before_first_target_mask_open": true,
+    "primitive_unary_and_rendered_score_hashes_required": true,
+    "no_clobber": true
+  },
+  "causal_gate_before_target_scoring": {
+    "reference_balanced_bce_must_decrease": true,
+    "positive_mass_weighted_probability_must_exceed_negative": true,
+    "observed_strong_unary_rows_must_change": true,
+    "unobserved_rows_must_preserve_field_prior": true
+  },
+  "promotion_gate": {
+    "pair_macro_iou_delta_minimum": 0.005,
+    "per_scene_iou_delta_minimum": -0.002,
+    "requires_both_conditions": true
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "thermal_poll_seconds": 60,
+    "soft_pause_c": 82,
+    "resume_c": 78,
+    "hard_stop_c": 85,
+    "maximum_power_limit_w": 300.5
+  }
+}
