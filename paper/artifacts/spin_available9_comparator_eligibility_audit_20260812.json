@@ -1,0 +1,212 @@
+{
+  "schema": "radio_gs.spin_available9_comparator_eligibility_audit.v1",
+  "schema_version": 1,
+  "audit_id": "spin-available9-comparator-eligibility-audit-20260812-v1",
+  "as_of": "2026-08-12",
+  "source_cutoff": "2026-08-11",
+  "status": "complete_no_eligible_existing_comparator",
+  "scope": {
+    "evaluation_contract_id": "spin-full-mask-field-only-available-nine-v1",
+    "purpose": "Decide whether an existing external comparator can supply a claim-eligible numeric SOTA Target without borrowing cross-contract evidence.",
+    "bounded_claim": "No candidate present in the frozen repository evidence or the primary-source delta audit through the source cutoff is eligible or can be upgraded by metadata-only repair.",
+    "not_claimed": "This audit does not prove that a future independently implemented and audited same-contract comparator is impossible."
+  },
+  "contract": {
+    "cohort": [
+      "orchids",
+      "leaves",
+      "fern",
+      "room",
+      "horns",
+      "fortress",
+      "pinecone",
+      "truck",
+      "lego"
+    ],
+    "authorized_query_input": "complete binary mask on the single canonical official reference frame plus reference calibration",
+    "query_boundary": "frozen field plus Authorized Query Input and target Output Request Metadata; no captured or rendered RGB, external vision model, mask cache, or target mask",
+    "scored_frames": "every non-reference annotated frame; the reference frame is not scored",
+    "metrics": [
+      "foreground_iou",
+      "binary_pixel_accuracy_mandatory_report_only"
+    ],
+    "aggregation": "unweighted frame mean within each scene, then unweighted macro over all nine scenes",
+    "required_proof": "runtime-compliance-proof-v1 PASS over the complete Exact Row Authority",
+    "comparator_role": "external comparator rather than the current RADIO-GS method",
+    "fail_closed": true
+  },
+  "decision_authorities": [
+    {
+      "name": "Freeze six dated SOTA Targets and Evaluation Contracts",
+      "url": "https://github.com/Arthurshen926/RADIO-GS/issues/5#issuecomment-5264137513",
+      "comment_body_sha256": "37ce22d7f80d13714bb4835063acdb780addc975a83316c01c7a71b1f8bfc5db"
+    },
+    {
+      "name": "Define the transitive runtime compliance contract",
+      "url": "https://github.com/Arthurshen926/RADIO-GS/issues/9#issuecomment-5263693541",
+      "comment_body_sha256": "d6b04296f8d304bf2b0fe3ccfe1ada88b17ef502da50621d844a327b73320b4a"
+    },
+    {
+      "name": "Choose the claimable NVOS and SPIn-NeRF protocol tracks",
+      "url": "https://github.com/Arthurshen926/RADIO-GS/issues/10#issuecomment-5261992514",
+      "comment_body_sha256": "3067fcb4bfec9581b07b8f6ef551b9892e06e26fa927fd60d60f0bf48e759887"
+    },
+    {
+      "name": "Freeze the six-task evidence hierarchy and canonical row registry",
+      "url": "https://github.com/Arthurshen926/RADIO-GS/issues/8#issuecomment-5255364869",
+      "comment_body_sha256": "e0eba117251e10c24814a850946a2200a8f9da26dc99e5249ac2492b4c5df7ae"
+    }
+  ],
+  "repository_evidence": [
+    {
+      "id": "promptable_nvs_protocol_registry",
+      "path": "paper/artifacts/promptable_nvs_protocol_registry.yaml",
+      "sha256": "5d1a044513ce2c5d3850dbd95f4a3505c566ae2649e5d89b7e926daf4a568c54"
+    },
+    {
+      "id": "ludvig_sam_query_interface_audit",
+      "path": "paper/artifacts/spin9_ludvig_sam_query_interface_audit_20260804.json",
+      "sha256": "d634254ffaea4737b427cf58fa42bc2a69c0601240f773128cf54af208de3446"
+    },
+    {
+      "id": "radio_gs_reference_selected_result",
+      "path": "paper/artifacts/spin_reference_selected_query_interface_full9_exact_result_20260810.json",
+      "sha256": "c2a991389ce9cb81c96cd180a77c410c07a4915c1ada332ebf22f5f61135fa50"
+    },
+    {
+      "id": "radio_gs_legacy_exact_local9_authority",
+      "path": "paper/artifacts/spin9_canonical_mpr_v3_exact_local9_authority_20260803.json",
+      "sha256": "9eea89217b85b75319a87b90e3da4a27c8b62ed0c920f8b8da0a14a091899340"
+    },
+    {
+      "id": "six_task_context_registry",
+      "path": "paper/artifacts/unified_six_task_single_radio_mainline_v2.yaml",
+      "sha256": "dabf40d0ed4886ae7b68a525e4bf9b40b23f777eab82632ec86d7e4c211643fa"
+    },
+    {
+      "id": "promptable_nvs_primary_source_delta_audit",
+      "git_commit": "ac6db15514a1b97cd9d7cbc0775574bd7b8aebd5",
+      "git_path": "docs/research/wayfinder/promptable_nvs_protocol_sota_delta_20260811.md",
+      "git_blob": "b3be3a7602a5ad80e5f45d9b07b4cd5f9b9a2d2a",
+      "sha256": "ddfa6685e295f3595cd36e500ebb4ff17172521f3c627891830b31190480234f"
+    }
+  ],
+  "candidate_audit": [
+    {
+      "candidate_id": "ludvig-sam-local9-three-seed",
+      "candidate_role": "external_reproduction",
+      "reported_macro_foreground_iou_percent": 93.7200449592385,
+      "matching_contract_dimensions": [
+        "available_nine_cohort",
+        "complete_reference_mask",
+        "reference_not_scored",
+        "non_reference_frame_scoring"
+      ],
+      "blocking_failures": [
+        "query_reads_every_registered_RGB_image_including evaluation/target RGB",
+        "query invokes external SAM",
+        "query materializes a query-specific three-hypothesis primitive field rather than reading only a frozen field",
+        "no runtime-compliance-proof-v1 PASS exists",
+        "historical launcher identity is drifted from the frozen registry binding"
+      ],
+      "repair_class": "requires_method_change_and_new_audited_execution",
+      "eligible": false
+    },
+    {
+      "candidate_id": "ludvig-paper-matching-nine-recomputation",
+      "candidate_role": "external_paper_context",
+      "reported_macro_foreground_iou_percent": 94.57777777777778,
+      "blocking_failures": [
+        "paper values are a matching-nine recomputation rather than a complete same-contract Exact Row Authority",
+        "the LUDVIG query path reads target RGB and invokes an external vision model",
+        "no sealed prediction root or runtime-compliance-proof-v1 PASS exists"
+      ],
+      "repair_class": "requires_new_exact_row_and_incompatible_method_change",
+      "eligible": false
+    },
+    {
+      "candidate_id": "ludvig-paper-full10",
+      "candidate_role": "external_paper_context",
+      "reported_macro_foreground_iou_percent": 93.8,
+      "blocking_failures": [
+        "wrong cohort because the row includes Fork",
+        "the LUDVIG query path reads target RGB and invokes an external vision model",
+        "no Available-Nine Exact Row Authority or runtime-compliance-proof-v1 PASS exists"
+      ],
+      "repair_class": "cross_contract_row_cannot_be_relabelled",
+      "eligible": false
+    },
+    {
+      "candidate_id": "published-reusable-field-rows-through-cutoff",
+      "candidate_role": "external_paper_context",
+      "named_examples": [
+        "SAGA",
+        "OmniSeg3D"
+      ],
+      "blocking_failures": [
+        "published rows use sparse or under-specified sampled prompts rather than the frozen complete-reference-mask contract",
+        "no complete Available-Nine same-contract local prediction set or Exact Row Authority exists",
+        "no runtime-compliance-proof-v1 PASS exists"
+      ],
+      "repair_class": "requires_new_adapter_decision_and_new_audited_execution",
+      "eligible": false
+    },
+    {
+      "candidate_id": "published-online-rows-through-cutoff",
+      "candidate_role": "external_paper_context",
+      "named_examples": [
+        "WildSeg3D",
+        "SAGOnline",
+        "MV-SAM",
+        "Online Segment 3D Gaussians via Launching Virtual Drones"
+      ],
+      "blocking_failures": [
+        "prompt generation, view selection, cohort, or random seed differs or is under-specified",
+        "query-time RGB, rendered RGB, cached masks, or external vision models violate the frozen query boundary",
+        "no same-contract Exact Row Authority or runtime-compliance-proof-v1 PASS exists"
+      ],
+      "repair_class": "requires_new_method_identity_and_new_audited_execution",
+      "eligible": false
+    },
+    {
+      "candidate_id": "radio-gs-canonical-local9-legacy-exact",
+      "candidate_role": "current_method_context",
+      "reported_macro_foreground_iou_percent": 62.52262843520126,
+      "blocking_failures": [
+        "row is RADIO-GS rather than an external comparator",
+        "row is bound to the legacy local9 diagnostic identity rather than spin-full-mask-field-only-available-nine-v1",
+        "the historical authority predates and does not contain a runtime-compliance-proof-v1 PASS"
+      ],
+      "repair_class": "cannot_supply_an_external_sota_target",
+      "eligible": false
+    },
+    {
+      "candidate_id": "radio-gs-current-field-reference-selected-context",
+      "candidate_role": "current_method_context",
+      "reported_macro_foreground_iou_percent": 87.71615046217027,
+      "blocking_failures": [
+        "row is RADIO-GS rather than an external comparator",
+        "the containing result mixes field-only and target-RGB-assisted branches and is scoped as method-development evidence",
+        "no complete same-contract Exact Row Authority or runtime-compliance-proof-v1 PASS exists"
+      ],
+      "repair_class": "cannot_supply_an_external_sota_target",
+      "eligible": false
+    }
+  ],
+  "reproducible_checks": {
+    "validator": "radio_gs/scripts/validate_spin_available9_comparator_eligibility.py",
+    "command": "bash radio_gs/scripts/run_repo_python.sh radio_gs/scripts/validate_spin_available9_comparator_eligibility.py",
+    "expected_verdict": "no_eligible_existing_comparator",
+    "expected_candidate_count": 7
+  },
+  "resolution": {
+    "verdict": "no_eligible_existing_comparator",
+    "numeric_sota_target": null,
+    "target_status": "no_eligible_target",
+    "reason": "Every external candidate fails at least one immutable contract dimension and lacks a PASS Runtime Compliance Proof; RADIO-GS rows cannot serve as their own external SOTA comparator.",
+    "metadata_only_retrofit_permitted": false,
+    "historical_metric_reuse_permitted": false,
+    "future_unblock_condition": "Produce a new external same-contract execution with a complete Exact Row Authority and runtime-compliance-proof-v1 PASS. That would create a new evidence identity and a new explicit target decision; it would not upgrade any row audited here.",
+    "planning_consequence": "Keep the SPIn-NeRF numeric SOTA Target absent and fail closed. Do not substitute 93.7200449592385, 94.57777777777778, 93.8, or a RADIO-GS result."
+  }
+}
