@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一次性原型：RGB-free reference-prompt completion</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17211f;
+      --muted: #62706b;
+      --paper: #f3f6f4;
+      --panel: #ffffff;
+      --line: #d5ddd8;
+      --accent: #305f75;
+      --accent-soft: #e2eef3;
+      --good: #17613f;
+      --good-soft: #e2f3e8;
+      --warn: #8a6209;
+      --warn-soft: #fff1cc;
+      --bad: #9b3038;
+      --bad-soft: #fbe5e7;
+      --private: #65468b;
+      --private-soft: #eee7f6;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    main { width: min(1180px, calc(100% - 30px)); margin: 26px auto 60px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 1000px; font-size: clamp(30px, 4.8vw, 52px); line-height: 1.02; letter-spacing: -.04em; }
+    h2 { margin-bottom: 14px; font-size: 21px; }
+    h3 { margin-bottom: 8px; font-size: 16px; }
+    p, li { line-height: 1.56; }
+    a { color: var(--accent); }
+    code { font-size: .92em; }
+    button { font: inherit; }
+
+    .flag {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 10px;
+      border: 1px solid #e4be64;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #6f4a00;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    .intro { max-width: 1000px; color: #34423e; font-size: 17px; }
+    .scope {
+      margin: 20px 0 26px;
+      padding: 15px 17px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+    .scope strong { display: block; margin-bottom: 4px; }
+    .panel {
+      margin-top: 22px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgb(35 51 43 / .055);
+    }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcfa;
+    }
+    .card .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+    }
+    .card .value { margin-top: 6px; font-size: 17px; font-weight: 780; }
+    .card .detail { margin-top: 7px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .verdict { margin-top: 14px; padding: 16px; border-radius: 12px; }
+    .verdict.good { color: var(--good); background: var(--good-soft); }
+    .verdict.warn { color: var(--warn); background: var(--warn-soft); }
+    .verdict.bad { color: var(--bad); background: var(--bad-soft); }
+    .verdict strong { display: block; margin-bottom: 4px; }
+
+    .control-group + .control-group { margin-top: 20px; }
+    .control-label { margin-bottom: 9px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: .035em; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 9px; }
+    .choice, .action, .step-button, .tab {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .choice:hover, .action:hover, .step-button:hover, .tab:hover { border-color: var(--accent); }
+    .choice.active, .tab.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: #254e61;
+      font-weight: 780;
+    }
+    .action.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .action.private { border-color: #cbb9df; color: var(--private); }
+
+    .probe-layout { display: grid; grid-template-columns: 1.45fr .8fr; gap: 18px; align-items: start; }
+    .gaussian-grid { display: grid; grid-template-columns: repeat(8, minmax(64px, 1fr)); gap: 8px; }
+    .gaussian {
+      min-height: 112px;
+      padding: 9px 7px;
+      border: 2px solid transparent;
+      border-radius: 11px;
+      text-align: center;
+      color: #14201c;
+    }
+    .gaussian.boundary { border-style: dashed; border-color: #916f31; }
+    .gaussian.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgb(48 95 117 / .12); }
+    .gaussian .name { display: block; font-size: 12px; font-weight: 800; }
+    .gaussian .score { display: block; margin-top: 6px; font-size: 19px; font-weight: 820; }
+    .gaussian .minor { display: block; margin-top: 4px; color: #596761; font-size: 10px; line-height: 1.35; }
+    .probe-note { margin: 11px 0 0; color: var(--muted); font-size: 13px; }
+    .legend { display: grid; gap: 9px; }
+    .legend-row { display: grid; grid-template-columns: 18px 1fr; gap: 9px; align-items: start; color: var(--muted); font-size: 13px; }
+    .swatch { width: 18px; height: 18px; border-radius: 5px; }
+    .formula { margin-top: 14px; padding: 13px; border-radius: 11px; background: #edf2f4; font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-x: auto; }
+    .private-box { margin-top: 14px; padding: 13px; border-radius: 11px; background: var(--private-soft); color: var(--private); font-size: 13px; }
+    .private-box strong { display: block; margin-bottom: 5px; }
+
+    .gate-list, .evidence-list, .pilot-list, .diagnosis-list, .protocol-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .gate, .evidence-row, .pilot-step, .diagnosis-row, .protocol-row { padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; }
+    .gate { display: grid; grid-template-columns: 134px 1fr; gap: 10px; align-items: start; }
+    .gate .status { font-weight: 800; }
+    .gate.pass .status { color: var(--good); }
+    .gate.fail .status { color: var(--bad); }
+    .evidence-row strong, .pilot-step strong, .diagnosis-row strong, .protocol-row strong { display: block; }
+    .evidence-row p, .pilot-step p, .diagnosis-row p, .protocol-row p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+    .metric-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .metric-table th, .metric-table td { padding: 10px 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .metric-table th { color: var(--muted); font-size: 12px; letter-spacing: .025em; }
+    .metric-table td:first-child { font-weight: 760; }
+
+    .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .tab { white-space: nowrap; }
+    .walkthrough { margin-top: 14px; }
+    .walkthrough-description { min-height: 50px; color: var(--muted); }
+    .walkthrough-steps { display: grid; gap: 9px; counter-reset: step; }
+    .walkthrough-step { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; }
+    .walkthrough-step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 50%;
+      background: #edf0ed;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .walkthrough-step.done::before { content: "✓"; background: var(--good-soft); color: var(--good); }
+    .step-button { width: 100%; text-align: left; }
+    .step-button:disabled { cursor: default; opacity: .55; }
+
+    .decision-token {
+      width: 100%;
+      min-height: 190px;
+      margin-top: 12px;
+      padding: 12px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8faf8;
+      color: var(--ink);
+      font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .footnote { margin-top: 12px; color: var(--muted); font-size: 13px; }
+    .sources { columns: 2; column-gap: 32px; margin-bottom: 0; padding-left: 19px; }
+    .sources li { break-inside: avoid; margin-bottom: 8px; font-size: 13px; }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .gaussian-grid { grid-template-columns: repeat(4, minmax(64px, 1fr)); }
+      .probe-layout, .two-column { grid-template-columns: 1fr; }
+      .sources { columns: 1; }
+    }
+    @media (max-width: 620px) {
+      main { width: min(100% - 20px, 1180px); margin-top: 18px; }
+      .panel { padding: 16px; }
+      .grid { grid-template-columns: 1fr; }
+      .gaussian-grid { grid-template-columns: repeat(2, minmax(64px, 1fr)); }
+      .gate { grid-template-columns: 96px 1fr; }
+      .metric-table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <span class="flag">PROTOTYPE · 一次性逻辑决策实验台 · 不属于生产实现</span>
+  <h1>同一个 RGB-free reference-prompt completion，能同时服务 NVOS 与 SPIn-NeRF 吗？</h1>
+  <p class="intro">
+    本原型只回答 <a href="https://github.com/Arthurshen926/RADIO-GS/issues/21">Choose RGB-free reference-prompt completion for NVOS and SPIn-NeRF</a>：
+    在 sidecar-free D512/L512 Single Compact Feature Field 上，如何把 NVOS 正负 scribble 与 SPIn-NeRF 完整 reference mask 编译成同语义的注册证据，如何只用冻结字段补全到一个 Gaussian Query Posterior，以及怎样用最小 exact-contract pilot 把字段不可表示与 prompt completion 失败分开。
+  </p>
+  <div class="scope">
+    <strong>原型假设与边界</strong>
+    这是逻辑原型，不读取数据、不运行 benchmark、不制造分数。它假设已冻结的 Boundary-Calibrated Field Region Hierarchy 可从合法冷状态重建；本 ticket 决定的只是 reference-prompt compiler、INSTANCE posterior update、协议分区与归因证据。
+  </div>
+
+  <section class="panel">
+    <h2>当前完整状态</h2>
+    <div id="state-grid" class="grid"></div>
+    <div id="verdict" class="verdict warn"></div>
+  </section>
+
+  <section class="panel">
+    <h2>可点击的证据锚定与补全示意</h2>
+    <div class="probe-layout">
+      <div>
+        <div id="gaussian-grid" class="gaussian-grid"></div>
+        <p id="probe-note" class="probe-note"></p>
+        <div class="formula">
+          m⁺=Wᵀy⁺, m⁻=Wᵀy⁻, mᵥ=Wᵀ1; c=(m⁺+m⁻)/mᵥ; q=m⁺/(m⁺+m⁻)<br>
+          p = anchor-preserving-logit-transport(q, hierarchy-marginal h, budget=(1−c)κ), binary boundary p≥0.5
+        </div>
+      </div>
+      <div>
+        <div class="legend">
+          <div class="legend-row"><span class="swatch" style="background:#d9eee7"></span><span>对象区域：推荐机制应在未直接观察处补全，同时不改写已注册 prompt。</span></div>
+          <div class="legend-row"><span class="swatch" style="background:#f4e8d4"></span><span>干扰区域：平坦扩散容易越过尺度或边界；区域层级对全部合法假设边缘化。</span></div>
+          <div class="legend-row"><span class="swatch" style="background:#e8ece9"></span><span>背景/遮挡：完整 mask 的 complement 是负证据；scribble 未标注像素保持未知。</span></div>
+          <div class="legend-row"><span class="swatch" style="background:#e2eef3"></span><span>蓝边表示最终 posterior≥0.5；虚线表示 field-derived boundary。</span></div>
+        </div>
+        <div class="private-box">
+          <strong>紫色归因层只属于 evaluator</strong>
+          Target masks 只能在候选与 matched control 的 predictions 全部封存后计算 field ceiling 与 prompt-consistent ceiling；它们不能选 posterior、threshold、hierarchy、checkpoint 或 retry。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>自由试验</h2>
+    <div class="control-group">
+      <div class="control-label">Reference-prompt sanitizer / compiler family</div>
+      <div id="compiler-buttons" class="buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Registered lift</div>
+      <div id="lift-buttons" class="buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Gaussian posterior solver</div>
+      <div id="solver-buttons" class="buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Calibration / binary decision</div>
+      <div id="calibration-buttons" class="buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Protocol partition</div>
+      <div id="protocol-buttons" class="buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Illustration only — input schema and hard case</div>
+      <div id="demo-buttons" class="buttons"></div>
+      <div id="scenario-buttons" class="buttons" style="margin-top:9px"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Hypothetical sealed pilot result</div>
+      <div class="buttons">
+        <button class="action private" data-outcome="field_fail">Field ceiling 失败</button>
+        <button class="action private" data-outcome="observability_fail">Prompt-consistent ceiling 失败</button>
+        <button class="action private" data-outcome="solver_fail">Actual posterior 失败</button>
+        <button class="action private" data-outcome="nvos_only">只过 NVOS</button>
+        <button class="action private" data-outcome="joint_pass">两合同机制门通过</button>
+        <button class="action" data-outcome="unrun">清除假设结果</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="buttons">
+        <button id="recommend" class="action primary">套用当前建议</button>
+        <button id="reset" class="action">重置到简单 anchor-only</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>不可补偿的设计门</h2>
+    <ul id="gate-list" class="gate-list"></ul>
+  </section>
+
+  <section class="panel">
+    <h2>两个输入 schema，共用一种证据和 posterior 语义</h2>
+    <div class="two-column">
+      <ul id="protocol-list" class="protocol-list"></ul>
+      <table class="metric-table">
+        <thead><tr><th>边界</th><th>NVOS strict-unseen</th><th>Available-Nine SPIn-NeRF</th></tr></thead>
+        <tbody>
+          <tr><td>Mapping</td><td>仅 non-target observations；移除任何含 target-camera observation 的 sparse track。</td><td>全部 protocol-authorized scene RGB/poses 可用于 Mapping。</td></tr>
+          <tr><td>Query input</td><td>正负 reference scribbles + reference calibration；未标注像素是 unknown。</td><td>canonical reference frame 的完整 binary mask + calibration；complement 是 negative。</td></tr>
+          <tr><td>禁止</td><td>reference/source/target/rendered RGB、target tracks、SAM、GT、metric。</td><td>reference/target/rendered RGB、SAM、mask cache、target masks、metric。</td></tr>
+          <tr><td>Output</td><td>target metadata 只进入 Camera-Raster Output；nearest-neighbor GT raster alignment。</td><td>同一 posterior 输出所有 non-reference annotated frames；reference 不提交、不计分。</td></tr>
+          <tr><td>Aggregation</td><td>八个 official task 等权 macro。</td><td>先 frame mean，再九场景等权 macro。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>为什么不是现有路线</h2>
+    <ul id="evidence-list" class="evidence-list"></ul>
+  </section>
+
+  <section class="panel">
+    <h2>最小 exact-contract pilot</h2>
+    <ul id="pilot-list" class="pilot-list"></ul>
+  </section>
+
+  <section class="panel">
+    <h2>sealed 归因分叉</h2>
+    <ul id="diagnosis-list" class="diagnosis-list"></ul>
+  </section>
+
+  <section class="panel">
+    <h2>引导式 walkthrough</h2>
+    <div id="tabs" class="tabs"></div>
+    <div class="walkthrough">
+      <p id="walkthrough-description" class="walkthrough-description"></p>
+      <div id="walkthrough-steps" class="walkthrough-steps"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>把你的选择带回 ticket</h2>
+    <p>原型不会替你作 HITL 决定。检查建议组合和归因分叉后，复制 token；你可以直接同意，也可以只改其中一项。</p>
+    <textarea id="decision-token" class="decision-token" readonly></textarea>
+    <div class="buttons">
+      <button id="copy-token" class="action primary">复制 decision token</button>
+      <span id="copy-status" class="footnote"></span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>本原型依据</h2>
+    <ul class="sources">
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/4">Define the shared field and modality-specific query interface</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/5">Freeze six dated SOTA Targets and Evaluation Contracts</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/10">Choose the claimable NVOS and SPIn-NeRF protocol tracks</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/13">Define the mapping-query-evaluator information firewall</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/14">Choose the canonical field family and mapping-teacher policy</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/17">Establish a claim-eligible Available-Nine SPIn-NeRF comparator authority</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/19">Choose the transferable instance carrier and interactive update for AGILE3D</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/20">Choose the shared LERF semantic-support and boundary mechanism</a></li>
+      <li><code>radio_gs/querying/evidence_scorer.py</code> — exact continuous registered raster adjoint</li>
+      <li><code>radio_gs/querying/anchor_preserving_transport.py</code> — observation-preserving completion budget</li>
+      <li><code>paper/artifacts/nvos_observation_clamped_graph_completion_stop_results_20260806.json</code></li>
+      <li><code>paper/artifacts/nvos_hierarchical_trust_local_positive_full8_exact_results_20260805.json</code></li>
+      <li><code>paper/artifacts/spin_reference_selected_query_interface_full9_exact_result_20260810.json</code></li>
+      <li><code>paper/artifacts/six_task_destination_compliant_baseline_gap_matrix_20260812.json</code></li>
+    </ul>
+  </section>
+</main>
+
+<script>
+const ReferencePromptDecision = (() => {
+  const compilers = {
+    dual: {
+      name: "Typed dual sanitizer under one Registered-2D compiler family",
+      short: "Two schemas, one family",
+      legal: true,
+      servesBoth: true,
+      description: "SIGNED_SCRIBBLE_RASTER keeps unlabeled pixels unknown; COMPLETE_BINARY_MASK maps foreground/complement to positive/negative. Selection follows input schema, never benchmark identity."
+    },
+    scribbleAsMask: {
+      name: "Treat every unlabeled scribble pixel as background",
+      short: "Unlabeled = negative",
+      legal: true,
+      servesBoth: false,
+      description: "This destroys NVOS scribble semantics: sparse unlabeled space is unknown, not a complete negative mask."
+    },
+    maskOnly: {
+      name: "Complete-mask-only compiler",
+      short: "SPIn only",
+      legal: true,
+      servesBoth: false,
+      description: "It handles SPIn but cannot represent NVOS positive/negative scribbles without changing their meaning."
+    },
+    rgbSam: {
+      name: "Reference/target RGB + SAM completion",
+      short: "RGB/SAM",
+      legal: false,
+      servesBoth: true,
+      description: "It opens forbidden RGB and an external vision model at Primary Query. Diagnostic score cannot legalize the lineage."
+    }
+  };
+
+  const lifts = {
+    adjoint: {
+      name: "Exact front-to-back compositor adjoint Wᵀ",
+      short: "Exact raster adjoint",
+      legal: true,
+      continuous: true,
+      description: "Positive, negative, and visible masses use the same frozen geometry/opacity responsibility matrix; invisible or unlabeled rows retain zero confidence."
+    },
+    nearest: {
+      name: "Hard nearest-Gaussian pixel assignment",
+      short: "Hard assignment",
+      legal: true,
+      continuous: false,
+      description: "Legal but loses mixed visibility and occlusion responsibility; a single front primitive can erase supported evidence behind it."
+    },
+    targetAware: {
+      name: "Target-camera track / rendered-target assistance",
+      short: "Target-assisted",
+      legal: false,
+      continuous: true,
+      description: "It lets target-camera lineage enter semantic selection. NVOS target-camera tracks are excluded at Mapping and target metadata is output placement only."
+    }
+  };
+
+  const solvers = {
+    anchor: {
+      name: "Registered anchor only",
+      short: "Anchor only",
+      legal: true,
+      shared: true,
+      cold: true,
+      preservesAnchor: true,
+      completes: false,
+      description: "Retains the exact registered unary and abstains elsewhere. It is the matched no-propagation control, not a completion mechanism."
+    },
+    flat: {
+      name: "Observation-clamped flat graph diffusion",
+      short: "Flat diffusion",
+      legal: true,
+      shared: true,
+      cold: true,
+      preservesAnchor: true,
+      completes: true,
+      description: "A legalized flat topology can preserve anchors, but it commits to one scale. Existing NVOS evidence shows catastrophic scene-dependent propagation failure."
+    },
+    hierarchy: {
+      name: "Observation-Anchored Signed Region-Hypothesis Marginal",
+      short: "Anchored hierarchy marginal",
+      legal: true,
+      shared: true,
+      cold: true,
+      preservesAnchor: true,
+      completes: true,
+      description: "A source-frozen query-local signed prototype scores every legal region/antichain on the fixed field hierarchy; marginalization preserves scale uncertainty, then transport cannot rewrite fully observed anchors."
+    },
+    sceneRouter: {
+      name: "Per-scene branch router + persistent object memory",
+      short: "Scene router/memory",
+      legal: false,
+      shared: false,
+      cold: false,
+      preservesAnchor: false,
+      completes: true,
+      description: "It hides task/scene choice and query-conditioned state in the deployment package, breaking the single interface and cold-state closure."
+    }
+  };
+
+  const calibrations = {
+    global05: {
+      name: "Source-frozen likelihoods + one 0.5 boundary",
+      short: "Global 0.5",
+      legal: true,
+      shared: true,
+      description: "Shrinkage, priors, temperatures, entropy/support bounds, residual cap Δ, epsilon, tie-breaks, and binary posterior boundary are frozen before benchmark metrics."
+    },
+    taskSplit: {
+      name: "NVOS/SPIn-specific thresholds",
+      short: "Task thresholds",
+      legal: false,
+      shared: false,
+      description: "Benchmark identity selects semantic parameters and breaks the shared Gaussian Query Posterior semantics."
+    },
+    sceneTune: {
+      name: "Reference-IoU / target-metric scene routing",
+      short: "Scene tuning",
+      legal: false,
+      shared: false,
+      description: "Reference score, scene identity, or target metric chooses a branch, threshold, hierarchy level, or retry."
+    }
+  };
+
+  const protocols = {
+    valid: {
+      name: "Frozen channel-scoped partitions",
+      short: "Valid partitions",
+      legal: true,
+      description: "NVOS target tracks are excluded and target camera goes only to output; SPIn compiles once on its canonical reference and scores only non-reference frames."
+    },
+    nvosLeak: {
+      name: "NVOS field retains target-camera tracks",
+      short: "NVOS track leak",
+      legal: false,
+      description: "A mapping receipt that cannot prove transitive target-camera track exclusion fails closed before Query."
+    },
+    spinReference: {
+      name: "SPIn scores/selects on reference frame",
+      short: "SPIn reference leak",
+      legal: false,
+      description: "The reference mask is Authorized Query Input, but the reference frame is not scored and cannot select a branch or threshold."
+    }
+  };
+
+  const demos = {
+    nvos: {name:"NVOS signed scribble", detail:"Only explicit positive/negative scribble pixels contribute; all other reference pixels are unknown."},
+    spin: {name:"SPIn complete mask", detail:"Every supported reference pixel is labeled: mask foreground is positive and complement is negative."}
+  };
+
+  const scenarios = {
+    occlusion: {name:"遮挡补全", detail:"Reference 只观察对象的一部分；补全必须扩展到 field-supported occluded regions，同时锚点保持不变。"},
+    thinBoundary: {name:"细边界与干扰物", detail:"对象紧邻外观相似干扰物；平坦扩散易泄漏，层级假设应保留边界不确定性。"},
+    ambiguous: {name:"prompt/field 歧义", detail:"正负证据都合法，但字段无法把两个候选实例分开；真实系统应显式低置信或 abstain。"}
+  };
+
+  const nodes = [
+    {name:"g1", kind:"object", region:"object-visible"},
+    {name:"g2", kind:"object", region:"object-visible"},
+    {name:"g3", kind:"object", region:"object-boundary", boundary:true},
+    {name:"g4", kind:"object", region:"object-occluded"},
+    {name:"g5", kind:"distractor", region:"distractor", boundary:true},
+    {name:"g6", kind:"distractor", region:"distractor"},
+    {name:"g7", kind:"background", region:"background"},
+    {name:"g8", kind:"background", region:"background"}
+  ];
+
+  const probe = {
+    nvos: {
+      occlusion: {anchor:[.96,.79,.55,.50,.31,.50,.15,.50], confidence:[.95,.52,.18,0,.22,0,.81,0], hierarchy:[.95,.89,.78,.74,.18,.22,.09,.12], flat:[.92,.83,.69,.61,.59,.51,.18,.19]},
+      thinBoundary: {anchor:[.94,.77,.53,.50,.48,.50,.12,.50], confidence:[.92,.43,.16,0,.19,0,.86,0], hierarchy:[.93,.86,.72,.69,.24,.25,.08,.11], flat:[.89,.78,.62,.58,.64,.58,.16,.17]},
+      ambiguous: {anchor:[.83,.67,.51,.50,.55,.50,.22,.50], confidence:[.61,.31,.12,0,.13,0,.55,0], hierarchy:[.72,.66,.57,.56,.53,.49,.26,.29], flat:[.75,.68,.58,.55,.57,.54,.27,.30]}
+    },
+    spin: {
+      occlusion: {anchor:[.98,.93,.71,.50,.18,.50,.04,.50], confidence:[1,1,.82,0,.91,0,1,0], hierarchy:[.97,.94,.83,.79,.11,.16,.04,.08], flat:[.96,.91,.77,.68,.45,.39,.08,.13]},
+      thinBoundary: {anchor:[.97,.91,.64,.50,.37,.50,.03,.50], confidence:[1,1,.76,0,.88,0,1,0], hierarchy:[.96,.92,.79,.73,.19,.21,.04,.08], flat:[.94,.88,.70,.64,.52,.45,.08,.12]},
+      ambiguous: {anchor:[.91,.82,.57,.50,.46,.50,.11,.50], confidence:[.98,.93,.65,0,.62,0,.92,0], hierarchy:[.79,.74,.62,.59,.49,.46,.18,.22], flat:[.82,.76,.64,.58,.55,.50,.19,.24]}
+    }
+  };
+
+  const initial = () => ({
+    compiler: "dual",
+    lift: "adjoint",
+    solver: "anchor",
+    calibration: "global05",
+    protocol: "valid",
+    demo: "nvos",
+    scenario: "occlusion",
+    pilotOutcome: "unrun"
+  });
+
+  const recommend = () => ({
+    compiler: "dual",
+    lift: "adjoint",
+    solver: "hierarchy",
+    calibration: "global05",
+    protocol: "valid",
+    demo: "nvos",
+    scenario: "occlusion",
+    pilotOutcome: "unrun"
+  });
+
+  function clamp(v) { return Math.max(.001, Math.min(.999, v)); }
+  function logit(v) { const x=clamp(v); return Math.log(x/(1-x)); }
+  function sigmoid(v) { return 1/(1+Math.exp(-v)); }
+
+  function posterior(state) {
+    const values = probe[state.demo][state.scenario];
+    if (state.solver === "anchor") return values.anchor.slice();
+    if (state.solver === "sceneRouter") return nodes.map(n => n.kind === "object" ? .97 : .03);
+    const proposal = state.solver === "flat" ? values.flat : values.hierarchy;
+    return values.anchor.map((anchor, i) => {
+      const completionConfidence = state.solver === "hierarchy" ? .92 : .82;
+      const budget = (1-values.confidence[i]) * completionConfidence;
+      const delta = Math.max(-4, Math.min(4, logit(proposal[i])-logit(anchor)));
+      return clamp(anchor + (sigmoid(logit(anchor)+budget*delta)-sigmoid(logit(anchor))));
+    });
+  }
+
+  function reduce(state, action) {
+    if (action.type === "selectCompiler") return {...state, compiler:action.value};
+    if (action.type === "selectLift") return {...state, lift:action.value};
+    if (action.type === "selectSolver") return {...state, solver:action.value};
+    if (action.type === "selectCalibration") return {...state, calibration:action.value};
+    if (action.type === "selectProtocol") return {...state, protocol:action.value};
+    if (action.type === "selectDemo") return {...state, demo:action.value};
+    if (action.type === "selectScenario") return {...state, scenario:action.value};
+    if (action.type === "setOutcome") return {...state, pilotOutcome:action.value};
+    if (action.type === "recommend") return recommend();
+    if (action.type === "reset") return initial();
+    return state;
+  }
+
+  function diagnosis(outcome) {
+    const rows = {
+      unrun:"尚未运行；ticket 只冻结设计与证据，不制造 benchmark 结果。",
+      field_fail:"Field ceiling 未过 applicable pilot gate：Canonical Capability Feature、boundary carrier 或 output geometry 不可表示对象；停止在 prompt solver 上调参。",
+      observability_fail:"Field ceiling 过而 prompt-consistent ceiling 未过：合法 reference prompt 无法在字段中唯一支持合格假设；归因 registered lift / prompt observability。",
+      solver_fail:"两个 ceiling 都过而 actual posterior 未过：字段与 prompt 有足够信息，失败属于 prototype fitting、hypothesis likelihood、calibration 或 anchor transport。",
+      nvos_only:"共享机制失败：只过 NVOS 不能换取 SPIn task-specific head、阈值或 RGB fallback；SPIn 仍无 eligible numeric SOTA Target。",
+      joint_pass:"机制门通过：可交给 joint objective，但 SPIn numeric SOTA Target 仍 absent，因此不是 Development Advancement、Canonical Current Row 或 claim。"
+    };
+    return rows[outcome];
+  }
+
+  function evaluate(state) {
+    const compiler=compilers[state.compiler], lift=lifts[state.lift], solver=solvers[state.solver], calibration=calibrations[state.calibration], protocol=protocols[state.protocol];
+    const gates = [
+      {name:"两种 prompt schema", pass:compiler.servesBoth, detail:compiler.servesBoth ? "同一 registered-2D family 用 typed schema 区分 sparse scribble 与 complete mask。" : "当前 compiler 无法保持两个输入合同的真实语义。"},
+      {name:"Information Grant", pass:compiler.legal && lift.legal && solver.legal && protocol.legal, detail:"Primary Query 不得读 captured/rendered RGB、SAM、target masks/metrics、非法 tracks 或持久 object memory。"},
+      {name:"连续注册证据", pass:lift.continuous, detail:lift.continuous ? "同一 W 累积 positive/negative/visible mass，保留遮挡和混合贡献。" : "硬 assignment 丢失 compositor responsibility，不适合作为冻结候选。"},
+      {name:"Prompt 锚定", pass:solver.preservesAnchor, detail:solver.preservesAnchor ? "c=1 的 registered anchor bitwise 不变；未观察区才使用 completion budget。" : "补全可重写已授权 prompt。"},
+      {name:"真实 completion", pass:solver.completes, detail:solver.completes ? "未观察/遮挡 Gaussian 可从 query-local signed evidence 与 field hierarchy 获得 posterior。" : "只保留 anchor，无法回答 ticket 的补全问题。"},
+      {name:"Cold closure", pass:solver.cold, detail:solver.cold ? "Capability Views 与 hierarchy 只从 Deployment Scene State 和 identical Global Method Parameters 重建。" : "依赖语义 sidecar、query memory 或 Training Artifact。"},
+      {name:"共享 posterior", pass:solver.shared && calibration.shared, detail:"NVOS 与 SPIn 的差异停在 sanitizer 和 output request；INSTANCE solver、posterior schema 与 0.5 boundary 相同。"},
+      {name:"协议帧分区", pass:protocol.legal, detail:protocol.description}
+    ];
+    const allHard = gates.every(g=>g.pass) && calibration.legal;
+    let level="warn", title="保留为 control 或未完成候选", detail=solver.description;
+    if (!compiler.legal || !lift.legal || !solver.legal || !calibration.legal || !protocol.legal) {
+      level="bad"; title="契约不合法，不能成为 Primary Query 候选";
+    } else if (state.compiler === "dual" && state.lift === "adjoint" && state.solver === "hierarchy" && state.calibration === "global05" && state.protocol === "valid") {
+      level="good";
+      title="当前建议：Registered Raster-Adjoint Evidence + Observation-Anchored Signed Region-Hypothesis Marginal";
+      detail="Typed sanitizer 只决定哪些 reference pixels 是 positive、negative 或 unknown；精确 Wᵀ 生成 anchor/confidence，query-local signed prototype 在固定 Boundary-Calibrated Field Region Hierarchy 上对全部合法假设边缘化，最后用 (1−c)κ 预算保护已观察 anchor。";
+    }
+    if (state.pilotOutcome !== "unrun") detail += " " + diagnosis(state.pilotOutcome);
+    return {compiler,lift,solver,calibration,protocol,gates,allHard,level,title,detail};
+  }
+
+  function decisionToken(state) {
+    const e=evaluate(state);
+    return [
+      "ticket=Choose RGB-free reference-prompt completion for NVOS and SPIn-NeRF",
+      `compiler=${e.compiler.name}`,
+      `lift=${e.lift.name}`,
+      `solver=${e.solver.name}`,
+      `calibration=${e.calibration.name}`,
+      `protocol=${e.protocol.name}`,
+      "evidence=exact W^T positive/negative/visible masses -> anchor q and observation confidence c; unlabeled scribble pixels remain unknown; complete-mask complement is negative",
+      "posterior=query-local signed shrinkage prototype + marginal over all legal regions/antichains on one field-derived hierarchy; anchor-preserving logit transport budget=(1-c)*completion_confidence",
+      "nvos=remove target-camera tracks at Mapping; target camera only Output Request Metadata; eight official reference-target tasks",
+      "spin=compile once on canonical complete reference mask; reuse one posterior for every non-reference annotated frame; reference never scored or used for branch selection",
+      "abstain=invalid lineage/schema/calibration, missing signs/support, track-exclusion failure, non-rebuildable hierarchy, ill-conditioned fitting, contradictory evidence, empty hypotheses, numerical/output-support failure; never fallback",
+      "boundary=binary Gaussian and Camera-Raster posterior >= 0.5; no task/scene threshold",
+      "pilot=registered2d-anchored-hierarchy-full8-plus-available9-v1; matched anchor-only vs hierarchy; predictions sealed before field and prompt-consistent ceilings",
+      `diagnosis=${diagnosis(state.pilotOutcome)}`,
+      "human_decision=同意 / 改为… / 先补证据…"
+    ].join("\n");
+  }
+
+  return {compilers,lifts,solvers,calibrations,protocols,demos,scenarios,nodes,probe,initial,recommend,posterior,reduce,evaluate,diagnosis,decisionToken};
+})();
+
+let state = ReferencePromptDecision.initial();
+let activeWalkthrough = "recommend";
+let completedSteps = 0;
+
+const walkthroughs = {
+  recommend: {
+    name:"建议组合",
+    description:"逐步组成两个 typed sanitizer、精确 raster adjoint、observation-anchored hierarchy marginal 和全局 0.5 posterior。",
+    steps:[
+      {label:"选择两个 typed schema，但共享一个 Registered-2D compiler family", action:{type:"selectCompiler",value:"dual"}},
+      {label:"用同一 compositor responsibility 的 exact Wᵀ 注册正/负/可见质量", action:{type:"selectLift",value:"adjoint"}},
+      {label:"选择 Observation-Anchored Signed Region-Hypothesis Marginal", action:{type:"selectSolver",value:"hierarchy"}},
+      {label:"冻结 source-only 参数与一个 posterior≥0.5 boundary", action:{type:"selectCalibration",value:"global05"}},
+      {label:"绑定 NVOS target-track exclusion 与 SPIn non-reference scoring", action:{type:"selectProtocol",value:"valid"}}
+    ]
+  },
+  firewall: {
+    name:"防火墙陷阱",
+    description:"高分或直觉合理的路径仍可能因 lineage 非法而立即失败。",
+    steps:[
+      {label:"选择 Query-time RGB/SAM completion：观察 Information Grant 失败", action:{type:"selectCompiler",value:"rgbSam"}},
+      {label:"让 target-camera track 帮助 lift：观察 NVOS 分区失败", action:{type:"selectLift",value:"targetAware"}},
+      {label:"按 reference IoU / scene metric 路由：观察共享校准失败", action:{type:"selectCalibration",value:"sceneTune"}},
+      {label:"回到完整建议组合", action:{type:"recommend"}}
+    ]
+  },
+  partitions: {
+    name:"帧分区",
+    description:"reference 输入合法不代表整个 frame 合法；target pose 合法也不代表 target evidence 合法。",
+    steps:[
+      {label:"模拟 NVOS mapping 保留 target-camera tracks：preflight 必须失败", action:{type:"selectProtocol",value:"nvosLeak"}},
+      {label:"模拟 SPIn 用 reference score 选 branch：reference 不计分且不能选择", action:{type:"selectProtocol",value:"spinReference"}},
+      {label:"恢复 channel-scoped frozen partitions", action:{type:"selectProtocol",value:"valid"}},
+      {label:"切到 SPIn complete-mask 示意：同一 posterior 仅输出 non-reference frames", action:{type:"selectDemo",value:"spin"}}
+    ]
+  },
+  attribution: {
+    name:"归因分叉",
+    description:"所有 oracle ceiling 都在 predictions sealed 之后；它们只决定失败属于哪个 seam。",
+    steps:[
+      {label:"Field ceiling 失败：字段/边界 carrier/output geometry 不可表示", action:{type:"setOutcome",value:"field_fail"}},
+      {label:"Field 过而 prompt-consistent ceiling 失败：prompt observability/registration", action:{type:"setOutcome",value:"observability_fail"}},
+      {label:"两个 ceiling 过而 actual posterior 失败：solver/calibration/transport", action:{type:"setOutcome",value:"solver_fail"}},
+      {label:"清除假设；真实 pilot 尚未运行", action:{type:"setOutcome",value:"unrun"}}
+    ]
+  },
+  rejectSplit: {
+    name:"拒绝 task split",
+    description:"SPIn 没有 numeric SOTA Target，也不能因此借用 NVOS 通过、历史 RGB/SAM 分数或 task-specific fallback。",
+    steps:[
+      {label:"套用完整建议", action:{type:"recommend"}},
+      {label:"假设只过 NVOS：共享机制整体不通过", action:{type:"setOutcome",value:"nvos_only"}},
+      {label:"假设两边机制门通过：仍不产生 SPIn SOTA claim", action:{type:"setOutcome",value:"joint_pass"}}
+    ]
+  }
+};
+
+const protocolRows = [
+  ["SIGNED_SCRIBBLE_RASTER", "要求 reference identity/calibration、非空且不重叠的 positive/negative scribble。只有显式标注 pixel 进入 y⁺/y⁻；其余 pixel 不得转成 background。"],
+  ["COMPLETE_BINARY_MASK", "要求 canonical reference identity/calibration、严格 binary mask、非空 foreground 与 supported complement。mask 是 y⁺，complement 是 y⁻，不打开同容器 RGB。"],
+  ["Shared evidence", "同一 W 从 frozen Gaussian geometry/covariance/opacity 和 reference calibration 计算。输出 signed anchor、observation confidence、typed evidence groups、query identity 与完整 Evidence Lineage。"],
+  ["Shared query-local fitting", "用 decoded Capability View 与 signed responsibility 做 globally frozen shrinkage fit；gradient-free、无 scene/task parameter，结果只在当前 Query Workspace。ill-conditioned fitting 返回 Query Abstention。"],
+  ["Shared solver", "在固定 Boundary-Calibrated Field Region Hierarchy 上给全部合法 region/antichain hypothesis 计分并边缘化；不选 top component、scene threshold 或 query-conditioned topology。"],
+  ["Shared failure", "missing/forbidden lineage、schema/calibration mismatch、prompt/support 不足、sign 冲突、invalid hierarchy、empty hypotheses、numerical/output support failure 都 typed-abstain；不退回 RGB、SAM、legacy cache 或 all-background。"]
+];
+
+const evidenceRows = [
+  ["Exact raster adjoint 已给出正确的起点", "仓库现有 primitive 定义用同一 W 累积 foreground/background/visible mass；完整 mask 在可见 primitive 上 c=1，scribble 未观察处 c=0。它避免把 unlabeled 当 background，也避免 nearest assignment 丢掉混合 visibility。"],
+  ["旧平坦图补全不是可移植答案", "observation-clamped completion 在 horns_left 提升 +5.44 pp，却让 fern 下降 −24.46 pp；source-LOO gate 反而给失败的 fern 81.34% unknown coverage、给受益的 horns_left 11.12%。证据要求停止 threshold/gate sweep。"],
+  ["NVOS 的 74.7771% 只是 Context Evidence", "hierarchical-trust graph-off row 高于 70.1 条件目标，但它 posthoc、用 INTER_LINEAR 而非 frozen nearest-neighbor alignment，且 target-camera track exclusion 与 cold/runtime closure 未证明；不能直接成为设计 authority。"],
+  ["SPIn 的显著提升来自非法语义支路", "reference-selected diagnostic 从 field-only 87.7162% 到 94.8415%，但候选支路读取 target/reference RGB、调用 SAM 并生成 query-specific primitive field。它说明 completion 缺口值得解决，不说明该支路可部署。"],
+  ["Full mask 与 scribble 需要相同 anchor 语义，不同 coverage", "完整 mask 应在 reference-visible rows 上阻止补全改写；sparse scribble 则必须给 unobserved rows 合法 completion 预算。共享公式 (1−c)κ 恰好表达这个差别，无需 benchmark switch。"],
+  ["复用已选定的 field-derived hierarchy", "AGILE3D 与 LERF 已分别选择同一 Boundary-Calibrated Field Region Hierarchy。INSTANCE reference prompts 可复用 Signed Region-Hypothesis semantics，避免为 NVOS/SPIn 新建第二套 persistent topology。"]
+];
+
+const pilotRows = [
+  ["1. Cold + lineage preflight", "对 sidecar-free D512/L512 fields 删除 Training Artifacts 和 caches、禁网，重建 Capability Views 与 Boundary-Calibrated Field Region Hierarchy 两次并要求 bitwise identity。NVOS 每个 field receipt 必须证明删除所有含 held-out target camera 的 sparse tracks；任何失败都在 metric 前终止。"],
+  ["2. Source-only component freeze", "在独立 source-train folds 冻结 typed sanitizer schemas、W compositor identity、Capability View projection、shrinkage fitting、hypothesis likelihood/prior、completion confidence、Δ cap、entropy/support abstention bounds、epsilon、tie-break 和 0.5 boundary；不读取两个 benchmark 的 mask/metric 来选值。"],
+  ["3. Exact dual cohort", "绑定一个 development identity `registered2d-anchored-hierarchy-full8-plus-available9-v1`：NVOS 全部 8 个 official reference-target task；SPIn Available-Nine 全 9 场景、每场景 canonical reference mask 与全部 non-reference annotated frames。子集不能叫 exact-contract pilot。"],
+  ["4. Matched causal arms", "在 byte-identical cold fields 上运行 A=exact registered anchor + no propagation，H=A + query-local signed prototype + hierarchy marginal + anchor-preserving transport。两臂共享 prompt manifests、W、posterior schema、0.5 boundary、Camera-Raster Output、nearest-neighbor alignment、environment；只有 completion component 不同。"],
+  ["5. Prediction seal before metrics", "两合同、两臂的全部 predictions 与 Query Abstentions 一次性封存，再开放 evaluator ground truth。NVOS 用 8-task macro IoU；SPIn 只对 non-reference frames 先 frame mean、再 scene macro。任何 skip、fallback、reference scoring 或 identity drift 失败。"],
+  ["6. Mechanism admission gates", "H 必须零 Query Abstention；NVOS macro IoU ≥70.1，且相对 A 任一 official task 不回退超过 0.5 pp、macro 至少 +1.0 pp。SPIn 因 numeric SOTA Target absent，只能用 development gate：相对 A scene-macro 至少 +1.0 pp，任一 scene 不回退超过 0.5 pp。该 SPIn gate绝不变成 SOTA Target。"],
+  ["7. Sealed attribution ceilings", "封存后 evaluator 才算 F=在固定 field hierarchy/output 上的 best representable target ceiling，以及 P=同时满足 frozen reference-prompt consistency 的 best legal hypothesis ceiling。两者使用 applicable pilot gate，只归因，不能选 candidate output。"],
+  ["8. Bounded handoff", "两合同机制门通过才把该 component identity 交给 Define six-task negative-transfer controls and the joint mapping objective。即使通过，SPIn target 仍 absent；不创建 Canonical Current Row、Development Advancement 或 SOTA claim，也不运行 final benchmark campaign。"]
+];
+
+const diagnosisRows = [
+  ["Preflight / output support 失败", "归因 compliance/reconstruction：非法 lineage、target-track leak、不可重建 cache、reference calibration mismatch 或目标输出无支持；不能伪装成 representation 或 completion 分数。"],
+  ["F: field representability ceiling 失败", "Canonical Capability Feature、boundary Capability View、field hierarchy 或 Camera-Raster geometry 无法表达 applicable gate；这是字段/carrier deficit，继续改 prompt solver 没有依据。"],
+  ["F 通过，P: prompt-consistent ceiling 失败", "字段可表达对象，但合法 reference evidence 在固定字段中不能识别合格假设；这是 registered lift、reference observability 或 prompt-to-field separation deficit。"],
+  ["F 与 P 通过，H actual 失败", "信息存在且 prompt 足够；失败属于 query-local fitting、hypothesis likelihood/marginal、calibration 或 anchor-preserving transport。"],
+  ["NVOS 通过、SPIn 失败", "共享 candidate 被否决；不得用不同 threshold、head、reference-score branch 或 RGB/SAM fallback。SPIn 的 target absence 也不授权降低门。"],
+  ["H 两边都通过", "只证明该机制值得进入 joint mapping-objective pilot；仍受三 seed、六任务 non-regression、cold/runtime proof、以及缺失 SPIn eligible target 的约束。"]
+];
+
+function dispatch(action) {
+  state=ReferencePromptDecision.reduce(state,action);
+  render();
+}
+
+function renderState() {
+  const e=ReferencePromptDecision.evaluate(state);
+  const cards=[
+    ["Compiler",e.compiler.short,e.compiler.description],
+    ["Registered lift",e.lift.short,e.lift.description],
+    ["Posterior solver",e.solver.short,e.solver.description],
+    ["Calibration",e.calibration.short,e.calibration.description],
+    ["Protocol",e.protocol.short,e.protocol.description],
+    ["Illustration",ReferencePromptDecision.demos[state.demo].name,ReferencePromptDecision.demos[state.demo].detail],
+    ["Hard case",ReferencePromptDecision.scenarios[state.scenario].name,ReferencePromptDecision.scenarios[state.scenario].detail],
+    ["Pilot diagnosis",state.pilotOutcome === "unrun" ? "尚未运行" : "假设状态",ReferencePromptDecision.diagnosis(state.pilotOutcome)]
+  ];
+  document.getElementById("state-grid").innerHTML=cards.map(([label,value,detail])=>`<div class="card"><div class="label">${label}</div><div class="value">${value}</div><div class="detail">${detail}</div></div>`).join("");
+  const verdict=document.getElementById("verdict");
+  verdict.className=`verdict ${e.level}`;
+  verdict.innerHTML=`<strong>${e.title}</strong>${e.detail}`;
+}
+
+function renderProbe() {
+  const scores=ReferencePromptDecision.posterior(state);
+  const data=ReferencePromptDecision.probe[state.demo][state.scenario];
+  const colors={object:"#d9eee7",distractor:"#f4e8d4",background:"#e8ece9"};
+  document.getElementById("gaussian-grid").innerHTML=ReferencePromptDecision.nodes.map((node,i)=>{
+    const selected=scores[i] >= .5 ? " selected" : "";
+    const boundary=node.boundary ? " boundary" : "";
+    return `<div class="gaussian${selected}${boundary}" style="background:${colors[node.kind]}"><span class="name">${node.name}</span><span class="score">p=${scores[i].toFixed(2)}</span><span class="minor">anchor=${data.anchor[i].toFixed(2)}<br>c=${data.confidence[i].toFixed(2)}<br>${node.region}</span></div>`;
+  }).join("");
+  document.getElementById("probe-note").textContent=`${ReferencePromptDecision.demos[state.demo].name} · ${ReferencePromptDecision.scenarios[state.scenario].name}：数值仅演示状态模型。c=1 的 anchor 在推荐机制中保持不变；c=0 的 row 才能获得完整 completion budget。`;
+}
+
+function choiceButtons(container, items, selected, dataName, actionType) {
+  document.getElementById(container).innerHTML=Object.entries(items).map(([key,item])=>`<button class="choice${selected === key ? " active" : ""}" data-${dataName}="${key}">${item.name}</button>`).join("");
+  document.querySelectorAll(`[data-${dataName}]`).forEach(button=>button.onclick=()=>dispatch({type:actionType,value:button.dataset[dataName]}));
+}
+
+function renderControls() {
+  choiceButtons("compiler-buttons",ReferencePromptDecision.compilers,state.compiler,"compiler","selectCompiler");
+  choiceButtons("lift-buttons",ReferencePromptDecision.lifts,state.lift,"lift","selectLift");
+  choiceButtons("solver-buttons",ReferencePromptDecision.solvers,state.solver,"solver","selectSolver");
+  choiceButtons("calibration-buttons",ReferencePromptDecision.calibrations,state.calibration,"calibration","selectCalibration");
+  choiceButtons("protocol-buttons",ReferencePromptDecision.protocols,state.protocol,"protocol","selectProtocol");
+  choiceButtons("demo-buttons",ReferencePromptDecision.demos,state.demo,"demo","selectDemo");
+  choiceButtons("scenario-buttons",ReferencePromptDecision.scenarios,state.scenario,"scenario","selectScenario");
+}
+
+function renderGates() {
+  document.getElementById("gate-list").innerHTML=ReferencePromptDecision.evaluate(state).gates.map(g=>`<li class="gate ${g.pass ? "pass" : "fail"}"><div class="status">${g.pass ? "PASS" : "FAIL"} · ${g.name}</div><div>${g.detail}</div></li>`).join("");
+}
+
+function renderStaticLists() {
+  document.getElementById("protocol-list").innerHTML=protocolRows.map(([t,b])=>`<li class="protocol-row"><strong>${t}</strong><p>${b}</p></li>`).join("");
+  document.getElementById("evidence-list").innerHTML=evidenceRows.map(([t,b])=>`<li class="evidence-row"><strong>${t}</strong><p>${b}</p></li>`).join("");
+  document.getElementById("pilot-list").innerHTML=pilotRows.map(([t,b])=>`<li class="pilot-step"><strong>${t}</strong><p>${b}</p></li>`).join("");
+  document.getElementById("diagnosis-list").innerHTML=diagnosisRows.map(([t,b])=>`<li class="diagnosis-row"><strong>${t}</strong><p>${b}</p></li>`).join("");
+}
+
+function startWalkthrough(key) {
+  activeWalkthrough=key;
+  completedSteps=0;
+  state=ReferencePromptDecision.initial();
+  render();
+}
+
+function renderWalkthrough() {
+  document.getElementById("tabs").innerHTML=Object.entries(walkthroughs).map(([key,flow])=>`<button class="tab${activeWalkthrough === key ? " active" : ""}" data-tab="${key}">${flow.name}</button>`).join("");
+  document.querySelectorAll("[data-tab]").forEach(button=>button.onclick=()=>startWalkthrough(button.dataset.tab));
+  const flow=walkthroughs[activeWalkthrough];
+  document.getElementById("walkthrough-description").textContent=flow.description;
+  document.getElementById("walkthrough-steps").innerHTML=flow.steps.map((step,index)=>`<div class="walkthrough-step${index < completedSteps ? " done" : ""}"><button class="step-button" data-step="${index}" ${index !== completedSteps ? "disabled" : ""}>${step.label}</button></div>`).join("");
+  document.querySelectorAll("[data-step]").forEach(button=>button.onclick=()=>{
+    const index=Number(button.dataset.step);
+    dispatch(flow.steps[index].action);
+    completedSteps=Math.min(flow.steps.length,completedSteps+1);
+    renderWalkthrough();
+  });
+}
+
+function renderToken() {
+  document.getElementById("decision-token").value=ReferencePromptDecision.decisionToken(state);
+}
+
+function render() {
+  renderState();
+  renderProbe();
+  renderControls();
+  renderGates();
+  renderToken();
+  renderWalkthrough();
+}
+
+document.querySelectorAll("[data-outcome]").forEach(button=>button.onclick=()=>dispatch({type:"setOutcome",value:button.dataset.outcome}));
+document.getElementById("recommend").onclick=()=>dispatch({type:"recommend"});
+document.getElementById("reset").onclick=()=>dispatch({type:"reset"});
+document.getElementById("copy-token").onclick=async()=>{
+  const token=document.getElementById("decision-token").value;
+  try {
+    await navigator.clipboard.writeText(token);
+    document.getElementById("copy-status").textContent="已复制。请回到对话确认或修改这个决策。";
+  } catch (error) {
+    document.getElementById("copy-status").textContent="浏览器拒绝剪贴板访问；请直接选中文本复制。";
+  }
+};
+
+renderStaticLists();
+render();
+</script>
+</body>
+</html>
