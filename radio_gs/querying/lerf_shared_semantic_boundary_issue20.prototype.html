@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一次性原型：共享 LERF 语义支持与边界机制</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17211f;
+      --muted: #62706b;
+      --paper: #f4f6f3;
+      --panel: #ffffff;
+      --line: #d7ded9;
+      --accent: #285f59;
+      --accent-soft: #e2efec;
+      --good: #17613f;
+      --good-soft: #e2f3e8;
+      --warn: #8a6209;
+      --warn-soft: #fff1cc;
+      --bad: #9b3038;
+      --bad-soft: #fbe5e7;
+      --private: #65468b;
+      --private-soft: #eee7f6;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    main { width: min(1180px, calc(100% - 30px)); margin: 26px auto 60px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 980px; font-size: clamp(30px, 4.8vw, 52px); line-height: 1.02; letter-spacing: -.04em; }
+    h2 { margin-bottom: 14px; font-size: 21px; }
+    h3 { margin-bottom: 8px; font-size: 16px; }
+    p, li { line-height: 1.56; }
+    a { color: var(--accent); }
+    code { font-size: .92em; }
+    button { font: inherit; }
+
+    .flag {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 10px;
+      border: 1px solid #e4be64;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #6f4a00;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    .intro { max-width: 980px; color: #34423e; font-size: 17px; }
+    .scope {
+      margin: 20px 0 26px;
+      padding: 15px 17px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+    .scope strong { display: block; margin-bottom: 4px; }
+
+    .panel {
+      margin-top: 22px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgb(35 51 43 / .055);
+    }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcfa;
+    }
+    .card .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+    }
+    .card .value { margin-top: 6px; font-size: 17px; font-weight: 780; }
+    .card .detail { margin-top: 7px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .verdict { margin-top: 14px; padding: 16px; border-radius: 12px; }
+    .verdict.good { color: var(--good); background: var(--good-soft); }
+    .verdict.warn { color: var(--warn); background: var(--warn-soft); }
+    .verdict.bad { color: var(--bad); background: var(--bad-soft); }
+    .verdict strong { display: block; margin-bottom: 4px; }
+
+    .control-group + .control-group { margin-top: 20px; }
+    .control-label { margin-bottom: 9px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: .035em; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 9px; }
+    .choice, .action, .step-button, .tab {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .choice:hover, .action:hover, .step-button:hover, .tab:hover { border-color: var(--accent); }
+    .choice.active, .tab.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: #234e48;
+      font-weight: 780;
+    }
+    .action.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .action.private { border-color: #cbb9df; color: var(--private); }
+
+    .probe-layout { display: grid; grid-template-columns: 1.45fr .8fr; gap: 18px; align-items: start; }
+    .probe-grid { display: grid; grid-template-columns: repeat(6, minmax(54px, 1fr)); gap: 8px; }
+    .gaussian {
+      min-height: 78px;
+      padding: 9px 7px;
+      border: 2px solid transparent;
+      border-radius: 11px;
+      text-align: center;
+      color: #14201c;
+    }
+    .gaussian.boundary { border-style: dashed; border-color: #916f31; }
+    .gaussian.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgb(40 95 89 / .12); }
+    .gaussian .name { display: block; font-size: 12px; font-weight: 800; }
+    .gaussian .score { display: block; margin-top: 7px; font-size: 20px; font-weight: 820; }
+    .gaussian .region { display: block; margin-top: 4px; color: #596761; font-size: 11px; }
+    .probe-note { margin: 11px 0 0; color: var(--muted); font-size: 13px; }
+    .legend { display: grid; gap: 9px; }
+    .legend-row { display: grid; grid-template-columns: 18px 1fr; gap: 9px; align-items: start; color: var(--muted); font-size: 13px; }
+    .swatch { width: 18px; height: 18px; border-radius: 5px; }
+    .private-box { margin-top: 14px; padding: 13px; border-radius: 11px; background: var(--private-soft); color: var(--private); font-size: 13px; }
+    .private-box strong { display: block; margin-bottom: 5px; }
+
+    .gate-list, .evidence-list, .pilot-list, .diagnosis-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .gate, .evidence-row, .pilot-step, .diagnosis-row { padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; }
+    .gate { display: grid; grid-template-columns: 122px 1fr; gap: 10px; align-items: start; }
+    .gate .status { font-weight: 800; }
+    .gate.pass .status { color: var(--good); }
+    .gate.fail .status { color: var(--bad); }
+    .gate.unknown .status { color: var(--warn); }
+    .evidence-row strong, .pilot-step strong, .diagnosis-row strong { display: block; }
+    .evidence-row p, .pilot-step p, .diagnosis-row p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+    .metric-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .metric-table th, .metric-table td { padding: 10px 9px; border-bottom: 1px solid var(--line); text-align: right; }
+    .metric-table th:first-child, .metric-table td:first-child { text-align: left; }
+    .metric-table th { color: var(--muted); font-size: 12px; letter-spacing: .025em; }
+    .metric-table .pass { color: var(--good); font-weight: 800; }
+    .metric-table .fail { color: var(--bad); font-weight: 800; }
+
+    .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .tab { white-space: nowrap; }
+    .walkthrough { margin-top: 14px; }
+    .walkthrough-description { min-height: 50px; color: var(--muted); }
+    .walkthrough-steps { display: grid; gap: 9px; counter-reset: step; }
+    .walkthrough-step { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; }
+    .walkthrough-step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 50%;
+      background: #edf0ed;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .walkthrough-step.done::before { content: "✓"; background: var(--good-soft); color: var(--good); }
+    .step-button { width: 100%; text-align: left; }
+    .step-button:disabled { cursor: default; opacity: .55; }
+
+    .decision-token {
+      width: 100%;
+      min-height: 100px;
+      margin-top: 12px;
+      padding: 12px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8faf8;
+      color: var(--ink);
+      font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .footnote { margin-top: 12px; color: var(--muted); font-size: 13px; }
+    .sources { columns: 2; column-gap: 32px; margin-bottom: 0; padding-left: 19px; }
+    .sources li { break-inside: avoid; margin-bottom: 8px; font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .probe-layout, .two-column { grid-template-columns: 1fr; }
+      .sources { columns: 1; }
+    }
+    @media (max-width: 620px) {
+      main { width: min(100% - 20px, 1180px); margin-top: 18px; }
+      .panel { padding: 16px; }
+      .grid { grid-template-columns: 1fr; }
+      .probe-grid { grid-template-columns: repeat(3, minmax(54px, 1fr)); }
+      .gate { grid-template-columns: 88px 1fr; }
+      .metric-table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <span class="flag">PROTOTYPE · 一次性逻辑决策实验台 · 不属于生产实现</span>
+  <h1>同一套 LERF 语义支持与边界机制，能同时服务 2D 和 3D 吗？</h1>
+  <p class="intro">
+    本原型只回答 <a href="https://github.com/Arthurshen926/RADIO-GS/issues/20">Choose the shared LERF semantic-support and boundary mechanism</a>：
+    在已冻结的 sidecar-free D512/L512 Single Compact Feature Field 上，应让哪一种 task-agnostic Capability View、语义支持机制和边界算子进入实现规格，并用什么最小四场景证据把字段支持不足与 readout 失败分开。
+  </p>
+  <div class="scope">
+    <strong>边界与假设</strong>
+    玩具图只帮助检查机制逻辑，不是跑分。建议组合复用已经冻结的 Boundary-Calibrated Field Region Hierarchy，但为 CATEGORY Query 使用独立的、全局冻结的 Semantic Region-Hypothesis Marginal；它在固定层级上边缘化全部合法 foreground/background/split 状态，不选择一个 query-seeded component，也不读取 Query 时 RGB、SAM、teacher 或 MPR sidecar。
+  </div>
+
+  <section class="panel" aria-labelledby="state-heading">
+    <h2 id="state-heading">当前决策状态</h2>
+    <div class="grid" id="state-grid"></div>
+    <div id="verdict" class="verdict warn"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="probe-heading">
+    <h2 id="probe-heading">玩具 Gaussian 场：看语义碎片、断开的同类实例和边界泄漏</h2>
+    <div class="probe-layout">
+      <div>
+        <div class="probe-grid" id="probe-grid"></div>
+        <p class="probe-note" id="probe-note"></p>
+      </div>
+      <div>
+        <div class="legend">
+          <div class="legend-row"><span class="swatch" style="background:#d9eee7"></span><span>对象区域：同一 category 的两个断开实例。</span></div>
+          <div class="legend-row"><span class="swatch" style="background:#f4e8d4"></span><span>干扰区域：局部 text unary 很高，但 field boundary 应阻断扩散。</span></div>
+          <div class="legend-row"><span class="swatch" style="background:#e8ece9"></span><span>背景区域：没有足够语义证据。</span></div>
+          <div class="legend-row"><span class="swatch" style="border:2px solid #285f59"></span><span>共享 Gaussian Query Posterior ≥ 0.5；2D 与 3D 都只消费它。</span></div>
+        </div>
+        <div class="private-box">
+          <strong>紫色诊断只属于 evaluator</strong>
+          语义排序 ceiling 和 hierarchy representability ceiling 只能在预测封存后用 private GT 计算；不得选后验、区域、阈值或 checkpoint。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="free-play-heading">
+    <h2 id="free-play-heading">自由组合</h2>
+    <div class="control-group">
+      <div class="control-label">语义支持 / 边界机制</div>
+      <div class="buttons" id="mechanism-buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">概率校准与二值边界</div>
+      <div class="buttons" id="calibration-buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">玩具情形</div>
+      <div class="buttons" id="scenario-buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">假设 pilot 结果（只演示诊断逻辑）</div>
+      <div class="buttons">
+        <button class="action private" data-outcome="semantic_fail">语义 ranking ceiling 失败</button>
+        <button class="action private" data-outcome="topology_fail">语义过、hierarchy ceiling 失败</button>
+        <button class="action private" data-outcome="readout_fail">两个 ceiling 过、实际后验失败</button>
+        <button class="action private" data-outcome="split_fail">只过一个 LERF task</button>
+        <button class="action private" data-outcome="joint_pass">五个 VPA 分量全过</button>
+        <button class="action" data-outcome="unrun">清除假设结果</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="buttons">
+        <button class="action primary" id="recommend">回到建议组合</button>
+        <button class="action" id="reset">重置</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="gates-heading">
+    <h2 id="gates-heading">契约硬门</h2>
+    <ul class="gate-list" id="gate-list"></ul>
+  </section>
+
+  <section class="panel" aria-labelledby="evidence-heading">
+    <h2 id="evidence-heading">为什么优先试区域层级 + 多区域边缘后验</h2>
+    <ul class="evidence-list" id="evidence-list"></ul>
+  </section>
+
+  <section class="panel" aria-labelledby="metrics-heading">
+    <h2 id="metrics-heading">不可补偿的四场景 VPA 门</h2>
+    <p>同一个候选后验必须同时恢复五个 mandatory VPA 分量。红色是当前 gap matrix 尚未达到的分量；LERF-2D LocAcc 已略过 floor，必须保住。</p>
+    <div style="overflow-x:auto">
+      <table class="metric-table">
+        <thead><tr><th>任务 / 分量</th><th>当前 Context Evidence</th><th>mandatory VPA floor</th><th>差值 (pp)</th><th>候选要求</th></tr></thead>
+        <tbody>
+          <tr><td>LERF-2D mIoU</td><td>51.7373374</td><td>63.6200435</td><td class="fail">−11.8827061</td><td>恢复至 floor</td></tr>
+          <tr><td>LERF-2D LocAcc</td><td>82.9690779</td><td>82.8487101</td><td class="pass">+0.1203678</td><td>不得丢失</td></tr>
+          <tr><td>LERF-3D mIoU</td><td>42.3784450</td><td>54.1248877</td><td class="fail">−11.7464428</td><td>恢复至 floor</td></tr>
+          <tr><td>LERF-3D Acc@.25</td><td>75.1771899</td><td>79.3526471</td><td class="fail">−4.1754572</td><td>恢复至 floor</td></tr>
+          <tr><td>LERF-3D Acc@.50</td><td>40.7636981</td><td>56.6114038</td><td class="fail">−15.8477056</td><td>恢复至 floor</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">此外，候选相对同字段纯 unary matched arm 的任何分量回退不得超过 0.5 pp。通过 floor 只允许机制进入后续 joint objective；dated Conditional SOTA Targets 仍是 68.8/88.7 与 60.4/79.6/68.2，不能由本票降格。</p>
+  </section>
+
+  <section class="panel" aria-labelledby="pilot-heading">
+    <h2 id="pilot-heading">最小固定四场景证据：<code>lerf-shared-region-marginal-full4-v1</code></h2>
+    <ol class="pilot-list" id="pilot-list"></ol>
+  </section>
+
+  <section class="panel" aria-labelledby="diagnosis-heading">
+    <h2 id="diagnosis-heading">失败归因必须在封存后单向进行</h2>
+    <ul class="diagnosis-list" id="diagnosis-list"></ul>
+  </section>
+
+  <section class="panel" aria-labelledby="walkthrough-heading">
+    <h2 id="walkthrough-heading">引导式推演</h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="walkthrough">
+      <p class="walkthrough-description" id="walkthrough-description"></p>
+      <div class="walkthrough-steps" id="walkthrough-steps"></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="handoff-heading">
+    <h2 id="handoff-heading">给 Wayfinder 的人类决策</h2>
+    <p>请先走一遍“建议组合”和“归因分叉”。然后复制 decision token，在对话里回复“同意”、指出要改的机制，或选择保留哪条替代路线。本页不持久化状态，也不会自行关闭 ticket。</p>
+    <textarea class="decision-token" id="decision-token" readonly></textarea>
+    <div class="buttons"><button class="action primary" id="copy-token">复制 decision token</button></div>
+    <p class="footnote" id="copy-status">若浏览器不允许剪贴板访问，可直接选中文本复制。</p>
+  </section>
+
+  <section class="panel" aria-labelledby="sources-heading">
+    <h2 id="sources-heading">原型绑定的仓库证据与前序决议</h2>
+    <ul class="sources">
+      <li><a href="../../paper/artifacts/six_task_destination_compliant_baseline_gap_matrix_20260812.json">six-task destination-compliant gap matrix</a></li>
+      <li><a href="../../paper/artifacts/lerf2d_current_field_boundary_readout_stage_a_20260810.json">LERF-2D current-field boundary diagnosis</a></li>
+      <li><a href="../../paper/artifacts/lerf_full4_post_readout_odds_residual_transport_v4_result_20260810.json">primitive-local residual four-scene failure</a></li>
+      <li><a href="../../paper/artifacts/gaussian_carrier_ceiling_lerf_results_20260804.json">Gaussian scalar-carrier feasibility ceiling</a></li>
+      <li><a href="../../paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_result_20260807.json">single- vs multi-region diagnostic</a></li>
+      <li><a href="../../paper/artifacts/source_sam_single_radio_lerf_figurines_rgb_free_benchmark_result_20260811.json">mapping-only SAM relation attenuation</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/4">Define the shared field and modality-specific query interface</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/5">Freeze six dated SOTA Targets and Evaluation Contracts</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/14">Choose the canonical field family and mapping-teacher policy</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/19">Choose the transferable instance carrier and interactive update for AGILE3D</a></li>
+    </ul>
+  </section>
+</main>
+
+<script>
+// Portable logic module. It owns all decision state and never touches the DOM.
+const LerfDecision = (() => {
+  const mechanisms = {
+    unary: {
+      name: "纯 Gaussian text unary",
+      short: "Unary control",
+      legal: true,
+      fieldDerived: true,
+      multiRegion: true,
+      boundaryAware: false,
+      sharedPosterior: true,
+      description: "只校准 semantic Capability View 的 per-Gaussian text log-odds；作为 matched causal control 保留。",
+      verdict: "合法但不足：不利用 field boundary，无法解释已有 2D 边界 deficit 与 3D support omission。"
+    },
+    local: {
+      name: "primitive-local odds residual",
+      short: "Local residual",
+      legal: true,
+      fieldDerived: false,
+      multiRegion: true,
+      boundaryAware: false,
+      sharedPosterior: true,
+      description: "在旧 spatial readout 之后逐 Gaussian 修补 log-odds。",
+      verdict: "已被四场景因果结果否定：scale collapse 与 visibility/support omission 无法靠局部公式修复。"
+    },
+    single: {
+      name: "单 SurfaceRegion 选择",
+      short: "Single region",
+      legal: true,
+      fieldDerived: false,
+      multiRegion: false,
+      boundaryAware: true,
+      sharedPosterior: false,
+      description: "每个 category query 只保留一个最强 region。",
+      verdict: "结构上不够：category 可含断开的多个实例，且前序 oracle 显示单区域覆盖明显不足。"
+    },
+    hierarchy: {
+      name: "Field Region Hierarchy + Semantic Marginal",
+      short: "Hierarchy marginal",
+      legal: true,
+      fieldDerived: true,
+      multiRegion: true,
+      boundaryAware: true,
+      sharedPosterior: true,
+      description: "从 legal cold field 编译 laminar 边界区域层级；用 source-frozen likelihood 做 tree-structured sum-product，边缘化全部合法 foreground/background/split 状态，得到多区域 Gaussian posterior。",
+      verdict: "建议候选：既保留断开同类区域，又用 field boundary 阻断泄漏；不做 query-seeded component selection。"
+    },
+    targetRgb: {
+      name: "target-RGB SAM / proposal snap",
+      short: "Target RGB",
+      legal: false,
+      fieldDerived: false,
+      multiRegion: true,
+      boundaryAware: true,
+      sharedPosterior: false,
+      description: "Query 时读取 target/rendered RGB 或外部视觉模型补边界。",
+      verdict: "直接违规：target RGB 是 Evaluation View，不能成为 Primary Query evidence。"
+    }
+  };
+
+  const calibrations = {
+    global05: {
+      name: "source-frozen affine log-odds + 0.5",
+      short: "Global 0.5",
+      legal: true,
+      shared: true,
+      description: "温度、偏置、tree-state prior 与 conductance 参数只从独立 source-train 冻结；binary posterior boundary 固定 0.5。"
+    },
+    legacySplit: {
+      name: "2D 0.5 / 3D legacy 0.6",
+      short: "Split thresholds",
+      legal: false,
+      shared: false,
+      description: "按 output/task 继承不同 semantic threshold，破坏一个共享 Gaussian Query Posterior 的校准语义。"
+    },
+    sceneTune: {
+      name: "per-scene / metric sweep",
+      short: "Scene tuning",
+      legal: false,
+      shared: false,
+      description: "用 LERF metric、scene 或 query 身份选择阈值、尺度或 region 数量。"
+    }
+  };
+
+  const scenarios = {
+    fragmented: {
+      name: "断开的同类实例",
+      note: "A-left 与 A-right 是同一 category 的两个实例。单区域选择会漏掉右侧；多区域 marginal 可以同时保留。",
+      base: [0.76, 0.64, 0.31, 0.23, 0.52, 0.47, 0.17, 0.21, 0.66, 0.58, 0.29, 0.19]
+    },
+    boundaryLeak: {
+      name: "高响应边界干扰",
+      note: "干扰区有一个高 text unary。primitive-local 或 flat smoothing 容易泄漏；field boundary 应让区域证据在边界处停止。",
+      base: [0.73, 0.62, 0.36, 0.27, 0.71, 0.59, 0.18, 0.24, 0.57, 0.51, 0.33, 0.21]
+    },
+    weakSemantic: {
+      name: "字段语义本身过弱",
+      note: "目标区 unary 接近随机。边界层级不能凭空创造语义；若 sealed ranking ceiling 也失败，应归因字段 representation。",
+      base: [0.52, 0.48, 0.42, 0.38, 0.49, 0.45, 0.35, 0.39, 0.51, 0.46, 0.41, 0.37]
+    }
+  };
+
+  const nodes = [
+    {name:"g1", region:"A-left", kind:"object"}, {name:"g2", region:"A-left", kind:"object"},
+    {name:"g3", region:"A-left", kind:"object", boundary:true}, {name:"g4", region:"background", kind:"background", boundary:true},
+    {name:"g5", region:"distractor", kind:"distractor"}, {name:"g6", region:"distractor", kind:"distractor"},
+    {name:"g7", region:"background", kind:"background"}, {name:"g8", region:"background", kind:"background"},
+    {name:"g9", region:"A-right", kind:"object"}, {name:"g10", region:"A-right", kind:"object"},
+    {name:"g11", region:"background", kind:"background", boundary:true}, {name:"g12", region:"background", kind:"background"}
+  ];
+
+  const initial = () => ({
+    mechanism: "unary",
+    calibration: "global05",
+    scenario: "fragmented",
+    pilotOutcome: "unrun"
+  });
+
+  const recommend = () => ({
+    mechanism: "hierarchy",
+    calibration: "global05",
+    scenario: "fragmented",
+    pilotOutcome: "unrun"
+  });
+
+  function clamp(value) { return Math.max(0.01, Math.min(0.99, value)); }
+
+  function posterior(state) {
+    const raw = scenarios[state.scenario].base;
+    return raw.map((value, index) => {
+      const node = nodes[index];
+      if (state.mechanism === "unary") return value;
+      if (state.mechanism === "local") return clamp(value + (value - 0.5) * 0.16);
+      if (state.mechanism === "single") {
+        if (node.region === "A-left") return clamp(value + 0.19);
+        if (node.region === "A-right") return clamp(value - 0.24);
+        return clamp(value - 0.05);
+      }
+      if (state.mechanism === "targetRgb") return node.kind === "object" ? 0.92 : 0.08;
+      if (state.mechanism === "hierarchy") {
+        if (state.scenario === "weakSemantic") return clamp(value + (node.kind === "object" ? 0.03 : -0.03));
+        if (node.kind === "object") return clamp(value + 0.19);
+        if (node.kind === "distractor") return clamp(value - 0.25);
+        return clamp(value - 0.10);
+      }
+      return value;
+    });
+  }
+
+  function reduce(state, action) {
+    if (action.type === "selectMechanism") return {...state, mechanism: action.value};
+    if (action.type === "selectCalibration") return {...state, calibration: action.value};
+    if (action.type === "selectScenario") return {...state, scenario: action.value};
+    if (action.type === "setOutcome") return {...state, pilotOutcome: action.value};
+    if (action.type === "recommend") return recommend();
+    if (action.type === "reset") return initial();
+    return state;
+  }
+
+  function diagnosis(outcome) {
+    const diagnoses = {
+      unrun: "尚未运行：本票只选择机制与冻结最小证据，不制造新 benchmark 结果。",
+      semantic_fail: "字段 representation deficit：sealed per-Gaussian semantic ranking/oracle-threshold ceiling 已低于相应 floor；readout 无权用 GT 修复。",
+      topology_fail: "field boundary / support topology deficit：语义排序有信息，但合法 hierarchy 无法表示对象边界或多区域支持。",
+      readout_fail: "readout/calibration deficit：语义 ceiling 与 hierarchy representability ceiling 都过，但实际全局冻结 marginal 未过。",
+      split_fail: "共享机制被否决：只改善 LERF-2D 或 LERF-3D 不能换取另一 task 回退，也不能拆成 task-specific head。",
+      joint_pass: "假设 admission 成立：同一后验通过全部五个 VPA floor，才可交给后续 joint objective；仍不是 Development Advancement 或 SOTA row。"
+    };
+    return diagnoses[outcome];
+  }
+
+  function evaluate(state) {
+    const mechanism = mechanisms[state.mechanism];
+    const calibration = calibrations[state.calibration];
+    const gates = [
+      {name:"信息合法", pass:mechanism.legal, detail:mechanism.legal ? "Query 不读 RGB、teacher、MPR 或 GT。" : "包含被禁止的 Evaluation View 或任务路径。"},
+      {name:"cold closure", pass:mechanism.fieldDerived, detail:mechanism.fieldDerived ? "Capability View / topology 可仅从 Deployment Scene State 与 Global Method Parameters 重建。" : "当前机制不是合法 cold field 的闭包。"},
+      {name:"多区域类别", pass:mechanism.multiRegion, detail:mechanism.multiRegion ? "允许同一 category 的多个断开实例，不把 region 数量调成 scene knob。" : "单区域假设会丢失多实例或断开支持。"},
+      {name:"边界支持", pass:mechanism.boundaryAware, detail:mechanism.boundaryAware ? "边界来自 field-derived Capability View，而非 target RGB。" : "没有机制处理已观测的边界/支持缺口。"},
+      {name:"共享 posterior", pass:mechanism.sharedPosterior, detail:mechanism.sharedPosterior ? "Camera-Raster 与 selected-Gaussian 只消费同一 Gaussian Query Posterior。" : "2D/3D 路径在语义层发生分叉。"},
+      {name:"统一校准", pass:calibration.legal && calibration.shared, detail:calibration.description}
+    ];
+    const hardPass = gates.every(g => g.pass);
+    let level = "warn";
+    let title = "保留为 control 或待比较路线";
+    let detail = mechanism.verdict;
+    if (!mechanism.legal || !calibration.legal) {
+      level = "bad";
+      title = "契约不合法，不能成为候选";
+    } else if (state.mechanism === "hierarchy" && state.calibration === "global05") {
+      level = "good";
+      title = "当前建议：Boundary-Calibrated Field Region Hierarchy + Semantic Region-Hypothesis Marginal";
+      detail = "用一个 source-frozen CATEGORY preset 在固定 laminar hierarchy 上做 sum-product，生成共享 Gaussian posterior；2D 连续 alpha-normalized raster 与 3D posterior≥0.5 selected-only alpha 只是两个 Output-Domain Operators。";
+    }
+    if (state.pilotOutcome !== "unrun") detail += " " + diagnosis(state.pilotOutcome);
+    return {mechanism, calibration, gates, hardPass, level, title, detail};
+  }
+
+  function decisionToken(state) {
+    const e = evaluate(state);
+    return [
+      `ticket=Choose the shared LERF semantic-support and boundary mechanism`,
+      `mechanism=${e.mechanism.name}`,
+      `calibration=${e.calibration.name}`,
+      `outputs=one Gaussian Query Posterior -> Camera-Raster Output + posterior>=0.5 selected-Gaussian alpha output`,
+      `solver=tree-structured marginal over all legal foreground/background/split states; no query-seeded component selection`,
+      `pilot=lerf-shared-region-marginal-full4-v1; four scenes; 22 annotated cameras; 208 queries; five non-compensable VPA floors`,
+      `diagnosis=${diagnosis(state.pilotOutcome)}`,
+      `human_decision=同意 / 改为… / 先补证据…`
+    ].join("\n");
+  }
+
+  return {mechanisms, calibrations, scenarios, nodes, initial, recommend, posterior, reduce, evaluate, diagnosis, decisionToken};
+})();
+
+let state = LerfDecision.initial();
+let activeWalkthrough = "recommend";
+let completedSteps = 0;
+
+const walkthroughs = {
+  recommend: {
+    name: "建议组合",
+    description: "检查为何推荐 field-derived 区域层级、多区域 marginal 与一个全局 0.5 posterior boundary。",
+    steps: [
+      {label:"选择 Boundary-Calibrated Field Region Hierarchy + Semantic Marginal", action:{type:"selectMechanism", value:"hierarchy"}},
+      {label:"冻结 source-only affine log-odds，binary boundary = 0.5", action:{type:"selectCalibration", value:"global05"}},
+      {label:"观察断开同类实例：两个区域都应保留", action:{type:"selectScenario", value:"fragmented"}}
+    ]
+  },
+  attribution: {
+    name: "归因分叉",
+    description: "sealed diagnostics 只把失败归到下一个 seam；它们不能反向选择预测或参数。",
+    steps: [
+      {label:"先看 semantic ranking ceiling：失败就归因 field representation", action:{type:"setOutcome", value:"semantic_fail"}},
+      {label:"假设语义过但 hierarchy ceiling 失败：归因 boundary/topology", action:{type:"setOutcome", value:"topology_fail"}},
+      {label:"假设两个 ceiling 都过但实际 marginal 失败：归因 readout/calibration", action:{type:"setOutcome", value:"readout_fail"}},
+      {label:"清除假设结果；真实 pilot 尚未运行", action:{type:"setOutcome", value:"unrun"}}
+    ]
+  },
+  traps: {
+    name: "两条陷阱",
+    description: "直观看起来能补边界或保定位的做法，可能破坏 Information Grant 或共享 posterior。",
+    steps: [
+      {label:"选择 target-RGB SAM proposal：观察合法性门直接失败", action:{type:"selectMechanism", value:"targetRgb"}},
+      {label:"选择 2D 0.5 / 3D 0.6：观察统一校准门失败", action:{type:"selectCalibration", value:"legacySplit"}},
+      {label:"回到建议组合", action:{type:"recommend"}}
+    ]
+  },
+  rejectSplit: {
+    name: "拒绝 task split",
+    description: "若只过 LERF-2D 或只过 LERF-3D，不能用两个 task-specific head 拼出通过。",
+    steps: [
+      {label:"选择建议组合", action:{type:"recommend"}},
+      {label:"假设只过一个 task：共享机制整体失败", action:{type:"setOutcome", value:"split_fail"}},
+      {label:"假设五个 VPA 分量全过：只获得进入 joint objective 的资格", action:{type:"setOutcome", value:"joint_pass"}}
+    ]
+  }
+};
+
+const evidence = [
+  ["几何 carrier 不是全局硬上限", "GT-only 诊断的 one-scalar-per-Gaussian 可行下界在四场景均高于 0.90 mIoU；应先修语义支持、校准与边界，而不是重建 Gaussian geometry。"],
+  ["边界 deficit 存在，但不解释全部差距", "同一 current-field scalar map 加 forbidden target-RGB GrabCut 只恢复 +1.200 pp LERF-2D mIoU，LocAcc 不变；剩余约 5.96 pp 到历史 feature-only SAM3 row 仍牵涉语义支持/readout。"],
+  ["primitive-local 修补已失败", "四场景 odds-residual v4 相对 legacy macro mIoU −0.577 pp、Acc@.50 −1.763 pp，且每个 scene mIoU 都退化；其自身审计要求停止 algebra-only mapping。"],
+  ["单区域结构不足", "Figurines 诊断中 single rendered region fixed IoU 37.67%，最多八区域 union 为 77.13%；这是 evaluator-private oracle，不是候选得分，但明确了 multi-region seam。"],
+  ["mapping-only SAM 信号被现有 readout 衰减", "同 generation 的 source-SAM 关系监督在 LERF-2D 仅 +0.139 pp、LERF-3D −0.053 pp；说明合法 teacher signal 存在，却未被当前 multiscale spatial readout 稳定利用。"],
+  ["复用跨任务 field-derived region hierarchy", "AGILE3D 已选择同一个 query-independent Boundary-Calibrated Field Region Hierarchy。LERF CATEGORY preset 不使用 clicks，而是用 text unary 独立评分全部区域并边缘化，避免新建第二套 topology。"]
+];
+
+const pilotSteps = [
+  ["1. Cold carrier preflight", "对四个 sidecar-free D512/L512 field 删除 Training Artifacts 与 caches；从 sole Canonical Capability Feature、geometry、opacity 和允许 support state 重建 semantic/boundary Capability Views 与 region hierarchy 两次，要求 bitwise identity 与 Runtime Compliance Proof PASS。"],
+  ["2. Source-only freeze", "在任何新的四场景 metric 释放前，用独立 source-train folds 冻结 text affine calibration、region likelihood、boundary conductance、tree-state priors、sum-product 规则和全部 tie-break；相同 component identity 跨 scene 与 LERF-2D/3D。"],
+  ["3. Exact fixed cohort", "一次性绑定 figurines、ramen、teatime、waldo_kitchen，22 个 annotated cameras、208 个 official queries 和 annotated-camera semantic holdout；不做 query/scene skip。"],
+  ["4. Matched arms before metrics", "在 byte-identical cold fields 上封存 U=纯全局校准 text unary 与 H=region hierarchy + semantic marginal。两臂共享 text compiler、Gaussian posterior schema、0.5 boundary、geometry、Camera-Raster 与 selected-only-alpha outputs；只有支持/readout component 不同。"],
+  ["5. Three sealed diagnostic layers", "在 U/H predictions 全封存后，evaluator 才计算 (a) per-Gaussian semantic ranking / oracle-threshold ceiling，(b) hierarchy-consistent multi-region representability ceiling，(c) 实际 source-frozen marginal。前两层仅归因，绝不选择方法输出。"],
+  ["6. Non-compensable admission", "同一个 H posterior 必须达到 LERF-2D 63.6200435/82.8487101 与 LERF-3D 54.1248877/79.3526471/56.6114038；相对 U 任一分量不得低于 −0.5 pp。任何一项失败都不允许 task-specific fallback。"],
+  ["7. Bounded handoff", "通过只把这套机制交给 Define six-task negative-transfer controls and the joint mapping objective；不创建 Canonical Current Row，不主张 Development Advancement，也不运行 final six-task campaign。"]
+];
+
+const diagnosisRows = [
+  ["Semantic ranking ceiling 失败", "Canonical Capability Feature 没有足够 query-aligned semantic ordering；归因 representation，停止在 readout 上调阈值。"],
+  ["Semantic 过，hierarchy ceiling 失败", "boundary Capability View 或 Field-Derived Support Topology 不能表示合法对象支持；归因 boundary/topology。"],
+  ["两个 ceiling 过，实际 marginal 失败", "字段与 hierarchy 有足够信息，但全局 likelihood、calibration 或 marginal 用错；归因 readout。"],
+  ["只有一个 LERF task 通过", "共享机制失败。不得按 benchmark identity 选择 threshold、head、region count 或 fallback。"],
+  ["实际 posterior 五项全过", "机制进入后续 joint mapping-objective 候选；仍需 paired seeds、六任务 non-regression、cold/runtime gates 与 dated SOTA Targets。"]
+];
+
+function dispatch(action) {
+  state = LerfDecision.reduce(state, action);
+  render();
+}
+
+function renderState() {
+  const e = LerfDecision.evaluate(state);
+  const cards = [
+    ["Support mechanism", e.mechanism.short, e.mechanism.description],
+    ["Calibration", e.calibration.short, e.calibration.description],
+    ["Outputs", "One posterior, two domains", "2D 连续 alpha-normalized Camera-Raster；3D posterior≥0.5 Gaussian subset + selected-only alpha。"],
+    ["Pilot diagnosis", state.pilotOutcome === "unrun" ? "尚未运行" : "假设状态", LerfDecision.diagnosis(state.pilotOutcome)]
+  ];
+  document.getElementById("state-grid").innerHTML = cards.map(([label,value,detail]) => `
+    <div class="card"><div class="label">${label}</div><div class="value">${value}</div><div class="detail">${detail}</div></div>
+  `).join("");
+  const verdict = document.getElementById("verdict");
+  verdict.className = `verdict ${e.level}`;
+  verdict.innerHTML = `<strong>${e.title}</strong>${e.detail}`;
+}
+
+function renderProbe() {
+  const scores = LerfDecision.posterior(state);
+  const colors = {object:"#d9eee7", distractor:"#f4e8d4", background:"#e8ece9"};
+  document.getElementById("probe-grid").innerHTML = LerfDecision.nodes.map((node, i) => {
+    const selected = scores[i] >= 0.5 ? " selected" : "";
+    const boundary = node.boundary ? " boundary" : "";
+    return `<div class="gaussian${selected}${boundary}" style="background:${colors[node.kind]}">
+      <span class="name">${node.name}</span><span class="score">${scores[i].toFixed(2)}</span><span class="region">${node.region}</span>
+    </div>`;
+  }).join("");
+  const scenario = LerfDecision.scenarios[state.scenario];
+  document.getElementById("probe-note").textContent = `${scenario.name}：${scenario.note} 数值为机制示意，不是 benchmark 测量。`;
+}
+
+function renderControls() {
+  document.getElementById("mechanism-buttons").innerHTML = Object.entries(LerfDecision.mechanisms).map(([key, item]) =>
+    `<button class="choice${state.mechanism === key ? " active" : ""}" data-mechanism="${key}">${item.name}</button>`
+  ).join("");
+  document.getElementById("calibration-buttons").innerHTML = Object.entries(LerfDecision.calibrations).map(([key, item]) =>
+    `<button class="choice${state.calibration === key ? " active" : ""}" data-calibration="${key}">${item.name}</button>`
+  ).join("");
+  document.getElementById("scenario-buttons").innerHTML = Object.entries(LerfDecision.scenarios).map(([key, item]) =>
+    `<button class="choice${state.scenario === key ? " active" : ""}" data-scenario="${key}">${item.name}</button>`
+  ).join("");
+  document.querySelectorAll("[data-mechanism]").forEach(button => button.onclick = () => dispatch({type:"selectMechanism", value:button.dataset.mechanism}));
+  document.querySelectorAll("[data-calibration]").forEach(button => button.onclick = () => dispatch({type:"selectCalibration", value:button.dataset.calibration}));
+  document.querySelectorAll("[data-scenario]").forEach(button => button.onclick = () => dispatch({type:"selectScenario", value:button.dataset.scenario}));
+}
+
+function renderGates() {
+  const gates = LerfDecision.evaluate(state).gates;
+  document.getElementById("gate-list").innerHTML = gates.map(gate => `
+    <li class="gate ${gate.pass ? "pass" : "fail"}"><div class="status">${gate.pass ? "PASS" : "FAIL"} · ${gate.name}</div><div>${gate.detail}</div></li>
+  `).join("");
+}
+
+function renderStaticLists() {
+  document.getElementById("evidence-list").innerHTML = evidence.map(([title, body]) => `<li class="evidence-row"><strong>${title}</strong><p>${body}</p></li>`).join("");
+  document.getElementById("pilot-list").innerHTML = pilotSteps.map(([title, body]) => `<li class="pilot-step"><strong>${title}</strong><p>${body}</p></li>`).join("");
+  document.getElementById("diagnosis-list").innerHTML = diagnosisRows.map(([title, body]) => `<li class="diagnosis-row"><strong>${title}</strong><p>${body}</p></li>`).join("");
+}
+
+function startWalkthrough(key) {
+  activeWalkthrough = key;
+  completedSteps = 0;
+  state = LerfDecision.initial();
+  render();
+}
+
+function renderWalkthrough() {
+  document.getElementById("tabs").innerHTML = Object.entries(walkthroughs).map(([key, flow]) =>
+    `<button class="tab${activeWalkthrough === key ? " active" : ""}" data-tab="${key}">${flow.name}</button>`
+  ).join("");
+  document.querySelectorAll("[data-tab]").forEach(button => button.onclick = () => startWalkthrough(button.dataset.tab));
+  const flow = walkthroughs[activeWalkthrough];
+  document.getElementById("walkthrough-description").textContent = flow.description;
+  document.getElementById("walkthrough-steps").innerHTML = flow.steps.map((step, index) => `
+    <div class="walkthrough-step${index < completedSteps ? " done" : ""}">
+      <button class="step-button" data-step="${index}" ${index !== completedSteps ? "disabled" : ""}>${step.label}</button>
+    </div>
+  `).join("");
+  document.querySelectorAll("[data-step]").forEach(button => button.onclick = () => {
+    const index = Number(button.dataset.step);
+    dispatch(flow.steps[index].action);
+    completedSteps = Math.min(flow.steps.length, completedSteps + 1);
+    renderWalkthrough();
+  });
+}
+
+function renderToken() {
+  document.getElementById("decision-token").value = LerfDecision.decisionToken(state);
+}
+
+function render() {
+  renderState();
+  renderProbe();
+  renderControls();
+  renderGates();
+  renderToken();
+  renderWalkthrough();
+}
+
+document.querySelectorAll("[data-outcome]").forEach(button => button.onclick = () => dispatch({type:"setOutcome", value:button.dataset.outcome}));
+document.getElementById("recommend").onclick = () => dispatch({type:"recommend"});
+document.getElementById("reset").onclick = () => dispatch({type:"reset"});
+document.getElementById("copy-token").onclick = async () => {
+  const token = document.getElementById("decision-token").value;
+  try {
+    await navigator.clipboard.writeText(token);
+    document.getElementById("copy-status").textContent = "已复制。请回到对话确认或修改这个决策。";
+  } catch (error) {
+    document.getElementById("copy-status").textContent = "浏览器拒绝剪贴板访问；请直接选中文本复制。";
+  }
+};
+
+renderStaticLists();
+render();
+</script>
+</body>
+</html>
