@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一次性原型：Canonical Capability Feature 决策实验台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17211d;
+      --muted: #5e6b65;
+      --paper: #f7f8f4;
+      --panel: #ffffff;
+      --line: #d8ded9;
+      --accent: #146c5a;
+      --accent-soft: #dff1eb;
+      --warn: #8b5d00;
+      --warn-soft: #fff0c9;
+      --bad: #9b2c2c;
+      --bad-soft: #fbe4e4;
+      --good: #1f6b3b;
+      --good-soft: #e2f2e7;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    main { width: min(1180px, calc(100% - 32px)); margin: 28px auto 64px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(28px, 4vw, 46px); line-height: 1.05; letter-spacing: -0.035em; }
+    h2 { margin-bottom: 14px; font-size: 21px; }
+    h3 { margin-bottom: 8px; font-size: 16px; }
+    p, li { line-height: 1.55; }
+    a { color: var(--accent); }
+    code { font-size: 0.93em; }
+    button { font: inherit; }
+
+    .prototype-flag {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 10px;
+      border: 1px solid #efc15c;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #704800;
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: 0.04em;
+    }
+    .intro { max-width: 900px; font-size: 17px; color: #33413a; }
+    .scope-note {
+      margin: 20px 0 26px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+    .scope-note strong { display: block; margin-bottom: 4px; }
+
+    .panel {
+      margin-top: 22px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 7px 22px rgb(35 52 44 / 0.06);
+    }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .card { padding: 15px; border: 1px solid var(--line); border-radius: 12px; background: #fbfcfa; }
+    .card .label { color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .045em; text-transform: uppercase; }
+    .card .value { margin-top: 6px; font-size: 17px; font-weight: 750; }
+    .card .detail { margin-top: 7px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .verdict { margin-top: 14px; padding: 16px; border-radius: 12px; }
+    .verdict.good { color: var(--good); background: var(--good-soft); }
+    .verdict.warn { color: var(--warn); background: var(--warn-soft); }
+    .verdict.bad { color: var(--bad); background: var(--bad-soft); }
+    .verdict strong { display: block; margin-bottom: 4px; }
+
+    .control-group + .control-group { margin-top: 20px; }
+    .control-label { margin-bottom: 9px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: .035em; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 9px; }
+    .choice, .action, .step-button, .tab {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .choice:hover, .action:hover, .step-button:hover, .tab:hover { border-color: var(--accent); }
+    .choice.active, .tab.active { border-color: var(--accent); background: var(--accent-soft); color: #0c5647; font-weight: 750; }
+    .action.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+    .gate-list, .evidence-list, .pilot-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .gate, .evidence-row, .pilot-step { padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; }
+    .gate { display: grid; grid-template-columns: 105px 1fr; gap: 10px; align-items: start; }
+    .gate .status { font-weight: 800; }
+    .gate.pass .status { color: var(--good); }
+    .gate.fail .status { color: var(--bad); }
+    .gate.unknown .status { color: var(--warn); }
+    .gate p, .evidence-row p, .pilot-step p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .evidence-row strong, .pilot-step strong { display: block; }
+
+    .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .tab { white-space: nowrap; }
+    .walkthrough { margin-top: 14px; }
+    .walkthrough-description { min-height: 50px; color: var(--muted); }
+    .walkthrough-steps { display: grid; gap: 9px; counter-reset: step; }
+    .walkthrough-step { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; }
+    .walkthrough-step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 50%;
+      background: #edf0ed;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .walkthrough-step.done::before { background: var(--good-soft); color: var(--good); content: "✓"; }
+    .step-button { width: 100%; text-align: left; }
+    .step-button:disabled { cursor: default; opacity: .55; }
+
+    .decision-token {
+      width: 100%;
+      min-height: 80px;
+      margin-top: 12px;
+      padding: 12px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8faf8;
+      color: var(--ink);
+      font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .footnote { margin-top: 12px; color: var(--muted); font-size: 13px; }
+    .sources { columns: 2; column-gap: 32px; margin-bottom: 0; padding-left: 19px; }
+    .sources li { break-inside: avoid; margin-bottom: 8px; font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sources { columns: 1; }
+    }
+    @media (max-width: 560px) {
+      main { width: min(100% - 20px, 1180px); margin-top: 18px; }
+      .panel { padding: 16px; }
+      .grid { grid-template-columns: 1fr; }
+      .gate { grid-template-columns: 82px 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <span class="prototype-flag">PROTOTYPE · 一次性决策实验台 · 不属于生产实现</span>
+  <h1>Canonical Capability Feature 家族与 mapping teacher 怎么配？</h1>
+  <p class="intro">
+    本原型只回答 <a href="https://github.com/Arthurshen926/RADIO-GS/issues/14">Choose the canonical field family and mapping-teacher policy</a>：
+    在一项严格的 Single Compact Feature Field 方法规格中，应冻结哪一种每-Gaussian 单特征家族，以及 mapping 阶段允许哪些 teacher 约束。
+  </p>
+  <div class="scope-note">
+    <strong>读数边界</strong>
+    这些数字是 Development / Context Evidence，不是可晋升的 six-task row。当前 Joint Development Baseline 仍为空；这个 ticket 只选进入实现规格的候选，不执行后续 six-task negative-transfer 或最终 benchmark 工作。
+  </div>
+
+  <section class="panel" aria-labelledby="state-heading">
+    <h2 id="state-heading">当前决策状态</h2>
+    <div class="grid" id="state-grid"></div>
+    <div id="verdict" class="verdict warn"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="free-play-heading">
+    <h2 id="free-play-heading">自由组合</h2>
+    <div class="control-group">
+      <div class="control-label">Canonical Capability Feature 家族</div>
+      <div class="buttons" id="family-buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Mapping-stage teacher policy</div>
+      <div class="buttons" id="teacher-buttons"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">审查动作</div>
+      <div class="buttons">
+        <button class="action" data-action="toggleCold">切换：cold-start 重打包是否已验证</button>
+        <button class="action" data-action="toggleJoint">切换：三 seed joint pilot 是否已跑</button>
+        <button class="action primary" data-action="recommend">回到建议组合</button>
+        <button class="action" data-action="reset">重置</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="gates-heading">
+    <h2 id="gates-heading">硬门与证据门</h2>
+    <ul class="gate-list" id="gate-list"></ul>
+  </section>
+
+  <section class="panel" aria-labelledby="evidence-heading">
+    <h2 id="evidence-heading">已观测证据</h2>
+    <ul class="evidence-list" id="evidence-list"></ul>
+  </section>
+
+  <section class="panel" aria-labelledby="pilot-heading">
+    <h2 id="pilot-heading">把“建议”变成可执行规格的最小证据</h2>
+    <ol class="pilot-list" id="pilot-list"></ol>
+  </section>
+
+  <section class="panel" aria-labelledby="walkthrough-heading">
+    <h2 id="walkthrough-heading">引导式推演</h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="walkthrough">
+      <p class="walkthrough-description" id="walkthrough-description"></p>
+      <div class="walkthrough-steps" id="walkthrough-steps"></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="handoff-heading">
+    <h2 id="handoff-heading">给 wayfinder 的人类决策</h2>
+    <p>选好组合后复制下面的 decision token，并在对话中说明“同意”“改为……”或“先补证据”。本页不持久化状态，也不会自行关闭 ticket。</p>
+    <textarea class="decision-token" id="decision-token" readonly></textarea>
+    <div class="buttons">
+      <button class="action primary" id="copy-token">复制 decision token</button>
+    </div>
+    <p class="footnote" id="copy-status">如果浏览器不允许剪贴板访问，可直接选中文本复制。</p>
+  </section>
+
+  <section class="panel" aria-labelledby="sources-heading">
+    <h2 id="sources-heading">原型绑定的仓库证据</h2>
+    <ul class="sources">
+      <li><a href="../../paper/artifacts/canonical_compact_capability_iteration_20260714.md">D384 与 D256/L128 compact 对照</a></li>
+      <li><a href="../../paper/artifacts/core_problem_iteration_20260715.md">full-1280 ceiling 与 boundary diagnosis</a></li>
+      <li><a href="../../paper/artifacts/canonical_field_stage_b_figurines_source_only_multiteacher_v2_results_20260810.json">D512/L512 source-only teacher gates</a></li>
+      <li><a href="../../paper/artifacts/canonical_field_stage_b_figurines_lerf3d_one_shot_ab_results_20260810.json">D512/L512 frozen LERF3D A/B</a></li>
+      <li><a href="../../paper/artifacts/source_sam_single_radio_scannet_paper8_exact_result_20260810.json">source-only SAM ScanNet paper8</a></li>
+      <li><a href="../../paper/artifacts/source_sam_single_radio_lerf_figurines_capability_relative_v3_rgb_free_benchmark_result_20260811.json">source-only SAM LERF attenuation diagnosis</a></li>
+      <li><a href="../../paper/artifacts/six_task_destination_compliant_baseline_gap_matrix_20260812.json">destination-compliant gap matrix</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/7">Persistent Scene-Storage Increment gate</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/12">joint promotion rule</a></li>
+    </ul>
+  </section>
+</main>
+
+<script>
+// Portable logic module: it owns the decision state and contains no DOM calls.
+const FieldDecision = (() => {
+  const families = {
+    d384: {
+      name: "D384 高保真 oracle",
+      short: "D384 oracle",
+      feature: "单一 D384 coefficient feature；解码到 RADIO",
+      storage: "Ramen 历史 package 约 569 MiB；按已冻结预算仍可过门",
+      singleFeature: true,
+      storageGate: true,
+      coldStatus: "unknown",
+      evidence: [
+        "full-1280 相对 D384 的 held-out raw cosine 只高 0.002689：扩大到 full dimension 没有解释主要误差。",
+        "它是 fidelity oracle，不是绑定到当前 six-task 合法执行链的候选身份。"
+      ]
+    },
+    compact: {
+      name: "D256/L128 compact",
+      short: "D256/L128",
+      feature: "单一 L128 local code；scene-bound affine decoder",
+      storage: "Ramen 历史 checkpoint 约 196 MiB；明显低于 soft target",
+      singleFeature: true,
+      storageGate: true,
+      coldStatus: "unknown",
+      evidence: [
+        "历史 compact 主线在多个单场景诊断中接近 D384；体积最小。",
+        "历史 Query 仍使用 capability/descriptor cache，尚未证明从合法 cold package 独立重建。"
+      ]
+    },
+    factorizedCurrent: {
+      name: "现有 factorized D512/L512 执行链",
+      short: "factorized-as-is",
+      feature: "checkpoint 内是一份 local code，但 Query 链依赖 primitive/capability sidecar",
+      storage: "Figurines checkpoint 333.962 MiB；soft target 337.670 MiB",
+      singleFeature: false,
+      storageGate: true,
+      coldStatus: "fail",
+      evidence: [
+        "D512/L512 checkpoint 的 local_codes、basis 与 fusion 本身可计费并处于 storage soft target 内。",
+        "现有 factorized primitive state、capability/descriptor materialization 会重新打开 MPR/teacher 派生物，当前执行身份硬失败。"
+      ]
+    },
+    d512Single: {
+      name: "sidecar-free D512/L512 单特征包",
+      short: "D512/L512 single",
+      feature: "唯一 local code + scene-bound decoder/fusion；幅度若必需则内嵌同一 feature schema",
+      storage: "原型以 333.962 MiB fp32 Figurines checkpoint 为上界；距 soft target 尚余 3,887,999 bytes",
+      singleFeature: true,
+      storageGate: true,
+      coldStatus: "needs_preflight",
+      evidence: [
+        "source direction-only training 的 raw/DINO/SAM mean cosine 为 0.9931/0.9881/0.9857，八个 source gate 全过。",
+        "同一 frozen LERF3D readout 相对 factorized control 提升 0.1349 pp；虽小，但方向为正且没有换 readout。"
+      ]
+    }
+  };
+
+  const teachers = {
+    raw: {
+      name: "仅 raw RADIO reconstruction",
+      short: "raw-only",
+      legal: true,
+      maturity: "known",
+      evidence: "信息边界清楚，但没有利用已观测的 DINO/SAM capability 与 region-structure 增益。"
+    },
+    capability: {
+      name: "raw + frozen DINO/SAM capability targets",
+      short: "capability",
+      legal: true,
+      maturity: "known",
+      evidence: "teacher 仅在 Mapping Observation 上运行，产物为 Training Artifacts；现有 compact/factorized source gates 支持此策略。"
+    },
+    samRelative: {
+      name: "capability + source-only SAM relative structure",
+      short: "SAM-relative",
+      legal: true,
+      maturity: "observed",
+      evidence: "ScanNet paper8 三个 split 的 mIoU 分别 +0.0543/+0.0357/+0.1188 pp；LERF 的新 v3 relation arm近中性且未过旧 +0.2 pp promotion threshold。"
+    },
+    renderRegion: {
+      name: "capability + source-render-consistent region/boundary",
+      short: "render-region",
+      legal: true,
+      maturity: "hypothesis",
+      evidence: "这是 LERF attenuation 与 boundary diagnosis 指向的新 arm；尚无 frozen result，不能在本 ticket 中伪装成已验证 winner。"
+    }
+  };
+
+  const initialState = () => ({
+    family: "d384",
+    teacher: "raw",
+    coldPreflight: false,
+    jointPilot: false,
+    lastChange: "已载入默认对照；尚未采用建议组合。"
+  });
+
+  const recommendedState = () => ({
+    family: "d512Single",
+    teacher: "samRelative",
+    coldPreflight: false,
+    jointPilot: false,
+    lastChange: "已选择建议组合；仍需实现阶段通过 cold-start preflight。"
+  });
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case "selectFamily":
+        return { ...state, family: action.value, coldPreflight: false, jointPilot: false, lastChange: `Field 切换为 ${families[action.value].short}。` };
+      case "selectTeacher":
+        return { ...state, teacher: action.value, jointPilot: false, lastChange: `Teacher policy 切换为 ${teachers[action.value].short}。` };
+      case "toggleCold":
+        return { ...state, coldPreflight: !state.coldPreflight, jointPilot: state.coldPreflight ? false : state.jointPilot, lastChange: `Cold-start preflight 标记为 ${!state.coldPreflight ? "已通过" : "未通过"}。` };
+      case "toggleJoint":
+        return { ...state, jointPilot: !state.jointPilot, lastChange: `Joint pilot 标记为 ${!state.jointPilot ? "已完成" : "未完成"}。` };
+      case "recommend":
+        return recommendedState();
+      case "reset":
+        return initialState();
+      default:
+        return state;
+    }
+  }
+
+  function derive(state) {
+    const family = families[state.family];
+    const teacher = teachers[state.teacher];
+    const hardFail = !family.singleFeature || family.coldStatus === "fail" || !family.storageGate || !teacher.legal;
+    const isRecommendation = state.family === "d512Single" && state.teacher === "samRelative";
+    const isUnrunArm = teacher.maturity === "hypothesis";
+    let tone = "warn";
+    let headline = "可比较，但证据不足以冻结";
+    let explanation = "该组合没有触发已知硬门，但还没有形成比现有候选更强、且可追溯的选择理由。";
+
+    if (hardFail) {
+      tone = "bad";
+      headline = "硬门失败：不能进入实现规格";
+      explanation = "当前部署执行链不满足 single-feature / cold-start closure；数值质量和更小体积都不能抵消这类失败。";
+    } else if (isUnrunArm) {
+      headline = "保留为 issue 18 的实验 arm，不在此处直接冻结";
+      explanation = "source-render-consistent region/boundary objective 有明确诊断依据，但还没有 frozen runnable result。把它当 winner 会把假设写成结论。";
+    } else if (isRecommendation && !state.coldPreflight) {
+      headline = "建议进入实现规格（附硬性 preflight）";
+      explanation = "D512/L512 已给出最强的同架构 source fidelity 与小幅 frozen task 增益；source-only SAM relative structure 在 paper8 上有精确正向转移。规格必须同时删除所有 teacher/MPR sidecar 依赖，并把重打包验证设为前置硬门。";
+    } else if (isRecommendation && state.coldPreflight && !state.jointPilot) {
+      tone = "good";
+      headline = "实现候选已通过 cold-start 资格门"
+      explanation = "可以交给后续 joint-objective ticket；这仍不是 Development Advancement，因为固定三 seed six-task pilot 尚未完成。";
+    } else if (isRecommendation && state.coldPreflight && state.jointPilot) {
+      tone = "good";
+      headline = "候选具备进入 advancement 判定的证据形状";
+      explanation = "这里只演示状态转移；真实 joint pilot 必须由后续 ticket 的 content-bound receipts 证明，不能由本页勾选替代。";
+    } else if (state.family === "d384") {
+      headline = "D384 不是 storage 失败，而是选择理由不足";
+      explanation = "它仍可过已冻结 storage gate；但 full-1280 ceiling 没显示出容量主导误差，且 D384 没有比 D512 source-structure candidate 更新的 matched transfer 证据。继续把它当 oracle 比直接冻结更诚实。";
+    } else if (state.family === "compact") {
+      headline = "D256/L128 是保守 fallback，不是当前证据的首选"
+      explanation = "它最省空间，历史覆盖广；但 storage 只在质量等价后才是次级 tie-break，而且当前合法 cold rebuild 与最新 source-only structural transfer 都未绑定到该身份。";
+    }
+
+    const gates = [
+      {
+        status: family.singleFeature ? "pass" : "fail",
+        label: family.singleFeature ? "单特征：通过" : "单特征：失败",
+        text: family.feature
+      },
+      {
+        status: family.storageGate ? "pass" : "fail",
+        label: family.storageGate ? "Storage：通过" : "Storage：失败",
+        text: family.storage
+      },
+      {
+        status: family.coldStatus === "fail" ? "fail" : state.coldPreflight ? "pass" : "unknown",
+        label: family.coldStatus === "fail" ? "Cold start：失败" : state.coldPreflight ? "Cold start：标记通过" : "Cold start：待验证",
+        text: family.coldStatus === "fail"
+          ? "现有执行身份会读取 primitive/capability/descriptor sidecar。"
+          : "删除 Training Artifacts 和 caches 后，必须只从 Deployment Scene State + Global Method Parameters 重建所有 Capability View 与 topology。"
+      },
+      {
+        status: teacher.legal ? "pass" : "fail",
+        label: teacher.legal ? "信息边界：通过" : "信息边界：失败",
+        text: "Teacher 只允许读取 Mapping Observations；teacher outputs、SAM regions 和 MPR 都是 Training Artifacts，不能进入 cold Query。"
+      },
+      {
+        status: state.jointPilot ? "pass" : "unknown",
+        label: state.jointPilot ? "Joint transfer：标记完成" : "Joint transfer：未测",
+        text: "NVOS、SPIn-NeRF、LERF-2D、LERF-3D、ScanNet OVS、AGILE3D 的同身份三-seed negative transfer 尚未有 matched evidence。"
+      }
+    ];
+
+    const pilot = [
+      {
+        title: "A. Sidecar-free cold package preflight（先做，失败即停）",
+        text: "把唯一 local_codes、计费的 scene-bound decoder/fusion、允许的 support scalars 和常规 Gaussian state 封成一个 Deployment Scene State；移走 MPR、teacher、primitive-state、capability/descriptor caches，断网执行六种 smoke query，并逐项记录文件读取。"
+      },
+      {
+        title: "B. Rebuild challenge 与 byte authority",
+        text: "从空 cache 仅用 cold package 重建 Capability Views 与 Field-Derived Support Topology，两次 bitwise 一致；按 deployed dtype 统计逻辑 tensor bytes 与 serialized package bytes。D512/L512 的现有 fp32 Figurines checkpoint 333.962 MiB 只是一条上界证据，不替代正式账本。"
+      },
+      {
+        title: "C. 把 teacher policy 写成 mapping-only envelope",
+        text: "冻结 raw RADIO + official DINO/SAM capability + source-only SAM relative structure；source-render-consistent region/boundary 保留为下一 ticket 的显式 arm。不得把 teacher region、proposal、descriptor 或 topology 序列化到部署包。"
+      },
+      {
+        title: "D. 后续 ticket 才运行 matched joint evidence",
+        text: "由 six-task negative-transfer / joint mapping objective ticket 冻结 objective、weights、Mapping-Only Checkpoint Rule、pilot manifests 和 seeds {0,1,2}。本 ticket 不提前选这些参数，也不制造虚拟 Joint Development Baseline。"
+      }
+    ];
+
+    const token = [
+      `field=${families[state.family].short}`,
+      `teacher=${teachers[state.teacher].short}`,
+      `cold_preflight=${state.coldPreflight ? "passed_in_prototype_only" : "required"}`,
+      `joint_pilot=${state.jointPilot ? "completed_in_prototype_only" : "deferred_to_issue_18"}`,
+      `prototype_verdict=${headline}`
+    ].join(" | ");
+
+    return { family, teacher, tone, headline, explanation, gates, pilot, token, evidence: [...family.evidence, teacher.evidence], lastChange: state.lastChange };
+  }
+
+  return { families, teachers, initialState, recommendedState, reducer, derive };
+})();
+
+const scenarios = [
+  {
+    name: "非法现状",
+    description: "感受为什么“checkpoint 本身像单特征”仍不够：只要 Query 链需要 teacher/MPR 派生 sidecar，Cold-Start Storage Gate 就硬失败。",
+    steps: [
+      { label: "选择现有 factorized 执行链", action: { type: "selectFamily", value: "factorizedCurrent" } },
+      { label: "加入 source-only SAM relative teacher", action: { type: "selectTeacher", value: "samRelative" } }
+    ]
+  },
+  {
+    name: "D384 不是太大",
+    description: "D384 保留为 oracle 的原因不是硬 storage 上限；观察准确率优先规则如何阻止我们把“更小”误当作“自动更优”。",
+    steps: [
+      { label: "选择 D384 oracle", action: { type: "selectFamily", value: "d384" } },
+      { label: "选择 capability teacher", action: { type: "selectTeacher", value: "capability" } }
+    ]
+  },
+  {
+    name: "建议组合",
+    description: "这是拟交给实现规格的组合：一份 sidecar-free D512/L512 Canonical Capability Feature，Mapping 允许 official capability 与 source-only SAM relative supervision。",
+    steps: [
+      { label: "采用建议组合", action: { type: "recommend" } },
+      { label: "模拟通过 cold-start 重打包", action: { type: "toggleCold" } }
+    ]
+  },
+  {
+    name: "不要把假设写成结论",
+    description: "LERF 诊断支持 source-render-consistent region/boundary objective，但尚未运行；它应该成为后续 arm，而不是在此 ticket 直接宣称 winner。",
+    steps: [
+      { label: "选择 sidecar-free D512/L512", action: { type: "selectFamily", value: "d512Single" } },
+      { label: "选择未运行的 render-region teacher", action: { type: "selectTeacher", value: "renderRegion" } }
+    ]
+  }
+];
+
+let state = FieldDecision.initialState();
+let activeScenario = 0;
+let scenarioStep = 0;
+
+function dispatch(action) {
+  state = FieldDecision.reducer(state, action);
+  render();
+}
+
+function render() {
+  const view = FieldDecision.derive(state);
+  document.getElementById("state-grid").innerHTML = [
+    ["Field family", view.family.name, view.family.feature],
+    ["Teacher policy", view.teacher.name, view.teacher.evidence],
+    ["Evidence maturity", view.teacher.maturity, view.lastChange],
+    ["Next authority", "issue 18", "negative-transfer controls 与 joint mapping objective；本原型不越界决定其参数。"]
+  ].map(([label, value, detail]) => `
+    <div class="card">
+      <div class="label">${label}</div>
+      <div class="value">${value}</div>
+      <div class="detail">${detail}</div>
+    </div>`).join("");
+
+  const verdict = document.getElementById("verdict");
+  verdict.className = `verdict ${view.tone}`;
+  verdict.innerHTML = `<strong>${view.headline}</strong>${view.explanation}`;
+
+  document.getElementById("family-buttons").innerHTML = Object.entries(FieldDecision.families)
+    .map(([key, value]) => `<button class="choice ${state.family === key ? "active" : ""}" data-family="${key}">${value.short}</button>`)
+    .join("");
+  document.getElementById("teacher-buttons").innerHTML = Object.entries(FieldDecision.teachers)
+    .map(([key, value]) => `<button class="choice ${state.teacher === key ? "active" : ""}" data-teacher="${key}">${value.short}</button>`)
+    .join("");
+
+  document.getElementById("gate-list").innerHTML = view.gates.map(gate => `
+    <li class="gate ${gate.status}">
+      <span class="status">${gate.label}</span>
+      <span>${gate.text}</span>
+    </li>`).join("");
+
+  document.getElementById("evidence-list").innerHTML = view.evidence.map((item, index) => `
+    <li class="evidence-row"><strong>${index === 0 ? "Field evidence" : index === view.evidence.length - 1 ? "Teacher evidence" : "Constraint"}</strong><p>${item}</p></li>`).join("");
+
+  document.getElementById("pilot-list").innerHTML = view.pilot.map(item => `
+    <li class="pilot-step"><strong>${item.title}</strong><p>${item.text}</p></li>`).join("");
+
+  document.getElementById("decision-token").value = view.token;
+  renderWalkthrough();
+
+  document.querySelectorAll("[data-family]").forEach(button => {
+    button.addEventListener("click", () => dispatch({ type: "selectFamily", value: button.dataset.family }));
+  });
+  document.querySelectorAll("[data-teacher]").forEach(button => {
+    button.addEventListener("click", () => dispatch({ type: "selectTeacher", value: button.dataset.teacher }));
+  });
+}
+
+function startScenario(index) {
+  activeScenario = index;
+  scenarioStep = 0;
+  state = FieldDecision.initialState();
+  render();
+}
+
+function runScenarioStep(index) {
+  if (index !== scenarioStep) return;
+  state = FieldDecision.reducer(state, scenarios[activeScenario].steps[index].action);
+  scenarioStep += 1;
+  render();
+}
+
+function renderWalkthrough() {
+  document.getElementById("tabs").innerHTML = scenarios.map((scenario, index) =>
+    `<button class="tab ${activeScenario === index ? "active" : ""}" data-scenario="${index}">${scenario.name}</button>`
+  ).join("");
+  const scenario = scenarios[activeScenario];
+  document.getElementById("walkthrough-description").textContent = scenario.description;
+  document.getElementById("walkthrough-steps").innerHTML = scenario.steps.map((step, index) => `
+    <div class="walkthrough-step ${index < scenarioStep ? "done" : ""}">
+      <button class="step-button" data-step="${index}" ${index > scenarioStep || index < scenarioStep ? "disabled" : ""}>${step.label}</button>
+    </div>`).join("");
+  document.querySelectorAll("[data-scenario]").forEach(button => {
+    button.addEventListener("click", () => startScenario(Number(button.dataset.scenario)));
+  });
+  document.querySelectorAll("[data-step]").forEach(button => {
+    button.addEventListener("click", () => runScenarioStep(Number(button.dataset.step)));
+  });
+}
+
+document.querySelectorAll("[data-action]").forEach(button => {
+  button.addEventListener("click", () => dispatch({ type: button.dataset.action }));
+});
+document.getElementById("copy-token").addEventListener("click", async () => {
+  const token = document.getElementById("decision-token").value;
+  try {
+    await navigator.clipboard.writeText(token);
+    document.getElementById("copy-status").textContent = "已复制；请把 token 贴回对话，并说明你的判断。";
+  } catch {
+    document.getElementById("decision-token").select();
+    document.getElementById("copy-status").textContent = "浏览器阻止了剪贴板访问；文本已选中，请手动复制。";
+  }
+});
+
+render();
+</script>
+</body>
+</html>
