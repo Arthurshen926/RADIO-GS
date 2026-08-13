@@ -23,9 +23,10 @@ def test_reference_candidate_authority_binds_the_five_contracts() -> None:
 
     assert bundle["schema_version"] == "radio_gs.candidate_authority.v1"
     assert len(bundle["candidate_id"]) == 64
-    assert tuple(
-        contract["contract_id"] for contract in bundle["evaluation_contracts"]
-    ) == EXPECTED_EVALUATION_CONTRACT_IDS
+    assert (
+        tuple(contract["contract_id"] for contract in bundle["evaluation_contracts"])
+        == EXPECTED_EVALUATION_CONTRACT_IDS
+    )
     assert bundle["method_contract"]["field_schema"]["local_code_dimension"] == 512
     assert bundle["method_contract"]["field_schema"]["persistent_semantic_fields"] == 1
 
@@ -46,7 +47,8 @@ def test_candidate_identity_changes_when_a_bound_member_changes() -> None:
     [
         (
             lambda value: value["evaluation_contracts"].__setitem__(
-                0, {**value["evaluation_contracts"][0], "contract_id": "legacy-six-task"}
+                0,
+                {**value["evaluation_contracts"][0], "contract_id": "legacy-six-task"},
             ),
             "contract identity",
         ),
@@ -73,6 +75,12 @@ def test_candidate_identity_changes_when_a_bound_member_changes() -> None:
             "mapping_checkpoint_rule identity",
         ),
         (
+            lambda value: value["method_contract"]["mapping_checkpoint_rule"].update(
+                {"maximum_budget": 8}
+            ),
+            "maximum budget",
+        ),
+        (
             lambda value: value["method_contract"]["modality_compilers"].update(
                 {"by_benchmark": {"lerf2d": "different"}}
             ),
@@ -85,21 +93,27 @@ def test_candidate_identity_changes_when_a_bound_member_changes() -> None:
             "benchmark-conditioned",
         ),
         (
-            lambda value: value["evaluation_contracts"][2]["information_boundary"].update(
-                {"query_captured_rgb": "forbidden"}
-            ),
+            lambda value: value["evaluation_contracts"][2][
+                "information_boundary"
+            ].update({"query_captured_rgb": "forbidden"}),
             "RGB-free",
         ),
         (
-            lambda value: value["evaluation_contracts"][0]["information_boundary"].update(
-                {"targets": "authorized"}
-            ),
+            lambda value: value["evaluation_contracts"][0][
+                "information_boundary"
+            ].update({"targets": "authorized"}),
             "information boundary",
         ),
         (
-            lambda value: value["evaluation_contracts"][0]["authorized_query_input"].update(
-                {"private_siblings": []}
+            lambda value: value["evaluation_contracts"][0].update(
+                {"target_identity": "different-target"}
             ),
+            "target_identity",
+        ),
+        (
+            lambda value: value["evaluation_contracts"][0][
+                "authorized_query_input"
+            ].update({"private_siblings": []}),
             "private sibling",
         ),
         (
@@ -136,7 +150,9 @@ def test_candidate_bundle_is_recursively_immutable() -> None:
         bundle["evaluation_contracts"][0]["contract_id"] = "legacy-six-task"
 
 
-def test_candidate_authority_round_trips_through_immutable_artifact(tmp_path: Path) -> None:
+def test_candidate_authority_round_trips_through_immutable_artifact(
+    tmp_path: Path,
+) -> None:
     bundle = build_candidate_authority(**reference_candidate_authority_inputs())
     path = tmp_path / "authority.json"
 
@@ -158,7 +174,9 @@ def test_candidate_authority_round_trips_through_immutable_artifact(tmp_path: Pa
         )
 
 
-def test_candidate_authority_rejects_content_drift_after_sealing(tmp_path: Path) -> None:
+def test_candidate_authority_rejects_content_drift_after_sealing(
+    tmp_path: Path,
+) -> None:
     bundle = build_candidate_authority(**reference_candidate_authority_inputs())
     path = tmp_path / "authority.json"
     write_candidate_authority(path, bundle)
@@ -168,6 +186,8 @@ def test_candidate_authority_rejects_content_drift_after_sealing(tmp_path: Path)
 
     report = audit_candidate_authority(path)
     assert report["valid"] is False
-    assert any("seed_policy" in error or "candidate_id" in error for error in report["errors"])
+    assert any(
+        "seed_policy" in error or "candidate_id" in error for error in report["errors"]
+    )
     with pytest.raises(CandidateAuthorityError, match="seed_policy"):
         validate_candidate_authority(payload)

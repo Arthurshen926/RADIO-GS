@@ -4,16 +4,18 @@ The bundle is the immutable boundary between method construction and any
 scored lifecycle work.  It binds one shared Method Contract, the five current
 Evaluation Contracts, and the execution identities needed to attribute later
 evidence.  Benchmark identity appears only in the Evaluation Adapter bindings;
-it cannot select algorithmic behavior.
+it cannot select algorithmic behavior.  The registered-2D SAM3 identity below
+belongs to the current LUDVIG-online Primary method contract from issue #22;
+it is not the historical LUDVIG comparator path scoped by ADR 0002.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping
-from dataclasses import dataclass
 import copy
 import hashlib
 import re
+from collections.abc import Iterator, Mapping
+from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -92,6 +94,8 @@ _FIELD_KEYS = {
 }
 _MAPPING_OBJECTIVE_KEYS = {
     "identity",
+    "calibration_authority",
+    "normalization_policy",
     "primitive_formula",
     "render_formula",
     "source_scope",
@@ -101,6 +105,12 @@ _CHECKPOINT_KEYS = {
     "identity",
     "selection_scope",
     "validation_objective",
+    "validation_split",
+    "check_frequency",
+    "patience",
+    "maximum_budget",
+    "observation_budget_schedule",
+    "deterministic_tie_break",
     "earliest_best",
     "min_delta",
     "benchmark_independent",
@@ -120,8 +130,19 @@ _COMPILER_KEYS = {
     "query_time_vision_model_identity",
 }
 _VIEW_KEYS = {"identity", "source", "persistent"}
-_TOPOLOGY_KEYS = {"identity", "source", "persistent", "query_independent", "rebuildable"}
-_SOLVER_KEYS = {"solver_identity", "calibration_identity", "frozen", "benchmark_independent"}
+_TOPOLOGY_KEYS = {
+    "identity",
+    "source",
+    "persistent",
+    "query_independent",
+    "rebuildable",
+}
+_SOLVER_KEYS = {
+    "solver_identity",
+    "calibration_identity",
+    "frozen",
+    "benchmark_independent",
+}
 _OUTPUT_KEYS = {"identity", "inputs", "benchmark_independent"}
 _PRECISION_KEYS = {
     "deployed_dtype",
@@ -140,8 +161,16 @@ _EVALUATION_BOUNDARY_KEYS = {
     "labels",
 }
 _QUERY_INPUT_KEYS = {"modality", "shape", "private_siblings"}
-_EXECUTION_MATRIX_KEYS = {"contract_ids", "required_stage_order", "requires_all_contracts"}
-_SEED_POLICY_KEYS = {"stochastic_seeds", "deterministic_seed", "paired_across_contracts"}
+_EXECUTION_MATRIX_KEYS = {
+    "contract_ids",
+    "required_stage_order",
+    "requires_all_contracts",
+}
+_SEED_POLICY_KEYS = {
+    "stochastic_seeds",
+    "deterministic_seed",
+    "paired_across_contracts",
+}
 _RETRY_POLICY_KEYS = {"max_retries", "allowed_failure_class", "identity_preserving"}
 _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _EXPECTED_CONTRACT_FACTS = {
@@ -156,6 +185,11 @@ _EXPECTED_CONTRACT_FACTS = {
         "labels": "evaluator_private",
         "private_siblings": ["target_mask", "target_box", "metric"],
         "output_domain": "camera_raster",
+        "evaluator_identity": "lerf-evaluator-v1",
+        "metric_aggregation_identity": "lerf2d-object-scene-four-scene-macro-v1",
+        "comparator_identity": "sad-gs-vpa-occamlgs-v1",
+        "target_identity": "sad-gs-68.8-locacc-88.7-round-half-up-v1",
+        "mandatory_floor_identity": "occamlgs-63.6200435-82.8487101-v1",
     },
     "lerf3d-field-only-four-scene-v1": {
         "cohort_identity": "lerf-four-scene-208-query-v1",
@@ -168,6 +202,11 @@ _EXPECTED_CONTRACT_FACTS = {
         "labels": "evaluator_private",
         "private_siblings": ["target_mask", "metric"],
         "output_domain": "world_sample",
+        "evaluator_identity": "lerf-evaluator-v1",
+        "metric_aggregation_identity": "lerf3d-object-scene-four-scene-macro-v1",
+        "comparator_identity": "pairgs-raw-3d-vala-v1",
+        "target_identity": "pairgs-60.4-79.6-68.2-round-half-up-v1",
+        "mandatory_floor_identity": "vala-54.1248877-79.3526471-56.6114038-v1",
     },
     "nvos-ludvig-online-all-view-eight-v1": {
         "cohort_identity": "nvos-official-eight-task-v1",
@@ -180,6 +219,11 @@ _EXPECTED_CONTRACT_FACTS = {
         "labels": "evaluator_private",
         "private_siblings": ["target_mask", "metric"],
         "output_domain": "camera_raster",
+        "evaluator_identity": "nvos-evaluator-v1",
+        "metric_aggregation_identity": "nvos-eight-task-foreground-iou-macro-v1",
+        "comparator_identity": "ludvig-dinov2-v1",
+        "target_identity": "ludvig-dinov2-92.4-round-half-up-v1",
+        "mandatory_floor_identity": "ludvig-sam-91.25768502741802-v1",
     },
     "spin-ludvig-online-full-mask-available-nine-v1": {
         "cohort_identity": "spin-available-nine-excluding-fork-v1",
@@ -192,6 +236,11 @@ _EXPECTED_CONTRACT_FACTS = {
         "labels": "evaluator_private",
         "private_siblings": ["target_mask", "metric"],
         "output_domain": "camera_raster",
+        "evaluator_identity": "spin-evaluator-v1",
+        "metric_aggregation_identity": "spin-frame-scene-nine-scene-macro-v1",
+        "comparator_identity": "ludvig-sam-available9-v1",
+        "target_identity": "ludvig-sam-93.7200449592385-v1",
+        "mandatory_floor_identity": "ludvig-sam-93.7200449592385-v1",
     },
     "scannet-ovs-paper8-v1": {
         "cohort_identity": "scannet-paper8-eight-scene-v1",
@@ -204,6 +253,11 @@ _EXPECTED_CONTRACT_FACTS = {
         "labels": "evaluator_private",
         "private_siblings": ["mesh_labels", "pseudo_gt", "metric"],
         "output_domain": "world_sample",
+        "evaluator_identity": "scannet-ovs-evaluator-v1",
+        "metric_aggregation_identity": "scannet-eight-scene-19-15-10-macro-v1",
+        "comparator_identity": "vala-paper8-v1",
+        "target_identity": "scannet-six-component-zero-tolerance-v1",
+        "mandatory_floor_identity": "scannet-six-component-zero-tolerance-v1",
     },
 }
 
@@ -227,7 +281,9 @@ def _exact_keys(value: Mapping[str, Any], expected: set[str], label: str) -> Non
     if actual != expected:
         missing = sorted(expected - actual)
         extra = sorted(actual - expected)
-        if any("benchmark" in key or "task" in key or "contract" in key for key in extra):
+        if any(
+            "benchmark" in key or "task" in key or "contract" in key for key in extra
+        ):
             _fail(f"{label} is benchmark-conditioned; extra={extra}")
         _fail(f"{label} has unexpected fields; missing={missing}, extra={extra}")
 
@@ -268,7 +324,9 @@ def _validate_method_contract(method: Any) -> None:
     if field["canonical_capability_feature"] != "Canonical Capability Feature":
         _fail("field_schema must name the Canonical Capability Feature")
     support = _mapping(field["deployment_support_state"], "deployment_support_state")
-    _exact_keys(support, {"validity_bits", "quality_scalars"}, "deployment_support_state")
+    _exact_keys(
+        support, {"validity_bits", "quality_scalars"}, "deployment_support_state"
+    )
     if support["validity_bits"] != 1 or support["quality_scalars"] != 5:
         _fail("deployment support state exceeds the admitted schema")
     if field["sidecar_policy"] != "forbid_second_semantic_field_and_cache":
@@ -276,7 +334,9 @@ def _validate_method_contract(method: Any) -> None:
     _nonempty_string(field["decoder_identity"], "field_schema.decoder_identity")
     _nonempty_string(field["fusion_identity"], "field_schema.fusion_identity")
 
-    objective = _mapping(method_map["joint_mapping_objective"], "joint_mapping_objective")
+    objective = _mapping(
+        method_map["joint_mapping_objective"], "joint_mapping_objective"
+    )
     _exact_keys(objective, _MAPPING_OBJECTIVE_KEYS, "joint_mapping_objective")
     _nonempty_string(objective["identity"], "joint_mapping_objective.identity")
     if objective["identity"] != "joint-mapping-objective-v1":
@@ -285,23 +345,61 @@ def _validate_method_contract(method: Any) -> None:
         _fail("joint_mapping_objective primitive formula differs")
     if objective["render_formula"] != "R + 0.5 C + 0.25 S + 0.5 G + 0.5 B + Omega":
         _fail("joint_mapping_objective render formula differs")
-    _nonempty_string(objective["primitive_formula"], "joint_mapping_objective.primitive_formula")
-    _nonempty_string(objective["render_formula"], "joint_mapping_objective.render_formula")
+    if objective["calibration_authority"] != "scene-disjoint-source-calibration-v1":
+        _fail("joint_mapping_objective calibration authority differs")
+    if objective["normalization_policy"] != "b0-median-nonzero-family-scale-v1":
+        _fail("joint_mapping_objective normalization policy differs")
+    _nonempty_string(
+        objective["primitive_formula"], "joint_mapping_objective.primitive_formula"
+    )
+    _nonempty_string(
+        objective["render_formula"], "joint_mapping_objective.render_formula"
+    )
     _nonempty_string(objective["source_scope"], "joint_mapping_objective.source_scope")
-    _bool(objective["benchmark_independent"], True, "joint_mapping_objective.benchmark_independent")
+    _bool(
+        objective["benchmark_independent"],
+        True,
+        "joint_mapping_objective.benchmark_independent",
+    )
 
-    checkpoint = _mapping(method_map["mapping_checkpoint_rule"], "mapping_checkpoint_rule")
+    checkpoint = _mapping(
+        method_map["mapping_checkpoint_rule"], "mapping_checkpoint_rule"
+    )
     _exact_keys(checkpoint, _CHECKPOINT_KEYS, "mapping_checkpoint_rule")
     _nonempty_string(checkpoint["identity"], "mapping_checkpoint_rule.identity")
     if checkpoint["identity"] != "mapping-only-checkpoint-rule-v1":
         _fail("mapping_checkpoint_rule identity differs from the frozen method")
     if checkpoint["selection_scope"] != "mapping_only":
         _fail("mapping_checkpoint_rule must be mapping-only")
-    _nonempty_string(checkpoint["validation_objective"], "mapping_checkpoint_rule.validation_objective")
+    _nonempty_string(
+        checkpoint["validation_objective"],
+        "mapping_checkpoint_rule.validation_objective",
+    )
+    if checkpoint["validation_objective"] != "joint_mapping_objective":
+        _fail("mapping_checkpoint_rule validation objective differs")
+    if checkpoint["validation_split"] != "scene-disjoint-held-out-mapping-v1":
+        _fail("mapping_checkpoint_rule validation split differs")
+    if checkpoint["check_frequency"] != "every_observation_equivalent_pass":
+        _fail("mapping_checkpoint_rule check frequency differs")
+    if checkpoint["patience"] != "none":
+        _fail("mapping_checkpoint_rule patience differs")
+    if checkpoint["maximum_budget"] != 16:
+        _fail("mapping_checkpoint_rule maximum budget differs")
+    if checkpoint["observation_budget_schedule"] != [1, 2, 4, 8, 16]:
+        _fail("mapping_checkpoint_rule observation budget schedule differs")
+    if (
+        checkpoint["deterministic_tie_break"]
+        != "earliest_checkpoint_then_canonical_digest_order"
+    ):
+        _fail("mapping_checkpoint_rule deterministic tie-break differs")
     _bool(checkpoint["earliest_best"], True, "mapping_checkpoint_rule.earliest_best")
     if checkpoint["min_delta"] != 0:
         _fail("mapping_checkpoint_rule.min_delta must equal zero")
-    _bool(checkpoint["benchmark_independent"], True, "mapping_checkpoint_rule.benchmark_independent")
+    _bool(
+        checkpoint["benchmark_independent"],
+        True,
+        "mapping_checkpoint_rule.benchmark_independent",
+    )
 
     global_parameters = _mapping(
         method_map["global_method_parameters"], "global_method_parameters"
@@ -311,30 +409,59 @@ def _validate_method_contract(method: Any) -> None:
     if global_parameters["identity"] != "global-method-parameters-v1":
         _fail("global_method_parameters identity differs from the frozen method")
     _bool(global_parameters["frozen"], True, "global_method_parameters.frozen")
-    _bool(global_parameters["scene_bound"], False, "global_method_parameters.scene_bound")
+    _bool(
+        global_parameters["scene_bound"], False, "global_method_parameters.scene_bound"
+    )
 
     method_parameters = _mapping(
         method_map["method_specific_global_parameters"],
         "method_specific_global_parameters",
     )
-    _exact_keys(method_parameters, _METHOD_GLOBAL_PARAMETER_KEYS, "method_specific_global_parameters")
-    _nonempty_string(method_parameters["identity"], "method_specific_global_parameters.identity")
+    _exact_keys(
+        method_parameters,
+        _METHOD_GLOBAL_PARAMETER_KEYS,
+        "method_specific_global_parameters",
+    )
+    _nonempty_string(
+        method_parameters["identity"], "method_specific_global_parameters.identity"
+    )
     if method_parameters["identity"] != "method-specific-global-parameters-v1":
-        _fail("method_specific_global_parameters identity differs from the frozen method")
+        _fail(
+            "method_specific_global_parameters identity differs from the frozen method"
+        )
     _bool(method_parameters["frozen"], True, "method_specific_global_parameters.frozen")
-    _bool(method_parameters["scene_bound"], False, "method_specific_global_parameters.scene_bound")
-    if not isinstance(method_parameters["soft_limit_bytes"], int) or method_parameters["soft_limit_bytes"] <= 0:
+    _bool(
+        method_parameters["scene_bound"],
+        False,
+        "method_specific_global_parameters.scene_bound",
+    )
+    if (
+        not isinstance(method_parameters["soft_limit_bytes"], int)
+        or method_parameters["soft_limit_bytes"] <= 0
+    ):
         _fail("method_specific_global_parameters.soft_limit_bytes must be positive")
-    if not isinstance(method_parameters["hard_limit_bytes"], int) or method_parameters["hard_limit_bytes"] <= method_parameters["soft_limit_bytes"]:
-        _fail("method_specific_global_parameters.hard_limit_bytes must exceed soft limit")
+    if (
+        not isinstance(method_parameters["hard_limit_bytes"], int)
+        or method_parameters["hard_limit_bytes"]
+        <= method_parameters["soft_limit_bytes"]
+    ):
+        _fail(
+            "method_specific_global_parameters.hard_limit_bytes must exceed soft limit"
+        )
 
     compilers = _mapping(method_map["modality_compilers"], "modality_compilers")
-    expected_modalities = {"category_text", "positive_scribble_raster", "complete_binary_mask"}
+    expected_modalities = {
+        "category_text",
+        "positive_scribble_raster",
+        "complete_binary_mask",
+    }
     _exact_keys(compilers, expected_modalities, "modality_compilers")
     for modality, raw_compiler in compilers.items():
         compiler = _mapping(raw_compiler, f"modality_compilers.{modality}")
         _exact_keys(compiler, _COMPILER_KEYS, f"modality_compilers.{modality}")
-        _nonempty_string(compiler["identity"], f"modality_compilers.{modality}.identity")
+        _nonempty_string(
+            compiler["identity"], f"modality_compilers.{modality}.identity"
+        )
         _nonempty_string(
             compiler["query_time_vision_model_identity"],
             f"modality_compilers.{modality}.query_time_vision_model_identity",
@@ -345,7 +472,9 @@ def _validate_method_contract(method: Any) -> None:
             "complete_binary_mask": "registered2d-sam3-multiview-consensus-v1",
         }[modality]
         if compiler["identity"] != expected_compiler_identity:
-            _fail(f"modality_compilers.{modality} identity differs from the frozen method")
+            _fail(
+                f"modality_compilers.{modality} identity differs from the frozen method"
+            )
         expected_vision_identity = (
             "not_applicable"
             if modality == "category_text"
@@ -353,8 +482,16 @@ def _validate_method_contract(method: Any) -> None:
         )
         if compiler["query_time_vision_model_identity"] != expected_vision_identity:
             _fail(f"modality_compilers.{modality} vision model identity differs")
-        _bool(compiler["benchmark_independent"], True, f"modality_compilers.{modality}.benchmark_independent")
-        _bool(compiler["query_workspace_only"], True, f"modality_compilers.{modality}.query_workspace_only")
+        _bool(
+            compiler["benchmark_independent"],
+            True,
+            f"modality_compilers.{modality}.benchmark_independent",
+        )
+        _bool(
+            compiler["query_workspace_only"],
+            True,
+            f"modality_compilers.{modality}.query_workspace_only",
+        )
 
     views = _mapping(method_map["capability_views"], "capability_views")
     _exact_keys(views, {"semantic", "appearance", "boundary"}, "capability_views")
@@ -380,16 +517,27 @@ def _validate_method_contract(method: Any) -> None:
     if topology["source"] != "Deployment Scene State and Global Method Parameters":
         _fail("field_derived_support_topology must derive from field state")
     _bool(topology["persistent"], False, "field_derived_support_topology.persistent")
-    _bool(topology["query_independent"], True, "field_derived_support_topology.query_independent")
+    _bool(
+        topology["query_independent"],
+        True,
+        "field_derived_support_topology.query_independent",
+    )
     _bool(topology["rebuildable"], True, "field_derived_support_topology.rebuildable")
 
     solvers = _mapping(method_map["solvers_calibrations"], "solvers_calibrations")
-    _exact_keys(solvers, {"category_retrieval", "instance_selection"}, "solvers_calibrations")
+    _exact_keys(
+        solvers, {"category_retrieval", "instance_selection"}, "solvers_calibrations"
+    )
     for name, raw_solver in solvers.items():
         solver = _mapping(raw_solver, f"solvers_calibrations.{name}")
         _exact_keys(solver, _SOLVER_KEYS, f"solvers_calibrations.{name}")
-        _nonempty_string(solver["solver_identity"], f"solvers_calibrations.{name}.solver_identity")
-        _nonempty_string(solver["calibration_identity"], f"solvers_calibrations.{name}.calibration_identity")
+        _nonempty_string(
+            solver["solver_identity"], f"solvers_calibrations.{name}.solver_identity"
+        )
+        _nonempty_string(
+            solver["calibration_identity"],
+            f"solvers_calibrations.{name}.calibration_identity",
+        )
         expected_solver_identity = {
             "category_retrieval": "semantic-region-hypothesis-marginal-v1",
             "instance_selection": "candidate-and-hierarchy-marginal-v1",
@@ -403,42 +551,72 @@ def _validate_method_contract(method: Any) -> None:
         if solver["calibration_identity"] != expected_calibration_identity:
             _fail(f"solvers_calibrations.{name} calibration identity differs")
         _bool(solver["frozen"], True, f"solvers_calibrations.{name}.frozen")
-        _bool(solver["benchmark_independent"], True, f"solvers_calibrations.{name}.benchmark_independent")
+        _bool(
+            solver["benchmark_independent"],
+            True,
+            f"solvers_calibrations.{name}.benchmark_independent",
+        )
 
-    operators = _mapping(method_map["output_domain_operators"], "output_domain_operators")
+    operators = _mapping(
+        method_map["output_domain_operators"], "output_domain_operators"
+    )
     _exact_keys(operators, {"camera_raster", "world_sample"}, "output_domain_operators")
     for name, raw_operator in operators.items():
         operator = _mapping(raw_operator, f"output_domain_operators.{name}")
         _exact_keys(operator, _OUTPUT_KEYS, f"output_domain_operators.{name}")
-        _nonempty_string(operator["identity"], f"output_domain_operators.{name}.identity")
+        _nonempty_string(
+            operator["identity"], f"output_domain_operators.{name}.identity"
+        )
         if operator["identity"] != f"{name.replace('_', '-')}-output-v1":
-            _fail(f"output_domain_operators.{name} identity differs from the frozen method")
+            _fail(
+                f"output_domain_operators.{name} identity differs from the frozen method"
+            )
         if not isinstance(operator["inputs"], list) or not operator["inputs"]:
             _fail(f"output_domain_operators.{name}.inputs must be non-empty")
-        _bool(operator["benchmark_independent"], True, f"output_domain_operators.{name}.benchmark_independent")
+        _bool(
+            operator["benchmark_independent"],
+            True,
+            f"output_domain_operators.{name}.benchmark_independent",
+        )
 
     precision = _mapping(
         method_map["precision_determinism_policy"], "precision_determinism_policy"
     )
     _exact_keys(precision, _PRECISION_KEYS, "precision_determinism_policy")
-    _nonempty_string(precision["deployed_dtype"], "precision_determinism_policy.deployed_dtype")
-    _nonempty_string(precision["compute_dtype"], "precision_determinism_policy.compute_dtype")
+    _nonempty_string(
+        precision["deployed_dtype"], "precision_determinism_policy.deployed_dtype"
+    )
+    _nonempty_string(
+        precision["compute_dtype"], "precision_determinism_policy.compute_dtype"
+    )
     if precision["binary_posterior_boundary"] != 0.5:
         _fail("precision_determinism_policy binary boundary must equal 0.5")
-    _bool(precision["deterministic_reduction"], True, "precision_determinism_policy.deterministic_reduction")
+    _bool(
+        precision["deterministic_reduction"],
+        True,
+        "precision_determinism_policy.deterministic_reduction",
+    )
     _nonempty_string(precision["tie_policy"], "precision_determinism_policy.tie_policy")
 
-    implementation = _mapping(method_map["implementation_identity"], "implementation_identity")
+    implementation = _mapping(
+        method_map["implementation_identity"], "implementation_identity"
+    )
     _exact_keys(implementation, _IMPLEMENTATION_KEYS, "implementation_identity")
     for key in _IMPLEMENTATION_KEYS:
         _nonempty_string(implementation[key], f"implementation_identity.{key}")
-    _require_sha256(implementation["dirty_patch_sha256"], "implementation_identity.dirty_patch_sha256")
+    _require_sha256(
+        implementation["dirty_patch_sha256"],
+        "implementation_identity.dirty_patch_sha256",
+    )
 
     environment = _mapping(method_map["environment_identity"], "environment_identity")
     _exact_keys(environment, _ENVIRONMENT_KEYS, "environment_identity")
     for key in _ENVIRONMENT_KEYS:
         _nonempty_string(environment[key], f"environment_identity.{key}")
-    _require_sha256(environment["dependency_lock_sha256"], "environment_identity.dependency_lock_sha256")
+    _require_sha256(
+        environment["dependency_lock_sha256"],
+        "environment_identity.dependency_lock_sha256",
+    )
 
 
 def _require_sha256(value: Any, label: str) -> None:
@@ -449,10 +627,13 @@ def _require_sha256(value: Any, label: str) -> None:
 def _validate_evaluation_contracts(contracts: Any) -> None:
     if not isinstance(contracts, list):
         _fail("evaluation_contracts must be a list")
-    if tuple(
-        contract.get("contract_id") if isinstance(contract, Mapping) else None
-        for contract in contracts
-    ) != EXPECTED_EVALUATION_CONTRACT_IDS:
+    if (
+        tuple(
+            contract.get("contract_id") if isinstance(contract, Mapping) else None
+            for contract in contracts
+        )
+        != EXPECTED_EVALUATION_CONTRACT_IDS
+    ):
         _fail("evaluation contract identity or frozen order differs")
     adapter_ids = [
         contract.get("adapter_id") if isinstance(contract, Mapping) else None
@@ -465,7 +646,9 @@ def _validate_evaluation_contracts(contracts: Any) -> None:
         _exact_keys(contract, _EVALUATION_KEYS, f"evaluation_contracts[{index}]")
         if contract["contract_schema"] != EVALUATION_CONTRACT_SCHEMA:
             _fail(f"evaluation_contracts[{index}] contract identity is not current")
-        _nonempty_string(contract["contract_id"], f"evaluation_contracts[{index}].contract_id")
+        _nonempty_string(
+            contract["contract_id"], f"evaluation_contracts[{index}].contract_id"
+        )
         expected_facts = _EXPECTED_CONTRACT_FACTS[contract["contract_id"]]
         for fact in ("cohort_identity", "output_domain"):
             expected = expected_facts[fact]
@@ -473,9 +656,16 @@ def _validate_evaluation_contracts(contracts: Any) -> None:
                 _fail(
                     f"evaluation_contracts[{index}] {fact} differs from the current contract"
                 )
-        _nonempty_string(contract["adapter_id"], f"evaluation_contracts[{index}].adapter_id")
-        _nonempty_string(contract["cohort_identity"], f"evaluation_contracts[{index}].cohort_identity")
-        _nonempty_string(contract["output_domain"], f"evaluation_contracts[{index}].output_domain")
+        _nonempty_string(
+            contract["adapter_id"], f"evaluation_contracts[{index}].adapter_id"
+        )
+        _nonempty_string(
+            contract["cohort_identity"],
+            f"evaluation_contracts[{index}].cohort_identity",
+        )
+        _nonempty_string(
+            contract["output_domain"], f"evaluation_contracts[{index}].output_domain"
+        )
         for key in (
             "evaluator_identity",
             "metric_aggregation_identity",
@@ -484,6 +674,10 @@ def _validate_evaluation_contracts(contracts: Any) -> None:
             "mandatory_floor_identity",
         ):
             _nonempty_string(contract[key], f"evaluation_contracts[{index}].{key}")
+            if contract[key] != expected_facts[key]:
+                _fail(
+                    f"evaluation_contracts[{index}] {key} differs from the current authority"
+                )
         boundary = _mapping(
             contract["information_boundary"],
             f"evaluation_contracts[{index}].information_boundary",
@@ -503,13 +697,25 @@ def _validate_evaluation_contracts(contracts: Any) -> None:
             f"evaluation_contracts[{index}].authorized_query_input",
         )
         if query_input["modality"] != expected_facts["query_modality"]:
-            _fail(f"evaluation_contracts[{index}] query modality differs from the current contract")
+            _fail(
+                f"evaluation_contracts[{index}] query modality differs from the current contract"
+            )
         if query_input["shape"] != expected_facts["query_shape"]:
-            _fail(f"evaluation_contracts[{index}] query shape differs from the current contract")
-        _nonempty_string(query_input["modality"], f"evaluation_contracts[{index}].authorized_query_input.modality")
-        _nonempty_string(query_input["shape"], f"evaluation_contracts[{index}].authorized_query_input.shape")
+            _fail(
+                f"evaluation_contracts[{index}] query shape differs from the current contract"
+            )
+        _nonempty_string(
+            query_input["modality"],
+            f"evaluation_contracts[{index}].authorized_query_input.modality",
+        )
+        _nonempty_string(
+            query_input["shape"],
+            f"evaluation_contracts[{index}].authorized_query_input.shape",
+        )
         if not isinstance(query_input["private_siblings"], list):
-            _fail(f"evaluation_contracts[{index}].authorized_query_input.private_siblings must be a list")
+            _fail(
+                f"evaluation_contracts[{index}].authorized_query_input.private_siblings must be a list"
+            )
         for boundary_key in (
             "mapping_captured_rgb",
             "query_captured_rgb",
@@ -518,8 +724,13 @@ def _validate_evaluation_contracts(contracts: Any) -> None:
             "labels",
         ):
             if boundary[boundary_key] != expected_facts[boundary_key]:
-                if boundary_key == "query_captured_rgb" and boundary[boundary_key] == "forbidden":
-                    _fail(f"evaluation_contracts[{index}] is an obsolete RGB-free authority")
+                if (
+                    boundary_key == "query_captured_rgb"
+                    and boundary[boundary_key] == "forbidden"
+                ):
+                    _fail(
+                        f"evaluation_contracts[{index}] is an obsolete RGB-free authority"
+                    )
                 _fail(
                     f"evaluation_contracts[{index}] {boundary_key} differs from the current information boundary"
                 )
@@ -540,7 +751,11 @@ def _validate_execution_policy(authority: Mapping[str, Any]) -> None:
         "evaluation",
     ):
         _fail("execution_matrix stage order differs")
-    _bool(matrix["requires_all_contracts"], True, "execution_matrix.requires_all_contracts")
+    _bool(
+        matrix["requires_all_contracts"],
+        True,
+        "execution_matrix.requires_all_contracts",
+    )
 
     seeds = _mapping(authority["seed_policy"], "seed_policy")
     _exact_keys(seeds, _SEED_POLICY_KEYS, "seed_policy")
@@ -572,7 +787,9 @@ def _authority_body(authority: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def _validate_authority_mapping(authority: Any, *, check_identity: bool) -> dict[str, Any]:
+def _validate_authority_mapping(
+    authority: Any, *, check_identity: bool
+) -> dict[str, Any]:
     value = _mapping(authority, "candidate authority")
     _exact_keys(value, _AUTHORITY_KEYS, "candidate authority")
     if value["schema_version"] != CANDIDATE_AUTHORITY_SCHEMA:
@@ -664,7 +881,11 @@ def validate_candidate_authority(
 ) -> CandidateAuthorityBundle:
     """Revalidate a candidate bundle without accepting metadata-only repair."""
 
-    value = authority.as_dict() if isinstance(authority, CandidateAuthorityBundle) else authority
+    value = (
+        authority.as_dict()
+        if isinstance(authority, CandidateAuthorityBundle)
+        else authority
+    )
     validated = _validate_authority_mapping(value, check_identity=True)
     return CandidateAuthorityBundle(_freeze(validated))
 
@@ -721,6 +942,8 @@ def reference_candidate_authority_inputs() -> dict[str, Any]:
         },
         "joint_mapping_objective": {
             "identity": "joint-mapping-objective-v1",
+            "calibration_authority": "scene-disjoint-source-calibration-v1",
+            "normalization_policy": "b0-median-nonzero-family-scale-v1",
             "primitive_formula": "R + 0.5 C + 0.25 S + Omega",
             "render_formula": "R + 0.5 C + 0.25 S + 0.5 G + 0.5 B + Omega",
             "source_scope": "mapping_observations_and_mapping_artifacts_only",
@@ -730,6 +953,12 @@ def reference_candidate_authority_inputs() -> dict[str, Any]:
             "identity": "mapping-only-checkpoint-rule-v1",
             "selection_scope": "mapping_only",
             "validation_objective": "joint_mapping_objective",
+            "validation_split": "scene-disjoint-held-out-mapping-v1",
+            "check_frequency": "every_observation_equivalent_pass",
+            "patience": "none",
+            "maximum_budget": 16,
+            "observation_budget_schedule": [1, 2, 4, 8, 16],
+            "deterministic_tie_break": "earliest_checkpoint_then_canonical_digest_order",
             "earliest_best": True,
             "min_delta": 0,
             "benchmark_independent": True,
@@ -807,7 +1036,12 @@ def reference_candidate_authority_inputs() -> dict[str, Any]:
         "output_domain_operators": {
             "camera_raster": {
                 "identity": "camera-raster-output-v1",
-                "inputs": ["geometry", "opacity", "Gaussian Query Posterior", "Output Request Metadata"],
+                "inputs": [
+                    "geometry",
+                    "opacity",
+                    "Gaussian Query Posterior",
+                    "Output Request Metadata",
+                ],
                 "benchmark_independent": True,
             },
             "world_sample": {
