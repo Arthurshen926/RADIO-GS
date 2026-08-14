@@ -121,6 +121,23 @@ mesh-domain evaluators live in `radio_gs/benchmarks/scannet_pfir/`. See
 `docs/benchmarks/scannet_pfir_small_v1.md` for the held-out-frame, private-GT,
 ranking, and instance-selection contracts.
 
+The unified text/image/prompt harness lives in
+`radio_gs/benchmarks/scannet_uqis/`. See
+`docs/benchmarks/scannet_uqis_9_v0_1.md` for its paired-target information
+firewall, strict no-RGB 2-D prompt protocol, mesh-probability evaluator, and
+current result-ineligible pilot status.
+The non-formal
+[`v0.2 construction candidate`](docs/benchmarks/scannet_uqis_9_v0_2_candidate.md)
+separates a common four-modality Core cohort from relational-text stress cases
+and records the benchmark-local LUDVIG CLIP+DINO diffusion path.
+
+An open-source-ready extraction lives in
+[`standalone/uqis-benchmark`](standalone/uqis-benchmark/README.md). It contains
+an installable `uqis-benchmark` package, interface-level tests, protocol ADRs,
+detailed construction/evaluation documentation, and a dependency-light LUDVIG
+graph-diffusion example. Use its synchronization tool until the directory is
+split into a separate repository.
+
 ## Audit ladder
 
 Do not infer field quality from primitive-to-MPR cosine alone. The repository includes separate checks for lifting, coverage, compression, compositing, capability preservation, and query behavior:

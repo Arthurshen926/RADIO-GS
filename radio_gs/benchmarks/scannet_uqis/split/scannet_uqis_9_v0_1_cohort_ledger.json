@@ -1,0 +1,27 @@
+{
+  "schema_version": "scannet_uqis_cohort_derivation_v1",
+  "benchmark_version": "scannet-uqis-9-v0.1",
+  "selection_information": "official_scannet_geometry_plus_nr3d_annotations_only",
+  "formal_method_predictions_opened": false,
+  "final_scene_order": [
+    "scene0030_00",
+    "scene0249_00",
+    "scene0353_00",
+    "scene0435_00",
+    "scene0700_00",
+    "scene0704_00",
+    "scene0246_00",
+    "scene0203_00",
+    "scene0535_00"
+  ],
+  "decisions": [
+    {"scene_id": "scene0046_00", "decision": "excluded_before_formal_release", "reason": "nr3d_eligible_targets_span_only_three_raw_semantic_categories"},
+    {"scene_id": "scene0412_00", "decision": "excluded_before_formal_release", "reason": "nr3d_eligible_targets_span_only_three_raw_semantic_categories"},
+    {"scene_id": "scene0550_00", "decision": "excluded_before_formal_release", "reason": "only_two_nr3d_eligible_geometry_targets"},
+    {"scene_id": "scene0678_00", "decision": "excluded_before_formal_release", "reason": "nr3d_eligible_targets_span_only_three_raw_semantic_categories"},
+    {"scene_id": "scene0246_00", "decision": "included_as_preregistered_replacement", "reason": "seven_nr3d_eligible_targets_across_five_raw_semantic_categories"},
+    {"scene_id": "scene0203_00", "decision": "included_before_any_formal_method_evaluation", "reason": "sixteen_nr3d_eligible_targets_across_seven_raw_semantic_categories"},
+    {"scene_id": "scene0535_00", "decision": "included_before_any_formal_method_evaluation", "reason": "eight_nr3d_eligible_targets_across_four_raw_semantic_categories"},
+    {"scene_id": null, "decision": "freeze_nine_scene_cohort", "reason": "user_accepted_nine_scenes_without_mining_full_validation_for_a_tenth"}
+  ]
+}
