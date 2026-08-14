@@ -32,6 +32,7 @@ from radio_gs.interfaces.factorized_primitive_state import (
     load_factorized_primitive_state,
 )
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
+from radio_gs.training.gauge_separated_capability import gauge_separated_radio
 from radio_gs.utils.immutable_artifacts import (
     canonical_json_sha256,
     load_json_object,
@@ -558,12 +559,13 @@ def load_source_only_multiteacher_bundle(
 
 
 class FrozenPrimitiveSiglipProxy(nn.Module):
-    """The exact pointwise projection used by the existing O2 source teacher.
+    """Legacy pointwise projection used by the archived O2 source teacher.
 
-    This is named a proxy, not an official primitive adaptor: the official
-    SigLIP summary head was trained for summary tokens.  Stage-B uses it only
-    because the frozen O2 teacher applies that same head to raster-aggregated
-    source RADIO rows, making this the matched student projection.
+    The official SigLIP summary head was trained for genuine summary tokens,
+    not primitive or spatial tokens.  The class remains only to reproduce the
+    immutable O2 artifact family; new core-method runs must use a genuine
+    region-view summary teacher instead and therefore fail closed unless the
+    caller explicitly opts into legacy reproduction.
     """
 
     def __init__(self, head: nn.Module) -> None:
@@ -573,8 +575,17 @@ class FrozenPrimitiveSiglipProxy(nn.Module):
 
     @classmethod
     def from_radio_checkpoint(
-        cls, path: str | Path, *, expected_sha256: str
+        cls,
+        path: str | Path,
+        *,
+        expected_sha256: str,
+        allow_legacy_primitive_proxy: bool = False,
     ) -> "FrozenPrimitiveSiglipProxy":
+        if not bool(allow_legacy_primitive_proxy):
+            raise ValueError(
+                "primitive SigLIP summary projection is legacy-only; use a "
+                "genuine source-region summary teacher for core-method runs"
+            )
         actual = sha256_file(path)
         if actual != str(expected_sha256):
             raise ValueError("Stage-B official RADIO checkpoint differs")
@@ -606,13 +617,13 @@ def source_direction_only_radio(
     values = torch.as_tensor(radio)
     if values.ndim != 2 or values.shape[1] != 1280:
         raise ValueError("Stage-B source RADIO rows must be [B,1280]")
-    if not values.dtype.is_floating_point or not bool(torch.isfinite(values).all()):
-        raise ValueError("Stage-B source RADIO rows must be finite floating point")
-    gauge = torch.linalg.vector_norm(values.float(), dim=-1, keepdim=True)
-    if bool((gauge <= float(norm_epsilon)).any()):
+    if bool(
+        (torch.linalg.vector_norm(values.float(), dim=-1) <= norm_epsilon).any()
+    ):
         raise ValueError("Stage-B source RADIO gauge must be positive")
-    direction = values.float() / gauge
-    return direction * gauge.detach()
+    return gauge_separated_radio(
+        values, feature_dim=-1, norm_epsilon=norm_epsilon
+    )
 
 
 def primitive_source_descriptor_loss(

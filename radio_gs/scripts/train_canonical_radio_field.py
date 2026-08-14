@@ -2240,7 +2240,11 @@ def train(args: argparse.Namespace) -> dict:
             expected_radio_checkpoint_sha256=radio_hash,
         )
         source_descriptor_projector = FrozenPrimitiveSiglipProxy.from_radio_checkpoint(
-            args.radio_checkpoint, expected_sha256=radio_hash
+            args.radio_checkpoint,
+            expected_sha256=radio_hash,
+            allow_legacy_primitive_proxy=bool(
+                getattr(args, "allow_legacy_primitive_siglip_proxy", False)
+            ),
         ).to(device)
         field.eval()
         control_source_multiteacher_metrics.update(
@@ -3385,14 +3389,23 @@ def main() -> None:
         "--source-only-multiteacher-manifest",
         default="",
         help=(
-            "Optional immutable Stage-B manifest adding query-free primitive "
-            "descriptor and local semantic-relation teachers."
+            "Archived Stage-B primitive-proxy manifest. This is not a valid "
+            "core-method region-summary teacher and requires an explicit "
+            "legacy opt-in."
         ),
     )
     parser.add_argument(
         "--expected-source-only-multiteacher-manifest-sha256",
         default="",
         help="Caller-trusted SHA-256 for the Stage-B manifest.",
+    )
+    parser.add_argument(
+        "--allow-legacy-primitive-siglip-proxy",
+        action="store_true",
+        help=(
+            "Reproduce the archived O2 primitive-summary proxy. Never enable "
+            "this for core-method or benchmark-candidate training."
+        ),
     )
     parser.add_argument(
         "--source-only-sam-structure-manifest",

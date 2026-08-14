@@ -379,6 +379,11 @@ def validate_factorized_radio_builder_policy(args: argparse.Namespace) -> bool:
 # runtime.  The direct path deliberately consumes the saved official adaptor
 # output, rather than applying an MLP to an already interpolated raw map.
 _EXTRACTED_CAPABILITY_SPECS: dict[str, dict[str, object]] = {
+    "siglip2-g": {
+        "adaptor_name": "siglip2-g",
+        "subdir": "siglip2",
+        "output_dim": 1536,
+    },
     "dino_v3": {
         "adaptor_name": "dino_v3_7b",
         "subdir": "dino_v3_7b",

@@ -47,7 +47,7 @@ SCANNET_VARIANT="${SCANNET_VARIANT:-v14}"
 WARMSTART_VARIANT="${WARMSTART_VARIANT:-}"
 WARMSTART_PATH="${WARMSTART_PATH:-}"
 TRAIN_EPOCHS="${TRAIN_EPOCHS:-}"
-SIGLIP_SUMMARY_ALIGNMENT_WEIGHT="${SIGLIP_SUMMARY_ALIGNMENT_WEIGHT:-}"
+SIGLIP_SPATIAL_ALIGNMENT_WEIGHT="${SIGLIP_SPATIAL_ALIGNMENT_WEIGHT:-}"
 DIRECT_POINT_LOSS_WEIGHT="${DIRECT_POINT_LOSS_WEIGHT:-0.0}"
 DIRECT_POINT_SAMPLE_COUNT="${DIRECT_POINT_SAMPLE_COUNT:-2048}"
 DIRECT_POINT_QUERY_MODE="${DIRECT_POINT_QUERY_MODE:-gaussian_index}"
@@ -151,8 +151,8 @@ for scene in "${SCENES[@]}"; do
   if [[ -n "${TRAIN_EPOCHS}" ]]; then
     config_extra_args+=(--epochs "${TRAIN_EPOCHS}")
   fi
-  if [[ -n "${SIGLIP_SUMMARY_ALIGNMENT_WEIGHT}" ]]; then
-    config_extra_args+=(--siglip_summary_alignment_weight "${SIGLIP_SUMMARY_ALIGNMENT_WEIGHT}")
+  if [[ -n "${SIGLIP_SPATIAL_ALIGNMENT_WEIGHT}" ]]; then
+    config_extra_args+=(--siglip_spatial_alignment_weight "${SIGLIP_SPATIAL_ALIGNMENT_WEIGHT}")
   fi
   bash "${PY_WRAPPER}" radio_gs/scripts/generate_scannet_og_configs.py \
     --scenes "${scene}" \

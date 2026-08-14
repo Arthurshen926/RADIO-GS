@@ -48,7 +48,7 @@ def generate_config(
     num_workers: int = 4,
     variant: str = "v14",
     epochs: int | None = None,
-    siglip_summary_alignment_weight: float | None = None,
+    siglip_spatial_alignment_weight: float | None = None,
     direct_point_loss_weight: float = 0.0,
     direct_point_sample_count: int = 2048,
     direct_point_sample_strategy: str = "uniform",
@@ -235,8 +235,9 @@ def generate_config(
     )
     if epochs is not None:
         cfg["epochs"] = int(epochs)
-    if siglip_summary_alignment_weight is not None:
-        cfg["siglip_summary_alignment_weight"] = float(siglip_summary_alignment_weight)
+    if siglip_spatial_alignment_weight is not None:
+        cfg["siglip_alignment_weight"] = float(siglip_spatial_alignment_weight)
+        cfg["siglip_summary_alignment_weight"] = 0.0
 
     output_root.mkdir(parents=True, exist_ok=True)
     output_path = output_root / f"scannet_og_hybrid_{variant}_{scene}.yaml"
@@ -258,7 +259,7 @@ def main() -> None:
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--variant", default="v14")
     parser.add_argument("--epochs", type=int, default=None)
-    parser.add_argument("--siglip_summary_alignment_weight", type=float, default=None)
+    parser.add_argument("--siglip_spatial_alignment_weight", type=float, default=None)
     parser.add_argument("--direct_point_loss_weight", type=float, default=0.0)
     parser.add_argument("--direct_point_sample_count", type=int, default=2048)
     parser.add_argument(
@@ -348,7 +349,7 @@ def main() -> None:
             num_workers=args.num_workers,
             variant=args.variant,
             epochs=args.epochs,
-            siglip_summary_alignment_weight=args.siglip_summary_alignment_weight,
+            siglip_spatial_alignment_weight=args.siglip_spatial_alignment_weight,
             direct_point_loss_weight=args.direct_point_loss_weight,
             direct_point_sample_count=args.direct_point_sample_count,
             direct_point_sample_strategy=args.direct_point_sample_strategy,

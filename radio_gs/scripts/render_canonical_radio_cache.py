@@ -12,15 +12,20 @@ import torch
 
 from radio_gs.config import load_config
 from radio_gs.field import (
-    load_canonical_field_checkpoint,
+    load_factorized_canonical_field_checkpoint,
     load_view_residual_checkpoint,
 )
+from radio_gs.data.benchmark_paths import load_w2c_from_pose_dir
+from radio_gs.interfaces.semantic_alignment import (
+    GlobalRegionSummaryBridge,
+    project_dense_region_semantics,
+)
+from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.rendering.coefficient_renderer import (
     render_canonical_radio,
     render_view_conditioned_radio,
 )
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
-from radio_gs.training.feature_training_utils import SimpleRadioDataset
 
 
 def _sha256_tensor_rows(values: torch.Tensor) -> str:
@@ -36,6 +41,33 @@ def _sha256_file(path: str | Path) -> str:
     return digest.hexdigest()
 
 
+def _benchmark_frames_from_payload(payload: dict) -> list[int]:
+    render_optimization = payload.get("render_optimization", {})
+    if isinstance(render_optimization, dict):
+        direct = render_optimization.get("excluded_benchmark_frames")
+        if direct:
+            return sorted({int(frame) for frame in direct})
+    mpr_metadata = payload.get("mpr_cache_metadata", {})
+    if not isinstance(mpr_metadata, dict):
+        return []
+    direct = mpr_metadata.get("excluded_frame_ids")
+    registration = mpr_metadata.get("registration_responsibility_contract", {})
+    nested = (
+        registration.get("excluded_frame_ids")
+        if isinstance(registration, dict)
+        else None
+    )
+    declared = direct if direct is not None else nested
+    return sorted({int(frame) for frame in (declared or [])})
+
+
+def _parse_region_kernel_sizes(raw: str) -> tuple[int, ...]:
+    values = tuple(int(value) for value in str(raw).split(",") if value.strip())
+    if not values or any(value <= 0 or value % 2 == 0 for value in values):
+        raise ValueError("region kernel sizes must be positive odd integers")
+    return values
+
+
 def render(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
     config = load_config(args.config)
@@ -46,7 +78,11 @@ def render(args: argparse.Namespace) -> dict:
         strict_checkpoint_contract=True,
         load_ply_rgb_features=False,
     )
-    field, payload = load_canonical_field_checkpoint(args.field_checkpoint, map_location="cpu")
+    field, payload, _factorized_signature = (
+        load_factorized_canonical_field_checkpoint(
+            args.field_checkpoint, map_location="cpu"
+        )
+    )
     xyz_hash = _sha256_tensor_rows(model.get_xyz())
     if xyz_hash != str(
         payload.get("geometry_fingerprint", {}).get("xyz_sha256", "")
@@ -77,39 +113,55 @@ def render(args: argparse.Namespace) -> dict:
             raise ValueError("view residual lacks the rendering-only invariant")
         view_residual = view_residual.to(device).eval()
 
-    feature_dir = Path(str(getattr(config, "feature_dir", "")))
-    fallback = feature_dir / "poses_w2c"
-    dataset = SimpleRadioDataset(
-        feature_dir=str(feature_dir),
-        pose_file=None,
-        pose_dir=str(fallback),
-        feature_size=(int(config.feature_height), int(config.feature_width)),
-        split="validation",
-        dataset_type=str(config.dataset_type),
-    )
+    region_bridge = None
+    region_summary_head = None
+    region_kernel_sizes: tuple[int, ...] = ()
+    if args.readout == "region_summary":
+        if view_residual is not None:
+            raise ValueError(
+                "region-summary readout is defined only on the canonical field"
+            )
+        if not str(args.semantic_bridge_checkpoint).strip():
+            raise ValueError(
+                "region-summary readout requires --semantic-bridge-checkpoint"
+            )
+        region_bridge, _bridge_manifest = GlobalRegionSummaryBridge.from_checkpoint(
+            args.semantic_bridge_checkpoint, map_location="cpu"
+        )
+        region_bridge = region_bridge.to(device).eval()
+        region_summary_head = SigLIP2SummaryHead.from_radio_checkpoint(
+            args.radio_checkpoint
+        ).to(device).eval()
+        region_kernel_sizes = _parse_region_kernel_sizes(
+            args.semantic_kernel_sizes
+        )
+
     metadata = dict(payload.get("render_optimization", {}))
     if args.frame_policy == "benchmark":
-        frames = [int(value) for value in metadata.get("excluded_benchmark_frames", [])]
+        frames = _benchmark_frames_from_payload(dict(payload))
     else:
         frames = [int(value) for value in metadata.get("validation_frames", [])]
     if not frames:
         raise RuntimeError(f"field checkpoint has no {args.frame_policy} frame manifest")
-    frame_to_index = {int(frame): index for index, frame in enumerate(dataset.frame_indices)}
+    feature_dir = Path(str(getattr(config, "feature_dir", "")))
+    declared_pose_dir = str(getattr(config, "pose_dir", "") or "").strip()
+    pose_dir = Path(declared_pose_dir) if declared_pose_dir else feature_dir / "poses_w2c"
+    if not pose_dir.is_dir():
+        raise FileNotFoundError(f"registered pose directory is missing: {pose_dir}")
+    poses_w2c = load_w2c_from_pose_dir(pose_dir, frames)
     output_scene = Path(args.output_root) / str(args.scene)
     output_dir = output_scene / "backbone"
     output_dir.mkdir(parents=True, exist_ok=True)
     rendered_frames: list[int] = []
     with torch.inference_mode():
-        for frame in frames:
-            if frame not in frame_to_index:
-                raise ValueError(f"frame {frame} is unavailable in the RADIO cache")
-            sample = dataset[frame_to_index[frame]]
+        for frame, pose_w2c in zip(frames, poses_w2c):
+            pose_tensor = torch.as_tensor(pose_w2c).to(device)
             if view_residual is None:
                 result = render_canonical_radio(
                     renderer,
                     model,
                     field,
-                    sample["pose_w2c"].to(device),
+                    pose_tensor,
                     feature_height=int(config.feature_height),
                     feature_width=int(config.feature_width),
                     use_reliability=False,
@@ -120,11 +172,20 @@ def render(args: argparse.Namespace) -> dict:
                     model,
                     field,
                     view_residual,
-                    sample["pose_w2c"].to(device),
+                    pose_tensor,
                     feature_height=int(config.feature_height),
                     feature_width=int(config.feature_width),
                 )
-            torch.save(result["feature_map"].half().cpu(), output_dir / f"rgb_{frame}.pt")
+            feature_map = result["feature_map"]
+            if region_bridge is not None:
+                feature_map = project_dense_region_semantics(
+                    region_bridge,
+                    region_summary_head,
+                    feature_map[None],
+                    kernel_sizes=region_kernel_sizes,
+                    projection_batch_size=int(args.semantic_projection_batch_size),
+                )[0]
+            torch.save(feature_map.half().cpu(), output_dir / f"rgb_{frame}.pt")
             rendered_frames.append(frame)
     report = {
         "schema_version": 1,
@@ -140,8 +201,18 @@ def render(args: argparse.Namespace) -> dict:
         "geometry_checkpoint": str(Path(args.geometry_checkpoint).resolve()),
         "frame_policy": args.frame_policy,
         "frames": rendered_frames,
-        "feature_dim": int(field.decoder.feature_dim),
+        "pose_dir": str(pose_dir.resolve()),
+        "readout": args.readout,
+        "feature_dim": (
+            1536 if region_bridge is not None else int(field.decoder.feature_dim)
+        ),
         "feature_grid": [int(config.feature_height), int(config.feature_width)],
+        "semantic_bridge_checkpoint": (
+            str(Path(args.semantic_bridge_checkpoint).resolve())
+            if region_bridge is not None
+            else ""
+        ),
+        "semantic_kernel_sizes": list(region_kernel_sizes),
         "normalized_splat": True,
         "affine_decode_after_splat": True,
         "reliability_splat": False,
@@ -165,6 +236,18 @@ def main() -> None:
     parser.add_argument(
         "--frame-policy", choices=["benchmark", "render_validation"], default="benchmark"
     )
+    parser.add_argument(
+        "--readout",
+        choices=["raw_radio", "region_summary"],
+        default="raw_radio",
+    )
+    parser.add_argument("--semantic-bridge-checkpoint", default="")
+    parser.add_argument(
+        "--radio-checkpoint",
+        default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    )
+    parser.add_argument("--semantic-kernel-sizes", default="3,7,15")
+    parser.add_argument("--semantic-projection-batch-size", type=int, default=2048)
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
     print(json.dumps(render(args), indent=2))

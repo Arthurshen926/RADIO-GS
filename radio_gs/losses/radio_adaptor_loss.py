@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from radio_gs.models.radio_adaptors import project_feature_map_with_adaptor
+from radio_gs.training.gauge_separated_capability import gauge_separated_radio
 
 
 def _zero_like_features(features: torch.Tensor) -> torch.Tensor:
@@ -196,6 +197,7 @@ def compute_radio_adaptor_masked_render_losses(
     local_radius: int = 1,
     local_balance_quantile: float = 0.0,
     teacher_capability_maps: Mapping[str, torch.Tensor] | None = None,
+    gauge_separated: bool = True,
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, dict[str, torch.Tensor]]]:
     """Preserve official dense capability and local relations after rendering.
 
@@ -234,13 +236,18 @@ def compute_radio_adaptor_masked_render_losses(
         zero = _zero_like_features(decoded)
         return zero, zero, {}
 
+    predicted_radio = (
+        gauge_separated_radio(decoded, feature_dim=1)
+        if bool(gauge_separated)
+        else decoded
+    )
     total_weight = sum(requested.values())
     alignment_total = _zero_like_features(decoded)
     local_total = _zero_like_features(decoded)
     details: dict[str, dict[str, torch.Tensor]] = {}
     for name, weight in requested.items():
         adaptor = adaptors[name]
-        predicted = project_feature_map_with_adaptor(decoded, adaptor)
+        predicted = project_feature_map_with_adaptor(predicted_radio, adaptor)
         if teacher_capability_maps is None:
             with torch.no_grad():
                 teacher = project_feature_map_with_adaptor(target, adaptor)

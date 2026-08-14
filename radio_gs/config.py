@@ -148,6 +148,8 @@ class RadioGSConfig:
     samclip_feature_level: int = 0
     samclip_language_feature_dir: str = ""
     siglip_alignment_weight: float = 0.0
+    # Legacy invalid proxy: the SigLIP summary head is not a spatial adaptor.
+    # Kept only so old YAML files load; active training fails if this is nonzero.
     siglip_summary_alignment_weight: float = 0.0
     siglip_summary_head_weights: str = "checkpoints/siglip2_summary_head.pth"
     radio_adaptor_alignment_names: str = ""

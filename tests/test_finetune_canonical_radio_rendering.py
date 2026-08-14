@@ -11,6 +11,51 @@ def test_checkpoint_persists_capability_pareto_drop_authority() -> None:
     assert '"max_capability_drop": float(args.max_capability_drop)' in source
 
 
+def test_render_finetune_exposes_official_siglip_spatial_capability() -> None:
+    source = Path(finetune.__file__).read_text(encoding="utf-8")
+    assert '"siglip2-g": float(args.siglip_spatial_render_weight)' in source
+    assert "SigLIP2FeatureProjection.from_radio_checkpoint" in source
+    assert "--siglip-spatial-render-weight" in source
+
+
+def test_mpr_exclusions_accept_nested_registration_authority() -> None:
+    metadata = {
+        "registration_responsibility_contract": {
+            "excluded_frame_ids": [41, 105, 152, 195]
+        }
+    }
+
+    assert finetune._excluded_mpr_frame_ids(metadata) == {41, 105, 152, 195}
+
+
+def test_mpr_exclusions_fail_closed_when_authority_is_missing() -> None:
+    with pytest.raises(ValueError, match="does not declare"):
+        finetune._excluded_mpr_frame_ids({})
+
+
+def test_load_consensus_accepts_factorized_radio_cache(tmp_path: Path) -> None:
+    path = tmp_path / "factorized.pt"
+    torch.save(
+        {
+            "factorized_radio": {
+                "canonical_feature": torch.tensor([[1.0, 2.0], [3.0, 4.0]]),
+                "valid": torch.tensor([True, False]),
+                "reliability": torch.ones(2, 5),
+            },
+            "view_counts": torch.tensor([3, 0]),
+            "metadata": {"selected_frame_indices": [1]},
+        },
+        path,
+    )
+
+    consensus, payload = finetune._load_consensus(str(path))
+
+    assert consensus.targets.shape == (2, 2)
+    assert consensus.reliability.shape == (2, 5)
+    assert consensus.observation_count.tolist() == [3, 0]
+    assert payload["metadata"]["selected_frame_indices"] == [1]
+
+
 class _IdentityAdaptor(torch.nn.Module):
     def forward(self, values):
         return values

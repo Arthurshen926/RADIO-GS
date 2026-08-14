@@ -121,6 +121,8 @@ eval_every: 5
 log_every: 50
 num_workers: 2
 
-# Text-space alignment via frozen SigLIP2 summary head
-siglip_summary_alignment_weight: 0.5
+# Full-grid official SigLIP2 spatial preservation.  Region summary supervision
+# is trained separately from genuine source-view summary tokens.
+siglip_alignment_weight: 0.5
+siglip_summary_alignment_weight: 0.0
 siglip_summary_head_weights: "checkpoints/siglip2_summary_head.pth"

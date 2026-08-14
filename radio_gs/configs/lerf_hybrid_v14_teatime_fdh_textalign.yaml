@@ -130,4 +130,7 @@ frozen_depth_head_num_layers: 3
 frozen_depth_loss_type: "scale_invariant"
 frozen_depth_gradient_weight: 0.1
 frozen_depth_warmup_epochs: 30
-siglip_summary_alignment_weight: 0.2
+# Full-grid official SigLIP2 spatial preservation.  The summary head is only
+# valid for genuine region/image summary tokens, never individual map tokens.
+siglip_alignment_weight: 0.2
+siglip_summary_alignment_weight: 0.0

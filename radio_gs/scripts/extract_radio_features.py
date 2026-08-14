@@ -42,6 +42,7 @@ from radio_gs.data.view_split import (
     load_excluded_image_stems,
     select_image_indices,
 )
+from radio_gs.models.siglip_projection import SigLIP2FeatureProjection
 from radio_gs.utils.immutable_artifacts import (
     load_fixed_radio_checkpoint_payload,
     load_json_object,
@@ -510,6 +511,57 @@ def _adaptor_output_subdir(name: str) -> str:
     if name == "siglip2-g":
         return "siglip2"
     return name.replace("-", "_")
+
+
+def _load_direct_spatial_projectors(
+    adaptor_names: list[str] | None,
+    *,
+    radio_checkpoint: str,
+    device: torch.device,
+) -> dict[str, torch.nn.Module]:
+    """Load official spatial-only projections without their text towers.
+
+    C-RADIO's SigLIP2 adaptor constructs a Hugging Face text model even when
+    extraction only needs the visual feature projection.  Loading the frozen
+    projection directly is both semantically exact for the spatial output and
+    avoids making visual teacher extraction depend on text-head ABI details.
+    """
+
+    requested = set(adaptor_names or [])
+    projectors: dict[str, torch.nn.Module] = {}
+    if "siglip2-g" in requested:
+        if not str(radio_checkpoint).strip():
+            raise ValueError(
+                "siglip2-g spatial extraction requires --radio_checkpoint"
+            )
+        projector = SigLIP2FeatureProjection.from_radio_checkpoint(
+            str(radio_checkpoint)
+        ).to(device).eval()
+        for parameter in projector.parameters():
+            parameter.requires_grad_(False)
+        projectors["siglip2-g"] = projector
+    return projectors
+
+
+def _apply_direct_spatial_projectors(
+    spatial_2d: torch.Tensor,
+    adaptor_outputs: dict[str, torch.Tensor],
+    projectors: dict[str, torch.nn.Module],
+    *,
+    amp: bool,
+) -> dict[str, torch.Tensor]:
+    if not projectors:
+        return adaptor_outputs
+    batch, _channels, height, width = spatial_2d.shape
+    tokens = spatial_2d.flatten(2).transpose(1, 2)
+    outputs = dict(adaptor_outputs)
+    with torch.cuda.amp.autocast(enabled=amp):
+        for name, projector in projectors.items():
+            projected = projector(tokens)
+            outputs[name] = projected.transpose(1, 2).reshape(
+                batch, projected.shape[-1], height, width
+            )
+    return outputs
 
 
 def _split_radio_output_pair(value) -> tuple[torch.Tensor, torch.Tensor]:
@@ -1802,6 +1854,14 @@ def extract(args: argparse.Namespace) -> None:
                 "committed frames"
             )
 
+    direct_spatial_projectors = _load_direct_spatial_projectors(
+        adaptor_names,
+        radio_checkpoint=str(getattr(args, "radio_checkpoint", "")),
+        device=device,
+    )
+    runtime_adaptor_names = [
+        name for name in (adaptor_names or []) if name not in direct_spatial_projectors
+    ]
     model = None
     conditioner = None
     if len(committed_frames) != len(image_paths):
@@ -1809,7 +1869,7 @@ def extract(args: argparse.Namespace) -> None:
         model, conditioner = _load_radio_model(
             args.radio_repo,
             model_source["load_source"],
-            adaptor_names,
+            runtime_adaptor_names,
             device,
             expected_checkpoint_sha256=model_source["checkpoint_sha256"],
         )
@@ -1842,7 +1902,7 @@ def extract(args: argparse.Namespace) -> None:
                 args.amp,
                 tile_size=args.tile_size,
                 tile_overlap=args.tile_overlap,
-                adaptor_names=adaptor_names,
+                adaptor_names=runtime_adaptor_names,
             )
         else:
             summary, spatial_2d, adaptor_2d = _run_radio_batch(
@@ -1852,8 +1912,14 @@ def extract(args: argparse.Namespace) -> None:
                 args.amp,
                 patch_h,
                 patch_w,
-                adaptor_names=adaptor_names,
+                adaptor_names=runtime_adaptor_names,
             )
+        adaptor_2d = _apply_direct_spatial_projectors(
+            spatial_2d,
+            adaptor_2d,
+            direct_spatial_projectors,
+            amp=bool(args.amp),
+        )
 
         B, D, _, _ = spatial_2d.shape
         if B != len(batch_paths):

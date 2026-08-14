@@ -1,0 +1,9 @@
+base_config: ../../lerf_hybrid_v14_figurines_fdh_ws240_240ep.yaml
+
+# Query-free source bundle.  Frozen LERF target frames 41/105/152/195 are
+# excluded at extraction time; the pose authority remains the verified COLMAP
+# bundle used by the exact-marginal D512/L512 checkpoint.
+feature_dir: /root/RADIO-GS/output/canonical_teacher_features_v2/figurines_source_only_siglip2
+pose_file: ""
+pose_dir: /root/RADIO-GS/output/canonical_teacher_features/figurines/poses_c2w_colmap_verified
+scene_root: /mnt/pool/sqy/3d_understanding/lerf_ovs/figurines

@@ -10,6 +10,7 @@ from radio_gs.training.source_only_multiteacher import (
     SOURCE_ONLY_MULTITEACHER_CONTRACT_SHA256,
     SOURCE_ONLY_MULTITEACHER_SCHEMA,
     SOURCE_ONLY_MULTITEACHER_SCHEMA_VERSION,
+    FrozenPrimitiveSiglipProxy,
     PrimitiveDescriptorTeacher,
     _evenly_spaced_edge_selection,
     evaluate_source_only_gates,
@@ -19,6 +20,16 @@ from radio_gs.training.source_only_multiteacher import (
     validate_source_only_multiteacher_manifest,
 )
 from radio_gs.utils.immutable_artifacts import file_record
+
+
+def test_primitive_siglip_proxy_fails_closed_for_core_method_runs(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="legacy-only"):
+        FrozenPrimitiveSiglipProxy.from_radio_checkpoint(
+            tmp_path / "unused.pth",
+            expected_sha256="0" * 64,
+        )
 
 
 def _manifest(tmp_path: Path) -> dict:

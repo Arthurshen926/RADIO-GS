@@ -9,6 +9,7 @@ import torch
 
 from radio_gs.scripts.extract_radio_features import (
     _adaptor_output_subdir,
+    _apply_direct_spatial_projectors,
     _compute_scaled_radio_resolution,
     _parse_adaptor_names,
     _radio_model_source,
@@ -16,7 +17,10 @@ from radio_gs.scripts.extract_radio_features import (
     _unpack_radio_output,
 )
 from radio_gs.scripts import eval_lerf_grounding as eval_lerf_grounding_module
-from radio_gs.scripts.eval_lerf_grounding import load_or_generate_prompt_ensemble_embeddings
+from radio_gs.scripts.eval_lerf_grounding import (
+    fuse_typed_text_scores,
+    load_or_generate_prompt_ensemble_embeddings,
+)
 from radio_gs.scripts.sweep_lerf_grounding import (
     build_eval_command,
     iter_sweep_cases,
@@ -156,6 +160,28 @@ def test_radio_adaptor_names_are_configurable() -> None:
     assert _adaptor_output_subdir("dino_v3") == "dino_v3"
 
 
+def test_direct_spatial_projection_preserves_full_grid_token_context() -> None:
+    class ContextProjector(torch.nn.Module):
+        def forward(self, tokens: torch.Tensor) -> torch.Tensor:
+            context = tokens.mean(dim=1, keepdim=True)
+            return torch.cat((tokens, context.expand_as(tokens)), dim=-1)
+
+    spatial = torch.arange(1 * 2 * 2 * 3, dtype=torch.float32).reshape(
+        1, 2, 2, 3
+    )
+    previous = {"sam3": torch.ones(1, 1, 2, 3)}
+
+    outputs = _apply_direct_spatial_projectors(
+        spatial,
+        previous,
+        {"siglip2-g": ContextProjector()},
+        amp=False,
+    )
+
+    assert outputs["sam3"] is previous["sam3"]
+    assert outputs["siglip2-g"].shape == (1, 4, 2, 3)
+
+
 def test_unpack_radio_output_keeps_requested_adaptors() -> None:
     summary = torch.zeros(1, 2)
     spatial = torch.arange(1 * 4 * 3).reshape(1, 4, 3).float()
@@ -246,3 +272,22 @@ def test_prompt_ensemble_loads_exact_cache_before_encoding(tmp_path: Path, monke
 
     assert torch.allclose(loaded, torch.nn.functional.normalize(embeddings, dim=-1))
     assert encode_calls == []
+
+
+def test_lerf_evaluator_accepts_typed_preprojected_text_features() -> None:
+    source = Path(eval_lerf_grounding_module.__file__).read_text(encoding="utf-8")
+    assert "--preprojected_text_features" in source
+    assert "native SigLIP2 text-space features" in source
+    assert "--region_feature_dir" in source
+    assert '"score_fusion": "fixed_convex_mean"' in source
+
+
+def test_typed_text_score_fusion_is_one_global_convex_mean() -> None:
+    primitive = torch.tensor([[[0.8, 0.2]]])
+    region = torch.tensor([[[0.4, 0.6]]])
+    assert torch.allclose(
+        fuse_typed_text_scores(primitive, region),
+        torch.tensor([[[0.6, 0.4]]]),
+    )
+    with pytest.raises(ValueError, match="matching shapes"):
+        fuse_typed_text_scores(primitive, region[..., :1])

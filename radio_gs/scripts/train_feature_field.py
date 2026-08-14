@@ -884,6 +884,12 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.siglip_summary_alignment_weight = getattr(
             config, "siglip_summary_alignment_weight", 0.0
         )
+        if self.siglip_summary_alignment_weight > 0:
+            raise ValueError(
+                "siglip_summary_alignment_weight is a retired per-token summary-head "
+                "proxy; use siglip_alignment_weight for official full-grid spatial "
+                "preservation and train region summaries from genuine summary tokens"
+            )
         self.text_heatmap_distill_weight = float(
             getattr(config, "text_heatmap_distill_weight", 0.0)
         )

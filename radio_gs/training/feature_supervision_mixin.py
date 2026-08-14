@@ -52,6 +52,7 @@ from radio_gs.training.feature_training_utils import (
     sample_multiview_radio_targets as _sample_multiview_radio_targets_impl,
     select_visible_gaussian_indices as _select_visible_gaussian_indices_impl,
 )
+from radio_gs.training.gauge_separated_capability import gauge_separated_radio
 from radio_gs.training.tensor_cache_io import load_training_tensor_cache
 
 
@@ -1402,7 +1403,9 @@ class FeatureSupervisionMixin:
             return torch.tensor(0.0, device=self.device)
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
-        pred_siglip = self._project_siglip_features(decoded)
+        pred_siglip = self._project_siglip_features(
+            gauge_separated_radio(decoded, feature_dim=1)
+        )
         with torch.no_grad():
             target_siglip = self._project_siglip_features(target)
         return self.siglip_alignment_weight * F.mse_loss(pred_siglip, target_siglip)
@@ -1508,7 +1511,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         adaptor_loss, _ = compute_radio_adaptor_alignment_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             self.radio_adaptor_alignment_adaptors,
         )
@@ -1538,7 +1541,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         relation_loss, _ = compute_radio_adaptor_relation_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_relation_downsample,
@@ -1564,7 +1567,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         local_loss, _ = compute_radio_adaptor_local_affinity_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_local_affinity_downsample,
@@ -1589,7 +1592,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         token_contrast_loss, _ = compute_radio_adaptor_token_contrast_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_token_contrast_downsample,
@@ -1615,7 +1618,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         peak_loss, _ = compute_radio_adaptor_peak_background_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_peak_background_downsample,
@@ -1643,7 +1646,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         region_loss, _ = compute_radio_adaptor_region_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_region_downsample,
@@ -1670,7 +1673,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         mask_logit_loss, _ = compute_radio_adaptor_mask_logit_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_mask_logit_downsample,
@@ -1698,7 +1701,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         cross_view_loss, _ = compute_radio_adaptor_cross_view_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_cross_view_downsample,
@@ -1728,7 +1731,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         propagation_loss, _ = compute_radio_adaptor_cross_view_propagation_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_cross_view_propagation_downsample,
@@ -1759,7 +1762,7 @@ class FeatureSupervisionMixin:
         if decoded.shape[-2:] != target.shape[-2:]:
             target = self._resize_map(target, decoded.shape[-2:])
         propagation_loss, _ = compute_radio_adaptor_cross_view_mask_propagation_loss(
-            decoded.float(),
+            gauge_separated_radio(decoded.float(), feature_dim=1),
             target.float(),
             adaptors,
             downsample=self.radio_adaptor_cross_view_mask_propagation_downsample,

@@ -14,7 +14,7 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.config import load_config
-from radio_gs.field import load_canonical_field_checkpoint
+from radio_gs.field import load_factorized_canonical_field_checkpoint
 from radio_gs.interfaces.semantic_alignment import (
     GlobalRegionSummaryBridge,
     project_dense_region_semantics,
@@ -26,12 +26,16 @@ from radio_gs.models.radio_adaptors import (
     load_radio_adaptor_from_checkpoint,
     project_feature_map_with_adaptor,
 )
-from radio_gs.models.siglip_projection import SigLIP2SummaryHead
+from radio_gs.models.siglip_projection import (
+    SigLIP2FeatureProjection,
+    SigLIP2SummaryHead,
+)
 from radio_gs.rendering.coefficient_renderer import render_canonical_radio
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
 from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     _resolve_extracted_capability_source,
 )
+from radio_gs.training.gauge_separated_capability import gauge_separated_radio
 from radio_gs.training.canonical_field_losses import normalized_render_reconstruction_loss
 from radio_gs.training.feature_training_utils import SimpleRadioDataset
 from radio_gs.training.primitive_consensus import (
@@ -47,10 +51,16 @@ def _sha256_tensor_rows(values: torch.Tensor) -> str:
 
 def _load_consensus(path: str) -> tuple[PrimitiveConsensus, dict]:
     cache = torch.load(path, map_location="cpu")
-    targets = torch.as_tensor(cache["features"]).float()
-    valid = torch.as_tensor(cache["valid"]).bool()
+    factorized = cache.get("factorized_radio")
+    if isinstance(factorized, Mapping):
+        targets = torch.as_tensor(factorized["canonical_feature"]).float()
+        valid = torch.as_tensor(factorized["valid"]).bool()
+        reliability = torch.as_tensor(factorized["reliability"]).float()
+    else:
+        targets = torch.as_tensor(cache["features"]).float()
+        valid = torch.as_tensor(cache["valid"]).bool()
+        reliability = torch.as_tensor(cache["reliability"]).float()
     counts = torch.as_tensor(cache["view_counts"]).long()
-    reliability = torch.as_tensor(cache["reliability"]).float()
     return (
         PrimitiveConsensus(
             targets=targets,
@@ -158,6 +168,25 @@ def _even_subset(values: list[int], count: int) -> list[int]:
         return list(values)
     positions = torch.linspace(0, len(values) - 1, count).round().long().tolist()
     return [values[int(index)] for index in positions]
+
+
+def _excluded_mpr_frame_ids(metadata: Mapping[str, object]) -> set[int]:
+    """Recover the frozen exclusion set from current or nested MPR metadata."""
+
+    direct = metadata.get("excluded_frame_ids")
+    registration = metadata.get("registration_responsibility_contract", {})
+    nested = (
+        registration.get("excluded_frame_ids")
+        if isinstance(registration, Mapping)
+        else None
+    )
+    declared = direct if direct is not None else nested
+    if declared is None:
+        raise ValueError("MPR metadata does not declare excluded benchmark frames")
+    values = {int(frame) for frame in declared}
+    if not values:
+        raise ValueError("MPR benchmark exclusion set must not be empty")
+    return values
 
 
 def _parse_frame_ids(raw: str) -> set[int]:
@@ -402,7 +431,7 @@ def _mean_semantic_view_metrics(
         predicted = project_dense_region_semantics(
             bridge,
             summary_head,
-            result["feature_map"][None],
+            gauge_separated_radio(result["feature_map"][None], feature_dim=1),
             kernel_sizes=kernel_sizes,
             projection_batch_size=projection_batch_size,
         )
@@ -447,7 +476,11 @@ def finetune(args: argparse.Namespace) -> dict:
         strict_checkpoint_contract=True,
         load_ply_rgb_features=False,
     )
-    field, payload = load_canonical_field_checkpoint(args.field_checkpoint, map_location="cpu")
+    field, payload, _factorized_signature = (
+        load_factorized_canonical_field_checkpoint(
+            args.field_checkpoint, map_location="cpu"
+        )
+    )
     expected_hash = str(payload.get("geometry_fingerprint", {}).get("xyz_sha256", ""))
     if expected_hash != _sha256_tensor_rows(model.get_xyz()):
         raise ValueError("canonical field and geometry rows differ")
@@ -460,10 +493,11 @@ def finetune(args: argparse.Namespace) -> dict:
     if mpr_geometry_hash != expected_hash:
         raise ValueError("MPR override and canonical field geometry rows differ")
     mpr_metadata = dict(mpr_cache.get("metadata", {}))
-    if field.reliability.shape != consensus.reliability.shape:
-        raise ValueError("MPR override reliability rows do not match canonical field")
-    with torch.no_grad():
-        field.reliability.copy_(consensus.reliability.to(device))
+    if field.reliability.shape[1] > 0:
+        if field.reliability.shape != consensus.reliability.shape:
+            raise ValueError("MPR override reliability rows do not match canonical field")
+        with torch.no_grad():
+            field.reliability.copy_(consensus.reliability.to(device))
     included_frames = sorted(_parse_frame_ids(args.include_frame_ids))
     dataset = _dataset(config, renderer, included_frames or None)
     frame_to_index = {int(frame): index for index, frame in enumerate(dataset.frame_indices)}
@@ -474,10 +508,7 @@ def finetune(args: argparse.Namespace) -> dict:
     ]
     if not mpr_frames:
         raise RuntimeError("field checkpoint has no row-aligned MPR training frames")
-    excluded_from_field_training = set(
-        int(frame)
-        for frame in mpr_metadata.get("excluded_frame_ids", [])
-    )
+    excluded_from_field_training = _excluded_mpr_frame_ids(mpr_metadata)
     declared_validation = _parse_frame_ids(args.validation_frame_ids)
     if declared_validation:
         missing = declared_validation - excluded_from_field_training
@@ -544,6 +575,7 @@ def finetune(args: argparse.Namespace) -> dict:
             _semantic_teacher_path(semantic_teacher_root, semantic_scene, frame)
 
     capability_weights = {
+        "siglip2-g": float(args.siglip_spatial_render_weight),
         "dino_v3": float(args.dino_render_weight),
         "sam3": float(args.sam3_render_weight),
     }
@@ -552,8 +584,12 @@ def finetune(args: argparse.Namespace) -> dict:
     }
     capability_adaptors: dict[str, torch.nn.Module] = {}
     for name in capability_weights:
-        adaptor = load_radio_adaptor_from_checkpoint(
-            args.radio_checkpoint, name, kind="feature_projection"
+        adaptor = (
+            SigLIP2FeatureProjection.from_radio_checkpoint(args.radio_checkpoint)
+            if name == "siglip2-g"
+            else load_radio_adaptor_from_checkpoint(
+                args.radio_checkpoint, name, kind="feature_projection"
+            )
         ).to(device).eval()
         for parameter in adaptor.parameters():
             parameter.requires_grad_(False)
@@ -587,6 +623,11 @@ def finetune(args: argparse.Namespace) -> dict:
     probe_order = torch.randperm(valid_rows.numel(), generator=generator)[:probe_count]
     mpr_probe_rows = valid_rows[probe_order]
     reliability_splat = bool(args.reliability_splat)
+    if reliability_splat and field.reliability.shape[1] == 0:
+        raise ValueError(
+            "factorized field has no persistent reliability columns; "
+            "--reliability-splat is unavailable"
+        )
     initial_validation = _mean_view_cosine(
         field,
         model,
@@ -715,7 +756,9 @@ def finetune(args: argparse.Namespace) -> dict:
             predicted_semantics = project_dense_region_semantics(
                 semantic_bridge,
                 semantic_summary_head,
-                result["feature_map"][None],
+                gauge_separated_radio(
+                    result["feature_map"][None], feature_dim=1
+                ),
                 kernel_sizes=semantic_kernel_sizes,
                 projection_batch_size=int(args.semantic_projection_batch_size),
             )
@@ -906,7 +949,10 @@ def finetune(args: argparse.Namespace) -> dict:
     output.parent.mkdir(parents=True, exist_ok=True)
     payload = dict(payload)
     payload["state_dict"] = field.state_dict()
-    payload["reliability"] = consensus.reliability.half()
+    # Schema-v2 factorized fields deliberately keep target reliability out of
+    # persistent scene state.  It may weight the MPR training objective above,
+    # but must never be copied into the saved deployment checkpoint.
+    payload["reliability"] = field.reliability.detach().cpu()
     payload["mpr_cache"] = str(Path(mpr_cache_path).resolve())
     payload["mpr_cache_metadata"] = mpr_metadata
     payload["render_optimization"] = {
@@ -1042,6 +1088,16 @@ def main() -> None:
     parser.add_argument("--mpr-validation-rows", type=int, default=32768)
     parser.add_argument("--render-huber-weight", type=float, default=0.0)
     parser.add_argument(
+        "--siglip-spatial-render-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Weight for query-free full-grid alignment through the official "
+            "SigLIP2 spatial projection; this never applies the summary head "
+            "to individual pixels or Gaussians."
+        ),
+    )
+    parser.add_argument(
         "--dino-render-weight",
         type=float,
         default=0.0,
@@ -1085,7 +1141,7 @@ def main() -> None:
         choices=["project_raw", "official_extracted"],
         default="project_raw",
         help=(
-            "Teacher source for DINO/SAM render losses. 'official_extracted' "
+            "Teacher source for SigLIP2/DINO/SAM render losses. 'official_extracted' "
             "requires extractor-produced native official adaptor maps and "
             "only resamples them to the render grid."
         ),
@@ -1127,6 +1183,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
     if min(
+        args.siglip_spatial_render_weight,
         args.dino_render_weight,
         args.sam3_render_weight,
         args.capability_local_affinity_weight,

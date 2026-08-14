@@ -8,6 +8,7 @@ from PIL import Image
 
 from radio_gs.scripts import extract_radio_features as extraction
 from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
+    _EXTRACTED_CAPABILITY_SPECS,
     _load_extracted_capability_maps,
     _load_responsibility_cache,
     _resolve_extracted_capability_source,
@@ -19,6 +20,14 @@ from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     raster_fusion_reliability,
     validate_raster_reliability_policy,
 )
+
+
+def test_official_siglip_spatial_extraction_contract_is_registered() -> None:
+    assert _EXTRACTED_CAPABILITY_SPECS["siglip2-g"] == {
+        "adaptor_name": "siglip2-g",
+        "subdir": "siglip2",
+        "output_dim": 1536,
+    }
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     select_top_raster_hits_per_gaussian,
 )

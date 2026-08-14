@@ -130,6 +130,8 @@ frozen_depth_head_num_layers: 3
 frozen_depth_loss_type: "scale_invariant"
 frozen_depth_gradient_weight: 0.1
 
-# Text-space alignment via frozen SigLIP2 summary head
-siglip_summary_alignment_weight: 0.5
+# Full-grid official SigLIP2 spatial preservation.  Region summary supervision
+# is trained separately from genuine source-view summary tokens.
+siglip_alignment_weight: 0.5
+siglip_summary_alignment_weight: 0.0
 siglip_summary_head_weights: "checkpoints/siglip2_summary_head.pth"

@@ -97,7 +97,7 @@ def test_generate_config_can_emit_direct_point_variant(tmp_path):
         repo_root=repo_root,
         variant="v15_direct",
         epochs=20,
-        siglip_summary_alignment_weight=0.1,
+        siglip_spatial_alignment_weight=0.1,
         direct_point_loss_weight=0.25,
         direct_point_sample_count=4096,
         direct_point_sample_strategy="class_balanced",
@@ -140,7 +140,8 @@ def test_generate_config_can_emit_direct_point_variant(tmp_path):
         repo_root / "output" / "radio_gs" / f"scannet_og_{scene}_v15_direct"
     )
     assert payload["epochs"] == 20
-    assert payload["siglip_summary_alignment_weight"] == 0.1
+    assert payload["siglip_alignment_weight"] == 0.1
+    assert payload["siglip_summary_alignment_weight"] == 0.0
     assert payload["direct_point_loss_weight"] == 0.25
     assert payload["direct_point_sample_count"] == 4096
     assert payload["direct_point_sample_strategy"] == "class_balanced"

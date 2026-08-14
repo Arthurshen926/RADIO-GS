@@ -24,6 +24,11 @@ class IdentityAdaptor(torch.nn.Module):
         return x
 
 
+class GaugeSensitiveAdaptor(torch.nn.Module):
+    def forward(self, x):
+        return x + 0.25
+
+
 def test_compute_radio_adaptor_alignment_loss_returns_zero_without_adaptors():
     decoded = torch.randn(1, 4, 2, 2)
     target = decoded.clone()
@@ -102,6 +107,26 @@ def test_masked_render_losses_ignore_unsupported_pixels_and_pairs() -> None:
     assert local.item() < 1e-6
 
 
+def test_masked_render_losses_accept_zero_background() -> None:
+    target = torch.randn(1, 4, 3, 3)
+    decoded = target.clone()
+    decoded[:, :, 1, 1] = 0.0
+    valid = torch.ones(1, 3, 3, dtype=torch.bool)
+    valid[:, 1, 1] = False
+
+    alignment, local, _ = compute_radio_adaptor_masked_render_losses(
+        decoded,
+        target,
+        {"sam3": IdentityAdaptor()},
+        valid,
+    )
+
+    assert torch.isfinite(alignment)
+    assert torch.isfinite(local)
+    assert alignment.item() < 1e-6
+    assert local.item() < 1e-6
+
+
 def test_masked_render_losses_support_teacher_boundary_balancing() -> None:
     torch.manual_seed(7)
     target = torch.randn(1, 4, 4, 4)
@@ -118,6 +143,25 @@ def test_masked_render_losses_support_teacher_boundary_balancing() -> None:
     assert torch.isfinite(local)
     assert local.item() > 0
     assert stats["sam3"]["local_balance_quantile"].item() == pytest.approx(0.2)
+
+
+def test_masked_capability_gradient_is_tangent_to_radio_gauge() -> None:
+    decoded = torch.randn(1, 1280, 2, 2, requires_grad=True)
+    target = torch.randn_like(decoded)
+    valid = torch.ones(1, 2, 2, dtype=torch.bool)
+
+    alignment, local, _stats = compute_radio_adaptor_masked_render_losses(
+        decoded,
+        target,
+        {"siglip2-g": GaugeSensitiveAdaptor()},
+        valid,
+    )
+    (alignment + local).backward()
+
+    assert decoded.grad is not None
+    radial = (decoded.grad * decoded.detach()).sum(dim=1)
+    assert torch.allclose(radial, torch.zeros_like(radial), atol=2e-5)
+    assert bool((torch.linalg.vector_norm(decoded.grad, dim=1) > 0).all())
 
 
 def test_compute_radio_adaptor_relation_loss_matches_identical_pairwise_structure():

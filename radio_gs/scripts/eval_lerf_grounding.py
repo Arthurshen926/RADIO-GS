@@ -1080,6 +1080,24 @@ def compute_relevancy_heatmap(
     return heatmaps
 
 
+def fuse_typed_text_scores(
+    primitive_scores: torch.Tensor,
+    region_scores: torch.Tensor,
+    *,
+    region_weight: float = 0.5,
+) -> torch.Tensor:
+    """Fuse primitive and region probabilities with one global fixed weight."""
+
+    primitive = torch.as_tensor(primitive_scores)
+    region = torch.as_tensor(region_scores)
+    if primitive.shape != region.shape:
+        raise ValueError("primitive and region score maps must have matching shapes")
+    weight = float(region_weight)
+    if not 0.0 <= weight <= 1.0:
+        raise ValueError("region_weight must be in [0,1]")
+    return (1.0 - weight) * primitive + weight * region
+
+
 def apply_readout_confidence_gate(
     heatmaps: torch.Tensor,
     aux_maps: Optional[Dict[str, torch.Tensor]],
@@ -2067,6 +2085,8 @@ def evaluate_scene(
     device: torch.device,
     *,
     gt_feature_dir: Optional[str] = None,
+    region_feature_dir: Optional[str] = None,
+    region_score_weight: float = 0.5,
     render_pipeline: Optional[tuple] = None,
     lerf_dataset: Optional[LERFDataset] = None,
     vis_dir: Optional[Path] = None,
@@ -2131,6 +2151,11 @@ def evaluate_scene(
         dict with ``loc_acc``, ``miou``, per-category breakdowns, etc.
     """
     frame_annotations, scene_categories, img_h, img_w = load_lerf_ovs_labels(label_dir, scene)
+    if (
+        region_feature_dir is not None
+        and not 0.0 <= float(region_score_weight) <= 1.0
+    ):
+        raise ValueError("region_score_weight must be in [0,1]")
 
     # Map each scene category to an index in the global embedding tensor
     cat_to_idx = {c: i for i, c in enumerate(categories)}
@@ -2287,6 +2312,7 @@ def evaluate_scene(
             desc=f"  {scene}/{canonical_mode}",
             leave=False,
         ):
+            region_siglip_feat = None
             # --- obtain 1280-d features ---
             if mode == "gt":
                 feat_path = Path(gt_feature_dir) / f"rgb_{frame_id}.pt"
@@ -2373,6 +2399,27 @@ def evaluate_scene(
                 in {"primitive_query", "primitive_score", "primitive_support", "primitive_unary"}
             ):
                 siglip_feat = project_to_siglip2(feat_1280.half(), proj)
+            if mode == "gt" and region_feature_dir is not None:
+                region_path = Path(region_feature_dir) / f"rgb_{frame_id}.pt"
+                if not region_path.exists():
+                    region_path = (
+                        Path(region_feature_dir)
+                        / "backbone"
+                        / f"rgb_{frame_id}.pt"
+                    )
+                if not region_path.is_file():
+                    raise FileNotFoundError(
+                        f"typed region feature is missing for frame {frame_id}: "
+                        f"{region_path}"
+                    )
+                region_features = torch.load(
+                    region_path, map_location=device
+                ).float()
+                if region_features.ndim == 3:
+                    region_features = region_features[None]
+                region_siglip_feat = project_to_siglip2(
+                    region_features, nn.Identity().to(device)
+                )
 
             # Only evaluate categories present in this frame
             frame_cats = {obj["category"] for obj in frame_objects}
@@ -2608,6 +2655,28 @@ def evaluate_scene(
                     all_scene_emb=all_scene_emb,
                     active_scene_indices=active_scene_idx,
                 )
+                if region_siglip_feat is not None:
+                    region_heatmaps = compute_relevancy_heatmap(
+                        region_siglip_feat,
+                        active_emb,
+                        canonical_emb=canonical_emb,
+                        temperature=temperature,
+                        scoring=scoring,
+                        all_scene_emb=all_scene_emb,
+                        active_scene_indices=active_scene_idx,
+                    )
+                    if region_heatmaps.shape[-2:] != heatmaps.shape[-2:]:
+                        region_heatmaps = F.interpolate(
+                            region_heatmaps[None],
+                            size=heatmaps.shape[-2:],
+                            mode="bilinear",
+                            align_corners=False,
+                        )[0]
+                    heatmaps = fuse_typed_text_scores(
+                        heatmaps,
+                        region_heatmaps,
+                        region_weight=region_score_weight,
+                    )
             if mode_confidence_gate != "none":
                 heatmaps = apply_readout_confidence_gate(
                     heatmaps,
@@ -2980,6 +3049,20 @@ def main() -> None:
     # Teacher/oracle RADIO features
     parser.add_argument("--gt_feature_dir", default=None,
                         help="Dir with teacher/oracle RADIO 1280-d .pt files (or parent with backbone/ subdir)")
+    parser.add_argument(
+        "--region_feature_dir",
+        default=None,
+        help=(
+            "Optional typed 1536-D region-summary map paired with the primary "
+            "RADIO map for fixed two-level score fusion."
+        ),
+    )
+    parser.add_argument(
+        "--region_score_weight",
+        type=float,
+        default=0.5,
+        help="Fixed region score share; frozen VALA evaluation requires 0.5.",
+    )
     parser.add_argument("--gt_only", action="store_true",
                         help="Evaluate teacher/oracle RADIO features only (skip rendered mode)")
     parser.add_argument("--rendered_only", action="store_true",
@@ -3079,6 +3162,14 @@ def main() -> None:
                         help="Use the text-aligned summary head instead of spatial projection (default)")
     parser.add_argument("--no_summary_head", dest="use_summary_head", action="store_false",
                         help="Use spatial feature projection instead of summary head")
+    parser.add_argument(
+        "--preprojected_text_features",
+        action="store_true",
+        help=(
+            "Input maps are already normalized 1536-D SigLIP2 text-space "
+            "descriptors produced by the typed region-summary readout."
+        ),
+    )
     parser.add_argument("--text_embedding_cache", default=None,
                         help="Path to cache/load pre-computed text embeddings")
     parser.add_argument("--canonical_embedding_cache", default=None,
@@ -3268,6 +3359,17 @@ def main() -> None:
         )
     if args.gt_only and args.rendered_only:
         parser.error("--gt_only and --rendered_only are mutually exclusive")
+    if args.preprojected_text_features and not args.gt_only:
+        parser.error(
+            "--preprojected_text_features is only valid for a typed GT cache"
+        )
+    if args.preprojected_text_features and args.region_feature_dir:
+        parser.error(
+            "a preprojected region cache cannot also be the primitive level "
+            "of a two-level readout"
+        )
+    if args.region_feature_dir and not args.gt_feature_dir:
+        parser.error("--region_feature_dir requires --gt_feature_dir")
     if args.render_readout in {
         "primitive_query",
         "primitive_score",
@@ -3321,6 +3423,10 @@ def main() -> None:
         # native SAM-CLIP/OpenCLIP fields are already in their text space and
         # therefore use the identity projection below.
         args.use_summary_head = args.text_encoder == "siglip2"
+        if args.region_feature_dir and args.region_score_weight != 0.5:
+            parser.error(
+                "vala_paper_2d freezes primitive/region score fusion at 0.5"
+            )
     args.label_dir = resolve_lerf_label_dir(args.label_dir)
     prompt_templates = parse_prompt_templates(args.prompt_templates)
 
@@ -3393,7 +3499,12 @@ def main() -> None:
                 "vala_paper_2d requires explicit --text_embedding_cache and "
                 "--canonical_embedding_cache with frozen provenance metadata"
             )
-        if args.text_encoder == "siglip2" and not Path(args.summary_head_weights).exists():
+        if (
+            args.text_encoder == "siglip2"
+            and args.use_summary_head
+            and not args.preprojected_text_features
+            and not Path(args.summary_head_weights).exists()
+        ):
             parser.error(
                 "vala_paper_2d requires the declared --summary_head_weights file; "
                 "frozen evaluation forbids implicit checkpoint fallback"
@@ -3423,7 +3534,14 @@ def main() -> None:
     # ------------------------------------------------------------------
     # 2. Load the visual-to-text projection model
     # ------------------------------------------------------------------
-    if args.text_encoder == "openclip":
+    if args.preprojected_text_features:
+        if args.text_encoder != "siglip2":
+            parser.error(
+                "--preprojected_text_features requires SigLIP2 text embeddings"
+            )
+        proj = nn.Identity()
+        print("Using identity projection for native SigLIP2 text-space features")
+    elif args.text_encoder == "openclip":
         proj = nn.Identity()
         print("Using identity projection for native OpenCLIP/SAM-CLIP features")
     elif args.use_summary_head:
@@ -3586,6 +3704,21 @@ def main() -> None:
                 logger.warning("GT feature dir not found: %s", gt_feat_dir)
                 gt_feat_dir = None
 
+        region_feat_dir = None
+        if args.region_feature_dir:
+            region_candidate = Path(args.region_feature_dir)
+            if (
+                region_candidate.name == scene
+                or (region_candidate / "backbone").exists()
+            ):
+                region_feat_dir = str(region_candidate)
+            else:
+                region_feat_dir = str(region_candidate / scene)
+            if not Path(region_feat_dir).exists():
+                raise FileNotFoundError(
+                    f"typed region feature directory is missing: {region_feat_dir}"
+                )
+
         prompt_mask_head = None
         prompt_mask_target_size = (240, 320)
         sam3_box_refiner = None
@@ -3616,6 +3749,8 @@ def main() -> None:
             categories=categories,
             device=device,
             gt_feature_dir=gt_feat_dir if not args.gt_only or gt_feat_dir else gt_feat_dir,
+            region_feature_dir=region_feat_dir,
+            region_score_weight=args.region_score_weight,
             render_pipeline=render_pipeline if not args.gt_only else None,
             lerf_dataset=lerf_datasets.get(scene),
             vis_dir=vis_root,
@@ -3744,7 +3879,11 @@ def main() -> None:
         "primitive_confidence": args.primitive_confidence,
         "primitive_fallback_blend": args.primitive_fallback_blend,
     }
-    if args.text_encoder == "siglip2" and args.use_summary_head:
+    if (
+        args.text_encoder == "siglip2"
+        and args.use_summary_head
+        and not args.preprojected_text_features
+    ):
         provenance_paths["summary_head_weights"] = args.summary_head_weights
 
     report = {
@@ -3783,6 +3922,17 @@ def main() -> None:
                 float(args.primitive_valid_coverage_power)
                 if args.primitive_valid_normalization
                 else None
+            ),
+            "typed_text_readout": (
+                {
+                    "levels": ["primitive", "region_summary"],
+                    "score_fusion": "fixed_convex_mean",
+                    "region_weight": float(args.region_score_weight),
+                }
+                if args.region_feature_dir
+                else {"levels": ["region_summary"]}
+                if args.preprojected_text_features
+                else {"levels": ["primitive"]}
             ),
             "query_dependent": False,
             "changes_geometry_or_alpha": False,

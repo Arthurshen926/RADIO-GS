@@ -111,7 +111,10 @@ class SigLIP2SummaryHead(nn.Module):
     Architecture: Linear(1280→1520) + 2 residual blocks(LN+GELU+Linear) + final(LN+GELU+Linear→1536).
     This is ``_heads.siglip2-g`` from the RADIO checkpoint. Unlike the spatial feature projection,
     the summary head produces embeddings in the same space as SigLIP2 text embeddings, making it
-    suitable for text grounding / open-vocabulary tasks.
+    suitable for text grounding / open-vocabulary tasks when its inputs are
+    genuine or explicitly predicted summary tokens.  Applying this head to
+    every spatial pixel or Gaussian is not an official SigLIP2 projection;
+    use :class:`SigLIP2FeatureProjection` for full-grid spatial preservation.
     """
 
     def __init__(self) -> None:
