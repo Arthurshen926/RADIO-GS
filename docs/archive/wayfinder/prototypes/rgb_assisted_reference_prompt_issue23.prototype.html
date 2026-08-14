@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一次性原型：RGB-assisted registered-2D query compiler</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18201e;
+      --muted: #63706c;
+      --paper: #f2f5f3;
+      --panel: #ffffff;
+      --line: #d4ddd8;
+      --accent: #255f66;
+      --accent-soft: #dfeff0;
+      --good: #17613f;
+      --good-soft: #e2f3e8;
+      --warn: #8a6209;
+      --warn-soft: #fff1cc;
+      --bad: #9b3038;
+      --bad-soft: #fbe5e7;
+      --private: #65468b;
+      --private-soft: #eee7f6;
+      --vision: #315ea8;
+      --vision-soft: #e4ecfa;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    main { width: min(1220px, calc(100% - 30px)); margin: 26px auto 64px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 1060px; font-size: clamp(30px, 4.7vw, 52px); line-height: 1.03; letter-spacing: -.04em; }
+    h2 { margin-bottom: 14px; font-size: 21px; }
+    h3 { margin-bottom: 8px; font-size: 16px; }
+    p, li { line-height: 1.56; }
+    a { color: var(--accent); }
+    code { font-size: .92em; }
+    button { font: inherit; }
+
+    .flag {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 10px;
+      border: 1px solid #e4be64;
+      border-radius: 999px;
+      background: #fff7df;
+      color: #6f4a00;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    .intro { max-width: 1060px; color: #34423e; font-size: 17px; }
+    .scope {
+      margin: 20px 0 26px;
+      padding: 15px 17px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+    .scope strong { display: block; margin-bottom: 4px; }
+    .panel {
+      margin-top: 22px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgb(35 51 43 / .055);
+    }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcfa;
+    }
+    .card .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+    }
+    .card .value { margin-top: 6px; font-size: 17px; font-weight: 780; }
+    .card .detail { margin-top: 7px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .verdict { margin-top: 14px; padding: 16px; border-radius: 12px; }
+    .verdict.good { color: var(--good); background: var(--good-soft); }
+    .verdict.warn { color: var(--warn); background: var(--warn-soft); }
+    .verdict.bad { color: var(--bad); background: var(--bad-soft); }
+    .verdict strong { display: block; margin-bottom: 4px; }
+
+    .control-group + .control-group { margin-top: 20px; }
+    .control-label { margin-bottom: 9px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing: .035em; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 9px; }
+    .choice, .action, .step-button, .tab {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .choice:hover, .action:hover, .step-button:hover, .tab:hover { border-color: var(--accent); }
+    .choice.active, .tab.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: #204d52;
+      font-weight: 780;
+    }
+    .action.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .action.private { border-color: #cbb9df; color: var(--private); }
+
+    .flow { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
+    .flow-step { position: relative; min-height: 118px; padding: 13px 12px; border: 1px solid var(--line); border-radius: 12px; background: #fbfcfa; }
+    .flow-step::after { content: "→"; position: absolute; right: -10px; top: 44px; z-index: 2; color: var(--muted); font-weight: 900; }
+    .flow-step:last-child::after { display: none; }
+    .flow-step .num { color: var(--accent); font-size: 12px; font-weight: 850; }
+    .flow-step strong { display: block; margin: 5px 0; font-size: 14px; }
+    .flow-step span { color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+    .probe-layout { display: grid; grid-template-columns: 1.45fr .8fr; gap: 18px; align-items: start; }
+    .view-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+    .view-card { padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: #fafcfb; }
+    .view-card .view-title { display: flex; justify-content: space-between; gap: 8px; font-weight: 780; font-size: 13px; }
+    .view-card .bar { height: 9px; margin: 10px 0 7px; overflow: hidden; border-radius: 999px; background: #e5ebe8; }
+    .view-card .bar > span { display: block; height: 100%; background: var(--vision); }
+    .view-card .minor { color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .gaussian-grid { display: grid; grid-template-columns: repeat(8, minmax(64px, 1fr)); gap: 8px; margin-top: 14px; }
+    .gaussian {
+      min-height: 105px;
+      padding: 9px 7px;
+      border: 2px solid transparent;
+      border-radius: 11px;
+      text-align: center;
+      color: #14201c;
+    }
+    .gaussian.boundary { border-style: dashed; border-color: #916f31; }
+    .gaussian.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgb(37 95 102 / .12); }
+    .gaussian .name { display: block; font-size: 12px; font-weight: 800; }
+    .gaussian .score { display: block; margin-top: 6px; font-size: 18px; font-weight: 820; }
+    .gaussian .minor { display: block; margin-top: 4px; color: #596761; font-size: 10px; line-height: 1.35; }
+    .probe-note { margin: 11px 0 0; color: var(--muted); font-size: 13px; }
+    .legend { display: grid; gap: 9px; }
+    .legend-row { display: grid; grid-template-columns: 18px 1fr; gap: 9px; align-items: start; color: var(--muted); font-size: 13px; }
+    .swatch { width: 18px; height: 18px; border-radius: 5px; }
+    .formula { margin-top: 14px; padding: 13px; border-radius: 11px; background: #edf2f1; font: 12px/1.58 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-x: auto; }
+    .private-box { margin-top: 14px; padding: 13px; border-radius: 11px; background: var(--private-soft); color: var(--private); font-size: 13px; }
+    .private-box strong { display: block; margin-bottom: 5px; }
+
+    .gate-list, .evidence-list, .pilot-list, .diagnosis-list, .protocol-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .gate, .evidence-row, .pilot-step, .diagnosis-row, .protocol-row { padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; }
+    .gate { display: grid; grid-template-columns: 142px 1fr; gap: 10px; align-items: start; }
+    .gate .status { font-weight: 800; }
+    .gate.pass .status { color: var(--good); }
+    .gate.fail .status { color: var(--bad); }
+    .evidence-row strong, .pilot-step strong, .diagnosis-row strong, .protocol-row strong { display: block; }
+    .evidence-row p, .pilot-step p, .diagnosis-row p, .protocol-row p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+    .metric-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .metric-table th, .metric-table td { padding: 10px 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .metric-table th { color: var(--muted); font-size: 12px; letter-spacing: .025em; }
+    .metric-table td:first-child { font-weight: 760; }
+
+    .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .tab { white-space: nowrap; }
+    .walkthrough { margin-top: 14px; }
+    .walkthrough-description { min-height: 50px; color: var(--muted); }
+    .walkthrough-steps { display: grid; gap: 9px; counter-reset: step; }
+    .walkthrough-step { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; }
+    .walkthrough-step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 50%;
+      background: #edf0ed;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .walkthrough-step.done::before { content: "✓"; background: var(--good-soft); color: var(--good); }
+    .step-button { width: 100%; text-align: left; }
+    .step-button:disabled { cursor: default; opacity: .55; }
+
+    .decision-token {
+      width: 100%;
+      min-height: 260px;
+      margin-top: 12px;
+      padding: 12px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8faf8;
+      color: var(--ink);
+      font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .footnote { margin-top: 12px; color: var(--muted); font-size: 13px; }
+    .sources { columns: 2; column-gap: 32px; margin-bottom: 0; padding-left: 19px; }
+    .sources li { break-inside: avoid; margin-bottom: 8px; font-size: 13px; }
+
+    @media (max-width: 1050px) {
+      .flow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .flow-step:nth-child(4)::after { display: none; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .probe-layout, .two-column { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .flow, .view-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow-step::after { display: none; }
+      .gaussian-grid { grid-template-columns: repeat(4, minmax(64px, 1fr)); }
+      .sources { columns: 1; }
+    }
+    @media (max-width: 520px) {
+      main { width: min(100% - 20px, 1220px); margin-top: 18px; }
+      .panel { padding: 16px; }
+      .grid, .flow, .view-grid { grid-template-columns: 1fr; }
+      .gaussian-grid { grid-template-columns: repeat(2, minmax(64px, 1fr)); }
+      .gate { grid-template-columns: 100px 1fr; }
+      .metric-table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <span class="flag">PROTOTYPE · 一次性逻辑决策实验台 · 不属于生产实现</span>
+  <h1>同一个 RGB-assisted Registered-2D compiler，能否把两种 reference prompt 变成一个可信的 Gaussian posterior？</h1>
+  <p class="intro">
+    本原型只回答 <a href="https://github.com/Arthurshen926/RADIO-GS/issues/23">Choose the shared RGB-assisted reference-prompt query mechanism for NVOS and SPIn-NeRF</a>：
+    在两个 LUDVIG-online Evaluation Contract 已授权全部注册 captured RGB、但仍禁止 Gaussian-rendered RGB 的前提下，冻结哪一个 Query-Time Vision Model、prompt sanitizer、多视角证据构造、候选边缘化、校准、Query Workspace 生命周期与最小 pilot，才能让 NVOS positive scribble 和 SPIn-NeRF complete mask 共用一个 task-agnostic compiler。
+  </p>
+  <div class="scope">
+    <strong>原型假设与边界</strong>
+    这是状态模型，不读取图片、不调用 SAM3、不运行 benchmark、不制造分数。它默认使用已选 sidecar-free D512/L512 Single Compact Feature Field 和 Boundary-Calibrated Field Region Hierarchy；本 ticket 只决定 Query 机制。模型质量只能由后续 sealed exact-contract pilot 证明。
+  </div>
+
+  <section class="panel">
+    <h2>当前完整状态</h2>
+    <div id="state-grid" class="grid"></div>
+    <div id="verdict" class="verdict warn"></div>
+  </section>
+
+  <section class="panel">
+    <h2>建议机制的数据流</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="num">01</div><strong>Sanitize</strong><span>按输入 schema 解释 positive、negative、unknown，不读取 sibling label/mask。</span></div>
+      <div class="flow-step"><div class="num">02</div><strong>Reference candidates</strong><span>确定性 10× point ensemble 调用 hash-pinned official SAM3 code + public mirror checkpoint。</span></div>
+      <div class="flow-step"><div class="num">03</div><strong>Project prompts</strong><span>只从 geometry/opacity 与候选 Gaussian evidence 投影点提示；绝不渲染 RGB。</span></div>
+      <div class="flow-step"><div class="num">04</div><strong>All-view vision</strong><span>每个 registered captured RGB 同步生成候选 mask；顺序不影响结果。</span></div>
+      <div class="flow-step"><div class="num">05</div><strong>Exact registration</strong><span>每视角 exact compositor Wᵀ 累积 positive/negative/visible mass。</span></div>
+      <div class="flow-step"><div class="num">06</div><strong>Marginalize</strong><span>在固定 field hierarchy 上保留并边缘化全部合法候选，不选 scene winner。</span></div>
+      <div class="flow-step"><div class="num">07</div><strong>Posterior</strong><span>全局 source-frozen calibration；一个 Gaussian posterior，binary boundary 固定 0.5。</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>可点击的全视角证据与 Gaussian posterior 示意</h2>
+    <div class="probe-layout">
+      <div>
+        <div id="view-grid" class="view-grid"></div>
+        <div id="gaussian-grid" class="gaussian-grid"></div>
+        <p id="probe-note" class="probe-note"></p>
+        <div class="formula">
+          e[k,g] = robust_sum_v Wᵥᵀ mask(v,k) / Wᵥᵀ1<br>
+          α[k] ∝ exp(prompt-consistency(k) + source-frozen-quality(k) + field-support(k)); preserve all legal k<br>
+          p[g] = sigmoid(global-affine(anchor[g], Σₖ α[k]e[k,g], field-hierarchy-marginal[g])), binary p≥0.5
+        </div>
+      </div>
+      <div>
+        <div class="legend">
+          <div class="legend-row"><span class="swatch" style="background:#d9eee7"></span><span>对象区域：蓝边表示最终 Gaussian Query Posterior ≥ 0.5。</span></div>
+          <div class="legend-row"><span class="swatch" style="background:#f4e8d4"></span><span>干扰区域：顺序相关 self-training 或 winner-take-all 容易放大一次错误。</span></div>
+          <div class="legend-row"><span class="swatch" style="background:#e8ece9"></span><span>背景/遮挡：positive scribble 未标注区保持 unknown；complete-mask complement 才是 negative。</span></div>
+          <div class="legend-row"><span class="swatch" style="background:#e4ecfa"></span><span>SAM3 只消费已授权 captured RGB；投影提示来自 posterior/geometry，不是 Gaussian-rendered RGB。</span></div>
+        </div>
+        <div class="private-box">
+          <strong>紫色诊断层永远在 evaluator 后面</strong>
+          Vision candidate、registration、field representability ceilings 只能在所有候选 posterior、predictions 与 Query Abstentions 封存后计算。它们只归因，不能选 mask、候选、阈值、field checkpoint 或 retry。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>自由试验</h2>
+    <div class="control-group"><div class="control-label">Query-Time Vision Model identity</div><div id="model-buttons" class="buttons"></div></div>
+    <div class="control-group"><div class="control-label">Typed prompt sanitization and candidate construction</div><div id="prompt-buttons" class="buttons"></div></div>
+    <div class="control-group"><div class="control-label">All-view evidence schedule</div><div id="multiview-buttons" class="buttons"></div></div>
+    <div class="control-group"><div class="control-label">Mask-to-Gaussian registration</div><div id="registration-buttons" class="buttons"></div></div>
+    <div class="control-group"><div class="control-label">Candidate / field / posterior semantics</div><div id="posterior-buttons" class="buttons"></div></div>
+    <div class="control-group"><div class="control-label">Calibration and decision boundary</div><div id="calibration-buttons" class="buttons"></div></div>
+    <div class="control-group"><div class="control-label">Query Workspace lifecycle</div><div id="lifecycle-buttons" class="buttons"></div></div>
+    <div class="control-group"><div class="control-label">Illustration only — input schema and hard case</div><div id="schema-buttons" class="buttons"></div><div id="scenario-buttons" class="buttons" style="margin-top:9px"></div></div>
+    <div class="control-group">
+      <div class="control-label">Hypothetical sealed pilot diagnosis</div>
+      <div class="buttons">
+        <button class="action private" data-outcome="vision_fail">Vision ceiling 失败</button>
+        <button class="action private" data-outcome="registration_fail">Registration ceiling 失败</button>
+        <button class="action private" data-outcome="field_fail">Field ceiling 失败</button>
+        <button class="action private" data-outcome="posterior_fail">Actual posterior 失败</button>
+        <button class="action private" data-outcome="joint_pass">两合同机制门通过</button>
+        <button class="action" data-outcome="unrun">清除假设结果</button>
+      </div>
+    </div>
+    <div class="control-group"><div class="buttons"><button id="recommend" class="action primary">套用当前建议</button><button id="reset" class="action">重置到 reference-only SAM</button></div></div>
+  </section>
+
+  <section class="panel">
+    <h2>不可补偿的设计门</h2>
+    <ul id="gate-list" class="gate-list"></ul>
+  </section>
+
+  <section class="panel">
+    <h2>两个输入 schema，同一个 compiler identity</h2>
+    <div class="two-column">
+      <ul id="protocol-list" class="protocol-list"></ul>
+      <table class="metric-table">
+        <thead><tr><th>边界</th><th>LUDVIG-online NVOS</th><th>LUDVIG-online Available-Nine SPIn-NeRF</th></tr></thead>
+        <tbody>
+          <tr><td>Authorized prompt</td><td><code>POSITIVE_SCRIBBLE_RASTER</code>；只给 positive，未标注区是 unknown。</td><td><code>COMPLETE_BINARY_MASK</code>；foreground positive，完整 complement negative。</td></tr>
+          <tr><td>Captured RGB at Query</td><td>全部 registered views，包括 scored target，均可给 frozen vision model；不得读取 target mask。</td><td>canonical reference 与全部 scored target captured RGB 均可读；不得读取 non-reference mask。</td></tr>
+          <tr><td>Shared behavior</td><td colspan="2">同一 SAM3、preprocessing、point sampler、K=10 candidate semantics、同步 all-view schedule、Wᵀ registration、hierarchy marginal、global calibration、0.5 Gaussian boundary。</td></tr>
+          <tr><td>Output</td><td>official target raster foreground IoU + mandatory pixel accuracy；八 task 等权 macro。</td><td>同一 posterior 输出全部 non-reference annotated frames；先 frame mean，再九 scene macro；reference 不计分。</td></tr>
+          <tr><td>Forbidden</td><td colspan="2">Gaussian-rendered RGB、target/reference GT sibling channels、metric-driven candidate/threshold、benchmark router、cross-query object memory、persistent query primitive field。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel"><h2>为什么建议这个组合</h2><ul id="evidence-list" class="evidence-list"></ul></section>
+  <section class="panel"><h2>最小 exact-contract pilot</h2><ul id="pilot-list" class="pilot-list"></ul></section>
+  <section class="panel"><h2>sealed 失败归因</h2><ul id="diagnosis-list" class="diagnosis-list"></ul></section>
+
+  <section class="panel">
+    <h2>引导式 walkthrough</h2>
+    <div id="tabs" class="tabs"></div>
+    <div class="walkthrough"><p id="walkthrough-description" class="walkthrough-description"></p><div id="walkthrough-steps" class="walkthrough-steps"></div></div>
+  </section>
+
+  <section class="panel">
+    <h2>把你的选择带回 ticket</h2>
+    <p>原型不会替你作 HITL 决定。建议先走“建议组合”“两种 prompt”“归因分叉”三个 walkthrough，然后复制 token；你可以直接同意，也可以只改其中一项。</p>
+    <textarea id="decision-token" class="decision-token" readonly></textarea>
+    <div class="buttons"><button id="copy-token" class="action primary">复制 decision token</button><span id="copy-status" class="footnote"></span></div>
+  </section>
+
+  <section class="panel">
+    <h2>本原型依据</h2>
+    <ul class="sources">
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/22">Choose the five-benchmark claim tracks and RGB authority boundary</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/4">Define the shared field and modality-specific query interface</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/6">Define the deployment scene-state and artifact lifecycle boundary</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/9">Define the transitive runtime compliance contract</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/14">Choose the canonical field family and mapping-teacher policy</a></li>
+      <li><a href="https://github.com/Arthurshen926/RADIO-GS/issues/21">Choose RGB-free reference-prompt completion for NVOS and SPIn-NeRF</a> — diagnostic control only</li>
+      <li><code>paper/artifacts/nvos_published_compatible_reference_completion_audit_20260803.json</code></li>
+      <li><code>paper/artifacts/nvos_official_sam3_reference_completion_registration_20260803.json</code></li>
+      <li><code>reproductions/ludvig/README.md</code> and <code>reproductions/ludvig/run_ludvig_sam.py</code></li>
+      <li><code>/root/external/sam3</code> commit <code>46957e47805e…</code>; <code>Sam3Processor</code> and <code>predict_inst</code> interfaces inspected locally</li>
+      <li><code>checkpoints/sam3_modelscope/sam3.pt</code> SHA-256 <code>9999e2341cee…</code></li>
+      <li><code>checkpoints/sam3_modelscope/config.json</code> SHA-256 <code>4616385e4b21…</code></li>
+    </ul>
+  </section>
+</main>
+
+<script>
+const RGBQueryDecision = (() => {
+  const models = {
+    sam3: {
+      name: "Hash-pinned official SAM3 code + public ModelScope mirror checkpoint",
+      short: "SAM3 code + mirror · pinned",
+      legal: true,
+      exact: true,
+      detail: "Source 46957e47805e…, checkpoint 9999e2341cee…, config 4616385e4b21…; enable_inst_interactivity=true, point-only predict_inst, FP32 weights + CUDA BF16 autocast, no CPU/model fallback."
+    },
+    samv1: {
+      name: "LUDVIG SAM v1 ViT-H reproduction",
+      short: "SAM v1 control",
+      legal: true,
+      exact: true,
+      detail: "Exact audited comparator dependency, but it is retained as a same-evaluator control rather than RADIO-GS's selected Query-Time Vision Model."
+    },
+    auto: {
+      name: "Choose SAM3 or SAM v1 by scene score / availability",
+      short: "Runtime model router",
+      legal: false,
+      exact: false,
+      detail: "Model identity would depend on scene outcome or environment. Missing SAM3 must Query-Abstain, not silently change the Method Contract."
+    }
+  };
+
+  const prompts = {
+    typed: {
+      name: "Typed deterministic 10× point ensemble",
+      short: "Schema-aware K=10",
+      legal: true,
+      shared: true,
+      detail: "Both schemas rank prompt-raster pixels with SplitMix64 and positive salt 0x243F6A8885A308D3, then reshape the first 30 into ten triplets; COMPLETE_BINARY_MASK also uses complement salt 0x13198A2E03707344 for 30 negatives. multimask_output=false; no random point sampling."
+    },
+    unlabeledNegative: {
+      name: "Treat positive-scribble unlabeled pixels as negatives",
+      short: "Unlabeled = background",
+      legal: false,
+      shared: false,
+      detail: "This invents a negative channel that nvos-ludvig-online-all-view-eight-v1 does not authorize."
+    },
+    benchmarkSpecific: {
+      name: "Separate NVOS and SPIn prompt pipelines",
+      short: "Benchmark-specific compiler",
+      legal: true,
+      shared: false,
+      detail: "It can be made runnable, but benchmark identity rather than input schema selects semantic computation."
+    }
+  };
+
+  const multiviews = {
+    synchronous: {
+      name: "Synchronous all-view candidate evidence",
+      short: "Order-invariant all-view",
+      legal: true,
+      complete: true,
+      stable: true,
+      detail: "Freeze the candidate bank on the reference, alpha-normalize each candidate into every registered view, sample three p≥0.5 positive and three p<0.5 negative visible pixels by candidate/view digest, run identical SAM3 calls independently, then aggregate all views symmetrically."
+    },
+    sequential: {
+      name: "Sequential best-mask self-training across views",
+      short: "Order-dependent rollout",
+      legal: true,
+      complete: true,
+      stable: false,
+      detail: "An early mask changes later prompts, so filename order becomes semantic state and a false positive can compound."
+    },
+    referenceOnly: {
+      name: "Reference RGB only",
+      short: "Reference-only",
+      legal: true,
+      complete: false,
+      stable: true,
+      detail: "Legal, but deliberately leaves the newly authorized all-view visual evidence unused and cannot test the online mechanism the ticket asks to choose."
+    },
+    renderedRgb: {
+      name: "Fill difficult views with Gaussian-rendered RGB",
+      short: "Rendered-RGB fallback",
+      legal: false,
+      complete: true,
+      stable: true,
+      detail: "Gaussian-rendered RGB is forbidden in both current Primary contracts even though captured target RGB is authorized."
+    }
+  };
+
+  const registrations = {
+    adjoint: {
+      name: "Per-view exact front-to-back compositor adjoint Wᵀ",
+      short: "Exact Wᵀ per view",
+      legal: true,
+      exact: true,
+      detail: "Use only sealed geometry/covariance, opacity, camera calibration and current query masks; accumulate mask and visible masses with complete Evidence Lineage."
+    },
+    nearest: {
+      name: "Nearest visible Gaussian assignment",
+      short: "Nearest row",
+      legal: true,
+      exact: false,
+      detail: "Cheap but discards mixed visibility and occlusion responsibility, obscuring whether a miss is visual or registration failure."
+    },
+    cachedDescriptor: {
+      name: "Reuse persistent SAM / descriptor scene cache",
+      short: "Persistent semantic sidecar",
+      legal: false,
+      exact: false,
+      detail: "A query-independent RGB feature bank would be a second persistent capability path; a prompt-conditioned bank is cross-query Query Workspace leakage."
+    }
+  };
+
+  const posteriors = {
+    marginal: {
+      name: "Prompt-anchored candidate and field-hierarchy marginal",
+      short: "Keep and marginalize K",
+      legal: true,
+      onePosterior: true,
+      detail: "Retain all K=10 legal candidate fields. Weight them only by typed prompt consistency, source-frozen SAM quality and field support; robustly combine all views, then marginalize with the fixed field hierarchy into one Gaussian Query Posterior."
+    },
+    winner: {
+      name: "Pick the best candidate / view / hierarchy level",
+      short: "Winner-take-all",
+      legal: true,
+      onePosterior: false,
+      detail: "A winner creates an unstable hidden branch; choosing by target metric is forbidden and choosing by incomplete positive scribble is underdetermined."
+    },
+    ludvigOnly: {
+      name: "Return a per-view LUDVIG-style SAM mask",
+      short: "No Gaussian posterior",
+      legal: true,
+      onePosterior: false,
+      detail: "Useful same-evaluator control, but it bypasses the Canonical Query Interface and does not produce the required shared Gaussian posterior."
+    }
+  };
+
+  const calibrations = {
+    global05: {
+      name: "Source-frozen affine fusion + Gaussian boundary 0.5",
+      short: "Global calibration · p≥0.5",
+      legal: true,
+      shared: true,
+      detail: "SAM mask logits use the pinned 0.5 decoder boundary; candidate weights and posterior fusion constants are trained only on independent source data. The final binary Gaussian boundary is exactly 0.5."
+    },
+    referenceTune: {
+      name: "Choose candidate and threshold by complete-reference IoU",
+      short: "Full-mask-only tuning",
+      legal: true,
+      shared: false,
+      detail: "The SPIn contract permits it, but positive-only NVOS cannot supply the same signed calibration. It would make the shared compiler schema-dependent beyond sanitization."
+    },
+    targetTune: {
+      name: "Choose threshold by target mask or scene metric",
+      short: "Evaluator-tuned",
+      legal: false,
+      shared: false,
+      detail: "Target masks and metrics are evaluator-only and cannot select any query result, threshold, candidate or retry."
+    }
+  };
+
+  const lifecycles = {
+    ephemeral: {
+      name: "Fresh Query Workspace; destroy candidates after sealing",
+      short: "Query-local only",
+      legal: true,
+      clean: true,
+      detail: "Start empty; masks, RGB embeddings, candidate primitive fields, weights and fitted calibration bind the complete query identity. They never alter scene state or another query."
+    },
+    objectMemory: {
+      name: "Persist object masks/features for later queries",
+      short: "Cross-query object memory",
+      legal: false,
+      clean: false,
+      detail: "Query-derived visual evidence would accumulate into a semantic scene cache outside the Single Compact Feature Field."
+    },
+    warmCache: {
+      name: "Call prompt-conditioned RGB features a Warm Cache",
+      short: "Misclassified warm cache",
+      legal: false,
+      clean: false,
+      detail: "Anything depending on Authorized Query Input is Query Workspace, never a query-independent Rebuildable Warm Cache."
+    }
+  };
+
+  const schemas = {
+    nvos: { name: "NVOS positive scribble", detail: "Only explicitly positive pixels are prompt evidence; everything else is unknown. All registered RGB—including the scored target RGB—is authorized to the pinned Query-Time Vision Model." },
+    spin: { name: "SPIn complete mask", detail: "The exact canonical reference mask supplies positive foreground and negative complement. The reference is not scored; all non-reference annotated captured RGB may provide Query evidence." }
+  };
+
+  const scenarios = {
+    clean: { name: "跨视角一致对象", detail: "Reference 候选与 side/front views 互相支持；同步聚合应提升遮挡处 posterior。" },
+    distractor: { name: "单视角相似干扰物", detail: "一个 view 的高置信误分不应压过其余视角、prompt anchor 与 field hierarchy。" },
+    occlusion: { name: "遮挡与弱注册", detail: "低 visibility 的 view 不能贡献与清晰 view 相同的 mass；exact Wᵀ 应保留支持强度。" }
+  };
+
+  const nodes = [
+    {name:"G1",kind:"object",boundary:false},{name:"G2",kind:"object",boundary:true},{name:"G3",kind:"object",boundary:false},{name:"G4",kind:"object",boundary:true},
+    {name:"G5",kind:"distractor",boundary:true},{name:"G6",kind:"distractor",boundary:false},{name:"G7",kind:"background",boundary:true},{name:"G8",kind:"background",boundary:false}
+  ];
+
+  const baseEvidence = {
+    nvos: {
+      clean: {views:[.84,.78,.73,.81], anchor:[.94,.72,.22,.08,.05,.04,.02,.01], vision:[.91,.85,.79,.68,.27,.18,.08,.05], field:[.88,.84,.76,.61,.31,.20,.09,.05]},
+      distractor: {views:[.85,.82,.88,.77], anchor:[.95,.66,.18,.06,.03,.02,.01,.01], vision:[.88,.81,.73,.62,.82,.56,.12,.08], field:[.86,.80,.72,.59,.38,.29,.12,.08]},
+      occlusion: {views:[.82,.31,.48,.75], anchor:[.94,.69,.15,.04,.03,.02,.01,.01], vision:[.86,.63,.57,.42,.25,.18,.10,.06], field:[.84,.78,.68,.55,.33,.24,.11,.07]}
+    },
+    spin: {
+      clean: {views:[.97,.85,.82,.88], anchor:[.99,.96,.90,.68,.04,.02,.01,.01], vision:[.96,.92,.86,.78,.18,.10,.04,.03], field:[.91,.88,.82,.74,.24,.14,.06,.04]},
+      distractor: {views:[.96,.84,.91,.79], anchor:[.99,.95,.88,.65,.03,.02,.01,.01], vision:[.95,.90,.84,.74,.76,.47,.06,.04], field:[.90,.87,.81,.72,.34,.23,.07,.05]},
+      occlusion: {views:[.96,.29,.51,.81], anchor:[.99,.95,.86,.61,.03,.02,.01,.01], vision:[.94,.79,.72,.59,.19,.13,.07,.04], field:[.89,.85,.78,.68,.27,.17,.08,.05]}
+    }
+  };
+
+  function initial() {
+    return {model:"samv1",prompt:"typed",multiview:"referenceOnly",registration:"adjoint",posterior:"ludvigOnly",calibration:"global05",lifecycle:"ephemeral",schema:"nvos",scenario:"clean",pilotOutcome:"unrun"};
+  }
+
+  function recommend(state) {
+    return {...state,model:"sam3",prompt:"typed",multiview:"synchronous",registration:"adjoint",posterior:"marginal",calibration:"global05",lifecycle:"ephemeral"};
+  }
+
+  function reduce(state, action) {
+    const maps = {selectModel:"model",selectPrompt:"prompt",selectMultiview:"multiview",selectRegistration:"registration",selectPosterior:"posterior",selectCalibration:"calibration",selectLifecycle:"lifecycle",selectSchema:"schema",selectScenario:"scenario",setOutcome:"pilotOutcome"};
+    if (action.type === "recommend") return recommend(state);
+    if (action.type === "reset") return initial();
+    if (maps[action.type]) return {...state,[maps[action.type]]:action.value};
+    return state;
+  }
+
+  function gates(state) {
+    const model=models[state.model], prompt=prompts[state.prompt], multiview=multiviews[state.multiview], registration=registrations[state.registration], posterior=posteriors[state.posterior], calibration=calibrations[state.calibration], lifecycle=lifecycles[state.lifecycle];
+    return [
+      {name:"Model identity",pass:model.legal && model.exact,detail:model.legal && model.exact ? "Vision model, code, weights, config, preprocessing, dtype and failure semantics are content-bound." : model.detail},
+      {name:"Typed shared compiler",pass:prompt.legal && prompt.shared,detail:prompt.legal && prompt.shared ? "Only input schema changes positive/negative/unknown sanitization; benchmark identity does not choose semantic code." : prompt.detail},
+      {name:"RGB authority",pass:multiview.legal,detail:multiview.legal ? "Only registered captured RGB is consumed; labels, masks, metrics and Gaussian-rendered RGB remain closed." : multiview.detail},
+      {name:"All-view + order",pass:multiview.complete && multiview.stable,detail:multiview.complete && multiview.stable ? "Every required registered view is processed independently and symmetrically; filename order is semantically inert." : multiview.detail},
+      {name:"Exact registration",pass:registration.legal && registration.exact,detail:registration.legal && registration.exact ? "Per-view mask evidence reaches Gaussians through exact visibility/occlusion responsibility with typed lineage." : registration.detail},
+      {name:"One posterior",pass:posterior.legal && posterior.onePosterior,detail:posterior.legal && posterior.onePosterior ? "All legal candidates remain hypotheses and are marginalized into one Gaussian Query Posterior." : posterior.detail},
+      {name:"Shared calibration",pass:calibration.legal && calibration.shared,detail:calibration.legal && calibration.shared ? "No scene/task/metric threshold; the binary Gaussian boundary is exactly 0.5." : calibration.detail},
+      {name:"Workspace lifecycle",pass:lifecycle.legal && lifecycle.clean,detail:lifecycle.legal && lifecycle.clean ? "Query-derived RGB features, masks, candidate fields and fitting remain current-query state only." : lifecycle.detail}
+    ];
+  }
+
+  function evaluate(state) {
+    const gs=gates(state), failed=gs.filter(g=>!g.pass), level=failed.length ? (failed.some(g=>["Model identity","RGB authority","Workspace lifecycle"].includes(g.name)) ? "bad" : "warn") : "good";
+    let title=failed.length ? `尚不能成为共享 Primary compiler：${failed.length} 个硬门失败` : "设计状态完整：建议进入 sealed exact-contract pilot";
+    let detail=failed.length ? failed.map(g=>g.name).join("、") + "。这些门不可由更高 IoU 补偿。" : "这是候选机制，不是结果：仍需在两个完整合同、byte-identical cold fields 和 empty Query Workspace 上以 matched control 验证。";
+    if (state.pilotOutcome !== "unrun") detail += " " + diagnosis(state.pilotOutcome);
+    return {gs,level,title,detail};
+  }
+
+  function posteriorScores(state) {
+    const d=baseEvidence[state.schema][state.scenario];
+    let scores;
+    if (state.posterior === "ludvigOnly") scores=[...d.vision];
+    else if (state.posterior === "winner") scores=d.vision.map((v,i)=>Math.max(v,d.field[i]));
+    else scores=d.anchor.map((a,i)=>.25*a+.42*d.vision[i]+.33*d.field[i]);
+    if (state.multiview === "referenceOnly") scores=scores.map((v,i)=>.62*v+.38*d.anchor[i]);
+    if (state.multiview === "sequential" && state.scenario === "distractor") scores=scores.map((v,i)=>i===4||i===5?Math.min(1,v+.2):v);
+    if (state.registration === "nearest" && state.scenario === "occlusion") scores=scores.map((v,i)=>i===2||i===3?v*.55:v);
+    if (state.calibration === "referenceTune" && state.schema === "spin") scores=scores.map(v=>Math.min(1,v+.07));
+    if (state.calibration === "targetTune") scores=scores.map(v=>Math.min(1,v+.13));
+    return scores.map(v=>Math.max(0,Math.min(1,v)));
+  }
+
+  function viewEvidence(state) {
+    const d=baseEvidence[state.schema][state.scenario];
+    if (state.multiview === "referenceOnly") return [d.views[0],0,0,0];
+    if (state.multiview === "sequential" && state.scenario === "distractor") return [d.views[0],d.views[1],Math.min(1,d.views[2]+.08),Math.min(1,d.views[3]+.05)];
+    return [...d.views];
+  }
+
+  function diagnosis(outcome) {
+    const map={
+      unrun:"真实 pilot 尚未运行；原型数值没有 evidence status。",
+      vision_fail:"V ceiling 失败：合法 captured RGB + frozen SAM3 的 K=10 candidate bank 本身不含足够好的对象 mask；归因 vision model / preprocessing / prompt sampling，不改 registration 或 field。",
+      registration_fail:"V 通过但 R ceiling 失败：2D candidate 存在，exact Wᵀ 与 geometry/visibility 无法把它注册成合格 Gaussian evidence；归因 calibration/pose/compositor support。",
+      field_fail:"V 与 R 通过但 F ceiling 失败：visual evidence 可生成且可注册，固定 Canonical Capability Feature / boundary hierarchy / output support 无法表达跨视角一致对象。",
+      posterior_fail:"V、R、F ceilings 都通过但 actual M 失败：信息存在，失败属于候选 likelihood、robust aggregation、field marginal 或 global calibration。",
+      joint_pass:"M 在两个完整合同上通过 mechanism gates：只允许进入 five-contract baseline reconstruction；不产生 Canonical Current Row、Development Advancement 或 SOTA claim。"
+    };
+    return map[outcome];
+  }
+
+  function decisionToken(state) {
+    const e=evaluate(state);
+    return [
+      "ticket=Choose the shared RGB-assisted reference-prompt query mechanism for NVOS and SPIn-NeRF",
+      `model=${models[state.model].name}`,
+      "model_identity=source commit 46957e47805eaa273f4aa7bbbd25a88bca9108ce; checkpoint sha256 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e; config sha256 4616385e4b21f2e5e22c875b65679185cbccfa95de42542b9166f7dc3d57160f",
+      "preprocessing=PIL decode+convert RGB on exact registered captured raster; prompt pixel centers map to reference RGB by (x_rgb+0.5)=(x_prompt+0.5)*W_rgb/W_prompt and the analogous y rule; Sam3Processor resolution=1008 transform uint8 -> Resize(1008,1008) -> float[0,1] -> Normalize(mean=.5,std=.5); bilinear mask-logit restore; FP32 weights with CUDA BF16 autocast; no CPU/model fallback",
+      `prompt=${prompts[state.prompt].name}`,
+      "prompt_semantics=POSITIVE_SCRIBBLE_RASTER: positive only, all unlabeled unknown; COMPLETE_BINARY_MASK: foreground positive + complement negative; rank pixel id with SplitMix64(id XOR salt), tie by id; positive salt=0x243F6A8885A308D3, complement salt=0x13198A2E03707344; first 30 positive pixels -> ten triplets; complete mask adds first 30 complement negatives; SplitMix64 z=(x+0x9E3779B97F4A7C15); z=(z xor z>>30)*0xBF58476D1CE4E5B9; z=(z xor z>>27)*0x94D049BB133111EB; return z xor z>>31, all mod 2^64; predict_inst multimask_output=false",
+      `multiview=${multiviews[state.multiview].name}`,
+      "candidate_semantics=freeze K=10 reference candidates before all-view processing; exact W_ref^T lifts each candidate, then Camera-Raster posterior/visibility (never RGB) projects it to each registered view; visible p>=0.5 and p<0.5 populations supply three positive/three negative points ranked by SplitMix64(pixel_id XOR sign_salt XOR low64(candidate_sha256) XOR low64(view_sha256)), with salts 0xA4093822299F31D0 and 0x082EFA98EC4E6C89; invoke identical SAM3 point calls independently per view; keep all valid candidates and aggregate views symmetrically; never rendered RGB or sequential self-training",
+      `registration=${registrations[state.registration].name}`,
+      `posterior=${posteriors[state.posterior].name}`,
+      `calibration=${calibrations[state.calibration].name}`,
+      "posterior_semantics=prompt consistency + source-frozen SAM quality + field support weight all legal K hypotheses; robust per-view W^T evidence and fixed Boundary-Calibrated Field Region Hierarchy are marginalized into one Gaussian Query Posterior; binary boundary p>=0.5",
+      `lifecycle=${lifecycles[state.lifecycle].name}`,
+      "abstain=missing/drifted model identity; malformed prompt/calibration/RGB manifest; insufficient point population; any required-view/model/candidate failure; nonfinite mask; pose/W mismatch; missing view completeness; invalid field hierarchy; contradictory evidence; numerical/output-support failure; never fallback or all-background",
+      "pilot=registered2d-sam3-multiview-consensus-full8-plus-available9-v1; matched A=closed RGB-free diagnostic control and M=recommended compiler on byte-identical cold fields; all predictions sealed before V/R/F ceilings or metrics",
+      "mechanism_gates=zero abstentions; NVOS M >= 91.25768502741802 VPA floor, target status reported against 92.4, macro improvement over A >=1.0pp, no task regression >0.5pp; SPIn M >=93.7200449592385 Available-Nine floor/conditional target, macro improvement over A >=1.0pp, no scene regression >0.5pp",
+      `hypothetical_diagnosis=${diagnosis(state.pilotOutcome)}`,
+      `design_gate_status=${e.gs.every(g=>g.pass)?"PASS":"FAIL"}`,
+      "human_decision=同意建议组合 / 改为… / 先补证据…"
+    ].join("\n");
+  }
+
+  return {models,prompts,multiviews,registrations,posteriors,calibrations,lifecycles,schemas,scenarios,nodes,baseEvidence,initial,recommend,reduce,gates,evaluate,posteriorScores,viewEvidence,diagnosis,decisionToken};
+})();
+
+let state=RGBQueryDecision.initial();
+let activeWalkthrough="recommend";
+let completedSteps=0;
+
+const walkthroughs={
+  recommend:{
+    name:"建议组合",
+    description:"从 hash-pinned SAM3 到一个 Gaussian posterior，逐步组成完整建议；每一步都对应 ticket 的一个冻结项。",
+    steps:[
+      {label:"冻结 official SAM3 source、public mirror checkpoint/config、1008 preprocessing 与无 fallback 语义",action:{type:"selectModel",value:"sam3"}},
+      {label:"选择 schema-aware deterministic K=10 point ensemble",action:{type:"selectPrompt",value:"typed"}},
+      {label:"选择 order-invariant synchronous all-view evidence",action:{type:"selectMultiview",value:"synchronous"}},
+      {label:"每个 view 用 exact front-to-back Wᵀ 注册 mask mass",action:{type:"selectRegistration",value:"adjoint"}},
+      {label:"保留 K 个 candidate，在固定 field hierarchy 上边缘化",action:{type:"selectPosterior",value:"marginal"}},
+      {label:"冻结 source-only affine fusion 与 Gaussian p≥0.5",action:{type:"selectCalibration",value:"global05"}},
+      {label:"每个 query 从 empty workspace 开始并在 sealing 后销毁中间状态",action:{type:"selectLifecycle",value:"ephemeral"}}
+    ]
+  },
+  prompts:{
+    name:"两种 prompt",
+    description:"验证差异只停留在 typed sanitization；后续 model、候选、全视角、registration、posterior 都同身份。",
+    steps:[
+      {label:"切到 NVOS：只有 positive scribble，未标注 pixels 保持 unknown",action:{type:"selectSchema",value:"nvos"}},
+      {label:"尝试把未标注区当 negative：观察授权与语义失败",action:{type:"selectPrompt",value:"unlabeledNegative"}},
+      {label:"切到 SPIn complete mask：foreground/complement 是完整 signed prompt",action:{type:"selectSchema",value:"spin"}},
+      {label:"恢复 typed K=10；同一 compiler 只由 schema 选择 sanitizer",action:{type:"selectPrompt",value:"typed"}},
+      {label:"套用完整建议组合",action:{type:"recommend"}}
+    ]
+  },
+  allview:{
+    name:"全视角陷阱",
+    description:"captured target RGB 现在合法，但“合法”不等于任意传播策略都稳定，也不授权 rendered RGB。",
+    steps:[
+      {label:"只读 reference RGB：合法但没有回答 online all-view 设计问题",action:{type:"selectMultiview",value:"referenceOnly"}},
+      {label:"按 filename 顺序 self-train：观察单视角错误被放大",action:{type:"selectScenario",value:"distractor"}},
+      {label:"选择 sequential rollout：顺序成为隐藏语义状态",action:{type:"selectMultiview",value:"sequential"}},
+      {label:"尝试 rendered-RGB fallback：Information Grant 立即失败",action:{type:"selectMultiview",value:"renderedRgb"}},
+      {label:"恢复同步、独立、对称 all-view aggregation",action:{type:"selectMultiview",value:"synchronous"}}
+    ]
+  },
+  candidate:{
+    name:"候选与校准",
+    description:"完整 mask 可以给更多 prompt consistency，但不能让两合同变成不同 posterior 或 threshold 体系。",
+    steps:[
+      {label:"选择 winner-take-all：观察隐藏 branch 与单错放大",action:{type:"selectPosterior",value:"winner"}},
+      {label:"按 complete-reference IoU 调 threshold：只能服务 SPIn，破坏共享语义",action:{type:"selectCalibration",value:"referenceTune"}},
+      {label:"按 target metric 调 threshold：观察 evaluator leak",action:{type:"selectCalibration",value:"targetTune"}},
+      {label:"恢复 all-candidate marginal + source-frozen global p≥0.5",action:{type:"selectPosterior",value:"marginal"}},
+      {label:"恢复共享 calibration",action:{type:"selectCalibration",value:"global05"}}
+    ]
+  },
+  attribution:{
+    name:"归因分叉",
+    description:"V/R/F 都是 sealed 后 evaluator-only ceiling，按顺序把失败定位到 vision、registration、field 或 posterior seam。",
+    steps:[
+      {label:"V 失败：candidate bank 没有对象；归因 vision model / preprocessing / prompt sampling",action:{type:"setOutcome",value:"vision_fail"}},
+      {label:"V 过而 R 失败：2D mask 有了，但 exact registration 不可用",action:{type:"setOutcome",value:"registration_fail"}},
+      {label:"V/R 过而 F 失败：field/hierarchy/output 无法表达跨视角对象",action:{type:"setOutcome",value:"field_fail"}},
+      {label:"V/R/F 过而 actual 失败：candidate marginal / fusion / calibration",action:{type:"setOutcome",value:"posterior_fail"}},
+      {label:"清除假设；真实 pilot 尚未运行",action:{type:"setOutcome",value:"unrun"}}
+    ]
+  },
+  lifecycle:{
+    name:"生命周期",
+    description:"Query 可合法产生大体量 RGB features 和 primitive hypotheses，但它们不会因此变成可持久语义 scene cache。",
+    steps:[
+      {label:"把 prompt-conditioned RGB features 称为 Warm Cache：分类错误",action:{type:"selectLifecycle",value:"warmCache"}},
+      {label:"跨 query 持久化 object memory：Single Compact Feature Field 失败",action:{type:"selectLifecycle",value:"objectMemory"}},
+      {label:"恢复 empty Query Workspace → sealed outputs → destroy intermediates",action:{type:"selectLifecycle",value:"ephemeral"}},
+      {label:"尝试 persistent SAM descriptor scene cache：第二 capability path",action:{type:"selectRegistration",value:"cachedDescriptor"}},
+      {label:"恢复 current-query exact Wᵀ registration",action:{type:"selectRegistration",value:"adjoint"}}
+    ]
+  }
+};
+
+const protocolRows=[
+  ["Model Contract", "Freeze official SAM3 source commit 46957e47805e…, public ModelScope mirror checkpoint/config SHA-256, loader flags, point interface, preprocessing, FP32/BF16 policy, CUDA/runtime identity, deterministic algorithms and hard failure. The model is Global Method Parameters/foundation dependency, not scene state."],
+  ["RGB preprocessing", "Open the exact content-bound registered captured raster with Pillow and convert RGB; preserve its calibration-bound dimensions. Map prompt pixel centers to reference RGB by `(x_rgb+0.5)=(x_prompt+0.5)·W_rgb/W_prompt` and the analogous y rule. Sam3Processor then performs uint8 → fixed 1008×1008 resize → float [0,1] → mean/std 0.5 normalization and bilinear mask-logit restoration. Bind decoded tensors and output hashes."],
+  ["POSITIVE_SCRIBBLE_RASTER", "Require nonempty in-bounds positive pixels on the official reference identity/calibration. Rank row-major pixel id by SplitMix64(id XOR `0x243F6A8885A308D3`), tie-break by id, take 30 and reshape [10,3,2]. Do not synthesize negatives; insufficient population abstains."],
+  ["COMPLETE_BINARY_MASK", "Require strict binary foreground and nonempty complement. Use the same positive sampler plus 30 complement pixels ranked with salt `0x13198A2E03707344`; reshape ten calls of three positive + three negative points. The exact mask—not the sample—remains the registered reference anchor."],
+  ["Candidate semantics", "Each of ten point sets produces exactly one finite mask and quality value with multimask_output=false. No call is a winner. A candidate's prompt-consistency and quality become typed hypothesis evidence; missing/malformed candidate fails the query rather than changing K."],
+  ["All-view construction", "Freeze K reference candidates first and lift each through exact W_refᵀ. Alpha-normalize its posterior and visibility into every registered camera without rendering RGB; visible p≥0.5/p<0.5 pixels provide three positive/three negative points ranked by `(pixel id, candidate digest, view digest, sign salt)`. Invoke the same model independently on every exact captured RGB. Aggregate symmetrically; view order cannot affect bytes."],
+  ["Canonical Query Evidence", "For every k, retain typed prompt anchor, per-view masks, exact Wᵀ positive/mask/visible mass, field-support likelihood, query identity and full Evidence Lineage. Candidate primitive fields are Query Workspace, not Deployment Scene State."],
+  ["Posterior and failure", "A source-frozen likelihood marginalizes K candidates and legal field-hierarchy hypotheses into one Gaussian Query Posterior. Final binary boundary is p≥0.5. Any model/view/registration/lineage/support/numerical incompleteness returns Query Abstention; no fallback." ]
+];
+
+const evidenceRows=[
+  ["The five-contract authority now permits the useful evidence", "Both LUDVIG-online contracts explicitly grant every registered captured RGB—including scored targets—to a preregistered Query-Time Vision Model. That supersedes the prior RGB-free Primary clauses while preserving channel-level lineage, one field and one Canonical Query Interface."],
+  ["Official SAM3 is the strongest locally bindable RADIO-GS model candidate", "The repo already binds a clean official source commit, public mirror checkpoint/config hashes, a working point interface, 1008 preprocessing and a documented FP32-weights/BF16-autocast constraint. Selecting it creates less new authority than an unpinned model or scene router."],
+  ["The LUDVIG reproduction stays a control, not the RADIO-GS compiler", "Audited LUDVIG-SAM demonstrates the online all-view role and supplies mandatory same-evaluator floors, but its per-view output, random point sampling, min-max/threshold behavior and SPIn reference-IoU selection do not produce RADIO-GS's one Gaussian posterior."],
+  ["Synchronous hypotheses avoid an order-dependent hidden state", "A sequential mask rollout makes one view's false positive alter every later call and turns filename ordering into semantics. Freeze the K candidate identities at the reference, process every view independently, then aggregate them symmetrically."],
+  ["Exact Wᵀ creates the seam needed for attribution", "Nearest assignment collapses occlusion and mixed responsibility. Exact per-view compositor adjoints make it possible to separate a good 2D candidate that registers badly from a field/posterior failure."],
+  ["The previous RGB-free mechanism remains a matched diagnostic control", "Registered Raster-Adjoint Evidence plus the Observation-Anchored Signed Region-Hypothesis Marginal is no longer Primary, but matched arm A isolates what the newly authorized vision model and all-view evidence add on byte-identical cold fields."],
+  ["No semantic cache is smuggled into the compact claim", "All image embeddings, masks, candidate fields, prompt fits and weights are query-derived. They begin in an empty Query Workspace, bind the complete query identity, and are destroyed after prediction sealing; only immutable receipts/predictions remain." ]
+];
+
+const pilotRows=[
+  ["1. Freeze identity before metrics", "Create development identity `registered2d-sam3-multiview-consensus-full8-plus-available9-v1`. Bind both Evaluation Contracts, exact scene/view/query manifests, official SAM3 source plus public ModelScope mirror checkpoint/config, loader/preprocessing, point salts/K, W implementation, field/hierarchy, candidate likelihood, calibration, implementation tree, environment and one deterministic execution policy."],
+  ["2. Cold + runtime preflight", "For every sidecar-free D512/L512 field, delete Training Artifacts/caches, rebuild Capability Views and hierarchy twice bitwise, start empty Query Workspace, mount only declared captured RGB/prompt/camera/cold-state/model inputs, disable network and trace the full process. A missing registered view or drifted SAM3 runtime fails before metric access."],
+  ["3. Exact dual cohort", "Run all eight official NVOS tasks and every registered captured view for each query. Run all nine Available-Nine SPIn scenes, the canonical reference prompt and every registered captured view; score only non-reference annotated frames. A subset can be a smoke test but cannot carry this pilot identity."],
+  ["4. Matched arms on byte-identical fields", "Arm A is the closed RGB-free Registered Raster-Adjoint Evidence + Observation-Anchored Signed Region-Hypothesis Marginal diagnostic. Arm M is the selected official-SAM3-code/public-mirror-checkpoint synchronous all-view compiler. They share field, hierarchy, prompt manifests, W, Gaussian posterior schema, output operator, 0.5 boundary and evaluator; only authorized RGB/vision/candidate evidence differs."],
+  ["5. Seal before evaluator", "Seal every A/M Canonical Query Evidence root, Gaussian posterior, Camera-Raster prediction and Query Abstention for both full contracts before the evaluator first opens target masks or emits any metric/ceiling. Missing candidate/view/query, all-background substitution, fallback, reference scoring or identity drift fails the pilot."],
+  ["6. Mechanism gates", "M must have zero Query Abstentions. NVOS: macro foreground IoU ≥91.25768502741802, report target status against 92.4, improve A macro by ≥1.0 pp and regress no official task by >0.5 pp. SPIn: scene macro ≥93.7200449592385, improve A by ≥1.0 pp and regress no scene by >0.5 pp. Pixel accuracy is mandatory report-only."],
+  ["7. Sealed V/R/F ceilings", "After sealing, compute V=best candidate mask performance available from frozen SAM3 calls, R=best target performance representable after exact candidate Wᵀ registration and fixed output, and F=best target performance representable by the fixed field hierarchy/output. They are evaluator-only and cannot select M."],
+  ["8. Bounded outcome", "Only a two-contract pass hands M's complete component identity to Reconstruct the destination-compliant five-contract baseline gap matrix. It does not upgrade LUDVIG historical rows, create a Canonical Current Row, run the final three-seed Prospective Evaluation Batch, or establish the Five-Benchmark Claim Outcome." ]
+];
+
+const diagnosisRows=[
+  ["Preflight fails", "Compliance/model-runtime failure: undeclared RGB/model read, missing view, environment drift, non-rebuildable field cache, invalid prompt/calibration, incomplete K, or nonfinite model output. Stop before interpreting quality."],
+  ["V fails", "Vision-model failure: even evaluator-best among the frozen K masks on authorized captured RGB cannot meet the applicable diagnostic gate. Change model/preprocessing/prompt construction only through a new preregistered candidate identity."],
+  ["V passes, R fails", "Registration failure: useful 2D masks exist, but exact geometry/pose/opacity responsibilities cannot express them as a Gaussian evidence field and output. Do not blame the Canonical Capability Feature yet."],
+  ["V and R pass, F fails", "Field/carrier failure: visual evidence is available and registrable, but the sole Canonical Capability Feature, boundary Capability View, fixed hierarchy or output support cannot maintain the required cross-view object hypothesis."],
+  ["V/R/F pass, actual M fails", "Posterior failure: candidate likelihood, robust view aggregation, hierarchy marginal or global affine calibration fails to use available evidence. Target oracle still cannot select a replacement threshold/candidate."],
+  ["M passes both contracts", "The shared Query mechanism is selected for the method spec and baseline reconstruction. Later five-contract, three-seed, storage, Runtime Compliance Proof, conditional-target and prospective-freeze gates remain fully in force." ]
+];
+
+function dispatch(action) { state=RGBQueryDecision.reduce(state,action); render(); }
+
+function renderState() {
+  const e=RGBQueryDecision.evaluate(state);
+  const cards=[
+    ["Vision model",RGBQueryDecision.models[state.model].short,RGBQueryDecision.models[state.model].detail],
+    ["Prompt",RGBQueryDecision.prompts[state.prompt].short,RGBQueryDecision.prompts[state.prompt].detail],
+    ["All-view",RGBQueryDecision.multiviews[state.multiview].short,RGBQueryDecision.multiviews[state.multiview].detail],
+    ["Registration",RGBQueryDecision.registrations[state.registration].short,RGBQueryDecision.registrations[state.registration].detail],
+    ["Posterior",RGBQueryDecision.posteriors[state.posterior].short,RGBQueryDecision.posteriors[state.posterior].detail],
+    ["Calibration",RGBQueryDecision.calibrations[state.calibration].short,RGBQueryDecision.calibrations[state.calibration].detail],
+    ["Lifecycle",RGBQueryDecision.lifecycles[state.lifecycle].short,RGBQueryDecision.lifecycles[state.lifecycle].detail],
+    ["Illustration",RGBQueryDecision.schemas[state.schema].name + " · " + RGBQueryDecision.scenarios[state.scenario].name,RGBQueryDecision.schemas[state.schema].detail + " " + RGBQueryDecision.scenarios[state.scenario].detail]
+  ];
+  document.getElementById("state-grid").innerHTML=cards.map(([label,value,detail])=>`<div class="card"><div class="label">${label}</div><div class="value">${value}</div><div class="detail">${detail}</div></div>`).join("");
+  const verdict=document.getElementById("verdict"); verdict.className=`verdict ${e.level}`; verdict.innerHTML=`<strong>${e.title}</strong>${e.detail}`;
+}
+
+function renderProbe() {
+  const viewNames=["Reference","Registered view B","Registered view C","Scored target view"];
+  const evidence=RGBQueryDecision.viewEvidence(state);
+  document.getElementById("view-grid").innerHTML=viewNames.map((name,i)=>`<div class="view-card"><div class="view-title"><span>${name}</span><span>${evidence[i]===0?"unused":evidence[i].toFixed(2)}</span></div><div class="bar"><span style="width:${Math.round(evidence[i]*100)}%"></span></div><div class="minor">${i===0?"typed prompt + captured RGB":"projected candidate points + captured RGB"}<br>${evidence[i]===0?"not admitted to aggregation":"exact Wᵀ evidence admitted"}</div></div>`).join("");
+  const scores=RGBQueryDecision.posteriorScores(state), colors={object:"#d9eee7",distractor:"#f4e8d4",background:"#e8ece9"};
+  const d=RGBQueryDecision.baseEvidence[state.schema][state.scenario];
+  document.getElementById("gaussian-grid").innerHTML=RGBQueryDecision.nodes.map((node,i)=>`<div class="gaussian${scores[i]>=.5?" selected":""}${node.boundary?" boundary":""}" style="background:${colors[node.kind]}"><span class="name">${node.name}</span><span class="score">p=${scores[i].toFixed(2)}</span><span class="minor">anchor=${d.anchor[i].toFixed(2)}<br>vision=${d.vision[i].toFixed(2)}<br>field=${d.field[i].toFixed(2)}</span></div>`).join("");
+  document.getElementById("probe-note").textContent=`${RGBQueryDecision.schemas[state.schema].name} · ${RGBQueryDecision.scenarios[state.scenario].name}：数值仅演示状态转移。视角条表示合法视觉候选的示意支持，不是 benchmark evidence；scored target captured RGB 在当前 online contract 中合法，但其 mask 永远不进入 Query。`;
+}
+
+function choiceButtons(container, items, selected, dataName, actionType) {
+  document.getElementById(container).innerHTML=Object.entries(items).map(([key,item])=>`<button class="choice${selected===key?" active":""}" data-${dataName}="${key}">${item.name}</button>`).join("");
+  document.querySelectorAll(`[data-${dataName}]`).forEach(button=>button.onclick=()=>dispatch({type:actionType,value:button.dataset[dataName]}));
+}
+
+function renderControls() {
+  choiceButtons("model-buttons",RGBQueryDecision.models,state.model,"model","selectModel");
+  choiceButtons("prompt-buttons",RGBQueryDecision.prompts,state.prompt,"prompt","selectPrompt");
+  choiceButtons("multiview-buttons",RGBQueryDecision.multiviews,state.multiview,"multiview","selectMultiview");
+  choiceButtons("registration-buttons",RGBQueryDecision.registrations,state.registration,"registration","selectRegistration");
+  choiceButtons("posterior-buttons",RGBQueryDecision.posteriors,state.posterior,"posterior","selectPosterior");
+  choiceButtons("calibration-buttons",RGBQueryDecision.calibrations,state.calibration,"calibration","selectCalibration");
+  choiceButtons("lifecycle-buttons",RGBQueryDecision.lifecycles,state.lifecycle,"lifecycle","selectLifecycle");
+  choiceButtons("schema-buttons",RGBQueryDecision.schemas,state.schema,"schema","selectSchema");
+  choiceButtons("scenario-buttons",RGBQueryDecision.scenarios,state.scenario,"scenario","selectScenario");
+}
+
+function renderGates() { document.getElementById("gate-list").innerHTML=RGBQueryDecision.gates(state).map(g=>`<li class="gate ${g.pass?"pass":"fail"}"><div class="status">${g.pass?"PASS":"FAIL"} · ${g.name}</div><div>${g.detail}</div></li>`).join(""); }
+function renderStaticLists() {
+  document.getElementById("protocol-list").innerHTML=protocolRows.map(([t,b])=>`<li class="protocol-row"><strong>${t}</strong><p>${b}</p></li>`).join("");
+  document.getElementById("evidence-list").innerHTML=evidenceRows.map(([t,b])=>`<li class="evidence-row"><strong>${t}</strong><p>${b}</p></li>`).join("");
+  document.getElementById("pilot-list").innerHTML=pilotRows.map(([t,b])=>`<li class="pilot-step"><strong>${t}</strong><p>${b}</p></li>`).join("");
+  document.getElementById("diagnosis-list").innerHTML=diagnosisRows.map(([t,b])=>`<li class="diagnosis-row"><strong>${t}</strong><p>${b}</p></li>`).join("");
+}
+
+function startWalkthrough(key) { activeWalkthrough=key; completedSteps=0; state=RGBQueryDecision.initial(); render(); }
+function renderWalkthrough() {
+  document.getElementById("tabs").innerHTML=Object.entries(walkthroughs).map(([key,flow])=>`<button class="tab${activeWalkthrough===key?" active":""}" data-tab="${key}">${flow.name}</button>`).join("");
+  document.querySelectorAll("[data-tab]").forEach(button=>button.onclick=()=>startWalkthrough(button.dataset.tab));
+  const flow=walkthroughs[activeWalkthrough]; document.getElementById("walkthrough-description").textContent=flow.description;
+  document.getElementById("walkthrough-steps").innerHTML=flow.steps.map((step,index)=>`<div class="walkthrough-step${index<completedSteps?" done":""}"><button class="step-button" data-step="${index}" ${index!==completedSteps?"disabled":""}>${step.label}</button></div>`).join("");
+  document.querySelectorAll("[data-step]").forEach(button=>button.onclick=()=>{const index=Number(button.dataset.step); dispatch(flow.steps[index].action); completedSteps=Math.min(flow.steps.length,completedSteps+1); renderWalkthrough();});
+}
+
+function renderToken() { document.getElementById("decision-token").value=RGBQueryDecision.decisionToken(state); }
+function render() { renderState(); renderProbe(); renderControls(); renderGates(); renderToken(); renderWalkthrough(); }
+
+document.querySelectorAll("[data-outcome]").forEach(button=>button.onclick=()=>dispatch({type:"setOutcome",value:button.dataset.outcome}));
+document.getElementById("recommend").onclick=()=>dispatch({type:"recommend"});
+document.getElementById("reset").onclick=()=>dispatch({type:"reset"});
+document.getElementById("copy-token").onclick=async()=>{const token=document.getElementById("decision-token").value; try {await navigator.clipboard.writeText(token); document.getElementById("copy-status").textContent="已复制。请回到对话确认或修改这个决策。";} catch (error) {document.getElementById("copy-status").textContent="浏览器拒绝剪贴板访问；请直接选中文本复制。";}};
+
+renderStaticLists();
+render();
+</script>
+</body>
+</html>

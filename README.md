@@ -2,11 +2,13 @@
 
 RADIO-GS reconstructs one query-independent C-RADIOv4 feature field on 3D Gaussian primitives and exposes several frozen query interfaces over that same field.
 
-The current research mainline is the **one-field route trained with
+The executable historical mainline is the **one-field route trained with
 `canonical-mpr-v3`**: the `canonical-mpr-v2` compact core plus one global,
-scene-disjoint 3-D surface-region summary readout. The older HCD, dual-stream screen decoder, and
-screen-space refiner remain available only as legacy baselines; they are not
-the default method described here.
+scene-disjoint 3-D surface-region summary readout. The active five-benchmark
+research target is a sidecar-free D512/L512 Single Compact Feature Field, but
+that target has not yet completed an end-to-end cold-field benchmark run. The
+older HCD, dual-stream screen decoder, and screen-space refiner remain legacy
+baselines.
 
 ## Current method
 
@@ -54,7 +56,8 @@ queries. It only compensates view context when rendering a 2D feature map.
 ### Representation status
 
 - `Canonical-D384` is a high-fidelity oracle, not the submitted compact design.
-- The current compact candidate uses a 128-D per-Gaussian local code, primitive-local fusion to a 256-D affine coefficient, and a shared 1280-D RADIO basis.
+- The historical compact candidate uses a 128-D per-Gaussian local code, primitive-local fusion to a 256-D affine coefficient, and a shared 1280-D RADIO basis.
+- The active five-benchmark target uses one 512-D Canonical Capability Feature per Gaussian and must remove historical MPR, semantic-score, descriptor, and topology sidecars before cold query execution.
 - DINOv3 and SAM3 capability losses/readouts use the frozen adaptors shipped in the official C-RADIOv4 checkpoint.
 - The text readout is custom and predicts a 1280-D RADIO backbone summary token from a physical-scale, surface-connected canonical primitive region. The predicted token is passed through the frozen official SigLIP2 summary head; the custom readout must not be described as an official adaptor.
 - It is trained once, without labels, masks, text, or scene IDs, on 24 ScanNet train scenes and selected on 8 disjoint official-val scenes. The older 2-D crop bridge and scene-specific crop-summary MPR caches are diagnostic/oracle baselines only.
@@ -120,23 +123,6 @@ The reproducible pose-free ScanNet benchmark builder and its method-independent
 mesh-domain evaluators live in `radio_gs/benchmarks/scannet_pfir/`. See
 `docs/benchmarks/scannet_pfir_small_v1.md` for the held-out-frame, private-GT,
 ranking, and instance-selection contracts.
-
-The unified text/image/prompt harness lives in
-`radio_gs/benchmarks/scannet_uqis/`. See
-`docs/benchmarks/scannet_uqis_9_v0_1.md` for its paired-target information
-firewall, strict no-RGB 2-D prompt protocol, mesh-probability evaluator, and
-current result-ineligible pilot status.
-The non-formal
-[`v0.2 construction candidate`](docs/benchmarks/scannet_uqis_9_v0_2_candidate.md)
-separates a common four-modality Core cohort from relational-text stress cases
-and records the benchmark-local LUDVIG CLIP+DINO diffusion path.
-
-An open-source-ready extraction lives in
-[`standalone/uqis-benchmark`](standalone/uqis-benchmark/README.md). It contains
-an installable `uqis-benchmark` package, interface-level tests, protocol ADRs,
-detailed construction/evaluation documentation, and a dependency-light LUDVIG
-graph-diffusion example. Use its synchronization tool until the directory is
-split into a separate repository.
 
 ## Audit ladder
 
