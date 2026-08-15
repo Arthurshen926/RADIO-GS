@@ -14,7 +14,14 @@ from PIL import Image
 from torchvision.transforms.functional import pil_to_tensor
 from tqdm import tqdm
 
+from radio_gs.data.view_split import (
+    load_excluded_image_stems,
+    select_image_indices,
+)
 from radio_gs.interfaces.frozen_radio_views import OfficialCropSummaryRuntime
+
+
+FRAME_ID_MODES = ("numeric_suffix", "source_rank")
 
 
 def _window_starts(length: int, window: int, stride_ratio: float) -> list[int]:
@@ -66,6 +73,44 @@ def _resolve_frames(
     if not frames:
         raise FileNotFoundError(f"no {mode} images resolved for {scene}")
     return frames
+
+
+def _generic_frame_records(
+    image_dir: Path,
+    *,
+    frame_id_mode: str,
+    excluded_image_stems: tuple[str, ...] = (),
+) -> tuple[list[tuple[int, Path]], list[str]]:
+    """Resolve generic RGBs with the same post-exclusion IDs as extraction.
+
+    Promptable benchmarks build their pose/config authority after excluding a
+    target RGB.  ``source_rank`` therefore assigns dense IDs only after the
+    exact basename exclusion, matching ``extract_radio_features.py``.
+    """
+
+    if frame_id_mode not in FRAME_ID_MODES:
+        raise ValueError(f"unsupported frame-id mode: {frame_id_mode}")
+    paths = sorted(
+        (
+            path
+            for path in image_dir.iterdir()
+            if path.suffix.lower() in {".jpg", ".jpeg", ".png"}
+        ),
+        key=lambda path: (int(path.stem.split("_")[-1]), path.name),
+    )
+    retained_indices, excluded_names = select_image_indices(
+        paths,
+        excluded_image_stems,
+    )
+    retained = [paths[index] for index in retained_indices]
+    if frame_id_mode == "source_rank":
+        records = list(enumerate(retained))
+    else:
+        records = [
+            (int(path.stem.split("_")[-1]), path)
+            for path in retained
+        ]
+    return records, excluded_names
 
 
 @torch.no_grad()
@@ -145,6 +190,10 @@ def extract(args: argparse.Namespace) -> dict:
     dataset_root = Path(args.dataset_root)
     label_dir = Path(args.label_dir)
     output_root = Path(args.output_root)
+    excluded_image_stems = load_excluded_image_stems(
+        args.exclude_image_stem,
+        args.exclude_image_stems_file,
+    )
     excluded = {
         int(value)
         for value in str(args.exclude_frame_ids).replace(",", " ").split()
@@ -156,29 +205,43 @@ def extract(args: argparse.Namespace) -> dict:
         if value.strip()
     }
     scene_reports = {}
+    excluded_image_names: list[str] = []
     for scene in scenes:
         if args.image_dir:
             if len(scenes) != 1:
                 raise ValueError("--image-dir requires exactly one --scenes entry")
             image_dir = Path(args.image_dir)
-            frames = sorted(
-                (path for path in image_dir.iterdir() if path.suffix.lower() in {".jpg", ".jpeg", ".png"}),
-                key=lambda path: int(path.stem.split("_")[-1]),
+            frame_records, excluded_image_names = _generic_frame_records(
+                image_dir,
+                frame_id_mode=args.frame_id_mode,
+                excluded_image_stems=excluded_image_stems,
             )
         else:
             frames = _resolve_frames(dataset_root, label_dir, scene, args.frames)
-        frames = [
-            path for path in frames
-            if int(path.stem.split("_")[-1]) not in excluded
-            and (not included or int(path.stem.split("_")[-1]) in included)
+            retained_indices, excluded_image_names = select_image_indices(
+                frames,
+                excluded_image_stems,
+            )
+            retained = [frames[index] for index in retained_indices]
+            frame_records = [
+                (int(path.stem.split("_")[-1]), path)
+                for path in retained
+            ]
+        frame_records = [
+            (frame_id, path)
+            for frame_id, path in frame_records
+            if frame_id not in excluded
+            and (not included or frame_id in included)
         ]
-        if not frames:
+        if not frame_records:
             raise RuntimeError(f"all frames excluded for {scene}")
         scene_output = output_root / scene
         scene_output.mkdir(parents=True, exist_ok=True)
         frame_reports = []
-        for image_path in tqdm(frames, desc=f"official crop summaries/{scene}"):
-            frame_id = int(image_path.stem.split("_")[-1])
+        for frame_id, image_path in tqdm(
+            frame_records,
+            desc=f"official crop summaries/{scene}",
+        ):
             dense, report = _extract_frame(
                 image_path,
                 runtime,
@@ -206,7 +269,10 @@ def extract(args: argparse.Namespace) -> dict:
             "dataset_root": str(dataset_root.resolve()),
             "label_dir": str(label_dir.resolve()),
             "frame_selection": args.frames,
+            "frame_id_mode": args.frame_id_mode,
             "excluded_frame_ids": sorted(excluded),
+            "excluded_image_stems": list(excluded_image_stems),
+            "excluded_image_names": excluded_image_names,
             "label_content_opened": False,
             "benchmark_masks_opened": False,
             "text_queries_opened": False,
@@ -226,7 +292,10 @@ def extract(args: argparse.Namespace) -> dict:
         "dataset_root": str(dataset_root.resolve()),
         "label_dir": str(label_dir.resolve()),
         "frame_selection": args.frames,
+        "frame_id_mode": args.frame_id_mode,
         "excluded_frame_ids": sorted(excluded),
+        "excluded_image_stems": list(excluded_image_stems),
+        "excluded_image_names": excluded_image_names,
         "label_content_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
@@ -250,6 +319,26 @@ def main() -> None:
         "--image-dir",
         default="",
         help="Optional generic frame-id RGB directory for one declared scene.",
+    )
+    parser.add_argument(
+        "--frame-id-mode",
+        choices=FRAME_ID_MODES,
+        default="numeric_suffix",
+        help=(
+            "Teacher tensor ID policy. source_rank assigns dense IDs after "
+            "exact image-stem exclusion, matching promptable field configs."
+        ),
+    )
+    parser.add_argument(
+        "--exclude-image-stem",
+        action="append",
+        default=[],
+        help="Exact case-sensitive RGB basename stem to exclude before opening it.",
+    )
+    parser.add_argument(
+        "--exclude-image-stems-file",
+        default="",
+        help="Optional JSON/text exact-stem exclusion authority.",
     )
     parser.add_argument("--output-root", required=True)
     parser.add_argument("--scenes", default="figurines,ramen,teatime,waldo_kitchen")
