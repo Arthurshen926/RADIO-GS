@@ -168,6 +168,48 @@ def write_runtime_config(assets: SceneAssets, feature_dir: Path, output: Path) -
     _write_exact_text(output, text)
 
 
+def build_mpr_common_args(
+    *,
+    config: Path,
+    assets: SceneAssets,
+    feature_bundle_sha256: str,
+    validation_csv: str,
+) -> list[str | Path]:
+    """Return the exact-marginal MPR policy shared by every capability cache."""
+
+    return [
+        "--config",
+        config,
+        "--checkpoint",
+        assets.geometry,
+        "--device",
+        "cuda:0",
+        "--exclude-frame-ids",
+        validation_csv,
+        "--expected-feature-scene",
+        assets.scene,
+        "--expected-feature-image-dir",
+        assets.image_dir,
+        "--expected-geometry-checkpoint-sha256",
+        assets.geometry_sha256,
+        "--expected-feature-output-bundle-sha256",
+        feature_bundle_sha256,
+        "--max-views",
+        "120",
+        "--alpha-threshold",
+        "0",
+        "--aggregation-mode",
+        "raster_marginal_responsibility",
+        "--registration-weight-mode",
+        "alpha_depth",
+        "--raster-view-fusion",
+        "contribution_mean",
+        "--no-robust-mpr",
+        "--raster-channel-chunk-size",
+        "128",
+    ]
+
+
 def _run(
     args: argparse.Namespace,
     stage: str,
@@ -375,26 +417,12 @@ def run(args: argparse.Namespace) -> dict:
     if stop_index == 1:
         return {"scene": assets.scene, "completed_stage": STAGES[1]}
 
-    mpr_common = [
-        "--config",
-        config,
-        "--checkpoint",
-        assets.geometry,
-        "--device",
-        "cuda:0",
-        "--exclude-frame-ids",
-        validation_csv,
-        "--expected-feature-scene",
-        assets.scene,
-        "--expected-feature-image-dir",
-        assets.image_dir,
-        "--expected-geometry-checkpoint-sha256",
-        assets.geometry_sha256,
-        "--expected-feature-output-bundle-sha256",
-        feature_bundle,
-        "--raster-channel-chunk-size",
-        "128",
-    ]
+    mpr_common = build_mpr_common_args(
+        config=config,
+        assets=assets,
+        feature_bundle_sha256=feature_bundle,
+        validation_csv=validation_csv,
+    )
     factorized_report = factorized.with_suffix(factorized.suffix + ".json")
     factorized_parts = [
         factorized.is_file() and factorized.stat().st_size > 0,

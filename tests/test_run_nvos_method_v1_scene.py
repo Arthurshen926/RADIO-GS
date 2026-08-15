@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from radio_gs.scripts.run_nvos_method_v1_scene import (
+    build_mpr_common_args,
     resolve_scene_assets,
     write_runtime_config,
 )
@@ -51,3 +52,26 @@ def test_runtime_config_only_overrides_the_source_feature_bundle(
 def test_scene_outside_frozen_full8_fails_closed() -> None:
     with pytest.raises(ValueError, match="outside frozen NVOS full8"):
         resolve_scene_assets("room")
+
+
+def test_mpr_commands_bind_the_exact_marginal_policy() -> None:
+    assets = resolve_scene_assets("fern")
+    command = [
+        str(value)
+        for value in build_mpr_common_args(
+            config=Path("method.yaml"),
+            assets=assets,
+            feature_bundle_sha256="a" * 64,
+            validation_csv="3,7,11,15",
+        )
+    ]
+
+    assert command[command.index("--max-views") + 1] == "120"
+    assert command[command.index("--alpha-threshold") + 1] == "0"
+    assert command[command.index("--aggregation-mode") + 1] == (
+        "raster_marginal_responsibility"
+    )
+    assert command[command.index("--raster-view-fusion") + 1] == (
+        "contribution_mean"
+    )
+    assert "--no-robust-mpr" in command
