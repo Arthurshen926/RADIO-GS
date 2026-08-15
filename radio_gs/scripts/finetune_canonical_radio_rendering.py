@@ -17,6 +17,7 @@ from radio_gs.config import load_config
 from radio_gs.field import load_factorized_canonical_field_checkpoint
 from radio_gs.interfaces.semantic_alignment import (
     GlobalRegionSummaryBridge,
+    align_full_extent_feature_grid,
     project_dense_region_semantics,
 )
 from radio_gs.losses.radio_adaptor_loss import (
@@ -368,11 +369,17 @@ def _semantic_fidelity_losses(
 ) -> tuple[torch.Tensor, torch.Tensor, int]:
     if predicted.ndim != 4 or predicted.shape[0] != 1:
         raise ValueError("predicted semantics must be [1,C,H,W]")
-    if teacher.shape != predicted.shape[1:]:
+    if teacher.ndim != 3 or teacher.shape[0] != predicted.shape[1]:
         raise ValueError(
             f"semantic teacher/prediction mismatch: {tuple(teacher.shape)} vs "
             f"{tuple(predicted.shape[1:])}"
         )
+    predicted_size = tuple(int(value) for value in predicted.shape[-2:])
+    teacher = align_full_extent_feature_grid(
+        teacher,
+        predicted_size,
+        label="semantic teacher/prediction mismatch",
+    )
     valid = alpha_map >= float(alpha_threshold)
     predicted_pixels = predicted[0].permute(1, 2, 0)[valid]
     teacher_pixels = teacher.permute(1, 2, 0)[valid]

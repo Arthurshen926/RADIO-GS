@@ -46,6 +46,27 @@ def test_identical_region_maps_have_zero_response_loss() -> None:
     assert stats["regions"] == 64
 
 
+def test_response_loss_aligns_one_row_full_extent_rounding_difference() -> None:
+    teacher = torch.randn(1, 6, 46, 62, generator=torch.Generator().manual_seed(11))
+    predicted = torch.nn.functional.interpolate(
+        teacher,
+        size=(45, 62),
+        mode="bilinear",
+        align_corners=False,
+    )
+
+    loss, stats = generic_region_text_response_loss(
+        predicted,
+        teacher,
+        torch.ones(45, 62),
+        _bundle(),
+        alpha_threshold=0.02,
+    )
+
+    assert float(loss) == pytest.approx(0.0, abs=2e-6)
+    assert float(stats["profile_cosine"]) == pytest.approx(1.0, abs=2e-6)
+
+
 def test_response_loss_is_differentiable_and_detects_spatial_permutation() -> None:
     teacher = torch.randn(1, 6, 16, 16, generator=torch.Generator().manual_seed(9))
     predicted = teacher.flip(-1).clone().requires_grad_(True)

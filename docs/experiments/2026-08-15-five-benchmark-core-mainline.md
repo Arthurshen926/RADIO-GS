@@ -70,6 +70,102 @@ field capacity. Per-scene fusion tuning, graph repair, and connected-component
 repair remain prohibited because they would conceal rather than solve that
 interface error.
 
+## Frozen Method-v1 LERF full-four results
+
+All four shared LERF fields now pass the executable Method-v1 gate, including
+the exact predecessor-file hashes for base, official spatial, and genuine
+crop-summary stages. The first completed full-four evaluation rendered the
+RADIO field and then applied the SigLIP2 head. It is retained as a useful
+dense-readout diagnostic, but it is not the frozen Method-v1 readout and is
+not eligible for a Method-v1 row.
+
+| Scene | Samples | LocAcc | sample mIoU |
+|---|---:|---:|---:|
+| Figurines | 56 | 0.85714 | 0.37559 |
+| Ramen | 71 | 0.81690 | 0.20185 |
+| Teatime | 59 | 0.89831 | 0.37762 |
+| Waldo Kitchen | 22 | 0.81818 | 0.29908 |
+| Full four diagnostic | 208 | 0.85096 | 0.30877 |
+
+The diagnostic scene-macro mIoU is 0.31353 and category-macro mIoU is 0.30849.
+
+The exact frozen Method-v1 LERF2D readout scores text on each primitive and
+then renders the scalar score, with no primitive-confidence modification and
+no mask refinement:
+
+| Scene | Samples | LocAcc | sample mIoU |
+|---|---:|---:|---:|
+| Figurines | 56 | 0.91071 | 0.37021 |
+| Ramen | 71 | 0.85915 | 0.21985 |
+| Teatime | 59 | 0.89831 | 0.37536 |
+| Waldo Kitchen | 22 | 0.81818 | 0.31187 |
+| Full four Method-v1 | 208 | 0.87981 | 0.31417 |
+
+The Method-v1 LERF2D scene-macro mIoU is 0.31932 and category-macro mIoU is
+0.31303. This exact readout is slightly stronger than the dense diagnostic,
+but it is not a SOTA result; Ramen remains the largest 2-D bottleneck.
+
+The frozen `vala_paper_3d` evaluation uses primitive relevancy, the fixed 0.6
+score threshold, selected-only alpha projection, the released `>10/255`
+silhouette rule, and no postprocessing:
+
+| Scene | Samples | mIoU | Acc@0.25 | Acc@0.50 |
+|---|---:|---:|---:|---:|
+| Figurines | 56 | 0.44840 | 0.78571 | 0.44643 |
+| Ramen | 71 | 0.29173 | 0.50704 | 0.21127 |
+| Teatime | 59 | 0.32871 | 0.54237 | 0.22034 |
+| Waldo Kitchen | 22 | 0.19815 | 0.36364 | 0.18182 |
+| Full four Method-v1 | 208 | 0.33450 | 0.57692 | 0.27404 |
+
+The LERF3D scene-macro mIoU is 0.31675. Waldo Kitchen is the largest 3-D
+bottleneck. These two complete LERF evaluations establish that field
+materialization is no longer the immediate LERF blocker; the primitive-query
+score geometry and typed readout are.
+
+Waldo also exposed a legitimate grid-rounding boundary: the frozen crop
+teacher is 46x62 while its native RADIO grid is 45x62. The shared semantic
+alignment interface now permits only a one-cell full-extent bilinear alignment
+and continues to reject larger or channel mismatches. Both region fidelity and
+generic response use the same helper. The original Waldo construction then
+completed, and the final generic stage improved generic loss 0.29299 to
+0.27985, profile cosine 0.18656 to 0.22345, and region validation 0.55012 to
+0.55796 while retaining MPR within 0.00003.
+
+## ScanNet OVS scene0070 sentinel
+
+Scene0070 is the first paper-eight ScanNet scene rebuilt as the exact
+Method-v1 field. Its deterministic fidelity holdout is frames 260, 520, 800,
+and 1060; the exact-marginal base construction uses the remaining 63 source
+views. The final field passes the strict schema-v2 D512/L512 lineage gate and
+its query-independent primitive cache is SHA-bound to the field and geometry.
+
+The three capability stages all improve their own held-out objective while
+retaining the exact-marginal MPR probe:
+
+| Stage | Primary held-out change | Raw validation | MPR probe |
+|---|---:|---:|---:|
+| Official SigLIP2 spatial | 0.74106 → 0.74520 | 0.75649 → 0.75703 | 0.99566 → 0.99567 |
+| Genuine crop summary | 0.53660 → 0.54418 | 0.75703 → 0.75739 | 0.99567 → 0.99565 |
+| Generic text response | 0.29498 → 0.27791 loss; 0.18467 → 0.23178 cosine | 0.75739 → 0.75764 | 0.99565 → 0.99561 |
+
+The frozen Gaussian-center evaluator consumes the external primitive cache
+directly, checks its cache hash and embedded field provenance, row count, XYZ
+alignment, feature dimension, validity mask, method identity, and
+no-postprocessing contract, then applies
+the fixed five-prompt SigLIP2 text ensemble. It performs no target-scene
+calibration or prediction postprocessing:
+
+| Split | VALA volume mIoU | VALA volume mAcc | Row mIoU | Row mAcc |
+|---|---:|---:|---:|---:|
+| 19 classes | 0.28825 | 0.49546 | 0.31334 | 0.49073 |
+| 15 classes | 0.30541 | 0.44857 | 0.32720 | 0.43890 |
+| 10 classes | 0.32357 | 0.69809 | 0.40309 | 0.70776 |
+
+This is valid single-scene development evidence, not a paper-eight aggregate
+or a SOTA claim. It raises the legal field inventory to 5/29 overall and 1/8
+for ScanNet. The next ScanNet gate is to reproduce the same source-only chain
+on the other seven frozen scenes before aggregating any paper-eight number.
+
 ## NVOS/SPIn query-transient RGB/SAM adapter
 
 The common persistent/transient seam is now explicit in
@@ -96,12 +192,16 @@ reference; it has likewise not yet been regenerated from the new field.
 
 ## Five-benchmark readiness
 
-- LERF2D: one legal Figurines development slice completed; full four-scene
-  D512/L512 cohort remains to run.
-- LERF3D: frozen protocol exists; needs the same full LERF field cohort and
-  typed 3-D output execution.
-- ScanNet OVS: genuine sparse region-view teachers and several D512/L512
-  fields exist, but the paper eight-scene cohort is incomplete.
+- LERF2D: the legal D512/L512 full-four cohort is complete; the current
+  0.31417 sample-micro mIoU demonstrates a readout-quality gap, not a missing
+  field or protocol gap.
+- LERF3D: the shared full-four field cohort and frozen typed 3-D evaluation are
+  complete; 0.33450 sample-micro mIoU demonstrates the same readout-quality
+  gap, with Waldo Kitchen as the worst scene.
+- ScanNet OVS: scene0070 now has a complete D512/L512 Method-v1 field,
+  primitive cache, and frozen single-scene result. The paper-eight cohort is
+  still only 1/8; five remaining scenes have reusable source bundles, while
+  scene0062 and scene0140 need their current source bundles/configs rebuilt.
 - NVOS: the public-compatible signed RGB/SAM transient adapter is implemented
   and audited; unified full-eight D512/L512 fields are not materialized.
 - Available-Nine SPIn-NeRF: frozen protocol exists; unified D512/L512 fields
@@ -113,9 +213,12 @@ must not be combined into a virtual incumbent.
 
 ## Reproducible artifacts
 
-- Spatial field: `official_siglip2_spatial_w005_s0_64.pth`
-- Spatial+region field: `official_siglip2_spatial_region_w005_s0_64.pth`
-- Frozen-basis generic-response field: `generic_text_response_w005_s0_64.pth`
+- Per-scene spatial field: `official_siglip2_spatial_w005_s0_64.pth`
+- Per-scene spatial+region field:
+  `official_siglip2_spatial_region_w005_s0_64.pth`
+- Per-scene frozen-basis generic-response field:
+  `generic_text_response_w005_s0_64.pth` (Figurines uses the repaired
+  `generic_text_response_w005_s0_64_lineage.pth`)
 - Joint-basis early-stop ablation:
   `generic_text_response_basis_w005_lr5e4_s0_64.pth`
 - Source-only official spatial bundle:
@@ -124,15 +227,22 @@ must not be combined into a virtual incumbent.
   `optimization_20260716/semantic_teacher_train`
 - Frozen global region bridge:
   `global_region_summary_coco15000_full_context_local_scales_imageholdout.pth`
-- Frozen evaluation reports: `lerf2d_eval_initial`, `lerf2d_eval`,
-  `lerf2d_eval_spatial_region_field_raw_readout`,
-  `lerf2d_eval_region_readout`, and `lerf2d_eval_typed_two_level` under
-  `optimization_20260815/core_method_v1/figurines`.
+- Frozen Method-v1 primitive caches: `primitive_query_method_v1.pth` under
+  each scene directory.
+- Frozen LERF2D Method-v1 reports: `lerf2d_eval_method_v1_primitive` under
+  each scene directory. The older `lerf2d_eval_method_v1` and Figurines
+  `lerf2d_eval_method_v1_lineage` directories are dense-readout diagnostics.
+- Frozen LERF3D Method-v1 reports: `lerf3d_eval_method_v1/<scene>/` under each
+  scene directory.
+- Frozen ScanNet scene0070 Method-v1 report:
+  `optimization_20260815/core_method_v1/scene0070_00/scannet_vala_method_v1/`
+  under the results root.
 
 ## Verification
 
-- 121 focused field, finetune, renderer, response, adapter, and frozen-protocol
-  tests pass.
+- The focused Method-v1, primitive-cache, finetune, generic-response, and
+  ScanNet external-primitive evaluator regression suites pass 25/25,
+  including the Waldo one-row alignment and fail-closed larger mismatch cases.
 - 104 audited LUDVIG wrapper/full-carrier and SPIn adapter tests pass.
 - Python compilation and `git diff --check` pass.
 - The frozen five-contract validator still reports zero eligible joint rows;

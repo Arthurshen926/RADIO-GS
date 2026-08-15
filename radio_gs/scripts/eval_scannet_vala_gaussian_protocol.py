@@ -40,6 +40,8 @@ from radio_gs.scannet_constants import (
 )
 from radio_gs.scripts.eval_lerf_grounding import parse_prompt_templates
 from radio_gs.querying.unified_query import cosine_bank_torch
+from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.utils.immutable_artifacts import sha256_file
 from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import (
     _build_hybrid_model,
     _decode_gaussian_indices_1280,
@@ -329,6 +331,7 @@ def _predict_gaussian_labels(
     device: torch.device,
     chunk_size: int,
     compact_feature_key: str,
+    external_query_features: torch.Tensor | None = None,
 ) -> dict[str, np.ndarray]:
     predictions = {
         split: np.empty(model.num_gaussians, dtype=np.int32) for split in split_names
@@ -340,14 +343,21 @@ def _predict_gaussian_labels(
         end = min(start + int(chunk_size), model.num_gaussians)
         indices = torch.arange(start, end, device=device, dtype=torch.long)
         with torch.no_grad():
-            decoded = _decode_gaussian_indices_1280(
-                model,
-                codec,
-                indices,
-                points_xyz=None,
-                compact_feature_key=compact_feature_key,
-            )
-            visual = F.normalize(projection(decoded.unsqueeze(0)).squeeze(0).float(), dim=-1)
+            if external_query_features is None:
+                decoded = _decode_gaussian_indices_1280(
+                    model,
+                    codec,
+                    indices,
+                    points_xyz=None,
+                    compact_feature_key=compact_feature_key,
+                )
+                visual = F.normalize(
+                    projection(decoded.unsqueeze(0)).squeeze(0).float(), dim=-1
+                )
+            else:
+                visual = external_query_features[start:end].to(
+                    device=device, dtype=torch.float32
+                )
             for split in split_names:
                 class_ids = np.asarray(
                     OPENGAUSSIAN_NYU40_CLASS_SPLITS[split], dtype=np.int32
@@ -359,6 +369,69 @@ def _predict_gaussian_labels(
                     logits.argmax(dim=-1).cpu().numpy()
                 ]
     return predictions
+
+
+def load_method_v1_external_query_features(
+    path: str | Path,
+    *,
+    expected_sha256: str,
+    expected_xyz: torch.Tensor,
+    expected_dim: int,
+) -> tuple[torch.Tensor, dict[str, object]]:
+    """Load one SHA-bound, row-aligned Method-v1 primitive descriptor cache."""
+
+    source = Path(path).expanduser().resolve()
+    if len(expected_sha256) != 64:
+        raise ValueError(
+            "--expected_external_query_feature_cache_sha256 is required"
+        )
+    actual_sha256 = sha256_file(source)
+    if actual_sha256 != expected_sha256:
+        raise ValueError("external query feature cache SHA-256 mismatch")
+    payload = load_trusted_checkpoint(source, map_location="cpu")
+    if not isinstance(payload, dict):
+        raise TypeError("external query feature cache must be a mapping")
+    metadata = payload.get("metadata")
+    if (
+        not isinstance(metadata, dict)
+        or metadata.get("artifact_type")
+        != "radio_gs_method_v1_primitive_query_cache"
+        or metadata.get("method_id") != "radio-gs-method-v1"
+        or metadata.get("query_independent") is not True
+        or metadata.get("postprocessing") != "none"
+    ):
+        raise ValueError("external query feature cache is not a Method-v1 cache")
+    features = payload.get("summary_features", payload.get("features"))
+    xyz = payload.get("xyz")
+    valid = payload.get("valid")
+    expected_shape = (int(expected_xyz.shape[0]), int(expected_dim))
+    if not isinstance(features, torch.Tensor) or tuple(features.shape) != expected_shape:
+        raise ValueError(f"external query features must be {expected_shape}")
+    if not isinstance(xyz, torch.Tensor) or xyz.shape != expected_xyz.shape:
+        raise ValueError("external query feature cache xyz shape mismatch")
+    if not isinstance(valid, torch.Tensor) or valid.shape != (expected_shape[0],):
+        raise ValueError("external query feature cache valid mask mismatch")
+    if not bool(valid.bool().all()):
+        raise ValueError("ScanNet Method-v1 query cache requires all rows valid")
+    max_xyz_error = float(
+        (xyz.float() - expected_xyz.detach().cpu().float()).norm(dim=-1).max()
+    )
+    if max_xyz_error > 1e-6:
+        raise ValueError(
+            f"external query feature cache xyz mismatch: {max_xyz_error:.3e}"
+        )
+    features = features.float()
+    if not bool(torch.isfinite(features).all()):
+        raise ValueError("external query features contain NaN or infinity")
+    features = F.normalize(features, dim=-1, eps=1e-8)
+    return features, {
+        "path": str(source),
+        "sha256": actual_sha256,
+        "feature_dim": int(features.shape[1]),
+        "num_gaussians": int(features.shape[0]),
+        "method_id": metadata["method_id"],
+        "construction": metadata.get("construction", ""),
+    }
 
 
 def _scene_macro(scene_results: dict[str, dict[str, object]], protocol: str) -> dict[str, dict[str, float]]:
@@ -400,6 +473,16 @@ def main() -> None:
     parser.add_argument("--class_aliases", default="none")
     parser.add_argument("--projection_weights", default=DEFAULT_SIGLIP2_PROJECTION_WEIGHTS)
     parser.add_argument("--summary_head_weights", default="checkpoints/siglip2_summary_head.pth")
+    parser.add_argument(
+        "--external_query_feature_cache",
+        default="",
+        help="May contain {scene}; row-aligned Method-v1 primitive descriptors.",
+    )
+    parser.add_argument(
+        "--expected_external_query_feature_cache_sha256",
+        default="",
+        help="Required SHA-256 when one external cache is evaluated.",
+    )
     parser.add_argument(
         "--radio_checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
@@ -451,6 +534,24 @@ def main() -> None:
         gaussian_scales = model.get_scaling().detach().float().cpu().numpy()
         gaussian_rotations = model.get_rotation().detach().float().cpu().numpy()
         gaussian_opacity = model.get_opacity().detach().float().cpu().numpy().reshape(-1)
+        external_query_features = None
+        external_query_feature_record = None
+        if args.external_query_feature_cache:
+            if len(scenes) != 1:
+                raise ValueError(
+                    "SHA-bound external query features currently require one scene per run"
+                )
+            external_path = _format_scene_path(
+                args.external_query_feature_cache, scene
+            )
+            external_query_features, external_query_feature_record = (
+                load_method_v1_external_query_features(
+                    external_path,
+                    expected_sha256=args.expected_external_query_feature_cache_sha256,
+                    expected_xyz=model.get_xyz(),
+                    expected_dim=int(split_text_embeddings[split_names[0]].shape[1]),
+                )
+            )
         label_ply = _format_scene_path(args.label_ply, scene) or _default_label_ply(
             prepared_root, scene
         )
@@ -478,6 +579,7 @@ def main() -> None:
             device=device,
             chunk_size=args.feature_chunk_size,
             compact_feature_key=args.compact_feature_key,
+            external_query_features=external_query_features,
         )
         significance = gaussian_scales.prod(axis=1) * gaussian_opacity
         if point_labels.shape[0] != gaussian_xyz.shape[0]:
@@ -537,6 +639,11 @@ def main() -> None:
             "vala_pseudo_volume": vala_metrics,
             "opengaussian_row_unweighted": row_metrics,
             "prediction_npz": str(prediction_path),
+            "query_feature_source": (
+                external_query_feature_record
+                if external_query_feature_record is not None
+                else {"source": "decoded_geometry_checkpoint"}
+            ),
         }
         del model, codec
         torch.cuda.empty_cache()
@@ -552,6 +659,11 @@ def main() -> None:
             "scene_aggregation": "unweighted scene macro",
             "text_encoder": args.text_encoder,
             "prompt_templates": prompt_templates,
+            "primitive_readout": (
+                "external_method_v1_query_feature_cache"
+                if args.external_query_feature_cache
+                else "decoded_geometry_checkpoint"
+            ),
         },
         "args": {key: str(value) for key, value in vars(args).items()},
         "macro": {

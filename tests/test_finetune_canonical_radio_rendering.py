@@ -88,6 +88,38 @@ def test_load_consensus_accepts_factorized_radio_cache(tmp_path: Path) -> None:
     assert payload["metadata"]["selected_frame_indices"] == [1]
 
 
+def test_semantic_fidelity_aligns_one_row_teacher_rounding_difference() -> None:
+    """Crop-summary teachers may round the native RADIO height up by one row."""
+
+    predicted = torch.randn(1, 8, 45, 62)
+    teacher = torch.randn(8, 46, 62)
+    alpha = torch.ones(45, 62)
+
+    absolute, centered, pixels = finetune._semantic_fidelity_losses(
+        predicted,
+        teacher,
+        alpha,
+        alpha_threshold=0.02,
+    )
+
+    assert pixels == 45 * 62
+    assert torch.isfinite(absolute)
+    assert torch.isfinite(centered)
+
+
+def test_semantic_fidelity_rejects_non_rounding_grid_mismatch() -> None:
+    predicted = torch.randn(1, 8, 45, 62)
+    teacher = torch.randn(8, 47, 62)
+
+    with pytest.raises(ValueError, match="semantic teacher/prediction mismatch"):
+        finetune._semantic_fidelity_losses(
+            predicted,
+            teacher,
+            torch.ones(45, 62),
+            alpha_threshold=0.02,
+        )
+
+
 class _IdentityAdaptor(torch.nn.Module):
     def forward(self, values):
         return values

@@ -14,6 +14,40 @@ from torch import nn
 import torch.nn.functional as F
 
 
+def align_full_extent_feature_grid(
+    value: torch.Tensor,
+    target_size: tuple[int, int],
+    *,
+    label: str,
+) -> torch.Tensor:
+    """Align a full-image feature grid across a one-cell rounding difference.
+
+    RADIO's native token grid follows the rounded model input resolution, while
+    a frozen full-extent teacher may use one shared grid across scenes.  A
+    one-cell difference therefore describes the same image domain; anything
+    larger remains a contract error.
+    """
+
+    if value.ndim not in (3, 4):
+        raise ValueError(f"{label}: feature map must be [C,H,W] or [B,C,H,W]")
+    target = tuple(int(size) for size in target_size)
+    if len(target) != 2 or min(target) <= 0:
+        raise ValueError(f"{label}: target grid must be positive HxW")
+    source = tuple(int(size) for size in value.shape[-2:])
+    if source == target:
+        return value
+    if max(abs(a - b) for a, b in zip(source, target)) > 1:
+        raise ValueError(f"{label}: grid {source} vs {target}")
+    batched = value.unsqueeze(0) if value.ndim == 3 else value
+    aligned = F.interpolate(
+        batched,
+        size=target,
+        mode="bilinear",
+        align_corners=False,
+    )
+    return aligned[0] if value.ndim == 3 else aligned
+
+
 class SemanticAlignmentStage(str, Enum):
     OFFICIAL_SPATIAL = "official_siglip2_spatial"
     OFFICIAL_CROP_SUMMARY = "official_siglip2_crop_summary"

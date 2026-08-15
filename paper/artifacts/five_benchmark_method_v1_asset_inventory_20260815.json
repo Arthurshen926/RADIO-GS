@@ -7,43 +7,155 @@
   "field_instance_accounting": {
     "total_required": 29,
     "note": "LERF2D and LERF3D share four fields; identically named NVOS and SPIn-NeRF scenes remain distinct dataset instances.",
-    "method_v1_complete": 1,
-    "base_d512_l512_only": 2,
-    "base_d512_l512_materializing": 1,
-    "legacy_or_missing": 25
+    "method_v1_complete": 5,
+    "base_d512_l512_only": 0,
+    "base_d512_l512_materializing": 0,
+    "legacy_or_missing": 24
   },
   "lerf_shared_four": {
     "figurines": {
       "status": "method_v1_complete",
-      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/figurines/generic_text_response_w005_s0_64.pth",
-      "field_sha256": "f80bceb09c40b98a1ed753608022aa8c3ef8dd0f11748b7686fa4fd42ae31063",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/figurines/generic_text_response_w005_s0_64_lineage.pth",
+      "field_sha256": "9beeb9db4f91055ee17eaee4b85c60f790417fb9cc109772fea853b1c5b86e8b",
+      "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/figurines/primitive_query_method_v1.pth",
+      "primitive_query_cache_sha256": "acc0b8b4cbf429d92e2f9df05865898066349fb79bcbe0bd3933ae1e504f1e18",
       "method_v1_gate": "pass"
     },
     "ramen": {
-      "status": "base_d512_l512_only",
-      "base_field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/fields/trainable_basis_d512_l512_exact_marginal.pth",
-      "official_siglip2_source_bundle": "materialized",
-      "genuine_crop_summary_teacher": "available",
-      "generic_text_relation_authority": "available_global"
+      "status": "method_v1_complete",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/ramen/generic_text_response_w005_s0_64.pth",
+      "field_sha256": "9b469fb1732235f9f81db1609fc0e2cf710f7211f74410b895bc1edcf8971e8f",
+      "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/ramen/primitive_query_method_v1.pth",
+      "primitive_query_cache_sha256": "893fda2a90142f71ee8175e666f12353a93e08a8125d8d5bdaf26d3a95dc54b5",
+      "method_v1_gate": "pass"
     },
     "teatime": {
-      "status": "base_d512_l512_only",
-      "base_field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/fields/trainable_basis_d512_l512_exact_marginal.pth",
-      "official_siglip2_source_bundle": "missing",
-      "genuine_crop_summary_teacher": "available",
-      "generic_text_relation_authority": "available_global"
+      "status": "method_v1_complete",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/teatime/generic_text_response_w005_s0_64.pth",
+      "field_sha256": "6fccff587374e5d6a9ba7cb9f381065bdd1d91615f6331e942e06248992f4d55",
+      "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/teatime/primitive_query_method_v1.pth",
+      "primitive_query_cache_sha256": "3938c13cd5f2c78cc2522aeff26cb0f77ba08cbeb519288b4b564dffd629b96b",
+      "method_v1_gate": "pass"
     },
     "waldo_kitchen": {
-      "status": "base_d512_l512_materializing",
-      "exact_marginal_responsibility_authority": "materialized",
-      "matched_raw_radio": "materialized",
-      "matched_dino_v3": "materializing",
-      "matched_sam3": "pending",
-      "base_field": "pending",
-      "official_siglip2_source_bundle": "missing",
-      "genuine_crop_summary_teacher": "available",
-      "generic_text_relation_authority": "available_global"
+      "status": "method_v1_complete",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/waldo_kitchen/generic_text_response_w005_s0_64.pth",
+      "field_sha256": "c6604f4bb69771d41452b28fb28cdfac8c6934ed22a47312322143dde3c4f4c1",
+      "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/waldo_kitchen/primitive_query_method_v1.pth",
+      "primitive_query_cache_sha256": "01ffe08e54466dc0da720bcc2e25029ae2b085e24e78f8ac5ad9ced28085159f",
+      "method_v1_gate": "pass"
     }
+  },
+  "lerf2d_render_then_score_full4_diagnostic": {
+    "status": "diagnostic_not_method_v1_readout",
+    "protocol_preset": "vala_paper_2d",
+    "readout": "raw_radio_then_official_siglip2_summary",
+    "localization_accuracy": 0.8509615384615384,
+    "sample_micro_miou": 0.30876632189555636,
+    "scene_macro_miou": 0.3135328682463719,
+    "category_macro_miou": 0.3084852036641498,
+    "sample_count": 208,
+    "scene_count": 4,
+    "scene_results": {
+      "figurines": {
+        "miou": 0.3755887563147758,
+        "localization_accuracy": 0.8571428571428571,
+        "report_sha256": "be7d420b5045ea677a42181fe3557b5af3a991314a42d1ae812b6fbdeebd0476"
+      },
+      "ramen": {
+        "miou": 0.20185009362263054,
+        "localization_accuracy": 0.8169014084507042,
+        "report_sha256": "48b32f1746f7b75919202397e45d6b13ccbbbd3ce1aa8dd97ddd986e38404a17"
+      },
+      "teatime": {
+        "miou": 0.3776170336860463,
+        "localization_accuracy": 0.8983050847457628,
+        "report_sha256": "1da341fd7a08d26206a070e4d8e4c56d4d70425a70a82a59e3c0daf3169d8a65"
+      },
+      "waldo_kitchen": {
+        "miou": 0.299075589362035,
+        "localization_accuracy": 0.8181818181818182,
+        "report_sha256": "305396f33fac5dd50a460a453f5b61dc28714f17d8654740b38a6c5eeb9c93d8"
+      }
+    },
+    "finding": "This render-then-score row is retained as a diagnostic only. Method-v1 requires primitive text scoring followed by scalar rendering, so this row is not eligible as Method-v1 evidence."
+  },
+  "lerf2d_frozen_full4": {
+    "status": "complete_development_evidence",
+    "protocol_preset": "vala_paper_2d",
+    "readout": "primitive_text_score_then_scalar_render",
+    "primitive_confidence": "none",
+    "postprocessing": "none",
+    "localization_accuracy": 0.8798076923076923,
+    "sample_micro_miou": 0.3141749763543635,
+    "scene_macro_miou": 0.3193216831193597,
+    "category_macro_miou": 0.3130327856,
+    "sample_count": 208,
+    "scene_count": 4,
+    "scene_results": {
+      "figurines": {
+        "miou": 0.3702112495,
+        "localization_accuracy": 0.9107142857142857,
+        "report_sha256": "48e3675f769b91ae867d0512b6cd82426f17a2a0edead03e05a7b3ace47fadac"
+      },
+      "ramen": {
+        "miou": 0.2198506482,
+        "localization_accuracy": 0.8591549295774648,
+        "report_sha256": "57136170f8960435e0107ac1051e3de59f44bb143addf996169bbbbe52fa7c7f"
+      },
+      "teatime": {
+        "miou": 0.3753573712,
+        "localization_accuracy": 0.8983050847457628,
+        "report_sha256": "73edbf88f3ca9c767a882ecb19e1df8f55e0e421f99f97aa7f8897f605405012"
+      },
+      "waldo_kitchen": {
+        "miou": 0.3118674636,
+        "localization_accuracy": 0.8181818181818182,
+        "report_sha256": "539d323dfc91f0b12eb8670c4114f48b11a87326c2e2f92caee0777d8b041411"
+      }
+    },
+    "finding": "The exact Method-v1 primitive-first readout is complete but not SOTA; Ramen remains the largest 2-D scene-level bottleneck."
+  },
+  "lerf3d_frozen_full4": {
+    "status": "complete_development_evidence",
+    "protocol_preset": "vala_paper_3d",
+    "readout": "primitive_text_score_on_frozen_3d_support",
+    "selection": "relevancy_score_threshold_0p6",
+    "projection": "selected_only_alpha_png_uint8_gt10",
+    "postprocessing": "none",
+    "sample_micro_miou": 0.3345018489143023,
+    "sample_micro_acc025": 0.5769230769230769,
+    "sample_micro_acc050": 0.27403846153846156,
+    "scene_macro_miou": 0.31674642488360405,
+    "sample_count": 208,
+    "scene_count": 4,
+    "scene_results": {
+      "figurines": {
+        "miou": 0.44840091466903687,
+        "acc025": 0.7857142857142857,
+        "acc050": 0.44642857142857145,
+        "report_sha256": "ac583bd03183e47cf3eafd83d0d47648df3f2997eafe393e90e4efffa28c4f73"
+      },
+      "ramen": {
+        "miou": 0.29173415899276733,
+        "acc025": 0.5070422535211268,
+        "acc050": 0.2112676056338028,
+        "report_sha256": "12386d582d47db9b5df826367d28b3e2cffb605a12d213ed26f977d0dd85447e"
+      },
+      "teatime": {
+        "miou": 0.3287052512168884,
+        "acc025": 0.5423728813559322,
+        "acc050": 0.22033898305084745,
+        "report_sha256": "67df1df128b90e3483a73b7a2b77d30d980cc400bb109c9cf17901a7d12a9214"
+      },
+      "waldo_kitchen": {
+        "miou": 0.19814537465572357,
+        "acc025": 0.36363636363636365,
+        "acc050": 0.18181818181818182,
+        "report_sha256": "78f24d337d60874c3d65955d5ae1a40c29af1952f1bc068fa17b7bbef6dc3390"
+      }
+    },
+    "finding": "The frozen primitive-support 3-D readout is complete but not SOTA; Waldo Kitchen is the largest 3-D bottleneck."
   },
   "scannet_ovs_paper8": {
     "required_scenes": [
@@ -56,8 +168,34 @@
       "scene0400_00",
       "scene0590_00"
     ],
-    "method_v1_complete": 0,
-    "finding": "All eight available source-SAM paper8 fields are legacy schema/D256-L128 carriers. The isolated scene0070 D512 smoke field is base-only and not a paper8 Method-v1 cohort.",
+    "method_v1_complete": 1,
+    "scene_results": {
+      "scene0070_00": {
+        "status": "method_v1_complete_development_evidence",
+        "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0070_00/generic_text_response_w005_s0_64.pth",
+        "field_sha256": "e47f319f34b5a7934bcc021f8ab0474107fff83510796fb8d8d6558d7ec402ab",
+        "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0070_00/primitive_query_method_v1.pth",
+        "primitive_query_cache_sha256": "ec0c0942804723f89e91a48a0d7d48665d0c9d40bd7cf397aca3c82b1938b177",
+        "method_v1_gate": "pass",
+        "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0070_00/scannet_vala_method_v1/scannet_vala_gaussian_protocol_results.json",
+        "evaluation_report_sha256": "51a64fb95670e0f55c91318875a0dc9e02363118d779aa8ede9274b33787873f",
+        "vala_pseudo_volume": {
+          "19": {
+            "miou": 0.28825407097164146,
+            "macc": 0.495464852749656
+          },
+          "15": {
+            "miou": 0.3054103238317792,
+            "macc": 0.4485655052711388
+          },
+          "10": {
+            "miou": 0.32356976142444827,
+            "macc": 0.6980924368082628
+          }
+        }
+      }
+    },
+    "finding": "Scene0070 is the first complete D512/L512 Method-v1 field and frozen primitive-readout evaluation. Five remaining scenes have reusable frozen source bundles; scene0062 and scene0140 still require current source-bundle/config reconstruction. The paper-eight cohort remains incomplete.",
     "evaluation_protocol": "frozen_and_reproduced",
     "historical_exact_metric_row": "numerically_above_all_six_targets_but_not_method_v1"
   },

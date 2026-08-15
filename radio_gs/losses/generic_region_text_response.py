@@ -16,6 +16,7 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.evaluation.text_response_fidelity import tensor_sha256
+from radio_gs.interfaces.semantic_alignment import align_full_extent_feature_grid
 from radio_gs.losses.source_global_response_listwise_loss_v21 import (
     FrozenCompositionalGenericBank,
     load_frozen_compositional_generic_bank,
@@ -180,8 +181,13 @@ def generic_region_text_response_loss(
 
     predicted = _finite_summary_map(predicted, label="predicted region summaries")
     teacher = _finite_summary_map(teacher, label="teacher region summaries")
-    if teacher.shape != predicted.shape:
+    if teacher.shape[:2] != predicted.shape[:2]:
         raise ValueError("predicted and teacher region-summary maps must match")
+    teacher = align_full_extent_feature_grid(
+        teacher,
+        tuple(int(size) for size in predicted.shape[-2:]),
+        label="predicted and teacher region-summary maps must match",
+    )
     if alpha_map.shape == (1, *predicted.shape[-2:]):
         alpha_map = alpha_map[0]
     if alpha_map.shape != predicted.shape[-2:]:
