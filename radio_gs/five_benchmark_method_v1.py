@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from pathlib import Path
+import re
 from typing import Any
+
+from radio_gs.utils.immutable_artifacts import sha256_file
 
 
 METHOD_ID = "radio-gs-method-v1"
@@ -13,6 +17,11 @@ COEFFICIENT_DIM = 512
 LOCAL_DIM = 512
 STAGE_WEIGHT = 0.05
 GENERIC_COMPONENTS = ["profile", "listwise", "sibling", "synonym"]
+PREDECESSOR_STAGES = [
+    "factorized_d512_l512",
+    "official_siglip2_full_grid",
+    "genuine_source_crop_region_summary",
+]
 
 
 class MethodV1ValidationError(ValueError):
@@ -61,6 +70,14 @@ def validate_method_authority(authority: Mapping[str, Any]) -> None:
         construction.get("field_observation_contract")
         == "canonical-factorized-radio-v1",
         "field contract differs",
+    )
+    _require(
+        construction.get("factorized_raw_radio_normalize_each_view") is False,
+        "raw RADIO amplitude gauge differs",
+    )
+    _require(
+        construction.get("matched_capability_normalize_each_view") is True,
+        "matched capability normalization differs",
     )
     _require(
         construction.get("capability_gradients") == "tangent_only",
@@ -120,6 +137,27 @@ def validate_complete_field_payload(payload: Mapping[str, Any]) -> dict[str, Any
         render.get("benchmark_labels_opened") is False, "benchmark labels were opened"
     )
     _require(render.get("text_queries_opened") is False, "benchmark text was opened")
+    _require(
+        render.get("method_v1_stage") == "target_blind_generic_text_response",
+        "final Method-v1 stage differs",
+    )
+    lineage = payload.get("method_v1_construction_lineage")
+    _require(isinstance(lineage, list), "Method-v1 predecessor lineage is missing")
+    _require(
+        [record.get("stage") for record in lineage if isinstance(record, Mapping)]
+        == PREDECESSOR_STAGES,
+        "Method-v1 predecessor stage order differs",
+    )
+    for record in lineage:
+        _require(isinstance(record, Mapping), "Method-v1 lineage record is malformed")
+        _require(
+            Path(str(record.get("field", ""))).is_absolute(),
+            "Method-v1 predecessor path is not absolute",
+        )
+        _require(
+            re.fullmatch(r"[0-9a-f]{64}", str(record.get("sha256", ""))) is not None,
+            "Method-v1 predecessor hash is malformed",
+        )
 
     official = render.get("official_render_capability")
     _require(
@@ -186,8 +224,24 @@ def validate_complete_field_payload(payload: Mapping[str, Any]) -> dict[str, Any
     }
 
 
+def verify_predecessor_files(payload: Mapping[str, Any]) -> None:
+    """Verify every declared predecessor through its current file content."""
+
+    lineage = payload.get("method_v1_construction_lineage")
+    _require(isinstance(lineage, list), "Method-v1 predecessor lineage is missing")
+    for record in lineage:
+        _require(isinstance(record, Mapping), "Method-v1 lineage record is malformed")
+        path = Path(str(record.get("field", "")))
+        _require(path.is_file(), f"Method-v1 predecessor is missing: {path}")
+        _require(
+            sha256_file(path) == record.get("sha256"),
+            f"Method-v1 predecessor content differs: {path}",
+        )
+
+
 __all__ = [
     "MethodV1ValidationError",
     "validate_complete_field_payload",
     "validate_method_authority",
+    "verify_predecessor_files",
 ]

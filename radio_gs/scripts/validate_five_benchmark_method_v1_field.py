@@ -9,6 +9,7 @@ from pathlib import Path
 from radio_gs.five_benchmark_method_v1 import (
     validate_complete_field_payload,
     validate_method_authority,
+    verify_predecessor_files,
 )
 from radio_gs.utils.immutable_artifacts import load_json_object, load_torch_mapping
 
@@ -38,6 +39,7 @@ def main() -> None:
         label="five-benchmark Method-v1 field",
     )
     report = validate_complete_field_payload(payload)
+    verify_predecessor_files(payload)
     report.update(
         {
             "status": "pass",

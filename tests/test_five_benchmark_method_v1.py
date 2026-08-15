@@ -31,7 +31,22 @@ def _complete_payload() -> dict:
             "fusion_reliability": False,
         },
         "reliability": torch.empty(4, 0),
+        "method_v1_construction_lineage": [
+            {
+                "stage": stage,
+                "field": f"/tmp/{stage}.pth",
+                "sha256": str(index + 1) * 64,
+            }
+            for index, stage in enumerate(
+                [
+                    "factorized_d512_l512",
+                    "official_siglip2_full_grid",
+                    "genuine_source_crop_region_summary",
+                ]
+            )
+        ],
         "render_optimization": {
+            "method_v1_stage": "target_blind_generic_text_response",
             "train_basis": False,
             "train_fusion": False,
             "benchmark_masks_opened": False,

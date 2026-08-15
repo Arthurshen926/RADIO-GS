@@ -1,9 +1,41 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 import torch
 
 import radio_gs.scripts.finetune_canonical_radio_rendering as finetune
+
+
+def test_method_v1_lineage_recovers_base_and_parent_stage(tmp_path: Path) -> None:
+    base = tmp_path / "base.pth"
+    parent = tmp_path / "spatial.pth"
+    base.write_bytes(b"base")
+    parent.write_bytes(b"spatial")
+    parent_payload = {
+        "architecture": {"coefficient_dim": 512, "local_dim": 512},
+        "training_config": {"output": str(base)},
+        "render_optimization": {
+            "selection_policy": "capability_pareto",
+            "best_step": 64,
+            "official_render_capability": {"adaptor_weights": {"siglip2-g": 0.05}},
+            "semantic_capability": {"enabled": False},
+            "generic_text_response": {"enabled": False},
+        },
+    }
+    args = SimpleNamespace(field_checkpoint=str(parent), construction_prior_field=[])
+
+    lineage = finetune._method_v1_predecessor_lineage(
+        args,
+        parent_payload,
+        current_stage="genuine_source_crop_region_summary",
+    )
+
+    assert [record["stage"] for record in lineage] == [
+        "factorized_d512_l512",
+        "official_siglip2_full_grid",
+    ]
+    assert all(len(record["sha256"]) == 64 for record in lineage)
 
 
 def test_checkpoint_persists_capability_pareto_drop_authority() -> None:

@@ -41,17 +41,144 @@ from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     _resolve_extracted_capability_source,
 )
 from radio_gs.training.gauge_separated_capability import gauge_separated_radio
-from radio_gs.training.canonical_field_losses import normalized_render_reconstruction_loss
+from radio_gs.training.canonical_field_losses import (
+    normalized_render_reconstruction_loss,
+)
 from radio_gs.training.feature_training_utils import SimpleRadioDataset
 from radio_gs.training.primitive_consensus import (
     PrimitiveConsensus,
     primitive_reconstruction_loss,
 )
+from radio_gs.utils.immutable_artifacts import load_torch_mapping, sha256_file
+
+
+METHOD_V1_STAGES = [
+    "factorized_d512_l512",
+    "official_siglip2_full_grid",
+    "genuine_source_crop_region_summary",
+    "target_blind_generic_text_response",
+]
 
 
 def _sha256_tensor_rows(values: torch.Tensor) -> str:
     array = values.detach().float().cpu().contiguous().numpy().astype("<f4", copy=False)
     return hashlib.sha256(array.tobytes()).hexdigest()
+
+
+def _payload_method_v1_stage(payload: Mapping[str, object]) -> str:
+    """Infer the most advanced completed Method-v1 stage in one field."""
+
+    render = payload.get("render_optimization")
+    if not isinstance(render, Mapping):
+        architecture = payload.get("architecture")
+        if not isinstance(architecture, Mapping) or (
+            int(architecture.get("coefficient_dim", -1)) != 512
+            or int(architecture.get("local_dim", -1)) != 512
+        ):
+            raise ValueError("Method-v1 base field is not D512/L512")
+        return "factorized_d512_l512"
+    generic = render.get("generic_text_response")
+    if isinstance(generic, Mapping) and generic.get("enabled") is True:
+        return "target_blind_generic_text_response"
+    semantic = render.get("semantic_capability")
+    if isinstance(semantic, Mapping) and semantic.get("enabled") is True:
+        return "genuine_source_crop_region_summary"
+    official = render.get("official_render_capability")
+    if isinstance(official, Mapping) and (
+        float(official.get("adaptor_weights", {}).get("siglip2-g", 0.0)) > 0.0
+    ):
+        return "official_siglip2_full_grid"
+    raise ValueError("cannot infer Method-v1 stage from field payload")
+
+
+def _lineage_record(
+    path: Path,
+    digest: str,
+    payload: Mapping[str, object],
+) -> dict[str, object]:
+    render = payload.get("render_optimization")
+    return {
+        "stage": _payload_method_v1_stage(payload),
+        "field": str(path),
+        "sha256": digest,
+        "selection_policy": (
+            str(render.get("selection_policy", ""))
+            if isinstance(render, Mapping)
+            else "mapping_only_checkpoint_rule"
+        ),
+        "best_step": (
+            int(render.get("best_step", 0)) if isinstance(render, Mapping) else 0
+        ),
+    }
+
+
+def _method_v1_predecessor_lineage(
+    args: argparse.Namespace,
+    parent_payload: Mapping[str, object],
+    *,
+    current_stage: str,
+) -> list[dict[str, object]]:
+    """Bind every predecessor field by content before saving a new stage."""
+
+    parent_path = Path(args.field_checkpoint).expanduser().resolve()
+    parent_sha256 = sha256_file(parent_path)
+    existing = parent_payload.get("method_v1_construction_lineage")
+    if existing is None:
+        lineage: list[dict[str, object]] = []
+    elif isinstance(existing, list) and all(
+        isinstance(record, Mapping) for record in existing
+    ):
+        lineage = [dict(record) for record in existing]
+    else:
+        raise ValueError("Method-v1 construction lineage is malformed")
+
+    if not lineage:
+        training = parent_payload.get("training_config")
+        if not isinstance(training, Mapping):
+            raise ValueError("Method-v1 field lacks base training identity")
+        base_value = str(training.get("output", "")).strip()
+        if not base_value:
+            raise ValueError("Method-v1 field lacks base checkpoint path")
+        base_path = Path(base_value).expanduser().resolve()
+        if not base_path.is_file():
+            raise FileNotFoundError(f"Method-v1 base field is missing: {base_path}")
+        lineage.append(
+            {
+                "stage": "factorized_d512_l512",
+                "field": str(base_path),
+                "sha256": sha256_file(base_path),
+                "selection_policy": "mapping_only_checkpoint_rule",
+                "best_step": 0,
+            }
+        )
+        for value in args.construction_prior_field:
+            prior_path = Path(value).expanduser().resolve()
+            prior_payload, prior_sha256, _ = load_torch_mapping(
+                prior_path,
+                map_location="cpu",
+                label="Method-v1 prior field",
+            )
+            lineage.append(_lineage_record(prior_path, prior_sha256, prior_payload))
+
+    parent_stage = _payload_method_v1_stage(parent_payload)
+    if parent_stage != "factorized_d512_l512":
+        lineage.append(_lineage_record(parent_path, parent_sha256, parent_payload))
+    elif Path(lineage[0]["field"]) != parent_path:
+        raise ValueError("Method-v1 base lineage and parent field differ")
+
+    current_index = METHOD_V1_STAGES.index(current_stage)
+    observed_stages = [str(record.get("stage", "")) for record in lineage]
+    if observed_stages != METHOD_V1_STAGES[:current_index]:
+        raise ValueError(
+            "Method-v1 predecessor stages differ: "
+            f"expected={METHOD_V1_STAGES[:current_index]}, observed={observed_stages}"
+        )
+    digests = [str(record.get("sha256", "")) for record in lineage]
+    if len(set(digests)) != len(digests) or any(
+        len(digest) != 64 for digest in digests
+    ):
+        raise ValueError("Method-v1 predecessor hashes are missing or duplicated")
+    return lineage
 
 
 def _load_consensus(path: str) -> tuple[PrimitiveConsensus, dict]:
@@ -87,7 +214,9 @@ def _dataset(
 ) -> SimpleRadioDataset:
     feature_dir = Path(str(getattr(config, "feature_dir", "")))
     raw_pose_file = str(getattr(config, "pose_file", "") or "").strip()
-    pose_file = raw_pose_file if raw_pose_file and Path(raw_pose_file).is_file() else None
+    pose_file = (
+        raw_pose_file if raw_pose_file and Path(raw_pose_file).is_file() else None
+    )
     raw_pose_dir = str(getattr(config, "pose_dir", "") or "").strip()
     fallback = feature_dir / "poses_w2c"
     pose_dir = (
@@ -215,13 +344,13 @@ def _semantic_teacher_path(root: Path, scene: str, frame: int) -> Path:
     for candidate in candidates:
         if candidate.is_file():
             return candidate
-    raise FileNotFoundError(f"semantic teacher is missing for frame {frame}: {candidates}")
+    raise FileNotFoundError(
+        f"semantic teacher is missing for frame {frame}: {candidates}"
+    )
 
 
 def _load_semantic_teacher(root: Path, scene: str, frame: int, device) -> torch.Tensor:
-    teacher = torch.load(
-        _semantic_teacher_path(root, scene, frame), map_location="cpu"
-    )
+    teacher = torch.load(_semantic_teacher_path(root, scene, frame), map_location="cpu")
     teacher = torch.as_tensor(teacher).float()
     if teacher.ndim == 4 and teacher.shape[0] == 1:
         teacher = teacher[0]
@@ -264,7 +393,9 @@ def _semantic_fidelity_losses(
 
 
 @torch.no_grad()
-def _view_cosine(field, model, renderer, sample, device, *, reliability_splat: bool) -> tuple[float, int]:
+def _view_cosine(
+    field, model, renderer, sample, device, *, reliability_splat: bool
+) -> tuple[float, int]:
     result = render_canonical_radio(
         renderer,
         model,
@@ -312,8 +443,16 @@ def _mean_view_cosine(
 
 @torch.no_grad()
 def _mean_multicapability_fidelity(
-    field, model, renderer, dataset, frame_to_index, frames, device, *,
-    adaptors: dict[str, torch.nn.Module], reliability_splat: bool,
+    field,
+    model,
+    renderer,
+    dataset,
+    frame_to_index,
+    frames,
+    device,
+    *,
+    adaptors: dict[str, torch.nn.Module],
+    reliability_splat: bool,
     alpha_threshold: float,
     capability_teacher_datasets: Mapping[str, SimpleRadioDataset] | None = None,
     capability_teacher_frame_to_index: Mapping[str, Mapping[int, int]] | None = None,
@@ -341,7 +480,10 @@ def _mean_multicapability_fidelity(
     for frame in frames:
         sample = dataset[frame_to_index[frame]]
         result = render_canonical_radio(
-            renderer, model, field, sample["pose_w2c"].to(device),
+            renderer,
+            model,
+            field,
+            sample["pose_w2c"].to(device),
             feature_height=sample["radio_features"].shape[1],
             feature_width=sample["radio_features"].shape[2],
             use_reliability=reliability_splat,
@@ -352,9 +494,10 @@ def _mean_multicapability_fidelity(
         pixels = int(valid.sum())
         if not pixels:
             continue
-        totals["raw_radio"] += float(
-            F.cosine_similarity(predicted, target, dim=1)[0][valid].mean()
-        ) * pixels
+        totals["raw_radio"] += (
+            float(F.cosine_similarity(predicted, target, dim=1)[0][valid].mean())
+            * pixels
+        )
         for name, adaptor in adaptors.items():
             projected = project_feature_map_with_adaptor(predicted, adaptor)
             if capability_teacher_datasets is None:
@@ -373,7 +516,9 @@ def _mean_multicapability_fidelity(
                         f"official {name} teacher/render shape mismatch: "
                         f"{tuple(teacher.shape)} vs {tuple(projected.shape)}"
                     )
-            totals[name] += float((projected * teacher).sum(dim=1)[0][valid].mean()) * pixels
+            totals[name] += (
+                float((projected * teacher).sum(dim=1)[0][valid].mean()) * pixels
+            )
         count += pixels
     if count <= 0:
         raise RuntimeError("multicapability validation rendered no visible pixels")
@@ -521,7 +666,9 @@ def _mean_generic_text_response_metrics(
                 totals[name] += float(stats[name]) * regions
         count += regions
     if count <= 0:
-        raise RuntimeError("generic text-response validation has fewer than two regions")
+        raise RuntimeError(
+            "generic text-response validation has fewer than two regions"
+        )
     return {name: value / count for name, value in totals.items()}
 
 
@@ -550,10 +697,8 @@ def finetune(args: argparse.Namespace) -> dict:
         strict_checkpoint_contract=True,
         load_ply_rgb_features=False,
     )
-    field, payload, _factorized_signature = (
-        load_factorized_canonical_field_checkpoint(
-            args.field_checkpoint, map_location="cpu"
-        )
+    field, payload, _factorized_signature = load_factorized_canonical_field_checkpoint(
+        args.field_checkpoint, map_location="cpu"
     )
     expected_hash = str(payload.get("geometry_fingerprint", {}).get("xyz_sha256", ""))
     if expected_hash != _sha256_tensor_rows(model.get_xyz()):
@@ -569,12 +714,16 @@ def finetune(args: argparse.Namespace) -> dict:
     mpr_metadata = dict(mpr_cache.get("metadata", {}))
     if field.reliability.shape[1] > 0:
         if field.reliability.shape != consensus.reliability.shape:
-            raise ValueError("MPR override reliability rows do not match canonical field")
+            raise ValueError(
+                "MPR override reliability rows do not match canonical field"
+            )
         with torch.no_grad():
             field.reliability.copy_(consensus.reliability.to(device))
     included_frames = sorted(_parse_frame_ids(args.include_frame_ids))
     dataset = _dataset(config, renderer, included_frames or None)
-    frame_to_index = {int(frame): index for index, frame in enumerate(dataset.frame_indices)}
+    frame_to_index = {
+        int(frame): index for index, frame in enumerate(dataset.frame_indices)
+    }
     mpr_frames = [
         int(frame)
         for frame in mpr_metadata.get("selected_frame_indices", [])
@@ -603,7 +752,9 @@ def finetune(args: argparse.Namespace) -> dict:
         validation_candidates = [
             frame for frame in training_pool if frame not in set(mpr_frames)
         ]
-        validation_frames = _even_subset(validation_candidates, int(args.validation_views))
+        validation_frames = _even_subset(
+            validation_candidates, int(args.validation_views)
+        )
     if not validation_frames:
         raise RuntimeError("no non-benchmark validation views remain")
     benchmark_frames = excluded_from_field_training - set(validation_frames)
@@ -616,14 +767,31 @@ def finetune(args: argparse.Namespace) -> dict:
         render_train_frames = list(mpr_frames)
     else:
         held_out = set(validation_frames)
-        render_train_frames = [frame for frame in raw_training_pool if frame not in held_out]
+        render_train_frames = [
+            frame for frame in raw_training_pool if frame not in held_out
+        ]
     if not render_train_frames:
         raise RuntimeError("no raw render training views remain")
 
     semantic_enabled = bool(str(args.semantic_teacher_root).strip())
     generic_text_response_enabled = float(args.generic_text_response_weight) > 0.0
+    if generic_text_response_enabled:
+        current_method_v1_stage = "target_blind_generic_text_response"
+    elif semantic_enabled and float(args.semantic_weight) > 0.0:
+        current_method_v1_stage = "genuine_source_crop_region_summary"
+    elif float(args.siglip_spatial_render_weight) > 0.0:
+        current_method_v1_stage = "official_siglip2_full_grid"
+    else:
+        raise ValueError("fine-tuning invocation does not identify a Method-v1 stage")
+    method_v1_predecessor_lineage = _method_v1_predecessor_lineage(
+        args,
+        payload,
+        current_stage=current_method_v1_stage,
+    )
     if float(args.semantic_weight) > 0.0 and not semantic_enabled:
-        raise ValueError("--semantic-teacher-root is required when semantic loss is enabled")
+        raise ValueError(
+            "--semantic-teacher-root is required when semantic loss is enabled"
+        )
     if generic_text_response_enabled and not semantic_enabled:
         raise ValueError(
             "generic text-response preservation requires --semantic-teacher-root"
@@ -640,21 +808,29 @@ def finetune(args: argparse.Namespace) -> dict:
     semantic_bridge = None
     semantic_summary_head = None
     generic_text_bundle = None
-    semantic_teacher_root = Path(args.semantic_teacher_root) if semantic_enabled else None
+    semantic_teacher_root = (
+        Path(args.semantic_teacher_root) if semantic_enabled else None
+    )
     semantic_scene = str(args.semantic_scene).strip() or Path(config.scene_root).name
     semantic_kernel_sizes = tuple(
-        int(value) for value in str(args.semantic_kernel_sizes).split(",") if value.strip()
+        int(value)
+        for value in str(args.semantic_kernel_sizes).split(",")
+        if value.strip()
     )
     if semantic_enabled:
         if not args.semantic_bridge_checkpoint:
-            raise ValueError("--semantic-bridge-checkpoint is required for semantic teachers")
+            raise ValueError(
+                "--semantic-bridge-checkpoint is required for semantic teachers"
+            )
         semantic_bridge, _semantic_manifest = GlobalRegionSummaryBridge.from_checkpoint(
             args.semantic_bridge_checkpoint, map_location="cpu"
         )
         semantic_bridge = semantic_bridge.to(device).eval()
-        semantic_summary_head = SigLIP2SummaryHead.from_radio_checkpoint(
-            args.radio_checkpoint
-        ).to(device).eval()
+        semantic_summary_head = (
+            SigLIP2SummaryHead.from_radio_checkpoint(args.radio_checkpoint)
+            .to(device)
+            .eval()
+        )
         for module in (semantic_bridge, semantic_summary_head):
             for parameter in module.parameters():
                 parameter.requires_grad_(False)
@@ -687,22 +863,23 @@ def finetune(args: argparse.Namespace) -> dict:
     capability_adaptors: dict[str, torch.nn.Module] = {}
     for name in capability_weights:
         adaptor = (
-            SigLIP2FeatureProjection.from_radio_checkpoint(args.radio_checkpoint)
-            if name == "siglip2-g"
-            else load_radio_adaptor_from_checkpoint(
-                args.radio_checkpoint, name, kind="feature_projection"
+            (
+                SigLIP2FeatureProjection.from_radio_checkpoint(args.radio_checkpoint)
+                if name == "siglip2-g"
+                else load_radio_adaptor_from_checkpoint(
+                    args.radio_checkpoint, name, kind="feature_projection"
+                )
             )
-        ).to(device).eval()
+            .to(device)
+            .eval()
+        )
         for parameter in adaptor.parameters():
             parameter.requires_grad_(False)
         capability_adaptors[name] = adaptor
     capability_teacher_datasets: dict[str, SimpleRadioDataset] | None = None
     capability_teacher_frame_to_index: dict[str, dict[int, int]] | None = None
     capability_teacher_provenance: dict[str, dict[str, object]] = {}
-    if (
-        capability_adaptors
-        and args.capability_map_source == "official_extracted"
-    ):
+    if capability_adaptors and args.capability_map_source == "official_extracted":
         (
             capability_teacher_datasets,
             capability_teacher_frame_to_index,
@@ -742,8 +919,15 @@ def finetune(args: argparse.Namespace) -> dict:
     )
     best_validation = initial_validation
     initial_capability_validation = _mean_multicapability_fidelity(
-        field, model, renderer, dataset, frame_to_index, validation_frames, device,
-        adaptors=capability_adaptors, reliability_splat=reliability_splat,
+        field,
+        model,
+        renderer,
+        dataset,
+        frame_to_index,
+        validation_frames,
+        device,
+        adaptors=capability_adaptors,
+        reliability_splat=reliability_splat,
         alpha_threshold=float(args.alpha_threshold),
         capability_teacher_datasets=capability_teacher_datasets,
         capability_teacher_frame_to_index=capability_teacher_frame_to_index,
@@ -758,32 +942,8 @@ def finetune(args: argparse.Namespace) -> dict:
     initial_semantic_centered = None
     best_semantic_validation = None
     if semantic_enabled:
-        initial_semantic_absolute, initial_semantic_centered = _mean_semantic_view_metrics(
-            field,
-            model,
-            renderer,
-            dataset,
-            frame_to_index,
-            validation_frames,
-            device,
-            bridge=semantic_bridge,
-            summary_head=semantic_summary_head,
-            teacher_root=semantic_teacher_root,
-            scene=semantic_scene,
-            kernel_sizes=semantic_kernel_sizes,
-            projection_batch_size=int(args.semantic_projection_batch_size),
-            reliability_splat=reliability_splat,
-            alpha_threshold=float(args.alpha_threshold),
-        )
-        initial_semantic_validation = 0.5 * (
-            initial_semantic_absolute + initial_semantic_centered
-        )
-        best_semantic_validation = initial_semantic_validation
-    initial_generic_text_response_validation = None
-    best_generic_text_response_validation = None
-    if generic_text_response_enabled:
-        initial_generic_text_response_validation = (
-            _mean_generic_text_response_metrics(
+        initial_semantic_absolute, initial_semantic_centered = (
+            _mean_semantic_view_metrics(
                 field,
                 model,
                 renderer,
@@ -799,8 +959,32 @@ def finetune(args: argparse.Namespace) -> dict:
                 projection_batch_size=int(args.semantic_projection_batch_size),
                 reliability_splat=reliability_splat,
                 alpha_threshold=float(args.alpha_threshold),
-                text_bundle=generic_text_bundle,
             )
+        )
+        initial_semantic_validation = 0.5 * (
+            initial_semantic_absolute + initial_semantic_centered
+        )
+        best_semantic_validation = initial_semantic_validation
+    initial_generic_text_response_validation = None
+    best_generic_text_response_validation = None
+    if generic_text_response_enabled:
+        initial_generic_text_response_validation = _mean_generic_text_response_metrics(
+            field,
+            model,
+            renderer,
+            dataset,
+            frame_to_index,
+            validation_frames,
+            device,
+            bridge=semantic_bridge,
+            summary_head=semantic_summary_head,
+            teacher_root=semantic_teacher_root,
+            scene=semantic_scene,
+            kernel_sizes=semantic_kernel_sizes,
+            projection_batch_size=int(args.semantic_projection_batch_size),
+            reliability_splat=reliability_splat,
+            alpha_threshold=float(args.alpha_threshold),
+            text_bundle=generic_text_bundle,
         )
         best_generic_text_response_validation = dict(
             initial_generic_text_response_validation
@@ -812,7 +996,9 @@ def finetune(args: argparse.Namespace) -> dict:
 
     for step in range(int(args.steps)):
         if not shuffled:
-            order = torch.randperm(len(render_train_frames), generator=generator).tolist()
+            order = torch.randperm(
+                len(render_train_frames), generator=generator
+            ).tolist()
             shuffled = [render_train_frames[index] for index in order]
         frame = shuffled.pop()
         sample = dataset[frame_to_index[frame]]
@@ -855,7 +1041,9 @@ def finetune(args: argparse.Namespace) -> dict:
             if capability_teacher_datasets is not None:
                 teacher_capability_maps = {}
                 for name, teacher_dataset in capability_teacher_datasets.items():
-                    teacher_index = capability_teacher_frame_to_index[name].get(int(frame))
+                    teacher_index = capability_teacher_frame_to_index[name].get(
+                        int(frame)
+                    )
                     if teacher_index is None:
                         raise ValueError(
                             f"official {name} teacher does not contain frame {int(frame)}"
@@ -888,9 +1076,7 @@ def finetune(args: argparse.Namespace) -> dict:
             predicted_semantics = project_dense_region_semantics(
                 semantic_bridge,
                 semantic_summary_head,
-                gauge_separated_radio(
-                    result["feature_map"][None], feature_dim=1
-                ),
+                gauge_separated_radio(result["feature_map"][None], feature_dim=1),
                 kernel_sizes=semantic_kernel_sizes,
                 projection_batch_size=int(args.semantic_projection_batch_size),
             )
@@ -931,8 +1117,7 @@ def finetune(args: argparse.Namespace) -> dict:
             * float(args.capability_local_affinity_weight)
             * capability_local_affinity_loss
             + float(args.semantic_weight) * semantic_loss
-            + float(args.generic_text_response_weight)
-            * generic_response_loss
+            + float(args.generic_text_response_weight) * generic_response_loss
         )
         loss.backward()
         torch.nn.utils.clip_grad_norm_(field.parameters(), float(args.grad_clip))
@@ -958,8 +1143,14 @@ def finetune(args: argparse.Namespace) -> dict:
                 field, consensus, mpr_probe_rows, device
             )
             capability_validation = _mean_multicapability_fidelity(
-                field, model, renderer, dataset, frame_to_index, validation_frames,
-                device, adaptors=capability_adaptors,
+                field,
+                model,
+                renderer,
+                dataset,
+                frame_to_index,
+                validation_frames,
+                device,
+                adaptors=capability_adaptors,
                 reliability_splat=reliability_splat,
                 alpha_threshold=float(args.alpha_threshold),
                 capability_teacher_datasets=capability_teacher_datasets,
@@ -994,27 +1185,23 @@ def finetune(args: argparse.Namespace) -> dict:
                 )
             generic_text_response_validation = None
             if generic_text_response_enabled:
-                generic_text_response_validation = (
-                    _mean_generic_text_response_metrics(
-                        field,
-                        model,
-                        renderer,
-                        dataset,
-                        frame_to_index,
-                        validation_frames,
-                        device,
-                        bridge=semantic_bridge,
-                        summary_head=semantic_summary_head,
-                        teacher_root=semantic_teacher_root,
-                        scene=semantic_scene,
-                        kernel_sizes=semantic_kernel_sizes,
-                        projection_batch_size=int(
-                            args.semantic_projection_batch_size
-                        ),
-                        reliability_splat=reliability_splat,
-                        alpha_threshold=float(args.alpha_threshold),
-                        text_bundle=generic_text_bundle,
-                    )
+                generic_text_response_validation = _mean_generic_text_response_metrics(
+                    field,
+                    model,
+                    renderer,
+                    dataset,
+                    frame_to_index,
+                    validation_frames,
+                    device,
+                    bridge=semantic_bridge,
+                    summary_head=semantic_summary_head,
+                    teacher_root=semantic_teacher_root,
+                    scene=semantic_scene,
+                    kernel_sizes=semantic_kernel_sizes,
+                    projection_batch_size=int(args.semantic_projection_batch_size),
+                    reliability_splat=reliability_splat,
+                    alpha_threshold=float(args.alpha_threshold),
+                    text_bundle=generic_text_bundle,
                 )
             if args.selection_policy == "final":
                 selected = True
@@ -1023,8 +1210,7 @@ def finetune(args: argparse.Namespace) -> dict:
             elif args.selection_policy == "raw_fidelity":
                 selected = (
                     validation_cosine > best_validation
-                    and mpr_probe_cosine
-                    >= initial_mpr_probe - float(args.max_mpr_drop)
+                    and mpr_probe_cosine >= initial_mpr_probe - float(args.max_mpr_drop)
                 )
             elif args.selection_policy == "pareto_mpr":
                 selected = (
@@ -1043,8 +1229,7 @@ def finetune(args: argparse.Namespace) -> dict:
                         - float(args.max_capability_drop)
                         for name in initial_capability_validation
                     )
-                    and mpr_probe_cosine
-                    >= initial_mpr_probe - float(args.max_mpr_drop)
+                    and mpr_probe_cosine >= initial_mpr_probe - float(args.max_mpr_drop)
                 )
             elif args.selection_policy == "semantic_capability":
                 selected = (
@@ -1052,8 +1237,7 @@ def finetune(args: argparse.Namespace) -> dict:
                     and semantic_validation > best_semantic_validation
                     and validation_cosine
                     >= initial_validation - float(args.max_validation_drop)
-                    and mpr_probe_cosine
-                    >= initial_mpr_probe - float(args.max_mpr_drop)
+                    and mpr_probe_cosine >= initial_mpr_probe - float(args.max_mpr_drop)
                 )
             else:
                 selected = (
@@ -1065,8 +1249,7 @@ def finetune(args: argparse.Namespace) -> dict:
                     >= initial_semantic_validation - float(args.max_capability_drop)
                     and validation_cosine
                     >= initial_validation - float(args.max_validation_drop)
-                    and mpr_probe_cosine
-                    >= initial_mpr_probe - float(args.max_mpr_drop)
+                    and mpr_probe_cosine >= initial_mpr_probe - float(args.max_mpr_drop)
                 )
             if selected:
                 best_validation = validation_cosine
@@ -1086,31 +1269,23 @@ def finetune(args: argparse.Namespace) -> dict:
                 "loss": float(loss.detach()),
                 "render_loss": float(render_loss.detach()),
                 "mpr_loss": float(mpr_loss.detach()),
-                "capability_alignment_loss": float(
-                    capability_alignment_loss.detach()
-                ),
+                "capability_alignment_loss": float(capability_alignment_loss.detach()),
                 "capability_local_affinity_loss": float(
                     capability_local_affinity_loss.detach()
                 ),
                 "capability_adaptors": {
                     name: {
                         "alignment": float(values["alignment"].detach()),
-                        "local_affinity": float(
-                            values["local_affinity"].detach()
-                        ),
+                        "local_affinity": float(values["local_affinity"].detach()),
                     }
                     for name, values in capability_stats.items()
                 },
                 "semantic_loss": float(semantic_loss.detach()),
                 "semantic_absolute_loss": float(semantic_absolute_loss.detach()),
                 "semantic_centered_loss": float(semantic_centered_loss.detach()),
-                "generic_text_response_loss": float(
-                    generic_response_loss.detach()
-                ),
+                "generic_text_response_loss": float(generic_response_loss.detach()),
                 "generic_text_response_components": {
-                    name: int(value)
-                    if isinstance(value, int)
-                    else float(value)
+                    name: int(value) if isinstance(value, int) else float(value)
                     for name, value in generic_text_response_stats.items()
                 },
                 "validation_cosine": validation_cosine,
@@ -1123,9 +1298,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 "best_validation_cosine": best_validation,
                 "best_mpr_probe_cosine": best_mpr_probe,
                 "best_semantic_validation_cosine": best_semantic_validation,
-                "generic_text_response_validation": (
-                    generic_text_response_validation
-                ),
+                "generic_text_response_validation": (generic_text_response_validation),
                 "best_generic_text_response_validation": (
                     best_generic_text_response_validation
                 ),
@@ -1156,7 +1329,9 @@ def finetune(args: argparse.Namespace) -> dict:
     payload["reliability"] = field.reliability.detach().cpu()
     payload["mpr_cache"] = str(Path(mpr_cache_path).resolve())
     payload["mpr_cache_metadata"] = mpr_metadata
+    payload["method_v1_construction_lineage"] = method_v1_predecessor_lineage
     payload["render_optimization"] = {
+        "method_v1_stage": current_method_v1_stage,
         "config": str(Path(args.config).resolve()),
         "geometry_checkpoint": str(Path(args.geometry_checkpoint).resolve()),
         "render_view_policy": args.render_view_policy,
@@ -1188,14 +1363,18 @@ def finetune(args: argparse.Namespace) -> dict:
         "max_capability_drop": float(args.max_capability_drop),
         "semantic_capability": {
             "enabled": semantic_enabled,
-            "teacher_root": str(semantic_teacher_root.resolve()) if semantic_enabled else "",
+            "teacher_root": (
+                str(semantic_teacher_root.resolve()) if semantic_enabled else ""
+            ),
             "scene": semantic_scene,
-            "bridge_checkpoint": str(Path(args.semantic_bridge_checkpoint).resolve())
-            if semantic_enabled
-            else "",
-            "radio_checkpoint": str(Path(args.radio_checkpoint).resolve())
-            if semantic_enabled
-            else "",
+            "bridge_checkpoint": (
+                str(Path(args.semantic_bridge_checkpoint).resolve())
+                if semantic_enabled
+                else ""
+            ),
+            "radio_checkpoint": (
+                str(Path(args.radio_checkpoint).resolve()) if semantic_enabled else ""
+            ),
             "kernel_sizes": list(semantic_kernel_sizes),
             "weight": float(args.semantic_weight),
             "centered_weight": float(args.semantic_centered_weight),
@@ -1243,9 +1422,7 @@ def finetune(args: argparse.Namespace) -> dict:
             ),
             "region_operator": "fixed_adaptive_average_8x8_visible_cells",
             "components": ["profile", "listwise", "sibling", "synonym"],
-            "generic_target_blind_text_bank_opened": (
-                generic_text_response_enabled
-            ),
+            "generic_target_blind_text_bank_opened": (generic_text_response_enabled),
             "benchmark_text_queries_opened": False,
             "uses_benchmark_masks": False,
             "uses_target_metrics_for_selection": False,
@@ -1261,13 +1438,9 @@ def finetune(args: argparse.Namespace) -> dict:
             "teacher_map_source": args.capability_map_source,
             "teacher_map_provenance": capability_teacher_provenance,
             "dense_alignment": bool(capability_adaptors),
-            "local_affinity_weight": float(
-                args.capability_local_affinity_weight
-            ),
+            "local_affinity_weight": float(args.capability_local_affinity_weight),
             "local_radius": int(args.capability_local_radius),
-            "local_balance_quantile": float(
-                args.capability_local_balance_quantile
-            ),
+            "local_balance_quantile": float(args.capability_local_balance_quantile),
             "projection_order": (
                 "complete_rendered_2d_grid_vs_resample(official_runtime_adaptor_output)"
                 if args.capability_map_source == "official_extracted"
@@ -1332,6 +1505,15 @@ def main() -> None:
     parser.add_argument("--config", required=True)
     parser.add_argument("--geometry-checkpoint", required=True)
     parser.add_argument("--field-checkpoint", required=True)
+    parser.add_argument(
+        "--construction-prior-field",
+        action="append",
+        default=[],
+        help=(
+            "Recovery-only predecessor field between the base and immediate parent; "
+            "repeat in Method-v1 stage order when upgrading a pre-lineage checkpoint."
+        ),
+    )
     parser.add_argument(
         "--mpr-cache",
         default="",
@@ -1402,9 +1584,7 @@ def main() -> None:
         ),
     )
     parser.add_argument("--generic-text-relation-authority", default="")
-    parser.add_argument(
-        "--expected-generic-text-relation-authority-sha256", default=""
-    )
+    parser.add_argument("--expected-generic-text-relation-authority-sha256", default="")
     parser.add_argument(
         "--radio-checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
@@ -1434,7 +1614,9 @@ def main() -> None:
         help="Optional registered-frame allowlist applied before pose loading.",
     )
     parser.add_argument(
-        "--render-view-policy", choices=["all_nonbenchmark", "mpr"], default="all_nonbenchmark"
+        "--render-view-policy",
+        choices=["all_nonbenchmark", "mpr"],
+        default="all_nonbenchmark",
     )
     parser.add_argument("--reliability-splat", action="store_true")
     parser.add_argument("--train-basis", action="store_true")
@@ -1456,14 +1638,17 @@ def main() -> None:
     parser.add_argument("--max-capability-drop", type=float, default=0.002)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
-    if min(
-        args.siglip_spatial_render_weight,
-        args.dino_render_weight,
-        args.sam3_render_weight,
-        args.capability_local_affinity_weight,
-        args.semantic_weight,
-        args.generic_text_response_weight,
-    ) < 0:
+    if (
+        min(
+            args.siglip_spatial_render_weight,
+            args.dino_render_weight,
+            args.sam3_render_weight,
+            args.capability_local_affinity_weight,
+            args.semantic_weight,
+            args.generic_text_response_weight,
+        )
+        < 0
+    ):
         parser.error("render, semantic, and response weights cannot be negative")
     if args.capability_local_radius <= 0:
         parser.error("--capability-local-radius must be positive")
