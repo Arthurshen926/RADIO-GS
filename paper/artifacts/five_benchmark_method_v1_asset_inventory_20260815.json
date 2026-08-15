@@ -7,10 +7,10 @@
   "field_instance_accounting": {
     "total_required": 29,
     "note": "LERF2D and LERF3D share four fields; identically named NVOS and SPIn-NeRF scenes remain distinct dataset instances.",
-    "method_v1_complete": 5,
+    "method_v1_complete": 7,
     "base_d512_l512_only": 0,
     "base_d512_l512_materializing": 0,
-    "legacy_or_missing": 24
+    "legacy_or_missing": 22
   },
   "lerf_shared_four": {
     "figurines": {
@@ -168,7 +168,7 @@
       "scene0400_00",
       "scene0590_00"
     ],
-    "method_v1_complete": 1,
+    "method_v1_complete": 3,
     "scene_results": {
       "scene0070_00": {
         "status": "method_v1_complete_development_evidence",
@@ -193,9 +193,79 @@
             "macc": 0.6980924368082628
           }
         }
+      },
+      "scene0097_00": {
+        "status": "method_v1_complete_development_evidence",
+        "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0097_00/generic_text_response_w005_s0_64.pth",
+        "field_sha256": "328695d8a0392f071301477634631f72f35eee117fabe9624276d75d5a23e8b5",
+        "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0097_00/primitive_query_method_v1.pth",
+        "primitive_query_cache_sha256": "4a34500f1429dd747ec48b9b32af9bf593e38d395f3c34f0bf768a7e632dec19",
+        "method_v1_gate": "pass",
+        "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0097_00/scannet_vala_method_v1/scannet_vala_gaussian_protocol_results.json",
+        "evaluation_report_sha256": "e9dd01cf3364e027efce6c6b5b45977688807249f921879de9111dae27bbaabf",
+        "vala_pseudo_volume": {
+          "19": {
+            "miou": 0.31037779235922935,
+            "macc": 0.7275121668415501
+          },
+          "15": {
+            "miou": 0.2935529503134053,
+            "macc": 0.7060828919868901
+          },
+          "10": {
+            "miou": 0.46516886076321856,
+            "macc": 0.6922279404444768
+          }
+        }
+      },
+      "scene0347_00": {
+        "status": "method_v1_complete_development_evidence",
+        "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0347_00/generic_text_response_w005_s0_64.pth",
+        "field_sha256": "b6bd461fe20e6c21d93609fccc7f139b411eada89f1150d52eceafbffe966344",
+        "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0347_00/primitive_query_method_v1.pth",
+        "primitive_query_cache_sha256": "3dbb367f4c213c7fc6c446b10e4c7b343621368218221d565a50c27f3949df37",
+        "method_v1_gate": "pass",
+        "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0347_00/scannet_vala_method_v1/scannet_vala_gaussian_protocol_results.json",
+        "evaluation_report_sha256": "730fa8aee7a799e16e6a1a80841ed28f00b1f618354caa5ab842bb0fdddb2c0a",
+        "vala_pseudo_volume": {
+          "19": {
+            "miou": 0.36930010703529764,
+            "macc": 0.7120063873889194
+          },
+          "15": {
+            "miou": 0.351919038937559,
+            "macc": 0.6838289826089414
+          },
+          "10": {
+            "miou": 0.6451350776956573,
+            "macc": 0.7815794713505159
+          }
+        }
       }
     },
-    "finding": "Scene0070 is the first complete D512/L512 Method-v1 field and frozen primitive-readout evaluation. Five remaining scenes have reusable frozen source bundles; scene0062 and scene0140 still require current source-bundle/config reconstruction. The paper-eight cohort remains incomplete.",
+    "three_scene_development_macro": {
+      "scenes": [
+        "scene0070_00",
+        "scene0097_00",
+        "scene0347_00"
+      ],
+      "vala_pseudo_volume": {
+        "19": {
+          "miou": 0.32264399012205613,
+          "macc": 0.6449944689933752
+        },
+        "15": {
+          "miou": 0.3169607710275812,
+          "macc": 0.6128257932889901
+        },
+        "10": {
+          "miou": 0.47795789996110805,
+          "macc": 0.7239666162010852
+        }
+      },
+      "eligible_as_paper8_row": false
+    },
+    "finding": "Scene0070, scene0097, and scene0347 now have complete D512/L512 Method-v1 fields, SHA-bound primitive caches, and frozen primitive-readout evaluations. Three remaining scenes have reusable frozen source bundles; scene0062 and scene0140 still require current source-bundle/config reconstruction. The paper-eight cohort remains incomplete.",
     "evaluation_protocol": "frozen_and_reproduced",
     "historical_exact_metric_row": "numerically_above_all_six_targets_but_not_method_v1"
   },
