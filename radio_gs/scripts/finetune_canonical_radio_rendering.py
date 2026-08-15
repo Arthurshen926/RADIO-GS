@@ -330,6 +330,28 @@ def _parse_frame_ids(raw: str) -> set[int]:
         return set()
     path = Path(value)
     if path.is_file():
+        if path.suffix.lower() == ".json":
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(payload, list):
+                items = payload
+            elif isinstance(payload, Mapping):
+                items = next(
+                    (
+                        payload[key]
+                        for key in ("frame_ids", "frames", "indices")
+                        if key in payload
+                    ),
+                    None,
+                )
+                if items is None:
+                    raise ValueError(
+                        f"unsupported JSON frame-id authority: {path}"
+                    )
+            else:
+                raise ValueError(f"unsupported JSON frame-id authority: {path}")
+            if not isinstance(items, list):
+                raise ValueError(f"JSON frame-id authority is not a list: {path}")
+            return {int(item) for item in items}
         value = path.read_text(encoding="utf-8")
     tokens: list[str] = []
     for line in value.splitlines():

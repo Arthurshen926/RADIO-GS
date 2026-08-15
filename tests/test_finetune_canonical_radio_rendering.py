@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -74,6 +75,16 @@ def test_training_frame_ids_fall_back_to_frozen_config_authority(
 
     assert finetune._resolve_training_frame_ids(config, "") == {0, 20, 40}
     assert finetune._resolve_training_frame_ids(config, "7,9") == {7, 9}
+
+
+def test_training_frame_ids_accept_frozen_json_authority(tmp_path: Path) -> None:
+    authority = tmp_path / "train_frame_ids.json"
+    authority.write_text(
+        json.dumps({"frame_ids": [0, 2, 4, 7]}), encoding="utf-8"
+    )
+    config = SimpleNamespace(train_frame_ids_path=str(authority))
+
+    assert finetune._resolve_training_frame_ids(config, "") == {0, 2, 4, 7}
 
 
 def test_training_frame_ids_fail_closed_for_missing_config_authority(
