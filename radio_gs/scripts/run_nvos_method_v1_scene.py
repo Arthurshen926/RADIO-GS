@@ -88,6 +88,7 @@ class SceneAssets:
     training_frame_count: int
     feature_height: int
     feature_width: int
+    resolution_scale: float
 
 
 def _authority_scene_records() -> dict[str, dict]:
@@ -145,6 +146,7 @@ def resolve_scene_assets(scene: str) -> SceneAssets:
         training_frame_count=len(dataset_row["training_frames"]),
         feature_height=int(config["feature_height"]),
         feature_width=int(config["feature_width"]),
+        resolution_scale=0.25,
     )
 
 
@@ -255,9 +257,19 @@ def _feature_bundle(feature_dir: Path, assets: SceneAssets) -> str:
     ):
         raise ValueError(f"{assets.scene} source-only feature authority differs")
     features = manifest.get("features", {})
+    expected_grid = [assets.feature_height, assets.feature_width]
+    if (
+        float(manifest.get("resolution_scale", -1.0)) != assets.resolution_scale
+        or features.get("backbone", {}).get("grid") != expected_grid
+    ):
+        raise ValueError(
+            f"{assets.scene} source feature grid differs from frozen config"
+        )
     adaptors = features.get("adaptors", [])
     if not any(
-        row.get("name") == "siglip2-g" and row.get("subdir") == "siglip2"
+        row.get("name") == "siglip2-g"
+        and row.get("subdir") == "siglip2"
+        and row.get("grid") == expected_grid
         for row in adaptors
     ):
         raise ValueError(f"{assets.scene} has no official SigLIP2 grid")
@@ -329,7 +341,7 @@ def run(args: argparse.Namespace) -> dict:
                 "--adaptor_names",
                 "siglip2-g",
                 "--resolution_scale",
-                "1.0",
+                str(assets.resolution_scale),
                 "--device",
                 "cuda",
                 "--amp",

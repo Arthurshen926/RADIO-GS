@@ -28,6 +28,7 @@ def test_all_frozen_nvos_scenes_resolve_to_target_excluded_source_cohorts() -> N
         assert assets.training_frame_count >= 5
         assert assets.feature_height > 0
         assert assets.feature_width > 0
+        assert assets.resolution_scale == 0.25
 
 
 def test_runtime_config_only_overrides_the_source_feature_bundle(
