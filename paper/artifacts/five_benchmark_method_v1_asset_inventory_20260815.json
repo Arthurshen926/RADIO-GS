@@ -7,10 +7,10 @@
   "field_instance_accounting": {
     "total_required": 29,
     "note": "LERF2D and LERF3D share four fields; identically named NVOS and SPIn-NeRF scenes remain distinct dataset instances.",
-    "method_v1_complete": 7,
+    "method_v1_complete": 9,
     "base_d512_l512_only": 0,
     "base_d512_l512_materializing": 0,
-    "legacy_or_missing": 22
+    "legacy_or_missing": 20
   },
   "lerf_shared_four": {
     "figurines": {
@@ -168,7 +168,7 @@
       "scene0400_00",
       "scene0590_00"
     ],
-    "method_v1_complete": 3,
+    "method_v1_complete": 5,
     "scene_results": {
       "scene0070_00": {
         "status": "method_v1_complete_development_evidence",
@@ -241,31 +241,81 @@
             "macc": 0.7815794713505159
           }
         }
+      },
+      "scene0400_00": {
+        "status": "method_v1_complete_development_evidence",
+        "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0400_00/generic_text_response_w005_s0_64.pth",
+        "field_sha256": "abf1ea691574be8f6c979c6be2ebdd8d891dd3c4c3ce455591e8fa7da9422864",
+        "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0400_00/primitive_query_method_v1.pth",
+        "primitive_query_cache_sha256": "e168d80c787a3627abed0d7cc9a30764caafe41e02d1a3ab786fe9cf1a82c106",
+        "method_v1_gate": "pass",
+        "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0400_00/scannet_vala_method_v1/scannet_vala_gaussian_protocol_results.json",
+        "evaluation_report_sha256": "6db7764f711156d036fb4666bf37a8ff15551d3d674589d28d86399aaaf76be6",
+        "vala_pseudo_volume": {
+          "19": {
+            "miou": 0.4212058076825665,
+            "macc": 0.6852922616482054
+          },
+          "15": {
+            "miou": 0.39972190082028414,
+            "macc": 0.6910995087797376
+          },
+          "10": {
+            "miou": 0.3769026194618603,
+            "macc": 0.8020481809845211
+          }
+        }
+      },
+      "scene0590_00": {
+        "status": "method_v1_complete_development_evidence",
+        "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0590_00/generic_text_response_w005_s0_64.pth",
+        "field_sha256": "9dfbbb50e63e9578e53d123a8ef23bef468fd103d6290533f0a24c06a12700ee",
+        "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0590_00/primitive_query_method_v1.pth",
+        "primitive_query_cache_sha256": "e8b1fde7a1e4e19e967785bfff4677bee61552c1dddaa23e494a40a1805a21e1",
+        "method_v1_gate": "pass",
+        "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0590_00/scannet_vala_method_v1/scannet_vala_gaussian_protocol_results.json",
+        "evaluation_report_sha256": "f5cc03365d251dbc3f03246d2007ec96f90d5ce4f5dcf7adadeb9f42940ca965",
+        "vala_pseudo_volume": {
+          "19": {
+            "miou": 0.3529602369807165,
+            "macc": 0.6777883351075012
+          },
+          "15": {
+            "miou": 0.35396085768458,
+            "macc": 0.6577862553182264
+          },
+          "10": {
+            "miou": 0.43270247201082956,
+            "macc": 0.7417074663737111
+          }
+        }
       }
     },
-    "three_scene_development_macro": {
+    "five_scene_development_macro": {
       "scenes": [
         "scene0070_00",
         "scene0097_00",
-        "scene0347_00"
+        "scene0347_00",
+        "scene0400_00",
+        "scene0590_00"
       ],
       "vala_pseudo_volume": {
         "19": {
-          "miou": 0.32264399012205613,
-          "macc": 0.6449944689933752
+          "miou": 0.3484196030058903,
+          "macc": 0.6596128007471664
         },
         "15": {
-          "miou": 0.3169607710275812,
-          "macc": 0.6128257932889901
+          "miou": 0.3409130143175215,
+          "macc": 0.6374726287929868
         },
         "10": {
-          "miou": 0.47795789996110805,
-          "macc": 0.7239666162010852
+          "miou": 0.4486957582712028,
+          "macc": 0.7431310991922976
         }
       },
       "eligible_as_paper8_row": false
     },
-    "finding": "Scene0070, scene0097, and scene0347 now have complete D512/L512 Method-v1 fields, SHA-bound primitive caches, and frozen primitive-readout evaluations. Three remaining scenes have reusable frozen source bundles; scene0062 and scene0140 still require current source-bundle/config reconstruction. The paper-eight cohort remains incomplete.",
+    "finding": "Scene0070, scene0097, scene0347, scene0400, and scene0590 now have complete D512/L512 Method-v1 fields, SHA-bound primitive caches, and frozen primitive-readout evaluations. Scene0000 has reusable frozen source assets; scene0062 and scene0140 still require current source-bundle/config reconstruction. The paper-eight cohort remains incomplete.",
     "evaluation_protocol": "frozen_and_reproduced",
     "historical_exact_metric_row": "numerically_above_all_six_targets_but_not_method_v1"
   },

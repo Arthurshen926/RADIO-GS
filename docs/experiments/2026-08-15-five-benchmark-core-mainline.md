@@ -131,15 +131,16 @@ completed, and the final generic stage improved generic loss 0.29299 to
 0.27985, profile cosine 0.18656 to 0.22345, and region validation 0.55012 to
 0.55796 while retaining MPR within 0.00003.
 
-## ScanNet OVS Method-v1 scenes 0070, 0097, and 0347
+## ScanNet OVS Method-v1 scenes 0070, 0097, 0347, 0400, and 0590
 
 Scene0070 is the first paper-eight ScanNet scene rebuilt as the exact
-Method-v1 field. Scene0097 and scene0347 now reproduce the same source-only
-chain. Their deterministic fidelity holdouts are respectively frames
-260/520/800/1060, 140/300/440/600, and 200/420/640/860; the exact-marginal
-base construction excludes only those four views in each scene. All three
-final fields pass the strict schema-v2 D512/L512 lineage gate, and each
-query-independent primitive cache is SHA-bound to its field and geometry.
+Method-v1 field. Scene0097, scene0347, scene0400, and scene0590 now reproduce
+the same source-only chain. Their deterministic fidelity holdouts are
+respectively frames 260/520/800/1060, 140/300/440/600, 200/420/640/860,
+280/520/760/1000, and 540/1080/1620/2160; the exact-marginal base construction
+excludes only those four views in each scene. All five final fields pass the
+strict schema-v2 D512/L512 lineage gate, and each query-independent primitive
+cache is SHA-bound to its field and geometry.
 
 The three capability stages all improve their own held-out objective while
 retaining the exact-marginal MPR probe:
@@ -178,6 +179,27 @@ Scene0097 and scene0347 then completed the identical capability chain:
 | 0347 genuine crop summary | 0.54795 → 0.55849 | 0.76107 → 0.76161 | 0.99671 → 0.99672 |
 | 0347 generic response | 0.32283 → 0.29430 loss; 0.10467 → 0.18411 cosine | 0.76161 → 0.76200 | 0.99672 → 0.99667 |
 
+Scene0400 and scene0590 complete two further instances with the same frozen
+weights, step budget, and selection policies:
+
+| Scene/stage | Primary held-out change | Raw validation | MPR probe |
+|---|---:|---:|---:|
+| 0400 official SigLIP2 | 0.75151 → 0.75500 | 0.74618 → 0.74703 | 0.99706 → 0.99708 |
+| 0400 genuine crop summary | 0.55965 → 0.56811 | 0.74703 → 0.74771 | 0.99708 → 0.99707 |
+| 0400 generic response | 0.29610 → 0.27534 loss; 0.17828 → 0.23606 cosine | 0.74771 → 0.74818 | 0.99707 → 0.99704 |
+| 0590 official SigLIP2 | 0.76952 → 0.77176 | 0.77409 → 0.77463 | 0.99622 → 0.99626 |
+| 0590 genuine crop summary | 0.57323 → 0.57831 | 0.77463 → 0.77503 | 0.99626 → 0.99626 |
+| 0590 generic response | 0.28262 → 0.26834 loss; 0.21525 → 0.25491 cosine | 0.77503 → 0.77532 | 0.99626 → 0.99622 |
+
+Scene0400 also exposed a real cohort-authority defect: its source image
+directory contains 64 extracted frames, but only 61 have registered training
+poses. The finetune entrypoint previously ignored the configured
+`train_frame_ids_path` unless `--include-frame-ids` was repeated on the command
+line. It now resolves an explicit CLI allowlist first and otherwise requires
+the configured frozen allowlist, failing closed on a missing or empty file.
+The corrected path ran scene0590 without a CLI allowlist and selected exactly
+its 135 registered frames.
+
 Their frozen primitive-readout ScanNet metrics are:
 
 | Scene | Split | VALA volume mIoU | VALA volume mAcc |
@@ -188,13 +210,19 @@ Their frozen primitive-readout ScanNet metrics are:
 | 0347 | 19 | 0.36930 | 0.71201 |
 | 0347 | 15 | 0.35192 | 0.68383 |
 | 0347 | 10 | 0.64514 | 0.78158 |
-| Three-scene macro | 19 | 0.32264 | 0.64499 |
-| Three-scene macro | 15 | 0.31696 | 0.61283 |
-| Three-scene macro | 10 | 0.47796 | 0.72397 |
+| 0400 | 19 | 0.42121 | 0.68529 |
+| 0400 | 15 | 0.39972 | 0.69110 |
+| 0400 | 10 | 0.37690 | 0.80205 |
+| 0590 | 19 | 0.35296 | 0.67779 |
+| 0590 | 15 | 0.35396 | 0.65779 |
+| 0590 | 10 | 0.43270 | 0.74171 |
+| Five-scene macro | 19 | 0.34842 | 0.65961 |
+| Five-scene macro | 15 | 0.34091 | 0.63747 |
+| Five-scene macro | 10 | 0.44870 | 0.74313 |
 
-The three-scene macro is development diagnostics only and is not eligible as
-the paper-eight row. The legal inventory is now 7/29 overall and 3/8 for
-ScanNet; the remaining five paper-eight scenes must be completed before an
+The five-scene macro is development diagnostics only and is not eligible as
+the paper-eight row. The legal inventory is now 9/29 overall and 5/8 for
+ScanNet; the remaining three paper-eight scenes must be completed before an
 aggregate or SOTA comparison is made.
 
 ## NVOS/SPIn query-transient RGB/SAM adapter
@@ -229,10 +257,10 @@ reference; it has likewise not yet been regenerated from the new field.
 - LERF3D: the shared full-four field cohort and frozen typed 3-D evaluation are
   complete; 0.33450 sample-micro mIoU demonstrates the same readout-quality
   gap, with Waldo Kitchen as the worst scene.
-- ScanNet OVS: scene0070, scene0097, and scene0347 now have complete D512/L512
-  Method-v1 fields, primitive caches, and frozen single-scene results. The
-  paper-eight cohort is 3/8; three remaining scenes have reusable source
-  bundles, while scene0062 and scene0140 need their current source
+- ScanNet OVS: scene0070, scene0097, scene0347, scene0400, and scene0590 now
+  have complete D512/L512 Method-v1 fields, primitive caches, and frozen
+  single-scene results. The paper-eight cohort is 5/8; scene0000 has reusable
+  frozen source assets, while scene0062 and scene0140 need their current source
   bundles/configs rebuilt.
 - NVOS: the public-compatible signed RGB/SAM transient adapter is implemented
   and audited; unified full-eight D512/L512 fields are not materialized.
@@ -268,13 +296,14 @@ must not be combined into a virtual incumbent.
   scene directory.
 - Frozen ScanNet Method-v1 reports: `scannet_vala_method_v1/` under each of
   `optimization_20260815/core_method_v1/scene0070_00/`, `scene0097_00/`, and
-  `scene0347_00/` in the results root.
+  `scene0347_00/`, `scene0400_00/`, and `scene0590_00/` in the results root.
 
 ## Verification
 
-- The focused Method-v1, primitive-cache, finetune, generic-response, and
-  ScanNet external-primitive evaluator regression suites pass 25/25,
-  including the Waldo one-row alignment and fail-closed larger mismatch cases.
+- The focused Method-v1, primitive-cache, finetune, generic-response,
+  semantic-alignment, and ScanNet external-primitive evaluator regression
+  suites pass 33/33, including the Waldo one-row alignment, fail-closed larger
+  mismatch cases, and configured ScanNet frame-authority fallback.
 - 104 audited LUDVIG wrapper/full-carrier and SPIn adapter tests pass.
 - Python compilation and `git diff --check` pass.
 - The frozen five-contract validator still reports zero eligible joint rows;

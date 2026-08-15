@@ -337,6 +337,26 @@ def _parse_frame_ids(raw: str) -> set[int]:
     return {int(token) for token in tokens}
 
 
+def _resolve_training_frame_ids(config, cli_value: str) -> set[int]:
+    """Resolve the registered source-frame cohort without widening it silently."""
+
+    declared = _parse_frame_ids(cli_value)
+    if declared:
+        return declared
+    configured = str(getattr(config, "train_frame_ids_path", "") or "").strip()
+    if not configured:
+        return set()
+    path = Path(configured).expanduser()
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"configured training frame authority is missing: {path}"
+        )
+    declared = _parse_frame_ids(str(path))
+    if not declared:
+        raise ValueError(f"configured training frame authority is empty: {path}")
+    return declared
+
+
 def _semantic_teacher_path(root: Path, scene: str, frame: int) -> Path:
     candidates = (
         root / scene / f"rgb_{frame}.pt",
@@ -726,7 +746,9 @@ def finetune(args: argparse.Namespace) -> dict:
             )
         with torch.no_grad():
             field.reliability.copy_(consensus.reliability.to(device))
-    included_frames = sorted(_parse_frame_ids(args.include_frame_ids))
+    included_frames = sorted(
+        _resolve_training_frame_ids(config, args.include_frame_ids)
+    )
     dataset = _dataset(config, renderer, included_frames or None)
     frame_to_index = {
         int(frame): index for index, frame in enumerate(dataset.frame_indices)

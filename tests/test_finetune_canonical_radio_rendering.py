@@ -65,6 +65,32 @@ def test_mpr_exclusions_fail_closed_when_authority_is_missing() -> None:
         finetune._excluded_mpr_frame_ids({})
 
 
+def test_training_frame_ids_fall_back_to_frozen_config_authority(
+    tmp_path: Path,
+) -> None:
+    authority = tmp_path / "train_frames.txt"
+    authority.write_text("0\n20 # registered\n40\n", encoding="utf-8")
+    config = SimpleNamespace(train_frame_ids_path=str(authority))
+
+    assert finetune._resolve_training_frame_ids(config, "") == {0, 20, 40}
+    assert finetune._resolve_training_frame_ids(config, "7,9") == {7, 9}
+
+
+def test_training_frame_ids_fail_closed_for_missing_config_authority(
+    tmp_path: Path,
+) -> None:
+    config = SimpleNamespace(train_frame_ids_path=str(tmp_path / "missing.txt"))
+
+    with pytest.raises(FileNotFoundError, match="training frame authority"):
+        finetune._resolve_training_frame_ids(config, "")
+
+    empty = tmp_path / "empty.txt"
+    empty.write_text("# no registered frames\n", encoding="utf-8")
+    config.train_frame_ids_path = str(empty)
+    with pytest.raises(ValueError, match="training frame authority is empty"):
+        finetune._resolve_training_frame_ids(config, "")
+
+
 def test_load_consensus_accepts_factorized_radio_cache(tmp_path: Path) -> None:
     path = tmp_path / "factorized.pt"
     torch.save(
