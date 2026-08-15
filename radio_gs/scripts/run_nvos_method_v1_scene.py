@@ -74,6 +74,16 @@ STAGES = (
     "generic_stage",
     "method_gate",
 )
+GPU_THERMAL_ENV = {
+    "GPU_MAX_POWER_LIMIT_W": "300.5",
+    "GPU_POLL_SECONDS": "3",
+    "GPU_START_MAX_TEMP_C": "78",
+    "GPU_SOFT_PAUSE_TEMP_C": "76",
+    "GPU_SOFT_RESUME_TEMP_C": "68",
+    "GPU_MAX_TEMP_C": "84",
+    "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES": "3",
+    "GPU_OWNER_PID_NAMESPACE_MODE": "exclusive-singleton-after-clear-v1",
+}
 
 
 @dataclass(frozen=True)
@@ -224,17 +234,8 @@ def _run(
         environment = os.environ.copy()
         environment.update(
             {
+                **GPU_THERMAL_ENV,
                 "GPU": str(args.gpu),
-                "GPU_MAX_POWER_LIMIT_W": "300.5",
-                "GPU_POLL_SECONDS": "10",
-                "GPU_START_MAX_TEMP_C": "78",
-                "GPU_SOFT_PAUSE_TEMP_C": "81",
-                "GPU_SOFT_RESUME_TEMP_C": "76",
-                "GPU_MAX_TEMP_C": "84",
-                "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES": "3",
-                "GPU_OWNER_PID_NAMESPACE_MODE": (
-                    "exclusive-singleton-after-clear-v1"
-                ),
                 "GPU_TELEMETRY_LOG": str(log_dir / f"gpu{args.gpu}_telemetry.csv"),
                 "GPU_OWNER_AUDIT_LOG": str(log_dir / f"gpu{args.gpu}_owner.csv"),
             }
