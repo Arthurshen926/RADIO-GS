@@ -7,10 +7,10 @@
   "field_instance_accounting": {
     "total_required": 29,
     "note": "LERF2D and LERF3D share four fields; identically named NVOS and SPIn-NeRF scenes remain distinct dataset instances.",
-    "method_v1_complete": 11,
+    "method_v1_complete": 12,
     "base_d512_l512_only": 0,
     "base_d512_l512_materializing": 0,
-    "legacy_or_missing": 18
+    "legacy_or_missing": 17
   },
   "lerf_shared_four": {
     "figurines": {
@@ -168,7 +168,7 @@
       "scene0400_00",
       "scene0590_00"
     ],
-    "method_v1_complete": 7,
+    "method_v1_complete": 8,
     "scene_results": {
       "scene0000_00": {
         "status": "method_v1_complete_development_evidence",
@@ -266,6 +266,30 @@
           }
         }
       },
+      "scene0140_00": {
+        "status": "method_v1_complete_development_evidence",
+        "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0140_00/generic_text_response_w005_s0_64.pth",
+        "field_sha256": "4497b412ed3b3beb8d757b2b800e634b7d20c4af6c6446f476011a5f93541e1f",
+        "primitive_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0140_00/primitive_query_method_v1.pth",
+        "primitive_query_cache_sha256": "06bd53b8f0cbe49e2e2f2681df5074801ecb22adc8cc63c4dc73a237d6af267f",
+        "method_v1_gate": "pass",
+        "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0140_00/scannet_vala_method_v1/scannet_vala_gaussian_protocol_results.json",
+        "evaluation_report_sha256": "c21827cd6f8f977e1d8e99b8d3246b645679a5f0e4164ff350c84e9ec0d984fe",
+        "vala_pseudo_volume": {
+          "19": {
+            "miou": 0.3174495379450043,
+            "macc": 0.6328583714621913
+          },
+          "15": {
+            "miou": 0.36366125993476334,
+            "macc": 0.6011601002834315
+          },
+          "10": {
+            "miou": 0.41866077843228067,
+            "macc": 0.7231577612667045
+          }
+        }
+      },
       "scene0347_00": {
         "status": "method_v1_complete_development_evidence",
         "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0347_00/generic_text_response_w005_s0_64.pth",
@@ -339,33 +363,35 @@
         }
       }
     },
-    "seven_scene_development_macro": {
+    "paper8_macro": {
       "scenes": [
         "scene0000_00",
         "scene0062_00",
         "scene0070_00",
         "scene0097_00",
+        "scene0140_00",
         "scene0347_00",
         "scene0400_00",
         "scene0590_00"
       ],
       "vala_pseudo_volume": {
         "19": {
-          "miou": 0.3379112294034698,
-          "macc": 0.6698830355723807
+          "miou": 0.33535351797116164,
+          "macc": 0.665254952558607
         },
         "15": {
-          "miou": 0.32941420093762297,
-          "macc": 0.6564535410631702
+          "miou": 0.3336950833122655,
+          "macc": 0.649541860965703
         },
         "10": {
-          "miou": 0.42262662793345823,
-          "macc": 0.7409365472079017
+          "miou": 0.422130896745811,
+          "macc": 0.7387141989652519
         }
       },
-      "eligible_as_paper8_row": false
+      "eligible_as_paper8_row": true,
+      "sota_claim_supported": false
     },
-    "finding": "Scene0000, scene0062, scene0070, scene0097, scene0347, scene0400, and scene0590 now have complete D512/L512 Method-v1 fields, SHA-bound primitive caches, and frozen primitive-readout evaluations. Scene0140 still requires current source-bundle/config reconstruction. The paper-eight cohort remains incomplete.",
+    "finding": "All eight required scenes now have complete D512/L512 Method-v1 fields, SHA-bound primitive caches, and frozen primitive-readout evaluations. The paper-eight row is eligible under the frozen reproduced protocol, but the measured values do not establish a SOTA claim.",
     "evaluation_protocol": "frozen_and_reproduced",
     "historical_exact_metric_row": "numerically_above_all_six_targets_but_not_method_v1"
   },
