@@ -155,6 +155,36 @@ def test_canonical_render_feature_source_is_mask_free_and_row_aligned() -> None:
         )
 
 
+def test_factorized_render_feature_source_requires_complete_method_and_geometry(
+    monkeypatch,
+) -> None:
+    from radio_gs import five_benchmark_method_v1 as method
+
+    checked = []
+    monkeypatch.setattr(
+        method,
+        "validate_complete_field_payload",
+        lambda payload: checked.append(payload),
+    )
+    payload = {
+        "architecture": {"num_gaussians": 3},
+        "geometry_fingerprint": {
+            "num_gaussians": 3,
+            "xyz_sha256": "abc",
+        },
+    }
+    render.validate_factorized_feature_source(
+        payload, num_gaussians=3, geometry_xyz_sha256="abc"
+    )
+    assert checked == [payload]
+
+    payload["geometry_fingerprint"]["xyz_sha256"] = "changed"
+    with pytest.raises(render.PromptableRenderError, match="geometry rows differ"):
+        render.validate_factorized_feature_source(
+            payload, num_gaussians=3, geometry_xyz_sha256="abc"
+        )
+
+
 def test_nvos_queue_excludes_target_everywhere_and_does_not_run_gpu(
     tmp_path: Path, monkeypatch
 ) -> None:

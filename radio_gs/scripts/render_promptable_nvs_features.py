@@ -87,6 +87,32 @@ def validate_canonical_feature_source(
         raise PromptableRenderError("Canonical field lacks text-query exclusion authority")
 
 
+def validate_factorized_feature_source(
+    payload: Mapping[str, Any],
+    *,
+    num_gaussians: int,
+    geometry_xyz_sha256: str,
+) -> None:
+    """Validate a complete schema-v2 Method-v1 field for feature-only rendering."""
+
+    from radio_gs.five_benchmark_method_v1 import validate_complete_field_payload
+
+    try:
+        validate_complete_field_payload(payload)
+    except ValueError as error:
+        raise PromptableRenderError(str(error)) from error
+    architecture = payload["architecture"]
+    fingerprint = payload["geometry_fingerprint"]
+    if (
+        int(architecture.get("num_gaussians", -1)) != int(num_gaussians)
+        or int(fingerprint.get("num_gaussians", -1)) != int(num_gaussians)
+        or str(fingerprint.get("xyz_sha256", "")) != geometry_xyz_sha256
+    ):
+        raise PromptableRenderError(
+            "Factorized Method-v1 field and geometry rows differ"
+        )
+
+
 def _safe_component(value: str, *, role: str) -> str:
     if not value or value in {".", ".."} or Path(value).name != value or "\\" in value:
         raise PromptableRenderError(f"Unsafe {role}: {value!r}")
@@ -446,6 +472,8 @@ def render_protocol_scene(
     config_path: str | Path,
     checkpoint_path: str | Path,
     canonical_field_checkpoint_path: str | Path | None = None,
+    canonical_field_checkpoint_schema: str = "canonical-v1",
+    expected_canonical_field_checkpoint_sha256: str = "",
     output_dir: str | Path,
     device: str = "cuda",
     overwrite: bool = False,
@@ -461,6 +489,10 @@ def render_protocol_scene(
         if canonical_field_checkpoint_path is not None
         else None
     )
+    if canonical_field_checkpoint_schema not in {"canonical-v1", "factorized-v2"}:
+        raise PromptableRenderError(
+            "canonical_field_checkpoint_schema must be canonical-v1 or factorized-v2"
+        )
     for path, label in (
         (manifest_source, "manifest"),
         (camera_map_source, "camera map"),
@@ -473,6 +505,13 @@ def render_protocol_scene(
         raise FileNotFoundError(
             f"canonical field checkpoint not found: {canonical_field_source}"
         )
+    if (
+        canonical_field_source is not None
+        and expected_canonical_field_checkpoint_sha256
+        and _sha256(canonical_field_source)
+        != str(expected_canonical_field_checkpoint_sha256)
+    ):
+        raise PromptableRenderError("Canonical field checkpoint SHA256 differs")
     manifest = json.loads(manifest_source.read_text(encoding="utf-8"))
     camera_mapping = json.loads(camera_map_source.read_text(encoding="utf-8"))
     normalized = validate_dataset_manifest(manifest, check_files=False)
@@ -517,7 +556,6 @@ def render_protocol_scene(
                 "Feature-only protocol unexpectedly constructed a refiner"
             )
     else:
-        from radio_gs.field import load_canonical_field_checkpoint
         from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
 
         model, _codec, renderer, _sharpener, refiner, _, _is_hybrid = (
@@ -533,15 +571,35 @@ def render_protocol_scene(
             raise PromptableRenderError(
                 "Canonical protocol unexpectedly constructed a screen refiner"
             )
-        canonical_field, canonical_payload = load_canonical_field_checkpoint(
-            canonical_field_source, map_location="cpu"
-        )
         geometry_xyz_sha256 = _sha256_float32_rows(model.get_xyz())
-        validate_canonical_feature_source(
-            canonical_payload,
-            num_gaussians=int(model.get_xyz().shape[0]),
-            geometry_xyz_sha256=geometry_xyz_sha256,
-        )
+        if canonical_field_checkpoint_schema == "factorized-v2":
+            from radio_gs.field import load_factorized_canonical_field_checkpoint
+
+            canonical_field, canonical_payload, _factorized_signature = (
+                load_factorized_canonical_field_checkpoint(
+                    canonical_field_source,
+                    map_location="cpu",
+                    expected_sha256=(
+                        expected_canonical_field_checkpoint_sha256 or None
+                    ),
+                )
+            )
+            validate_factorized_feature_source(
+                canonical_payload,
+                num_gaussians=int(model.get_xyz().shape[0]),
+                geometry_xyz_sha256=geometry_xyz_sha256,
+            )
+        else:
+            from radio_gs.field import load_canonical_field_checkpoint
+
+            canonical_field, canonical_payload = load_canonical_field_checkpoint(
+                canonical_field_source, map_location="cpu"
+            )
+            validate_canonical_feature_source(
+                canonical_payload,
+                num_gaussians=int(model.get_xyz().shape[0]),
+                geometry_xyz_sha256=geometry_xyz_sha256,
+            )
         canonical_field = canonical_field.to(torch_device).eval()
 
     output_root = Path(output_dir).expanduser().resolve()
@@ -579,6 +637,7 @@ def render_protocol_scene(
                 "camera_match_rule": view["camera_match_rule"],
                 "role": view["role"],
                 "feature_path": str(destination),
+                "feature_sha256": _sha256(destination),
                 "shape": list(decoded.shape),
                 "dtype": "float32",
             }
@@ -598,9 +657,17 @@ def render_protocol_scene(
         "checkpoint": str(checkpoint_source),
         "checkpoint_sha256": _sha256(checkpoint_source),
         "render_mode": (
-            "canonical_mpr_v3_affine_normalized_splat"
+            "factorized_v2_affine_normalized_splat"
+            if canonical_field_source is not None
+            and canonical_field_checkpoint_schema == "factorized-v2"
+            else "canonical_mpr_v3_affine_normalized_splat"
             if canonical_field_source is not None
             else "legacy_reusable_hcd_screen_field"
+        ),
+        "canonical_field_checkpoint_schema": (
+            canonical_field_checkpoint_schema
+            if canonical_field_source is not None
+            else None
         ),
         "canonical_field_checkpoint": (
             str(canonical_field_source) if canonical_field_source is not None else None
@@ -659,6 +726,12 @@ def build_parser() -> argparse.ArgumentParser:
             "then supplies only its row-aligned frozen geometry carrier."
         ),
     )
+    parser.add_argument(
+        "--canonical-field-checkpoint-schema",
+        choices=("canonical-v1", "factorized-v2"),
+        default="canonical-v1",
+    )
+    parser.add_argument("--expected-canonical-field-checkpoint-sha256", default="")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--overwrite", action="store_true")
@@ -674,6 +747,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         config_path=args.config,
         checkpoint_path=args.checkpoint,
         canonical_field_checkpoint_path=args.canonical_field_checkpoint,
+        canonical_field_checkpoint_schema=args.canonical_field_checkpoint_schema,
+        expected_canonical_field_checkpoint_sha256=(
+            args.expected_canonical_field_checkpoint_sha256
+        ),
         output_dir=args.output_dir,
         device=args.device,
         overwrite=args.overwrite,

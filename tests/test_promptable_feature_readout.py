@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -153,6 +154,101 @@ def test_nvos_prediction_uses_only_scribbles_and_works_with_missing_target_gt(
         evaluate_manifest(
             manifest,
             prediction_manifest=tmp_path / "predictions" / "prediction_manifest.json",
+        )
+
+
+def test_readout_can_materialize_a_bound_scene_subset(tmp_path: Path) -> None:
+    positive = _mask(tmp_path / "positive.png", np.array([[1, 0]]))
+    negative = _mask(tmp_path / "negative.png", np.array([[0, 1]]))
+    scenes = []
+    for scene_id in ("fern", "flower"):
+        root = tmp_path / scene_id
+        root.mkdir()
+        feature = np.array([[[1.0, 0.0]], [[0.0, 1.0]]], dtype=np.float32)
+        np.save(root / "reference.npy", feature)
+        np.save(root / "target.npy", feature)
+        scenes.append(
+            {
+                "scene_id": scene_id,
+                "prompt_frame_ids": ["reference"],
+                "calibration_frame_ids": [],
+                "evaluation_frame_ids": ["target"],
+                "frames": [
+                    {
+                        "frame_id": "reference",
+                        "ground_truth": None,
+                        "feature_path": str(root / "reference.npy"),
+                    },
+                    {
+                        "frame_id": "target",
+                        "ground_truth": str(root / "missing.png"),
+                        "feature_path": str(root / "target.npy"),
+                    },
+                ],
+                "prompt": {
+                    "type": "positive_negative_scribbles",
+                    "frame_id": "reference",
+                    "positive_path": str(positive),
+                    "negative_path": str(negative),
+                },
+            }
+        )
+    manifest = _bind(
+        {
+            "schema_version": 1,
+            "benchmark": "nvos",
+            "protocol": _protocol("NVOS"),
+            "scenes": scenes,
+        }
+    )
+    for scene_id in ("fern", "flower"):
+        root = tmp_path / scene_id
+        outputs = []
+        for frame_id in ("reference", "target"):
+            path = root / f"{frame_id}.npy"
+            outputs.append(
+                {
+                    "feature_path": str(path),
+                    "feature_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                }
+            )
+        (root / "render_manifest.json").write_text(
+            json.dumps(
+                {
+                    "kind": "promptable_nvs_gaussfm_render",
+                    "scene_id": scene_id,
+                    "protocol_hash": manifest["protocol_hash"],
+                    "outputs": outputs,
+                    "render_mode": "factorized_v2_affine_normalized_splat",
+                    "canonical_field_checkpoint": f"/{scene_id}/field.pth",
+                    "canonical_field_checkpoint_sha256": "a" * 64,
+                    "canonical_field_checkpoint_schema": "factorized-v2",
+                    "checkpoint": f"/{scene_id}/geometry.pth",
+                    "checkpoint_sha256": "b" * 64,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    result = generate_feature_readout_predictions(
+        manifest,
+        tmp_path / "out",
+        scene_ids=["flower"],
+        feature_layout="chw",
+        require_render_authority=True,
+    )
+
+    assert set(result["predictions"]) == {"flower"}
+    assert result["input"]["selected_scene_ids"] == ["flower"]
+    assert result["scenes"][0]["feature_render_authority"][
+        "field_checkpoint_schema"
+    ] == "factorized-v2"
+    with pytest.raises(FeatureReadoutError, match="scene_ids"):
+        generate_feature_readout_predictions(
+            manifest,
+            tmp_path / "bad",
+            scene_ids=["missing"],
+            feature_layout="chw",
         )
 
 

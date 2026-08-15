@@ -441,6 +441,69 @@ def _atomic_write_json(path: Path, payload: Mapping[str, Any], *, overwrite: boo
             temporary.unlink()
 
 
+def _load_feature_render_authority(
+    *,
+    scene_id: str,
+    protocol_hash: str,
+    feature_paths: Sequence[Path],
+    required: bool,
+) -> dict[str, Any] | None:
+    parents = {path.expanduser().resolve().parent for path in feature_paths}
+    authority_path = (
+        next(iter(parents)) / "render_manifest.json" if len(parents) == 1 else None
+    )
+    if authority_path is None or not authority_path.is_file():
+        if required:
+            raise FeatureReadoutError(
+                f"{scene_id} requires a colocated render_manifest.json authority"
+            )
+        return None
+    payload = json.loads(authority_path.read_text(encoding="utf-8"))
+    if (
+        not isinstance(payload, Mapping)
+        or payload.get("kind") != "promptable_nvs_gaussfm_render"
+        or str(payload.get("scene_id")) != scene_id
+        or str(payload.get("protocol_hash")) != protocol_hash
+    ):
+        raise FeatureReadoutError(f"{scene_id} feature render authority differs")
+    output_records = payload.get("outputs")
+    if not isinstance(output_records, list):
+        raise FeatureReadoutError(f"{scene_id} feature render outputs are absent")
+    by_path = {
+        Path(str(record.get("feature_path", ""))).expanduser().resolve(): record
+        for record in output_records
+        if isinstance(record, Mapping)
+    }
+    for feature_path in feature_paths:
+        source = feature_path.expanduser().resolve(strict=True)
+        record = by_path.get(source)
+        if (
+            not isinstance(record, Mapping)
+            or record.get("feature_sha256") != _sha256(source)
+        ):
+            raise FeatureReadoutError(
+                f"{scene_id} rendered feature is not SHA-bound: {source}"
+            )
+    field_sha = str(payload.get("canonical_field_checkpoint_sha256") or "")
+    if required and (
+        payload.get("canonical_field_checkpoint_schema") != "factorized-v2"
+        or len(field_sha) != 64
+    ):
+        raise FeatureReadoutError(
+            f"{scene_id} requires a SHA-bound factorized-v2 render authority"
+        )
+    return {
+        "path": str(authority_path.resolve()),
+        "sha256": _sha256(authority_path),
+        "render_mode": payload.get("render_mode"),
+        "field_checkpoint": payload.get("canonical_field_checkpoint"),
+        "field_checkpoint_sha256": field_sha or None,
+        "field_checkpoint_schema": payload.get("canonical_field_checkpoint_schema"),
+        "geometry_checkpoint": payload.get("checkpoint"),
+        "geometry_checkpoint_sha256": payload.get("checkpoint_sha256"),
+    }
+
+
 def generate_feature_readout_predictions(
     manifest: str | Path | Mapping[str, Any],
     output_dir: str | Path,
@@ -453,6 +516,8 @@ def generate_feature_readout_predictions(
     projection_chunk_size: int = 8192,
     method_name: str = "GaussFM feature-field prototype readout",
     output_manifest_name: str = PREDICTION_MANIFEST_NAME,
+    scene_ids: Sequence[str] | None = None,
+    require_render_authority: bool = False,
     overwrite: bool = False,
 ) -> dict[str, Any]:
     """Generate protocol-bound scores without opening evaluation ground truth."""
@@ -482,6 +547,18 @@ def generate_feature_readout_predictions(
         raise FeatureReadoutError(f"feature_layout must be one of {FEATURE_LAYOUTS}")
 
     protocol_hash = compute_protocol_hash(raw_manifest)
+    available_scene_ids = [str(scene["scene_id"]) for scene in normalized["scenes"]]
+    selected_scene_ids = (
+        available_scene_ids if scene_ids is None else [str(value) for value in scene_ids]
+    )
+    if (
+        not selected_scene_ids
+        or len(set(selected_scene_ids)) != len(selected_scene_ids)
+        or not set(selected_scene_ids).issubset(available_scene_ids)
+    ):
+        raise FeatureReadoutError(
+            "scene_ids must be a nonempty unique subset of the frozen manifest"
+        )
     output_root = Path(output_dir).expanduser().resolve()
     resolved_feature_root = (
         Path(feature_root).expanduser().resolve() if feature_root is not None else None
@@ -502,6 +579,8 @@ def generate_feature_readout_predictions(
 
     for scene in normalized["scenes"]:
         scene_id = _safe_component(str(scene["scene_id"]), role="scene_id")
+        if scene_id not in selected_scene_ids:
+            continue
         prompt_ids = list(scene["prompt_frame_ids"])
         if len(prompt_ids) != 1:
             raise FeatureReadoutError(f"Scene {scene_id} must have exactly one prompt frame")
@@ -576,6 +655,15 @@ def generate_feature_readout_predictions(
             )
         predictions[scene_id] = scene_predictions
         prediction_sha256[scene_id] = scene_prediction_hashes
+        render_authority = _load_feature_render_authority(
+            scene_id=scene_id,
+            protocol_hash=protocol_hash,
+            feature_paths=[
+                prompt_feature_path,
+                *(Path(record["feature_path"]) for record in output_frames),
+            ],
+            required=require_render_authority,
+        )
         scene_records.append(
             {
                 "scene_id": scene_id,
@@ -584,6 +672,7 @@ def generate_feature_readout_predictions(
                 "prompt_feature_sha256": _sha256(prompt_feature_path),
                 "prompt": prompt_metadata,
                 "embedding_dim": int(prompt_features.shape[0]),
+                "feature_render_authority": render_authority,
                 "outputs": output_frames,
             }
         )
@@ -621,6 +710,8 @@ def generate_feature_readout_predictions(
             "feature_root": str(resolved_feature_root) if resolved_feature_root else None,
             "feature_pattern": feature_pattern,
             "feature_layout": feature_layout,
+            "selected_scene_ids": selected_scene_ids,
+            "require_render_authority": bool(require_render_authority),
         },
         "safety": {
             "evaluation_performed": False,

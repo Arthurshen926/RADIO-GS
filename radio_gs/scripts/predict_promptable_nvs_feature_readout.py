@@ -38,6 +38,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--feature-layout", choices=FEATURE_LAYOUTS, default="auto")
     parser.add_argument(
+        "--scene-id",
+        action="append",
+        dest="scene_ids",
+        help="Predict only this frozen scene (repeatable); the full manifest remains bound.",
+    )
+    parser.add_argument(
         "--radio-sam3-adaptor-checkpoint",
         type=Path,
         default=None,
@@ -48,6 +54,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--adaptor-device", default="cpu")
     parser.add_argument("--projection-chunk-size", type=int, default=8192)
+    parser.add_argument(
+        "--require-render-authority",
+        action="store_true",
+        help="Require every consumed feature to be SHA-bound to a factorized-v2 render.",
+    )
     parser.add_argument(
         "--method-name",
         default="GaussFM feature-field prototype readout",
@@ -79,6 +90,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         projection_chunk_size=args.projection_chunk_size,
         method_name=args.method_name,
         output_manifest_name=args.output_manifest_name,
+        scene_ids=args.scene_ids,
+        require_render_authority=args.require_render_authority,
         overwrite=args.overwrite,
     )
     print(
