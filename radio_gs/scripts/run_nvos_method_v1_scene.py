@@ -79,7 +79,10 @@ GPU_THERMAL_ENV = {
     "GPU_POLL_SECONDS": "3",
     "GPU_START_MAX_TEMP_C": "78",
     "GPU_SOFT_PAUSE_TEMP_C": "76",
-    "GPU_SOFT_RESUME_TEMP_C": "68",
+    # A 6 C hysteresis is sufficient with the 3 s poll cadence. Requiring
+    # 68 C can deadlock the second card near 70 C under dual-GPU heat soak even
+    # while both guarded children are stopped.
+    "GPU_SOFT_RESUME_TEMP_C": "70",
     "GPU_MAX_TEMP_C": "84",
     "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES": "3",
     "GPU_OWNER_PID_NAMESPACE_MODE": "exclusive-singleton-after-clear-v1",

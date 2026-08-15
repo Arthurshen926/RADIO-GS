@@ -12,6 +12,9 @@ from radio_gs.scripts.run_nvos_method_v1_scene import (
 
 def test_gpu_guard_pauses_before_the_hard_temperature_limit() -> None:
     assert GPU_THERMAL_ENV["GPU_POLL_SECONDS"] == "3"
+    assert GPU_THERMAL_ENV["GPU_SOFT_PAUSE_TEMP_C"] == "76"
+    assert GPU_THERMAL_ENV["GPU_SOFT_RESUME_TEMP_C"] == "70"
+    assert GPU_THERMAL_ENV["GPU_MAX_TEMP_C"] == "84"
     assert int(GPU_THERMAL_ENV["GPU_SOFT_RESUME_TEMP_C"]) < int(
         GPU_THERMAL_ENV["GPU_SOFT_PAUSE_TEMP_C"]
     )
