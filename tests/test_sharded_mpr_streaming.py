@@ -12,6 +12,7 @@ import torch
 
 from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     _load_saved_responsibility_for_sharded_resume,
+    _sharded_support_weights_equivalent,
     _stream_channel_sharded_contribution_mean,
     accumulate_contribution_mean_channel_chunked,
     finalize_registered_mean_chunked,
@@ -371,6 +372,20 @@ def test_streamed_contribution_mean_matches_dense_and_resumes(
     )
     resumed = _stream_channel_sharded_contribution_mean(**kwargs)
     assert resumed[0] == shards
+
+
+def test_sharded_support_audit_accepts_cuda_reduction_roundoff_only() -> None:
+    reference = torch.tensor([0.0, 1.0, 6.5, 12.0], dtype=torch.float32)
+    observed = reference.clone()
+    observed[2] = torch.nextafter(observed[2], torch.tensor(float("inf")))
+
+    assert _sharded_support_weights_equivalent(observed, reference)
+    assert not _sharded_support_weights_equivalent(
+        torch.tensor([1e-8, 1.0, 6.5, 12.0]), reference
+    )
+    assert not _sharded_support_weights_equivalent(
+        torch.tensor([0.0, 1.0, 6.6, 12.0]), reference
+    )
 
 
 def _write_responsibility_fixture(path: Path, contract: dict) -> str:

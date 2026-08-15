@@ -1570,6 +1570,30 @@ def _exact_marginal_visibility_purity(
     return purity
 
 
+def _sharded_support_weights_equivalent(
+    observed: torch.Tensor,
+    reference: torch.Tensor,
+) -> bool:
+    """Audit two CUDA atomic reductions without requiring bitwise identity.
+
+    Exact-marginal weights are accumulated once for the frozen denominator and
+    once per output shard. CUDA ``index_add_`` may sum colliding values in a
+    different order between launches, so valid repeats can differ by a few
+    float32 ULPs. The support set must remain identical and the values must be
+    finite and agree within a deliberately tight float32 reduction tolerance.
+    """
+
+    lhs = torch.as_tensor(observed).detach().float().cpu()
+    rhs = torch.as_tensor(reference).detach().float().cpu()
+    if lhs.shape != rhs.shape or not bool(torch.isfinite(lhs).all()) or not bool(
+        torch.isfinite(rhs).all()
+    ):
+        return False
+    if not torch.equal(lhs > 0, rhs > 0):
+        return False
+    return bool(torch.allclose(lhs, rhs, rtol=1e-6, atol=1e-7))
+
+
 def _stream_channel_sharded_contribution_mean_impl(
     *,
     output: Path,
@@ -1780,7 +1804,9 @@ def _stream_channel_sharded_contribution_mean_impl(
                 if device.type == "cuda":
                     torch.cuda.empty_cache()
 
-            if not torch.equal(ignored_counts, registered_counts):
+            if not _sharded_support_weights_equivalent(
+                ignored_counts, registered_counts
+            ):
                 raise RuntimeError(
                     "channel-sharded accumulation support weights changed "
                     "between the frozen count pass and feature pass"
