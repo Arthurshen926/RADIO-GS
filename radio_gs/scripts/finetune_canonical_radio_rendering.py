@@ -22,6 +22,11 @@ from radio_gs.interfaces.semantic_alignment import (
 from radio_gs.losses.radio_adaptor_loss import (
     compute_radio_adaptor_masked_render_losses,
 )
+from radio_gs.losses.generic_region_text_response import (
+    FrozenGenericRegionTextBundle,
+    generic_region_text_response_loss,
+    load_frozen_generic_region_text_bundle,
+)
 from radio_gs.models.radio_adaptors import (
     load_radio_adaptor_from_checkpoint,
     project_feature_map_with_adaptor,
@@ -451,6 +456,75 @@ def _mean_semantic_view_metrics(
     )
 
 
+@torch.no_grad()
+def _mean_generic_text_response_metrics(
+    field,
+    model,
+    renderer,
+    dataset,
+    frame_to_index: dict[int, int],
+    frames: list[int],
+    device,
+    *,
+    bridge: GlobalRegionSummaryBridge,
+    summary_head: torch.nn.Module,
+    teacher_root: Path,
+    scene: str,
+    kernel_sizes: tuple[int, ...],
+    projection_batch_size: int,
+    reliability_splat: bool,
+    alpha_threshold: float,
+    text_bundle: FrozenGenericRegionTextBundle,
+) -> dict[str, float]:
+    totals = {
+        "loss": 0.0,
+        "profile": 0.0,
+        "profile_cosine": 0.0,
+        "listwise": 0.0,
+        "sibling": 0.0,
+        "synonym": 0.0,
+    }
+    count = 0
+    field.eval()
+    for frame in frames:
+        sample = dataset[frame_to_index[frame]]
+        result = render_canonical_radio(
+            renderer,
+            model,
+            field,
+            sample["pose_w2c"].to(device),
+            feature_height=sample["radio_features"].shape[1],
+            feature_width=sample["radio_features"].shape[2],
+            use_reliability=reliability_splat,
+        )
+        predicted = project_dense_region_semantics(
+            bridge,
+            summary_head,
+            gauge_separated_radio(result["feature_map"][None], feature_dim=1),
+            kernel_sizes=kernel_sizes,
+            projection_batch_size=projection_batch_size,
+        )
+        teacher = _load_semantic_teacher(teacher_root, scene, frame, device)[None]
+        loss, stats = generic_region_text_response_loss(
+            predicted,
+            teacher,
+            result["alpha_map"],
+            text_bundle,
+            alpha_threshold=alpha_threshold,
+        )
+        regions = int(stats["regions"])
+        if regions < 2:
+            continue
+        totals["loss"] += float(loss) * regions
+        for name in totals:
+            if name != "loss":
+                totals[name] += float(stats[name]) * regions
+        count += regions
+    if count <= 0:
+        raise RuntimeError("generic text-response validation has fewer than two regions")
+    return {name: value / count for name, value in totals.items()}
+
+
 def _trainable_parameters(field, args: argparse.Namespace) -> list[torch.nn.Parameter]:
     for parameter in field.parameters():
         parameter.requires_grad_(False)
@@ -547,12 +621,25 @@ def finetune(args: argparse.Namespace) -> dict:
         raise RuntimeError("no raw render training views remain")
 
     semantic_enabled = bool(str(args.semantic_teacher_root).strip())
+    generic_text_response_enabled = float(args.generic_text_response_weight) > 0.0
     if float(args.semantic_weight) > 0.0 and not semantic_enabled:
         raise ValueError("--semantic-teacher-root is required when semantic loss is enabled")
+    if generic_text_response_enabled and not semantic_enabled:
+        raise ValueError(
+            "generic text-response preservation requires --semantic-teacher-root"
+        )
     if args.selection_policy == "semantic_capability" and not semantic_enabled:
         raise ValueError("semantic_capability selection requires semantic teachers")
+    if (
+        args.selection_policy == "text_response_capability"
+        and not generic_text_response_enabled
+    ):
+        raise ValueError(
+            "text_response_capability selection requires a positive response weight"
+        )
     semantic_bridge = None
     semantic_summary_head = None
+    generic_text_bundle = None
     semantic_teacher_root = Path(args.semantic_teacher_root) if semantic_enabled else None
     semantic_scene = str(args.semantic_scene).strip() or Path(config.scene_root).name
     semantic_kernel_sizes = tuple(
@@ -573,6 +660,21 @@ def finetune(args: argparse.Namespace) -> dict:
                 parameter.requires_grad_(False)
         for frame in set(render_train_frames) | set(validation_frames):
             _semantic_teacher_path(semantic_teacher_root, semantic_scene, frame)
+    if generic_text_response_enabled:
+        if not args.generic_text_relation_authority:
+            raise ValueError(
+                "--generic-text-relation-authority is required when response loss is enabled"
+            )
+        if not args.expected_generic_text_relation_authority_sha256:
+            raise ValueError(
+                "--expected-generic-text-relation-authority-sha256 is required"
+            )
+        generic_text_bundle = load_frozen_generic_region_text_bundle(
+            args.generic_text_relation_authority,
+            expected_relation_authority_sha256=(
+                args.expected_generic_text_relation_authority_sha256
+            ),
+        ).to(device)
 
     capability_weights = {
         "siglip2-g": float(args.siglip_spatial_render_weight),
@@ -677,6 +779,32 @@ def finetune(args: argparse.Namespace) -> dict:
             initial_semantic_absolute + initial_semantic_centered
         )
         best_semantic_validation = initial_semantic_validation
+    initial_generic_text_response_validation = None
+    best_generic_text_response_validation = None
+    if generic_text_response_enabled:
+        initial_generic_text_response_validation = (
+            _mean_generic_text_response_metrics(
+                field,
+                model,
+                renderer,
+                dataset,
+                frame_to_index,
+                validation_frames,
+                device,
+                bridge=semantic_bridge,
+                summary_head=semantic_summary_head,
+                teacher_root=semantic_teacher_root,
+                scene=semantic_scene,
+                kernel_sizes=semantic_kernel_sizes,
+                projection_batch_size=int(args.semantic_projection_batch_size),
+                reliability_splat=reliability_splat,
+                alpha_threshold=float(args.alpha_threshold),
+                text_bundle=generic_text_bundle,
+            )
+        )
+        best_generic_text_response_validation = dict(
+            initial_generic_text_response_validation
+        )
     best_step = 0
     best_state = copy.deepcopy(field.state_dict())
     history: list[dict] = []
@@ -752,7 +880,11 @@ def finetune(args: argparse.Namespace) -> dict:
         semantic_absolute_loss = render_loss.detach() * 0.0
         semantic_centered_loss = render_loss.detach() * 0.0
         semantic_loss = render_loss.detach() * 0.0
-        if semantic_enabled and float(args.semantic_weight) > 0.0:
+        generic_response_loss = render_loss.detach() * 0.0
+        generic_text_response_stats: dict[str, torch.Tensor | int] = {}
+        if semantic_enabled and (
+            float(args.semantic_weight) > 0.0 or generic_text_response_enabled
+        ):
             predicted_semantics = project_dense_region_semantics(
                 semantic_bridge,
                 semantic_summary_head,
@@ -779,6 +911,17 @@ def finetune(args: argparse.Namespace) -> dict:
                 semantic_absolute_loss
                 + float(args.semantic_centered_weight) * semantic_centered_loss
             )
+            if generic_text_response_enabled:
+                (
+                    generic_response_loss,
+                    generic_text_response_stats,
+                ) = generic_region_text_response_loss(
+                    predicted_semantics,
+                    semantic_teacher[None],
+                    result["alpha_map"],
+                    generic_text_bundle,
+                    alpha_threshold=float(args.alpha_threshold),
+                )
         capability_scale = sum(capability_weights.values())
         loss = (
             render_loss
@@ -788,6 +931,8 @@ def finetune(args: argparse.Namespace) -> dict:
             * float(args.capability_local_affinity_weight)
             * capability_local_affinity_loss
             + float(args.semantic_weight) * semantic_loss
+            + float(args.generic_text_response_weight)
+            * generic_response_loss
         )
         loss.backward()
         torch.nn.utils.clip_grad_norm_(field.parameters(), float(args.grad_clip))
@@ -847,6 +992,30 @@ def finetune(args: argparse.Namespace) -> dict:
                 semantic_validation = 0.5 * (
                     semantic_validation_absolute + semantic_validation_centered
                 )
+            generic_text_response_validation = None
+            if generic_text_response_enabled:
+                generic_text_response_validation = (
+                    _mean_generic_text_response_metrics(
+                        field,
+                        model,
+                        renderer,
+                        dataset,
+                        frame_to_index,
+                        validation_frames,
+                        device,
+                        bridge=semantic_bridge,
+                        summary_head=semantic_summary_head,
+                        teacher_root=semantic_teacher_root,
+                        scene=semantic_scene,
+                        kernel_sizes=semantic_kernel_sizes,
+                        projection_batch_size=int(
+                            args.semantic_projection_batch_size
+                        ),
+                        reliability_splat=reliability_splat,
+                        alpha_threshold=float(args.alpha_threshold),
+                        text_bundle=generic_text_bundle,
+                    )
+                )
             if args.selection_policy == "final":
                 selected = True
             elif args.selection_policy == "validation":
@@ -877,10 +1046,23 @@ def finetune(args: argparse.Namespace) -> dict:
                     and mpr_probe_cosine
                     >= initial_mpr_probe - float(args.max_mpr_drop)
                 )
-            else:
+            elif args.selection_policy == "semantic_capability":
                 selected = (
                     semantic_validation is not None
                     and semantic_validation > best_semantic_validation
+                    and validation_cosine
+                    >= initial_validation - float(args.max_validation_drop)
+                    and mpr_probe_cosine
+                    >= initial_mpr_probe - float(args.max_mpr_drop)
+                )
+            else:
+                selected = (
+                    generic_text_response_validation is not None
+                    and generic_text_response_validation["loss"]
+                    < best_generic_text_response_validation["loss"]
+                    and semantic_validation is not None
+                    and semantic_validation
+                    >= initial_semantic_validation - float(args.max_capability_drop)
                     and validation_cosine
                     >= initial_validation - float(args.max_validation_drop)
                     and mpr_probe_cosine
@@ -891,6 +1073,10 @@ def finetune(args: argparse.Namespace) -> dict:
                 best_mpr_probe = mpr_probe_cosine
                 if semantic_validation is not None:
                     best_semantic_validation = semantic_validation
+                if generic_text_response_validation is not None:
+                    best_generic_text_response_validation = dict(
+                        generic_text_response_validation
+                    )
                 best_capability_validation = dict(capability_validation)
                 best_step = step + 1
                 best_state = copy.deepcopy(field.state_dict())
@@ -918,6 +1104,15 @@ def finetune(args: argparse.Namespace) -> dict:
                 "semantic_loss": float(semantic_loss.detach()),
                 "semantic_absolute_loss": float(semantic_absolute_loss.detach()),
                 "semantic_centered_loss": float(semantic_centered_loss.detach()),
+                "generic_text_response_loss": float(
+                    generic_response_loss.detach()
+                ),
+                "generic_text_response_components": {
+                    name: int(value)
+                    if isinstance(value, int)
+                    else float(value)
+                    for name, value in generic_text_response_stats.items()
+                },
                 "validation_cosine": validation_cosine,
                 "mpr_probe_cosine": mpr_probe_cosine,
                 "capability_validation_cosine": capability_validation,
@@ -928,6 +1123,12 @@ def finetune(args: argparse.Namespace) -> dict:
                 "best_validation_cosine": best_validation,
                 "best_mpr_probe_cosine": best_mpr_probe,
                 "best_semantic_validation_cosine": best_semantic_validation,
+                "generic_text_response_validation": (
+                    generic_text_response_validation
+                ),
+                "best_generic_text_response_validation": (
+                    best_generic_text_response_validation
+                ),
             }
             history.append(record)
             print(json.dumps(record), flush=True)
@@ -970,10 +1171,16 @@ def finetune(args: argparse.Namespace) -> dict:
         "initial_semantic_validation_cosine": initial_semantic_validation,
         "initial_semantic_absolute_cosine": initial_semantic_absolute,
         "initial_semantic_centered_cosine": initial_semantic_centered,
+        "initial_generic_text_response_validation": (
+            initial_generic_text_response_validation
+        ),
         "best_validation_cosine": best_validation,
         "best_mpr_probe_cosine": best_mpr_probe,
         "best_capability_validation_cosine": best_capability_validation,
         "best_semantic_validation_cosine": best_semantic_validation,
+        "best_generic_text_response_validation": (
+            best_generic_text_response_validation
+        ),
         "best_step": best_step,
         "selection_policy": args.selection_policy,
         "max_validation_drop": float(args.max_validation_drop),
@@ -995,6 +1202,53 @@ def finetune(args: argparse.Namespace) -> dict:
             "selection_score": "mean(absolute_cosine, centered_cosine)",
             "uses_benchmark_masks": False,
             "uses_text_queries": False,
+        },
+        "generic_text_response": {
+            "enabled": generic_text_response_enabled,
+            "weight": float(args.generic_text_response_weight),
+            "relation_authority": (
+                str(Path(args.generic_text_relation_authority).resolve())
+                if generic_text_response_enabled
+                else ""
+            ),
+            "relation_authority_sha256": (
+                generic_text_bundle.relation_authority_sha256
+                if generic_text_response_enabled
+                else ""
+            ),
+            "relation_content_authority_sha256": (
+                generic_text_bundle.relation_content_authority_sha256
+                if generic_text_response_enabled
+                else ""
+            ),
+            "primary_file_sha256": (
+                generic_text_bundle.primary_file_sha256
+                if generic_text_response_enabled
+                else ""
+            ),
+            "primary_embedding_sha256": (
+                generic_text_bundle.primary_embedding_sha256
+                if generic_text_response_enabled
+                else ""
+            ),
+            "synonym_file_sha256": (
+                generic_text_bundle.synonym_file_sha256
+                if generic_text_response_enabled
+                else ""
+            ),
+            "synonym_embedding_sha256": (
+                generic_text_bundle.synonym_embedding_sha256
+                if generic_text_response_enabled
+                else ""
+            ),
+            "region_operator": "fixed_adaptive_average_8x8_visible_cells",
+            "components": ["profile", "listwise", "sibling", "synonym"],
+            "generic_target_blind_text_bank_opened": (
+                generic_text_response_enabled
+            ),
+            "benchmark_text_queries_opened": False,
+            "uses_benchmark_masks": False,
+            "uses_target_metrics_for_selection": False,
         },
         "official_render_capability": {
             "enabled": bool(capability_adaptors),
@@ -1051,10 +1305,16 @@ def finetune(args: argparse.Namespace) -> dict:
         "initial_semantic_validation_cosine": initial_semantic_validation,
         "initial_semantic_absolute_cosine": initial_semantic_absolute,
         "initial_semantic_centered_cosine": initial_semantic_centered,
+        "initial_generic_text_response_validation": (
+            initial_generic_text_response_validation
+        ),
         "best_validation_cosine": best_validation,
         "best_mpr_probe_cosine": best_mpr_probe,
         "best_capability_validation_cosine": best_capability_validation,
         "best_semantic_validation_cosine": best_semantic_validation,
+        "best_generic_text_response_validation": (
+            best_generic_text_response_validation
+        ),
         "best_step": best_step,
         "train_probe_cosine": final_train_probe,
         "num_render_train_frames": len(render_train_frames),
@@ -1133,6 +1393,19 @@ def main() -> None:
     parser.add_argument("--semantic-kernel-sizes", default="3,7,15")
     parser.add_argument("--semantic-projection-batch-size", type=int, default=2048)
     parser.add_argument(
+        "--generic-text-response-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Single weight for fixed target-blind response-profile, listwise, "
+            "sibling, and synonym preservation on genuine source region summaries."
+        ),
+    )
+    parser.add_argument("--generic-text-relation-authority", default="")
+    parser.add_argument(
+        "--expected-generic-text-relation-authority-sha256", default=""
+    )
+    parser.add_argument(
         "--radio-checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
     )
@@ -1174,6 +1447,7 @@ def main() -> None:
             "raw_fidelity",
             "pareto_mpr",
             "semantic_capability",
+            "text_response_capability",
             "capability_pareto",
         ],
         default="validation",
@@ -1187,8 +1461,10 @@ def main() -> None:
         args.dino_render_weight,
         args.sam3_render_weight,
         args.capability_local_affinity_weight,
+        args.semantic_weight,
+        args.generic_text_response_weight,
     ) < 0:
-        parser.error("capability render weights cannot be negative")
+        parser.error("render, semantic, and response weights cannot be negative")
     if args.capability_local_radius <= 0:
         parser.error("--capability-local-radius must be positive")
     print(json.dumps(finetune(args), indent=2))

@@ -26,6 +26,11 @@ from PIL import Image, JpegImagePlugin, features
 from PIL import __version__ as PILLOW_VERSION
 import yaml
 
+from radio_gs.querying.transient_rgb_sam import (
+    PromptMode,
+    transient_adapter_contract,
+)
+
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BENCHMARK_ROOT = Path(
@@ -1524,6 +1529,11 @@ def launch(args: argparse.Namespace) -> Path:
         ),
         "reference_mask_calibration": inputs["reference_mask_calibration"],
         "target_masks_scoring_only": True,
+        "transient_adapter_contract": transient_adapter_contract(
+            PromptMode.SIGNED_SCRIBBLE
+            if args.benchmark == "nvos"
+            else PromptMode.FULL_REFERENCE_MASK
+        ),
         "aggregation": inputs["aggregation"],
         "cohort": inputs["cohort"],
         "upstream_commit": UPSTREAM_COMMIT,

@@ -46,6 +46,8 @@ def _sam(path: Path, scene: str, reference: float, target: float) -> Path:
             "protocol_hash": "frozen",
             "foreground_iou": target,
             "prediction_persisted_before_target_mask_access": True,
+            "persisted_field_used_target_rgb_during_original_generation": True,
+            "target_masks_used_during_original_generation": False,
             "render_resolution_mode": "registered",
             "renderer_resolution": [10, 20],
             "reference_receipt": {
@@ -68,6 +70,21 @@ def test_reference_only_selector_and_canonical_tie(tmp_path: Path) -> None:
     assert result["macro"]["canonical"] == pytest.approx(0.75)
     assert result["macro"]["sam"] == pytest.approx(0.525)
     assert result["macro"]["reference_selected"] == pytest.approx(0.925)
+    assert result["transient_adapter_contract"] == {
+        "prompt_mode": "full_reference_mask",
+        "persistent_scene_state": False,
+        "query_transient": True,
+        "target_rgb_opened": True,
+        "target_mask_opened": False,
+        "target_metric_used_for_selection": False,
+        "signed_positive_negative_points": True,
+        "trials": 10,
+        "points_per_trial": {"positive": 3, "negative": 3},
+        "graph": False,
+        "connected_component": False,
+        "observation_clamped_fusion": True,
+        "full_reference_calibration_only": True,
+    }
 
 
 def test_requires_exact_scene_cohort_and_protocol(tmp_path: Path) -> None:
@@ -87,3 +104,27 @@ def test_report_specs_reject_duplicates() -> None:
     assert _parse_report_specs(["a=/tmp/a.json"])["a"] == Path("/tmp/a.json")
     with pytest.raises(ValueError, match="duplicate"):
         _parse_report_specs(["a=/tmp/a.json", "a=/tmp/b.json"])
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        (
+            "persisted_field_used_target_rgb_during_original_generation",
+            False,
+            "target-RGB provenance",
+        ),
+        ("target_masks_used_during_original_generation", True, "target mask"),
+    ],
+)
+def test_rejects_incompatible_sam_provenance(
+    tmp_path: Path, field: str, value: bool, message: str
+) -> None:
+    canonical = _canonical(tmp_path / "canonical.json")
+    a = _sam(tmp_path / "a.json", "a", 0.9, 0.9)
+    b = _sam(tmp_path / "b.json", "b", 0.9, 0.9)
+    report = json.loads(a.read_text())
+    report[field] = value
+    _write(a, report)
+    with pytest.raises(ValueError, match=message):
+        aggregate(canonical, {"a": a, "b": b})

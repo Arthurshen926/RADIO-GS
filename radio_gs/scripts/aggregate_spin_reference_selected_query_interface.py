@@ -9,6 +9,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+from radio_gs.querying.transient_rgb_sam import (
+    PromptMode,
+    transient_adapter_contract,
+)
+
 
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -67,6 +72,10 @@ def aggregate(canonical_path: Path, sam_paths: dict[str, Path]) -> dict[str, Any
             raise ValueError(f"SAM protocol hash mismatch for {scene}")
         if sam.get("prediction_persisted_before_target_mask_access") is not True:
             raise ValueError(f"SAM prediction receipt is not sealed for {scene}")
+        if sam.get("persisted_field_used_target_rgb_during_original_generation") is not True:
+            raise ValueError(f"SAM target-RGB provenance is not declared for {scene}")
+        if sam.get("target_masks_used_during_original_generation") is not False:
+            raise ValueError(f"SAM persistent field used a target mask for {scene}")
         receipt = sam.get("reference_receipt")
         if not isinstance(receipt, dict) or receipt.get("target_masks_opened") is not False:
             raise ValueError(f"SAM reference receipt is invalid for {scene}")
@@ -130,6 +139,9 @@ def aggregate(canonical_path: Path, sam_paths: dict[str, Path]) -> dict[str, Any
             "target_metric_used_for_selection": False,
             "scene_identifier_used_for_selection": False,
         },
+        "transient_adapter_contract": transient_adapter_contract(
+            PromptMode.FULL_REFERENCE_MASK
+        ),
         "protocol_hash": protocol_hash,
         "canonical_audit": str(canonical_path),
         "canonical_audit_sha256": _sha256(canonical_path),
