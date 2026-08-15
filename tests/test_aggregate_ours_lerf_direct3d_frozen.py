@@ -71,6 +71,9 @@ def _build(tmp_path: Path) -> Path:
             "artifact_type": "radio_gs_lerf_multiscale_primitive_query_score_cache",
             "contract": "radio_gs.lerf_multiscale_query_score_authority.v2",
             "score_semantics": "raw_independent_normalized_cosine",
+            "score_formula": (
+                "l2_normalize(descriptor) @ l2_normalize(text_embedding).T"
+            ),
             "score_dtype": "torch.float16",
             "scale_axis": [
                 {"id": "0.25", "value": 0.25, "unit": "meter"},
