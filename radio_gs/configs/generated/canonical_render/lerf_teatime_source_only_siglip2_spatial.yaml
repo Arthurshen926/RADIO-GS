@@ -1,0 +1,9 @@
+base_config: ../seeds/lerf_hybrid_v14_teatime_fdh_ws240_240ep_seed7.yaml
+
+# Method-v1 official full-grid SigLIP2 teacher.  All six labeled LERF-OVS
+# frames are excluded before RGB decoding; frames 4 and 178 are source-only
+# validation views outside the exact-marginal MPR anchors.
+feature_dir: /root/RADIO-GS/output/canonical_teacher_features_v2/teatime_source_only_siglip2
+pose_file: ""
+pose_dir: /root/RADIO-GS/output/canonical_teacher_features/teatime/poses_c2w_colmap_verified
+scene_root: /mnt/pool/sqy/3d_understanding/lerf_ovs/teatime

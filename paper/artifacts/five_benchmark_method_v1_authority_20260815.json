@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "artifact_type": "five_benchmark_method_authority",
+  "method_id": "radio-gs-method-v1",
+  "status": "frozen_joint_development_baseline",
+  "supersedes_method_identity_from": "paper/artifacts/five_contract_destination_compliant_baseline_gap_matrix_20260813.json",
+  "identity_note": "The old gap matrix remains an evaluation-gap record. Its registered2d-sam3 compiler is not the identity of this method.",
+  "persistent_scene_state": {
+    "count": 1,
+    "name": "single_compact_factorized_radio_field",
+    "field_schema_version": 2,
+    "canonical_feature_dim": 1280,
+    "coefficient_dim": 512,
+    "local_dim": 512,
+    "decoder": "shared_affine_radio_basis",
+    "fusion": "primitive_local_plus_spatial_hash",
+    "trainable_reliability_state": false,
+    "query_dependent_state": false,
+    "stored_dino_field": false,
+    "stored_sam_field": false,
+    "stored_text_field": false
+  },
+  "construction": {
+    "registration_observation_contract": "canonical-exact-marginal-mpr-v1",
+    "field_observation_contract": "canonical-factorized-radio-v1",
+    "registration_weight_mode": "alpha_depth",
+    "raster_view_fusion": "contribution_mean",
+    "normalize_each_view": true,
+    "raw_radio_owns_radial_gauge": true,
+    "capability_gradients": "tangent_only",
+    "factorized_capability_contract": "matched_exact_marginal",
+    "official_capabilities": [
+      "siglip2-g",
+      "dino_v3",
+      "sam3"
+    ],
+    "stage_order": [
+      {
+        "stage": "factorized_d512_l512",
+        "epochs": 20,
+        "learning_rate": 0.002,
+        "weight_decay": 0.00001,
+        "validation_fraction": 0.05,
+        "seed": 0
+      },
+      {
+        "stage": "official_siglip2_full_grid",
+        "steps": 64,
+        "weight": 0.05,
+        "basis_trainable": false,
+        "selection_policy": "capability_pareto"
+      },
+      {
+        "stage": "genuine_source_crop_region_summary",
+        "steps": 64,
+        "weight": 0.05,
+        "basis_trainable": false,
+        "selection_policy": "semantic_capability"
+      },
+      {
+        "stage": "target_blind_generic_text_response",
+        "steps": 64,
+        "weight": 0.05,
+        "basis_trainable": false,
+        "selection_policy": "text_response_capability",
+        "components": [
+          "response_profile",
+          "listwise",
+          "sibling",
+          "synonym"
+        ]
+      }
+    ],
+    "global_assets_only": true,
+    "scene_or_query_specific_hyperparameter_selection": false
+  },
+  "readouts": {
+    "lerf2d": {
+      "operator": "primitive_text_score_then_scalar_render",
+      "region_fusion": "disabled",
+      "postprocessing": "none"
+    },
+    "lerf3d": {
+      "operator": "primitive_text_score_on_frozen_3d_support",
+      "postprocessing": "none"
+    },
+    "scannet_ovs": {
+      "operator": "primitive_open_vocabulary_class_score",
+      "postprocessing": "none"
+    },
+    "nvos": {
+      "operator": "signed_field_prompt_to_query_transient_target_rgb_frozen_sam",
+      "trials": 10,
+      "positive_points": 3,
+      "negative_points": 3,
+      "reference_mask_selection": false,
+      "graph_or_connected_component": false
+    },
+    "spin_nerf_available9": {
+      "operator": "signed_field_prompt_to_query_transient_target_rgb_frozen_sam",
+      "trials": 10,
+      "positive_points": 3,
+      "negative_points": 3,
+      "reference_mask_selection": true,
+      "graph_or_connected_component": false
+    }
+  },
+  "frozen_cohorts": {
+    "lerf2d": [
+      "figurines",
+      "ramen",
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "lerf3d": [
+      "figurines",
+      "ramen",
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "scannet_ovs": [
+      "scene0000_00",
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00",
+      "scene0140_00",
+      "scene0347_00",
+      "scene0400_00",
+      "scene0590_00"
+    ],
+    "nvos": [
+      "fern",
+      "flower",
+      "fortress",
+      "horns_center",
+      "horns_left",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "spin_nerf_available9": [
+      "fern",
+      "fortress",
+      "horns",
+      "leaves",
+      "lego",
+      "orchids",
+      "pinecone",
+      "room",
+      "truck"
+    ]
+  },
+  "target_access": {
+    "field_construction_uses_target_rgb": false,
+    "field_construction_uses_benchmark_queries": false,
+    "field_construction_uses_target_masks": false,
+    "field_construction_uses_target_labels": false,
+    "field_construction_uses_target_metrics": false,
+    "query_transient_target_rgb_allowed_for": [
+      "nvos",
+      "spin_nerf_available9"
+    ],
+    "single_reference_mask_calibration_allowed_for": [
+      "spin_nerf_available9"
+    ]
+  },
+  "evaluation_authorities": [
+    "paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+    "paper/artifacts/ours_lerf2d_scalar_render_authority_20260802.json",
+    "paper/artifacts/lerf3d_surface_direction_contract_preregistration_20260805.json",
+    "paper/artifacts/vala_scannet_exact_protocol_reproduction_20260801.md",
+    "paper/artifacts/promptable_nvs_protocol_registry.yaml",
+    "paper/artifacts/spin_reference_mask_exact_w_header_authority_implementation_closure_20260805.json"
+  ],
+  "joint_row_eligibility": {
+    "same_method_id_required": true,
+    "all_frozen_scenes_required": true,
+    "all_fields_must_match_persistent_scene_state": true,
+    "all_construction_stages_required": true,
+    "all_evaluation_receipts_required": true,
+    "historical_peak_stitching_forbidden": true
+  },
+  "uqis_in_scope": false
+}

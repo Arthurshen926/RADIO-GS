@@ -3,6 +3,16 @@
 This is the single active experiment record for the post-grill cleanup. It
 records development evidence, not a final five-benchmark claim.
 
+The frozen joint-development identity is
+`paper/artifacts/five_benchmark_method_v1_authority_20260815.json`. The older
+five-contract gap matrix remains useful as an evaluation inventory, but its
+historical compiler identity no longer defines the candidate method.
+
+The live materialization gap is recorded in
+`paper/artifacts/five_benchmark_method_v1_asset_inventory_20260815.json` and
+enforced per field by
+`python -m radio_gs.scripts.validate_five_benchmark_method_v1_field`.
+
 ## Frozen method decisions
 
 - The persistent scene state is the schema-v2 factorized D512/L512 canonical

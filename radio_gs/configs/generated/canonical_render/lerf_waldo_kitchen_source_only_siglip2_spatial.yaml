@@ -1,0 +1,9 @@
+base_config: ../../lerf_hybrid_v14_waldo_kitchen_fdh_ws240_240ep.yaml
+
+# Method-v1 official full-grid SigLIP2 teacher.  All five labeled LERF-OVS
+# frames are excluded before RGB decoding; frames 2 and 189 are source-only
+# validation views outside the exact-marginal MPR anchors.
+feature_dir: /root/RADIO-GS/output/canonical_teacher_features_v2/waldo_kitchen_source_only_siglip2
+pose_file: ""
+pose_dir: /mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/poses_c2w_colmap_verified
+scene_root: /mnt/pool/sqy/3d_understanding/lerf_ovs/waldo_kitchen

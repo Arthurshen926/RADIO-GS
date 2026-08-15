@@ -1,0 +1,9 @@
+base_config: ../../lerf_hybrid_v14_ramen_fdh_ws240_240ep.yaml
+
+# Method-v1 official full-grid SigLIP2 teacher.  All seven labeled LERF-OVS
+# frames are excluded before RGB decoding; frames 2 and 130 are source-only
+# validation views outside the exact-marginal MPR anchors.
+feature_dir: /root/RADIO-GS/output/canonical_teacher_features_v2/ramen_source_only_siglip2
+pose_file: ""
+pose_dir: /root/RADIO-GS/output/radio_features_lerf/ramen/poses_c2w_colmap_verified
+scene_root: /mnt/pool/sqy/3d_understanding/lerf_ovs/ramen

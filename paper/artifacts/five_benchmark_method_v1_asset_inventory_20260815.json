@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "artifact_type": "five_benchmark_method_v1_asset_inventory",
+  "method_authority": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json",
+  "snapshot_status": "materialization_in_progress",
+  "joint_row_eligible": false,
+  "field_instance_accounting": {
+    "total_required": 29,
+    "note": "LERF2D and LERF3D share four fields; identically named NVOS and SPIn-NeRF scenes remain distinct dataset instances.",
+    "method_v1_complete": 1,
+    "base_d512_l512_only": 2,
+    "base_d512_l512_materializing": 1,
+    "legacy_or_missing": 25
+  },
+  "lerf_shared_four": {
+    "figurines": {
+      "status": "method_v1_complete",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/figurines/generic_text_response_w005_s0_64.pth",
+      "field_sha256": "f80bceb09c40b98a1ed753608022aa8c3ef8dd0f11748b7686fa4fd42ae31063",
+      "method_v1_gate": "pass"
+    },
+    "ramen": {
+      "status": "base_d512_l512_only",
+      "base_field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "official_siglip2_source_bundle": "materialized",
+      "genuine_crop_summary_teacher": "available",
+      "generic_text_relation_authority": "available_global"
+    },
+    "teatime": {
+      "status": "base_d512_l512_only",
+      "base_field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "official_siglip2_source_bundle": "missing",
+      "genuine_crop_summary_teacher": "available",
+      "generic_text_relation_authority": "available_global"
+    },
+    "waldo_kitchen": {
+      "status": "base_d512_l512_materializing",
+      "exact_marginal_responsibility_authority": "materialized",
+      "matched_raw_radio": "materialized",
+      "matched_dino_v3": "materializing",
+      "matched_sam3": "pending",
+      "base_field": "pending",
+      "official_siglip2_source_bundle": "missing",
+      "genuine_crop_summary_teacher": "available",
+      "generic_text_relation_authority": "available_global"
+    }
+  },
+  "scannet_ovs_paper8": {
+    "required_scenes": [
+      "scene0000_00",
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00",
+      "scene0140_00",
+      "scene0347_00",
+      "scene0400_00",
+      "scene0590_00"
+    ],
+    "method_v1_complete": 0,
+    "finding": "All eight available source-SAM paper8 fields are legacy schema/D256-L128 carriers. The isolated scene0070 D512 smoke field is base-only and not a paper8 Method-v1 cohort.",
+    "evaluation_protocol": "frozen_and_reproduced",
+    "historical_exact_metric_row": "numerically_above_all_six_targets_but_not_method_v1"
+  },
+  "nvos_full8": {
+    "required_tasks": [
+      "fern",
+      "flower",
+      "fortress",
+      "horns_center",
+      "horns_left",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "method_v1_complete": 0,
+    "finding": "Existing factorized fields are D256/L128 and the cohort is incomplete; none passes the Method-v1 gate.",
+    "query_transient_rgb_sam_adapter": "implemented_and_tested",
+    "historical_released_compatible_reference_iou": 0.9125768502741802,
+    "new_method_full8_evaluation": "pending"
+  },
+  "spin_nerf_available9": {
+    "required_scenes": [
+      "fern",
+      "fortress",
+      "horns",
+      "leaves",
+      "lego",
+      "orchids",
+      "pinecone",
+      "room",
+      "truck"
+    ],
+    "method_v1_complete": 0,
+    "finding": "Existing factorized fields are D256/L128 and the available-nine cohort has no Method-v1 field set.",
+    "query_transient_rgb_sam_adapter": "implemented_and_tested",
+    "historical_reference_selected_iou": 0.9484146824995366,
+    "new_method_available9_evaluation": "pending"
+  },
+  "shared_global_assets": {
+    "radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "region_summary_bridge": "/mnt/pool/sqy/results/RADIO-GS/output/semantic_bridge/global_region_summary_coco15000_full_context_local_scales_imageholdout.pth",
+    "generic_text_relation_authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_typed_text_relation_authority_v1/fit_relation_indices.pt",
+    "generic_text_relation_authority_sha256": "482e363bf31884e190b255cc0cf0996461400bcbb3cb3f8785fbc236da2702a9"
+  },
+  "next_hard_gate": "Complete all 29 field instances under the executable Method-v1 validator before any joint metric row is assembled.",
+  "uqis_in_scope": false
+}
