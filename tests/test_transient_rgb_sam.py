@@ -1,3 +1,7 @@
+from pathlib import Path
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 import torch
@@ -126,3 +130,24 @@ def test_contract_makes_persistent_transient_boundary_explicit() -> None:
     assert signed["target_mask_opened"] is False
     assert signed["full_reference_calibration_only"] is False
     assert full["full_reference_calibration_only"] is True
+
+
+def test_lightweight_transient_import_does_not_load_scipy() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import sys; "
+                "from radio_gs.querying.transient_rgb_sam import FROZEN_POLICY; "
+                "assert FROZEN_POLICY.trials == 10; "
+                "assert 'scipy' not in sys.modules"
+            ),
+        ],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
