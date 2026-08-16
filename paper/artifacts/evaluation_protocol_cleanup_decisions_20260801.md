@@ -103,6 +103,8 @@ Easy3D 通用 20-click 文档也加了 scope note。
 - **A：是否批准约 2.1 GB 的 safe-remove 波次？**
 - **B1/B2/B3：是否分别批准 Concept、LUDVIG、PFPR 的冷归档波次？**
 - **C-PFPR：当前 410+ GB materialized field 是近期保留还是长期暂停后裁剪？**
-- **C-AGILE3D：553 GiB 项目方法历史树交给方法改进会话逐目录判定，还是另开清理审计？**
+- C-AGILE3D 已处理：553 GiB 项目方法历史树已清除；详见
+  `paper/artifacts/agile3d_retirement_20260816.json`。外部 Easy3D/AGILE3D
+  协议收据仍按冻结文件保留。
 
-在收到选择前，所有候选都保持原位。
+其余候选仍需分别获得用户批准；本次清理不改变它们的状态。
