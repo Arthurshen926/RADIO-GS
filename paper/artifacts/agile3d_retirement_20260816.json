@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agile3d_project_route_retirement",
+  "status": "retired_from_uqis_and_five_benchmark_mainline",
+  "created": "2026-08-16",
+  "scope": {
+    "project_output_root": "/mnt/pool/sqy/results/RADIO-GS/output/agile3d_scannet40",
+    "branches": [
+      "codex/uqis-mainline",
+      "codex/radio-gs-five-benchmark-mainline"
+    ],
+    "reason": "The current UQIS and five-benchmark Method-v1 authorities do not include the project Agile3D route. The output tree and six-task artifacts were historical development evidence."
+  },
+  "retained_authorities": [
+    {
+      "path": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json",
+      "reason": "Current five-benchmark method authority; explicitly excludes UQIS and Agile3D."
+    },
+    {
+      "path": "paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+      "reason": "Retained historical external-baseline freeze; its Easy3D/AGILE3D receipts are not part of UQIS or the five-benchmark method row."
+    },
+    {
+      "path": "paper/artifacts/easy3d_agile3d_protocol_audit_20260731.md",
+      "reason": "Compact external reproduction provenance retained separately from the retired project-method output tree."
+    }
+  ],
+  "retired_output_receipts": [
+    {
+      "relative_path": "canonical_dense20_cellseed_v1/results.json",
+      "sha256": "6005b141f0c4edd73f738d60f051ffc2d90e75bc816f7714b0f88b92541d350b",
+      "bytes": 2381994
+    },
+    {
+      "relative_path": "formal_v1/results.json",
+      "sha256": "2ca89bc0710e94804b51e735938911da3f3cf660aa53ef6098748b2497e82a2b",
+      "bytes": 30242967
+    },
+    {
+      "relative_path": "background4_holdout/results.json",
+      "sha256": "cd32cdf2db75439fa84e8c5c4a8e798dabe822490fa5dae661006fe6c62f73b4",
+      "bytes": 358837
+    },
+    {
+      "relative_path": "pfpr_v2_queryheldout_pilot/results.json",
+      "sha256": "e4d0df74094b804f1c3013bf3587986c483ef961d0fe9dbb41ee26bcaefe2c8b",
+      "bytes": 424106
+    }
+  ],
+  "untouched": [
+    "radio_gs/benchmarks/scannet_uqis",
+    "standalone/uqis-benchmark",
+    "output/scannet_uqis_9_v0_1",
+    "output/scannet_uqis_9_v0_2_candidate",
+    "output/scannet_pfpr_small_v2/test_v2_r1",
+    "output/scannet_pfpr_small_v2/full_sens_official_v3_960_r1"
+  ]
+}

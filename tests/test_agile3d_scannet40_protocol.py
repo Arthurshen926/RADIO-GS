@@ -47,11 +47,6 @@ from radio_gs.field.observation_lifting_contract import (
 from radio_gs.querying.query_spec import SelectionMode
 from radio_gs.querying.support_solver import SupportGraphConfig, SupportSolverConfig
 from radio_gs.querying.support_solver import build_primitive_support_graph
-from radio_gs.scripts.export_canonical_field_to_agile3d_mesh import (
-    interpolate_feature_matrix,
-)
-
-
 def _canonical_signature(name: str, dim: int) -> FeatureSpaceSignature:
     return FeatureSpaceSignature(
         radio_version="c-radio_v4-h",
@@ -1157,22 +1152,6 @@ def test_observed_domain_refuses_to_hallucinate_remote_unobserved_click() -> Non
         (Click(point_index=2, is_positive=True, order=0),),
     )
     assert not prediction.any()
-
-
-def test_vector_feature_interpolation_is_query_and_label_free() -> None:
-    source_xyz = np.array([[0, 0, 0], [1, 0, 0]], dtype=np.float32)
-    source_features = np.eye(2, dtype=np.float32)
-    target_xyz = np.array([[0, 0, 0], [0.5, 0, 0], [3, 0, 0]], dtype=np.float32)
-    mapped, valid = interpolate_feature_matrix(
-        source_xyz,
-        source_features,
-        target_xyz,
-        neighbors=2,
-        maximum_distance_m=1.0,
-    )
-    np.testing.assert_array_equal(valid, [True, True, False])
-    np.testing.assert_allclose(mapped[0], [1, 0], atol=2e-4)
-    np.testing.assert_allclose(mapped[1], [2 ** -0.5, 2 ** -0.5], atol=1e-4)
 
 
 def test_quantized_feature_cache_requires_exact_unique_map(tmp_path) -> None:

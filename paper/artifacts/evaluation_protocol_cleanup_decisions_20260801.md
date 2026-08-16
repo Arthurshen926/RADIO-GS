@@ -54,10 +54,12 @@ undistortion v1、PFPR 并发 smoke 和运行缓存。它们均不在 freeze 的
   no-gate/support diagnostics。先保存 release/field contracts、结果 JSON、
   support reports 和 hashes。
 
-### C. 暂不由本会话处理，约 963 GB
+### C. 处理状态（2026-08-16 更新）
 
-- `output/agile3d_scannet40` 约 553 GiB，是项目自身方法的历史实验树，
-  并非 Easy3D baseline；可能仍被另一会话、论文资产或队列脚本使用。
+- `output/agile3d_scannet40` 约 553 GiB 已按独立退休清单清除。它是项目自身方法的
+  历史实验树，并非 Easy3D baseline；结果收据哈希和保留边界见
+  `paper/artifacts/agile3d_retirement_20260816.json`。轻量 Easy3D/AGILE3D
+  外部协议冻结仍保留，但不属于 UQIS 或五 benchmark 主线。
 - PFPR 当前 `reconstruction_v1` 至少 410 GB，重建成本高。若 1–2 个月内
   恢复正式 PFPR，应保留；若长期暂停，可先保留每场景 final checkpoint、
   geometry/render/source contracts、manifest 和摘要，再优先归档约 300 GB
