@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs.nvos_rgb_assisted_full8_evaluation_contract",
+  "contract_id": "nvos-rgb-assisted-full8-method-v1-v1",
+  "frozen_at_utc": "2026-08-16T00:00:00Z",
+  "status": "frozen_development_evaluation_contract",
+  "benchmark": "NVOS",
+  "cohort": [
+    "fern",
+    "flower",
+    "fortress",
+    "horns_center",
+    "horns_left",
+    "leaves",
+    "orchids",
+    "trex"
+  ],
+  "method_authority": {
+    "path": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json",
+    "sha256": "48e0d432f38ce9ad973e03a805e50a477c1e334ac78349f80eb6e6e02f6239c6"
+  },
+  "dataset_index_prompt_and_metric_authority": {
+    "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+    "reuse_scope": [
+      "ordered_full8_dataset_index",
+      "registered_source_scribbles",
+      "single_official_target_per_task",
+      "target_mask_scoring_only",
+      "foreground_iou_and_pixel_accuracy",
+      "fixed_zero_margin_threshold",
+      "equal_weight_macro_over_eight_tasks"
+    ],
+    "explicit_non_reuse": "The manifest's target_rgb_at_query=forbidden clause belongs only to the strict-unseen ablation and is superseded by this contract for the RGB-assisted main method."
+  },
+  "field_construction": {
+    "source_registered_rgb_only": true,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_opened": false,
+    "benchmark_query_used": false,
+    "persistent_state_updated_at_query": false
+  },
+  "query_workspace": {
+    "authorized_inputs": [
+      "registered_source_positive_and_negative_scribbles",
+      "sealed_signed_field_prompt",
+      "official_target_rgb"
+    ],
+    "target_rgb_access": "allowed_only_after_all_full8_signed_field_prompts_are_sealed",
+    "target_mask_access": "forbidden_until_complete_full8_prediction_batch_is_sealed",
+    "adapter": "frozen_official_sam3_point_interface",
+    "adapter_checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+    "trials": 10,
+    "positive_points_per_trial": 3,
+    "negative_points_per_trial": 3,
+    "candidate_selection": "none_exactly_one_candidate_per_trial",
+    "aggregation": "mean_of_ten_official_binary_masks",
+    "threshold": 0.5,
+    "reference_mask_selection": false,
+    "graph_or_connected_component": false,
+    "query_state_lifecycle": "ephemeral_per_query_no_writeback"
+  },
+  "pre_gt_barrier": {
+    "required": true,
+    "ordered_full8_fields_hash_verified": true,
+    "ordered_full8_signed_prompts_sealed_before_first_target_rgb_open": true,
+    "ordered_full8_predictions_and_receipts_hash_verified_before_first_target_mask_open": true,
+    "target_masks": "scorer_only_after_barrier"
+  },
+  "evaluation": {
+    "prediction_representation": "continuous_margin_mean_binary_sam_vote_minus_0.5",
+    "threshold": {
+      "mode": "fixed",
+      "value": 0.0,
+      "comparison": "greater_or_equal"
+    },
+    "metrics": [
+      "foreground_iou",
+      "pixel_accuracy"
+    ],
+    "within_task_aggregation": "single_official_target",
+    "dataset_aggregation": "equal_weight_macro_over_ordered_full8"
+  },
+  "claim_eligibility": {
+    "rgb_assisted_main_method": true,
+    "strict_unseen_protocol": false,
+    "blind_confirmation": false,
+    "sota_claim": false,
+    "result_classification": "development_evidence",
+    "reason": "The 0.81762 result and target set were already used during method development; a frozen rerun is reproducible development evidence, not a retrospective blind claim."
+  },
+  "strict_unseen_ablation": {
+    "retained": true,
+    "identity": "nvos_strict_unseen_v1",
+    "dataset_manifest_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "dataset_manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "target_rgb_at_query": "forbidden",
+    "reporting_role": "additional_field_only_ablation_not_main_method"
+  }
+}

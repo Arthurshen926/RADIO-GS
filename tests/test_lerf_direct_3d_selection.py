@@ -871,6 +871,40 @@ def test_direct3d_prompt_initial_mask_can_keep_heatmap_peak_component():
     assert np.array_equal(refined, expected)
 
 
+def test_peak_component_retention_guard_falls_back_below_quarter_support():
+    from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+        keep_peak_component_with_retention_guard,
+    )
+
+    coarse = np.zeros((10, 10), dtype=bool)
+    coarse[0:2, 0:2] = True
+    coarse[4:8, 4:8] = True
+
+    guarded, report = keep_peak_component_with_retention_guard(coarse, (0, 0))
+
+    assert np.array_equal(guarded, coarse)
+    assert report["peak_retention_guard_accepted"] is False
+    assert report["peak_component_retained_fraction"] == 0.2
+
+
+def test_peak_component_retention_guard_accepts_quarter_support():
+    from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+        keep_peak_component_with_retention_guard,
+    )
+
+    coarse = np.zeros((10, 10), dtype=bool)
+    coarse[0:2, 0:2] = True
+    coarse[4:7, 4:8] = True
+
+    guarded, report = keep_peak_component_with_retention_guard(coarse, (0, 0))
+
+    expected = np.zeros_like(coarse)
+    expected[0:2, 0:2] = True
+    assert np.array_equal(guarded, expected)
+    assert report["peak_retention_guard_accepted"] is True
+    assert report["peak_component_retained_fraction"] == 0.25
+
+
 def test_direct3d_oracle_prompt_initial_mask_supports_gt_mask_and_box():
     coarse = np.zeros((8, 8), dtype=bool)
     coarse[0:2, 0:2] = True

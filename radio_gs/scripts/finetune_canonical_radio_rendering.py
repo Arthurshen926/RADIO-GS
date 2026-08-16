@@ -231,6 +231,41 @@ def _optimizer_state_offload_enabled(
     return bool(requested) or bool(semantic_enabled)
 
 
+def _staged_feature_branch_gradient(
+    branch_loss: torch.Tensor,
+    feature_map: torch.Tensor,
+) -> torch.Tensor:
+    """Collapse a large frozen-head branch to its feature-map gradient.
+
+    The returned tensor is the exact first-order gradient.  Once this call
+    completes, autograd can release the dense semantic projection graph before
+    allocating the much larger primitive-local gradient.
+    """
+
+    (gradient,) = torch.autograd.grad(
+        branch_loss,
+        feature_map,
+        retain_graph=False,
+        create_graph=False,
+    )
+    return gradient.detach()
+
+
+def _backward_base_with_feature_gradient(
+    base_loss: torch.Tensor,
+    feature_map: torch.Tensor,
+    feature_gradient: torch.Tensor,
+) -> None:
+    """Backpropagate a base loss plus a precomputed feature-map gradient."""
+
+    if feature_gradient.shape != feature_map.shape:
+        raise ValueError("staged feature gradient shape differs")
+    torch.autograd.backward(
+        (base_loss, feature_map),
+        grad_tensors=(None, feature_gradient),
+    )
+
+
 def _payload_method_v1_stage(payload: Mapping[str, object]) -> str:
     """Infer the most advanced completed Method-v1 stage in one field."""
 
@@ -1250,7 +1285,11 @@ def finetune(args: argparse.Namespace) -> dict:
         sample = dataset[frame_to_index[frame]]
         _zero_optimizer_gradients(
             optimizer,
-            preserve_buffers=optimizer_state_offload,
+            # Dense full-grid semantic supervision needs the memory occupied
+            # by the previous 1.4M-row local-code gradient during the next
+            # forward pass. Adam moments remain CPU-offloaded; recreating the
+            # gradient preserves the exact update while lowering forward peak.
+            preserve_buffers=False,
         )
         field.train()
         result = render_canonical_radio(
@@ -1361,17 +1400,50 @@ def finetune(args: argparse.Namespace) -> dict:
                     alpha_threshold=float(args.alpha_threshold),
                 )
         capability_scale = sum(capability_weights.values())
-        loss = (
+        base_loss = (
             render_loss
             + float(args.mpr_weight) * mpr_loss
             + capability_scale * capability_alignment_loss
             + capability_scale
             * float(args.capability_local_affinity_weight)
             * capability_local_affinity_loss
-            + float(args.semantic_weight) * semantic_loss
+        )
+        feature_branch_loss = (
+            float(args.semantic_weight) * semantic_loss
             + float(args.generic_text_response_weight) * generic_response_loss
         )
-        loss.backward()
+        loss = (base_loss + feature_branch_loss).detach()
+        if semantic_enabled and (
+            float(args.semantic_weight) > 0.0 or generic_text_response_enabled
+        ):
+            feature_gradient = _staged_feature_branch_gradient(
+                feature_branch_loss,
+                result["feature_map"],
+            )
+            # Preserve only scalar diagnostics. The full descriptor and
+            # teacher would otherwise survive until after the local-code
+            # gradient allocation.
+            semantic_absolute_loss = semantic_absolute_loss.detach()
+            semantic_centered_loss = semantic_centered_loss.detach()
+            semantic_loss = semantic_loss.detach()
+            generic_response_loss = generic_response_loss.detach()
+            generic_text_response_stats = {
+                name: value.detach() if torch.is_tensor(value) else value
+                for name, value in generic_text_response_stats.items()
+            }
+            predicted_semantics = None
+            semantic_teacher = None
+            del feature_branch_loss
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
+            _backward_base_with_feature_gradient(
+                base_loss,
+                result["feature_map"],
+                feature_gradient,
+            )
+            del feature_gradient
+        else:
+            base_loss.backward()
         torch.nn.utils.clip_grad_norm_(field.parameters(), float(args.grad_clip))
         if optimizer_state_offload:
             _offloaded_adamw_step(
@@ -1587,6 +1659,7 @@ def finetune(args: argparse.Namespace) -> dict:
             semantic_loss,
             generic_response_loss,
             generic_text_response_stats,
+            base_loss,
             loss,
         )
         _release_validation_cuda_cache(

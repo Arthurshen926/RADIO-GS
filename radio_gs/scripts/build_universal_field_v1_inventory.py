@@ -31,6 +31,61 @@ SCANNET_SCENES = (
     "scene0400_00",
     "scene0590_00",
 )
+NVOS_SCENES = (
+    "fern",
+    "flower",
+    "fortress",
+    "horns_center",
+    "horns_left",
+    "leaves",
+    "orchids",
+    "trex",
+)
+
+
+def _validated_scene_record(field_path: Path, *, label: str) -> dict[str, Any]:
+    report_path = field_path.with_suffix(field_path.suffix + ".json")
+    report, report_sha, report_path = load_json_object(
+        report_path,
+        label=f"{label} Universal Field v1 migration report",
+    )
+    if (
+        report.get("status") != "complete"
+        or report.get("universal_field") != file_record(field_path)
+        or report.get("reliability_dim") != len(RELIABILITY_NAMES)
+        or report.get("reliability_serialized_once") is not True
+        or report.get("coefficient_decode_bitwise_equal") is not True
+        or report.get("radio_decode_bitwise_equal") is not True
+        or report.get("serialized_radio_decode_bitwise_equal") is not True
+        or report.get("field_training_rerun") is not False
+        or report.get("benchmark_data_opened") is not False
+    ):
+        raise ValueError(f"{label} migration report fails the inventory gate")
+    migration = report.get("migration", {})
+    if (
+        migration.get("universal_field_id") != UNIVERSAL_FIELD_ID
+        or migration.get("baseline_readout_id") != PRIMITIVE_READOUT_ID
+        or migration.get("reliability_scalar_names") != list(RELIABILITY_NAMES)
+        or migration.get("registration_weight_mode")
+        != "exact_front_to_back_marginal_responsibility"
+        or migration.get("fusion_reliability") is not False
+        or migration.get("decode_state_changed") is not False
+    ):
+        raise ValueError(f"{label} migration contract differs")
+    return {
+        "status": "complete",
+        "num_gaussians": report["num_gaussians"],
+        "source_field": report["source_field"],
+        "factorized_cache": report["factorized_cache"],
+        "universal_field": report["universal_field"],
+        "migration_report": {"path": str(report_path), "sha256": report_sha},
+        "storage_delta_bytes": report["storage_delta_bytes"],
+        "storage_overhead_bytes": report["storage_overhead_bytes"],
+        "reliability_serialized_once": True,
+        "coefficient_decode_bitwise_equal": True,
+        "radio_decode_bitwise_equal": True,
+        "serialized_radio_decode_bitwise_equal": True,
+    }
 
 
 def build_inventory(root: Path) -> dict[str, Any]:
@@ -43,47 +98,7 @@ def build_inventory(root: Path) -> dict[str, Any]:
             else "universal_field_v1.pth"
         )
         field_path = root / scene / filename
-        report_path = field_path.with_suffix(field_path.suffix + ".json")
-        report, report_sha, report_path = load_json_object(
-            report_path,
-            label=f"{scene} Universal Field v1 migration report",
-        )
-        if (
-            report.get("status") != "complete"
-            or report.get("universal_field") != file_record(field_path)
-            or report.get("reliability_dim") != len(RELIABILITY_NAMES)
-            or report.get("reliability_serialized_once") is not True
-            or report.get("coefficient_decode_bitwise_equal") is not True
-            or report.get("radio_decode_bitwise_equal") is not True
-            or report.get("serialized_radio_decode_bitwise_equal") is not True
-            or report.get("field_training_rerun") is not False
-        ):
-            raise ValueError(f"{scene} migration report fails the inventory gate")
-        migration = report.get("migration", {})
-        if (
-            migration.get("universal_field_id") != UNIVERSAL_FIELD_ID
-            or migration.get("baseline_readout_id") != PRIMITIVE_READOUT_ID
-            or migration.get("reliability_scalar_names") != list(RELIABILITY_NAMES)
-            or migration.get("registration_weight_mode")
-            != "exact_front_to_back_marginal_responsibility"
-            or migration.get("fusion_reliability") is not False
-            or migration.get("decode_state_changed") is not False
-        ):
-            raise ValueError(f"{scene} migration contract differs")
-        scene_records[scene] = {
-            "status": "complete",
-            "num_gaussians": report["num_gaussians"],
-            "source_field": report["source_field"],
-            "factorized_cache": report["factorized_cache"],
-            "universal_field": report["universal_field"],
-            "migration_report": {"path": str(report_path), "sha256": report_sha},
-            "storage_delta_bytes": report["storage_delta_bytes"],
-            "storage_overhead_bytes": report["storage_overhead_bytes"],
-            "reliability_serialized_once": True,
-            "coefficient_decode_bitwise_equal": True,
-            "radio_decode_bitwise_equal": True,
-            "serialized_radio_decode_bitwise_equal": True,
-        }
+        scene_records[scene] = _validated_scene_record(field_path, label=scene)
     return {
         "schema_version": 1,
         "artifact_type": "radio_gs_universal_field_v1_asset_inventory",
@@ -112,6 +127,33 @@ def build_inventory(root: Path) -> dict[str, Any]:
     }
 
 
+def build_live_inventory(root: Path, nvos_root: Path) -> dict[str, Any]:
+    """Extend the immutable paper-12 inventory with live NVOS migrations.
+
+    NVOS keys are namespaced so a future SPIn-NeRF cohort can coexist with its
+    same-named scenes without weakening asset identity.
+    """
+
+    inventory = build_inventory(root)
+    nvos_root = nvos_root.expanduser().resolve()
+    for scene in NVOS_SCENES:
+        inventory["scenes"][f"nvos/{scene}"] = _validated_scene_record(
+            nvos_root / scene / "universal_field_v1.pth",
+            label=f"NVOS {scene}",
+        )
+    inventory["schema_version"] = 2
+    inventory["artifact_type"] = "radio_gs_universal_field_v1_live_asset_inventory"
+    inventory["status"] = "complete_20_of_20_existing_d512_l512_fields"
+    inventory["accounting"].update(
+        {
+            "expected": 20,
+            "complete": len(inventory["scenes"]),
+            "nvos": len(NVOS_SCENES),
+        }
+    )
+    return inventory
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -122,8 +164,17 @@ def main() -> None:
         "--output",
         default="paper/artifacts/universal_field_v1_asset_inventory_20260816.json",
     )
+    parser.add_argument(
+        "--nvos-root",
+        default="",
+        help="when set, build a schema-v2 live inventory including NVOS",
+    )
     args = parser.parse_args()
-    inventory = build_inventory(Path(args.root))
+    inventory = (
+        build_live_inventory(Path(args.root), Path(args.nvos_root))
+        if args.nvos_root
+        else build_inventory(Path(args.root))
+    )
     write_frozen_json(args.output, inventory)
     print(json.dumps(inventory, indent=2, sort_keys=True))
 

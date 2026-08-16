@@ -53,8 +53,11 @@ REGION_BRIDGE = Path(
     "global_region_summary_coco15000_full_context_local_scales_imageholdout.pth"
 )
 GENERIC_RELATION_AUTHORITY = Path(
-    "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/"
-    "target_blind_typed_text_relation_authority_v1/fit_relation_indices.pt"
+    os.environ.get(
+        "RADIO_GS_GENERIC_RELATION_AUTHORITY",
+        "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/"
+        "target_blind_typed_text_relation_authority_v1/fit_relation_indices.pt",
+    )
 )
 GENERIC_RELATION_AUTHORITY_SHA256 = (
     "482e363bf31884e190b255cc0cf0996461400bcbb3cb3f8785fbc236da2702a9"
@@ -74,21 +77,6 @@ STAGES = (
     "generic_stage",
     "method_gate",
 )
-GPU_THERMAL_ENV = {
-    "GPU_MAX_POWER_LIMIT_W": "300.5",
-    "GPU_POLL_SECONDS": "3",
-    "GPU_START_MAX_TEMP_C": "78",
-    "GPU_SOFT_PAUSE_TEMP_C": "76",
-    # A 6 C hysteresis is sufficient with the 3 s poll cadence. Requiring
-    # 68 C can deadlock the second card near 70 C under dual-GPU heat soak even
-    # while both guarded children are stopped.
-    "GPU_SOFT_RESUME_TEMP_C": "70",
-    "GPU_MAX_TEMP_C": "84",
-    "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES": "3",
-    "GPU_OWNER_PID_NAMESPACE_MODE": "exclusive-singleton-after-clear-v1",
-}
-
-
 @dataclass(frozen=True)
 class SceneAssets:
     scene: str
@@ -235,20 +223,8 @@ def _run(
     command = [str(value) for value in command]
     if gpu:
         environment = os.environ.copy()
-        environment.update(
-            {
-                **GPU_THERMAL_ENV,
-                "GPU": str(args.gpu),
-                "GPU_TELEMETRY_LOG": str(log_dir / f"gpu{args.gpu}_telemetry.csv"),
-                "GPU_OWNER_AUDIT_LOG": str(log_dir / f"gpu{args.gpu}_owner.csv"),
-            }
-        )
+        environment["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
         full_command = [
-            "bash",
-            str(REPO_ROOT / "radio_gs/scripts/run_with_gpu_thermal_guard.sh"),
-            "--",
-            "env",
-            f"CUDA_VISIBLE_DEVICES={args.gpu}",
             "bash",
             str(REPO_ROOT / "radio_gs/scripts/run_repo_python.sh"),
             *command,

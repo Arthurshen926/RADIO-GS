@@ -1347,31 +1347,19 @@ def keep_peak_connected_component(
     peak_yx: Tuple[int, int],
 ) -> np.ndarray:
     """Keep only the predicted connected component containing the query peak."""
-    pred = np.asarray(mask).astype(bool)
-    if pred.ndim != 2:
-        raise ValueError(f"Expected 2D mask, got {pred.shape}")
-    if not pred.any():
-        return pred.copy()
-    peak_y = min(max(int(peak_yx[0]), 0), pred.shape[0] - 1)
-    peak_x = min(max(int(peak_yx[1]), 0), pred.shape[1] - 1)
-    num_labels, labels = cv2.connectedComponents(pred.astype(np.uint8), connectivity=8)
-    if num_labels <= 1:
-        return pred.copy()
-    peak_label = int(labels[peak_y, peak_x])
-    if peak_label > 0:
-        return labels == peak_label
+    from radio_gs.querying.typed_extent_posterior import (
+        PeakAnchoredExtentPolicy,
+        apply_peak_anchored_extent,
+    )
 
-    # If the argmax is just outside the thresholded support, snap to the nearest
-    # foreground component.  This keeps the readout peak-conditioned without
-    # silently falling back to a global largest-component heuristic.
-    ys, xs = np.nonzero(pred)
-    if ys.size == 0:
-        return pred.copy()
-    nearest_idx = int(np.argmin((ys - peak_y) ** 2 + (xs - peak_x) ** 2))
-    nearest_label = int(labels[int(ys[nearest_idx]), int(xs[nearest_idx])])
-    if nearest_label <= 0:
-        return pred.copy()
-    return labels == nearest_label
+    return apply_peak_anchored_extent(
+        mask,
+        peak_yx,
+        policy=PeakAnchoredExtentPolicy(
+            domain="dense_raster",
+            minimum_retained_fraction=0.0,
+        ),
+    ).mask
 
 
 def compute_iou(

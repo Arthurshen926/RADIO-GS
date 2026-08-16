@@ -367,6 +367,41 @@ def test_offloaded_optimizer_reuses_gradient_buffer() -> None:
     assert parameter.grad is None
 
 
+def test_staged_feature_branch_backward_matches_joint_backward() -> None:
+    torch.manual_seed(7)
+    reference = torch.nn.Linear(5, 4, bias=False).double()
+    staged = torch.nn.Linear(5, 4, bias=False).double()
+    staged.load_state_dict(reference.state_dict())
+    inputs = torch.randn(3, 5, dtype=torch.float64)
+
+    reference_feature = reference(inputs)
+    reference_base = reference_feature.square().mean()
+    reference_branch = torch.sin(reference_feature * 1.7).sum() * 0.03
+    (reference_base + reference_branch).backward()
+
+    staged_feature = staged(inputs)
+    staged_base = staged_feature.square().mean()
+    staged_branch = torch.sin(staged_feature * 1.7).sum() * 0.03
+    feature_gradient = finetune._staged_feature_branch_gradient(
+        staged_branch, staged_feature
+    )
+    finetune._backward_base_with_feature_gradient(
+        staged_base, staged_feature, feature_gradient
+    )
+
+    torch.testing.assert_close(
+        staged.weight.grad, reference.weight.grad, atol=1e-12, rtol=1e-12
+    )
+
+
+def test_staged_feature_branch_rejects_gradient_shape_drift() -> None:
+    feature = torch.randn(2, 3, requires_grad=True)
+    with pytest.raises(ValueError, match="shape differs"):
+        finetune._backward_base_with_feature_gradient(
+            feature.square().mean(), feature, torch.ones(2, 2)
+        )
+
+
 def test_cpu_selection_snapshot_refreshes_in_place() -> None:
     module = torch.nn.Linear(3, 2)
     snapshot = finetune._cpu_state_dict(module)

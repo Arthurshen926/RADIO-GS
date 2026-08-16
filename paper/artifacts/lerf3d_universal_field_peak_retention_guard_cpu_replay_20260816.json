@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_universal_field_peak_retention_guard_cpu_replay",
+  "status": "complete_retrospective_development_replay_pending_independent_gpu_execution",
+  "method": {
+    "base": "single-level Universal Field v1 kNN10 scene-minmax fixed-0.6 extent",
+    "candidate": "accept query-peak projected component iff retained_pixels / original_pixels >= 0.25; otherwise exact base fallback",
+    "rgb_or_gt_used_by_decision": false,
+    "global_parameters": {
+      "minimum_retained_fraction": 0.25
+    }
+  },
+  "replay_source": {
+    "description": "Existing unconditional-peak reports contain both initial and refined per-query predictions. The guarded result is reconstructed exactly by selecting the recorded refined metric when the target-blind retained fraction passes and the recorded initial metric otherwise.",
+    "figurines": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_peak_connected_extent_dev_v1/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "8aedfaf311e0d63a6292e3fed2da1ac328926f6cbc3a4a6fd9cd23a3df31cf78"
+    },
+    "ramen": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_peak_connected_extent_dev_v1/ramen/ramen/lerf_direct_3d_selection_results.json",
+      "sha256": "9cb312c059805d77040a9ec79074c90b00653eace2c469220fd1cae5ace668b5"
+    },
+    "teatime": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_peak_connected_extent_heldout_v1/teatime/teatime/lerf_direct_3d_selection_results.json",
+      "sha256": "8dd5175598bf68c69d89986d673536d8a710df7a25983d9950402296c52bd87a"
+    },
+    "waldo_kitchen": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_peak_connected_extent_heldout_v1/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json",
+      "sha256": "0a76f8a9eae249db72e6643832e5d12af9a96ea9a307c99ebf13a6cbad2ccabe"
+    }
+  },
+  "scene_results": {
+    "figurines": {
+      "samples": 56,
+      "guard_applied": 54,
+      "miou": 0.5765765125251258,
+      "acc025": 0.8392857142857143,
+      "acc050": 0.6964285714285714
+    },
+    "ramen": {
+      "samples": 71,
+      "guard_applied": 64,
+      "miou": 0.4045806929660792,
+      "acc025": 0.6338028169014085,
+      "acc050": 0.4084507042253521
+    },
+    "teatime": {
+      "samples": 59,
+      "guard_applied": 57,
+      "miou": 0.5512745101798704,
+      "acc025": 0.9152542372881356,
+      "acc050": 0.6440677966101694
+    },
+    "waldo_kitchen": {
+      "samples": 22,
+      "guard_applied": 19,
+      "miou": 0.3290935941150127,
+      "acc025": 0.6818181818181818,
+      "acc050": 0.18181818181818182
+    }
+  },
+  "aggregates": {
+    "full4_samples": 208,
+    "sample_micro_miou": 0.48451331285164134,
+    "sample_micro_acc025": 0.7740384615384616,
+    "sample_micro_acc050": 0.5288461538461539,
+    "scene_macro_miou": 0.465381327446522,
+    "delta_vs_fixed_extent_sample_micro_miou": 0.02267620983439373,
+    "delta_vs_unconditional_peak_sample_micro_miou": 0.004850300159079839
+  },
+  "claim_boundary": {
+    "development_evidence": true,
+    "independent_gpu_reexecution_pending": true,
+    "blind_or_heldout_confirmation": false,
+    "three_level_contract_complete": false,
+    "reason": "The replay is numerically exact for mIoU and accuracy given the existing paired per-query reports, but the candidate was selected after full4 metrics had already been observed."
+  },
+  "preregistration": "paper/artifacts/lerf3d_universal_field_peak_retention_guard_preregistration_20260816.json"
+}

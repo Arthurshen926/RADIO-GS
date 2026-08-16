@@ -9,7 +9,6 @@ import math
 import os
 from pathlib import Path
 import tempfile
-import time
 
 import torch
 import torch.nn.functional as F
@@ -82,16 +81,6 @@ def _load_reusable_dense(path: Path, output_size: tuple[int, int]) -> torch.Tens
     ):
         raise ValueError(f"partial crop-summary tensor differs: {path}")
     return value
-
-
-def _thermal_pace(device: torch.device, seconds: float) -> None:
-    if not math.isfinite(float(seconds)) or float(seconds) < 0:
-        raise ValueError("thermal pacing must be finite and non-negative")
-    if float(seconds) == 0:
-        return
-    if device.type == "cuda":
-        torch.cuda.synchronize(device)
-    time.sleep(float(seconds))
 
 
 def _window_starts(length: int, window: int, stride_ratio: float) -> list[int]:
@@ -340,10 +329,6 @@ def extract(args: argparse.Namespace) -> dict:
                     device=device,
                 )
                 _atomic_torch_save(dense, tensor_path)
-                _thermal_pace(
-                    device,
-                    float(args.thermal_pacing_seconds_per_frame),
-                )
             frame_reports.append({"frame_id": frame_id, **report})
         scene_reports[scene] = {
             "num_frames": len(frame_reports),
@@ -446,11 +431,6 @@ def main() -> None:
     parser.add_argument("--crop-resolution", type=int, default=384)
     parser.add_argument("--batch-size", type=int, default=2)
     parser.add_argument("--resume-partial", action="store_true")
-    parser.add_argument(
-        "--thermal-pacing-seconds-per-frame",
-        type=float,
-        default=0.0,
-    )
     parser.add_argument(
         "--radio-checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",

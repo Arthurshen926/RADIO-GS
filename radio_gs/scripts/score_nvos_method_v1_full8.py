@@ -16,6 +16,10 @@ from radio_gs.data.promptable_nvs_manifest import (
 )
 from radio_gs.evaluation.promptable_segmentation import evaluate_manifest
 from radio_gs.five_benchmark_method_v1 import METHOD_ID, validate_method_authority
+from radio_gs.scripts.validate_nvos_rgb_assisted_contract import (
+    DEFAULT_CONTRACT as DEFAULT_EVALUATION_CONTRACT,
+    validate_contract as validate_evaluation_contract,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -72,6 +76,7 @@ def verify_full8_before_gt(
     dataset_manifest_path: str | Path,
     prediction_manifest_path: str | Path,
     method_authority_path: str | Path,
+    evaluation_contract_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Return a sealed batch record without reading any target mask bytes."""
 
@@ -85,6 +90,18 @@ def verify_full8_before_gt(
         method_authority_path, label="Method-v1 authority"
     )
     validate_method_authority(authority)
+    contract = (
+        validate_evaluation_contract(evaluation_contract_path)
+        if evaluation_contract_path is not None
+        else None
+    )
+    if contract is not None and (
+        Path(contract["dataset_manifest"]) != dataset_path
+        or contract["dataset_manifest_sha256"] != dataset_sha
+        or Path(contract["method_authority"]) != authority_path
+        or contract["method_authority_sha256"] != authority_sha
+    ):
+        raise ValueError("NVOS RGB-assisted contract authority binding differs")
     scene_order = [str(value) for value in authority["frozen_cohorts"]["nvos"]]
     if [str(row["scene_id"]) for row in normalized["scenes"]] != scene_order:
         raise ValueError("dataset and Method-v1 NVOS full8 order differ")
@@ -102,6 +119,16 @@ def verify_full8_before_gt(
         or prediction.get("target_metric_opened") is not False
     ):
         raise ValueError("Method-v1 prediction manifest contract differs")
+    if contract is not None:
+        prediction_contract = prediction.get("evaluation_contract", {})
+        if (
+            not isinstance(prediction_contract, Mapping)
+            or Path(str(prediction_contract.get("path", ""))).resolve()
+            != Path(contract["contract"])
+            or prediction_contract.get("sha256") != contract["contract_sha256"]
+            or prediction_contract.get("contract_id") != contract["contract_id"]
+        ):
+            raise ValueError("prediction is not bound to the NVOS RGB contract")
     predictions = prediction.get("predictions")
     prediction_hashes = prediction.get("prediction_sha256")
     if (
@@ -177,6 +204,14 @@ def verify_full8_before_gt(
             or render.get("field_checkpoint_schema") != "factorized-v2"
         ):
             raise ValueError(f"{scene_id} transient receipt contract differs")
+        if contract is not None and (
+            Path(str(authorities.get("evaluation_contract", ""))).resolve()
+            != Path(contract["contract"])
+            or authorities.get("evaluation_contract_sha256")
+            != contract["contract_sha256"]
+            or authorities.get("evaluation_contract_id") != contract["contract_id"]
+        ):
+            raise ValueError(f"{scene_id} RGB-assisted contract receipt differs")
         field_path = Path(str(render.get("field_checkpoint", ""))).resolve(strict=True)
         field_sha = str(render.get("field_checkpoint_sha256", ""))
         if len(field_sha) != 64 or _sha256(field_path) != field_sha:
@@ -190,7 +225,7 @@ def verify_full8_before_gt(
             "receipt": str(receipt_path),
             "receipt_sha256": receipt_sha,
         }
-    return {
+    result = {
         "dataset_manifest": str(dataset_path),
         "dataset_manifest_sha256": dataset_sha,
         "prediction_manifest": str(prediction_path),
@@ -202,6 +237,9 @@ def verify_full8_before_gt(
         "verified": verified,
         "all_eight_receipts_verified_before_first_target_ground_truth_open": True,
     }
+    if contract is not None:
+        result["evaluation_contract"] = contract
+    return result
 
 
 def score(args: argparse.Namespace) -> dict[str, Any]:
@@ -209,6 +247,7 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
         dataset_manifest_path=args.manifest,
         prediction_manifest_path=args.prediction_manifest,
         method_authority_path=args.method_authority,
+        evaluation_contract_path=args.evaluation_contract,
     )
     # The complete prediction barrier is now sealed, so target annotation bytes
     # may be checked against the frozen dataset authority and then scored.
@@ -229,15 +268,20 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
         "pre_gt_barrier": barrier,
         "evaluation": report,
         "eligibility": {
+            "exact_rgb_assisted_evaluation_contract": True,
             "exact_frozen_scene_cohort": True,
             "exact_frozen_metric_implementation": True,
             "method_v1_target_rgb_authorized": True,
             "legacy_strict_unseen_manifest_target_rgb_at_query": "forbidden",
             "strict_unseen_protocol_eligible": False,
+            "blind_confirmation": False,
+            "sota_claim": False,
+            "result_classification": "development_evidence",
             "reason": (
-                "Method-v1 explicitly authorizes transient target RGB, while the "
-                "legacy strict-unseen NVOS manifest forbids it. Metrics remain useful "
-                "development evidence but are not an exact strict-unseen SOTA row."
+                "This is the frozen RGB-assisted main-method contract. The legacy "
+                "strict-unseen identity is retained only as a field-only ablation; "
+                "the already-used target set makes this development evidence rather "
+                "than retrospective blind confirmation."
             ),
         },
         "safety": {
@@ -255,6 +299,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--prediction-manifest", required=True)
     parser.add_argument("--method-authority", default=str(DEFAULT_METHOD_AUTHORITY))
+    parser.add_argument(
+        "--evaluation-contract", default=str(DEFAULT_EVALUATION_CONTRACT)
+    )
     parser.add_argument("--output", required=True)
     return parser
 

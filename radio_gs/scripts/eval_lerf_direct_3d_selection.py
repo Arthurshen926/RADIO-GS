@@ -5001,6 +5001,42 @@ def build_direct3d_prompt_initial_mask(
     raise ValueError(f"Unsupported direct-3D prompt initial refinement: {initial_refinement}")
 
 
+def keep_peak_component_with_retention_guard(
+    mask: np.ndarray,
+    peak_yx: tuple[int, int],
+    *,
+    minimum_retained_fraction: float = 0.25,
+) -> tuple[np.ndarray, Dict[str, float | bool]]:
+    """Keep the peak component only when it retains enough predicted support.
+
+    The decision is query/GT/RGB blind: it observes only the already-frozen
+    projected binary support and the rendered query-score peak.  Falling back
+    prevents a spurious peak from deleting most of a legitimate multi-part
+    object while preserving peak cleanup for a dominant connected extent.
+    """
+
+    from radio_gs.querying.typed_extent_posterior import (
+        PeakAnchoredExtentPolicy,
+        apply_peak_anchored_extent,
+    )
+
+    posterior = apply_peak_anchored_extent(
+        mask,
+        peak_yx,
+        policy=PeakAnchoredExtentPolicy(
+            domain="projected_primitive_alpha",
+            minimum_retained_fraction=float(minimum_retained_fraction),
+        ),
+    )
+    return posterior.mask, {
+        "peak_retention_guard_accepted": posterior.candidate_accepted,
+        "peak_component_retained_fraction": posterior.retained_fraction,
+        "peak_component_minimum_retained_fraction": float(
+            posterior.policy.minimum_retained_fraction
+        ),
+    }
+
+
 def build_direct3d_oracle_prompt_initial_mask(
     coarse_mask: np.ndarray,
     gt_mask: np.ndarray,
@@ -6752,7 +6788,12 @@ def evaluate_selection_spec(
         else None
     )
     needs_prompt_heatmap = (
-        mask_refinement in {"peak_component", "rgb_grabcut_score_component_guard"}
+        mask_refinement
+        in {
+            "peak_component",
+            "peak_component_retention_guard",
+            "rgb_grabcut_score_component_guard",
+        }
         or (
             mask_refinement == "sam3_box"
             and (
@@ -6936,11 +6977,23 @@ def evaluate_selection_spec(
             prompt_initial_pred = pred.copy()
             prompt_heatmap = score_heatmaps[cat_idx] if score_heatmaps is not None else silhouette[cat_idx]
             component_guard_report: Optional[Dict[str, float | int | bool]] = None
-            if mask_refinement == "peak_component":
+            if mask_refinement in {
+                "peak_component",
+                "peak_component_retention_guard",
+            }:
                 peak_yx = heatmap_peak_in_shape(
                     torch.as_tensor(prompt_heatmap), pred.shape
                 )
-                pred = keep_peak_connected_component(pred, peak_yx)
+                if mask_refinement == "peak_component":
+                    pred = keep_peak_connected_component(pred, peak_yx)
+                else:
+                    pred, component_guard_report = (
+                        keep_peak_component_with_retention_guard(
+                            pred,
+                            peak_yx,
+                            minimum_retained_fraction=0.25,
+                        )
+                    )
             if mask_refinement == "sam3_prompt_mask_head":
                 assert gt is not None
                 prompt_initial_pred = build_direct3d_prompt_initial_mask(
@@ -9595,6 +9648,7 @@ def main() -> None:
         choices=[
             "none",
             "peak_component",
+            "peak_component_retention_guard",
             "rgb_grabcut",
             "largest_component",
             "largest_component_rgb_grabcut",
@@ -9612,7 +9666,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--vala_post_mask_refinement",
-        choices=["none", "peak_component"],
+        choices=["none", "peak_component", "peak_component_retention_guard"],
         default="none",
         help=(
             "Opt-in target-blind mask cleanup applied after a frozen VALA base "

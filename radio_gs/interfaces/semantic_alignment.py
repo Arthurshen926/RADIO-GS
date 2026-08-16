@@ -351,20 +351,45 @@ def project_dense_region_semantics(
     kernel_sizes: tuple[int, ...] = (3, 7, 15),
     projection_batch_size: int = 2048,
 ) -> torch.Tensor:
-    """Region-align a RADIO map, then use the frozen official summary head."""
+    """Region-align a RADIO map, then use the frozen official summary head.
+
+    Scales are projected one at a time.  This is algebraically identical to
+    stacking every scale before projection, but avoids simultaneously holding
+    all dense RADIO summaries and all projected descriptors on the GPU.  The
+    latter is several GiB for a full-resolution SPIn frame.
+    """
 
     values = torch.as_tensor(radio_map).float()
     if values.ndim != 4:
         raise ValueError("radio_map must be [B,1280,H,W]")
-    summaries = bridge.dense_square_regions(values, kernel_sizes)
-    batch, scales, channels, height, width = summaries.shape
-    tokens = summaries.permute(0, 1, 3, 4, 2).reshape(-1, channels)
-    descriptors: list[torch.Tensor] = []
-    for start in range(0, tokens.shape[0], int(projection_batch_size)):
-        projected = official_summary_head(
-            tokens[start : start + int(projection_batch_size), None]
-        )[:, 0]
-        descriptors.append(F.normalize(projected.float(), dim=-1, eps=1e-8))
-    descriptor = torch.cat(descriptors).reshape(batch, scales, height, width, -1)
-    fused = F.normalize(descriptor.mean(dim=1), dim=-1, eps=1e-8)
+    kernels = tuple(int(kernel) for kernel in kernel_sizes)
+    if not kernels:
+        raise ValueError("kernel_sizes must contain at least one scale")
+    chunk_size = int(projection_batch_size)
+    if chunk_size <= 0:
+        raise ValueError("projection_batch_size must be positive")
+
+    batch, _channels, height, width = values.shape
+    descriptor_sum: torch.Tensor | None = None
+    for kernel in kernels:
+        summaries = bridge.dense_square_regions(values, (kernel,))[:, 0]
+        channels = int(summaries.shape[1])
+        tokens = summaries.permute(0, 2, 3, 1).reshape(-1, channels)
+        projected_chunks: list[torch.Tensor] = []
+        for start in range(0, tokens.shape[0], chunk_size):
+            projected = official_summary_head(tokens[start : start + chunk_size, None])[:, 0]
+            projected_chunks.append(
+                F.normalize(projected.float(), dim=-1, eps=1e-8)
+            )
+        scale_descriptor = torch.cat(projected_chunks).reshape(
+            batch, height, width, -1
+        )
+        descriptor_sum = (
+            scale_descriptor
+            if descriptor_sum is None
+            else descriptor_sum + scale_descriptor
+        )
+
+    assert descriptor_sum is not None
+    fused = F.normalize(descriptor_sum / float(len(kernels)), dim=-1, eps=1e-8)
     return fused.permute(0, 3, 1, 2).contiguous()

@@ -15,7 +15,9 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 import fcntl
 import json
+import os
 from pathlib import Path
+import time
 from typing import Iterable
 
 from radio_gs.config import load_config
@@ -59,6 +61,9 @@ DEFAULT_RUN_ROOT = Path(
 )
 CAPABILITY_SHARD_CHANNELS = 512
 HOST_MEMORY_STAGE_LOCK = Path("/tmp/radio_gs_spin9_host_memory_stage.lock")
+SCENE_RUN_LOCK_NAME = ".run_spin9_method_v1_scene.lock"
+HOST_MEMORY_STAGE_SLOTS_ENV = "RADIO_GS_SPIN9_HOST_MEMORY_SLOTS"
+DEFAULT_HOST_MEMORY_STAGE_SLOTS = 2
 HOST_MEMORY_HEAVY_STAGES = frozenset(
     {
         "factorized_mpr",
@@ -98,27 +103,126 @@ def _image_files(image_dir: Path) -> list[Path]:
 def _host_memory_stage_boundary(
     *, scene: str, stage: str
 ) -> Iterable[None]:
-    """Serialize stages whose measured RSS cannot safely overlap on this host."""
+    """Bound concurrent high-RSS stages without serializing every GPU.
+
+    This host has enough RAM for two measured SPIn Method-v1 stages. Each
+    process claims one advisory-lock slot, so GPU4 and GPU5 can make progress
+    concurrently while a larger accidental fan-out remains fail-safe.
+    """
 
     if stage not in HOST_MEMORY_HEAVY_STAGES:
         yield
         return
+    raw_slots = os.environ.get(
+        HOST_MEMORY_STAGE_SLOTS_ENV, str(DEFAULT_HOST_MEMORY_STAGE_SLOTS)
+    )
+    try:
+        slot_count = int(raw_slots)
+    except ValueError as exc:
+        raise ValueError(f"{HOST_MEMORY_STAGE_SLOTS_ENV} must be an integer") from exc
+    if slot_count <= 0 or slot_count > 8:
+        raise ValueError(f"{HOST_MEMORY_STAGE_SLOTS_ENV} must be in [1,8]")
     HOST_MEMORY_STAGE_LOCK.parent.mkdir(parents=True, exist_ok=True)
-    with HOST_MEMORY_STAGE_LOCK.open("a+", encoding="utf-8") as handle:
-        print(f"{scene}: waiting for host-memory stage lock ({stage})", flush=True)
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+    print(
+        f"{scene}: waiting for host-memory stage slot ({stage}; capacity={slot_count})",
+        flush=True,
+    )
+    handle = None
+    slot_index = -1
+    while handle is None:
+        for candidate in range(slot_count):
+            path = (
+                HOST_MEMORY_STAGE_LOCK
+                if candidate == 0
+                else Path(f"{HOST_MEMORY_STAGE_LOCK}.{candidate}")
+            )
+            current = path.open("a+", encoding="utf-8")
+            try:
+                fcntl.flock(current.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                current.close()
+                continue
+            handle = current
+            slot_index = candidate
+            break
+        if handle is None:
+            time.sleep(1.0)
+    handle.seek(0)
+    handle.truncate()
+    handle.write(
+        json.dumps({"scene": scene, "stage": stage, "slot": slot_index}) + "\n"
+    )
+    handle.flush()
+    print(
+        f"{scene}: acquired host-memory stage slot {slot_index} ({stage})",
+        flush=True,
+    )
+    try:
+        yield
+    finally:
         handle.seek(0)
         handle.truncate()
-        handle.write(json.dumps({"scene": scene, "stage": stage}) + "\n")
         handle.flush()
-        print(f"{scene}: acquired host-memory stage lock ({stage})", flush=True)
-        try:
-            yield
-        finally:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        handle.close()
+
+
+@contextmanager
+def _scene_run_boundary(*, run_root: Path, scene: str) -> Iterable[None]:
+    """Serialize writers for one run-root/scene without blocking other scenes."""
+
+    run_root.mkdir(parents=True, exist_ok=True)
+    lock_path = run_root / SCENE_RUN_LOCK_NAME
+    handle = lock_path.open("a+", encoding="utf-8")
+    # The run root is shared by root-squashed and non-squashed containers.
+    # Keep the coordination inode writable across their numeric UID mappings.
+    os.fchmod(handle.fileno(), 0o666)
+    acquired = False
+    announced_wait = False
+    try:
+        while not acquired:
+            try:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                acquired = True
+            except BlockingIOError:
+                if not announced_wait:
+                    print(
+                        f"{scene}: waiting for per-scene runner lock ({lock_path})",
+                        flush=True,
+                    )
+                    announced_wait = True
+                time.sleep(1.0)
+        handle.seek(0)
+        handle.truncate()
+        handle.write(
+            json.dumps(
+                {
+                    "pid": os.getpid(),
+                    "host": os.uname().nodename,
+                    "scene": scene,
+                    "run_root": str(run_root),
+                },
+                sort_keys=True,
+            )
+            + "\n"
+        )
+        handle.flush()
+        print(
+            f"{scene}: acquired per-scene runner lock ({lock_path})",
+            flush=True,
+        )
+        yield
+    finally:
+        if acquired:
             handle.seek(0)
             handle.truncate()
             handle.flush()
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            print(
+                f"{scene}: released per-scene runner lock ({lock_path})",
+                flush=True,
+            )
+        handle.close()
 
 
 def _run_spin_stage(
@@ -303,9 +407,9 @@ def _run_mpr_stage(
         _run_spin_stage(args, stage, command, gpu=True, log_dir=logs)
 
 
-def run(args: argparse.Namespace) -> dict:
-    assets = resolve_scene_assets(args.scene)
-    run_root = Path(args.run_root).expanduser().resolve() / assets.scene
+def _run_with_scene_lock(
+    args: argparse.Namespace, *, assets: SceneAssets, run_root: Path
+) -> dict:
     feature_dir = run_root / "all_view_features"
     config = run_root / "method_v1.yaml"
     logs = run_root / "logs"
@@ -575,8 +679,6 @@ def run(args: argparse.Namespace) -> dict:
                 "--device",
                 "cuda:0",
                 "--resume-partial",
-                "--thermal-pacing-seconds-per-frame",
-                "10",
             ],
             gpu=True,
             log_dir=logs,
@@ -771,10 +873,18 @@ def run(args: argparse.Namespace) -> dict:
     }
 
 
+def run(args: argparse.Namespace) -> dict:
+    assets = resolve_scene_assets(args.scene)
+    run_root = Path(args.run_root).expanduser().resolve() / assets.scene
+    with _scene_run_boundary(run_root=run_root, scene=assets.scene):
+        return _run_with_scene_lock(args, assets=assets, run_root=run_root)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scene", required=True)
-    parser.add_argument("--gpu", type=int, choices=(0, 1), required=True)
+    # Accept any physical device exposed by the current host.
+    parser.add_argument("--gpu", type=int, required=True)
     parser.add_argument("--run-root", default=str(DEFAULT_RUN_ROOT))
     parser.add_argument("--stop-after", choices=STAGES, default=STAGES[-1])
     args = parser.parse_args()

@@ -169,6 +169,7 @@ def _load_scene(
     text: torch.Tensor,
     device: torch.device,
     chunk_size: int,
+    require_exact_replay: bool = True,
 ) -> dict[str, Any]:
     record = inventory["scannet_ovs_paper8"]["scene_results"][scene]
     query, query_sha, query_path = load_torch_mapping(
@@ -223,7 +224,8 @@ def _load_scene(
 
     class_array = np.asarray(PAPER_CLASS_IDS, dtype=np.int32)
     baseline = class_array[logits.argmax(dim=-1).numpy()]
-    if not np.array_equal(baseline, frozen_predictions["19"]):
+    replay_mismatch_count = int(np.count_nonzero(baseline != frozen_predictions["19"]))
+    if require_exact_replay and replay_mismatch_count:
         raise ValueError(f"{scene} Primitive Readout-v0 replay differs")
     return {
         "logits": logits,
@@ -232,6 +234,11 @@ def _load_scene(
         "pseudo_labels": pseudo_labels,
         "significance": significance,
         "frozen_predictions": frozen_predictions,
+        "primitive_replay": {
+            "exact": replay_mismatch_count == 0,
+            "mismatch_count": replay_mismatch_count,
+            "row_count": int(valid.numel()),
+        },
         "provenance": {
             "primitive_query_cache": {"path": str(query_path), "sha256": query_sha},
             "universal_field": {"path": str(universal_path), "sha256": universal_sha},

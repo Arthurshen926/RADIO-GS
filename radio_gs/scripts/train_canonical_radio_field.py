@@ -118,6 +118,113 @@ CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1 = "matched_top1"
 CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL = "matched_exact_marginal"
 CAPABILITY_TARGET_CONTRACT_FIELD_A = "field_a_exact_adjoint"
 CAPABILITY_TARGET_CONTRACT_FIELD_C = "field_c_exact_center_uncertainty"
+DEFAULT_OPTIMIZER_STATE_CHUNK_ELEMENTS = 16_777_216
+
+
+@torch.no_grad()
+def _offloaded_adamw_step(
+    optimizer: torch.optim.AdamW,
+    *,
+    chunk_elements: int,
+) -> None:
+    """Apply AdamW exactly while staging CPU moments through bounded chunks.
+
+    The base D512/L512 field owns one very large local-code parameter.  A
+    regular AdamW step materializes full-size moment temporaries beside that
+    parameter and its gradient, which exceeds a 24 GiB device for the larger
+    SPIn scenes.  This is the same update used by the rendering fine-tuner:
+    moments remain on CPU and fixed-size slices are staged to the parameter
+    device without changing the AdamW formula or any optimizer hyperparameter.
+    """
+
+    if int(chunk_elements) <= 0:
+        raise ValueError("optimizer-state chunk size must be positive")
+    for group in optimizer.param_groups:
+        if (
+            bool(group.get("amsgrad", False))
+            or bool(group.get("maximize", False))
+            or bool(group.get("capturable", False))
+            or bool(group.get("differentiable", False))
+            or bool(group.get("fused", False))
+        ):
+            raise ValueError("chunked offloaded AdamW received unsupported options")
+        beta1, beta2 = group["betas"]
+        learning_rate = float(group["lr"])
+        weight_decay = float(group["weight_decay"])
+        epsilon = float(group["eps"])
+        for parameter in group["params"]:
+            gradient = parameter.grad
+            if gradient is None:
+                continue
+            if gradient.is_sparse:
+                raise RuntimeError("AdamW does not support sparse gradients")
+            if parameter.is_complex():
+                raise ValueError("chunked offloaded AdamW forbids complex parameters")
+            state = optimizer.state[parameter]
+            if not state:
+                state["step"] = torch.tensor(0.0)
+                state["exp_avg"] = torch.zeros_like(
+                    parameter,
+                    device="cpu",
+                    memory_format=torch.preserve_format,
+                )
+                state["exp_avg_sq"] = torch.zeros_like(
+                    parameter,
+                    device="cpu",
+                    memory_format=torch.preserve_format,
+                )
+            step_tensor = state["step"]
+            if not torch.is_tensor(step_tensor) or step_tensor.device.type != "cpu":
+                raise ValueError("offloaded AdamW step must remain on CPU")
+            step_tensor.add_(1)
+            step = float(step_tensor.item())
+            bias_correction1 = 1.0 - beta1**step
+            bias_correction2_sqrt = (1.0 - beta2**step) ** 0.5
+            step_size = learning_rate / bias_correction1
+
+            parameter_flat = parameter.view(-1)
+            gradient_flat = gradient.view(-1)
+            exp_avg_cpu = state["exp_avg"].view(-1)
+            exp_avg_sq_cpu = state["exp_avg_sq"].view(-1)
+            if (
+                exp_avg_cpu.device.type != "cpu"
+                or exp_avg_sq_cpu.device.type != "cpu"
+            ):
+                raise ValueError("AdamW moments must remain on CPU between steps")
+            for start in range(0, parameter_flat.numel(), int(chunk_elements)):
+                stop = min(start + int(chunk_elements), parameter_flat.numel())
+                parameter_chunk = parameter_flat[start:stop]
+                gradient_chunk = gradient_flat[start:stop]
+                exp_avg = exp_avg_cpu[start:stop].to(parameter.device)
+                exp_avg_sq = exp_avg_sq_cpu[start:stop].to(parameter.device)
+
+                parameter_chunk.mul_(1.0 - learning_rate * weight_decay)
+                exp_avg.mul_(beta1).add_(gradient_chunk, alpha=1.0 - beta1)
+                exp_avg_sq.mul_(beta2).addcmul_(
+                    gradient_chunk,
+                    gradient_chunk,
+                    value=1.0 - beta2,
+                )
+                denominator = (
+                    exp_avg_sq.sqrt().div_(bias_correction2_sqrt).add_(epsilon)
+                )
+                parameter_chunk.addcdiv_(
+                    exp_avg,
+                    denominator,
+                    value=-step_size,
+                )
+                exp_avg_cpu[start:stop].copy_(exp_avg)
+                exp_avg_sq_cpu[start:stop].copy_(exp_avg_sq)
+
+
+def _zero_optimizer_gradients(
+    optimizer: torch.optim.Optimizer,
+    *,
+    preserve_buffers: bool,
+) -> None:
+    """Reuse the giant local-code gradient instead of reallocating it."""
+
+    optimizer.zero_grad(set_to_none=not bool(preserve_buffers))
 LEGACY_FACTORIZED_CAPABILITY_RECEIPT_EXPERIMENT = (
     "canonical-factorized-radio-v1-label-free-source-gate"
 )
@@ -2675,7 +2782,7 @@ def train(args: argparse.Namespace) -> dict:
             range(0, epoch_order.numel(), int(args.batch_size))
         ):
             rows = epoch_order[start : start + int(args.batch_size)].to(device)
-            optimizer.zero_grad(set_to_none=True)
+            _zero_optimizer_gradients(optimizer, preserve_buffers=True)
             loss, _stats = canonical_primitive_loss(
                 field,
                 consensus,
@@ -2811,7 +2918,16 @@ def train(args: argparse.Namespace) -> dict:
                 loss = loss + loss_config.relation_weight * relation_loss
                 relation_totals.append(float(relation_loss.detach()))
             loss.backward()
-            optimizer.step()
+            _offloaded_adamw_step(
+                optimizer,
+                chunk_elements=int(
+                    getattr(
+                        args,
+                        "optimizer_state_chunk_elements",
+                        DEFAULT_OPTIMIZER_STATE_CHUNK_ELEMENTS,
+                    )
+                ),
+            )
             totals.append(float(loss.detach()))
         field.eval()
         validation = _reconstruction_metrics(
@@ -3646,6 +3762,16 @@ def main() -> None:
     parser.add_argument("--eval-batch-size", type=int, default=16384)
     parser.add_argument("--learning-rate", type=float, default=2e-3)
     parser.add_argument("--weight-decay", type=float, default=1e-5)
+    parser.add_argument(
+        "--optimizer-state-chunk-elements",
+        type=int,
+        default=DEFAULT_OPTIMIZER_STATE_CHUNK_ELEMENTS,
+        help=(
+            "Maximum number of AdamW moment elements staged on the field "
+            "device at once. Moments remain on CPU; the update is otherwise "
+            "identical to the configured AdamW optimizer."
+        ),
+    )
     parser.add_argument("--validation-fraction", type=float, default=0.05)
     parser.add_argument("--target-cosine", type=float, default=0.985)
     parser.add_argument("--seed", type=int, default=0)
@@ -3656,6 +3782,8 @@ def main() -> None:
         parser.error("--fusion-residual-blocks requires --primitive-fusion")
     if args.min_epochs <= 0 or args.min_epochs > args.epochs:
         parser.error("--min-epochs must lie in [1, --epochs]")
+    if args.optimizer_state_chunk_elements <= 0:
+        parser.error("--optimizer-state-chunk-elements must be positive")
     source_multiteacher_pair = (
         args.source_only_multiteacher_manifest,
         args.expected_source_only_multiteacher_manifest_sha256,

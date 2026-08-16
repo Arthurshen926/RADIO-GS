@@ -15,7 +15,6 @@ from radio_gs.scripts.materialize_spin9_method_v1_signed_field import (
     _validate_existing as _validate_signed_scene,
 )
 from radio_gs.scripts.run_nvos_method_v1_full8_readout import SAM3_RUNTIME_ENV
-from radio_gs.scripts.run_nvos_method_v1_scene import GPU_THERMAL_ENV
 from radio_gs.scripts.run_spin9_method_v1_scene import (
     DATASET_MANIFEST,
     DEFAULT_RUN_ROOT,
@@ -114,20 +113,8 @@ def _run(
             *command,
         ]
     else:
-        environment.update(
-            {
-                **GPU_THERMAL_ENV,
-                "GPU": str(gpu),
-                "GPU_TELEMETRY_LOG": str(log_path.with_suffix(".gpu_telemetry.csv")),
-                "GPU_OWNER_AUDIT_LOG": str(log_path.with_suffix(".gpu_owner.csv")),
-            }
-        )
+        environment["CUDA_VISIBLE_DEVICES"] = str(gpu)
         full_command = [
-            "bash",
-            str(REPO_ROOT / "radio_gs/scripts/run_with_gpu_thermal_guard.sh"),
-            "--",
-            "env",
-            f"CUDA_VISIBLE_DEVICES={gpu}",
             "bash",
             str(REPO_ROOT / "radio_gs/scripts/run_repo_python.sh"),
             *command,
@@ -237,7 +224,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--field-root", default=str(DEFAULT_RUN_ROOT))
     parser.add_argument("--output-root", default=str(DEFAULT_OUTPUT_ROOT))
-    parser.add_argument("--gpu", type=int, choices=(0, 1), required=True)
+    # Accept any physical device exposed by the current host.
+    parser.add_argument("--gpu", type=int, required=True)
     parser.add_argument("--stop-after", choices=STAGES, default=STAGES[-1])
     return parser
 

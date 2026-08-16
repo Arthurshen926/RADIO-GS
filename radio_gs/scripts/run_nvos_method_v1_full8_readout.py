@@ -20,11 +20,14 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from radio_gs.five_benchmark_method_v1 import validate_method_authority
 from radio_gs.scripts.run_nvos_method_v1_scene import (
-    GPU_THERMAL_ENV,
     METHOD_AUTHORITY,
     NVOS_AUTHORITY,
     REPO_ROOT,
     resolve_scene_assets,
+)
+from radio_gs.scripts.validate_nvos_rgb_assisted_contract import (
+    DEFAULT_CONTRACT as RGB_ASSISTED_CONTRACT,
+    validate_contract as validate_rgb_assisted_contract,
 )
 from radio_gs.utils.immutable_artifacts import load_json_object, sha256_file
 
@@ -36,7 +39,9 @@ DATASET_MANIFEST = Path(
 DEFAULT_FIELD_ROOT = Path(
     "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/" "core_method_v1/nvos"
 )
-DEFAULT_OUTPUT_ROOT = DEFAULT_FIELD_ROOT / "method_v1_readout/full8_20260816"
+DEFAULT_OUTPUT_ROOT = DEFAULT_FIELD_ROOT / (
+    "method_v1_readout/full8_rgb_assisted_contract_v1_20260816"
+)
 FINAL_FIELD_NAME = "generic_text_response_w005_s0_64.pth"
 SAM3_CHECKPOINT = REPO_ROOT / "checkpoints/sam3_modelscope/sam3.pt"
 SAM3_CHECKPOINT_SHA256 = (
@@ -191,6 +196,8 @@ def transient_sam_command(
         str(output_root / "transient_sam"),
         "--method-authority",
         str(METHOD_AUTHORITY),
+        "--evaluation-contract",
+        str(RGB_ASSISTED_CONTRACT),
         "--checkpoint",
         str(SAM3_CHECKPOINT),
         "--expected-checkpoint-sha256",
@@ -212,6 +219,8 @@ def score_command(output_root: Path) -> list[str]:
         str(output_root / "transient_sam/prediction_manifest.json"),
         "--method-authority",
         str(METHOD_AUTHORITY),
+        "--evaluation-contract",
+        str(RGB_ASSISTED_CONTRACT),
         "--output",
         str(output_root / "method_v1_nvos_full8_results.json"),
     ]
@@ -277,6 +286,17 @@ def _validate_prediction_manifest(
     else:
         if payload.get("evaluation_performed") is not False:
             raise ValueError("transient manifest evaluation boundary differs")
+        contract = payload.get("evaluation_contract", {})
+        expected_contract_sha = sha256_file(RGB_ASSISTED_CONTRACT)
+        if (
+            not isinstance(contract, Mapping)
+            or Path(str(contract.get("path", ""))).resolve()
+            != RGB_ASSISTED_CONTRACT.resolve()
+            or contract.get("sha256") != expected_contract_sha
+            or contract.get("contract_id")
+            != "nvos-rgb-assisted-full8-method-v1-v1"
+        ):
+            raise ValueError("transient manifest RGB-assisted contract differs")
         actual = tuple(str(value) for value in payload.get("predictions", {}))
         if (
             payload.get("target_mask_opened") is not False
@@ -305,20 +325,8 @@ def _run(
             *command,
         ]
     else:
-        environment.update(
-            {
-                **GPU_THERMAL_ENV,
-                "GPU": str(gpu),
-                "GPU_TELEMETRY_LOG": str(log_path.with_suffix(".gpu_telemetry.csv")),
-                "GPU_OWNER_AUDIT_LOG": str(log_path.with_suffix(".gpu_owner.csv")),
-            }
-        )
+        environment["CUDA_VISIBLE_DEVICES"] = str(gpu)
         full_command = [
-            "bash",
-            str(REPO_ROOT / "radio_gs/scripts/run_with_gpu_thermal_guard.sh"),
-            "--",
-            "env",
-            f"CUDA_VISIBLE_DEVICES={gpu}",
             "bash",
             str(REPO_ROOT / "radio_gs/scripts/run_repo_python.sh"),
             *command,
@@ -340,6 +348,11 @@ def _run(
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    contract = validate_rgb_assisted_contract(args.evaluation_contract)
+    if Path(contract["dataset_manifest"]) != DATASET_MANIFEST.resolve():
+        raise ValueError("runner dataset differs from RGB-assisted contract")
+    if Path(contract["method_authority"]) != METHOD_AUTHORITY.resolve():
+        raise ValueError("runner method authority differs from RGB-assisted contract")
     field_root = Path(args.field_root).expanduser().resolve()
     output_root = Path(args.output_root).expanduser().resolve()
     output_root.mkdir(parents=True, exist_ok=True)
@@ -397,7 +410,19 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     result_path = output_root / "method_v1_nvos_full8_results.json"
     if result_path.exists():
         result = _load_object(result_path, label="Method-v1 NVOS full8 result")
-        if result.get("artifact_type") != "radio_gs_method_v1_nvos_full8_results":
+        barrier_contract = result.get("pre_gt_barrier", {}).get(
+            "evaluation_contract", {}
+        )
+        if (
+            result.get("artifact_type")
+            != "radio_gs_method_v1_nvos_full8_results"
+            or barrier_contract.get("contract_sha256")
+            != sha256_file(RGB_ASSISTED_CONTRACT)
+            or result.get("eligibility", {}).get(
+                "exact_rgb_assisted_evaluation_contract"
+            )
+            is not True
+        ):
             raise ValueError("existing NVOS full8 result differs")
     else:
         print(
@@ -421,7 +446,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--field-root", default=str(DEFAULT_FIELD_ROOT))
     parser.add_argument("--output-root", default=str(DEFAULT_OUTPUT_ROOT))
-    parser.add_argument("--gpu", type=int, choices=(0, 1), required=True)
+    parser.add_argument("--gpu", type=int, required=True)
+    parser.add_argument("--evaluation-contract", default=str(RGB_ASSISTED_CONTRACT))
     parser.add_argument("--stop-after", choices=STAGES, default=STAGES[-1])
     return parser
 

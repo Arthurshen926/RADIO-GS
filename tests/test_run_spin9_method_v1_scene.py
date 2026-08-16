@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -67,6 +68,7 @@ def test_host_memory_heavy_stage_lock_wraps_only_declared_stages(
 ) -> None:
     calls: list[tuple[str, bool]] = []
     monkeypatch.setattr(spin, "HOST_MEMORY_STAGE_LOCK", tmp_path / "host.lock")
+    monkeypatch.setenv(spin.HOST_MEMORY_STAGE_SLOTS_ENV, "1")
     monkeypatch.setattr(
         spin,
         "_run",
@@ -88,3 +90,85 @@ def test_host_memory_heavy_stage_lock_wraps_only_declared_stages(
     assert "factorized_mpr" in spin.HOST_MEMORY_HEAVY_STAGES
     assert "generic_stage" in spin.HOST_MEMORY_HEAVY_STAGES
     assert "source_features" not in spin.HOST_MEMORY_HEAVY_STAGES
+
+
+def test_host_memory_stage_slot_count_is_fail_closed(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(spin, "HOST_MEMORY_STAGE_LOCK", tmp_path / "host.lock")
+    monkeypatch.setenv(spin.HOST_MEMORY_STAGE_SLOTS_ENV, "0")
+    with pytest.raises(ValueError, match=r"must be in \[1,8\]"):
+        with spin._host_memory_stage_boundary(scene="fixture", stage="base_field"):
+            pass
+
+
+def test_scene_runner_lock_waits_then_acquires_with_clear_log(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    scene_root = tmp_path / "scene"
+    scene_root.mkdir()
+    lock_path = scene_root / spin.SCENE_RUN_LOCK_NAME
+    blocker = lock_path.open("a+", encoding="utf-8")
+    spin.fcntl.flock(blocker.fileno(), spin.fcntl.LOCK_EX | spin.fcntl.LOCK_NB)
+    sleeps = []
+
+    def release_after_wait(seconds: float) -> None:
+        sleeps.append(seconds)
+        spin.fcntl.flock(blocker.fileno(), spin.fcntl.LOCK_UN)
+
+    monkeypatch.setattr(spin.time, "sleep", release_after_wait)
+    with spin._scene_run_boundary(run_root=scene_root, scene="fixture"):
+        assert json.loads(lock_path.read_text(encoding="utf-8"))["scene"] == "fixture"
+    blocker.close()
+
+    output = capsys.readouterr().out
+    assert sleeps == [1.0]
+    assert "waiting for per-scene runner lock" in output
+    assert "acquired per-scene runner lock" in output
+    assert "released per-scene runner lock" in output
+    assert lock_path.read_text(encoding="utf-8") == ""
+    assert lock_path.stat().st_mode & 0o777 == 0o666
+
+
+def test_scene_runner_lock_does_not_serialize_different_scenes(tmp_path: Path) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    with spin._scene_run_boundary(run_root=first, scene="first"):
+        with spin._scene_run_boundary(run_root=second, scene="second"):
+            assert (first / spin.SCENE_RUN_LOCK_NAME).read_text(encoding="utf-8")
+            assert (second / spin.SCENE_RUN_LOCK_NAME).read_text(encoding="utf-8")
+
+
+def test_scene_runner_lock_releases_after_exception(tmp_path: Path) -> None:
+    scene_root = tmp_path / "scene"
+    with pytest.raises(RuntimeError, match="fixture failure"):
+        with spin._scene_run_boundary(run_root=scene_root, scene="fixture"):
+            raise RuntimeError("fixture failure")
+
+    with spin._scene_run_boundary(run_root=scene_root, scene="fixture"):
+        assert json.loads(
+            (scene_root / spin.SCENE_RUN_LOCK_NAME).read_text(encoding="utf-8")
+        )["pid"] > 0
+
+
+def test_run_holds_scene_lock_before_entering_pipeline(
+    tmp_path: Path, monkeypatch
+) -> None:
+    assets = SimpleNamespace(scene="fixture")
+    observed = {}
+    monkeypatch.setattr(spin, "resolve_scene_assets", lambda _scene: assets)
+
+    def pipeline(_args, *, assets, run_root):
+        observed.update(
+            json.loads(
+                (run_root / spin.SCENE_RUN_LOCK_NAME).read_text(encoding="utf-8")
+            )
+        )
+        return {"scene": assets.scene}
+
+    monkeypatch.setattr(spin, "_run_with_scene_lock", pipeline)
+    result = spin.run(
+        SimpleNamespace(scene="fixture", run_root=str(tmp_path))
+    )
+
+    assert result == {"scene": "fixture"}
+    assert observed["scene"] == "fixture"
+    assert observed["run_root"] == str((tmp_path / "fixture").resolve())

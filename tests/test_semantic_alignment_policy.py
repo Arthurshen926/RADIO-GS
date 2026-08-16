@@ -104,3 +104,55 @@ def test_dense_semantic_projection_is_differentiable_and_multiscale():
     projected.sum().backward()
     assert feature_map.grad is not None
     assert torch.isfinite(feature_map.grad).all()
+
+
+def test_dense_semantic_projection_streaming_matches_stacked_reference():
+    torch.manual_seed(3)
+    bridge = GlobalRegionSummaryBridge(input_dim=8, output_dim=8, hidden_dim=4)
+    summary_head = nn.Linear(8, 6, bias=False)
+    for module in (bridge, summary_head):
+        for parameter in module.parameters():
+            parameter.requires_grad_(False)
+    feature_map = torch.randn(2, 8, 5, 7, requires_grad=True)
+
+    actual = project_dense_region_semantics(
+        bridge,
+        summary_head,
+        feature_map,
+        kernel_sizes=(1, 3, 5),
+        projection_batch_size=11,
+    )
+    actual.square().sum().backward()
+    actual_gradient = feature_map.grad.detach().clone()
+
+    reference_input = feature_map.detach().clone().requires_grad_(True)
+    summaries = bridge.dense_square_regions(reference_input, (1, 3, 5))
+    batch, scales, channels, height, width = summaries.shape
+    tokens = summaries.permute(0, 1, 3, 4, 2).reshape(-1, channels)
+    chunks = []
+    for start in range(0, tokens.shape[0], 11):
+        projected = summary_head(tokens[start : start + 11, None])[:, 0]
+        chunks.append(torch.nn.functional.normalize(projected.float(), dim=-1, eps=1e-8))
+    descriptor = torch.cat(chunks).reshape(batch, scales, height, width, -1)
+    reference = torch.nn.functional.normalize(
+        descriptor.mean(dim=1), dim=-1, eps=1e-8
+    ).permute(0, 3, 1, 2).contiguous()
+    reference.square().sum().backward()
+
+    torch.testing.assert_close(actual, reference, atol=2e-6, rtol=2e-6)
+    torch.testing.assert_close(
+        actual_gradient, reference_input.grad, atol=3e-6, rtol=3e-6
+    )
+
+
+def test_dense_semantic_projection_rejects_empty_scales_and_invalid_batch_size():
+    bridge = GlobalRegionSummaryBridge(input_dim=8, output_dim=8, hidden_dim=4)
+    summary_head = nn.Linear(8, 6, bias=False)
+    feature_map = torch.randn(1, 8, 3, 3)
+
+    with pytest.raises(ValueError, match="at least one scale"):
+        project_dense_region_semantics(bridge, summary_head, feature_map, kernel_sizes=())
+    with pytest.raises(ValueError, match="must be positive"):
+        project_dense_region_semantics(
+            bridge, summary_head, feature_map, projection_batch_size=0
+        )

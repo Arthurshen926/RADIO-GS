@@ -41,6 +41,10 @@ from radio_gs.scripts.build_sam3_foundation_cache import (
     sam3_autocast_context,
     set_requested_cuda_device,
 )
+from radio_gs.scripts.validate_nvos_rgb_assisted_contract import (
+    DEFAULT_CONTRACT as DEFAULT_EVALUATION_CONTRACT,
+    validate_contract as validate_evaluation_contract,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -202,6 +206,7 @@ def load_signed_field_prompt(
     dataset_manifest_path: str | Path,
     prompt_manifest_path: str | Path,
     method_authority_path: str | Path,
+    evaluation_contract_path: str | Path,
     scene_id: str,
 ) -> dict[str, Any]:
     """Resolve one target RGB and signed score without opening target GT."""
@@ -214,6 +219,14 @@ def load_signed_field_prompt(
         method_authority_path, label="Method-v1 authority"
     )
     _validate_readout_authority(authority)
+    contract = validate_evaluation_contract(evaluation_contract_path)
+    if (
+        Path(contract["dataset_manifest"]) != dataset_path
+        or contract["dataset_manifest_sha256"] != dataset_sha
+        or Path(contract["method_authority"]) != authority_path
+        or contract["method_authority_sha256"] != authority_sha
+    ):
+        raise ValueError("NVOS RGB-assisted contract authority binding differs")
     frozen_cohort = [str(value) for value in authority["frozen_cohorts"]["nvos"]]
     if scene_id not in frozen_cohort:
         raise ValueError(f"scene is outside frozen Method-v1 NVOS cohort: {scene_id}")
@@ -295,6 +308,9 @@ def load_signed_field_prompt(
         "prompt_manifest_sha256": prompt_sha,
         "method_authority": authority_path,
         "method_authority_sha256": authority_sha,
+        "evaluation_contract": Path(contract["contract"]),
+        "evaluation_contract_sha256": contract["contract_sha256"],
+        "evaluation_contract_id": contract["contract_id"],
         "feature_render_authority": dict(render_authority),
         "legacy_dataset_target_rgb_policy": raw_scene.get("target_rgb_policy"),
     }
@@ -373,6 +389,7 @@ def predict(args: argparse.Namespace) -> dict[str, Any]:
             dataset_manifest_path=args.manifest,
             prompt_manifest_path=args.signed_field_prompt_manifest,
             method_authority_path=args.method_authority,
+            evaluation_contract_path=args.evaluation_contract,
             scene_id=scene_id,
         )
         for scene_id in scene_ids
@@ -479,6 +496,11 @@ def predict(args: argparse.Namespace) -> dict[str, Any]:
                 "feature_render_authority": source["feature_render_authority"],
                 "method_authority": str(source["method_authority"]),
                 "method_authority_sha256": source["method_authority_sha256"],
+                "evaluation_contract": str(source["evaluation_contract"]),
+                "evaluation_contract_sha256": source[
+                    "evaluation_contract_sha256"
+                ],
+                "evaluation_contract_id": source["evaluation_contract_id"],
                 "official_sam3_checkpoint": str(checkpoint),
                 "official_sam3_checkpoint_sha256": checkpoint_sha,
             },
@@ -525,6 +547,11 @@ def predict(args: argparse.Namespace) -> dict[str, Any]:
             "reference_mask_selection": False,
             "graph_or_connected_component": False,
         },
+        "evaluation_contract": {
+            "path": str(sources[0]["evaluation_contract"]),
+            "sha256": sources[0]["evaluation_contract_sha256"],
+            "contract_id": sources[0]["evaluation_contract_id"],
+        },
         "receipts": receipts,
         "elapsed_seconds": float(time.time() - started),
         "evaluation_performed": False,
@@ -542,6 +569,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scene-id", action="append", dest="scene_ids", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--method-authority", default=str(DEFAULT_METHOD_AUTHORITY))
+    parser.add_argument(
+        "--evaluation-contract", default=str(DEFAULT_EVALUATION_CONTRACT)
+    )
     parser.add_argument("--checkpoint", default=str(DEFAULT_SAM3_CHECKPOINT))
     parser.add_argument(
         "--expected-checkpoint-sha256", default=FROZEN_SAM3_CHECKPOINT_SHA256

@@ -3,25 +3,10 @@ from pathlib import Path
 import pytest
 
 from radio_gs.scripts.run_nvos_method_v1_scene import (
-    GPU_THERMAL_ENV,
     build_mpr_common_args,
     resolve_scene_assets,
     write_runtime_config,
 )
-
-
-def test_gpu_guard_pauses_before_the_hard_temperature_limit() -> None:
-    assert GPU_THERMAL_ENV["GPU_POLL_SECONDS"] == "3"
-    assert GPU_THERMAL_ENV["GPU_SOFT_PAUSE_TEMP_C"] == "76"
-    assert GPU_THERMAL_ENV["GPU_SOFT_RESUME_TEMP_C"] == "70"
-    assert GPU_THERMAL_ENV["GPU_MAX_TEMP_C"] == "84"
-    assert int(GPU_THERMAL_ENV["GPU_SOFT_RESUME_TEMP_C"]) < int(
-        GPU_THERMAL_ENV["GPU_SOFT_PAUSE_TEMP_C"]
-    )
-    assert int(GPU_THERMAL_ENV["GPU_SOFT_PAUSE_TEMP_C"]) < int(
-        GPU_THERMAL_ENV["GPU_MAX_TEMP_C"]
-    )
-
 
 def test_all_frozen_nvos_scenes_resolve_to_target_excluded_source_cohorts() -> None:
     for scene in (

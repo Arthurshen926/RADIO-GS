@@ -49,6 +49,7 @@ def test_commands_preserve_full8_order_and_pre_gt_boundary() -> None:
         if value == "--scene-id"
     ] == list(order)
     assert "--require-render-authority" in signed
+    assert "--evaluation-contract" in transient
     assert "target" not in " ".join(signed).lower()
     assert "score_nvos_method_v1_full8.py" not in " ".join(signed)
     assert "score_nvos_method_v1_full8.py" not in " ".join(transient)
@@ -79,6 +80,7 @@ def test_only_final_command_opens_the_frozen_scorer() -> None:
     assert command[command.index("--prediction-manifest") + 1].endswith(
         "transient_sam/prediction_manifest.json"
     )
+    assert "--evaluation-contract" in command
 
 
 def test_signed_prompt_resume_reads_evaluation_boundary_from_safety(

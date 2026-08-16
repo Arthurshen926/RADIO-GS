@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_universal_field_peak_retention_guard_preregistration",
+  "status": "sealed_before_independent_candidate_execution_after_retrospective_full4_replay",
+  "candidate": {
+    "field": "unchanged Universal Field v1 single-level primitive query features shared with LERF2D",
+    "base_readout": "kNN10 then per-query scene minmax then clip(2u-1,0,1), fixed primitive threshold 0.6",
+    "projection": "selected-only alpha then png_uint8_gt10",
+    "typed_extent": "compute the 8-connected projected component containing the rendered query-score peak; accept it only when it retains at least 25 percent of the original projected support, otherwise return the original support",
+    "minimum_retained_fraction": 0.25,
+    "threshold_rationale": "A conservative quarter-support invariant prevents a single peak from deleting more than three quarters of the frozen prediction. It is global and dimensionless.",
+    "learned_parameters": false,
+    "scene_specific_parameters": false,
+    "query_specific_parameters": false,
+    "target_rgb_used": false,
+    "target_mask_or_metric_used_at_inference": false,
+    "persistent_field_updated": false
+  },
+  "cohort": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "execution": {
+    "runner": "radio_gs/scripts/run_lerf3d_peak_retention_guard_full4.sh",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_peak_retention_guard_full4_v1",
+    "protocol_preset": "vala_repo_3d",
+    "post_mask_refinement": "peak_component_retention_guard"
+  },
+  "evidence_boundary": {
+    "prior_fixed_extent_full4_metrics_already_opened": true,
+    "prior_unconditional_peak_full4_metrics_already_opened": true,
+    "retrospective_replay_used_to_select_candidate": true,
+    "eligible_as_blind_confirmation": false,
+    "eligible_as_development_evidence": true,
+    "eligible_as_frozen_three_level_contract_row": false,
+    "reason": "The candidate was motivated and screened after Waldo's unconditional-peak regression was known. Independent rerunning can verify implementation and reproducibility but cannot restore blindness."
+  },
+  "precommitted_reporting": {
+    "report_all_four_scenes": true,
+    "metrics": [
+      "mIoU",
+      "Acc@0.25",
+      "Acc@0.50"
+    ],
+    "aggregates": [
+      "full4_sample_micro",
+      "full4_scene_macro"
+    ],
+    "no_parameter_callback_after_execution": true
+  }
+}
