@@ -6752,7 +6752,7 @@ def evaluate_selection_spec(
         else None
     )
     needs_prompt_heatmap = (
-        mask_refinement == "rgb_grabcut_score_component_guard"
+        mask_refinement in {"peak_component", "rgb_grabcut_score_component_guard"}
         or (
             mask_refinement == "sam3_box"
             and (
@@ -6936,6 +6936,11 @@ def evaluate_selection_spec(
             prompt_initial_pred = pred.copy()
             prompt_heatmap = score_heatmaps[cat_idx] if score_heatmaps is not None else silhouette[cat_idx]
             component_guard_report: Optional[Dict[str, float | int | bool]] = None
+            if mask_refinement == "peak_component":
+                peak_yx = heatmap_peak_in_shape(
+                    torch.as_tensor(prompt_heatmap), pred.shape
+                )
+                pred = keep_peak_connected_component(pred, peak_yx)
             if mask_refinement == "sam3_prompt_mask_head":
                 assert gt is not None
                 prompt_initial_pred = build_direct3d_prompt_initial_mask(
@@ -9589,6 +9594,7 @@ def main() -> None:
         "--mask_refinement",
         choices=[
             "none",
+            "peak_component",
             "rgb_grabcut",
             "largest_component",
             "largest_component_rgb_grabcut",
@@ -9603,6 +9609,15 @@ def main() -> None:
         ],
         default="none",
         help="Optional GT-free projection cleanup after rendering selected primitives",
+    )
+    parser.add_argument(
+        "--vala_post_mask_refinement",
+        choices=["none", "peak_component"],
+        default="none",
+        help=(
+            "Opt-in target-blind mask cleanup applied after a frozen VALA base "
+            "preset; none preserves the frozen evaluator exactly"
+        ),
     )
     parser.add_argument(
         "--rgb_refinement_source",
@@ -9760,7 +9775,7 @@ def main() -> None:
         args.silhouette_threshold = 10.0 / 255.0
         args.projection_mode = "selected_only_alpha"
         args.alpha_binarization = "png_uint8_gt10"
-        args.mask_refinement = "none"
+        args.mask_refinement = args.vala_post_mask_refinement
         args.all_labeled_frames = False
         args.min_select = 0
         if not args.canonical_embedding_cache or args.canonical_embedding_cache == "checkpoints/siglip2_canonical_embeddings.pt":

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_capability_shard512_implementation_correction",
+  "status": "infrastructure_optimization_after_real_orchids_timing",
+  "scope": "future SPIn Method-v1 exact DINO/SAM capability cache materialization",
+  "trigger": {
+    "scene": "orchids",
+    "feature_space": "dino_v3",
+    "feature_dim": 4096,
+    "old_outer_shard_channels": 256,
+    "observed_problem": "each outer shard reprojects every registered view through the frozen official adaptor; 16 outer shards create avoidable repeated projection overhead"
+  },
+  "correction": {
+    "new_outer_shard_channels": 512,
+    "inner_accumulation_channel_chunk_size_unchanged": 128,
+    "registration_responsibility_unchanged": true,
+    "normalization_unchanged": true,
+    "float32_accumulation_and_float16_serialization_unchanged": true,
+    "method_or_evaluation_semantics_changed": false
+  },
+  "execution_boundary": {
+    "orchids_and_leaves_already_running_with_256_are_not_restarted": true,
+    "future_new_scene_processes_use_512": true,
+    "partial_cache_resume_requires_the_original_shard_contract": true
+  },
+  "verification": {
+    "synthetic_outer_shard_widths": [2, 4],
+    "reconstructed_feature_bitwise_equality_required": true,
+    "valid_count_and_reliability_bitwise_equality_required": true,
+    "test": "tests/test_sharded_mpr_streaming.py::test_streamed_contribution_mean_matches_dense_and_resumes"
+  },
+  "claim_boundary": "This is a storage partition and execution-time optimization only; it is not a method candidate and cannot be selected by benchmark metrics."
+}

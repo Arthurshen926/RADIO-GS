@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "artifact_type": "exact_marginal_registration_metadata_audit",
+  "status": "tensor_and_runtime_metadata_correct_no_cache_rebuild_required",
+  "question": "Does the legacy alpha_depth label in the immutable Method-v1 baseline authority mean the current fields were built with top-1 registration?",
+  "answer": false,
+  "findings": {
+    "cli_behavior": "Selecting raster_marginal_responsibility with alpha_threshold=0 deterministically replaces the legacy parser default alpha_depth with exact_front_to_back_marginal_responsibility before cache construction.",
+    "factorized_cache_metadata": "exact_front_to_back_marginal_responsibility",
+    "matched_exact_cache_metadata": "exact_front_to_back_marginal_responsibility",
+    "legacy_authority_field": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json retains alpha_depth as an immutable baseline-era metadata label and must not be used as the operational cache contract.",
+    "active_field_authority": "paper/artifacts/universal_field_v1_authority_20260816.json binds exact_front_to_back_marginal_responsibility."
+  },
+  "representative_current_evidence": [
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/leaves/factorized_raw_radio_heldout4.pt.json",
+      "sha256": "0ed536c0455bd352e66538428e1dc7e55c2aa9856e985d52e7e720ab44d2c99e",
+      "aggregation_mode": "raster_marginal_responsibility",
+      "registration_weight_mode": "exact_front_to_back_marginal_responsibility"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/leaves/raw_radio_matched_exact_marginal_heldout4.pt.json",
+      "sha256": "d538935206cf66bf9e3ea136c8b02cf27b83d211408bc8d47c29d1a946e21e9c",
+      "aggregation_mode": "raster_marginal_responsibility",
+      "registration_weight_mode": "exact_front_to_back_marginal_responsibility"
+    },
+    {
+      "path": "paper/artifacts/universal_field_v1_authority_20260816.json",
+      "sha256": "53e7f036a0aa3c3631322d78d845dc004bf92521fa820f3f69d915154015ddc6",
+      "registration_weight_mode": "exact_front_to_back_marginal_responsibility"
+    }
+  ],
+  "regression_tests": {
+    "result": "2 passed",
+    "tests": [
+      "tests/test_gaussian_multiview_teacher_cache.py::test_marginal_responsibility_policy_is_exact_and_threshold_free",
+      "tests/test_factorized_radio_builder.py::test_factorized_exact_marginal_cli_accepts_create_or_bound_reuse"
+    ]
+  },
+  "decision": {
+    "rebuild_existing_current_caches": false,
+    "mutate_immutable_method_v1_baseline_authority": false,
+    "use_universal_field_v1_authority_for_active_field_claims": true
+  }
+}

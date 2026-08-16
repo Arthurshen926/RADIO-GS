@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_orchids_method_v1_gate_result",
+  "status": "pass",
+  "scene": "orchids",
+  "benchmark": "SPIn-NeRF Available-Nine",
+  "stages": {
+    "factorized_d512_l512": {
+      "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/orchids/factorized_d512_l512_heldout4.pth",
+      "raw_radio_mean_cosine": 0.999101579,
+      "dino_v3_mean_cosine": 0.998306513,
+      "sam3_mean_cosine": 0.992467523
+    },
+    "official_siglip2_full_grid": {
+      "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/orchids/official_siglip2_spatial_w005_s0_64.pth",
+      "best_step": 64,
+      "initial_raw_validation_cosine": 0.905541129,
+      "best_raw_validation_cosine": 0.905710485,
+      "initial_siglip2_validation_cosine": 0.844307392,
+      "best_siglip2_validation_cosine": 0.844434957,
+      "initial_mpr_probe_cosine": 0.999106646,
+      "best_mpr_probe_cosine": 0.99910748
+    },
+    "genuine_source_crop_region_summary": {
+      "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/orchids/official_siglip2_spatial_region_w005_s0_64.pth",
+      "best_step": 64,
+      "initial_semantic_validation_cosine": 0.4229461886630109,
+      "best_semantic_validation_cosine": 0.4391167979219097,
+      "initial_raw_validation_cosine": 0.9057104848867612,
+      "best_raw_validation_cosine": 0.9057966909055898,
+      "initial_siglip2_validation_cosine": 0.844434956593256,
+      "best_siglip2_validation_cosine": 0.8447325625150973,
+      "initial_mpr_probe_cosine": 0.9991074800491333,
+      "best_mpr_probe_cosine": 0.9990994930267334
+    },
+    "target_blind_generic_text_response": {
+      "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/orchids/generic_text_response_w005_s0_64.pth",
+      "best_step": 64,
+      "initial_generic_text_response_loss": 0.2468978613615036,
+      "best_generic_text_response_loss": 0.2092249132692814,
+      "initial_semantic_validation_cosine": 0.4391167979219097,
+      "best_semantic_validation_cosine": 0.45350786800682175,
+      "initial_raw_validation_cosine": 0.9057966909055898,
+      "best_raw_validation_cosine": 0.9057855907780425,
+      "initial_siglip2_validation_cosine": 0.8447325625150973,
+      "best_siglip2_validation_cosine": 0.8448682931846291,
+      "initial_mpr_probe_cosine": 0.9990994930267334,
+      "best_mpr_probe_cosine": 0.9990744590759277
+    }
+  },
+  "gate": {
+    "status": "pass",
+    "field_sha256": "429123de3a9b2aa52ce09ed6cfa718a16f4798479ab48440be3e08ab730d3e9e",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/orchids/method_v1_gate.json"
+  },
+  "information_boundary": {
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  },
+  "claim_boundary": "This is one of nine required field gates. The benchmark masks remain sealed until all nine gates exist, so no new SPIn score or SOTA claim is supported yet."
+}

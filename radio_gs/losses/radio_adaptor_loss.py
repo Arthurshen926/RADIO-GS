@@ -117,6 +117,8 @@ def compute_radio_adaptor_alignment_loss(
     decoded: torch.Tensor,
     target: torch.Tensor,
     adaptors: Mapping[str, nn.Module],
+    *,
+    projection_amp: bool = False,
 ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
     """Match decoded and teacher RADIO features in frozen adaptor spaces.
 
@@ -128,9 +130,13 @@ def compute_radio_adaptor_alignment_loss(
 
     losses: dict[str, torch.Tensor] = {}
     for name, adaptor in adaptors.items():
-        pred = project_feature_map_with_adaptor(decoded, adaptor)
+        pred = project_feature_map_with_adaptor(
+            decoded, adaptor, amp=bool(projection_amp)
+        )
         with torch.no_grad():
-            ref = project_feature_map_with_adaptor(target, adaptor)
+            ref = project_feature_map_with_adaptor(
+                target, adaptor, amp=bool(projection_amp)
+            )
         losses[name] = 1.0 - (pred * ref).sum(dim=1).mean()
 
     total = torch.stack(list(losses.values())).mean()
@@ -198,6 +204,7 @@ def compute_radio_adaptor_masked_render_losses(
     local_balance_quantile: float = 0.0,
     teacher_capability_maps: Mapping[str, torch.Tensor] | None = None,
     gauge_separated: bool = True,
+    projection_amp: bool = False,
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, dict[str, torch.Tensor]]]:
     """Preserve official dense capability and local relations after rendering.
 
@@ -247,10 +254,14 @@ def compute_radio_adaptor_masked_render_losses(
     details: dict[str, dict[str, torch.Tensor]] = {}
     for name, weight in requested.items():
         adaptor = adaptors[name]
-        predicted = project_feature_map_with_adaptor(predicted_radio, adaptor)
+        predicted = project_feature_map_with_adaptor(
+            predicted_radio, adaptor, amp=bool(projection_amp)
+        )
         if teacher_capability_maps is None:
             with torch.no_grad():
-                teacher = project_feature_map_with_adaptor(target, adaptor)
+                teacher = project_feature_map_with_adaptor(
+                    target, adaptor, amp=bool(projection_amp)
+                )
         else:
             with torch.no_grad():
                 teacher = F.normalize(

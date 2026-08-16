@@ -294,7 +294,7 @@ def _validate_cache_authority(
     }:
         raise FrozenDirect3DError("v2 cache direct3d consumer contract differs")
     sources = _mapping(authority.get("source_artifacts"), "v2 source artifacts")
-    expected_roles = {
+    materialized_descriptor_roles = {
         "descriptor_cache",
         "text_query_cache",
         "field_checkpoint",
@@ -302,11 +302,25 @@ def _validate_cache_authority(
         "renderer_geometry_checkpoint",
         "materializer_source",
     }
-    if set(sources) != expected_roles:
+    streamed_descriptor_roles = {
+        "streamed_query_score_cache",
+        "text_query_cache",
+        "field_checkpoint",
+        "readout_checkpoint",
+        "renderer_geometry_checkpoint",
+        "streaming_source",
+        "materializer_source",
+    }
+    source_roles = set(sources)
+    if source_roles == materialized_descriptor_roles:
+        execution_representation = "materialized_descriptor_cache"
+    elif source_roles == streamed_descriptor_roles:
+        execution_representation = "streamed_scalar_scores_only"
+    else:
         raise FrozenDirect3DError("v2 source artifact roles differ")
     records = [
         {"role": role, **_verify_record(sources[role], label=role, verified=verified)}
-        for role in sorted(expected_roles)
+        for role in sorted(source_roles)
     ]
     by_role = {record["role"]: record for record in records}
     expected_source_shas = {
@@ -333,6 +347,7 @@ def _validate_cache_authority(
         "queries": len(validated.query_ids),
         "primitives": int(validated.query_scores.shape[0]),
         "valid_primitives": int(validated.valid.sum().item()),
+        "execution_representation": execution_representation,
     }, records
 
 

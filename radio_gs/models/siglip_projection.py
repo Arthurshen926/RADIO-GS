@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from types import MethodType
+
 import torch
 import torch.nn as nn
 from timm.models.vision_transformer import Block
@@ -15,6 +17,52 @@ from radio_gs.utils.immutable_artifacts import (
 OFFICIAL_C_RADIO_V4_H_HALF_SHA256 = (
     "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
 )
+
+
+def _xformers_memory_efficient_attention():
+    try:
+        from xformers.ops import memory_efficient_attention
+    except ImportError as exc:
+        raise RuntimeError(
+            "xFormers is required for memory-efficient SigLIP2 training "
+            "attention; install the wheel matching the active Torch/CUDA ABI"
+        ) from exc
+    return memory_efficient_attention
+
+
+def _xformers_attention_forward(
+    attention: nn.Module,
+    x: torch.Tensor,
+    attn_mask: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Exact global timm attention using xFormers' bounded-memory kernel."""
+
+    if attn_mask is not None:
+        raise ValueError(
+            "xFormers SigLIP2 projection does not accept an attention mask"
+        )
+    batch, tokens, _channels = x.shape
+    qkv = attention.qkv(x).reshape(
+        batch,
+        tokens,
+        3,
+        attention.num_heads,
+        attention.head_dim,
+    )
+    query, key, value = qkv.unbind(2)
+    query = attention.q_norm(query)
+    key = attention.k_norm(key)
+    projected = _xformers_memory_efficient_attention()(
+        query,
+        key,
+        value,
+        p=attention.attn_drop.p if attention.training else 0.0,
+        scale=attention.scale,
+    )
+    projected = projected.reshape(batch, tokens, attention.attn_dim)
+    projected = attention.norm(projected)
+    projected = attention.proj(projected)
+    return attention.proj_drop(projected)
 
 
 def _load_weights_only(path: str) -> object:
@@ -68,6 +116,21 @@ class SigLIP2FeatureProjection(nn.Module):
         x = self.mlp_fc1(x)
         x = self.mlp_final(x)
         return x
+
+    def enable_xformers_memory_efficient_attention(
+        self,
+    ) -> "SigLIP2FeatureProjection":
+        """Retain complete-grid attention with a training-capable sm86 kernel."""
+
+        # Resolve the optional dependency before mutating any module method.
+        _xformers_memory_efficient_attention()
+        for block in self.blocks:
+            block.attn.forward = MethodType(
+                _xformers_attention_forward,
+                block.attn,
+            )
+        self.attention_runtime = "xformers_memory_efficient_exact_global"
+        return self
 
     @classmethod
     def from_extracted_weights(cls, ckpt_path: str) -> "SigLIP2FeatureProjection":

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_text_posterior_v2_post_spatial_gap_candidate_preregistration",
+  "status": "sealed_before_gap_candidate_source_loso",
+  "source_only_motivation": {
+    "previous_result": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2/source_post_spatial_text_posterior.loso.v2.json",
+      "sha256": "abf213337be59cf4d78f50ec9639ddcb75487c184d55e2287e54d4ea08d185e4"
+    },
+    "passed_signals": {
+      "macro_hard_iou_delta": 0.07219857898825366,
+      "macro_balanced_bce_delta": -0.15041664354503156,
+      "macro_local_relation_loss_delta": -0.0009693232908224066
+    },
+    "failed_signal": {
+      "macro_positive_negative_gap_delta": -0.0026904145669606194
+    },
+    "development_or_target_data_used_for_candidate_choice": false
+  },
+  "candidate_change": {
+    "method_position_changed": false,
+    "architecture_changed": false,
+    "source_shards_changed": false,
+    "new_objective": "confidence-weighted one-minus-positive-negative-probability-gap",
+    "objective_weights": {
+      "balanced_bce_over_legacy": 0.35,
+      "local_relation_over_legacy": 0.2,
+      "soft_jaccard_over_legacy": 0.25,
+      "positive_negative_separation_over_legacy": 0.2
+    },
+    "recipe_id": "post-spatial-text-posterior-v2-adam-seed17-e192-lr0.01-gap-v2"
+  },
+  "unchanged_gate": {
+    "macro_hard_iou_at_0.6_strictly_improves": true,
+    "macro_balanced_bce_strictly_improves": true,
+    "macro_positive_negative_gap_strictly_improves": true,
+    "macro_local_relation_maximum_regression": "max(1e-5, 2 percent of base)",
+    "each_fold_hard_iou_maximum_regression": 0.01,
+    "each_fold_local_relation_maximum_regression": "max(1e-5, 2 percent of base)",
+    "promotion": "all macro checks and every fold admissibility check must pass"
+  },
+  "sealed_inputs": {
+    "dataset_manifest_sha256": "74ff10e74723002b749a4545dc270617416b17043550f98213811c7bbcc8f880",
+    "typed_posteriors_sha256": "45f8f5d0689a7e7a460c6557f8fa90d4ad682523d49bff3a1d4892384f56771a",
+    "trainer_sha256": "6bfeef677c15773e9865094311f68a17e11074ed66e06b6d930a90f83448e7d9"
+  },
+  "execution_boundary": {
+    "development_scene0003_opened": false,
+    "lerf_queries_or_ground_truth_opened": false,
+    "fit3_allowed_only_after_loso_pass": true
+  },
+  "uqis_in_scope": false
+}

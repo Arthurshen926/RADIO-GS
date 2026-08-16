@@ -40,7 +40,7 @@ def _contract(tmp_path: Path) -> FrozenDirect3DContract:
     )
 
 
-def _build(tmp_path: Path) -> Path:
+def _build(tmp_path: Path, *, streamed_sources: bool = False) -> Path:
     root = tmp_path / "results"
     shared_readout = _write(tmp_path / "readout.pth", b"readout")
     materializer = _write(tmp_path / "materializer.py", b"source")
@@ -49,6 +49,9 @@ def _build(tmp_path: Path) -> Path:
         config = _write(tmp_path / f"{scene}.yaml", b"config")
         renderer = _write(tmp_path / f"{scene}.pth", b"renderer")
         descriptor = _write(tmp_path / f"{scene}-descriptor.pt", b"descriptor")
+        streaming_source = _write(
+            tmp_path / f"{scene}-streaming.py", b"streaming source"
+        )
         text = _write(tmp_path / f"{scene}-text.pt", b"text")
         field = _write(tmp_path / f"{scene}-field.pth", b"field")
         xyz = torch.tensor([[1.0, 2.0, 3.0], [2.0, 3.0, 4.0]])
@@ -58,8 +61,16 @@ def _build(tmp_path: Path) -> Path:
             dtype=torch.float16,
         )
         geometry = xyz_geometry_fingerprint(xyz)
+        semantic_source = (
+            {
+                "streamed_query_score_cache": descriptor,
+                "streaming_source": streaming_source,
+            }
+            if streamed_sources
+            else {"descriptor_cache": descriptor}
+        )
         sources = {
-            "descriptor_cache": descriptor,
+            **semantic_source,
             "text_query_cache": text,
             "field_checkpoint": field,
             "readout_checkpoint": shared_readout,
@@ -271,6 +282,30 @@ def test_aggregates_exact_four_scene_208_object_cohort(tmp_path):
     assert result["scene_equal_macro"]["miou"] == pytest.approx(0.35)
     assert result["scene_equal_macro"]["acc025"] == pytest.approx(0.45)
     assert result["scene_equal_macro"]["acc050"] == pytest.approx(0.25)
+
+
+def test_aggregates_execution_equivalent_streamed_score_authority(tmp_path):
+    root = _build(tmp_path, streamed_sources=True)
+    result = aggregate_results_root(
+        root, repo_root=tmp_path, contract=_contract(tmp_path)
+    )
+    for scene in EXPECTED_SCENES:
+        authority = result["scene_results"][scene]["cache_authority"]
+        assert authority["execution_representation"] == "streamed_scalar_scores_only"
+        assert {
+            record["role"]
+            for record in result["scene_results"][scene][
+                "cache_source_artifacts"
+            ]
+        } == {
+            "streamed_query_score_cache",
+            "text_query_cache",
+            "field_checkpoint",
+            "readout_checkpoint",
+            "renderer_geometry_checkpoint",
+            "streaming_source",
+            "materializer_source",
+        }
 
 
 def test_rejects_sweep_or_extra_result_row(tmp_path):

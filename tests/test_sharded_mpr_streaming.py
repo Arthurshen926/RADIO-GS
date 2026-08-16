@@ -72,10 +72,7 @@ def _write_sharded_cache(
         stop = min(start + shard_channels, channels)
         path = root / f"target.channels_{start}_{stop}.f16"
         path.write_bytes(
-            values[:, start:stop]
-            .numpy()
-            .astype("<f2", copy=False)
-            .tobytes(order="C")
+            values[:, start:stop].numpy().astype("<f2", copy=False).tobytes(order="C")
         )
         shards.append(
             {
@@ -204,7 +201,9 @@ def test_sharded_cache_reads_validated_local_mirror_without_changing_provenance(
     assert all(shard.mapped_path.parent == mirror for shard in cache.shards)
     provenance = cache.provenance()
     assert Path(provenance["support"]["path"]).parent == authority.resolve()
-    assert all(Path(record["path"]).parent == authority for record in provenance["shards"])
+    assert all(
+        Path(record["path"]).parent == authority for record in provenance["shards"]
+    )
     assert not any(str(mirror) in str(value) for value in provenance["shards"])
     torch.testing.assert_close(
         cache.fetch_rows(torch.tensor([3, 0])), dense[[3, 0]], rtol=0, atol=0
@@ -327,8 +326,8 @@ def test_streamed_contribution_mean_matches_dense_and_resumes(
         device=torch.device("cpu"),
         resume_contract={"fixture": "v1"},
     )
-    shards, valid, counts, reliability = (
-        _stream_channel_sharded_contribution_mean(**kwargs)
+    shards, valid, counts, reliability = _stream_channel_sharded_contribution_mean(
+        **kwargs
     )
     streamed = torch.cat(
         [
@@ -363,6 +362,34 @@ def test_streamed_contribution_mean_matches_dense_and_resumes(
     assert torch.equal(valid, dense_valid)
     assert torch.equal(counts, torch.tensor([2, 2, 2]))
     torch.testing.assert_close(reliability[:, 2], valid.half())
+
+    wide_kwargs = {
+        **kwargs,
+        "output": tmp_path / "raw_wide.pt",
+        "shard_channels": 4,
+        "resume_contract": {"fixture": "v1-wide"},
+    }
+    wide_shards, wide_valid, wide_counts, wide_reliability = (
+        _stream_channel_sharded_contribution_mean(**wide_kwargs)
+    )
+    wide_streamed = torch.cat(
+        [
+            torch.from_numpy(
+                np.memmap(
+                    tmp_path / str(record["relative_path"]),
+                    mode="r",
+                    dtype="<f2",
+                    shape=tuple(record["shape"]),
+                ).copy()
+            )
+            for record in wide_shards
+        ],
+        dim=1,
+    )
+    torch.testing.assert_close(wide_streamed, streamed, rtol=0, atol=0)
+    assert torch.equal(wide_valid, valid)
+    assert torch.equal(wide_counts, counts)
+    torch.testing.assert_close(wide_reliability, reliability, rtol=0, atol=0)
 
     monkeypatch.setattr(
         "radio_gs.scripts.build_gaussian_multiview_teacher_cache._load_bundle_feature_maps",
@@ -412,9 +439,9 @@ def _write_progress_binding(output: Path, responsibility_sha256: str) -> Path:
         "registration_responsibility_cache_sha256": responsibility_sha256,
     }
     digest = hashlib.sha256(
-        json.dumps(
-            resume_contract, sort_keys=True, separators=(",", ":")
-        ).encode("utf-8")
+        json.dumps(resume_contract, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
     ).hexdigest()
     progress = output.with_suffix(output.suffix + ".partial.json")
     progress.write_text(
@@ -522,9 +549,7 @@ def test_stream_initializes_empty_progress_before_first_shard(
             resume_contract={"fixture": "empty-progress-v1"},
         )
     progress = json.loads(
-        output.with_suffix(output.suffix + ".partial.json").read_text(
-            encoding="utf-8"
-        )
+        output.with_suffix(output.suffix + ".partial.json").read_text(encoding="utf-8")
     )
     assert progress["shards"] == []
 
@@ -539,9 +564,7 @@ def test_dense_and_sharded_training_losses_are_equivalent(tmp_path: Path) -> Non
         ]
     ).half()
     path = _write_sharded_cache(tmp_path, features, feature_space="dino_v3")
-    sharded, _digest, _source = load_mpr_cache(
-        path, expected_feature_space="dino_v3"
-    )
+    sharded, _digest, _source = load_mpr_cache(path, expected_feature_space="dino_v3")
     assert isinstance(sharded, ShardedMPRCache)
     dense = PrimitiveConsensus(
         targets=features,
@@ -552,44 +575,32 @@ def test_dense_and_sharded_training_losses_are_equivalent(tmp_path: Path) -> Non
     )
     rows = torch.tensor([3, 0, 1])
     predicted = features[rows].float() + 0.1
-    dense_raw, _ = primitive_reconstruction_loss(
-        predicted, dense, row_indices=rows
-    )
-    sharded_raw, _ = primitive_reconstruction_loss(
-        predicted, sharded, row_indices=rows
-    )
+    dense_raw, _ = primitive_reconstruction_loss(predicted, dense, row_indices=rows)
+    sharded_raw, _ = primitive_reconstruction_loss(predicted, sharded, row_indices=rows)
     torch.testing.assert_close(sharded_raw, dense_raw, rtol=0, atol=0)
     dense_capability = _capability_consensus_loss(predicted, dense, rows)[0]
     sharded_capability = _capability_consensus_loss(predicted, sharded, rows)[0]
-    torch.testing.assert_close(
-        sharded_capability, dense_capability, rtol=0, atol=0
-    )
+    torch.testing.assert_close(sharded_capability, dense_capability, rtol=0, atol=0)
 
 
 def test_sharded_pca_materializes_the_same_frozen_sample(tmp_path: Path) -> None:
     features = torch.arange(80, dtype=torch.float32).reshape(10, 8).half()
     counts = torch.tensor([2, 1, 2, 1, 2, 0, 2, 1, 2, 1])
-    path = _write_sharded_cache(
-        tmp_path, features, counts=counts, shard_channels=3
-    )
+    path = _write_sharded_cache(tmp_path, features, counts=counts, shard_channels=3)
     sharded, _digest, _source = load_mpr_cache(path)
     assert isinstance(sharded, ShardedMPRCache)
     valid_rows = torch.where(counts > 0)[0]
     generator = torch.Generator(device="cpu").manual_seed(17)
     chosen = torch.randperm(valid_rows.numel(), generator=generator)[:4]
     expected = features[valid_rows[chosen]].float()
-    actual = _basis_fit_values(
-        sharded, valid_rows, max_samples=4, seed=17
-    )
+    actual = _basis_fit_values(sharded, valid_rows, max_samples=4, seed=17)
     torch.testing.assert_close(actual, expected, rtol=0, atol=0)
 
 
 def test_trainer_streams_raw_target_and_binds_all_shards(tmp_path: Path) -> None:
     features = torch.randn(12, 8).half()
     counts = torch.tensor([2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1])
-    cache = _write_sharded_cache(
-        tmp_path, features, counts=counts, shard_channels=3
-    )
+    cache = _write_sharded_cache(tmp_path, features, counts=counts, shard_channels=3)
     checkpoint = tmp_path / "radio.ckpt"
     checkpoint.write_bytes(b"test-only checkpoint identity")
     output = tmp_path / "field.pth"

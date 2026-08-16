@@ -1,0 +1,53 @@
+{
+  "artifact_type": "radio_gs_marginal_categorical_posterior_v2_independent_source_gate_result",
+  "schema_version": 1,
+  "status": "complete_rejected_before_fit3_and_paper_eight_open",
+  "preregistration": "paper/artifacts/marginal_categorical_posterior_v2_independent_source_preregistration_20260816.json",
+  "authorities": {
+    "dataset_manifest_sha256": "74ff10e74723002b749a4545dc270617416b17043550f98213811c7bbcc8f880",
+    "typed_posterior_source_sha256": "fac38cabde8fe18ac2dcb13c659b6a44f65848a4f1ce6a926dc0d1a243643a59",
+    "trainer_source_sha256": "a2d3584e07417f4cc41ceec2c88dfed23710061040f0b857cd95349c57be89d3",
+    "loso_result": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2/source_marginal_categorical_posterior_v2.loso.v1.json",
+      "sha256": "7aae5f17341879d89884cd3162fec791b6e79053aefcada2af48a7055a14fccb"
+    }
+  },
+  "source_loso": {
+    "all_passed": false,
+    "macro_delta": {
+      "miou": -0.05958946545918783,
+      "macc": -0.05310883124669393
+    },
+    "folds": {
+      "scene0001_00": {
+        "miou_delta": -0.05547720193862915,
+        "macc_delta": -0.04199540615081787,
+        "centering_strength": -0.45449700951576233,
+        "scaling_strength": -0.41558438539505005,
+        "passed": false
+      },
+      "scene0002_00": {
+        "miou_delta": -0.10114181041717529,
+        "macc_delta": -0.09394514560699463,
+        "centering_strength": -0.5533743500709534,
+        "scaling_strength": -0.37804657220840454,
+        "passed": false
+      },
+      "scene0005_00": {
+        "miou_delta": -0.022149384021759033,
+        "macc_delta": -0.023385941982269287,
+        "centering_strength": -0.4482247233390808,
+        "scaling_strength": -0.3568149209022522,
+        "passed": false
+      }
+    }
+  },
+  "conclusion": {
+    "mechanism": "Source-fit cross entropy consistently learns negative centering and scaling corrections, but the same rule worsens every held-out source scene. Class score marginals are not sufficiently stable across scenes for this low-dimensional transfer rule.",
+    "promote": false,
+    "fit3_executed": false,
+    "paper_eight_labels_opened": false,
+    "paper_or_sota_claim_eligible": false,
+    "next_action": "Stop categorical-head iteration at the frozen source gate; retain Primitive Readout-v0 for the eligible ScanNet row and complete the missing NVOS and Available-Nine SPIn-NeRF D512/L512 cohorts."
+  }
+}

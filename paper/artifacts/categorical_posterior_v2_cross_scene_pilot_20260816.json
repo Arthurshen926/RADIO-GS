@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_categorical_posterior_v2_cross_scene_pilot_evidence",
+  "status": "mechanism_supported_development_only",
+  "readout": "radio-gs-categorical-posterior-v2",
+  "baseline": "radio-gs-primitive-readout-v0",
+  "benchmark": "scannet_ovs_vala_pseudo_volume",
+  "eligibility": {
+    "benchmark_labels_opened": true,
+    "train_scenes": [
+      "scene0000_00",
+      "scene0070_00"
+    ],
+    "heldout_scenes": [
+      "scene0062_00",
+      "scene0097_00",
+      "scene0140_00",
+      "scene0347_00",
+      "scene0400_00",
+      "scene0590_00"
+    ],
+    "heldout_labels_used_for_optimization": false,
+    "paper_or_sota_claim_eligible": false
+  },
+  "heldout6": {
+    "19": {
+      "baseline_miou": 0.3416935929708547,
+      "calibrated_miou": 0.4144067854977307,
+      "miou_delta": 0.07271319252687597,
+      "baseline_macc": 0.6861508709426868,
+      "calibrated_macc": 0.7117084628556768,
+      "macc_delta": 0.025557591912990008
+    },
+    "15": {
+      "baseline_miou": 0.34017024121525324,
+      "calibrated_miou": 0.43041711292527207,
+      "miou_delta": 0.09024687171001883,
+      "baseline_macc": 0.6704128190494675,
+      "calibrated_macc": 0.7180852162487587,
+      "macc_delta": 0.04767239719929117
+    },
+    "10": {
+      "baseline_miou": 0.4503870225590872,
+      "calibrated_miou": 0.5379806483306367,
+      "miou_delta": 0.08759362577154955,
+      "baseline_macc": 0.7352856522768766,
+      "calibrated_macc": 0.7792906652032136,
+      "macc_delta": 0.04400501292633696
+    }
+  },
+  "all8_diagnostic": {
+    "19_miou": 0.3960231186146686,
+    "15_miou": 0.41223397678212303,
+    "10_miou": 0.5056792493093718
+  },
+  "heldout6_reliability_ablation": {
+    "operation": "set all five reliability scalars to zero at inference while keeping the trained head fixed",
+    "19_miou_delta_full_minus_zero_reliability": 0.0,
+    "15_miou_delta_full_minus_zero_reliability": 0.0,
+    "10_miou_delta_full_minus_zero_reliability": 0.0,
+    "conclusion": "The current categorical gain is entirely due to shared class temperature/bias calibration at the discrete-prediction level; this pilot does not establish an incremental benefit from reliability."
+  },
+  "gate": {
+    "rule": "held-out mIoU improves on 19/15/10 and held-out mAcc drop is <=0.01 on each split",
+    "pass": true
+  },
+  "full_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/categorical_posterior_v2_pilot_train0000_0070_sourcebound_v2/categorical_posterior_v2_cross_scene_pilot.json",
+    "sha256": "c48ff008c460fcf0fccaa41baa29e96d924d68da1d9bea114d706b2a78f2f4af"
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/categorical_posterior_v2_pilot_train0000_0070_sourcebound_v2/categorical_posterior_v2_development_only.pth",
+    "sha256": "b92997f0545750f7e23523604becd42561b2355c03bb41ab00a46094926d326a"
+  },
+  "conclusion": "A globally shared typed categorical calibration head generalizes across the six held-out scenes, so the low Primitive Readout-v0 row is a readout-calibration bottleneck rather than evidence that D512/L512 damaged the field. A paper-eligible head still requires independent source-scene training."
+}

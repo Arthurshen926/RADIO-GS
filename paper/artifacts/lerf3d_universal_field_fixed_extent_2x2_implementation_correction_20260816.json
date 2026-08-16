@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf3d_universal_field_fixed_extent_2x2_implementation_correction",
+  "status": "sealed_after_identity_attempt_and_before_corrected_candidate_metrics",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_fixed_extent_2x2_preregistration_20260816.json",
+    "sha256": "0cccade7f7171d825b8f7411ff8602898cbe8fec9d2b0695096c9bda4d8bd2a5"
+  },
+  "implementation_defect": {
+    "finding": "The vala_paper_3d preset overwrites --score_postprocess after argument parsing and forces none, so the first diagnostic invocation did not execute the preregistered candidate.",
+    "code_location": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "forced_rule": "vala_knn_minmax only when protocol_preset equals vala_repo_3d; otherwise none",
+    "impact": "The first two reports are exact Primitive Readout-v0 identities and contain no candidate metric information."
+  },
+  "identity_attempt": {
+    "figurines": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_fixed_extent_2x2/development/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "ab8704e4aa6617e555c738fc096eead3b8e940dde88581f37d42a3ce500624fd",
+      "effective_score_postprocess": "none",
+      "miou": 0.44840091466903687,
+      "delta_from_control": 0.0
+    },
+    "ramen": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_fixed_extent_2x2/development/ramen/ramen/lerf_direct_3d_selection_results.json",
+      "sha256": "5b2203c03dc545c92f1f74b6668081059bbdc55b2435bf9f47db853d16b13e81",
+      "effective_score_postprocess": "none",
+      "miou": 0.29173415899276733,
+      "delta_from_control": 0.0
+    }
+  },
+  "corrected_execution": {
+    "protocol_preset": "vala_repo_3d",
+    "reason": "Within the frozen VALA base presets this is the executable path that sets the preregistered query-independent vala_knn_minmax operator; all other base-preset settings remain shared.",
+    "effective_score_postprocess": "vala_knn_minmax",
+    "vala_knn_k": 10,
+    "all_other_frozen_candidate_settings_unchanged": true,
+    "new_parameter_or_target_tuning": false
+  },
+  "evaluation_contract_audit": {
+    "authority": "/root/RADIO-GS/paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+    "frozen_lerf3d_requires_semantic_levels": 3,
+    "frozen_lerf3d_requires_knn": 10,
+    "frozen_lerf3d_requires_minmax_relevance_mapping": true,
+    "current_primitive_readout_v0_row_used_semantic_levels": 1,
+    "current_primitive_readout_v0_row_used_knn_minmax": false,
+    "conclusion": "The 0.33450 row is valid development evidence for Primitive Readout-v0 but is not the complete frozen-contract LERF3D validation row. The corrected single-level run remains a causal diagnostic; a final row still requires three derived semantic levels."
+  },
+  "heldout_policy": "unchanged: do not execute corrected heldout candidates unless the corrected development gate passes",
+  "uqis_in_scope": false
+}

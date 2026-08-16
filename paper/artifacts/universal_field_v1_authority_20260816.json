@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_universal_field_authority",
+  "status": "active_development_field_authority",
+  "universal_field_id": "radio-gs-universal-field-v1",
+  "baseline_readout_id": "radio-gs-primitive-readout-v0",
+  "supersedes_field_role_from": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json",
+  "identity_note": "The old Method-v1 remains an immutable joint baseline. Universal Field v1 names only the reusable persistent scene field; Primitive Readout-v0 names its historical minimal causal readout.",
+  "persistent_scene_state": {
+    "count": 1,
+    "checkpoint_schema_version": 3,
+    "canonical_feature_dim": 1280,
+    "coefficient_dim": 512,
+    "local_dim": 512,
+    "reliability_dim": 5,
+    "reliability_scalar_names": [
+      "directional_resultant",
+      "directional_dispersion",
+      "log_amplitude_std",
+      "observation_evidence",
+      "visibility_purity"
+    ],
+    "reliability_fused_into_decoder": false,
+    "reliability_role": "query_posterior_calibration_only",
+    "query_dependent_state": false,
+    "stored_dino_field": false,
+    "stored_sam_field": false,
+    "stored_text_field": false
+  },
+  "construction": {
+    "observation_contract": "canonical-exact-marginal-mpr-v1",
+    "registration_weight_mode": "exact_front_to_back_marginal_responsibility",
+    "field_observation_contract": "canonical-factorized-radio-v1",
+    "raw_radio_owns_radial_gauge": true,
+    "capability_gradients": "tangent_only",
+    "field_training_changed_by_schema3_migration": false,
+    "decoded_radio_changed_by_schema3_migration": false
+  },
+  "query_interfaces": {
+    "primitive_readout_v0": {
+      "role": "frozen_causal_baseline",
+      "final_method": false
+    },
+    "text_posterior_v2": {
+      "tasks": ["lerf2d", "lerf3d"],
+      "status": "development"
+    },
+    "categorical_posterior_v2": {
+      "tasks": ["scannet_ovs"],
+      "status": "development"
+    },
+    "transient_rgb_sam_adapter": {
+      "tasks": ["nvos", "spin_nerf_available9"],
+      "status": "retained"
+    }
+  },
+  "target_access": {
+    "schema_migration_uses_benchmark_images": false,
+    "schema_migration_uses_benchmark_masks": false,
+    "schema_migration_uses_benchmark_queries": false,
+    "schema_migration_uses_benchmark_labels": false,
+    "schema_migration_uses_target_metrics": false
+  }
+}

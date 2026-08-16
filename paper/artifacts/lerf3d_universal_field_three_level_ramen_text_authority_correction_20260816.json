@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf3d_universal_field_three_level_ramen_text_authority_correction",
+  "status": "sealed_after_fail_closed_preflight_and_before_corrected_scores_or_metrics",
+  "registered_at": "2026-08-16T12:30:00+08:00",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_three_level_2x2_preregistration_20260816.json",
+    "sha256": "78a9c0c67585fbbb6ec9579e10add8d34cb3f71d22e72f4ca68f4aa71023ff9d"
+  },
+  "failed_input": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_ramen_officialcanonical_prompt5.pt",
+    "sha256": "075734115e2289c886160c5ef45c7f1d14c1be28647d0d9653dfe54c217c412a",
+    "prompt_templates": [
+      "{query}",
+      "a photo of {query}",
+      "a photo of a {query}",
+      "the {query}",
+      "a {query} object"
+    ],
+    "failure": "Frozen v2 authority requires the exact single {query} template. The materializer rejected this cache before metrics."
+  },
+  "corrected_input": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_universal_field_three_level_2x2_v1/assets/ramen/exact_query_text_cache.pt",
+    "sha256": "60781c9a9e2db6c18427d5496da330068e3665303e396deea1f3f377b801721c",
+    "prompt_templates": [
+      "{query}"
+    ],
+    "text_encoder": "siglip2",
+    "model_name": "google/siglip2-giant-opt-patch16-384",
+    "text_canonicalization": "official_c_radio_siglip2_g",
+    "queries": 14
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_siglip2_text_query_cache.py",
+    "sha256": "fb96ae78212c8db415daeae3ef59309f43cb823534b7680a8c2eb4136b12bdf9"
+  },
+  "independent_authority_check": {
+    "reference": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "query_order_matches": true,
+    "mean_cosine": 1.0,
+    "maximum_absolute_difference": 1.2665987014770508e-07,
+    "interpretation": "The regenerated exact-template rows reproduce the frozen all-query embedding directions to floating-point tolerance while adding the required explicit canonicalization metadata."
+  },
+  "execution_correction": {
+    "discard_old_streamed_scores_from_candidate_evidence": true,
+    "reuse_query_independent_radio_resume": false,
+    "recompute_all_ramen_streamed_scores_with_corrected_text_cache": true,
+    "changes_field": false,
+    "changes_surface_region_readout": false,
+    "changes_frozen_evaluator": false,
+    "opens_target_labels_or_metrics": false
+  },
+  "uqis_in_scope": false
+}

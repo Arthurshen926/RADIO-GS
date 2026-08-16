@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf3d_universal_field_three_level_development_score_seal",
+  "status": "sealed_before_development_labels_or_metrics",
+  "sealed_at": "2026-08-16T12:42:00+08:00",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_three_level_2x2_preregistration_20260816.json",
+    "sha256": "78a9c0c67585fbbb6ec9579e10add8d34cb3f71d22e72f4ca68f4aa71023ff9d"
+  },
+  "ramen_text_authority_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_three_level_ramen_text_authority_correction_20260816.json",
+    "sha256": "cbce6e35ea083711fe1b4ac33aed88e63232cebf8b721386eb79abe0ffeea3ae"
+  },
+  "query_score_authorities": {
+    "figurines": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_universal_field_three_level_2x2_v1/query_scores/figurines.pt",
+      "sha256": "296ee49a2f276d2a9419d12137cee73e67a453cb1a7e3ed02361ca033f82cbce",
+      "sidecar_sha256": "e88b0b709a420e32cfd03385cb02a6c030a2b5976249f031effa968d0251d1b2",
+      "shape_n3q": [
+        168791,
+        3,
+        21
+      ],
+      "valid_primitives": 96879,
+      "field_checkpoint_sha256": "9beeb9db4f91055ee17eaee4b85c60f790417fb9cc109772fea853b1c5b86e8b",
+      "renderer_geometry_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "ramen": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_universal_field_three_level_2x2_v1/query_scores/ramen.pt",
+      "sha256": "4624b7e2d5f7afb78a668fdfbc147c7eb3e307566c5ed564670cb3a5c38c2d67",
+      "sidecar_sha256": "37e72d02629d09474b426f2cf79827ac2673ac52cb2826cd7eb5f4de0b392016",
+      "shape_n3q": [
+        382687,
+        3,
+        14
+      ],
+      "valid_primitives": 328453,
+      "field_checkpoint_sha256": "9b469fb1732235f9f81db1609fc0e2cf710f7211f74410b895bc1edcf8971e8f",
+      "renderer_geometry_checkpoint_sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    }
+  },
+  "shared_contract": {
+    "scale_radii_m": [
+      0.25,
+      0.45,
+      0.7
+    ],
+    "score_semantics": "raw_independent_normalized_cosine",
+    "execution_representation": "streamed_scalar_scores_only",
+    "readout_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "calibration_or_threshold_applied": false,
+    "scale_reduction_applied": false
+  },
+  "preflight": {
+    "validate_ours_multiscale_query_score_cache": "pass_both_scenes",
+    "field_renderer_row_alignment": "pass_both_scenes",
+    "source_roles": [
+      "field_checkpoint",
+      "materializer_source",
+      "readout_checkpoint",
+      "renderer_geometry_checkpoint",
+      "streamed_query_score_cache",
+      "streaming_source",
+      "text_query_cache"
+    ],
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false
+  },
+  "uqis_in_scope": false
+}

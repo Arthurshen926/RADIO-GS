@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_host_memory_stage_lock_correction",
+  "status": "implemented_unit_tested_real_lock_passed_prior_failure_boundary",
+  "trigger": {
+    "failed_scene": "leaves",
+    "failed_stage": "region_stage_before_first_step_record",
+    "exit_code": 137,
+    "concurrent_scene": "fern",
+    "concurrent_stage": "factorized_mpr",
+    "fern_measured_rss_bytes_approx": 9643032000,
+    "fern_preflight_estimated_peak_bytes": 12433917821,
+    "fern_preflight_available_memory_bytes": 15623483392,
+    "partial_leaves_region_field_written": false,
+    "completed_fern_factorized_mpr_preserved": true
+  },
+  "root_cause": "The prior scheduler treated two GPUs as independent resources but did not model the shared 31 GiB host-memory boundary. Each stage passed its own local preflight, yet the fern MPR and leaves region load peaks could not coexist.",
+  "correction": {
+    "lock": "/tmp/radio_gs_spin9_host_memory_stage.lock",
+    "mechanism": "cross_process_fcntl_advisory_exclusive_lock",
+    "serialized_stages": [
+      "factorized_mpr",
+      "exact_raw_mpr",
+      "exact_dino_mpr",
+      "exact_sam_mpr",
+      "base_field",
+      "siglip_stage",
+      "region_stage",
+      "generic_stage"
+    ],
+    "still_parallel_stages": [
+      "source_features",
+      "validation_plan",
+      "crop_teacher",
+      "method_gate"
+    ],
+    "failed_or_missing_gate_stops_queue": true
+  },
+  "verification": {
+    "focused_runner_tests_passed": 4,
+    "python_compile": "pass",
+    "real_lock_owner": {
+      "scene": "leaves",
+      "stage": "region_stage"
+    },
+    "real_waiter": {
+      "scene": "fern",
+      "stage": "exact_raw_mpr"
+    },
+    "fern_factorized_mpr_output_bytes": 3424847791,
+    "leaves_region_step1_passed": true,
+    "leaves_region_rss_bytes_at_step1_approx": 21580444000,
+    "leaves_region_raw_validation_cosine_at_step1": 0.7910535324489173,
+    "leaves_region_siglip2_validation_cosine_at_step1": 0.7782904004693062,
+    "leaves_region_semantic_validation_cosine_at_step1": 0.45146284284446325,
+    "leaves_region_mpr_probe_cosine_at_step1": 0.9994603395462036,
+    "benchmark_masks_opened": false
+  },
+  "claim_boundary": "The lock has carried leaves through the former region-load failure boundary and full step-1 validation. Leaves step 32/64 and all remaining field/benchmark gates are still required."
+}

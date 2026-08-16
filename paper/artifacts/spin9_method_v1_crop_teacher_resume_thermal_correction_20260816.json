@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_crop_teacher_resume_thermal_correction",
+  "status": "implemented_unit_tested_and_real_leaves_full26_passed",
+  "trigger": {
+    "scene": "leaves",
+    "stage": "genuine_source_crop_summary_teacher",
+    "first_attempt_completed_frames": 12,
+    "thermal_guard_exit_code": 86,
+    "observed_temperature_c": 85,
+    "hard_temperature_threshold_c": 84,
+    "completed_frame_tensors_deleted": false
+  },
+  "correction": {
+    "per_frame_tensor_write": "atomic_replace",
+    "scene_manifest_write": "atomic_replace",
+    "root_manifest_write": "atomic_replace",
+    "resume_partial": true,
+    "resume_validation": [
+      "shape",
+      "dtype",
+      "finite"
+    ],
+    "reused_frame_report_reconstruction": "deterministic",
+    "thermal_pacing_seconds_per_new_frame": 10,
+    "teacher_or_crop_definition_changed": false
+  },
+  "real_leaves_verification": {
+    "reused_frames": 12,
+    "final_num_frames": 26,
+    "frame_id_mode": "source_rank",
+    "output_size": [
+      189,
+      252
+    ],
+    "benchmark_masks_opened": false,
+    "label_content_opened": false,
+    "excluded_image_stems": [],
+    "manifest": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/leaves/genuine_crop_summary_teacher/manifest.json"
+  },
+  "claim_boundary": "This is a crash-safe and thermally paced extraction correction; it reuses only validated source-image teacher tensors and does not inspect target masks or scores."
+}

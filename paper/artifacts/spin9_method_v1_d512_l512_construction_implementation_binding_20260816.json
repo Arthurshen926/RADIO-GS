@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_d512_l512_construction_implementation_binding",
+  "status": "implementation_bound_before_first_execution",
+  "preregistration": {
+    "path": "paper/artifacts/spin9_method_v1_d512_l512_construction_preregistration_20260816.json",
+    "sha256": "da9b77afd90828d4e1f0f9138d416230d0d8ea8e5e779c287896331c6f5faf12"
+  },
+  "implementation": {
+    "path": "radio_gs/scripts/run_spin9_method_v1_scene.py",
+    "sha256": "97adabd6cad5012d4407e362e9efeb671f7cb9b1453e78b4da6833ad91682b00"
+  },
+  "test": {
+    "path": "tests/test_run_spin9_method_v1_scene.py",
+    "sha256": "72f072a8c9523a41c6a1779294ce2286146f9dd4028c9a5a4509bf626849de64",
+    "result": "3 passed; registered-source versus benchmark-target RGB classification is explicit"
+  },
+  "frozen_checks": [
+    "Available-Nine scene membership and historical carrier hashes fail closed",
+    "resolution scale remains 1.0 and must reproduce each carrier config feature grid",
+    "all-view source extraction has no RGB exclusion option",
+    "all legal views are classified as registered source RGB, not gated benchmark-target RGB",
+    "official SigLIP2 adaptor extraction is mandatory",
+    "reference/evaluation masks, queries, and metrics remain unopened during construction",
+    "base field is D512/L512 and all three 64-step Method-v1 stages are mandatory"
+  ],
+  "execution_authorized": true
+}

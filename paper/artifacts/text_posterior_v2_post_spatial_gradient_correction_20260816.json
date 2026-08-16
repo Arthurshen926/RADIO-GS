@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_text_posterior_v2_post_spatial_gradient_correction",
+  "status": "sealed_before_corrected_source_loso",
+  "superseded_result": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2/source_post_spatial_text_posterior.loso.v1.json",
+    "sha256": "7ce64b039fc616298e0fc09f10ac212c57f5ea996ab5da736a0d78162d1c544d",
+    "observed_deltas": {
+      "balanced_bce_delta": 0.0,
+      "hard_iou_delta": 0.0,
+      "local_relation_loss_delta": 0.0,
+      "positive_negative_gap_delta": 0.0
+    },
+    "eligible_as_method_evidence": false
+  },
+  "root_cause": "An exact-identity torch.where selected the base-probability branch whenever the initialized residual equaled zero. That branch also blocked every residual gradient, so optimization only weight-decayed unused hidden weights and could never leave the identity state.",
+  "correction": "Remove the redundant torch.where. IEEE addition by an exact zero plus clamp already preserves all in-range base probabilities bitwise, while retaining the residual gradient.",
+  "method_or_gate_changed": false,
+  "data_or_labels_changed": false,
+  "corrected_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/querying/typed_posteriors.py",
+    "sha256": "45f8f5d0689a7e7a460c6557f8fa90d4ad682523d49bff3a1d4892384f56771a"
+  },
+  "verification": {
+    "zero_initialized_post_spatial_bitwise_identity": true,
+    "zero_initialized_residual_gradient_nonzero": true,
+    "targeted_tests_passed": 13,
+    "development_scene0003_opened": false,
+    "lerf_queries_or_ground_truth_opened": false
+  },
+  "corrected_run_rule": "Reuse the sealed source shards, training recipe, and precommitted LOSO gates; write a new v2 result without overwriting the superseded execution."
+}

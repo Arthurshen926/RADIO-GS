@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_d512_l512_construction_preregistration",
+  "status": "frozen_before_first_d512_l512_spin9_execution",
+  "benchmark": "SPIn-NeRF Available-Nine",
+  "method_id": "radio-gs-method-v1",
+  "scope": "query-independent persistent field construction only",
+  "authorities": {
+    "method": {
+      "path": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json",
+      "sha256": "48e0d432f38ce9ad973e03a805e50a477c1e334ac78349f80eb6e6e02f6239c6"
+    },
+    "protocol_registry": {
+      "path": "paper/artifacts/promptable_nvs_protocol_registry.yaml",
+      "sha256": "5d1a044513ce2c5d3850dbd95f4a3505c566ae2649e5d89b7e926daf4a568c54"
+    },
+    "exact_local9_assets": {
+      "path": "paper/artifacts/spin9_canonical_mpr_v3_exact_local9_authority_20260803.json",
+      "sha256": "9eea89217b85b75319a87b90e3da4a27c8b62ed0c920f8b8da0a14a091899340"
+    },
+    "dataset_manifest": {
+      "path": "output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    }
+  },
+  "cohort": [
+    "orchids",
+    "leaves",
+    "fern",
+    "room",
+    "horns",
+    "fortress",
+    "pinecone",
+    "truck",
+    "lego"
+  ],
+  "construction": {
+    "rgb_policy": "all registered RGB views permitted by the frozen SPIn-NeRF protocol",
+    "feature_extraction": {
+      "radio_version": "c-radio_v4-h",
+      "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+      "resolution_scale": 1.0,
+      "resolution_reason": "preserve each frozen carrier config's registered feature grid; do not replace it with the NVOS quarter-scale rule",
+      "frame_id_mode": "source_rank",
+      "official_adaptors": [
+        "siglip2-g"
+      ]
+    },
+    "validation": {
+      "policy": "deterministic_even_interior_frame_manifest_v1",
+      "views": 4,
+      "selection_inputs": "registered feature frame IDs only"
+    },
+    "registration": {
+      "observation_contract": "canonical-exact-marginal-mpr-v1",
+      "max_views": 120,
+      "alpha_threshold": 0,
+      "registration_weight_mode": "alpha_depth",
+      "raster_view_fusion": "contribution_mean",
+      "robust_mpr": false,
+      "normalize_each_view_for_matched_capabilities": true
+    },
+    "persistent_field": {
+      "observation_contract": "canonical-factorized-radio-v1",
+      "coefficient_dim": 512,
+      "local_dim": 512,
+      "fusion_reliability": false,
+      "basis_frozen": true,
+      "epochs": 20,
+      "minimum_epochs": 20,
+      "learning_rate": 0.002,
+      "weight_decay": 0.00001,
+      "seed": 0
+    },
+    "post_base_stages": [
+      {
+        "stage": "official_siglip2_full_grid",
+        "steps": 64,
+        "weight": 0.05,
+        "selection": "capability_pareto"
+      },
+      {
+        "stage": "genuine_source_crop_region_summary",
+        "steps": 64,
+        "weight": 0.05,
+        "selection": "semantic_capability"
+      },
+      {
+        "stage": "target_blind_generic_text_response",
+        "steps": 64,
+        "weight": 0.05,
+        "selection": "text_response_capability"
+      }
+    ]
+  },
+  "forbidden_during_construction": [
+    "reference masks",
+    "evaluation masks",
+    "benchmark text queries",
+    "target metrics",
+    "scene-specific hyperparameter selection",
+    "D256/L128 substitution"
+  ],
+  "execution_gate": {
+    "planned_runner": "radio_gs/scripts/run_spin9_method_v1_scene.py",
+    "require_source_hash_binding_before_execution": true,
+    "require_method_v1_field_gate_per_scene": true,
+    "require_complete_available9_before_evaluation": true
+  }
+}

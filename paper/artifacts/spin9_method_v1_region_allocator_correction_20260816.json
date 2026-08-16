@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_region_allocator_correction",
+  "status": "implemented_unit_tested_and_real_orchids_64_step_stage_passed",
+  "trigger": {
+    "scene": "orchids",
+    "stage": "genuine_source_crop_region_summary",
+    "first_failure": "step 2 backward exceeded the 24 GiB CUDA boundary after AdamW moments were materialized",
+    "second_failure": "the post-step-32 semantic forward requested 280 MiB with only 279.75 MiB free while 23.10 GiB was reserved",
+    "partial_region_field_written": false,
+    "parent_siglip_field_changed": false
+  },
+  "root_cause": "Dense render, capability and semantic validation graphs temporarily overlapped cached CUDA allocator blocks and GPU-resident AdamW moments even though the moments are not used during forward/backward.",
+  "correction": {
+    "delete_dense_step_references_before_next_forward": true,
+    "release_unused_cuda_cache_after_validation": true,
+    "optimizer_state_residency": "cpu_between_steps_gpu_only_during_exact_adamw_update",
+    "optimizer_update_rule_changed": false,
+    "loss_or_selection_rule_changed": false,
+    "automatic_semantic_stage_fallback": true
+  },
+  "real_orchids_verification": {
+    "completed_steps": 64,
+    "best_step": 64,
+    "previous_failure_boundary_crossed": true,
+    "initial_raw_validation_cosine": 0.9057104848867612,
+    "best_raw_validation_cosine": 0.9057966909055898,
+    "initial_siglip2_validation_cosine": 0.844434956593256,
+    "best_siglip2_validation_cosine": 0.8447325625150973,
+    "initial_semantic_validation_cosine": 0.4229461886630109,
+    "best_semantic_validation_cosine": 0.4391167979219097,
+    "initial_mpr_probe_cosine": 0.9991074800491333,
+    "best_mpr_probe_cosine": 0.9990994930267334,
+    "allowed_mpr_drop": 0.0002,
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/orchids/official_siglip2_spatial_region_w005_s0_64.pth",
+    "benchmark_masks_opened": false
+  },
+  "claim_boundary": "This validates the runtime correction and the source-only region stage on orchids; it is not a SPIn-NeRF benchmark score or SOTA claim."
+}

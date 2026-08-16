@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_source_feature_result",
+  "status": "complete_and_sealed",
+  "benchmark": "SPIn-NeRF Available-Nine",
+  "scene": "orchids",
+  "construction_preregistration": "paper/artifacts/spin9_method_v1_d512_l512_construction_preregistration_20260816.json",
+  "implementation_binding": {
+    "path": "paper/artifacts/spin9_method_v1_d512_l512_construction_implementation_binding_20260816.json",
+    "sha256": "c4244d6aeb78da9b583e8706f1c86822a3214f16aeb490e860e5e180aa844bb0"
+  },
+  "feature_manifest": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/orchids/all_view_features/frame_manifest.json",
+    "sha256": "df86606ac39343b06266f401cb781f5e07b90142073e49329b8ed41a04788b4e",
+    "output_bundle_sha256": "4537b0fe42bc1737311d3329a700afefd917d52e8e481c7447d71ec5250f4f60"
+  },
+  "result": {
+    "registered_rgb_frames": 25,
+    "excluded_image_stems": [],
+    "resolution_scale": 1.0,
+    "feature_grid": [
+      189,
+      252
+    ],
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "official_adaptors": [
+      "siglip2-g"
+    ],
+    "disk_footprint_gib_approx": 6.3
+  },
+  "safety": {
+    "registered_source_rgb_opened": true,
+    "reference_masks_opened": false,
+    "evaluation_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_opened": false
+  },
+  "next_stage": "deterministic four-view fidelity plan followed by factorized exact-marginal MPR"
+}

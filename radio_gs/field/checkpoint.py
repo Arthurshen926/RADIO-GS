@@ -446,3 +446,39 @@ def load_factorized_canonical_field_checkpoint(
     if field.reliability.shape != (field.num_gaussians, 0):
         raise ValueError("factorized field reconstructed target reliability")
     return field, payload, factorized_signature
+
+
+def load_universal_canonical_field_checkpoint(
+    path: str | Path,
+    *,
+    map_location: str | torch.device = "cpu",
+    expected_sha256: str | None = None,
+) -> tuple[CanonicalGaussianField, Mapping[str, Any], FactorizedRadioFieldSignature]:
+    """Load Universal Field v1 with deployment reliability kept out of fusion."""
+
+    from radio_gs.universal_field_v1 import validate_universal_field_payload
+
+    payload, _, _ = load_torch_mapping(
+        Path(path),
+        expected_sha256=expected_sha256,
+        map_location="cpu",
+        label="Universal Field v1 checkpoint",
+    )
+    if not isinstance(payload, Mapping):
+        raise ValueError("Universal Field v1 checkpoint is not a mapping")
+    validate_universal_field_payload(payload)
+    metadata = payload.get("factorized_radio_metadata")
+    if not isinstance(metadata, Mapping):
+        raise ValueError("Universal Field v1 lacks factorized RADIO metadata")
+    signature = validate_factorized_radio_checkpoint_metadata(metadata)
+    field = _canonical_field_from_payload(
+        payload,
+        map_location=map_location,
+        signature=signature.base_feature_signature,
+    )
+    if field.fusion_reliability or field.reliability.shape != (
+        field.num_gaussians,
+        5,
+    ):
+        raise ValueError("Universal Field v1 reliability reconstruction differs")
+    return field, payload, signature

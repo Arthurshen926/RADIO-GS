@@ -8,6 +8,19 @@ import torch
 import radio_gs.scripts.finetune_canonical_radio_rendering as finetune
 
 
+def test_selection_snapshot_is_independent_cpu_state() -> None:
+    module = torch.nn.Linear(3, 2)
+    snapshot = finetune._cpu_state_dict(module)
+    expected = {name: value.detach().clone() for name, value in module.state_dict().items()}
+
+    with torch.no_grad():
+        module.weight.add_(10.0)
+
+    assert all(value.device.type == "cpu" for value in snapshot.values())
+    assert all(torch.equal(snapshot[name], expected[name]) for name in snapshot)
+    assert snapshot["weight"].data_ptr() != module.weight.data_ptr()
+
+
 def test_method_v1_lineage_recovers_base_and_parent_stage(tmp_path: Path) -> None:
     base = tmp_path / "base.pth"
     parent = tmp_path / "spatial.pth"
@@ -37,6 +50,48 @@ def test_method_v1_lineage_recovers_base_and_parent_stage(tmp_path: Path) -> Non
         "official_siglip2_full_grid",
     ]
     assert all(len(record["sha256"]) == 64 for record in lineage)
+
+
+def test_method_v1_lineage_accepts_precomputed_parent_digest(
+    tmp_path: Path, monkeypatch
+) -> None:
+    parent = tmp_path / "base.pth"
+    parent.write_bytes(b"base")
+    args = SimpleNamespace(field_checkpoint=str(parent), construction_prior_field=[])
+    digest = "a" * 64
+    monkeypatch.setattr(
+        finetune,
+        "sha256_file",
+        lambda _path: pytest.fail("precomputed digest must avoid a second hash"),
+    )
+
+    lineage = finetune._method_v1_predecessor_lineage(
+        args,
+        {
+            "method_v1_construction_lineage": [
+                {
+                    "stage": "factorized_d512_l512",
+                    "field": "/frozen/base.pth",
+                    "sha256": "b" * 64,
+                    "selection_policy": "mapping_only_checkpoint_rule",
+                    "best_step": 0,
+                }
+            ],
+            "render_optimization": {
+                "selection_policy": "capability_pareto",
+                "best_step": 64,
+                "official_render_capability": {
+                    "adaptor_weights": {"siglip2-g": 0.05}
+                },
+                "semantic_capability": {"enabled": False},
+                "generic_text_response": {"enabled": False},
+            },
+        },
+        current_stage="genuine_source_crop_region_summary",
+        parent_sha256=digest,
+    )
+
+    assert lineage[-1]["sha256"] == digest
 
 
 def test_checkpoint_persists_capability_pareto_drop_authority() -> None:
@@ -223,3 +278,133 @@ def test_capability_validation_uses_direct_official_maps_without_reprojection(
 
     assert legacy["sam3"] == pytest.approx(0.0, abs=1e-6)
     assert direct["sam3"] == pytest.approx(1.0, abs=1e-6)
+
+
+def test_validation_cuda_cache_release_is_explicit_and_cuda_only(monkeypatch) -> None:
+    calls: list[bool] = []
+    monkeypatch.setattr(torch.cuda, "empty_cache", lambda: calls.append(True))
+
+    finetune._release_validation_cuda_cache(
+        torch.device("cpu"), enabled=True, should_validate=True
+    )
+    finetune._release_validation_cuda_cache(
+        torch.device("cuda:0"), enabled=False, should_validate=True
+    )
+    finetune._release_validation_cuda_cache(
+        torch.device("cuda:0"), enabled=True, should_validate=False
+    )
+    finetune._release_validation_cuda_cache(
+        torch.device("cuda:0"), enabled=True, should_validate=True
+    )
+
+    assert calls == [True]
+
+
+def test_optimizer_state_move_covers_all_tensor_entries() -> None:
+    class _Optimizer:
+        state = {
+            "parameter": {
+                "step": torch.tensor(2.0),
+                "exp_avg": torch.ones(3),
+                "exp_avg_sq": torch.ones(3) * 2,
+                "metadata": "retained",
+            }
+        }
+
+    optimizer = _Optimizer()
+    finetune._move_optimizer_state(optimizer, torch.device("meta"))
+
+    assert optimizer.state["parameter"]["step"].device.type == "meta"
+    assert optimizer.state["parameter"]["exp_avg"].device.type == "meta"
+    assert optimizer.state["parameter"]["exp_avg_sq"].device.type == "meta"
+    assert optimizer.state["parameter"]["metadata"] == "retained"
+
+
+def test_chunked_offloaded_adamw_matches_single_tensor_update() -> None:
+    initial = torch.linspace(-0.8, 0.9, 15, dtype=torch.float64).reshape(5, 3)
+    reference_parameter = torch.nn.Parameter(initial.clone())
+    chunked_parameter = torch.nn.Parameter(initial.clone())
+    kwargs = {
+        "lr": 0.002,
+        "betas": (0.9, 0.999),
+        "eps": 1e-8,
+        "weight_decay": 1e-5,
+        "foreach": False,
+    }
+    reference = torch.optim.AdamW([reference_parameter], **kwargs)
+    chunked = torch.optim.AdamW([chunked_parameter], **kwargs)
+
+    for scale in (0.3, -0.2, 0.7):
+        gradient = torch.linspace(-1.0, 1.0, 15, dtype=torch.float64).reshape(5, 3)
+        gradient = gradient * scale
+        reference_parameter.grad = gradient.clone()
+        chunked_parameter.grad = gradient.clone()
+        reference.step()
+        finetune._offloaded_adamw_step(chunked, chunk_elements=4)
+
+    assert torch.equal(chunked_parameter, reference_parameter)
+    for name in ("step", "exp_avg", "exp_avg_sq"):
+        assert torch.equal(
+            chunked.state[chunked_parameter][name],
+            reference.state[reference_parameter][name],
+        )
+        assert chunked.state[chunked_parameter][name].device.type == "cpu"
+
+
+def test_offloaded_optimizer_reuses_gradient_buffer() -> None:
+    parameter = torch.nn.Parameter(torch.ones(8))
+    optimizer = torch.optim.AdamW([parameter], lr=0.01)
+    parameter.grad = torch.arange(8, dtype=torch.float32)
+    pointer = parameter.grad.data_ptr()
+
+    finetune._zero_optimizer_gradients(optimizer, preserve_buffers=True)
+
+    assert parameter.grad is not None
+    assert parameter.grad.data_ptr() == pointer
+    assert torch.count_nonzero(parameter.grad) == 0
+
+    finetune._zero_optimizer_gradients(optimizer, preserve_buffers=False)
+    assert parameter.grad is None
+
+
+def test_cpu_selection_snapshot_refreshes_in_place() -> None:
+    module = torch.nn.Linear(3, 2)
+    snapshot = finetune._cpu_state_dict(module)
+    storage_ids = {name: id(value) for name, value in snapshot.items()}
+    with torch.no_grad():
+        module.weight.fill_(4.0)
+        module.bias.fill_(-2.0)
+
+    finetune._copy_state_dict_to_cpu_(snapshot, module)
+
+    assert {name: id(value) for name, value in snapshot.items()} == storage_ids
+    assert torch.equal(snapshot["weight"], module.weight.detach().cpu())
+    assert torch.equal(snapshot["bias"], module.bias.detach().cpu())
+
+
+def test_parent_payload_compaction_drops_only_reconstructed_tensors() -> None:
+    payload = {
+        "state_dict": {"large": torch.ones(3)},
+        "reliability": torch.empty(3, 0),
+        "architecture": {"coefficient_dim": 512},
+        "render_optimization": {"best_step": 32},
+    }
+
+    compact = finetune._metadata_only_parent_payload(payload)
+
+    assert "state_dict" not in compact
+    assert "reliability" not in compact
+    assert compact["architecture"] == payload["architecture"]
+    assert compact["render_optimization"] == payload["render_optimization"]
+
+
+def test_semantic_stage_automatically_enables_optimizer_state_offload() -> None:
+    assert finetune._optimizer_state_offload_enabled(
+        requested=False, semantic_enabled=True
+    )
+    assert finetune._optimizer_state_offload_enabled(
+        requested=True, semantic_enabled=False
+    )
+    assert not finetune._optimizer_state_offload_enabled(
+        requested=False, semantic_enabled=False
+    )

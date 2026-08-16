@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf3d_universal_field_fixed_extent_development_gate_result",
+  "status": "development_gate_passed_heldout_execution_authorized",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_fixed_extent_2x2_preregistration_20260816.json",
+    "sha256": "0cccade7f7171d825b8f7411ff8602898cbe8fec9d2b0695096c9bda4d8bd2a5"
+  },
+  "implementation_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_fixed_extent_2x2_implementation_correction_20260816.json",
+    "sha256": "b556fbb6d63d7557986b51da5978d8c5520eefaa3eeb20ff58a3446673edc394"
+  },
+  "development_results": {
+    "figurines": {
+      "control_miou": 0.44840091466903687,
+      "candidate_miou": 0.5276694297790527,
+      "delta_miou": 0.07926851511001587,
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_fixed_extent_2x2/development_corrected/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "report_sha256": "2d16290c73b007d717c810b2158c38807c60edcde4fd10df5ab87f3e08fc3cd2"
+    },
+    "ramen": {
+      "control_miou": 0.29173415899276733,
+      "candidate_miou": 0.3910095989704132,
+      "delta_miou": 0.09927543997764587,
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_fixed_extent_2x2/development_corrected/ramen/ramen/lerf_direct_3d_selection_results.json",
+      "report_sha256": "77988b7e9d88b96b4f072ff670c2f5d005df076a69870790dd74000e06e3f37b"
+    },
+    "scene_macro": {
+      "control_miou": 0.3700675368309021,
+      "candidate_miou": 0.45933951437473297,
+      "delta_miou": 0.08927197754383087
+    }
+  },
+  "gate": {
+    "development_scene_macro_delta_miou_strictly_positive": true,
+    "minimum_allowed_per_scene_delta_miou": -0.002,
+    "figurines_passed": true,
+    "ramen_passed": true,
+    "all_passed": true
+  },
+  "causal_conclusion": "The current Universal Field v1 semantic state is not the primary cause of the low LERF3D Primitive Readout-v0 row. Query-independent kNN10 plus min-max extent recovery produces a large same-field gain on both development scenes.",
+  "scope_limit": "This is a single-level causal diagnostic. The frozen LERF3D Evaluation Contract still requires three derived semantic levels before the result can be treated as complete final-protocol evidence.",
+  "heldout_execution": {
+    "authorized": true,
+    "scenes": [
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "candidate_parameters_changed_after_development_metrics": false
+  },
+  "uqis_in_scope": false
+}

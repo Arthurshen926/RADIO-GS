@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_universal_field_peak_connected_extent_development_preregistration",
+  "status": "sealed_before_candidate_development_metrics",
+  "candidate": {
+    "field": "unchanged current Universal Field v1 single-level query features",
+    "base_spatial_readout": "kNN10 then per-query scene minmax then clip(2u-1,0,1)",
+    "primitive_threshold": 0.6,
+    "projection": "selected-only alpha and png_uint8_gt10",
+    "conditional_extent": "for each frame/query keep only the 8-connected projected component containing the rendered target-blind score peak; snap the peak to the nearest selected pixel only when it lies immediately outside thresholded support",
+    "learned_parameters": false,
+    "rgb_used": false,
+    "target_mask_used_by_method": false,
+    "scene_or_query_specific_settings": false
+  },
+  "partition": {
+    "development_scenes": [
+      "figurines",
+      "ramen"
+    ],
+    "heldout_scenes": [
+      "teatime",
+      "waldo_kitchen"
+    ]
+  },
+  "precommitted_gate": {
+    "control_development_scene_macro_miou": 0.45933951437473297,
+    "candidate_development_scene_macro_miou_strictly_greater_than_control": true,
+    "maximum_allowed_per_scene_regression": 0.002,
+    "heldout_rule": "do not execute heldout scenes unless both development checks pass"
+  },
+  "sealed_implementation": {
+    "evaluator_path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "evaluator_sha256": "3056ac049fac551d72653cc829a2afdb7111a9c2726cb60aa8e4addc2f230fd3",
+    "targeted_tests_passed": 3
+  },
+  "execution_boundary": {
+    "development_labels_opened_before_candidate": false,
+    "heldout_metrics_opened_for_candidate": false,
+    "parameter_callback_allowed": false
+  },
+  "uqis_in_scope": false
+}

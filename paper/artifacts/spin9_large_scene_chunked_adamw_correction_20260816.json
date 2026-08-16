@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_large_scene_chunked_adamw_correction",
+  "status": "implemented_bitwise_and_gradient_reuse_tested_real_retry_queued",
+  "trigger": {
+    "scene": "leaves",
+    "stage": "region_stage_step2_optimizer_update",
+    "failure": "PyTorch AdamW foreach denominator construction requested a full 2.67 GiB exp_avg_sq sqrt tensor with only 2.32 GiB free",
+    "cuda_allocated_gib": 15.47,
+    "cuda_reserved_gib": 21.05,
+    "partial_region_field_written": false
+  },
+  "root_cause": "Moving complete CPU-resident moments to CUDA avoided forward/backward overlap but PyTorch's foreach AdamW still materialized a parameter-sized square-root denominator for the 1.4M by 512 local-code tensor.",
+  "followup_failure": {
+    "stage": "region_stage_step2_backward",
+    "failure": "discarding the 2.67 GiB local-code gradient with set_to_none required a contiguous reallocation on the next backward",
+    "cuda_allocated_gib": 13.33,
+    "cuda_reserved_gib": 20.85,
+    "cuda_free_gib": 2.52,
+    "requested_gib": 2.67
+  },
+  "correction": {
+    "optimizer": "AdamW",
+    "formula_changed": false,
+    "state_changed": false,
+    "parameter_groups_changed": false,
+    "default_chunk_elements": 16777216,
+    "float32_moment_or_denominator_bytes_per_chunk": 67108864,
+    "moment_residency": "cpu_between_and_during_steps_except_current_gpu_chunk",
+    "update": "bounded_gpu_chunks_with_cpu_moment_writeback",
+    "gradient_buffer": "zero_in_place_and_reuse_between_steps",
+    "first_step_gradient_allocation_changed": false
+  },
+  "verification": {
+    "three_step_reference": "torch.optim.AdamW_foreach_false",
+    "parameter_bitwise_equal": true,
+    "step_bitwise_equal": true,
+    "exp_avg_bitwise_equal": true,
+    "exp_avg_sq_bitwise_equal": true,
+    "focused_tests_passed": 10,
+    "gradient_buffer_pointer_reused": true,
+    "non_offload_set_to_none_preserved": true,
+    "python_compile": "pass",
+    "real_retry_status": "queued_behind_fern_exact_dino_mpr_host_lock",
+    "benchmark_masks_opened": false
+  },
+  "claim_boundary": "The chunked optimizer is bitwise equivalent on the fixed unit fixture and the gradient buffer is reused in tests; the real leaves retry must cross step 2 and later step 32/64 before the stage is sealed."
+}

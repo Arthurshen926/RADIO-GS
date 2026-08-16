@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_text_posterior_v2_post_spatial_source_gate_result",
+  "status": "source_loso_rejected_no_fit3_or_target_evaluation",
+  "deterministic_official_result": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2/source_post_spatial_text_posterior.loso.v5.json",
+    "sha256": "8ffd0d72426cc38cacdbcfe9b665a2ddce66100f2768d23c23938af403128958",
+    "macro_deltas": {
+      "balanced_bce_delta": -0.19421001374721528,
+      "hard_iou_delta": 0.0034926689294580795,
+      "local_relation_loss_delta": -0.0005935685088237127,
+      "positive_negative_gap_delta": 0.014843862441678846
+    },
+    "macro_gate_passed": true,
+    "fold_admissibility_passed": false,
+    "failed_fold": {
+      "scene_id": "scene0002_00",
+      "hard_iou_delta": -0.1809500428731553,
+      "positive_negative_gap_delta": -0.05461887940764426
+    }
+  },
+  "deterministic_global_residual_scale_audit": {
+    "tested_scales": [
+      0.0,
+      0.005,
+      0.01,
+      0.02,
+      0.03,
+      0.05,
+      0.075,
+      0.1,
+      0.15,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6
+    ],
+    "nonzero_scale_passing_all_precommitted_gates": null,
+    "common_failure": "every nonzero scale reduced the deterministic OOF macro positive-negative gap",
+    "largest_macro_hard_iou_gain_observed": 0.01619016,
+    "scale_at_largest_macro_hard_iou_gain": 0.3,
+    "scene0002_hard_iou_delta_at_that_scale": -0.032122
+  },
+  "decision": {
+    "text_posterior_v2_post_spatial_promoted": false,
+    "fit_all_three_source_scenes_performed": false,
+    "source_development_scene0003_opened": false,
+    "lerf_queries_or_ground_truth_opened": false,
+    "checkpoint_eligible_for_benchmarks": false,
+    "next_method": "target-blind conditional peak-connected extent over the accepted single-level spatial readout"
+  },
+  "conclusion": "Placing the posterior after spatial normalization fixes the earlier algebraic mismatch and improves several source metrics, but the learned residual is not cross-scene stable. The source gate rejects it without weakening any criterion."
+}

@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_method_v1_field_box_signed_points_sam3_candidate_preregistration",
+  "status": "frozen_before_first_signed_point_selected_box_candidate_prediction",
+  "candidate_id": "nvos-method-v1-field-box-sam3-signed-point-selector-v1",
+  "parent_candidate": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_sam3_candidate_20260816/result.json",
+      "sha256": "3b97f997c6a5ad2a7b9ceddfbed6fda93d30f2837d2bf30c9458efbe6e5de71e"
+    },
+    "macro_foreground_iou": 0.7313813427172002,
+    "failure": "horns_left selected the center object because whole-coarse-mask IoU rewards the larger false-positive support even though all sealed high-confidence positive points lie on the requested left object."
+  },
+  "method": {
+    "candidate_generation": "identical field-threshold-zero box, pad16, and official SAM3 geometric prompt as the parent candidate",
+    "signed_points": "the same ten deterministic trials with three positive and three negative weighted-farthest field points per trial",
+    "primary_selection_score": "mean of positive-point inclusion and negative-point exclusion across all 60 signed observations",
+    "secondary_tie_break": "IoU with the sealed coarse field mask",
+    "tertiary_tie_break": "higher official SAM3 candidate score",
+    "minimum_signed_evidence_score": 0.5,
+    "fallback": "sealed coarse field mask",
+    "target_mask_used_for_prediction": false,
+    "target_metric_used_for_prediction": false,
+    "graph": false,
+    "connected_component": false
+  },
+  "promotion_gate": {
+    "minimum_macro_foreground_iou": 0.768805,
+    "minimum_delta_vs_parent": 0.01,
+    "minimum_horns_left_foreground_iou": 0.45,
+    "no_scene_below_parent_minus": 0.02
+  },
+  "evaluation_barrier": {
+    "all_eight_predictions_sealed_before_evaluation": true,
+    "unchanged_frozen_nvos_evaluator": true
+  },
+  "access_at_freeze": {
+    "parent_candidate_metrics_opened": true,
+    "new_candidate_prediction_generated": false,
+    "new_candidate_target_metric_computed": false,
+    "prospectively_blind": false,
+    "development_use_only": true
+  }
+}

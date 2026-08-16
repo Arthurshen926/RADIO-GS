@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_method_v1_spin9_transient_readout_preregistration",
+  "status": "frozen_before_first_method_v1_spin9_target_readout",
+  "method_id": "radio-gs-method-v1",
+  "benchmark": "SPIn-NeRF Available-Nine",
+  "purpose": "Freeze the only readout used to evaluate the new D512/L512 Method-v1 fields before any target-frame prediction or metric from those fields is opened.",
+  "authorities": {
+    "method": {
+      "path": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json",
+      "sha256": "48e0d432f38ce9ad973e03a805e50a477c1e334ac78349f80eb6e6e02f6239c6"
+    },
+    "dataset_manifest": {
+      "path": "output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    },
+    "transient_interface": {
+      "path": "radio_gs/querying/transient_rgb_sam.py",
+      "sha256": "c6c7131dc11bbaff9a4beeefab31d07229d2b00a0655d5109cde6bc02c2a23ad"
+    }
+  },
+  "cohort": {
+    "identity": "spin-available-nine-excluding-fork-v1",
+    "scene_order_source": "dataset manifest protocol.cohort",
+    "scene_count": 9,
+    "all_non_reference_annotated_frames_required": true,
+    "reference_frame_scored": false,
+    "missing_fork_disclosed": true
+  },
+  "signed_field_prompt": {
+    "source": "one complete factorized-v2 Method-v1 field per scene",
+    "reference_prototypes": "mean L2-normalized field features under the complete reference foreground mask and its complement",
+    "score": "cosine_foreground_minus_cosine_background",
+    "reference_and_all_target_signed_margins_sealed_before_target_rgb": true,
+    "dense_feature_persistence": "ephemeral_per_scene_only",
+    "permanent_outputs": "scalar signed margins, receipts, hashes, and final field bindings",
+    "evaluation_target_masks_opened": false,
+    "target_metrics_opened": false
+  },
+  "transient_sam": {
+    "model": "frozen official local SAM3 checkpoint bound by Method-v1 runtime",
+    "target_rgb": "query-transient and permitted by Method-v1",
+    "trials": 10,
+    "positive_points_per_trial": 3,
+    "negative_points_per_trial": 3,
+    "point_selection": "deterministic signed weighted-farthest policy from radio_gs.querying.transient_rgb_sam",
+    "multimask_output": true,
+    "candidate_aggregation": "candidate-wise mean over ten trials",
+    "reference_selection": {
+      "authority": "the single canonical full reference mask only",
+      "candidate_indices": [0, 1, 2],
+      "threshold_candidates": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5,
+        0.55,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.8,
+        0.85,
+        0.9,
+        0.95
+      ],
+      "objective": "reference foreground IoU",
+      "tie_break": "lowest candidate index, then lowest threshold",
+      "canonical_branch_fallback": false,
+      "target_frame_metric_used": false
+    },
+    "target_transfer": "freeze the selected candidate index and threshold for every non-reference annotated frame in the scene",
+    "prediction_score": "selected aggregate SAM probability minus the frozen reference-selected threshold",
+    "graph": false,
+    "connected_component": false,
+    "scene_specific_manual_hyperparameters": false
+  },
+  "evaluation_barrier": {
+    "all_nine_scene_receipts_and_all_target_prediction_hashes_verified_before_first_evaluation_mask_open": true,
+    "threshold_in_evaluator": 0.0,
+    "threshold_comparison": "greater_or_equal",
+    "metrics": ["foreground_iou", "pixel_accuracy"],
+    "aggregation": "per-frame mean within scene, then unweighted nine-scene macro"
+  },
+  "claim_scope": {
+    "target_rgb_assisted": true,
+    "available_nine_diagnostic_not_full_ten": true,
+    "prospectively_blind": false,
+    "historical_target": 0.9484146824995366,
+    "historical_target_role": "comparison target only; no historical branch or target metric may select the new Method-v1 prediction"
+  },
+  "access_at_freeze": {
+    "new_method_v1_spin9_target_prediction_generated": false,
+    "new_method_v1_spin9_target_metric_computed": false,
+    "historical_project_target_metrics_already_known": true
+  }
+}

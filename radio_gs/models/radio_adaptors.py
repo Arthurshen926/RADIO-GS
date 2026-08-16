@@ -165,8 +165,15 @@ def project_feature_map_with_adaptor(
     adaptor: nn.Module,
     *,
     normalize: bool = True,
+    amp: bool = False,
 ) -> torch.Tensor:
-    """Project ``[B, C, H, W]`` RADIO features through a frozen adaptor."""
+    """Project ``[B, C, H, W]`` RADIO features through a frozen adaptor.
+
+    ``amp=True`` matches the official feature extractor's CUDA projection
+    runtime.  It is opt-in so existing float32 callers retain their numerical
+    contract, while large attention-based spatial adaptors can use the
+    memory-efficient half-precision SDPA kernel without changing token scope.
+    """
     if features.ndim != 4:
         raise ValueError(f"Expected features [B,C,H,W], got {tuple(features.shape)}")
     batch, channels, height, width = features.shape
@@ -177,7 +184,8 @@ def project_feature_map_with_adaptor(
         first_param = None
     if first_param is not None:
         tokens = tokens.to(dtype=first_param.dtype, device=first_param.device)
-    projected = adaptor(tokens)
+    with torch.cuda.amp.autocast(enabled=bool(amp and tokens.is_cuda)):
+        projected = adaptor(tokens)
     projected = projected.permute(0, 2, 1).reshape(batch, -1, height, width)
     if normalize:
         projected = F.normalize(projected.float(), dim=1)

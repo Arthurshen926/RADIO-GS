@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_universal_field_peak_connected_extent_development_gate_result",
+  "status": "development_gate_passed_heldout_authorized",
+  "control": {
+    "figurines_miou": 0.5276694297790527,
+    "ramen_miou": 0.3910095989704132,
+    "scene_macro_miou": 0.45933951437473297
+  },
+  "candidate": {
+    "figurines": {
+      "miou": 0.5737552642822266,
+      "delta_miou": 0.04608583450317383,
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_peak_connected_extent_dev_v1/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "report_sha256": "8aedfaf311e0d63a6292e3fed2da1ac328926f6cbc3a4a6fd9cd23a3df31cf78"
+    },
+    "ramen": {
+      "miou": 0.4087860584259033,
+      "delta_miou": 0.017776459455490112,
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_peak_connected_extent_dev_v1/ramen/ramen/lerf_direct_3d_selection_results.json",
+      "report_sha256": "9cb312c059805d77040a9ec79074c90b00653eace2c469220fd1cae5ace668b5"
+    },
+    "development_scene_macro_miou": 0.49127066135406494,
+    "development_scene_macro_delta_miou": 0.03193114697933197
+  },
+  "gate": {
+    "development_scene_macro_strictly_improved": true,
+    "all_development_scenes_within_regression_tolerance": true,
+    "all_passed": true
+  },
+  "execution_boundary": {
+    "heldout_metrics_opened_before_gate": false,
+    "heldout_execution_authorized": true,
+    "parameter_callback_performed": false
+  },
+  "preregistration": "paper/artifacts/lerf3d_universal_field_peak_connected_extent_development_preregistration_20260816.json"
+}

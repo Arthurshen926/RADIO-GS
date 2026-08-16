@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf3d_universal_field_fixed_extent_2x2_result",
+  "status": "complete_all_preregistered_gates_passed_single_level_diagnostic",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_fixed_extent_2x2_preregistration_20260816.json",
+    "sha256": "0cccade7f7171d825b8f7411ff8602898cbe8fec9d2b0695096c9bda4d8bd2a5"
+  },
+  "implementation_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_fixed_extent_2x2_implementation_correction_20260816.json",
+    "sha256": "b556fbb6d63d7557986b51da5978d8c5520eefaa3eeb20ff58a3446673edc394"
+  },
+  "development_gate": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_universal_field_fixed_extent_development_gate_result_20260816.json",
+    "sha256": "10da84a22569dd2cf55fd59d85c624322a00d43e94003c1bd3178603733a2d54"
+  },
+  "method": {
+    "field": "unchanged Universal Field v1 decode through the hash-bound current primitive query cache",
+    "semantic_levels": 1,
+    "spatial_readout": "query-independent kNN10 followed by per-query scene min-max",
+    "selection": "fixed relevancy threshold 0.6",
+    "projection": "selected-only alpha and png_uint8_gt10",
+    "learned_parameters": false,
+    "target_training_or_parameter_selection": false,
+    "scene_or_query_specific_settings": false
+  },
+  "scene_results": {
+    "figurines": {
+      "partition": "development",
+      "control_miou": 0.44840091466903687,
+      "candidate_miou": 0.5276694297790527,
+      "delta_miou": 0.07926851511001587,
+      "candidate_acc025": 0.875,
+      "candidate_acc050": 0.5357142857142857,
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_fixed_extent_2x2/development_corrected/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "report_sha256": "2d16290c73b007d717c810b2158c38807c60edcde4fd10df5ab87f3e08fc3cd2"
+    },
+    "ramen": {
+      "partition": "development",
+      "control_miou": 0.29173415899276733,
+      "candidate_miou": 0.3910095989704132,
+      "delta_miou": 0.09927543997764587,
+      "candidate_acc025": 0.5915492957746479,
+      "candidate_acc050": 0.39436619718309857,
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_fixed_extent_2x2/development_corrected/ramen/ramen/lerf_direct_3d_selection_results.json",
+      "report_sha256": "77988b7e9d88b96b4f072ff670c2f5d005df076a69870790dd74000e06e3f37b"
+    },
+    "teatime": {
+      "partition": "heldout",
+      "control_miou": 0.3287052512168884,
+      "candidate_miou": 0.5396644473075867,
+      "delta_miou": 0.21095919609069824,
+      "candidate_acc025": 0.9491525423728814,
+      "candidate_acc050": 0.576271186440678,
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_fixed_extent_2x2/heldout/teatime/teatime/lerf_direct_3d_selection_results.json",
+      "report_sha256": "db9de9bc61966696c268e1cb23a5b01ecc0ffee7ed8aee58a647c5ed8fb5733a"
+    },
+    "waldo_kitchen": {
+      "partition": "heldout",
+      "control_miou": 0.19814537465572357,
+      "candidate_miou": 0.31412479281425476,
+      "delta_miou": 0.11597941815853119,
+      "candidate_acc025": 0.6818181818181818,
+      "candidate_acc050": 0.13636363636363635,
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_fixed_extent_2x2/heldout/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json",
+      "report_sha256": "4c8d11b2b53551b9f90386240e206ac2b630894a2f3a33f82774bba987e98584"
+    }
+  },
+  "aggregates": {
+    "development_scene_macro": {
+      "control_miou": 0.3700675368309021,
+      "candidate_miou": 0.45933951437473297,
+      "delta_miou": 0.08927197754383087
+    },
+    "heldout_scene_macro": {
+      "control_miou": 0.263425312936306,
+      "candidate_miou": 0.4268946200609207,
+      "delta_miou": 0.16346930712461472
+    },
+    "full4_scene_macro": {
+      "control_miou": 0.31674642488360405,
+      "candidate_miou": 0.44311706721782684,
+      "delta_miou": 0.1263706423342228
+    },
+    "full4_sample_micro": {
+      "control_miou": 0.3345018489143023,
+      "candidate_miou": 0.4618371030172476,
+      "delta_miou": 0.12733525410294533
+    }
+  },
+  "gate": {
+    "development_scene_macro_delta_miou_strictly_positive": true,
+    "heldout_scene_macro_delta_miou_strictly_positive": true,
+    "full4_scene_macro_delta_miou_strictly_positive": true,
+    "all_per_scene_deltas_at_least_negative_0p002": true,
+    "overall_passed": true
+  },
+  "conclusion": "The low 0.33450 LERF3D number is primarily a Primitive Readout-v0 and protocol-completeness problem, not evidence that D512/L512 damaged Universal Field v1. The same current field improves by 12.73 sample-mIoU points when the frozen query-independent extent operator is restored.",
+  "scope_limit": "The result uses one semantic level. It is mechanism and causal evidence only; the frozen Evaluation Contract requires three derived semantic levels before final validation or a SOTA comparison.",
+  "next_action": "Materialize three current-field semantic levels, execute the exact frozen LERF3D contract, then use source-only TextPosteriorV2 only for residual errors beyond that corrected baseline.",
+  "uqis_in_scope": false
+}

@@ -1,6 +1,7 @@
 import pytest
 import torch
 
+import radio_gs.losses.radio_adaptor_loss as radio_adaptor_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_alignment_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_cross_view_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_cross_view_mask_propagation_loss
@@ -85,6 +86,34 @@ def test_masked_render_losses_accept_exact_official_capability_maps() -> None:
         teacher_capability_maps={"sam3": official_sam},
     )
 
+    assert alignment.item() < 1e-6
+    assert local.item() < 1e-6
+
+
+def test_masked_render_losses_forward_projection_amp(monkeypatch) -> None:
+    seen: list[bool] = []
+
+    def _project(features, _adaptor, *, normalize=True, amp=False):
+        seen.append(bool(amp))
+        return torch.nn.functional.normalize(features, dim=1) if normalize else features
+
+    monkeypatch.setattr(
+        radio_adaptor_loss,
+        "project_feature_map_with_adaptor",
+        _project,
+    )
+    decoded = torch.randn(1, 4, 3, 3)
+    valid = torch.ones(1, 3, 3, dtype=torch.bool)
+
+    alignment, local, _stats = compute_radio_adaptor_masked_render_losses(
+        decoded,
+        decoded.clone(),
+        {"siglip2-g": IdentityAdaptor()},
+        valid,
+        projection_amp=True,
+    )
+
+    assert seen == [True, True]
     assert alignment.item() < 1e-6
     assert local.item() < 1e-6
 

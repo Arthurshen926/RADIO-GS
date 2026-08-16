@@ -12,6 +12,10 @@ _Avoid_: task feature, capability bank, semantic sidecar
 A scene representation in which every Gaussian owns exactly one Canonical Capability Feature; task-specific semantic fields are excluded.
 _Avoid_: multi-head field, task field, hybrid feature bank
 
+**Universal Field v1**:
+The versioned Single Compact Feature Field containing one factorized D512/L512 RADIO feature and its five query-independent reliability scalars per Gaussian; query readouts are not part of its identity.
+_Avoid_: Method-v1, final method, task field
+
 **Deployment Scene State**:
 The persistent per-scene state required to execute a query from a cold start, including Gaussian rendering state and the Canonical Capability Feature.
 _Avoid_: deployment cache, training checkpoint
@@ -38,9 +42,24 @@ _Avoid_: online scene memory, persistent prompt cache
 The shared boundary that turns Authorized Query Input and the field into one Gaussian-domain result before output conversion.
 _Avoid_: benchmark query path, task head
 
+**Primitive Readout-v0**:
+The frozen minimal causal baseline that converts primitive similarity into output with fixed thresholds and no learned extent, boundary completion, or category rejection.
+_Avoid_: Method-v1, final query interface
+
+**Typed Posterior Interface**:
+A globally shared query interface specialized by query family that produces a calibrated Gaussian Query Posterior without introducing another persistent scene field.
+_Avoid_: task field, benchmark-specific sidecar
+
 **Gaussian Query Posterior**:
 The calibrated per-Gaussian output of the Canonical Query Interface before raster or world-space conversion.
 _Avoid_: benchmark mask, task score map
+
+**Signed-Evidence SAM Selector**:
+A query-transient selector that ranks frozen SAM proposals by inclusion of
+sealed positive field points and exclusion of sealed negative field points;
+field-mask overlap and SAM confidence are tie-breaks only. It is not eligible
+for contracts that forbid opening the target RGB at query time.
+_Avoid_: field repair, strict-unseen readout, target-mask calibration
 
 ## Evaluation
 

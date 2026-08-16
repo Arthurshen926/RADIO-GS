@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_method_v1_field_box_sam3_candidate_preregistration",
+  "status": "frozen_before_first_field_box_sam3_candidate_prediction",
+  "candidate_id": "nvos-method-v1-field-box-sam3-pad16-overlap-v1",
+  "baseline": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/full8_20260816/method_v1_nvos_full8_results.json",
+      "sha256": "1ea32f2c981630570d0a439712530f70870727115800f92138aa8ef70c225808"
+    },
+    "foreground_iou": 0.5268735259096345,
+    "causal_observation": "The target-field positive and negative SAM points are at least 96.7% and 100% label-consistent respectively, while the majority-vote SAM masks have high precision but severe recall loss. This registers a readout-undercoverage failure, not a field-fidelity failure."
+  },
+  "input": {
+    "signed_field_prompt_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/full8_20260816/signed_field_prompt/prediction_manifest.json",
+      "sha256": "fcc6d6b3263d19cf37ea46ac782c674840614f2949dc584b1746f8ad5db906ac"
+    },
+    "cohort": "frozen NVOS full8",
+    "all_signed_margins_already_sealed": true
+  },
+  "method": {
+    "coarse_mask": "target signed field cosine margin greater than or equal to zero",
+    "coarse_resize": "nearest to the fixed 1008x756 transient SAM raster",
+    "box": "tight coarse-mask box plus 16 pixels on every available side, represented as normalized cxcywh",
+    "target_rgb": "query-transient and opened only after the complete signed-field prompt manifest is verified",
+    "sam3_interface": "official processor.add_geometric_prompt(box, true)",
+    "candidate_selection": "maximum IoU with the sealed coarse field mask, tie by higher SAM score",
+    "minimum_coarse_overlap": 0.05,
+    "fallback": "sealed coarse field mask",
+    "graph": false,
+    "connected_component": false,
+    "target_mask_used_for_prediction": false,
+    "target_metric_used_for_prediction": false,
+    "inherited_parameter_authority": {
+      "path": "radio_gs/scripts/refine_lerf_coarse_receipt_official_sam3.py",
+      "sha256": "7f71898ee35fe8333ac952c49f7a24f99748b4173658cff158022bc00b7308d9",
+      "note": "Padding, overlap gate, normalized box semantics, and target-blind candidate selector are inherited without NVOS target tuning."
+    }
+  },
+  "evaluation_barrier": {
+    "all_eight_predictions_sealed_before_candidate_evaluation": true,
+    "evaluator": "the unchanged frozen NVOS full8 evaluator",
+    "threshold": 0.0,
+    "aggregation": "unweighted eight-scene macro foreground IoU"
+  },
+  "promotion_gate": {
+    "minimum_macro_foreground_iou": 0.768805,
+    "minimum_delta_vs_majority_vote_baseline": 0.01,
+    "reason": "The candidate must beat both the frozen Method-v1 baseline and the already-observed target-blind any-trial diagnostic rather than merely recover from the known majority-vote bug."
+  },
+  "access_at_freeze": {
+    "baseline_target_metrics_opened": true,
+    "candidate_prediction_generated": false,
+    "candidate_target_metric_computed": false,
+    "prospectively_blind": false,
+    "development_use_only": true
+  }
+}

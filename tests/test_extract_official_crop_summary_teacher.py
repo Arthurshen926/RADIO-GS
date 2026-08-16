@@ -1,10 +1,13 @@
 from pathlib import Path
 
 import pytest
+import torch
 
 from radio_gs.data.view_split import ViewSplitError
 from radio_gs.scripts.extract_official_crop_summary_teacher import (
+    _atomic_torch_save,
     _generic_frame_records,
+    _load_reusable_dense,
 )
 
 
@@ -55,3 +58,24 @@ def test_unknown_exact_exclusion_fails_closed(tmp_path: Path) -> None:
             frame_id_mode="source_rank",
             excluded_image_stems=("IMG_9999",),
         )
+
+
+def test_partial_crop_tensor_is_atomically_reusable_after_validation(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "rgb_0.pt"
+    expected = torch.ones(1536, 2, 3, dtype=torch.float16)
+
+    _atomic_torch_save(expected, path)
+    actual = _load_reusable_dense(path, (2, 3))
+
+    assert torch.equal(actual, expected)
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_partial_crop_tensor_with_wrong_shape_fails_closed(tmp_path: Path) -> None:
+    path = tmp_path / "rgb_0.pt"
+    torch.save(torch.ones(1536, 2, 2, dtype=torch.float16), path)
+
+    with pytest.raises(ValueError, match="partial crop-summary tensor differs"):
+        _load_reusable_dense(path, (2, 3))

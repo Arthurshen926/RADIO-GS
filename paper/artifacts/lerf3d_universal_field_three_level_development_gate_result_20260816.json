@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_universal_field_three_level_development_gate_result",
+  "status": "development_gate_failed_heldout_not_opened",
+  "candidate": {
+    "name": "universal_field_v1_old_surface_region_three_level_frozen_readout",
+    "semantic_levels": [
+      0.25,
+      0.45,
+      0.7
+    ],
+    "spatial_postprocess": "knn10_then_per_query_scene_minmax",
+    "threshold": 0.6,
+    "development_scenes": [
+      "figurines",
+      "ramen"
+    ],
+    "heldout_scenes": [
+      "teatime",
+      "waldo_kitchen"
+    ]
+  },
+  "precommitted_gate": {
+    "control_development_scene_macro_miou": 0.45933951437473297,
+    "required_candidate_scene_macro_miou_strictly_greater_than_control": true,
+    "maximum_allowed_per_scene_regression": 0.002
+  },
+  "results": {
+    "candidate_development_scene_macro_miou": 0.3668493330478668,
+    "candidate_minus_control_scene_macro_miou": -0.09249018132686617,
+    "scenes": [
+      {
+        "scene": "figurines",
+        "control_miou": 0.5276694297790527,
+        "candidate_miou": 0.3817809522151947,
+        "candidate_minus_control": -0.14588847756385803,
+        "candidate_report_sha256": "78a8843220514b60dac0d07b82ddb8705cecaac485497207d25204e89e5bed58"
+      },
+      {
+        "scene": "ramen",
+        "control_miou": 0.3910095989704132,
+        "candidate_miou": 0.35191771388053894,
+        "candidate_minus_control": -0.03909188508987427,
+        "candidate_report_sha256": "dc4176a9c833477a9249d133f4041bb78759622cbd204e1679eb3fd7de6d1d15"
+      }
+    ]
+  },
+  "gate": {
+    "development_macro_improved": false,
+    "all_development_scenes_within_regression_tolerance": false,
+    "all_passed": false
+  },
+  "execution_boundary": {
+    "development_metrics_opened": true,
+    "heldout_metrics_opened": false,
+    "heldout_execution_performed": false,
+    "parameter_callback_performed": false
+  },
+  "conclusion": "The historical global SurfaceRegion three-level readout is not compatible with the current Universal Field v1 assets. It is rejected before heldout evaluation. The failure does not implicate D512/L512 field learning because the same fields improve strongly under the simpler kNN10 plus scene-minmax readout.",
+  "next_action": "Train a globally shared TextPosteriorV2 on independent source scenes with its residual applied after the fixed spatial normalization, preserving end-to-end zero-residual identity.",
+  "evidence": {
+    "preregistration": "paper/artifacts/lerf3d_universal_field_three_level_2x2_preregistration_20260816.json",
+    "development_score_seal": "paper/artifacts/lerf3d_universal_field_three_level_development_score_seal_20260816.json",
+    "ramen_text_authority_correction": "paper/artifacts/lerf3d_universal_field_three_level_ramen_text_authority_correction_20260816.json",
+    "aggregator_sha256": "ee893497c686364c8c665ae8c8ed9fd701da6c24874e38e5d9d94f99fb8040b3"
+  }
+}

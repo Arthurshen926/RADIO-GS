@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_large_scene_host_memory_correction",
+  "status": "implemented_unit_tested_and_real_leaves_siglip64_passed",
+  "trigger": {
+    "scene": "leaves",
+    "num_gaussians": 1400000,
+    "local_dimension": 512,
+    "parent_checkpoint_bytes": 2869860951,
+    "failure_stage": "official_siglip2_full_grid_before_first_step_record",
+    "exit_code": 137,
+    "observed_pre_failure_rss_bytes_approx": 15387420000,
+    "partial_siglip_field_written": false,
+    "upstream_artifacts_changed": false
+  },
+  "root_cause": "The reconstructed CUDA field retained the parent checkpoint's full CPU state_dict, while selection snapshots allocated fresh CPU tensors on every improvement. Lineage hashing also prolonged the interval in which the multi-GiB parent payload remained resident.",
+  "correction": {
+    "discard_parent_state_after_reconstruction": true,
+    "preserve_parent_metadata_and_lineage": true,
+    "refresh_best_state_snapshot_in_place": true,
+    "release_best_snapshot_before_final_field_cpu_transfer": true,
+    "hash_parent_before_loading_multigib_state": true,
+    "nonsemantic_siglip_adam_state_residency": "optimizer_default_gpu",
+    "semantic_stage_adam_state_residency": "cpu_between_steps_gpu_during_exact_update",
+    "optimizer_or_selection_math_changed": false
+  },
+  "verification": {
+    "focused_memory_and_lineage_tests_passed": 8,
+    "real_retry_previous_failure_boundary_crossed": true,
+    "real_retry_completed_step": 64,
+    "real_retry_raw_validation_cosine_at_step1": 0.7906272576927738,
+    "real_retry_siglip2_validation_cosine_at_step1": 0.7781292564976207,
+    "real_retry_mpr_probe_cosine_at_step1": 0.9994624853134155,
+    "real_retry_raw_validation_cosine_at_step32": 0.7908131469666326,
+    "real_retry_siglip2_validation_cosine_at_step32": 0.7782017655418244,
+    "real_retry_mpr_probe_cosine_at_step32": 0.9994624257087708,
+    "real_retry_initial_raw_validation_cosine": 0.7906275912337073,
+    "real_retry_best_raw_validation_cosine": 0.7910569939755611,
+    "real_retry_initial_siglip2_validation_cosine": 0.7781175028732158,
+    "real_retry_best_siglip2_validation_cosine": 0.7782793794306082,
+    "real_retry_initial_mpr_probe_cosine": 0.9994624853134155,
+    "real_retry_best_mpr_probe_cosine": 0.9994604587554932,
+    "real_retry_best_step": 64,
+    "real_retry_full_stage_status": "sealed_pass",
+    "next_stage": "genuine_source_crop_region_summary_active",
+    "benchmark_masks_opened": false
+  },
+  "claim_boundary": "Completing the formerly failing SigLIP stage validates the host-memory correction; the leaves region/generic stages and the full-nine benchmark remain incomplete until their sealed outputs and gates exist."
+}

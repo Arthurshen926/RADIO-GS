@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_method_v1_field_box_signed_points_sam3_candidate_result",
+  "status": "development_candidate_promoted_by_preregistered_gate",
+  "candidate_id": "nvos-method-v1-field-box-sam3-signed-point-selector-v1",
+  "preregistration": {
+    "path": "paper/artifacts/nvos_method_v1_field_box_signed_points_sam3_candidate_preregistration_20260816.json",
+    "sha256": "19eac27dcdf6528c01d2da167c6d75be6dd6982a001d88fecbd0e93c2ca35813",
+    "frozen_before_first_candidate_prediction": true
+  },
+  "prediction_batch": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_signed_points_sam3_candidate_20260816/prediction_manifest.json",
+    "sha256": "f439d36f2d6d0491d8276724beff833cf23289c00c1ba3281fe07019171bf254",
+    "all_eight_predictions_sealed_before_first_target_mask_open": true
+  },
+  "result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_signed_points_sam3_candidate_20260816/result.json",
+    "sha256": "a4871a714ae233ae362f9e9caaf09bf063847ba805f2310a4bf802e70e268b12",
+    "macro_foreground_iou": 0.817616763357676,
+    "pixel_accuracy": 0.970203722761598,
+    "scene_foreground_iou": {
+      "fern": 0.8304732612835244,
+      "flower": 0.9680178415225879,
+      "fortress": 0.9754431952966958,
+      "horns_center": 0.6968090986196901,
+      "horns_left": 0.6898833651238061,
+      "leaves": 0.6386020952997714,
+      "orchids": 0.877437708030989,
+      "trex": 0.864267541684343
+    }
+  },
+  "comparisons": {
+    "frozen_majority_vote_method_v1_macro": 0.5268735259096345,
+    "parent_coarse_overlap_box_macro": 0.7313813427172002,
+    "delta_vs_parent": 0.0862354206404758,
+    "horns_left_parent": 0.0,
+    "horns_left_candidate": 0.6898833651238061,
+    "other_seven_scene_regressions": 0
+  },
+  "promotion_gate": {
+    "passed": true,
+    "minimum_macro_foreground_iou": 0.768805,
+    "minimum_delta_vs_parent": 0.01,
+    "minimum_horns_left_foreground_iou": 0.45,
+    "maximum_allowed_scene_regression": 0.02
+  },
+  "conclusion": {
+    "field_damaged_by_d512_l512": false,
+    "dominant_observed_failure": "target readout proposal aggregation and candidate identity selection",
+    "mechanism": "select an official SAM3 box proposal using all sealed deterministic positive-point inclusion and negative-point exclusion evidence, then use coarse field overlap and SAM score only as tie-breaks",
+    "development_mainline_action": "promote the signed-evidence selector over majority vote and coarse-overlap box selection",
+    "paper_claim_action": "do not call this strict-unseen or SOTA because target RGB is opened by the transient SAM stage"
+  },
+  "eligibility": {
+    "development_use_only": true,
+    "prospectively_blind": false,
+    "target_rgb_assisted": true,
+    "target_mask_used_for_prediction": false,
+    "target_metric_used_for_prediction": false,
+    "strict_unseen_protocol_eligible": false,
+    "sota_claim_supported": false
+  }
+}

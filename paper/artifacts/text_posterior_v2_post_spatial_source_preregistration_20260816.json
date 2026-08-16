@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_text_posterior_v2_post_spatial_source_preregistration",
+  "status": "sealed_before_source_loso_training",
+  "method": {
+    "field": "Universal Field v1 D512/L512 unchanged",
+    "base_readout": "positive cosine then kNN10 then per-query scene minmax then clip(2u-1,0,1)",
+    "posterior": "one global TextPosteriorV2 after the complete spatial readout",
+    "fixed_threshold": 0.6,
+    "zero_initialization_contract": "exact end-to-end equality with the base probability, including zero and one endpoints",
+    "persistent_task_field_added": false
+  },
+  "source_partition": {
+    "fit_scene_ids": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0005_00"
+    ],
+    "physical_space_disjoint": true,
+    "loso_fold_count": 3,
+    "development_scene_id": "scene0003_00",
+    "development_opened_before_loso": false,
+    "lerf_queries_or_ground_truth_opened": false
+  },
+  "frozen_training_recipe": {
+    "recipe_id": "post-spatial-text-posterior-v2-adam-seed17-e192-lr0.01-v1",
+    "seed": 17,
+    "epochs": 192,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0001,
+    "hidden_dim": 32,
+    "objective_weights": {
+      "balanced_bce_over_legacy": 0.45,
+      "local_relation_over_legacy": 0.25,
+      "soft_jaccard_over_legacy": 0.3
+    }
+  },
+  "precommitted_source_loso_gate": {
+    "macro_hard_iou_at_0.6_strictly_improves": true,
+    "macro_balanced_bce_strictly_improves": true,
+    "macro_positive_negative_gap_strictly_improves": true,
+    "macro_local_relation_maximum_regression": "max(1e-5, 2 percent of base)",
+    "each_fold_hard_iou_maximum_regression": 0.01,
+    "each_fold_local_relation_maximum_regression": "max(1e-5, 2 percent of base)",
+    "promotion": "all macro checks and every fold admissibility check must pass"
+  },
+  "target_evaluation_boundary": {
+    "source_loso_failure": "reject without fitting or opening development/target metrics",
+    "source_loso_pass": "fit all three source scenes, then open scene0003 exactly once",
+    "source_development_pass": "seal checkpoint before any LERF 2+2 evaluation",
+    "lerf_heldout_rule": "open Teatime and Waldo only after Figurines and Ramen pass the separately preregistered development gate"
+  },
+  "sealed_inputs": {
+    "dataset_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2/source_fit_dataset_manifest.v1.json",
+      "sha256": "74ff10e74723002b749a4545dc270617416b17043550f98213811c7bbcc8f880"
+    },
+    "shard_sha256": {
+      "scene0001_00": "35989f476805b3c55a1095bcd9cacd459446efc0d0d9cfa5ca5d45c1ff940d1d",
+      "scene0002_00": "e9c4cfb763f74401fe2871c838df517b7cfe1c9d7431a621cf0eabf9f91958ac",
+      "scene0005_00": "6983aa89db3ad812a9a3e2332c5a92ad4222ee6be2ae9fa4b7a3c36fa8a0fe7f"
+    },
+    "implementation_sha256": {
+      "typed_posteriors": "37f2583ed4e0d373c7a88921796ede0edffe1cd8b02c5b09f3466b55b96d6e14",
+      "source_post_spatial_contract": "c67a0b46371b6a54db1d2df68d720d783b96bd1b8dfa652bda77faa9608531e7",
+      "shard_builder": "953febf1213765d141530c8b2286a151efecaa6180ec95a2cbb423d5c9c1286e",
+      "trainer": "23c1e3fa0109f80e4eec812a003ee4e236ff6bc6ac883d557d8fe8ffd234e4fd"
+    }
+  },
+  "uqis_in_scope": false
+}

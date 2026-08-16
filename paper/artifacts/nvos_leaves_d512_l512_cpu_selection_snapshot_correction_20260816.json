@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_d512_l512_execution_memory_correction",
+  "status": "accepted_semantics_preserving_execution_fix",
+  "benchmark": "NVOS",
+  "scene": "leaves",
+  "root_cause": {
+    "num_gaussians": 1394440,
+    "coefficient_dim": 512,
+    "local_dim": 512,
+    "failure": "copy.deepcopy(field.state_dict()) retained the best-selection snapshot on CUDA and duplicated the primitive-local D512 tensor",
+    "observed_oom": "Tried to allocate 2.66 GiB with 19.84 GiB already allocated and 22.15 GiB reserved",
+    "evidence_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/leaves/logs/siglip_stage.log"
+  },
+  "correction": {
+    "description": "store independent detached CPU clones for selection snapshots and load the selected state through the unchanged state_dict interface",
+    "method_hyperparameters_changed": false,
+    "field_dimensions_changed": false,
+    "training_steps_changed": false,
+    "selection_policy_changed": false,
+    "source": {
+      "path": "radio_gs/scripts/finetune_canonical_radio_rendering.py",
+      "sha256": "bb6d246ec7206b1549dbc3ff929b4755528be0ddabf8c8f445c342f0a539ee86"
+    },
+    "test": {
+      "path": "tests/test_finetune_canonical_radio_rendering.py",
+      "sha256": "27934d6e9d59eb865c854cead067e5029b5b9c0c2dbc022f76746b7aa09311c2",
+      "selection_snapshot_independent_and_cpu": true,
+      "combined_regression_result": "18 passed"
+    }
+  },
+  "semantic_equivalence_check": {
+    "retry_step_1_exactly_matches_pre_oom_step_1": true,
+    "step_1": {
+      "loss": 0.17950044572353363,
+      "validation_cosine": 0.8135535727718266,
+      "mpr_probe_cosine": 0.9989420771598816,
+      "siglip2_g_validation_cosine": 0.7758872277136103
+    }
+  },
+  "completed_stages": {
+    "siglip": {
+      "steps": 64,
+      "raw_validation_cosine": 0.8142256686226284,
+      "siglip2_g_validation_cosine": 0.7841645169545202,
+      "mpr_probe_cosine": 0.9989284873008728
+    },
+    "region": {
+      "steps": 64,
+      "raw_validation_cosine": 0.8144903673457043,
+      "semantic_validation_cosine": 0.5723580381527158
+    },
+    "generic_text_response": {
+      "steps": 64,
+      "raw_validation_cosine": 0.8144046138573396,
+      "siglip2_g_validation_cosine": 0.7914183571873926,
+      "semantic_validation_cosine": 0.5937368082702681,
+      "generic_profile_cosine": 0.5810819081370793
+    }
+  },
+  "final_gate": {
+    "status": "pass",
+    "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/leaves/generic_text_response_w005_s0_64.pth",
+    "field_sha256": "3c5ca3004ebdda2cc333696f4bec0f4dd15c8e4503b40d37938f4bee57c82a39"
+  }
+}

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import argparse
-import copy
+import gc
 import hashlib
 import json
 from collections.abc import Mapping
@@ -66,6 +66,171 @@ def _sha256_tensor_rows(values: torch.Tensor) -> str:
     return hashlib.sha256(array.tobytes()).hexdigest()
 
 
+def _cpu_state_dict(module: torch.nn.Module) -> dict[str, torch.Tensor]:
+    """Snapshot selection state off device without sharing mutable storage."""
+
+    return {
+        name: value.detach().cpu().clone()
+        for name, value in module.state_dict().items()
+    }
+
+
+def _copy_state_dict_to_cpu_(
+    snapshot: dict[str, torch.Tensor], module: torch.nn.Module
+) -> None:
+    """Refresh a fixed-shape CPU selection snapshot without duplicating it."""
+
+    current = module.state_dict()
+    if set(snapshot) != set(current):
+        raise ValueError("selection snapshot keys differ from module state")
+    for name, value in current.items():
+        target = snapshot[name]
+        if target.shape != value.shape or target.dtype != value.dtype:
+            raise ValueError(f"selection snapshot tensor differs for {name}")
+        target.copy_(value.detach(), non_blocking=False)
+
+
+def _metadata_only_parent_payload(
+    payload: Mapping[str, object],
+) -> dict[str, object]:
+    """Drop parent tensor copies once their field has been reconstructed."""
+
+    metadata = dict(payload)
+    metadata.pop("state_dict", None)
+    metadata.pop("reliability", None)
+    return metadata
+
+
+def _release_validation_cuda_cache(
+    device: torch.device,
+    *,
+    enabled: bool,
+    should_validate: bool,
+) -> None:
+    """Return validation-only cached blocks without changing tensor values."""
+
+    if bool(enabled) and bool(should_validate) and device.type == "cuda":
+        torch.cuda.empty_cache()
+
+
+def _move_optimizer_state(
+    optimizer: torch.optim.Optimizer,
+    device: torch.device,
+) -> None:
+    """Move Adam state tensors without changing their values or update rule."""
+
+    for state in optimizer.state.values():
+        for name, value in tuple(state.items()):
+            if torch.is_tensor(value) and value.device != device:
+                state[name] = value.to(device=device)
+
+
+@torch.no_grad()
+def _offloaded_adamw_step(
+    optimizer: torch.optim.AdamW,
+    *,
+    chunk_elements: int,
+) -> None:
+    """Apply AdamW exactly while staging CPU moments through bounded chunks."""
+
+    if int(chunk_elements) <= 0:
+        raise ValueError("optimizer-state chunk size must be positive")
+    for group in optimizer.param_groups:
+        if (
+            bool(group.get("amsgrad", False))
+            or bool(group.get("maximize", False))
+            or bool(group.get("capturable", False))
+            or bool(group.get("differentiable", False))
+            or bool(group.get("fused", False))
+        ):
+            raise ValueError("chunked offloaded AdamW received unsupported options")
+        beta1, beta2 = group["betas"]
+        learning_rate = float(group["lr"])
+        weight_decay = float(group["weight_decay"])
+        epsilon = float(group["eps"])
+        for parameter in group["params"]:
+            gradient = parameter.grad
+            if gradient is None:
+                continue
+            if gradient.is_sparse:
+                raise RuntimeError("AdamW does not support sparse gradients")
+            if parameter.is_complex():
+                raise ValueError("chunked offloaded AdamW forbids complex parameters")
+            state = optimizer.state[parameter]
+            if not state:
+                state["step"] = torch.tensor(0.0)
+                state["exp_avg"] = torch.zeros_like(
+                    parameter,
+                    device="cpu",
+                    memory_format=torch.preserve_format,
+                )
+                state["exp_avg_sq"] = torch.zeros_like(
+                    parameter,
+                    device="cpu",
+                    memory_format=torch.preserve_format,
+                )
+            step_tensor = state["step"]
+            if not torch.is_tensor(step_tensor) or step_tensor.device.type != "cpu":
+                raise ValueError("offloaded AdamW step must remain on CPU")
+            step_tensor.add_(1)
+            step = float(step_tensor.item())
+            bias_correction1 = 1.0 - beta1**step
+            bias_correction2_sqrt = (1.0 - beta2**step) ** 0.5
+            step_size = learning_rate / bias_correction1
+
+            parameter_flat = parameter.view(-1)
+            gradient_flat = gradient.view(-1)
+            exp_avg_cpu = state["exp_avg"].view(-1)
+            exp_avg_sq_cpu = state["exp_avg_sq"].view(-1)
+            if (
+                exp_avg_cpu.device.type != "cpu"
+                or exp_avg_sq_cpu.device.type != "cpu"
+            ):
+                raise ValueError("AdamW moments must remain on CPU between steps")
+            for start in range(0, parameter_flat.numel(), int(chunk_elements)):
+                stop = min(start + int(chunk_elements), parameter_flat.numel())
+                parameter_chunk = parameter_flat[start:stop]
+                gradient_chunk = gradient_flat[start:stop]
+                exp_avg = exp_avg_cpu[start:stop].to(parameter.device)
+                exp_avg_sq = exp_avg_sq_cpu[start:stop].to(parameter.device)
+
+                parameter_chunk.mul_(1.0 - learning_rate * weight_decay)
+                exp_avg.mul_(beta1).add_(gradient_chunk, alpha=1.0 - beta1)
+                exp_avg_sq.mul_(beta2).addcmul_(
+                    gradient_chunk,
+                    gradient_chunk,
+                    value=1.0 - beta2,
+                )
+                denominator = (
+                    exp_avg_sq.sqrt().div_(bias_correction2_sqrt).add_(epsilon)
+                )
+                parameter_chunk.addcdiv_(
+                    exp_avg,
+                    denominator,
+                    value=-step_size,
+                )
+                exp_avg_cpu[start:stop].copy_(exp_avg)
+                exp_avg_sq_cpu[start:stop].copy_(exp_avg_sq)
+
+
+def _zero_optimizer_gradients(
+    optimizer: torch.optim.Optimizer,
+    *,
+    preserve_buffers: bool,
+) -> None:
+    """Reuse giant local-code gradients when reallocating them cannot fit."""
+
+    optimizer.zero_grad(set_to_none=not bool(preserve_buffers))
+
+
+def _optimizer_state_offload_enabled(
+    *, requested: bool, semantic_enabled: bool
+) -> bool:
+    """Protect dense semantic stages from Adam-state/teacher GPU overlap."""
+
+    return bool(requested) or bool(semantic_enabled)
+
+
 def _payload_method_v1_stage(payload: Mapping[str, object]) -> str:
     """Infer the most advanced completed Method-v1 stage in one field."""
 
@@ -118,11 +283,12 @@ def _method_v1_predecessor_lineage(
     parent_payload: Mapping[str, object],
     *,
     current_stage: str,
+    parent_sha256: str | None = None,
 ) -> list[dict[str, object]]:
     """Bind every predecessor field by content before saving a new stage."""
 
     parent_path = Path(args.field_checkpoint).expanduser().resolve()
-    parent_sha256 = sha256_file(parent_path)
+    parent_sha256 = parent_sha256 or sha256_file(parent_path)
     existing = parent_payload.get("method_v1_construction_lineage")
     if existing is None:
         lineage: list[dict[str, object]] = []
@@ -505,6 +671,7 @@ def _mean_multicapability_fidelity(
     alpha_threshold: float,
     capability_teacher_datasets: Mapping[str, SimpleRadioDataset] | None = None,
     capability_teacher_frame_to_index: Mapping[str, Mapping[int, int]] | None = None,
+    projection_amp: bool = False,
 ) -> dict[str, float]:
     if (capability_teacher_datasets is None) != (
         capability_teacher_frame_to_index is None
@@ -548,9 +715,13 @@ def _mean_multicapability_fidelity(
             * pixels
         )
         for name, adaptor in adaptors.items():
-            projected = project_feature_map_with_adaptor(predicted, adaptor)
+            projected = project_feature_map_with_adaptor(
+                predicted, adaptor, amp=bool(projection_amp)
+            )
             if capability_teacher_datasets is None:
-                teacher = project_feature_map_with_adaptor(target, adaptor)
+                teacher = project_feature_map_with_adaptor(
+                    target, adaptor, amp=bool(projection_amp)
+                )
             else:
                 teacher_index = capability_teacher_frame_to_index[name].get(int(frame))
                 if teacher_index is None:
@@ -739,6 +910,11 @@ def _trainable_parameters(field, args: argparse.Namespace) -> list[torch.nn.Para
 def finetune(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
     config = load_config(args.config)
+    parent_field_path = Path(args.field_checkpoint).expanduser().resolve()
+    # Hash before loading the multi-GiB state so lineage I/O never extends the
+    # period in which both the checkpoint payload and reconstructed field are
+    # resident in host memory.
+    parent_field_sha256 = sha256_file(parent_field_path)
     model, _codec, renderer, _sharpener, _refiner, _cfg, _hybrid = load_render_pipeline(
         args.config,
         args.geometry_checkpoint,
@@ -825,6 +1001,10 @@ def finetune(args: argparse.Namespace) -> dict:
         raise RuntimeError("no raw render training views remain")
 
     semantic_enabled = bool(str(args.semantic_teacher_root).strip())
+    optimizer_state_offload = _optimizer_state_offload_enabled(
+        requested=bool(args.offload_optimizer_state),
+        semantic_enabled=semantic_enabled,
+    )
     generic_text_response_enabled = float(args.generic_text_response_weight) > 0.0
     if generic_text_response_enabled:
         current_method_v1_stage = "target_blind_generic_text_response"
@@ -838,7 +1018,14 @@ def finetune(args: argparse.Namespace) -> dict:
         args,
         payload,
         current_stage=current_method_v1_stage,
+        parent_sha256=parent_field_sha256,
     )
+    # ``load_state_dict`` reconstructed the field before it moved to CUDA, so
+    # the checkpoint payload still owns a second full CPU copy.  Retain only
+    # metadata; the selected field state is reattached when the child stage is
+    # sealed.  This is material for million-row D512/L512 scenes.
+    payload = _metadata_only_parent_payload(payload)
+    gc.collect()
     if float(args.semantic_weight) > 0.0 and not semantic_enabled:
         raise ValueError(
             "--semantic-teacher-root is required when semantic loss is enabled"
@@ -913,17 +1100,21 @@ def finetune(args: argparse.Namespace) -> dict:
     }
     capability_adaptors: dict[str, torch.nn.Module] = {}
     for name in capability_weights:
-        adaptor = (
-            (
-                SigLIP2FeatureProjection.from_radio_checkpoint(args.radio_checkpoint)
-                if name == "siglip2-g"
-                else load_radio_adaptor_from_checkpoint(
-                    args.radio_checkpoint, name, kind="feature_projection"
-                )
+        if name == "siglip2-g":
+            adaptor = SigLIP2FeatureProjection.from_radio_checkpoint(
+                args.radio_checkpoint
             )
-            .to(device)
-            .eval()
-        )
+            if bool(args.capability_projection_xformers):
+                if not bool(args.capability_projection_amp):
+                    raise ValueError(
+                        "xFormers capability projection requires CUDA AMP"
+                    )
+                adaptor.enable_xformers_memory_efficient_attention()
+        else:
+            adaptor = load_radio_adaptor_from_checkpoint(
+                args.radio_checkpoint, name, kind="feature_projection"
+            )
+        adaptor = adaptor.to(device).eval()
         for parameter in adaptor.parameters():
             parameter.requires_grad_(False)
         capability_adaptors[name] = adaptor
@@ -982,6 +1173,7 @@ def finetune(args: argparse.Namespace) -> dict:
         alpha_threshold=float(args.alpha_threshold),
         capability_teacher_datasets=capability_teacher_datasets,
         capability_teacher_frame_to_index=capability_teacher_frame_to_index,
+        projection_amp=bool(args.capability_projection_amp),
     )
     best_capability_validation = dict(initial_capability_validation)
     initial_mpr_probe = _primitive_probe_cosine(
@@ -1041,7 +1233,10 @@ def finetune(args: argparse.Namespace) -> dict:
             initial_generic_text_response_validation
         )
     best_step = 0
-    best_state = copy.deepcopy(field.state_dict())
+    # D512/L512 fields can have more than one million primitive-local rows.
+    # Keeping the selection snapshot on the accelerator duplicates several
+    # GiB and does not affect optimization; retain the exact tensors on CPU.
+    best_state = _cpu_state_dict(field)
     history: list[dict] = []
     shuffled: list[int] = []
 
@@ -1053,7 +1248,10 @@ def finetune(args: argparse.Namespace) -> dict:
             shuffled = [render_train_frames[index] for index in order]
         frame = shuffled.pop()
         sample = dataset[frame_to_index[frame]]
-        optimizer.zero_grad(set_to_none=True)
+        _zero_optimizer_gradients(
+            optimizer,
+            preserve_buffers=optimizer_state_offload,
+        )
         field.train()
         result = render_canonical_radio(
             renderer,
@@ -1084,11 +1282,11 @@ def finetune(args: argparse.Namespace) -> dict:
         mpr_loss, _mpr_stats = primitive_reconstruction_loss(
             predicted_rows, consensus, row_indices=chosen
         )
+        teacher_capability_maps = None
         capability_alignment_loss = render_loss.detach() * 0.0
         capability_local_affinity_loss = render_loss.detach() * 0.0
         capability_stats: dict[str, dict[str, torch.Tensor]] = {}
         if capability_adaptors:
-            teacher_capability_maps = None
             if capability_teacher_datasets is not None:
                 teacher_capability_maps = {}
                 for name, teacher_dataset in capability_teacher_datasets.items():
@@ -1115,7 +1313,10 @@ def finetune(args: argparse.Namespace) -> dict:
                 local_radius=int(args.capability_local_radius),
                 local_balance_quantile=float(args.capability_local_balance_quantile),
                 teacher_capability_maps=teacher_capability_maps,
+                projection_amp=bool(args.capability_projection_amp),
             )
+        predicted_semantics = None
+        semantic_teacher = None
         semantic_absolute_loss = render_loss.detach() * 0.0
         semantic_centered_loss = render_loss.detach() * 0.0
         semantic_loss = render_loss.detach() * 0.0
@@ -1172,7 +1373,13 @@ def finetune(args: argparse.Namespace) -> dict:
         )
         loss.backward()
         torch.nn.utils.clip_grad_norm_(field.parameters(), float(args.grad_clip))
-        optimizer.step()
+        if optimizer_state_offload:
+            _offloaded_adamw_step(
+                optimizer,
+                chunk_elements=int(args.optimizer_state_chunk_elements),
+            )
+        else:
+            optimizer.step()
 
         should_validate = (
             (step + 1) % int(args.log_every) == 0
@@ -1206,6 +1413,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 alpha_threshold=float(args.alpha_threshold),
                 capability_teacher_datasets=capability_teacher_datasets,
                 capability_teacher_frame_to_index=capability_teacher_frame_to_index,
+                projection_amp=bool(args.capability_projection_amp),
             )
             semantic_validation = None
             semantic_validation_absolute = None
@@ -1313,7 +1521,7 @@ def finetune(args: argparse.Namespace) -> dict:
                     )
                 best_capability_validation = dict(capability_validation)
                 best_step = step + 1
-                best_state = copy.deepcopy(field.state_dict())
+                _copy_state_dict_to_cpu_(best_state, field)
             record = {
                 "step": step + 1,
                 "frame_id": frame,
@@ -1357,7 +1565,39 @@ def finetune(args: argparse.Namespace) -> dict:
             history.append(record)
             print(json.dumps(record), flush=True)
 
+        # Do not retain the previous step's dense render/capability/semantic
+        # outputs while constructing the next full-resolution graph.  This is
+        # especially important after validation, which temporarily exercises
+        # all declared held-out views and several frozen projection spaces.
+        del (
+            result,
+            teacher,
+            chosen,
+            predicted_rows,
+            render_loss,
+            mpr_loss,
+            teacher_capability_maps,
+            capability_alignment_loss,
+            capability_local_affinity_loss,
+            capability_stats,
+            predicted_semantics,
+            semantic_teacher,
+            semantic_absolute_loss,
+            semantic_centered_loss,
+            semantic_loss,
+            generic_response_loss,
+            generic_text_response_stats,
+            loss,
+        )
+        _release_validation_cuda_cache(
+            device,
+            enabled=bool(args.release_validation_cuda_cache),
+            should_validate=should_validate,
+        )
+
     field.load_state_dict(best_state, strict=True)
+    del best_state
+    gc.collect()
     train_probe_frames = _even_subset(render_train_frames, len(validation_frames))
     final_train_probe = _mean_view_cosine(
         field,
@@ -1499,6 +1739,42 @@ def finetune(args: argparse.Namespace) -> dict:
             ),
             "visibility_domain": f"rendered_alpha>={float(args.alpha_threshold)}",
             "custom_adaptor_head": False,
+            "projection_precision": (
+                "cuda_amp_matching_official_extractor"
+                if bool(args.capability_projection_amp)
+                else "float32"
+            ),
+            "attention_runtime": (
+                "xformers_memory_efficient_exact_global"
+                if bool(args.capability_projection_xformers)
+                else "torch_default_sdpa"
+            ),
+            "allocator_boundary": (
+                "release_unused_cuda_cache_after_validation"
+                if bool(args.release_validation_cuda_cache)
+                else "default_cuda_cache"
+            ),
+            "optimizer_state_residency": (
+                "cpu_moments_bounded_chunk_gpu_adamw_update"
+                if optimizer_state_offload
+                else "optimizer_default"
+            ),
+            "optimizer_state_chunk_elements": (
+                int(args.optimizer_state_chunk_elements)
+                if optimizer_state_offload
+                else None
+            ),
+            "gradient_buffer_residency": (
+                "zero_in_place_and_reuse_between_steps"
+                if optimizer_state_offload
+                else "set_to_none_each_step"
+            ),
+            "optimizer_state_offload_requested": bool(
+                args.offload_optimizer_state
+            ),
+            "optimizer_state_offload_auto_semantic": bool(
+                semantic_enabled and not bool(args.offload_optimizer_state)
+            ),
             "uses_benchmark_masks": False,
             "uses_text_queries": False,
         },
@@ -1648,6 +1924,47 @@ def main() -> None:
             "Teacher source for SigLIP2/DINO/SAM render losses. 'official_extracted' "
             "requires extractor-produced native official adaptor maps and "
             "only resamples them to the render grid."
+        ),
+    )
+    parser.add_argument(
+        "--capability-projection-amp",
+        action="store_true",
+        help=(
+            "Project rendered grids through frozen capability adaptors under "
+            "the same CUDA AMP runtime used by the official feature extractor."
+        ),
+    )
+    parser.add_argument(
+        "--capability-projection-xformers",
+        action="store_true",
+        help=(
+            "Use xFormers memory-efficient exact global attention for the "
+            "frozen SigLIP2 spatial adaptor."
+        ),
+    )
+    parser.add_argument(
+        "--release-validation-cuda-cache",
+        action="store_true",
+        help=(
+            "Release unused CUDA allocator blocks after heavy validation "
+            "boundaries; this does not change tensors or selection metrics."
+        ),
+    )
+    parser.add_argument(
+        "--offload-optimizer-state",
+        action="store_true",
+        help=(
+            "Keep AdamW moments on CPU during forward/backward and return "
+            "them to the field device only for optimizer.step()."
+        ),
+    )
+    parser.add_argument(
+        "--optimizer-state-chunk-elements",
+        type=int,
+        default=16777216,
+        help=(
+            "Maximum number of AdamW moment elements staged on the field "
+            "device at once when optimizer-state offload is active."
         ),
     )
     parser.add_argument("--alpha-threshold", type=float, default=0.02)

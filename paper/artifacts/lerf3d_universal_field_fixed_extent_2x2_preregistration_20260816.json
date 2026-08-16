@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf3d_universal_field_fixed_extent_2x2_preregistration",
+  "status": "sealed_before_current_field_candidate_metrics",
+  "purpose": "Isolate whether the low Universal Field v1 LERF3D row is caused by the field or by Primitive Readout-v0 omitting query-independent spatial extent.",
+  "method_role": "diagnostic precursor to TextPosteriorV2; not a final method or paper claim",
+  "hypothesis": "Applying the previously fixed query-independent kNN10 plus scene-minmax spatial readout to the exact current primitive semantic scores will improve current-field LERF3D without changing Universal Field v1.",
+  "frozen_split": {
+    "development": [
+      "figurines",
+      "ramen"
+    ],
+    "heldout": [
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "heldout_candidate_metrics_must_remain_unopened_until_development_gate_passes": true
+  },
+  "frozen_candidate": {
+    "protocol_preset": "vala_paper_3d",
+    "field_and_primitive_query_cache": "unchanged current Method-v1 assets whose migrated Universal Field v1 RADIO decode is bitwise identical",
+    "scoring": "relevancy",
+    "canonical_negative_embedding": "siglip2_lerf_all_generic_negatives_exact_official.pt",
+    "score_postprocess": "vala_knn_minmax",
+    "vala_knn_k": 10,
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": 0.0392156862745098,
+    "alpha_binarization": "png_uint8_gt10",
+    "changed_variable_from_primitive_readout_v0": "score_postprocess only",
+    "learned_parameters": false,
+    "target_label_or_mask_used_by_candidate": false,
+    "scene_or_query_specific_settings": false
+  },
+  "frozen_control": {
+    "artifact": {
+      "path": "/root/RADIO-GS/paper/artifacts/five_benchmark_method_v1_asset_inventory_20260815.json",
+      "sha256": "0e949f62386a34def4e1f381c204431ab3d0110267bff250d5e37d59e3c5adee"
+    },
+    "readout": "radio-gs-primitive-readout-v0",
+    "scene_miou": {
+      "figurines": 0.44840091466903687,
+      "ramen": 0.29173415899276733,
+      "teatime": 0.3287052512168884,
+      "waldo_kitchen": 0.19814537465572357
+    }
+  },
+  "immutable_inputs": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "e9e5988c2a37a90de7cee03f013097d5d98d53e15147811861403aed21342803"
+    },
+    "summary_head": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "positive_text": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+      "sha256": "2b8142252b541a585e248226d38efc30cde53cdef82d5b0ac371085102888e7b"
+    },
+    "canonical_negative_text": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt",
+      "sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0"
+    },
+    "primitive_query_cache_sha256": {
+      "figurines": "acc0b8b4cbf429d92e2f9df05865898066349fb79bcbe0bd3933ae1e504f1e18",
+      "ramen": "893fda2a90142f71ee8175e666f12353a93e08a8125d8d5bdaf26d3a95dc54b5",
+      "teatime": "3938c13cd5f2c78cc2522aeff26cb0f77ba08cbeb519288b4b564dffd629b96b",
+      "waldo_kitchen": "01ffe08e54466dc0da720bcc2e25029ae2b085e24e78f8ac5ad9ced28085159f"
+    }
+  },
+  "development_gate": {
+    "development_scene_macro_delta_miou_strictly_positive": true,
+    "minimum_allowed_per_scene_delta_miou": -0.002,
+    "on_failure": "stop this fixed extent operator without opening heldout candidate metrics"
+  },
+  "heldout_gate": {
+    "heldout_scene_macro_delta_miou_strictly_positive": true,
+    "full4_scene_macro_delta_miou_strictly_positive": true,
+    "minimum_allowed_per_scene_delta_miou": -0.002,
+    "on_failure": "retain only the causal diagnosis; do not promote the operator"
+  },
+  "access_disclosure": {
+    "primitive_readout_v0_metrics_already_open": true,
+    "historical_knn_minmax_metrics_on_different_field_and_cache_lineages_already_open": true,
+    "current_field_knn_minmax_candidate_metrics_open_before_this_preregistration": false,
+    "candidate_uses_lerf_ground_truth_for_training_or_parameter_selection": false
+  },
+  "uqis_in_scope": false
+}

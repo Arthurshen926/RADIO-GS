@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_text_posterior_v2_post_spatial_shrink06_candidate_preregistration",
+  "status": "sealed_before_official_shrink06_source_loso",
+  "candidate": {
+    "recipe_id": "post-spatial-text-posterior-v2-adam-seed17-e192-lr0.01-shrink0.6-v3",
+    "training_residual_scale": 1.0,
+    "deployment_residual_scale": 0.6,
+    "objective_weights": {
+      "balanced_bce_over_legacy": 0.45,
+      "local_relation_over_legacy": 0.25,
+      "soft_jaccard_over_legacy": 0.3
+    },
+    "fixed_threshold": 0.6,
+    "global_across_scenes_and_queries": true
+  },
+  "selection_evidence": "paper/artifacts/text_posterior_v2_post_spatial_source_residual_shrinkage_selection_20260816.json",
+  "unchanged_gate": {
+    "macro_hard_iou_at_0.6_strictly_improves": true,
+    "macro_balanced_bce_strictly_improves": true,
+    "macro_positive_negative_gap_strictly_improves": true,
+    "macro_local_relation_maximum_regression": "max(1e-5, 2 percent of base)",
+    "each_fold_hard_iou_maximum_regression": 0.01,
+    "each_fold_local_relation_maximum_regression": "max(1e-5, 2 percent of base)",
+    "promotion": "all macro checks and every fold admissibility check must pass"
+  },
+  "sealed_inputs": {
+    "dataset_manifest_sha256": "74ff10e74723002b749a4545dc270617416b17043550f98213811c7bbcc8f880",
+    "typed_posteriors_sha256": "1f7bb3ef01bd186392dc3fe7c18b90370cc168e6bc83bf2def5a87b1f2ab5100",
+    "trainer_sha256": "a7956035a2d59cd3dfd45a2de0a4a24303bb14d28d4b25f4541dda93c922f58e"
+  },
+  "execution_boundary": {
+    "development_scene0003_opened": false,
+    "lerf_queries_or_ground_truth_opened": false,
+    "fit3_allowed_only_after_official_loso_pass": true
+  },
+  "uqis_in_scope": false
+}

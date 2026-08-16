@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_universal_field_v1_implementation_status",
+  "status": "field_boundary_complete_typed_readouts_in_development",
+  "completed_improvements": {
+    "field_readout_separation": {
+      "status": "complete",
+      "conclusion": "Universal Field v1 is now the persistent D512/L512 field plus five reliability scalars; Primitive Readout-v0 is only a causal baseline and is not the final method."
+    },
+    "exact_marginal_authority": {
+      "status": "complete",
+      "conclusion": "The actual fields were already built with exact front-to-back marginal responsibility. The stale alpha-depth statement was an authority/metadata defect, not a tensor defect."
+    },
+    "reliability_persistence": {
+      "status": "complete_12_of_12_existing_d512_l512_fields",
+      "conclusion": "Five named float32 reliability scalars were recovered from each strict factorized cache and serialized once per Gaussian without retraining or decoder fusion."
+    },
+    "decode_preservation": {
+      "status": "pass",
+      "conclusion": "All 12 migrations pass coefficient, in-memory RADIO, and serialized RADIO bitwise-equality probes on 1024 fixed rows."
+    },
+    "typed_posterior_interfaces": {
+      "status": "implemented_and_unit_tested",
+      "conclusion": "TextPosteriorV2 and CategoricalPosteriorV2 are globally shared query interfaces; their zero initialization reproduces Primitive Readout-v0 and they add no persistent task field."
+    },
+    "scannet_categorical_sentinel": {
+      "status": "mechanism_supported_development_only",
+      "conclusion": "A head trained on two declared development scenes improves all 19/15/10 mIoU and mAcc metrics on six held-out scenes, isolating categorical calibration as a real bottleneck."
+    },
+    "categorical_reliability_ablation": {
+      "status": "no_incremental_effect_observed",
+      "conclusion": "Zeroing all five reliability inputs at inference changes none of the held-out discrete metrics; the observed categorical gain comes from shared class temperature/bias calibration."
+    },
+    "independent_source_categorical_calibration": {
+      "status": "two_candidates_rejected_by_source_loso",
+      "conclusion": "The full per-class/background head regressed source LOSO macro mIoU by 0.17308, and the transferable two-scalar target-blind marginal head regressed it by 0.05959. Neither was fit on all source scenes or evaluated on the paper-eight target cohort."
+    },
+    "lerf3d_protocol_readout_diagnosis": {
+      "status": "single_level_causal_gate_passed_three_followup_readouts_rejected",
+      "conclusion": "The reported 0.33450 used one primitive semantic level with no score postprocessing and therefore did not complete the frozen three-level LERF3D contract. Restoring kNN10 plus per-query min-max raises full-four sample-micro mIoU to 0.46184 and improves all four scenes. Historical SurfaceRegion three-level failed development, source-trained post-spatial TextPosteriorV2 failed source LOSO, and unconditional peak-connected extent improved aggregate micro mIoU to 0.47966 but regressed heldout Waldo by 0.00877, so it was not promoted."
+    },
+    "nvos_full8_field_and_readout_diagnosis": {
+      "status": "full8_complete_signed_evidence_sam_development_gate_passed",
+      "conclusion": "All eight D512/L512 fields pass their hash-bound gates. Frozen majority-vote SAM reaches 0.52687 macro IoU, while field-point correctness and raw margins show that under-recall aggregation is the dominant failure. A preregistered signed-evidence box-SAM3 selector reaches 0.81762, repairs horns_left from 0 to 0.68988, and leaves the other seven scenes unchanged. It is promoted only for target-RGB-assisted development and remains ineligible for the strict-unseen paper row."
+    },
+    "spin_capability_cache_partition": {
+      "status": "future_scenes_use_shard512_bitwise_storage_equivalence_test_passed",
+      "conclusion": "The 4096-D exact-DINO cache repeated official adaptor projection once per 256-channel outer shard. Future new scene processes use 512-channel outer shards while retaining 128-channel inner accumulation; synthetic reconstruction, support, count, and reliability are bitwise equal. Orchids/leaves preserve their active 256-channel resume contracts."
+    },
+    "spin_capability_cohort_v2_metadata": {
+      "status": "fail_closed_schema_omission_corrected_and_real_orchids_preflight_passed",
+      "conclusion": "The first orchids base-field preflight rejected a receipt that omitted benchmark_masks_opened=false despite retaining both specific mask-access false flags. No field tensor training or partial output occurred. A versioned v2 receipt adds only the aggregate false flag; all MPR tensors, registration, hyperparameters, and information access are unchanged, and orchids subsequently completed its D512/L512 base field."
+    },
+    "spin_siglip_complete_grid_amp": {
+      "status": "implemented_unit_tested_and_real_full_grid_forward_backward_smoke_passed",
+      "conclusion": "Float32 attention over the 189x252 SigLIP grid requested 135.21 GiB; AMP inference passed, but Torch 2.0.1 on sm86 then fell back to a 67.61 GiB training matrix for head_dim=80. The SPIn runner now opts into extractor-matched AMP plus xFormers 0.0.20 exact global memory-efficient attention, retaining all 47,628 tokens with no tiling or truncation. Real inference/gradient smoke tests peak at 2.21/5.84 GB with finite nonzero input gradients; existing callers retain their old default."
+    },
+    "spin_region_allocator_boundary": {
+      "status": "implemented_unit_tested_and_real_orchids_64_step_stage_passed",
+      "conclusion": "Dense step references and validation allocator blocks are released at explicit boundaries, while AdamW moments reside on CPU outside the unchanged optimizer update. Orchids crossed both former OOM boundaries and completed 64 steps: semantic validation rose 0.42295 to 0.43912, raw/SigLIP also rose, and MPR remained inside its frozen drop gate."
+    },
+    "spin_crop_teacher_resume_thermal": {
+      "status": "implemented_unit_tested_and_real_leaves_full26_passed",
+      "conclusion": "Atomic per-frame/manifest writes, validated partial resume, and ten-second pacing preserved the 12 leaves tensors completed before the 84 C hard guard and safely finished all 26 source frames without opening labels or benchmark masks."
+    },
+    "spin_large_scene_host_memory": {
+      "status": "implemented_unit_tested_real_leaves_siglip64_passed",
+      "conclusion": "The first 1.4M-Gaussian leaves SigLIP process was killed with exit 137 before any step record while redundant parent state and CPU selection snapshots overlapped. Parent tensors are now discarded after reconstruction, best snapshots refresh in place, final reload releases the snapshot before CPU transfer, and lineage hashing occurs before multi-GiB loading. The retry completed all 64 steps: raw and SigLIP validation improved, MPR changed by only 0.00000203, and the sealed field entered its region stage."
+    },
+    "spin_orchids_method_v1_gate": {
+      "status": "pass_1_of_9_required_scene_gates",
+      "conclusion": "Orchids completed all four persistent stages and passed the content-hash-bound Method-v1 gate. Its generic validation loss fell from 0.24690 to 0.20922 while semantic and SigLIP validation improved; raw and MPR stayed within their frozen drop gates. Benchmark masks remain sealed."
+    },
+    "spin_host_memory_stage_lock": {
+      "status": "implemented_unit_tested_real_lock_passed_prior_failure_boundary",
+      "conclusion": "A leaves region load was killed with exit 137 while fern factorized MPR held about 9.6 GB RSS and declared a 12.43 GB peak on the shared 31 GB host. SPIn high-memory stages now use a cross-process advisory lock. With fern waiting, leaves completed region step 1 plus full validation at about 21.6 GB RSS, proving both the former overlap's invalidity and the correction's effectiveness."
+    },
+    "spin_large_scene_chunked_adamw": {
+      "status": "implemented_bitwise_and_gradient_reuse_tested_real_retry_queued",
+      "conclusion": "After the host-memory fix, leaves exposed two distinct 2.67 GiB CUDA allocations: foreach AdamW's denominator and then the next backward after set_to_none discarded the giant local-code gradient. CPU moments now use 16,777,216-element GPU chunks and gradients are zeroed/reused in place. AdamW state/parameters are bitwise equal on a three-step fixture, gradient-buffer reuse is tested, and the real retry is queued behind fern exact-DINO MPR."
+    }
+  },
+  "benchmark_status": {
+    "lerf2d": {
+      "latest_paper_eligible_method": "radio-gs-primitive-readout-v0",
+      "latest_miou": 0.3141749763543635,
+      "typed_readout_status": "TextPosteriorV2 interface implemented; independent source-trained extent head pending",
+      "sota_claim_supported": false
+    },
+    "lerf3d": {
+      "latest_paper_eligible_method": "radio-gs-primitive-readout-v0",
+      "latest_miou": 0.3345018489143023,
+      "latest_single_level_protocol_diagnostic_miou": 0.4618371030172476,
+      "latest_single_level_unpromoted_peak_extent_diagnostic_miou": 0.4796630126925615,
+      "typed_readout_status": "Three follow-up readouts rejected by frozen gates; accepted robust single-level readout remains kNN10 plus scene-minmax",
+      "sota_claim_supported": false
+    },
+    "scannet_ovs": {
+      "latest_paper_eligible_method": "radio-gs-primitive-readout-v0",
+      "latest_miou_19_15_10": [
+        0.33535351797116164,
+        0.3336950833122655,
+        0.422130896745811
+      ],
+      "development_all8_miou_19_15_10": [
+        0.3960231186146686,
+        0.41223397678212303,
+        0.5056792493093718
+      ],
+      "typed_readout_status": "Development-only mechanism supported, but both independent-source transfer candidates failed frozen LOSO; Primitive Readout-v0 remains the eligible control",
+      "sota_claim_supported": false
+    },
+    "nvos": {
+      "latest_paper_eligible_method": null,
+      "latest_complete_frozen_majority_vote_macro_iou": 0.5268735259096345,
+      "development_signed_evidence_sam_macro_iou": 0.817616763357676,
+      "typed_readout_status": "all eight D512/L512 fields complete; signed-evidence SAM selector passes its development gate, but target-RGB-assisted predictions remain strict-unseen ineligible",
+      "sota_claim_supported": false
+    },
+    "spin_nerf_available9": {
+      "latest_paper_eligible_method": null,
+      "typed_readout_status": "full-nine reference-calibrated transient runner is implemented and tested; orchids is the first of nine scenes to pass the complete Method-v1 field gate, leaves has sealed its corrected 64-step SigLIP field and entered region training, and fern is building factorized MPR",
+      "sota_claim_supported": false
+    }
+  },
+  "verification": {
+    "targeted_tests": 79,
+    "targeted_tests_passed": 79,
+    "python_compile": "pass",
+    "git_diff_check": "pass"
+  },
+  "evidence": {
+    "field_inventory": "paper/artifacts/universal_field_v1_asset_inventory_20260816.json",
+    "categorical_pilot": "paper/artifacts/categorical_posterior_v2_cross_scene_pilot_20260816.json",
+    "authority": "paper/artifacts/universal_field_v1_authority_20260816.json",
+    "lerf3d_single_level_diagnosis": "paper/artifacts/lerf3d_universal_field_fixed_extent_2x2_result_20260816.json",
+    "lerf3d_three_level_preregistration": "paper/artifacts/lerf3d_universal_field_three_level_2x2_preregistration_20260816.json",
+    "lerf3d_three_level_development_gate": "paper/artifacts/lerf3d_universal_field_three_level_development_gate_result_20260816.json",
+    "text_posterior_v2_source_gate": "paper/artifacts/text_posterior_v2_post_spatial_source_gate_result_20260816.json",
+    "peak_connected_extent_result": "paper/artifacts/lerf3d_universal_field_peak_connected_extent_2x2_result_20260816.json",
+    "categorical_posterior_source_gate": "paper/artifacts/categorical_posterior_v2_independent_source_gate_result_20260816.json",
+    "marginal_categorical_posterior_source_gate": "paper/artifacts/marginal_categorical_posterior_v2_independent_source_gate_result_20260816.json",
+    "nvos_signed_evidence_sam_result": "paper/artifacts/nvos_method_v1_field_box_signed_points_sam3_candidate_result_20260816.json",
+    "spin_capability_shard512_correction": "paper/artifacts/spin9_method_v1_capability_shard512_implementation_correction_20260816.json",
+    "spin_capability_cohort_v2_correction": "paper/artifacts/spin9_method_v1_capability_cohort_v2_metadata_correction_20260816.json",
+    "spin_siglip_global_projection_amp_correction": "paper/artifacts/spin9_method_v1_siglip_global_projection_amp_correction_20260816.json",
+    "spin_region_allocator_correction": "paper/artifacts/spin9_method_v1_region_allocator_correction_20260816.json",
+    "spin_crop_teacher_resume_thermal_correction": "paper/artifacts/spin9_method_v1_crop_teacher_resume_thermal_correction_20260816.json",
+    "spin_large_scene_host_memory_correction": "paper/artifacts/spin9_method_v1_large_scene_host_memory_correction_20260816.json",
+    "spin_orchids_method_v1_gate_result": "paper/artifacts/spin9_orchids_method_v1_gate_result_20260816.json",
+    "spin_host_memory_stage_lock_correction": "paper/artifacts/spin9_host_memory_stage_lock_correction_20260816.json",
+    "spin_large_scene_chunked_adamw_correction": "paper/artifacts/spin9_large_scene_chunked_adamw_correction_20260816.json"
+  },
+  "next_hard_gates": [
+    "Keep the accepted kNN10 plus scene-minmax LERF readout as the robust control; defer any conditional extent gate until it can be trained entirely from independent source components.",
+    "Keep Primitive Readout-v0 as the ScanNet control; do not open the paper-eight cohort for either rejected source-trained categorical candidate.",
+    "Keep the NVOS signed-evidence selector as target-RGB-assisted development evidence, while building a target-RGB-free readout or freezing an explicitly comparable target-RGB protocol before any paper claim.",
+    "Complete the SPIn-NeRF Available-Nine D512/L512 cohort, migrate it to Universal Field v1, and run the already implemented full-nine pre-GT-barrier evaluation."
+  ]
+}

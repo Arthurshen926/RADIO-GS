@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_siglip_global_projection_amp_correction",
+  "status": "implemented_unit_tested_and_real_full_grid_forward_backward_smoke_passed",
+  "trigger": {
+    "scene": "orchids",
+    "stage": "official_siglip2_full_grid_initial_validation",
+    "grid": [
+      189,
+      252
+    ],
+    "token_count": 47628,
+    "failure": "float32 scaled-dot-product attention requested 135.21 GiB on a 23.69 GiB GPU",
+    "base_field_changed": false,
+    "partial_siglip_field_written": false
+  },
+  "root_cause": "The finetune validation path projected the complete SigLIP2 attention grid in float32, while the already sealed official extractor used CUDA AMP. AMP fixed inference, but Torch 2.0.1 on sm86 cannot use flash or memory-efficient training SDPA for the official head_dim=80 and fell back to a 67.61 GiB explicit half-precision attention matrix.",
+  "correction": {
+    "contract": "cuda_amp_matching_official_extractor",
+    "training_attention_runtime": "xformers_0.0.20_memory_efficient_exact_global",
+    "torch_cuda_abi": "torch_2.0.1_cu118_sm86",
+    "runtime_install_command": "bash radio_gs/scripts/run_repo_python.sh -m pip install --no-deps xformers==0.0.20",
+    "complete_global_token_scope_retained": true,
+    "spatial_tiling_used": false,
+    "attention_semantics_changed": false,
+    "default_for_existing_callers_changed": false,
+    "spin9_runner_opt_in": true,
+    "metadata_records_projection_precision": true
+  },
+  "verification": {
+    "related_tests_passed": 54,
+    "real_smoke_input_shape": [
+      1280,
+      189,
+      252
+    ],
+    "real_smoke_output_shape": [
+      1,
+      1536,
+      189,
+      252
+    ],
+    "real_smoke_output_finite": true,
+    "real_smoke_mean_output_norm": 1.0,
+    "real_inference_smoke_peak_allocated_bytes": 2205609472,
+    "real_gradient_smoke_output_shape": [
+      1,
+      1536,
+      189,
+      252
+    ],
+    "real_gradient_smoke_input_gradient_finite": true,
+    "real_gradient_smoke_input_gradient_nonzero": true,
+    "real_gradient_smoke_peak_allocated_bytes": 5844453376
+  },
+  "claim_boundary": "This is a runtime precision correction matching the official teacher extractor, not a new method or benchmark candidate."
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_method_v1_capability_cohort_v2_metadata_correction",
+  "status": "corrected_after_first_real_base_field_fail_closed_check",
+  "trigger": {
+    "scene": "orchids",
+    "stage": "base_field_preflight",
+    "error": "formal exact-marginal capability cohort authority differs",
+    "tensor_training_started": false,
+    "partial_field_written": false
+  },
+  "root_cause": "The SPIn receipt recorded reference_masks_opened=false and evaluation_masks_opened=false but omitted the trainer's required aggregate benchmark_masks_opened=false field.",
+  "correction": {
+    "old_receipt_name_retained": "method_v1_capability_cohort_authority.json",
+    "new_receipt_name": "method_v1_capability_cohort_authority_v2.json",
+    "added_field": {
+      "benchmark_masks_opened": false
+    },
+    "retained_specific_fields": {
+      "reference_masks_opened": false,
+      "evaluation_masks_opened": false
+    },
+    "mpr_tensor_changed": false,
+    "registration_changed": false,
+    "field_hyperparameter_changed": false,
+    "evaluation_information_opened": false
+  },
+  "resume": {
+    "orchids_reuses_all_hash_valid_factorized_raw_dino_sam_caches": true,
+    "leaves_reuses_all_stages_completed_before_its_old_runner_reaches_the_same_preflight": true
+  },
+  "claim_boundary": "This is a fail-closed receipt schema correction, not a method or benchmark candidate."
+}

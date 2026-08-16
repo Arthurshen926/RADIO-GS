@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_text_posterior_v2_post_spatial_determinism_correction",
+  "status": "sealed_before_deterministic_source_loso",
+  "trigger": {
+    "official_shrink06_result": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2/source_post_spatial_text_posterior.loso.v4.json",
+      "sha256": "75da3981f33dfb71826a7abb23720829545c276d8764ec55ba3a11bccb65707e"
+    },
+    "observed_issue": "The same seed and objective produced a one-ULP parameter difference depending on whether the required zero-identity evaluation ran before the first optimizer step; after 192 nonlinear steps this changed the scene0001 fold decision.",
+    "target_data_involved": false
+  },
+  "correction": {
+    "cpu_threads": 1,
+    "deterministic_algorithms": true,
+    "seed": 17,
+    "method_architecture_changed": false,
+    "source_data_changed": false,
+    "gate_changed": false,
+    "deployment_residual_scale": 0.6,
+    "recipe_id": "post-spatial-text-posterior-v2-adam-seed17-e192-lr0.01-shrink0.6-deterministic-v4"
+  },
+  "verification": {
+    "first_step_state_sha256_with_pre_evaluation": "23faaf8e9755e314aaf26ab9a3ae94e87a86355d5f52e66cc358f43aba6a9f34",
+    "first_step_state_sha256_without_pre_evaluation": "23faaf8e9755e314aaf26ab9a3ae94e87a86355d5f52e66cc358f43aba6a9f34",
+    "states_equal": true,
+    "targeted_tests_passed": 14
+  },
+  "sealed_implementation": {
+    "trainer_sha256": "0e7aeea4e2ae6b85111253394cddfe4b391e86e70efea44d79026dcf362ce75d",
+    "typed_posteriors_sha256": "1f7bb3ef01bd186392dc3fe7c18b90370cc168e6bc83bf2def5a87b1f2ab5100",
+    "dataset_manifest_sha256": "74ff10e74723002b749a4545dc270617416b17043550f98213811c7bbcc8f880"
+  },
+  "execution_boundary": {
+    "development_scene0003_opened": false,
+    "lerf_queries_or_ground_truth_opened": false,
+    "fit3_allowed_only_after_deterministic_loso_pass": true
+  }
+}

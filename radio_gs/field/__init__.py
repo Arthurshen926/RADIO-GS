@@ -30,6 +30,7 @@ from .boundary_screen_residual import (
 from .checkpoint import (
     load_canonical_field_checkpoint,
     load_factorized_canonical_field_checkpoint,
+    load_universal_canonical_field_checkpoint,
 )
 from .view_residual import ZeroMeanViewResidual, load_view_residual_checkpoint
 from .observation_lifting_contract import (
@@ -80,6 +81,7 @@ __all__ = [
     "validate_basis_conditioning",
     "load_canonical_field_checkpoint",
     "load_factorized_canonical_field_checkpoint",
+    "load_universal_canonical_field_checkpoint",
     "load_boundary_screen_residual_checkpoint",
     "ZeroMeanViewResidual",
     "load_view_residual_checkpoint",

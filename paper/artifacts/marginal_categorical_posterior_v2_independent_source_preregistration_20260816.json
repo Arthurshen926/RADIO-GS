@@ -1,0 +1,86 @@
+{
+  "artifact_type": "radio_gs_marginal_categorical_posterior_v2_independent_source_preregistration",
+  "schema_version": 1,
+  "status": "sealed_before_first_source_loso_execution",
+  "candidate": {
+    "name": "MarginalCategoricalPosteriorV2",
+    "model_schema": "radio_gs.marginal_categorical_posterior_v2.v1",
+    "motivation": "Replace non-transferable per-class learned parameters with a two-parameter rule that remains defined for source-fold-unseen classes, and align training rows with the frozen 19-class evaluation support.",
+    "input": "raw positive class cosine for all 19 classes",
+    "target_blind_scene_statistics": "per-class mean and population standard deviation over every valid scene row",
+    "calibration": "blend raw, class-centered, and class-standardized scores with one globally shared tanh-bounded centering strength and one globally shared tanh-bounded scaling strength",
+    "initialization": "both strengths zero, giving exact raw-score logits and argmax",
+    "persistent_scene_state": false,
+    "background_or_abstention_class": false,
+    "reliability_input": false,
+    "learned_scalar_count": 2
+  },
+  "source_partition": {
+    "fit_scenes": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0005_00"
+    ],
+    "loso_order": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0005_00"
+    ],
+    "development_scene_forbidden": "scene0003_00",
+    "source_validation_scenes_forbidden_for_fit": [
+      "scene0004_00",
+      "scene0008_00"
+    ]
+  },
+  "source_supervision": {
+    "target": "official soft semantic distribution renormalized over the frozen 19 evaluation classes",
+    "ignored_rows": "rows with zero official mass in the 19 evaluation classes",
+    "weight": "valid times training-label-weight times coverage times sqrt(resultant_length times evidence_saturation) times foreground_mass, followed by fit-scene class balancing",
+    "scene_statistics_use_labels": false
+  },
+  "training": {
+    "recipe_id": "source-marginal-categorical-posterior-v2-adamw-seed20260816-s300-v1",
+    "seed": 20260816,
+    "optimizer": "AdamW",
+    "steps": 300,
+    "learning_rate": 0.03,
+    "regularization": 0.01,
+    "cpu_threads": 1,
+    "deterministic_algorithms": true
+  },
+  "frozen_gate": {
+    "per_fold": {
+      "miou_delta_minimum": -0.01,
+      "macc_delta_minimum": -0.01
+    },
+    "macro": {
+      "miou_delta_strictly_positive": true,
+      "macc_delta_minimum": -0.01
+    },
+    "pass_rule": "all three per-fold checks and both macro checks pass",
+    "on_fail": "reject candidate; do not fit all three source scenes and do not open paper-eight labels",
+    "on_pass": "fit the identical recipe on all three source scenes, freeze one checkpoint, then evaluate the paper-eight ScanNet OVS cohort once"
+  },
+  "authorities": {
+    "dataset_manifest": {
+      "path": "/root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2/source_fit_dataset_manifest.v1.json",
+      "sha256": "74ff10e74723002b749a4545dc270617416b17043550f98213811c7bbcc8f880"
+    },
+    "typed_posterior_source": {
+      "path": "/root/RADIO-GS/radio_gs/querying/typed_posteriors.py",
+      "sha256": "fac38cabde8fe18ac2dcb13c659b6a44f65848a4f1ce6a926dc0d1a243643a59"
+    },
+    "trainer_source": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_source_marginal_categorical_posterior_v2.py",
+      "sha256": "a2d3584e07417f4cc41ceec2c88dfed23710061040f0b857cd95349c57be89d3"
+    }
+  },
+  "forbidden": [
+    "paper-eight label or metric access before source LOSO passes",
+    "per-class learned temperature or bias",
+    "source-validation scene relabeling as source-fit",
+    "per-scene or per-class hyperparameter tuning",
+    "post-hoc gate relaxation",
+    "reliability-conditioned background prediction"
+  ]
+}

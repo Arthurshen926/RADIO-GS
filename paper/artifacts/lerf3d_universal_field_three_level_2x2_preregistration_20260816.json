@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf3d_universal_field_three_level_2x2_preregistration",
+  "status": "sealed_before_current_field_three_level_materialization_and_before_metric_execution",
+  "registered_at": "2026-08-16T12:11:36+08:00",
+  "purpose": "Complete the already-frozen LERF3D protocol with three semantic levels derived from the current D512/L512 fields. This is a protocol-completeness baseline, not a new fitted posterior.",
+  "partition": {
+    "development": [
+      "figurines",
+      "ramen"
+    ],
+    "heldout_confirmation": [
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "heldout_opening_gate": "development scene-macro mIoU must exceed the single-level fixed-extent development scene-macro mIoU 0.45933951437473297, and neither development scene may regress by more than 0.002",
+    "no_reselection_after_heldout": true
+  },
+  "method": {
+    "persistent_field": "unchanged schema-v2 D512/L512 field; no retraining and no decoder change",
+    "factorized_state": "query-independent, SHA-bound, missingness-safe primitive state",
+    "capability_bank": "official RADIO DINO-v3 and SAM3 adaptors applied to the current field",
+    "support_graph": {
+      "neighbors": 16,
+      "spatial_scale": 2.0,
+      "appearance_temperature": 0.1,
+      "boundary_temperature": 0.1,
+      "normal_temperature": 0.2,
+      "surface_tangent_temperature": 0.2,
+      "surface_relation": "none",
+      "covisibility_weight": 0.0,
+      "capability_affinity_mode": "signed_hash",
+      "affinity_dim": 256,
+      "topology_mode": "symmetric_union"
+    },
+    "surface_region_readout": {
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+      "native_radii_m": [
+        0.25,
+        0.45,
+        0.7
+      ],
+      "feature_normalization": "legacy_raw",
+      "semantic_levels": 3,
+      "scale_reduction_before_evaluation": false
+    },
+    "direct3d": {
+      "protocol_preset": "vala_repo_3d",
+      "knn": 10,
+      "score_mapping": "per_query_scene_minmax",
+      "selection_threshold": 0.6,
+      "projection": "selected_only_alpha_png_uint8_gt10",
+      "aggregator": "radio_gs/scripts/aggregate_ours_lerf_direct3d_frozen.py"
+    },
+    "learned_parameters_added": false,
+    "scene_or_query_specific_parameter_selection": false
+  },
+  "frozen_common_inputs": {
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "evaluation_contract": {
+      "path": "/root/RADIO-GS/paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+      "sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916"
+    },
+    "accepted_v2_legacy_radio_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/surface_region_accepted_v2_legacy_radio_authority_20260805.json",
+      "sha256": "2d72ed54eef69378c665ddf83067838d79e42d6b72545d89aab12f95cb781948"
+    }
+  },
+  "scenes": {
+    "figurines": {
+      "partition": "development",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/figurines/generic_text_response_w005_s0_64_lineage.pth",
+      "field_sha256": "9beeb9db4f91055ee17eaee4b85c60f790417fb9cc109772fea853b1c5b86e8b",
+      "factorized_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_raw_radio_exact_marginal.pt",
+      "factorized_cache_sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b",
+      "text_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_figurines_officialcanonical_prompt5.pt",
+      "text_query_cache_sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b",
+      "renderer_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "renderer_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "ramen": {
+      "partition": "development",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/ramen/generic_text_response_w005_s0_64.pth",
+      "field_sha256": "9b469fb1732235f9f81db1609fc0e2cf710f7211f74410b895bc1edcf8971e8f",
+      "factorized_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/factorized_raw_radio_exact_marginal.pt",
+      "factorized_cache_sha256": "1b3c6c5ac01b6dea3e993db64217b60a942ba33adbed2e34e8357846854b3f8e",
+      "text_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_ramen_officialcanonical_prompt5.pt",
+      "text_query_cache_sha256": "075734115e2289c886160c5ef45c7f1d14c1be28647d0d9653dfe54c217c412a",
+      "renderer_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "renderer_checkpoint_sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "teatime": {
+      "partition": "heldout_confirmation",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/teatime/generic_text_response_w005_s0_64.pth",
+      "field_sha256": "6fccff587374e5d6a9ba7cb9f381065bdd1d91615f6331e942e06248992f4d55",
+      "factorized_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/factorized_raw_radio_exact_marginal.pt",
+      "factorized_cache_sha256": "c9d903172972c982d24e6062416b2a01136b4e1c5e7cc0fc2694fa5e4dcc1af3",
+      "text_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_teatime_officialcanonical_prompt5.pt",
+      "text_query_cache_sha256": "ecc942ae3ac2e43d1a503a4bb606baf35d7d1b3fa3d49b85ed2641117ef9c6a0",
+      "renderer_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep_seed7/checkpoints/best.pth",
+      "renderer_checkpoint_sha256": "f5be0dea030dba6b69906e8b49da740d2722ebb589fe1f9d6bce4731de877f53"
+    },
+    "waldo_kitchen": {
+      "partition": "heldout_confirmation",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/waldo_kitchen/generic_text_response_w005_s0_64.pth",
+      "field_sha256": "c6604f4bb69771d41452b28fb28cdfac8c6934ed22a47312322143dde3c4f4c1",
+      "factorized_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/waldo_kitchen/factorized_raw_radio_exact_marginal.pt",
+      "factorized_cache_sha256": "677c47a915528d48085fb29f1697cc77dff92cfd7281ae66210db62e2cf71787",
+      "text_query_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_waldo_kitchen_officialcanonical_prompt5.pt",
+      "text_query_cache_sha256": "3607f6661d46d71f8a0b92ccdcf8d16cd922f89f7a9dcae69553ef67d4801fb1",
+      "renderer_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "renderer_checkpoint_sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d"
+    }
+  },
+  "producer_sha256": {
+    "build_factorized_primitive_state.py": "035663cd8e0d0222390c3d6d72d155db09aa09b9c811f6c3c6a882fbb1b3a208",
+    "build_canonical_capability_views.py": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34",
+    "build_canonical_support_graph.py": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254",
+    "build_surface_region_semantic_cache.py": "490a0d801835d4d169c031c0386a823b6b2a09402bf4522bf666d20c0c71ecb0",
+    "materialize_lerf_streamed_multiscale_query_score_cache.py": "29d05494a889e5d5475483c9e5395608ac1e7d7cf7207c2e33f0841552ab4f98",
+    "eval_lerf_direct_3d_selection.py": "e9e5988c2a37a90de7cee03f013097d5d98d53e15147811861403aed21342803",
+    "aggregate_ours_lerf_direct3d_frozen.py": "ee893497c686364c8c665ae8c8ed9fd701da6c24874e38e5d9d94f99fb8040b3"
+  },
+  "access_audit": {
+    "target_metrics_opened_while_sealing": false,
+    "target_masks_opened_while_sealing": false,
+    "target_images_used_for_training": false,
+    "benchmark_queries_used_only_at_query_time": true,
+    "uqis_in_scope": false
+  }
+}

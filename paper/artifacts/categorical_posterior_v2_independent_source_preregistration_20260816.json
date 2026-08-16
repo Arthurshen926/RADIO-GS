@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_categorical_posterior_v2_independent_source_preregistration",
+  "status": "sealed_before_source_loso",
+  "candidate": {
+    "model": "one globally shared CategoricalPosteriorV2",
+    "persistent_task_field_added": false,
+    "inputs": "raw positive class cosine plus five query-independent Universal Field reliability scalars",
+    "classes": "frozen ScanNet NYU40 split19 plus learned background",
+    "recipe_id": "source-categorical-posterior-v2-adamw-seed20260816-s300-v1"
+  },
+  "source_partition": {
+    "fit_scene_ids": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0005_00"
+    ],
+    "physical_space_disjoint": true,
+    "loso_fold_count": 3,
+    "paper_eight_labels_opened": false
+  },
+  "precommitted_source_gate": {
+    "loso_macro_miou_strictly_improves": true,
+    "loso_macro_macc_maximum_regression": 0.01,
+    "each_fold_miou_maximum_regression": 0.01,
+    "each_fold_macc_maximum_regression": 0.01,
+    "fit3_allowed_only_if_all_checks_pass": true
+  },
+  "paper_eight_boundary": {
+    "evaluation_allowed_only_after_source_loso_and_fit3_pass": true,
+    "checkpoint_frozen_before_paper_eight_metrics": true,
+    "paper_eight_parameter_callback_allowed": false,
+    "required_report_splits": [
+      19,
+      15,
+      10
+    ]
+  },
+  "sealed_inputs": {
+    "dataset_manifest_sha256": "74ff10e74723002b749a4545dc270617416b17043550f98213811c7bbcc8f880",
+    "trainer_sha256": "f7210dc4cbff6af3f1f9766406bae83c0d22ca0b3764290de26a339068ba9fb5",
+    "targeted_tests_passed": 17
+  },
+  "uqis_in_scope": false
+}

@@ -105,9 +105,12 @@ The Method-v1 LERF2D scene-macro mIoU is 0.31932 and category-macro mIoU is
 0.31303. This exact readout is slightly stronger than the dense diagnostic,
 but it is not a SOTA result; Ramen remains the largest 2-D bottleneck.
 
-The frozen `vala_paper_3d` evaluation uses primitive relevancy, the fixed 0.6
-score threshold, selected-only alpha projection, the released `>10/255`
-silhouette rule, and no postprocessing:
+The first `vala_paper_3d` evaluation below uses one primitive semantic level,
+the fixed 0.6 score threshold, selected-only alpha projection, the released
+`>10/255` silhouette rule, and no postprocessing. It is a Primitive
+Readout-v0 diagnostic, not the completed frozen LERF3D protocol: the frozen
+contract requires three semantic levels, kNN=10, per-query min-max mapping,
+and highest-peak level selection.
 
 | Scene | Samples | mIoU | Acc@0.25 | Acc@0.50 |
 |---|---:|---:|---:|---:|
@@ -115,12 +118,16 @@ silhouette rule, and no postprocessing:
 | Ramen | 71 | 0.29173 | 0.50704 | 0.21127 |
 | Teatime | 59 | 0.32871 | 0.54237 | 0.22034 |
 | Waldo Kitchen | 22 | 0.19815 | 0.36364 | 0.18182 |
-| Full four Method-v1 | 208 | 0.33450 | 0.57692 | 0.27404 |
+| Full four Primitive Readout-v0 | 208 | 0.33450 | 0.57692 | 0.27404 |
 
-The LERF3D scene-macro mIoU is 0.31675. Waldo Kitchen is the largest 3-D
-bottleneck. These two complete LERF evaluations establish that field
-materialization is no longer the immediate LERF blocker; the primitive-query
-score geometry and typed readout are.
+The one-level scene-macro mIoU is 0.31675. Restoring only the frozen
+query-independent kNN10 plus per-query scene min-max extent operator on the
+same current field raises full-four sample-micro mIoU from 0.33450 to 0.46184
+and scene-macro mIoU from 0.31675 to 0.44312. All four scenes improve. This
+isolates protocol/readout incompleteness—not D512/L512 field damage—as the
+main cause of the unexpectedly low row. The one-level corrected result remains
+mechanism evidence only; the exact current-field three-level evaluation is the
+next hard gate before any LERF3D final claim.
 
 Waldo also exposed a legitimate grid-rounding boundary: the frozen crop
 teacher is 46x62 while its native RADIO grid is 45x62. The shared semantic
@@ -291,7 +298,26 @@ selected 0.948415 macro foreground IoU. The latter is +0.011214 over the local
 LUDVIG-SAM reproduction. This validates the adapter and selector semantics,
 but it is still a historical carrier rather than the new D512/L512 field.
 NVOS's released-compatible target-RGB path remains the audited 0.912577
-reference; it has likewise not yet been regenerated from the new field.
+reference.
+
+The complete D512/L512 NVOS full-eight cohort has now been regenerated. The
+first frozen Method-v1 majority-vote readout reaches 0.526874 macro foreground
+IoU and 0.929458 pixel accuracy. A causal audit shows that the rendered signed
+field is substantially stronger than this row: sampled positive points are at
+least 96.7% target-correct and all sampled negative points are correct, while
+the majority-vote SAM output is consistently high-precision but low-recall.
+This rules out D512/L512 field corruption as the primary cause of the low row.
+
+A preregistered box-SAM3 candidate selected by whole coarse-mask overlap
+reaches 0.731381 macro IoU but fails on `horns_left` by selecting the larger
+center object. It is rejected. Its preregistered successor selects proposals
+by inclusion/exclusion of all sealed signed points, using coarse overlap and
+SAM confidence only as tie-breaks. It reaches 0.817617 macro IoU and 0.970204
+pixel accuracy; `horns_left` rises from 0 to 0.689883 and the other seven
+scenes are bit-for-bit unchanged. The candidate passes every preregistered
+development gate and replaces majority vote as the current target-RGB-assisted
+development readout. It is not strict-unseen eligible and is not a SOTA claim,
+because transient SAM opens the target RGB.
 
 ## Five-benchmark readiness
 
@@ -305,11 +331,117 @@ reference; it has likewise not yet been regenerated from the new field.
   fields, primitive caches, and frozen results. The paper-eight macro is
   0.33535/0.33370/0.42213 mIoU for the 19/15/10-class splits. The row is
   protocol-eligible but does not yet support a SOTA claim.
-- NVOS: the public-compatible signed RGB/SAM transient adapter is implemented
-  and audited; unified full-eight D512/L512 fields are not materialized.
+- NVOS: all eight D512/L512 fields and the hash-bound full-eight evaluation are
+  complete. Frozen majority vote is 0.52687 macro IoU; the promoted
+  signed-evidence SAM selector is 0.81762 development macro IoU. The remaining
+  hard gap is a target-RGB-free readout or an explicitly comparable protocol,
+  not field materialization.
 - Available-Nine SPIn-NeRF: frozen protocol exists; unified D512/L512 fields
   must replace the historical carrier. Legal reference-only transient
-  selection is now implemented and reproduces its sealed full-nine result.
+  selection and the full-nine barrier runner are implemented; D512/L512 field
+  construction has started with orchids and leaves.
+
+Real orchids timing exposed a storage-partition inefficiency in the 4096-D
+exact-DINO cache: every 256-channel outer shard repeats the frozen official
+adaptor projection for every registered view. Future newly started scenes use
+512-channel outer shards while retaining the 128-channel accumulation chunk,
+normalization, float32 accumulation, and float16 serialization. A synthetic
+2-versus-4-channel fixture proves bitwise-equal reconstructed features,
+support counts, and reliability. Already-running orchids/leaves keep their
+original 256-channel resume contracts and are not restarted.
+
+The first real orchids base-field preflight also exposed a fail-closed receipt
+schema omission: the capability cohort recorded both
+`reference_masks_opened=false` and `evaluation_masks_opened=false`, but lacked
+the trainer's aggregate `benchmark_masks_opened=false` field. No tensor
+training started and no partial field was written. The original receipt is
+retained, while a versioned `method_v1_capability_cohort_authority_v2.json`
+adds only the missing aggregate flag. The factorized/RADIO/DINO/SAM caches,
+registration, field hyperparameters, and information-access boundary are
+unchanged. Orchids subsequently passed the v2 preflight and completed its
+D512/L512 base field; the post-field teacher/readout/gate stages remain active.
+
+The first orchids SigLIP validation then exposed a separate resolution-scaling
+defect: the complete 189x252 SigLIP2 attention grid was projected in float32,
+requesting 135.21 GiB. The already sealed official extractor projects the same
+complete grid under CUDA AMP. AMP fixes inference, but Torch 2.0.1 on sm86
+cannot train its head_dim=80 flash/memory-efficient SDPA and otherwise creates
+a 67.61 GiB half-precision attention matrix. The SPIn runner therefore opts
+into both the extractor-matched AMP precision and xFormers 0.0.20 exact global
+memory-efficient attention. No tiling, truncation, or attention approximation
+is used, and existing callers retain their prior default. Real complete-grid
+inference and gradient smoke tests peak at 2.21 GB and 5.84 GB respectively;
+the gradient is finite and nonzero.
+
+The following orchids region stage exposed a second, independent allocator
+boundary. AdamW moments remained on GPU while dense semantic/capability graphs
+were built, first failing at step 2 and then—after validation-cache cleanup—on
+the forward immediately after step 32. Dense step references are now released
+before the next forward, unused CUDA blocks are returned after validation, and
+AdamW moments live on CPU between steps while using the unchanged GPU update at
+`optimizer.step()`. The corrected real run completed all 64 steps. Source-only
+semantic validation rose from 0.422946 to 0.439117, raw/SigLIP validation also
+rose, and the MPR probe changed from 0.999107 to 0.999099, well inside the
+frozen 0.0002 drop gate. The resulting field has entered its final target-blind
+generic-response stage; no benchmark masks or scores were opened.
+
+Leaves also exposed two execution-boundary defects without invalidating its
+completed base field. Crop-summary extraction hit the hard 84 C thermal guard
+after 12 of 26 frames. Per-frame tensors and manifests are now atomic, partial
+resume validates shape/dtype/finiteness, and new frames are thermally paced;
+the resumed run reused the 12 sealed tensors and completed all 26 frames with
+`benchmark_masks_opened=false` and `label_content_opened=false`. Its first
+1.4-million-Gaussian SigLIP load was then killed with exit 137 because the
+parent checkpoint tensors and repeated CPU best-state snapshots overlapped in
+host memory. The parent tensor copy is now discarded after reconstruction,
+best-state refresh is in-place, and lineage hashing precedes multi-GiB loading.
+The retry reused every completed upstream artifact and completed all 64
+SigLIP steps; the previous run was killed before emitting any step record.
+Raw validation rose from 0.790628 to 0.791057, SigLIP rose from 0.778118 to
+0.778279, and MPR changed from 0.99946249 to 0.99946046. The sealed field has
+entered its source-only region stage with explicit optimizer-state offload.
+
+Orchids has now completed its target-blind generic-response stage and passed
+the content-hash-bound Method-v1 gate, the first of nine required scene gates.
+Generic validation loss fell from 0.246898 to 0.209225, semantic validation
+rose from 0.439117 to 0.453508, and SigLIP validation rose from 0.844733 to
+0.844868. Raw and MPR changed by only 0.000011 and 0.000025 respectively,
+inside their frozen 0.0002 drop limits. The sealed final field SHA-256 is
+`429123de3a9b2aa52ce09ed6cfa718a16f4798479ab48440be3e08ab730d3e9e`.
+With GPU0 released, fern construction has started under the same corrected
+runner. This remains a pre-GT field gate, not a benchmark score.
+
+Cross-scene execution exposed one further scheduling defect. Fern's
+factorized MPR declared a 12.43 GB host-memory peak and held about 9.6 GB RSS
+while leaves loaded its 1.4M-Gaussian region field; leaves was killed with exit
+137 before step 1 even though both GPUs separately had capacity. All SPIn MPR,
+base-field, SigLIP, region, and generic stages now share a cross-process host
+memory lock, while source extraction, crop extraction, validation planning,
+and method gates may still overlap. The real retry shows leaves holding the
+region lock and fern waiting at exact-raw MPR. Fern's completed 3.424 GB
+factorized MPR was preserved, and no partial leaves region field was accepted.
+With the conflicting MPR removed, leaves completed region step 1 plus full
+validation at about 21.6 GB RSS: semantic/raw/SigLIP/MPR validation were
+0.451463/0.791054/0.778290/0.999460 respectively. This crosses the previous
+failure boundary; the stage remains active through its step-32/64 gates.
+
+That successful step-1 validation exposed a separate optimizer-update peak at
+step 2. PyTorch foreach AdamW attempted to materialize a full 2.67 GiB
+second-moment square-root denominator for the 1.4M by 512 local-code tensor,
+with only 2.32 GiB free. Offloaded moments are now staged through fixed
+16,777,216-element GPU chunks (64 MB per float32 moment/denominator tensor),
+using the unchanged AdamW formula and CPU state. A three-step fixture is
+bitwise equal to PyTorch single-tensor AdamW for parameters, step, exp_avg, and
+exp_avg_sq. The first real retry acquired the host-memory lock while fern
+waited, proving that the allocator peak was isolated from cross-scene RSS.
+
+The next real retry passed step 1 with the chunked optimizer, then exposed the
+matching 2.67 GiB local-code gradient allocation on step-2 backward: the old
+`set_to_none=True` policy discarded the already valid giant gradient buffer.
+The offloaded path now zeros and reuses that buffer in place; non-offloaded
+callers retain `set_to_none`. Pointer reuse/zeroing and the unchanged fallback
+are covered by tests. The next real retry is queued behind fern exact-DINO MPR
+and must still cross step 2/32/64.
 
 No joint five-benchmark row is eligible yet. Existing historical peak numbers
 must not be combined into a virtual incumbent.
@@ -341,9 +473,35 @@ must not be combined into a virtual incumbent.
   `optimization_20260815/core_method_v1/scene0000_00/`, `scene0062_00/`,
   `scene0070_00/`, `scene0097_00/`, `scene0140_00/`, `scene0347_00/`,
   `scene0400_00/`, and `scene0590_00/` in the results root.
+- Frozen NVOS full-eight Method-v1 result:
+  `optimization_20260815/core_method_v1/nvos/method_v1_readout/full8_20260816/method_v1_nvos_full8_results.json`.
+- Promoted NVOS development candidate:
+  `optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_signed_points_sam3_candidate_20260816/result.json`.
+- SPIn exact-capability shard-width correction:
+  `paper/artifacts/spin9_method_v1_capability_shard512_implementation_correction_20260816.json`.
+- SPIn capability-cohort v2 metadata correction:
+  `paper/artifacts/spin9_method_v1_capability_cohort_v2_metadata_correction_20260816.json`.
+- SPIn complete-grid SigLIP AMP correction:
+  `paper/artifacts/spin9_method_v1_siglip_global_projection_amp_correction_20260816.json`.
+- SPIn region allocator correction:
+  `paper/artifacts/spin9_method_v1_region_allocator_correction_20260816.json`.
+- SPIn crop-teacher atomic resume/thermal correction:
+  `paper/artifacts/spin9_method_v1_crop_teacher_resume_thermal_correction_20260816.json`.
+- SPIn large-scene host-memory correction:
+  `paper/artifacts/spin9_method_v1_large_scene_host_memory_correction_20260816.json`.
+- First complete new SPIn Method-v1 scene gate (orchids):
+  `paper/artifacts/spin9_orchids_method_v1_gate_result_20260816.json`.
+- SPIn cross-scene host-memory stage lock:
+  `paper/artifacts/spin9_host_memory_stage_lock_correction_20260816.json`.
+- SPIn large-scene bounded-chunk AdamW correction:
+  `paper/artifacts/spin9_large_scene_chunked_adamw_correction_20260816.json`.
 
 ## Verification
 
+- The current SigLIP/xFormers, allocator/offload, large-scene snapshot,
+  crop-resume, SPIn runner/full-nine barrier, and NVOS readout regression slice
+  passes 79/79; the only warning is PyTorch 2.0.1's existing TypedStorage
+  deprecation notice.
 - The focused Method-v1, primitive-cache, finetune, generic-response,
   semantic-alignment, and ScanNet external-primitive evaluator regression
   suites pass 43/43, including the Waldo one-row alignment, fail-closed larger
@@ -351,6 +509,8 @@ must not be combined into a virtual incumbent.
   LERF3D authority formula fixture.
 - 104 audited LUDVIG wrapper/full-carrier and SPIn adapter tests pass.
 - Python compilation and `git diff --check` pass.
+- The NVOS field-box/signed-evidence and SPIn full-nine barrier regression
+  slice passes 16/16.
 - The frozen five-contract validator still reports zero eligible joint rows;
   it correctly refuses to stitch historical peak numbers into a virtual
   five-benchmark result.

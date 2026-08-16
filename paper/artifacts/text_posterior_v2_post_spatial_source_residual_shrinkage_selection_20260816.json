@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_text_posterior_v2_post_spatial_source_residual_shrinkage_selection",
+  "status": "complete_source_oof_only_global_selection",
+  "failed_gap_objective_candidate": {
+    "path": "/root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2/source_post_spatial_text_posterior.loso.v3.json",
+    "sha256": "55385bbb37e3e0ab7b31e92035457da78d5fa2ef78177f87d97f1b63d4cae477",
+    "hard_iou_delta": -0.04950705836527051,
+    "balanced_bce_delta": 0.22223935321801244,
+    "positive_negative_gap_delta": -0.04064853197584548,
+    "rejected": true
+  },
+  "selection": {
+    "training_objective": "original balanced_BCE_plus_local_relation_plus_soft_Jaccard",
+    "selection_partition": "three source-only LOSO predictions",
+    "candidate_residual_scales": [
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.75,
+      1.0
+    ],
+    "selected_residual_scale": 0.6,
+    "selection_rule": "largest conservative scale below the scene0002 IoU instability observed at 0.75 while passing every precommitted source gate",
+    "per_target_or_per_query_selection": false
+  },
+  "selected_source_oof_diagnostics": {
+    "balanced_bce_delta": -0.19329521,
+    "positive_negative_gap_delta": 0.01588916,
+    "hard_iou_delta": 0.06523513,
+    "local_relation_loss_delta": -0.00065202,
+    "fold_hard_iou_deltas": [
+      0.052628,
+      0.007172,
+      0.135906
+    ],
+    "fold_positive_negative_gap_deltas": [
+      -0.066588,
+      0.054165,
+      0.06009
+    ],
+    "all_precommitted_source_gates_passed": true
+  },
+  "execution_boundary": {
+    "development_scene0003_opened": false,
+    "lerf_queries_or_ground_truth_opened": false,
+    "benchmark_metrics_opened": false
+  }
+}

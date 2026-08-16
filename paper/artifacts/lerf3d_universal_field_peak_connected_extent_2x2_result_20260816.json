@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_universal_field_peak_connected_extent_2x2_result",
+  "status": "aggregate_gain_but_heldout_robustness_gate_failed_not_promoted",
+  "method": {
+    "field": "unchanged current Universal Field v1 single-level query features",
+    "base_spatial_readout": "kNN10 then per-query scene minmax then clip(2u-1,0,1)",
+    "conditional_extent": "per-frame query-score-peak connected projected component",
+    "learned_parameters": false,
+    "target_rgb_used": false
+  },
+  "scene_results": {
+    "figurines": {
+      "partition": "development",
+      "control_miou": 0.5276694297790527,
+      "candidate_miou": 0.5737552642822266,
+      "delta_miou": 0.04608583450317383,
+      "sample_count": 56,
+      "report_sha256": "8aedfaf311e0d63a6292e3fed2da1ac328926f6cbc3a4a6fd9cd23a3df31cf78"
+    },
+    "ramen": {
+      "partition": "development",
+      "control_miou": 0.3910095989704132,
+      "candidate_miou": 0.4087860584259033,
+      "delta_miou": 0.017776459455490112,
+      "sample_count": 71,
+      "report_sha256": "9cb312c059805d77040a9ec79074c90b00653eace2c469220fd1cae5ace668b5"
+    },
+    "teatime": {
+      "partition": "heldout",
+      "control_miou": 0.5396644473075867,
+      "candidate_miou": 0.5406457781791687,
+      "delta_miou": 0.0009813308715820312,
+      "sample_count": 59,
+      "report_sha256": "8dd5175598bf68c69d89986d673536d8a710df7a25983d9950402296c52bd87a"
+    },
+    "waldo_kitchen": {
+      "partition": "heldout",
+      "control_miou": 0.31412479281425476,
+      "candidate_miou": 0.30535003542900085,
+      "delta_miou": -0.008774757385253906,
+      "sample_count": 22,
+      "report_sha256": "0a76f8a9eae249db72e6643832e5d12af9a96ea9a307c99ebf13a6cbad2ccabe"
+    }
+  },
+  "aggregates": {
+    "development_scene_macro_miou": 0.49127066135406494,
+    "heldout_scene_macro_miou": 0.4229979068040848,
+    "heldout_scene_macro_delta_miou": -0.0038967132568358815,
+    "full4_scene_macro_miou": 0.45713428407907486,
+    "full4_scene_macro_delta_miou": 0.014017216861248017,
+    "full4_sample_micro_miou": 0.4796630126925615,
+    "full4_sample_micro_delta_miou": 0.0178259096753139
+  },
+  "gate": {
+    "development_gate_passed": true,
+    "heldout_scene_macro_improved": false,
+    "all_scene_deltas_at_least_negative_0p002": false,
+    "overall_passed": false
+  },
+  "decision": "Do not promote unconditional peak-connected extent. Retain the aggregate gain as mechanism evidence; any conditional application policy must be learned or frozen from independent source data, not tuned after Waldo.",
+  "scope_limit": "This remains a single-level causal diagnostic and is not the final three-level frozen-contract row.",
+  "preregistration": "paper/artifacts/lerf3d_universal_field_peak_connected_extent_development_preregistration_20260816.json",
+  "development_gate": "paper/artifacts/lerf3d_universal_field_peak_connected_extent_development_gate_result_20260816.json",
+  "uqis_in_scope": false
+}

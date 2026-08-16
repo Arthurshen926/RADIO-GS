@@ -6,7 +6,10 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 from pathlib import Path
+import tempfile
+import time
 
 import torch
 import torch.nn.functional as F
@@ -19,9 +22,76 @@ from radio_gs.data.view_split import (
     select_image_indices,
 )
 from radio_gs.interfaces.frozen_radio_views import OfficialCropSummaryRuntime
+from radio_gs.utils.immutable_artifacts import load_torch_payload
 
 
 FRAME_ID_MODES = ("numeric_suffix", "source_rank")
+
+
+def _atomic_torch_save(value: object, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        with temporary.open("wb") as handle:
+            torch.save(value, handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
+def _atomic_json_write(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
+def _load_reusable_dense(path: Path, output_size: tuple[int, int]) -> torch.Tensor:
+    value, _digest, _source = load_torch_payload(
+        path,
+        map_location="cpu",
+        label="partial official crop-summary tensor",
+    )
+    expected_shape = (1536, *output_size)
+    if (
+        not torch.is_tensor(value)
+        or tuple(value.shape) != expected_shape
+        or value.dtype != torch.float16
+        or not bool(torch.isfinite(value).all())
+    ):
+        raise ValueError(f"partial crop-summary tensor differs: {path}")
+    return value
+
+
+def _thermal_pace(device: torch.device, seconds: float) -> None:
+    if not math.isfinite(float(seconds)) or float(seconds) < 0:
+        raise ValueError("thermal pacing must be finite and non-negative")
+    if float(seconds) == 0:
+        return
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+    time.sleep(float(seconds))
 
 
 def _window_starts(length: int, window: int, stride_ratio: float) -> list[int]:
@@ -242,17 +312,38 @@ def extract(args: argparse.Namespace) -> dict:
             frame_records,
             desc=f"official crop summaries/{scene}",
         ):
-            dense, report = _extract_frame(
-                image_path,
-                runtime,
-                output_size=output_size,
-                scales=scales,
-                stride_ratio=float(args.stride_ratio),
-                crop_resolution=int(args.crop_resolution),
-                batch_size=int(args.batch_size),
-                device=device,
-            )
-            torch.save(dense, scene_output / f"rgb_{frame_id}.pt")
+            tensor_path = scene_output / f"rgb_{frame_id}.pt"
+            if bool(args.resume_partial) and tensor_path.is_file():
+                _load_reusable_dense(tensor_path, output_size)
+                with Image.open(image_path) as source_image:
+                    source_w, source_h = source_image.size
+                report = {
+                    "source_image": str(image_path),
+                    "source_size": [source_h, source_w],
+                    "output_size": list(output_size),
+                    "num_crops": len(
+                        _boxes(source_h, source_w, scales, float(args.stride_ratio))
+                    ),
+                    "scales": scales,
+                    "stride_ratio": float(args.stride_ratio),
+                    "crop_resolution": int(args.crop_resolution),
+                }
+            else:
+                dense, report = _extract_frame(
+                    image_path,
+                    runtime,
+                    output_size=output_size,
+                    scales=scales,
+                    stride_ratio=float(args.stride_ratio),
+                    crop_resolution=int(args.crop_resolution),
+                    batch_size=int(args.batch_size),
+                    device=device,
+                )
+                _atomic_torch_save(dense, tensor_path)
+                _thermal_pace(
+                    device,
+                    float(args.thermal_pacing_seconds_per_frame),
+                )
             frame_reports.append({"frame_id": frame_id, **report})
         scene_reports[scene] = {
             "num_frames": len(frame_reports),
@@ -281,9 +372,7 @@ def extract(args: argparse.Namespace) -> dict:
             "output_size": list(output_size),
             "scenes": {scene: scene_reports[scene]},
         }
-        (scene_output / "manifest.json").write_text(
-            json.dumps(scene_report, indent=2), encoding="utf-8"
-        )
+        _atomic_json_write(scene_output / "manifest.json", scene_report)
     report = {
         "schema_version": 1,
         "teacher_space": "official_siglip2_crop_summary",
@@ -305,9 +394,7 @@ def extract(args: argparse.Namespace) -> dict:
         "scenes": scene_reports,
     }
     output_root.mkdir(parents=True, exist_ok=True)
-    (output_root / "manifest.json").write_text(
-        json.dumps(report, indent=2), encoding="utf-8"
-    )
+    _atomic_json_write(output_root / "manifest.json", report)
     return report
 
 
@@ -358,6 +445,12 @@ def main() -> None:
     parser.add_argument("--output-size", default="46x62")
     parser.add_argument("--crop-resolution", type=int, default=384)
     parser.add_argument("--batch-size", type=int, default=2)
+    parser.add_argument("--resume-partial", action="store_true")
+    parser.add_argument(
+        "--thermal-pacing-seconds-per-frame",
+        type=float,
+        default=0.0,
+    )
     parser.add_argument(
         "--radio-checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
