@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf2d_historical_feature_sam3_current_field_contract_audit",
+  "created_at": "2026-08-17T14:00:00+08:00",
+  "status": "complete_non_promotable_development_audit",
+  "question": "Can the historical source-trained feature-only prompt-conditioned SAM3 boundary readout be restored as a contract-correct readout over Universal Field v1?",
+  "answer": "No. The already-completed current-field full4 transfer is a useful transductive development diagnostic, but the historical heads and the 0.588944 row do not satisfy the current single-field, cold-start, open-query, prospective-evaluation contract.",
+  "historical_row": {
+    "source": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json",
+      "sha256": "bf3c8c24e8166869a82c668fc0baf7546b5daa6c35953c7004a7b4a8bb433b8a"
+    },
+    "scene_macro_miou": 0.588944466161357,
+    "scene_macro_loc_acc": 0.8598309812650944,
+    "peak_component_scene_macro_miou": 0.5707228068698694,
+    "boundary_delta_scene_macro_miou": 0.01822165929148763,
+    "protocol_status": "legacy_post_hoc_diagnostic",
+    "post_hoc_evidence": {
+      "path": "/root/RADIO-GS/paper/artifacts/protocol_alignment_audit_20260711.md",
+      "sha256": "71846ac00d7c91af38344afdced5e217e9e093dde971c34234c83039614875e0",
+      "facts": [
+        "Scene-specific softmax temperatures 50, 40, 25, and 25 were selected for Figurines, Ramen, Teatime, and Waldo Kitchen.",
+        "Threshold and acceptance-guard variants were swept on the same four evaluated scenes.",
+        "The historical localization definition differs from the currently released frozen bbox-smoothed definition."
+      ]
+    }
+  },
+  "current_field_full4_transfer": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf2d_primitive_peak_feature_sam_boundary_v2",
+    "evaluation_identity": {
+      "render_readout": "primitive_score",
+      "scoring": "relevancy",
+      "absolute_threshold": 0.5,
+      "initial_refinement": "peak_component",
+      "target_rgb_used": false,
+      "benchmark_target_mask_used_by_inference": false,
+      "queries": 208,
+      "accepted_refinements": 68
+    },
+    "scene_macro": {
+      "initial_miou": 0.35296287449846153,
+      "refined_miou": 0.3627484388180786,
+      "delta_miou": 0.009785564319617107,
+      "loc_acc": 0.8715890295548329
+    },
+    "sample_micro": {
+      "initial_miou": 0.34975303026072396,
+      "refined_miou": 0.3615166259234476,
+      "delta_miou": 0.011763595662723687,
+      "loc_acc": 0.8798076923076923
+    },
+    "per_scene": {
+      "figurines": {
+        "initial_miou": 0.40403383402039106,
+        "refined_miou": 0.41018387435486886,
+        "delta_miou": 0.006150040334477802,
+        "accept_count": 30,
+        "queries": 56,
+        "result_sha256": "f7b1995b8320996d4ad3853ed401a3d6dcad35eeb0ddbde7d3e2c246edf1021c"
+      },
+      "ramen": {
+        "initial_miou": 0.263188831805655,
+        "refined_miou": 0.2810683689372951,
+        "delta_miou": 0.01787953713164009,
+        "accept_count": 16,
+        "queries": 71,
+        "result_sha256": "b15f999686bd132dc15bb7fa6b8c7d7c07a936a27310af0a999eeeb75fe6df1b"
+      },
+      "teatime": {
+        "initial_miou": 0.40687822224852893,
+        "refined_miou": 0.42040523702954546,
+        "delta_miou": 0.013527014781016533,
+        "accept_count": 21,
+        "queries": 59,
+        "result_sha256": "3512331e006777853e0a9f316220edeb2dbff847aa2599a43b0e1ced0c1116b4"
+      },
+      "waldo_kitchen": {
+        "initial_miou": 0.33775060991927114,
+        "refined_miou": 0.33933627495060514,
+        "delta_miou": 0.0015856650313340048,
+        "accept_count": 1,
+        "queries": 22,
+        "result_sha256": "7edf16289782343213c4513c8fd52cf91adfce0045c7c2ce8af3af427a348809"
+      }
+    },
+    "interpretation": "The old boundary head gives a small positive correction to a peak-component current-field baseline on all four scenes. It does not reproduce the historical semantic heatmaps or the 0.588944 row. The historical head itself contributed only 0.018222 scene-macro mIoU over its own much stronger and post-hoc-tuned coarse masks."
+  },
+  "head_training_audit": {
+    "target_evaluation_frame_overlap": {
+      "figurines": 0,
+      "ramen": 0,
+      "teatime": 0,
+      "waldo_kitchen": 0
+    },
+    "target_rgb_at_evaluation": false,
+    "sam_cache_tensor_semantics": "probability_in_[0,1]",
+    "probability_contract_status": "not_affected_by_double_sigmoid_erratum_because_training_binarizes_raw_cache_values_at_0.5",
+    "exact_benchmark_query_vocabulary_used_during_scene_head_training": true,
+    "evaluation_label_directory_used_to_obtain_scene_categories": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+    "official_sam3_source_views_prompted_with_all_scene_benchmark_queries": true,
+    "scene_specific_heads": true,
+    "head_feature_domain": "historical_scene_specific_rendered_HCD_fields_not_current_Universal_Field_v1",
+    "required_at_cold_start": true,
+    "persistent_state_violation": "Four different scene-specific learned semantic heads are required in addition to Universal Field v1. Their weights encode exact benchmark-query SAM pseudo masks and are neither a single global frozen readout nor a per-query transient computation.",
+    "provenance_gaps": [
+      "Historical head checkpoints contain path-valued configs but no SHA-256 binding to every SAM cache shard, source image, rendered training feature, or source field checkpoint.",
+      "The current transfer result records the head path but not the head checkpoint SHA-256 in its own provenance block.",
+      "Old SAM cache payloads bind the SAM checkpoint hash inside producer metadata but do not bind each source-image SHA-256."
+    ],
+    "head_sha256": {
+      "figurines": "b072fa0011615fa8328f65770b14e58934549e6ebe90b32210391f69cd270829",
+      "ramen": "04995b50bcd2433402cecaa2f03823b10d7c1b919e8afa61218c62a448491bb4",
+      "teatime": "6d055d078306cde11815c9cbdf2ad551ea51dfb5e391f0d515ff83ac54e19a4d",
+      "waldo_kitchen": "911c0404ddba9469ddedcb41e8d46691a4ccef706f4647dddfc7c808790a8ed8"
+    }
+  },
+  "current_field_identity": {
+    "status": "decode_equivalent_to_Universal_Field_v1",
+    "explanation": "The transfer consumes primitive-query rows and rendered 1280-D maps from each Method-v1 source field. Universal Field v1 migration reports verify bitwise-equal RADIO decode and do not feed reliability scalars back into the decoder.",
+    "universal_field_sha256": {
+      "figurines": "e52bcced0d09a34a8ca1cd65e361a866916d0eec75f70c7fe2be19edf8615a8d",
+      "ramen": "4a63cf28c492922fd9dd03c440cfff8c5f89ae4a3dd7d469a9247d80367d675a",
+      "teatime": "6a834bd21ba8009e3b9c0250354eff8aa94ef8fe44dcf2ccbc330ab5d84032d3",
+      "waldo_kitchen": "63130db23d0c5ff95fbde90873d750716c8aad7a568d226a02f4a932c89ac8e6"
+    }
+  },
+  "promotion_decision": {
+    "promote": false,
+    "valid_as": "transductive_legacy_head_transfer_development_diagnostic",
+    "invalid_as": [
+      "Universal Field v1 canonical method readout",
+      "open-query cold-start result",
+      "prospectively frozen LERF2D main result",
+      "evidence that Universal Field v1 reaches 0.588944 mIoU"
+    ],
+    "reason": "The branch does not implement the missing query-independent instance hierarchy. It is a bounded boundary polisher conditioned on a coarse text mask, trained scene by scene from exact benchmark query names, with historical gates selected on the evaluation cohort."
+  },
+  "next_contract_correct_route": [
+    "Build query-independent automatic SAM proposals from legal source views and bind every source image, model, mask shard, and MPR authority by hash.",
+    "Lift proposal membership with exact front-to-back marginal responsibility while preserving observed, positive, negative, and unknown support.",
+    "Associate proposals across views into a query-independent part/object/group hierarchy stored as a typed structural capability derived from the one canonical field.",
+    "At query time, use only the authorized text to select hierarchy nodes with masked-region plus context descriptors; fall back to the primitive posterior when proposal coverage or identity confidence is low.",
+    "Freeze all thresholds on a disjoint development split before evaluating the four official LERF scenes."
+  ]
+}

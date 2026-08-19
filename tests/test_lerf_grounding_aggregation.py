@@ -12,6 +12,8 @@ from radio_gs.scripts.eval_lerf_grounding import (
     normalize_primitive_scores_by_valid_mass,
     validate_primitive_support_cache,
     validate_primitive_unary_cache,
+    validate_primitive_posterior_cache,
+    validate_primitive_posterior_identity_cache,
 )
 
 
@@ -202,3 +204,32 @@ def test_primitive_unary_cache_accepts_only_independent_cosine() -> None:
     payload["metadata"]["scoring"] = "softmax_scene"
     with pytest.raises(ValueError, match="independent cosine"):
         validate_primitive_unary_cache(payload, xyz, ["bowl"])
+
+
+def test_primitive_posterior_cache_enforces_typed_information_contract() -> None:
+    xyz = torch.zeros(2, 3)
+    payload = {
+        "xyz": xyz.clone(),
+        "valid": torch.ones(2, dtype=torch.bool),
+        "query_scores": torch.tensor([[0.8], [0.2]]),
+        "identity_query_scores": torch.tensor([[1.0], [0.4]]),
+        "metadata": {
+            "query_names": ["bowl"],
+            "query_family": "text_object_extent",
+            "typed_posterior": "official_sam3_siglip2_identity_extent_factorization_v1",
+            "persistent_second_semantic_field": False,
+            "benchmark_images_opened": False,
+            "benchmark_masks_opened": False,
+            "evaluation_rgb_opened": False,
+            "separate_identity_localization": True,
+            "localization_authority": "field_siglip2_relevancy_identity",
+        },
+    }
+    scores, valid = validate_primitive_posterior_cache(payload, xyz, ["bowl"])
+    assert scores.shape == (2, 1) and bool(valid.all())
+    identity = validate_primitive_posterior_identity_cache(payload, xyz, ["bowl"])
+    assert identity is not None
+    torch.testing.assert_close(identity, torch.tensor([[1.0], [0.4]]))
+    payload["metadata"]["benchmark_masks_opened"] = True
+    with pytest.raises(ValueError, match="forbidden"):
+        validate_primitive_posterior_cache(payload, xyz, ["bowl"])

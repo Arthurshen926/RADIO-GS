@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "registered_at": "2026-08-17T13:29:12+08:00",
+  "status": "implementation_complete_one_frame_execution_smoke_passed_full_cohort_not_started",
+  "stage": "Stage-A query-independent official-SAM3 multiscale region hierarchy precursor",
+  "objective": "Recover object-part-group proposal support from legal registered source or mapping RGB before any text query, benchmark annotation, target RGB, or evaluation RGB is opened.",
+  "causal_scope": {
+    "allowed": [
+      "source-authority-listed registered source or mapping RGB bytes",
+      "official SAM3 checkpoint",
+      "fixed crop, point-grid, filtering, deduplication, and containment contracts"
+    ],
+    "forbidden": [
+      "query text or query-specific point/box/mask prompts",
+      "benchmark ground truth",
+      "target or evaluation RGB",
+      "per-scene or per-query threshold selection from benchmark metrics"
+    ],
+    "persistent_output": "query-independent per-source-view binary proposal masks and their 2-D containment graph"
+  },
+  "registered_method": {
+    "crop_layers_after_full_image": 2,
+    "crops_per_axis_at_layer": "2**layer",
+    "crop_overlap_ratio": 0.25,
+    "crop_box_convention": "full-image xyxy half-open, first and last intervals edge anchored, no coverage gaps",
+    "points_per_side_full_image": 16,
+    "point_grid_downscale_factor_per_layer": 2,
+    "point_placement": "deterministic pixel-cell centres in row-major order",
+    "multimask_output": true,
+    "minimum_quality": 0.7,
+    "minimum_stability": 0.0,
+    "stability_offset": 1.0,
+    "minimum_crop_area_fraction": 0.001,
+    "minimum_full_image_area_fraction": 0.0001,
+    "maximum_full_image_area_fraction": 0.9,
+    "artificial_crop_edge_policy": "reject when the proposal box is within two pixels of a crop edge that is not an image edge",
+    "deduplication": "per-crop then global quality-times-stability ranked suppression only for IoU above 0.85 and near-equal area ratio at least 0.90; proper containment is preserved",
+    "containment_graph": "each child selects the smallest proposal containing at least 0.90 of child pixels and having at least 1.05 times child area",
+    "full_image_remap": "exact integer embedding without interpolation"
+  },
+  "per_mask_outputs": [
+    "packed full-image binary mask",
+    "quality and stability",
+    "crop index, crop layer, crop xyxy, crop scale xy, and crop-window area fraction",
+    "full-image and crop-local seed xy",
+    "global prompt index and official multimask candidate index",
+    "full-image proposal box and area fraction",
+    "crop area fraction and crop/artificial-edge flags",
+    "direct parent index, containment, area ratio, and parent-child edge list"
+  ],
+  "fail_closed_identity": [
+    "source authority file SHA-256 and exact information policy",
+    "per-image source-byte SHA-256",
+    "official checkpoint path and SHA-256",
+    "Python/PyTorch/CUDA/cuDNN/NumPy/Pillow/SAM3 runtime fingerprint digest",
+    "producer script, hierarchy module, and official-SAM loader source SHA-256 closure",
+    "complete generation-contract digest",
+    "atomic output commit and output SHA-256 manifest",
+    "exact identity validation before skip-existing reuse"
+  ],
+  "stage_a_acceptance_gates": [
+    "all requested authority-listed frames pass source, checkpoint, runtime, producer, and generation-contract validation",
+    "every stored mask is non-empty, lies in the source raster, and has aligned per-mask metadata",
+    "no retained mask touches an artificial crop edge under the registered tolerance",
+    "parent edges are acyclic by strictly increasing area and satisfy the registered containment rule",
+    "at least two crop layers retain proposals and the hierarchy contains non-trivial parent-child edges on the development source cohort",
+    "single-scale and multiscale proposal coverage are reported without opening benchmark ground truth"
+  ],
+  "downstream_non_promotion_rule": "Stage-A construction alone is not a benchmark method improvement. It may advance to exact-MPR lifting and cross-view hierarchy only after the gates above pass; benchmark promotion still requires a frozen paired evaluation.",
+  "implementation": {
+    "module": {
+      "path": "radio_gs/models/sam3_multiscale_hierarchy.py",
+      "sha256": "71e42f61f03513ccda17773d9e80c3bfaa9cb34bc7c221b60fc296bcfc4d0f1d"
+    },
+    "runner": {
+      "path": "radio_gs/scripts/build_sam3_multiscale_hierarchy_cache.py",
+      "sha256": "54b544bb0bd0572e2f8baaac1bc2c35dba2cdf1a0e31c4635e4cd33436363fb8"
+    },
+    "focused_tests": {
+      "path": "tests/test_sam3_multiscale_hierarchy.py",
+      "sha256": "2b20d0e4da304108627eed0b376041e33d47b26393a8af9d185e68f83da98e9c",
+      "result": "9 passed in 2.03s"
+    }
+  },
+  "gpu_smoke": {
+    "status": "passed_execution_and_identity_contract_only",
+    "device": "NVIDIA GeForce RTX 4090 cuda:0",
+    "resource_policy": "GPU 4 was not used because it became saturated by the existing SPIn/ScanNet queue; GPU 0 was used only after two stable polls showed 15134 MiB free.",
+    "source_authority": {
+      "path": "paper/artifacts/lerf_figurines_stage_a_source_rgb_authority_smoke_20260817.json",
+      "sha256": "85f6ac1dc5c1e97d2087440ca354a21d7324671cdbcac83b75cecda97a0f5d46"
+    },
+    "configuration_delta_from_registered_full_run": "one frame, one crop layer after full image, 4 points per side, downscale factor 2, maximum 128 masks",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/sam3_multiscale_hierarchy_stage_a_smoke_v1/figurines",
+    "frame_output": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/sam3_multiscale_hierarchy_stage_a_smoke_v1/figurines/frame_00001.pt",
+      "sha256": "1d5640aa282f784415c843f94874ac028b51f07e66fe455c7d523ab5e0214ea6"
+    },
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/sam3_multiscale_hierarchy_stage_a_smoke_v1/figurines/manifest_grid4_crop1.json",
+      "sha256": "e98934918006fc7332293995ba7b63927ceb8cf07b8efa790605e5e0e64bf819",
+      "content_digest": "6b2e5c394ea31e7c7f6f7fb063a209605e6c0a5022b0f5de15dc33043c68b1ff"
+    },
+    "observed": {
+      "crop_count": 5,
+      "prompt_count": 32,
+      "official_multimask_candidates_before_filtering": 96,
+      "rejected_artificial_crop_edge": 6,
+      "accepted_before_per_crop_deduplication": 1,
+      "retained_proposals": 1,
+      "retained_crop_layers": [0],
+      "parent_edges": 0,
+      "decoder_logits_available_for_all_prompts": true
+    },
+    "interpretation": "The smoke validates official-decoder execution, exact crop/remap plumbing, artificial-edge filtering, and complete identity binding. Its deliberately sparse grid does not pass the registered multiscale coverage or non-trivial hierarchy gates and is not a method or accuracy result.",
+    "benchmark_result_claimed": false
+  }
+}

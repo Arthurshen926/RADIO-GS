@@ -49,3 +49,25 @@ def test_enable_xformers_attention_binds_every_projection_block(monkeypatch) -> 
         block.attn.forward.__func__ is siglip_projection._xformers_attention_forward
         for block in projection.blocks
     )
+
+
+def test_chunked_token_mlps_match_complete_forward_and_input_gradient() -> None:
+    torch.manual_seed(7)
+    reference = siglip_projection.SigLIP2FeatureProjection().eval()
+    candidate = siglip_projection.SigLIP2FeatureProjection().eval()
+    candidate.load_state_dict(reference.state_dict())
+    for parameter in candidate.parameters():
+        parameter.requires_grad_(False)
+    candidate.enable_chunked_token_mlp(3)
+    reference_input = torch.randn(1, 7, 1280, requires_grad=True)
+    candidate_input = reference_input.detach().clone().requires_grad_(True)
+
+    reference_output = reference(reference_input)
+    candidate_output = candidate(candidate_input)
+    reference_output.square().mean().backward()
+    candidate_output.square().mean().backward()
+
+    torch.testing.assert_close(candidate_output, reference_output, atol=2e-6, rtol=2e-5)
+    torch.testing.assert_close(
+        candidate_input.grad, reference_input.grad, atol=2e-7, rtol=2e-5
+    )

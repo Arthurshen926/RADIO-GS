@@ -40,6 +40,12 @@ from radio_gs.scannet_constants import (
 )
 from radio_gs.scripts.eval_lerf_grounding import parse_prompt_templates
 from radio_gs.querying.unified_query import cosine_bank_torch
+from radio_gs.querying.sam_categorical_instance_posterior import (
+    propagate_categorical_identity_over_proposals,
+)
+from radio_gs.scripts.build_lerf_sam3_exact_mpr_memberships import (
+    _float32_rows_sha256,
+)
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 from radio_gs.utils.immutable_artifacts import sha256_file
 from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import (
@@ -332,9 +338,22 @@ def _predict_gaussian_labels(
     chunk_size: int,
     compact_feature_key: str,
     external_query_features: torch.Tensor | None = None,
+    sam_region_graph: tuple[torch.Tensor, torch.Tensor] | None = None,
+    sam_proposal_memberships: tuple[
+        torch.Tensor, torch.Tensor, torch.Tensor, int, torch.Tensor
+    ] | None = None,
+    sam_region_alpha: float = 0.0,
+    sam_region_margin_threshold: float = 0.03,
+    instance_topology_settings: dict[str, float | int] | None = None,
+    instance_topology_stats_out: dict[str, object] | None = None,
+    raw_score_banks_out: dict[str, torch.Tensor] | None = None,
 ) -> dict[str, np.ndarray]:
-    predictions = {
-        split: np.empty(model.num_gaussians, dtype=np.int32) for split in split_names
+    score_banks = {
+        split: torch.empty(
+            (model.num_gaussians, len(OPENGAUSSIAN_NYU40_CLASS_SPLITS[split])),
+            dtype=torch.float32,
+        )
+        for split in split_names
     }
     for start in tqdm(
         range(0, model.num_gaussians, int(chunk_size)),
@@ -365,10 +384,451 @@ def _predict_gaussian_labels(
                 logits = cosine_bank_torch(
                     visual, split_text_embeddings[split].to(device)
                 )
-                predictions[split][start:end] = class_ids[
-                    logits.argmax(dim=-1).cpu().numpy()
-                ]
+                score_banks[split][start:end] = logits.detach().float().cpu()
+    predictions: dict[str, np.ndarray] = {}
+    for split in split_names:
+        scores = score_banks[split]
+        if raw_score_banks_out is not None:
+            raw_score_banks_out[split] = scores.clone()
+        if sam_proposal_memberships is not None:
+            if instance_topology_settings is None:
+                raise ValueError("SAM proposal memberships require instance topology settings")
+            scores, topology_stats = propagate_categorical_identity_over_proposals(
+                scores,
+                sam_proposal_memberships[0],
+                sam_proposal_memberships[1],
+                sam_proposal_memberships[2],
+                num_proposals=sam_proposal_memberships[3],
+                proposal_view_indices=sam_proposal_memberships[4],
+                seed_margin_threshold=float(
+                    instance_topology_settings["seed_margin_threshold"]
+                ),
+                update_margin_threshold=float(
+                    instance_topology_settings["update_margin_threshold"]
+                ),
+                semantic_tolerance=float(
+                    instance_topology_settings["semantic_tolerance"]
+                ),
+                consensus_threshold=float(
+                    instance_topology_settings["consensus_threshold"]
+                ),
+                minimum_supporting_proposals=int(
+                    instance_topology_settings.get("minimum_supporting_proposals", 2)
+                ),
+                minimum_supporting_views=int(
+                    instance_topology_settings.get("minimum_supporting_views", 1)
+                ),
+                iterations=int(instance_topology_settings["iterations"]),
+            )
+            if instance_topology_stats_out is not None:
+                instance_topology_stats_out[split] = topology_stats
+        elif sam_region_graph is not None:
+            if instance_topology_settings is not None:
+                scores, topology_stats = (
+                    propagate_categorical_identity_over_instance_topology(
+                        scores,
+                        sam_region_graph[0],
+                        sam_region_graph[1],
+                        seed_margin_threshold=float(
+                            instance_topology_settings["seed_margin_threshold"]
+                        ),
+                        update_margin_threshold=float(
+                            instance_topology_settings["update_margin_threshold"]
+                        ),
+                        semantic_tolerance=float(
+                            instance_topology_settings["semantic_tolerance"]
+                        ),
+                        consensus_threshold=float(
+                            instance_topology_settings["consensus_threshold"]
+                        ),
+                        iterations=int(instance_topology_settings["iterations"]),
+                    )
+                )
+                if instance_topology_stats_out is not None:
+                    instance_topology_stats_out[split] = topology_stats
+            elif float(sam_region_alpha) > 0:
+                scores, _ = smooth_categorical_scores_with_region_graph(
+                    scores,
+                    sam_region_graph[0],
+                    sam_region_graph[1],
+                    alpha=sam_region_alpha,
+                    margin_threshold=sam_region_margin_threshold,
+                    device=device,
+                    chunk_size=chunk_size,
+                )
+        class_ids = np.asarray(
+            OPENGAUSSIAN_NYU40_CLASS_SPLITS[split], dtype=np.int32
+        )
+        predictions[split] = class_ids[scores.argmax(dim=-1).numpy()]
     return predictions
+
+
+def load_official_sam_proposal_memberships(
+    path: str | Path,
+    *,
+    expected_sha256: str,
+    expected_xyz: torch.Tensor,
+) -> tuple[
+    tuple[torch.Tensor, torch.Tensor, torch.Tensor, int, torch.Tensor], dict[str, object]
+]:
+    """Load query-free official-SAM instances lifted by exact MPR."""
+
+    source = Path(path).expanduser().resolve()
+    actual_sha256 = sha256_file(source)
+    if len(expected_sha256) != 64 or actual_sha256 != expected_sha256:
+        raise ValueError("official-SAM proposal membership SHA-256 mismatch")
+    payload = load_trusted_checkpoint(source, map_location="cpu")
+    metadata = dict(payload.get("metadata", {}))
+    rows = torch.as_tensor(payload.get("row_indices")).long().cpu()
+    proposals = torch.as_tensor(payload.get("proposal_indices")).long().cpu()
+    weights = torch.as_tensor(payload.get("weights")).float().cpu()
+    proposal_views = torch.as_tensor(payload.get("proposal_view_indices")).long().cpu()
+    num_rows = int(payload.get("num_rows", -1))
+    num_proposals = int(payload.get("num_proposals", -1))
+    if (
+        payload.get("schema")
+        != "radio_gs.scannet_official_sam3_exact_mpr_memberships.v1"
+        or num_rows != int(expected_xyz.shape[0])
+        or num_proposals <= 0
+        or metadata.get("query_independent_proposal_set") is not True
+        or metadata.get("official_sam3_decoder") is not True
+        or metadata.get("membership_lifting")
+        != "exact_front_to_back_marginal_target_weight"
+        or metadata.get("xyz_sha256")
+        != _float32_rows_sha256(expected_xyz.detach().cpu().float())
+        or any(
+            bool(metadata.get(key, True))
+            for key in (
+                "benchmark_images_opened",
+                "benchmark_masks_opened",
+                "evaluation_rgb_opened",
+                "text_queries_opened",
+            )
+        )
+    ):
+        raise ValueError("official-SAM proposal membership contract differs")
+    if not (rows.shape == proposals.shape == weights.shape):
+        raise ValueError("official-SAM sparse membership axes differ")
+    if proposal_views.shape != (num_proposals,) or bool((proposal_views < 0).any()):
+        raise ValueError("official-SAM proposal view indices differ")
+    if rows.numel() and (
+        bool(((rows < 0) | (rows >= num_rows)).any())
+        or bool(((proposals < 0) | (proposals >= num_proposals)).any())
+        or not bool(torch.isfinite(weights).all())
+        or bool((weights <= 0).any())
+        or bool((weights > 1).any())
+    ):
+        raise ValueError("official-SAM sparse membership values differ")
+    return (rows, proposals, weights, num_proposals, proposal_views), {
+        "path": str(source),
+        "sha256": actual_sha256,
+        "construction": "official_sam3_source_masks_exact_mpr_lift",
+        "source_view_count": int(metadata.get("source_view_count", 0)),
+        "proposal_count": num_proposals,
+        "membership_count": int(rows.numel()),
+        "min_membership": float(metadata.get("min_membership", 0.0)),
+    }
+
+
+def load_official_sam_region_features(
+    path: str | Path,
+    *,
+    expected_sha256: str,
+    expected_xyz: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, object]]:
+    """Load a query-free, exact-MPR lifted official RADIO-SAM feature bank."""
+
+    source = Path(path).expanduser().resolve()
+    if len(expected_sha256) != 64 or sha256_file(source) != expected_sha256:
+        raise ValueError("official SAM region feature cache SHA-256 mismatch")
+    payload = load_trusted_checkpoint(source, map_location="cpu")
+    if not isinstance(payload, dict):
+        raise TypeError("official SAM region feature cache must be a mapping")
+    metadata = payload.get("metadata")
+    features = payload.get("features")
+    xyz = payload.get("xyz")
+    valid = payload.get("valid")
+    if (
+        not isinstance(metadata, dict)
+        or metadata.get("feature_space") != "sam3"
+        or bool(metadata.get("benchmark_masks_opened", True))
+        or bool(metadata.get("benchmark_images_opened", True))
+        or bool(metadata.get("text_queries_opened", True))
+    ):
+        raise ValueError("official SAM region cache access contract differs")
+    if (
+        not isinstance(features, torch.Tensor)
+        or features.ndim != 2
+        or int(features.shape[0]) != int(expected_xyz.shape[0])
+        or not isinstance(xyz, torch.Tensor)
+        or xyz.shape != expected_xyz.shape
+        or not isinstance(valid, torch.Tensor)
+        or valid.shape != (int(expected_xyz.shape[0]),)
+    ):
+        raise ValueError("official SAM region cache row shape differs")
+    max_xyz_error = float(
+        (xyz.float() - expected_xyz.detach().cpu().float()).norm(dim=-1).max()
+    )
+    if max_xyz_error > 1e-6:
+        raise ValueError(f"official SAM region cache xyz mismatch: {max_xyz_error:.3e}")
+    if not bool(torch.isfinite(features).all()):
+        raise ValueError("official SAM region features contain NaN or infinity")
+    return features.detach().cpu(), valid.detach().cpu().bool(), {
+        "path": str(source),
+        "sha256": expected_sha256,
+        "feature_dim": int(features.shape[1]),
+        "valid_rows": int(valid.bool().sum()),
+        "construction": metadata.get("construction", ""),
+        "official_adaptor_checkpoint_sha256": metadata.get(
+            "official_adaptor_checkpoint_sha256", ""
+        ),
+    }
+
+
+def build_official_sam_region_graph(
+    xyz: np.ndarray,
+    sam_features: torch.Tensor,
+    sam_valid: torch.Tensor,
+    *,
+    k: int,
+    radius: float,
+    similarity_threshold: float,
+    device: torch.device,
+    chunk_size: int = 4096,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, object]]:
+    """Build a local graph whose edges require spatial and SAM agreement."""
+
+    points = np.asarray(xyz, dtype=np.float32)
+    count = int(points.shape[0])
+    if points.shape != (count, 3) or int(k) <= 0 or float(radius) <= 0:
+        raise ValueError("SAM region graph requires [N,3] xyz, positive k and radius")
+    if not -1.0 <= float(similarity_threshold) < 1.0:
+        raise ValueError("similarity_threshold must be in [-1,1)")
+    if sam_features.ndim != 2 or sam_features.shape[0] != count:
+        raise ValueError("SAM region features must align with xyz")
+    tree = cKDTree(points)
+    query_k = min(int(k) + 1, count)
+    try:
+        distances, indices = tree.query(points, k=query_k, workers=-1)
+    except TypeError:
+        distances, indices = tree.query(points, k=query_k)
+    distances = np.asarray(distances, dtype=np.float32)
+    indices = np.asarray(indices, dtype=np.int64)
+    if distances.ndim == 1:
+        distances = distances[:, None]
+        indices = indices[:, None]
+    row_ids = np.arange(count, dtype=np.int64)[:, None]
+    geometric_valid = (
+        np.isfinite(distances)
+        & (distances <= float(radius))
+        & (indices != row_ids)
+    )
+    indices = np.clip(indices, 0, max(count - 1, 0))
+    feature_bank = F.normalize(
+        sam_features.to(device=device, dtype=torch.float32), dim=-1, eps=1e-8
+    )
+    neighbor_indices = torch.from_numpy(indices).long()
+    geometric = torch.from_numpy(geometric_valid)
+    distances_t = torch.from_numpy(distances)
+    valid_rows = sam_valid.detach().cpu().bool()
+    weights = torch.zeros_like(distances_t, dtype=torch.float32)
+    for start in range(0, count, int(chunk_size)):
+        end = min(start + int(chunk_size), count)
+        idx = neighbor_indices[start:end].to(device)
+        similarities = (
+            feature_bank[start:end, None, :] * feature_bank[idx]
+        ).sum(dim=-1)
+        affinity = (
+            (similarities - float(similarity_threshold))
+            / (1.0 - float(similarity_threshold))
+        ).clamp(0.0, 1.0)
+        spatial = torch.exp(
+            -0.5
+            * (
+                distances_t[start:end].to(device=device, dtype=torch.float32)
+                / float(radius)
+            ).square()
+        )
+        legal = geometric[start:end].to(device)
+        legal &= valid_rows[start:end].to(device)[:, None]
+        legal &= valid_rows[neighbor_indices[start:end]].to(device)
+        weights[start:end] = (affinity * spatial * legal.float()).cpu()
+    edge_count = int((weights > 0).sum())
+    stats: dict[str, object] = {
+        "k": int(k),
+        "radius": float(radius),
+        "similarity_threshold": float(similarity_threshold),
+        "edge_count": edge_count,
+        "rows_with_neighbors": int((weights.sum(dim=1) > 0).sum()),
+        "mean_positive_edge_weight": (
+            float(weights[weights > 0].mean()) if edge_count else 0.0
+        ),
+    }
+    del feature_bank
+    return neighbor_indices, weights, stats
+
+
+def smooth_categorical_scores_with_region_graph(
+    scores: torch.Tensor,
+    neighbor_indices: torch.Tensor,
+    neighbor_weights: torch.Tensor,
+    *,
+    alpha: float,
+    margin_threshold: float,
+    device: torch.device,
+    chunk_size: int = 8192,
+) -> tuple[torch.Tensor, dict[str, object]]:
+    """Apply a SAM-boundary-aware residual only to uncertain categorical rows."""
+
+    values = torch.as_tensor(scores).detach().cpu().float()
+    if values.ndim != 2 or neighbor_indices.shape != neighbor_weights.shape:
+        raise ValueError("scores or SAM region graph shape differs")
+    if neighbor_indices.ndim != 2 or neighbor_indices.shape[0] != values.shape[0]:
+        raise ValueError("SAM region graph rows must align with scores")
+    if not 0.0 <= float(alpha) <= 1.0 or float(margin_threshold) < 0:
+        raise ValueError("alpha must be in [0,1] and margin_threshold non-negative")
+    output = values.clone()
+    score_bank = values.to(device)
+    changed = 0
+    supported = 0
+    for start in range(0, int(values.shape[0]), int(chunk_size)):
+        end = min(start + int(chunk_size), int(values.shape[0]))
+        local = score_bank[start:end].clone()
+        idx = neighbor_indices[start:end].to(device=device, dtype=torch.long)
+        weights = neighbor_weights[start:end].to(device=device, dtype=torch.float32)
+        mass = weights.sum(dim=1)
+        supported_mask = mass > 1e-8
+        supported += int(supported_mask.sum())
+        neighbor_mean = (
+            score_bank[idx] * weights[:, :, None]
+        ).sum(dim=1) / mass.clamp_min(1e-8)[:, None]
+        if local.shape[1] > 1:
+            top2 = torch.topk(local, k=2, dim=-1).values
+            margin = top2[:, 0] - top2[:, 1]
+        else:
+            margin = local[:, 0].abs()
+        apply = supported_mask & (margin <= float(margin_threshold))
+        candidate = (1.0 - float(alpha)) * local + float(alpha) * neighbor_mean
+        local[apply] = candidate[apply]
+        changed += int(apply.sum())
+        output[start:end] = local.cpu()
+    del score_bank
+    return output, {
+        "alpha": float(alpha),
+        "margin_threshold": float(margin_threshold),
+        "supported_rows": supported,
+        "changed_rows": changed,
+    }
+
+
+def propagate_categorical_identity_over_instance_topology(
+    scores: torch.Tensor,
+    neighbor_indices: torch.Tensor,
+    neighbor_weights: torch.Tensor,
+    *,
+    seed_margin_threshold: float,
+    update_margin_threshold: float,
+    semantic_tolerance: float,
+    consensus_threshold: float,
+    iterations: int,
+) -> tuple[torch.Tensor, dict[str, object]]:
+    """Marker-controlled categorical propagation over a SAM topology graph.
+
+    Categorical logits remain the sole identity authority.  Rows whose
+    categorical margin exceeds ``seed_margin_threshold`` become immutable
+    markers.  SAM/spatial edges may only extend those identities into
+    low-margin rows whose own categorical score still considers the proposed
+    class plausible.  Conflicting markers therefore stop at a watershed-like
+    boundary instead of being averaged across it.
+    """
+
+    values = torch.as_tensor(scores).detach().cpu().float()
+    indices = torch.as_tensor(neighbor_indices).detach().cpu().long()
+    weights = torch.as_tensor(neighbor_weights).detach().cpu().float()
+    if values.ndim != 2 or indices.shape != weights.shape:
+        raise ValueError("scores or SAM instance topology graph shape differs")
+    if indices.ndim != 2 or indices.shape[0] != values.shape[0]:
+        raise ValueError("SAM instance topology rows must align with scores")
+    if values.shape[1] < 2:
+        return values.clone(), {"changed_rows": 0, "seed_rows": 0}
+    if not 0.0 <= float(consensus_threshold) <= 1.0:
+        raise ValueError("consensus_threshold must be in [0,1]")
+    if min(
+        float(seed_margin_threshold),
+        float(update_margin_threshold),
+        float(semantic_tolerance),
+    ) < 0 or int(iterations) <= 0:
+        raise ValueError("margin/tolerance must be non-negative and iterations positive")
+
+    top2 = torch.topk(values, k=2, dim=-1)
+    original_labels = top2.indices[:, 0]
+    original_margin = top2.values[:, 0] - top2.values[:, 1]
+    immutable = original_margin >= float(seed_margin_threshold)
+    eligible = (~immutable) & (
+        original_margin <= float(update_margin_threshold)
+    )
+    owners = torch.full_like(original_labels, -1)
+    owners[immutable] = original_labels[immutable]
+    assignment_round = torch.full_like(original_labels, -1)
+    changed_per_iteration: list[int] = []
+
+    for round_index in range(int(iterations)):
+        neighbor_owners = owners[indices]
+        valid = (neighbor_owners >= 0) & (weights > 0)
+        candidate_rows = eligible & (owners < 0) & valid.any(dim=1)
+        row_ids = torch.nonzero(candidate_rows, as_tuple=False).flatten()
+        if row_ids.numel() == 0:
+            changed_per_iteration.append(0)
+            break
+        local_owners = neighbor_owners[row_ids]
+        local_weights = weights[row_ids] * valid[row_ids].float()
+        votes = torch.zeros(
+            (row_ids.numel(), values.shape[1]), dtype=torch.float32
+        )
+        votes.scatter_add_(1, local_owners.clamp_min(0), local_weights)
+        support, proposed = votes.max(dim=1)
+        mass = votes.sum(dim=1).clamp_min(1e-8)
+        consensus = support / mass
+        original_best = values[row_ids].max(dim=1).values
+        proposed_score = values[row_ids, proposed]
+        plausible = (
+            original_best - proposed_score
+        ) <= float(semantic_tolerance)
+        accept = (
+            (consensus >= float(consensus_threshold))
+            & plausible
+            & (support > 0)
+        )
+        accepted_rows = row_ids[accept]
+        owners[accepted_rows] = proposed[accept]
+        assignment_round[accepted_rows] = round_index
+        count = int(accept.sum())
+        changed_per_iteration.append(count)
+        if count == 0:
+            break
+
+    output = values.clone()
+    assigned = eligible & (owners >= 0) & (owners != original_labels)
+    assigned_rows = torch.nonzero(assigned, as_tuple=False).flatten()
+    if assigned_rows.numel():
+        # Only the hard categorical decision is changed.  Preserve all source
+        # logits and add the minimum deterministic epsilon required for the
+        # marker identity to win; SAM never invents a new class score.
+        winner = values[assigned_rows].max(dim=1).values
+        output[assigned_rows, owners[assigned_rows]] = winner + 1e-6
+    return output, {
+        "construction": "marker_controlled_sam_topology_with_categorical_plausibility",
+        "seed_margin_threshold": float(seed_margin_threshold),
+        "update_margin_threshold": float(update_margin_threshold),
+        "semantic_tolerance": float(semantic_tolerance),
+        "consensus_threshold": float(consensus_threshold),
+        "iterations": int(iterations),
+        "seed_rows": int(immutable.sum()),
+        "eligible_rows": int(eligible.sum()),
+        "owned_rows": int((owners >= 0).sum()),
+        "changed_rows": int(assigned.sum()),
+        "changed_per_iteration": changed_per_iteration,
+    }
 
 
 def load_method_v1_external_query_features(
@@ -463,6 +923,11 @@ def main() -> None:
     parser.add_argument("--fallback_k", type=int, default=1)
     parser.add_argument("--no_class_balance", action="store_true")
     parser.add_argument("--force_pseudo_gt", action="store_true")
+    parser.add_argument(
+        "--pseudo_gt_cache_dir",
+        default="",
+        help="Optional existing pseudo-GT cache directory, independent of output_dir.",
+    )
     parser.add_argument("--row_opacity_threshold", type=float, default=0.1)
     parser.add_argument("--compact_feature_key", default="features")
     parser.add_argument("--prompt_templates", default="{query}")
@@ -482,6 +947,36 @@ def main() -> None:
         "--expected_external_query_feature_cache_sha256",
         default="",
         help="Required SHA-256 when one external cache is evaluated.",
+    )
+    parser.add_argument(
+        "--sam_region_feature_cache",
+        default="",
+        help="May contain {scene}; row-aligned exact-MPR official RADIO-SAM features.",
+    )
+    parser.add_argument("--expected_sam_region_feature_cache_sha256", default="")
+    parser.add_argument("--sam_region_k", type=int, default=8)
+    parser.add_argument("--sam_region_radius", type=float, default=0.10)
+    parser.add_argument("--sam_region_similarity_threshold", type=float, default=0.50)
+    parser.add_argument("--sam_region_alpha", type=float, default=0.25)
+    parser.add_argument("--sam_region_margin_threshold", type=float, default=0.03)
+    parser.add_argument(
+        "--sam_proposal_membership_cache",
+        default="",
+        help="May contain {scene}; exact-MPR lifted official-SAM proposal memberships.",
+    )
+    parser.add_argument("--expected_sam_proposal_membership_cache_sha256", default="")
+    parser.add_argument("--sam_instance_topology", action="store_true")
+    parser.add_argument("--sam_instance_seed_margin", type=float, default=0.04)
+    parser.add_argument("--sam_instance_update_margin", type=float, default=0.04)
+    parser.add_argument("--sam_instance_semantic_tolerance", type=float, default=0.025)
+    parser.add_argument("--sam_instance_consensus", type=float, default=0.70)
+    parser.add_argument("--sam_instance_minimum_supporting_proposals", type=int, default=2)
+    parser.add_argument("--sam_instance_minimum_supporting_views", type=int, default=1)
+    parser.add_argument("--sam_instance_iterations", type=int, default=6)
+    parser.add_argument(
+        "--save_development_score_cache",
+        action="store_true",
+        help="Save raw categorical logits and SAM graph for development sweeps.",
     )
     parser.add_argument(
         "--radio_checkpoint",
@@ -536,6 +1031,12 @@ def main() -> None:
         gaussian_opacity = model.get_opacity().detach().float().cpu().numpy().reshape(-1)
         external_query_features = None
         external_query_feature_record = None
+        sam_region_graph = None
+        sam_region_record = None
+        sam_proposal_memberships = None
+        sam_proposal_record = None
+        if args.sam_region_feature_cache and args.sam_proposal_membership_cache:
+            raise ValueError("select either SAM feature graph or exact proposal memberships")
         if args.external_query_feature_cache:
             if len(scenes) != 1:
                 raise ValueError(
@@ -552,12 +1053,55 @@ def main() -> None:
                     expected_dim=int(split_text_embeddings[split_names[0]].shape[1]),
                 )
             )
+        if args.sam_region_feature_cache:
+            if len(scenes) != 1:
+                raise ValueError("SHA-bound SAM region features require one scene per run")
+            sam_path = _format_scene_path(args.sam_region_feature_cache, scene)
+            sam_features, sam_valid, sam_region_record = load_official_sam_region_features(
+                sam_path,
+                expected_sha256=args.expected_sam_region_feature_cache_sha256,
+                expected_xyz=model.get_xyz(),
+            )
+            graph_indices, graph_weights, graph_stats = build_official_sam_region_graph(
+                gaussian_xyz,
+                sam_features,
+                sam_valid,
+                k=args.sam_region_k,
+                radius=args.sam_region_radius,
+                similarity_threshold=args.sam_region_similarity_threshold,
+                device=device,
+                chunk_size=args.feature_chunk_size,
+            )
+            sam_region_graph = (graph_indices, graph_weights)
+            sam_region_record.update(graph_stats)
+            sam_region_record.update({
+                "alpha": float(args.sam_region_alpha),
+                "margin_threshold": float(args.sam_region_margin_threshold),
+            })
+        if args.sam_proposal_membership_cache:
+            if len(scenes) != 1:
+                raise ValueError("SHA-bound SAM proposal memberships require one scene")
+            proposal_path = _format_scene_path(
+                args.sam_proposal_membership_cache, scene
+            )
+            sam_proposal_memberships, sam_proposal_record = (
+                load_official_sam_proposal_memberships(
+                    proposal_path,
+                    expected_sha256=args.expected_sam_proposal_membership_cache_sha256,
+                    expected_xyz=model.get_xyz(),
+                )
+            )
         label_ply = _format_scene_path(args.label_ply, scene) or _default_label_ply(
             prepared_root, scene
         )
         point_xyz, point_labels = _read_label_ply(label_ply)
+        pseudo_cache_root = (
+            Path(args.pseudo_gt_cache_dir)
+            if args.pseudo_gt_cache_dir
+            else output_dir / "pseudo_gt"
+        )
         pseudo_labels, pseudo_stats = _load_or_build_pseudo_gt(
-            output_dir / "pseudo_gt" / f"{scene}.npz",
+            pseudo_cache_root / f"{scene}.npz",
             gaussian_xyz,
             gaussian_scales,
             gaussian_rotations,
@@ -570,6 +1114,21 @@ def main() -> None:
             chunk_size=args.pseudo_chunk_size,
             force=args.force_pseudo_gt,
         )
+        topology_stats: dict[str, object] = {}
+        topology_settings = (
+            {
+                "seed_margin_threshold": args.sam_instance_seed_margin,
+                "update_margin_threshold": args.sam_instance_update_margin,
+                "semantic_tolerance": args.sam_instance_semantic_tolerance,
+                "consensus_threshold": args.sam_instance_consensus,
+                "minimum_supporting_proposals": args.sam_instance_minimum_supporting_proposals,
+                "minimum_supporting_views": args.sam_instance_minimum_supporting_views,
+                "iterations": args.sam_instance_iterations,
+            }
+            if args.sam_instance_topology
+            else None
+        )
+        raw_score_banks: dict[str, torch.Tensor] = {}
         predictions = _predict_gaussian_labels(
             model,
             codec,
@@ -580,6 +1139,15 @@ def main() -> None:
             chunk_size=args.feature_chunk_size,
             compact_feature_key=args.compact_feature_key,
             external_query_features=external_query_features,
+            sam_region_graph=sam_region_graph,
+            sam_proposal_memberships=sam_proposal_memberships,
+            sam_region_alpha=args.sam_region_alpha,
+            sam_region_margin_threshold=args.sam_region_margin_threshold,
+            instance_topology_settings=topology_settings,
+            instance_topology_stats_out=topology_stats,
+            raw_score_banks_out=(
+                raw_score_banks if args.save_development_score_cache else None
+            ),
         )
         significance = gaussian_scales.prod(axis=1) * gaussian_opacity
         if point_labels.shape[0] != gaussian_xyz.shape[0]:
@@ -619,6 +1187,36 @@ def main() -> None:
             significance=significance,
             **{f"pred_split_{split}": predictions[split] for split in split_names},
         )
+        if args.save_development_score_cache:
+            if sam_region_graph is None and sam_proposal_memberships is None:
+                raise ValueError("development score cache requires a SAM topology")
+            score_cache_path = output_dir / "development" / f"{scene}_scores.npz"
+            score_cache_path.parent.mkdir(parents=True, exist_ok=True)
+            topology_arrays = (
+                {
+                    "sam_neighbor_indices": sam_region_graph[0].numpy(),
+                    "sam_neighbor_weights": sam_region_graph[1].numpy(),
+                }
+                if sam_region_graph is not None
+                else {
+                    "sam_membership_rows": sam_proposal_memberships[0].numpy(),
+                    "sam_membership_proposals": sam_proposal_memberships[1].numpy(),
+                    "sam_membership_weights": sam_proposal_memberships[2].numpy(),
+                    "sam_num_proposals": np.asarray(sam_proposal_memberships[3]),
+                    "sam_proposal_view_indices": sam_proposal_memberships[4].numpy(),
+                }
+            )
+            np.savez_compressed(
+                score_cache_path,
+                gaussian_xyz=gaussian_xyz,
+                pseudo_labels=pseudo_labels,
+                significance=significance,
+                **topology_arrays,
+                **{
+                    f"scores_split_{split}": raw_score_banks[split].numpy()
+                    for split in split_names
+                },
+            )
         scene_results[scene] = {
             "num_gaussians": int(gaussian_xyz.shape[0]),
             "num_label_points": int(point_xyz.shape[0]),
@@ -644,6 +1242,18 @@ def main() -> None:
                 if external_query_feature_record is not None
                 else {"source": "decoded_geometry_checkpoint"}
             ),
+            "sam_region_readout": (
+                {
+                    **(
+                        sam_proposal_record
+                        if sam_proposal_record is not None
+                        else sam_region_record
+                    ),
+                    "instance_topology": topology_stats,
+                }
+                if sam_region_record is not None or sam_proposal_record is not None
+                else {"enabled": False}
+            ),
         }
         del model, codec
         torch.cuda.empty_cache()
@@ -652,7 +1262,15 @@ def main() -> None:
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "protocol": {
             "prediction_domain": "optimized Gaussian centers",
-            "prediction_postprocess": "none",
+            "prediction_postprocess": (
+                (
+                    "marker_controlled_official_sam_instance_topology"
+                    if args.sam_instance_topology
+                    else "official_sam_local_low_margin_residual"
+                )
+                if args.sam_region_feature_cache or args.sam_proposal_membership_cache
+                else "none"
+            ),
             "test_scene_calibration": "none",
             "pseudo_gt": "VALA Mahalanobis-density voting",
             "metric_weights": "opacity * sx * sy * sz",

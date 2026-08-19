@@ -1,0 +1,85 @@
+{
+  "schema": "radio_gs.sam_mask_aligned_language_teacher_sparse_sentinel_result.v1",
+  "generated_at": "2026-08-17T13:21:59+08:00",
+  "candidate_id": "lerf_figurines_source_only_sam_mask_aligned_siglip2_sparse_sentinel_v1",
+  "status": "contract_and_materialization_sentinel_passed",
+  "scope": {
+    "scene": "figurines",
+    "source_view": "frame_00001",
+    "proposal_count": 5,
+    "proposal_source": "official SAM3 grid12 single-image interactive multimasks",
+    "automatic_multiscale_hierarchy_complete": false,
+    "attachment_stage_a_complete": false,
+    "attachment_p2_complete": false
+  },
+  "legal_information": {
+    "query_free": true,
+    "source_only": true,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_vocabulary_opened": false,
+    "evaluation_rgb_opened": false,
+    "text_queries_opened": false
+  },
+  "outputs": {
+    "descriptor_space": "official_siglip2_crop_summary",
+    "text_compatibility": "official_siglip2_g_text_space",
+    "masked_crop_descriptor_shape": [
+      5,
+      1536
+    ],
+    "context_crop_descriptor_shape": [
+      5,
+      1536
+    ],
+    "dtype": "float16",
+    "masked_descriptor_norm_range": [
+      0.9999434351921082,
+      1.0000622272491455
+    ],
+    "context_descriptor_norm_range": [
+      0.9999488592147827,
+      1.0000094175338745
+    ],
+    "masked_context_paired_cosine": [
+      0.6058899760246277,
+      0.7372834086418152,
+      0.7727550268173218,
+      0.6300424337387085,
+      0.6997592449188232
+    ],
+    "masked_context_paired_cosine_mean": 0.6891460418701172,
+    "candidate_part_of_edges": 3,
+    "candidate_sibling_edges": 0
+  },
+  "interpretation": {
+    "supported": "The source-only producer can turn byte-bound official SAM proposals into distinct masked-identity and expanded-context descriptors in the frozen official SigLIP2 text-compatible space while preserving candidate geometric containment metadata.",
+    "not_supported": "No benchmark metric, cross-view identity, semantic part-whole assertion, sibling distinction, full multiscale proposal coverage, field supervision gain, or method improvement is established.",
+    "blocking_evidence": "This sparse frame has no shared-direct-parent sibling edge, so it cannot exercise the requested sibling supervision. A true automatic multiscale hierarchy with denser nested and sibling proposals is still required."
+  },
+  "artifacts": {
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_sam_mask_aligned_language_teacher.py",
+      "sha256": "4225f8d1f1cfa7270e307ef60f26923704486804350f77448090bedea835ce1e"
+    },
+    "tests": {
+      "path": "/root/RADIO-GS/tests/test_sam_mask_aligned_language_teacher.py",
+      "sha256": "e7077fe77053592861b4ddce62308e5bb816cdfb5fd11559ba9d2f8db0403faa",
+      "result": "6 passed"
+    },
+    "preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_figurines_mask_aligned_language_teacher_sparse_preregistration_20260817.json",
+      "sha256": "18397b1668eb32db34b066665ad3fb4d946ddea798a81bdd832e4c93cdff552c"
+    },
+    "materialization_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_mask_aligned_language_teacher_sparse_p2_sentinel_v1/figurines/manifest.json",
+      "sha256": "ef049be2d3832b273d68f2dfcdfaec4d0614c30a9e8e1da933a3ee4541182689"
+    },
+    "teacher_payload": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_mask_aligned_language_teacher_sparse_p2_sentinel_v1/figurines/frame_00001.pt",
+      "sha256": "c918049af4329befc1b0222b516b7efcb362330c1f0016f002cabb1b7221b2d3"
+    }
+  },
+  "benchmark_metrics_computed": false,
+  "method_promotion_eligible": false
+}

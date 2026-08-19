@@ -50,6 +50,24 @@ _Avoid_: Method-v1, final query interface
 A globally shared query interface specialized by query family that produces a calibrated Gaussian Query Posterior without introducing another persistent scene field.
 _Avoid_: task field, benchmark-specific sidecar
 
+**Identity--Extent Posterior**:
+A typed posterior that preserves a query-to-field identity unary for localization
+and derives object extent from query-independent instance/region membership.  The
+extent branch may complete support but cannot move or replace the identity peak.
+_Avoid_: SAM semantic classifier, unrestricted region averaging
+
+**Bounded Categorical Region Residual**:
+A low-margin-only topology residual for mutually exclusive category posteriors.
+It may smooth uncertain rows using query-independent SAM affinity, but cannot
+create a class identity or alter high-margin predictions.
+_Avoid_: SAM category logits, global proposal propagation
+
+**Independent Prompt Consensus**:
+For registered image prompts, box and signed-point SAM hypotheses are decoded
+independently and combined after mask decoding.  Prompt types are not assumed
+to be additive inside the frozen SAM prompt encoder.
+_Avoid_: joint box-point posterior, prompt concatenation as Bayesian fusion
+
 **Gaussian Query Posterior**:
 The calibrated per-Gaussian output of the Canonical Query Interface before raster or world-space conversion.
 _Avoid_: benchmark mask, task score map

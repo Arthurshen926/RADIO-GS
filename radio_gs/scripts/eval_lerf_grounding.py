@@ -434,6 +434,95 @@ def validate_primitive_unary_cache(
     return values, mask
 
 
+def validate_primitive_posterior_cache(
+    payload: Mapping[str, Any],
+    model_xyz: torch.Tensor,
+    categories: List[str],
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Validate a typed Gaussian Query Posterior for scalar rendering."""
+
+    scores = payload.get("query_scores")
+    valid = payload.get("valid")
+    cached_xyz = payload.get("xyz")
+    metadata = dict(payload.get("metadata", {}))
+    expected_shape = (int(model_xyz.shape[0]), len(categories))
+    if not isinstance(scores, torch.Tensor) or tuple(scores.shape) != expected_shape:
+        raise ValueError(f"Primitive posterior scores must be {expected_shape}")
+    if not isinstance(valid, torch.Tensor) or tuple(valid.shape) != (expected_shape[0],):
+        raise ValueError("Primitive posterior cache requires row-aligned valid")
+    if not isinstance(cached_xyz, torch.Tensor) or cached_xyz.shape != model_xyz.shape:
+        raise ValueError("Primitive posterior cache requires row-aligned xyz")
+    if [str(value) for value in metadata.get("query_names", [])] != list(categories):
+        raise ValueError("Primitive posterior query order mismatch")
+    if metadata.get("query_family") != "text_object_extent":
+        raise ValueError("primitive_posterior requires text_object_extent query family")
+    if not str(metadata.get("typed_posterior", "")).startswith(
+        "official_sam3_siglip2_identity_extent_factorization_"
+    ):
+        raise ValueError("primitive_posterior method identity differs")
+    if metadata.get("persistent_second_semantic_field") is not False:
+        raise ValueError("primitive_posterior introduced a persistent semantic field")
+    if any(
+        bool(metadata.get(key, False))
+        for key in (
+            "benchmark_images_opened",
+            "benchmark_masks_opened",
+            "evaluation_rgb_opened",
+        )
+    ):
+        raise ValueError("primitive_posterior opened forbidden evaluation information")
+    xyz_error = (cached_xyz.float() - model_xyz.detach().cpu().float()).norm(dim=-1)
+    if xyz_error.numel() and float(xyz_error.max()) > 1e-6:
+        raise ValueError(
+            f"Primitive posterior xyz mismatch: max_l2={float(xyz_error.max()):.3e}"
+        )
+    values = scores.float().cpu()
+    mask = valid.bool().cpu()
+    if bool(mask.any()):
+        selected = values[mask]
+        if not bool(torch.isfinite(selected).all()):
+            raise ValueError("Primitive posterior contains non-finite probabilities")
+        if float(selected.min()) < 0.0 or float(selected.max()) > 1.0:
+            raise ValueError("Primitive posterior probabilities must lie in [0,1]")
+    return values, mask
+
+
+def validate_primitive_posterior_identity_cache(
+    payload: Mapping[str, Any],
+    model_xyz: torch.Tensor,
+    categories: List[str],
+) -> Optional[torch.Tensor]:
+    """Validate the identity half of an identity/extent typed posterior.
+
+    Older extent-only caches remain readable and return ``None``.  A v3 cache
+    must carry a row-aligned identity posterior so localization never uses the
+    flat interior of an instance mask as an accidental identity score.
+    """
+
+    metadata = dict(payload.get("metadata", {}))
+    identity = payload.get("identity_query_scores")
+    if identity is None:
+        if metadata.get("separate_identity_localization") is True:
+            raise ValueError("separated primitive posterior lacks identity scores")
+        return None
+    expected_shape = (int(model_xyz.shape[0]), len(categories))
+    if not isinstance(identity, torch.Tensor) or tuple(identity.shape) != expected_shape:
+        raise ValueError(f"Primitive identity scores must be {expected_shape}")
+    if metadata.get("separate_identity_localization") is not True:
+        raise ValueError("primitive identity scores lack separated-output contract")
+    if metadata.get("localization_authority") != "field_siglip2_relevancy_identity":
+        raise ValueError("primitive localization authority differs")
+    values = identity.float().cpu()
+    valid = torch.as_tensor(payload.get("valid")).bool().cpu()
+    if bool(valid.any()):
+        selected = values[valid]
+        if not bool(torch.isfinite(selected).all()):
+            raise ValueError("Primitive identity posterior contains non-finite values")
+        if float(selected.min()) < 0.0 or float(selected.max()) > 1.0:
+            raise ValueError("Primitive relevancy identity must lie in [0,1]")
+    return values
+
+
 # ---------------------------------------------------------------------------
 # Text-embedding generation (SigLIP2 via ``transformers``)
 # ---------------------------------------------------------------------------
@@ -2120,6 +2209,7 @@ def evaluate_scene(
     sam3_prompt_mask_head_require_peak_in_refined: bool = False,
     sam3_prompt_mask_head_initial_refinement: str = "none",
     sam3_prompt_mask_head_apply_to: str = "rendered",
+    sam3_prompt_mask_head_feature_dir: Optional[str] = None,
     render_readout: str = "screen_decode",
     primitive_chunk_size: int = 8192,
     primitive_query_cache: str = "",
@@ -2182,6 +2272,7 @@ def evaluate_scene(
             primitive_query_primary = None
             primitive_support_rows = None
             primitive_support_valid = None
+            primitive_localization_rows = None
             if render_readout in {"primitive_query", "primitive_score"}:
                 if primitive_query_cache:
                     payload = torch.load(primitive_query_cache, map_location="cpu")
@@ -2245,17 +2336,58 @@ def evaluate_scene(
                         chunk_size=primitive_chunk_size,
                         store_on_cpu=render_readout == "primitive_score",
                     )
-            elif render_readout in {"primitive_support", "primitive_unary"}:
+            elif render_readout in {"primitive_support", "primitive_unary", "primitive_posterior"}:
                 if not primitive_score_cache:
                     raise ValueError(
                         f"{render_readout} requires --primitive_score_cache"
                     )
                 support_payload = torch.load(primitive_score_cache, map_location="cpu")
-                primitive_support_rows, primitive_support_valid = (
-                    validate_primitive_support_cache(support_payload, model.get_xyz(), categories)
-                    if render_readout == "primitive_support"
-                    else validate_primitive_unary_cache(support_payload, model.get_xyz(), categories)
-                )
+                if render_readout == "primitive_support":
+                    primitive_support_rows, primitive_support_valid = validate_primitive_support_cache(
+                        support_payload, model.get_xyz(), categories
+                    )
+                elif render_readout == "primitive_unary":
+                    primitive_support_rows, primitive_support_valid = validate_primitive_unary_cache(
+                        support_payload, model.get_xyz(), categories
+                    )
+                else:
+                    primitive_support_rows, primitive_support_valid = validate_primitive_posterior_cache(
+                        support_payload, model.get_xyz(), categories
+                    )
+                    primitive_localization_rows = validate_primitive_posterior_identity_cache(
+                        support_payload, model.get_xyz(), categories
+                    )
+                    if primitive_query_cache:
+                        identity_payload = torch.load(
+                            primitive_query_cache, map_location="cpu"
+                        )
+                        primitive_query_rows = identity_payload.get(
+                            "summary_features", identity_payload.get("features")
+                        )
+                        primitive_query_valid = torch.as_tensor(
+                            identity_payload.get("valid")
+                        ).bool()
+                        identity_xyz = identity_payload.get("xyz")
+                        if (
+                            not isinstance(primitive_query_rows, torch.Tensor)
+                            or primitive_query_rows.shape
+                            != (model.get_xyz().shape[0], 1536)
+                            or primitive_query_valid.shape
+                            != (model.get_xyz().shape[0],)
+                            or not isinstance(identity_xyz, torch.Tensor)
+                            or identity_xyz.shape != model.get_xyz().shape
+                        ):
+                            raise ValueError(
+                                "primitive posterior identity feature cache differs"
+                            )
+                        identity_xyz_error = (
+                            identity_xyz.float()
+                            - model.get_xyz().detach().cpu().float()
+                        ).norm(dim=-1)
+                        if float(identity_xyz_error.max()) > 1e-6:
+                            raise ValueError(
+                                "primitive posterior identity feature xyz differs"
+                            )
         else:
             scene_root_hint = ""
             primitive_query_rows = None
@@ -2264,6 +2396,7 @@ def evaluate_scene(
             primitive_query_primary = None
             primitive_support_rows = None
             primitive_support_valid = None
+            primitive_localization_rows = None
         canonical_mode = canonical_lerf_mode(mode)
         mode_mask_refinement = mask_refinement
         if (
@@ -2301,6 +2434,7 @@ def evaluate_scene(
             leave=False,
         ):
             region_siglip_feat = None
+            localization_heatmaps = None
             # --- obtain 1280-d features ---
             if mode == "gt":
                 feat_path = Path(gt_feature_dir) / f"rgb_{frame_id}.pt"
@@ -2341,7 +2475,7 @@ def evaluate_scene(
                         "alpha_map": primitive_render["alpha_map"][None, None]
                     }
                     feat_1280 = None
-                elif render_readout in {"primitive_score", "primitive_support", "primitive_unary"}:
+                elif render_readout in {"primitive_score", "primitive_support", "primitive_unary", "primitive_posterior"}:
                     if render_readout == "primitive_score":
                         assert primitive_query_rows is not None
                     siglip_feat = None
@@ -2363,6 +2497,7 @@ def evaluate_scene(
                     "primitive_score",
                     "primitive_support",
                     "primitive_unary",
+                    "primitive_posterior",
                 }:
                     pass
                 elif mode_confidence_gate != "none":
@@ -2384,7 +2519,7 @@ def evaluate_scene(
             if not (
                 mode == "rendered"
                 and render_readout
-                in {"primitive_query", "primitive_score", "primitive_support", "primitive_unary"}
+                in {"primitive_query", "primitive_score", "primitive_support", "primitive_unary", "primitive_posterior"}
             ):
                 siglip_feat = project_to_siglip2(feat_1280.half(), proj)
             if mode == "gt" and region_feature_dir is not None:
@@ -2421,7 +2556,7 @@ def evaluate_scene(
                 continue
 
             active_emb = text_embeddings[active_indices].to(device)  # [K, 1536]
-            if not (mode == "rendered" and render_readout in {"primitive_support", "primitive_unary"}):
+            if not (mode == "rendered" and render_readout in {"primitive_support", "primitive_unary", "primitive_posterior"}):
                 visual_dim = (
                     int(primitive_query_rows.shape[1])
                     if mode == "rendered" and render_readout == "primitive_score"
@@ -2586,13 +2721,50 @@ def evaluate_scene(
                         render_aux["semantic_coverage"] = semantic_coverage[
                             None, None
                         ]
-            elif mode == "rendered" and render_readout in {"primitive_support", "primitive_unary"}:
+            elif mode == "rendered" and render_readout in {"primitive_support", "primitive_unary", "primitive_posterior"}:
                 assert primitive_support_rows is not None
                 support_rows = primitive_support_rows[:, active_indices]
                 support_rows = neutralize_invalid_primitive_scores_for_render(
                     support_rows,
                     primitive_support_valid,
                 ).to(device=device, dtype=torch.float32)
+                localization_rows = None
+                if render_readout == "primitive_posterior":
+                    if primitive_query_rows is not None:
+                        identity_score_parts: List[torch.Tensor] = []
+                        for start in range(
+                            0, primitive_query_rows.shape[0], primitive_chunk_size
+                        ):
+                            identity_chunk = primitive_query_rows[
+                                start : start + primitive_chunk_size
+                            ].to(device=device, dtype=torch.float32)
+                            identity_heatmaps = compute_relevancy_heatmap(
+                                identity_chunk.T[None, :, :, None],
+                                active_emb,
+                                canonical_emb=canonical_emb,
+                                temperature=temperature,
+                                scoring=scoring,
+                                all_scene_emb=all_scene_emb,
+                                active_scene_indices=active_scene_idx,
+                            )
+                            identity_score_parts.append(
+                                identity_heatmaps.squeeze(-1).T
+                            )
+                        localization_rows = torch.cat(
+                            identity_score_parts, dim=0
+                        ).contiguous()
+                        localization_rows = neutralize_invalid_primitive_scores_for_render(
+                            localization_rows,
+                            primitive_query_valid,
+                        )
+                    elif primitive_localization_rows is not None:
+                        localization_rows = primitive_localization_rows[
+                            :, active_indices
+                        ]
+                        localization_rows = neutralize_invalid_primitive_scores_for_render(
+                            localization_rows,
+                            primitive_support_valid,
+                        ).to(device=device, dtype=torch.float32)
                 render_rows = support_rows
                 if primitive_valid_normalization:
                     if primitive_support_valid is None:
@@ -2601,11 +2773,11 @@ def evaluate_scene(
                         )
                     render_rows = torch.cat(
                         [
-                            support_rows,
+                            render_rows,
                             torch.as_tensor(
                                 primitive_support_valid,
                                 device=device,
-                                dtype=support_rows.dtype,
+                                dtype=render_rows.dtype,
                             )[:, None],
                         ],
                         dim=1,
@@ -2618,15 +2790,26 @@ def evaluate_scene(
                     contribution_gamma=feature_contribution_gamma,
                 )
                 if primitive_valid_normalization:
-                    heatmaps, semantic_coverage = (
+                    rendered_semantics, semantic_coverage = (
                         normalize_primitive_scores_by_valid_mass(
                             support_render["feature_map"].float(),
                             coverage_power=primitive_valid_coverage_power,
                         )
                     )
                 else:
-                    heatmaps = support_render["feature_map"].float()
+                    rendered_semantics = support_render["feature_map"].float()
                     semantic_coverage = None
+                heatmaps = rendered_semantics[: len(active_indices)]
+                localization_heatmaps = (
+                    renderer.render_feature_rows(
+                        model,
+                        viewmat.squeeze(0),
+                        localization_rows,
+                        alpha_normalize=True,
+                        contribution_gamma=feature_contribution_gamma,
+                    )["feature_map"].float()
+                    if localization_rows is not None else None
+                )
                 render_aux = {
                     "alpha_map": support_render["alpha_map"][None, None]
                 }
@@ -2683,6 +2866,13 @@ def evaluate_scene(
                     mode="bilinear",
                     align_corners=False,
                 ).squeeze(0)
+                if localization_heatmaps is not None:
+                    localization_heatmaps = F.interpolate(
+                        localization_heatmaps.unsqueeze(0),
+                        size=(img_h, img_w),
+                        mode="bilinear",
+                        align_corners=False,
+                    ).squeeze(0)
             elif heatmap_upsample > 1:
                 K = heatmaps.shape[0]
                 heatmaps = F.interpolate(
@@ -2691,10 +2881,46 @@ def evaluate_scene(
                     mode="bilinear",
                     align_corners=False,
                 ).squeeze(0)  # [K, fH*up, fW*up]
+                if localization_heatmaps is not None:
+                    localization_heatmaps = F.interpolate(
+                        localization_heatmaps.unsqueeze(0),
+                        scale_factor=heatmap_upsample,
+                        mode="bilinear",
+                        align_corners=False,
+                    ).squeeze(0)
 
             fH, fW = heatmaps.shape[1], heatmaps.shape[2]
             prompt_mask_feature = None
             if mode_mask_refinement == "sam3_prompt_mask_head" and sam3_prompt_mask_head is not None:
+                if feat_1280 is None and sam3_prompt_mask_head_feature_dir:
+                    feature_path = (
+                        Path(sam3_prompt_mask_head_feature_dir)
+                        / f"rgb_{frame_id}.pt"
+                    )
+                    if not feature_path.is_file():
+                        feature_path = (
+                            Path(sam3_prompt_mask_head_feature_dir)
+                            / "backbone"
+                            / f"rgb_{frame_id}.pt"
+                        )
+                    if not feature_path.is_file():
+                        raise FileNotFoundError(
+                            "feature-only SAM3 boundary input is missing: "
+                            f"{feature_path}"
+                        )
+                    feat_1280 = torch.load(feature_path, map_location=device).float()
+                    if feat_1280.ndim == 3:
+                        feat_1280 = feat_1280.unsqueeze(0)
+                    if feat_1280.ndim != 4 or int(feat_1280.shape[1]) != 1280:
+                        raise ValueError(
+                            "feature-only SAM3 boundary input must have shape "
+                            f"[1,1280,H,W], got {tuple(feat_1280.shape)}"
+                        )
+                if feat_1280 is None:
+                    raise ValueError(
+                        "sam3_prompt_mask_head requires rendered 1280D features; "
+                        "set --sam3_prompt_mask_head_feature_dir for primitive_score"
+                    )
                 prompt_mask_feature = F.interpolate(
                     feat_1280.float(),
                     size=tuple(int(v) for v in sam3_prompt_mask_head_target_size),
@@ -2709,7 +2935,15 @@ def evaluate_scene(
                                            src_height=img_h, src_width=img_w)
             rgb_image_for_masks = None
             sam3_box_state = None
-            if mode_mask_refinement != "none" or save_overlay_vis:
+            if (
+                mode_mask_refinement
+                in {
+                    "rgb_grabcut",
+                    "peak_component_rgb_grabcut",
+                    "sam3_box",
+                }
+                or save_overlay_vis
+            ):
                 if (
                     mode_mask_refinement != "none"
                     and rgb_refinement_source == "rendered"
@@ -2739,6 +2973,13 @@ def evaluate_scene(
             gt_vis: Dict[str, np.ndarray] = {}
             for ki, cat in enumerate(active_cats):
                 hm = heatmaps[ki]  # [fH, fW]
+                hm_localization = (
+                    localization_heatmaps[ki]
+                    if mode == "rendered"
+                    and render_readout == "primitive_posterior"
+                    and localization_heatmaps is not None
+                    else hm
+                )
                 gt_full = gt_masks_full[cat]
                 gt_feat = gt_masks_feat[cat]
                 initial_pred_for_save: Optional[np.ndarray] = None
@@ -2755,13 +2996,13 @@ def evaluate_scene(
                         if obj["category"] == cat and obj.get("bbox") is not None
                     ]
                     is_correct = localization_accuracy_bbox_smoothed(
-                        hm,
+                        hm_localization,
                         cat_bboxes,
                         image_shape=(img_h, img_w),
                         kernel_size=localization_smoothing_kernel,
                     )
                 elif localization_mode == "polygon_argmax":
-                    is_correct = localization_accuracy(hm, gt_full)
+                    is_correct = localization_accuracy(hm_localization, gt_full)
                 else:
                     raise ValueError(f"Unsupported localization_mode: {localization_mode}")
                 loc_correct += int(is_correct)
@@ -3063,6 +3304,7 @@ def main() -> None:
             "primitive_score",
             "primitive_support",
             "primitive_unary",
+            "primitive_posterior",
         ],
         default="screen_decode",
         help=(
@@ -3323,6 +3565,14 @@ def main() -> None:
         help="GT-free refinement applied to the heatmap coarse mask before feature-only SAM3 decoding.",
     )
     parser.add_argument("--sam3_prompt_mask_head_apply_to", choices=["rendered", "all"], default="rendered")
+    parser.add_argument(
+        "--sam3_prompt_mask_head_feature_dir",
+        default="",
+        help=(
+            "Optional current-field rendered 1280D feature directory used by "
+            "the feature-only SAM3 head when the identity readout is primitive_score"
+        ),
+    )
     # Hardware
     parser.add_argument("--gpu", type=int, default=0,
                         help="GPU device id")
@@ -3363,9 +3613,10 @@ def main() -> None:
         "primitive_score",
         "primitive_support",
         "primitive_unary",
+        "primitive_posterior",
     } and args.text_encoder != "siglip2":
         parser.error("primitive-first render readouts currently require --text_encoder siglip2")
-    if args.render_readout in {"primitive_support", "primitive_unary"} and not args.primitive_score_cache:
+    if args.render_readout in {"primitive_support", "primitive_unary", "primitive_posterior"} and not args.primitive_score_cache:
         parser.error(f"{args.render_readout} requires --primitive_score_cache")
     if (
         args.primitive_valid_normalization
@@ -3375,6 +3626,7 @@ def main() -> None:
             "primitive_score",
             "primitive_support",
             "primitive_unary",
+            "primitive_posterior",
         }
     ):
         parser.error(
@@ -3707,6 +3959,24 @@ def main() -> None:
                     f"typed region feature directory is missing: {region_feat_dir}"
                 )
 
+        prompt_mask_feature_dir = None
+        if args.sam3_prompt_mask_head_feature_dir:
+            prompt_candidate = Path(
+                args.sam3_prompt_mask_head_feature_dir.format(scene=scene)
+            )
+            if (
+                prompt_candidate.name == scene
+                or (prompt_candidate / "backbone").is_dir()
+            ):
+                prompt_mask_feature_dir = str(prompt_candidate)
+            else:
+                prompt_mask_feature_dir = str(prompt_candidate / scene)
+            if not Path(prompt_mask_feature_dir).is_dir():
+                raise FileNotFoundError(
+                    "feature-only SAM3 boundary directory is missing: "
+                    f"{prompt_mask_feature_dir}"
+                )
+
         prompt_mask_head = None
         prompt_mask_target_size = (240, 320)
         sam3_box_refiner = None
@@ -3784,6 +4054,7 @@ def main() -> None:
             sam3_prompt_mask_head_require_peak_in_refined=args.sam3_prompt_mask_head_require_peak_in_refined,
             sam3_prompt_mask_head_initial_refinement=args.sam3_prompt_mask_head_initial_refinement,
             sam3_prompt_mask_head_apply_to=args.sam3_prompt_mask_head_apply_to,
+            sam3_prompt_mask_head_feature_dir=prompt_mask_feature_dir,
             render_readout=args.render_readout,
             primitive_chunk_size=args.primitive_chunk_size,
             primitive_query_cache=args.primitive_query_cache,
@@ -3873,6 +4144,15 @@ def main() -> None:
         and not args.preprojected_text_features
     ):
         provenance_paths["summary_head_weights"] = args.summary_head_weights
+    if args.sam3_prompt_mask_head_feature_dir:
+        feature_root = Path(
+            args.sam3_prompt_mask_head_feature_dir.format(scene=args.scene)
+        )
+        feature_manifest = feature_root / "canonical_render_manifest.json"
+        if feature_manifest.is_file():
+            provenance_paths["sam3_prompt_mask_head_feature_manifest"] = str(
+                feature_manifest
+            )
 
     report = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),

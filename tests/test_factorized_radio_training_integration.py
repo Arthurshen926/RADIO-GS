@@ -184,6 +184,8 @@ def _exact_factorized_payload(rows: int = 2) -> dict:
         "formula_sha256": FACTORIZED_RADIO_EXACT_MARGINAL_PURITY_AUTHORITY[
             "formula_sha256"
         ],
+        "builder_implementation_sha256": "1" * 64,
+        "authority_implementation_sha256": "2" * 64,
         "query_independent": True,
     }
     metadata.update(
@@ -554,6 +556,8 @@ def _exact_mpr_payload(
                 "formula_sha256": (
                     FACTORIZED_RADIO_EXACT_MARGINAL_PURITY_AUTHORITY["formula_sha256"]
                 ),
+                "builder_implementation_sha256": "1" * 64,
+                "authority_implementation_sha256": "2" * 64,
                 "query_independent": True,
             },
             "marginal_responsibility_contract": MARGINAL_RESPONSIBILITY_CONTRACT,
@@ -661,6 +665,75 @@ def test_factorized_exact_marginal_cohort_is_four_cache_fail_closed(
     )
     assert reference["capability_cohort_authority_mode"] == ("formal_exact_marginal_v1")
     assert reference["registration_responsibility_cache_sha256"] == (RESPONSIBILITY_SHA)
+
+    lineage_only = _exact_mpr_payload(
+        feature_space="sam3",
+        features=torch.ones(2, 5),
+        xyz=xyz,
+        official_checkpoint_sha256=SHA,
+    )
+    lineage_only["metadata"]["registration_responsibility_contract"].update(
+        {
+            "builder_implementation_sha256": "3" * 64,
+            "authority_implementation_sha256": "4" * 64,
+        }
+    )
+    lineage_only_path = tmp_path / "exact-sam-lineage-only.pt"
+    torch.save(lineage_only, lineage_only_path)
+    lineage_authority = copy.deepcopy(authority)
+    lineage_authority["frozen_cache_authorities"]["sam3"] = {
+        "path": str(lineage_only_path),
+        "sha256": sha256_file(lineage_only_path),
+    }
+    lineage_authority_path = tmp_path / "exact-authority-lineage-only.json"
+    lineage_authority_path.write_text(
+        json.dumps(lineage_authority), encoding="utf-8"
+    )
+    lineage_targets, _, _ = _load_factorized_exact_marginal_capability_targets(
+        factorized=factorized,
+        reference_path=paths["radio"],
+        reference_expected_sha256=digests["radio"],
+        dino_path=paths["dino_v3"],
+        dino_expected_sha256=digests["dino_v3"],
+        sam3_path=lineage_only_path,
+        sam3_expected_sha256=sha256_file(lineage_only_path),
+        correction_path=lineage_authority_path,
+        correction_expected_sha256=sha256_file(lineage_authority_path),
+        radio_checkpoint_sha256=SHA,
+    )
+    assert set(lineage_targets) == {"dino_v3", "sam3"}
+
+    material_drift = copy.deepcopy(lineage_only)
+    material_drift["metadata"]["registration_responsibility_contract"][
+        "post_compositor_alpha_threshold"
+    ] = 0.01
+    material_drift_path = tmp_path / "exact-sam-material-drift.pt"
+    torch.save(material_drift, material_drift_path)
+    material_authority = copy.deepcopy(authority)
+    material_authority["frozen_cache_authorities"]["sam3"] = {
+        "path": str(material_drift_path),
+        "sha256": sha256_file(material_drift_path),
+    }
+    material_authority_path = tmp_path / "exact-authority-material-drift.json"
+    material_authority_path.write_text(
+        json.dumps(material_authority), encoding="utf-8"
+    )
+    with pytest.raises(
+        ValueError,
+        match="registration_responsibility_contract|lifting",
+    ):
+        _load_factorized_exact_marginal_capability_targets(
+            factorized=factorized,
+            reference_path=paths["radio"],
+            reference_expected_sha256=digests["radio"],
+            dino_path=paths["dino_v3"],
+            dino_expected_sha256=digests["dino_v3"],
+            sam3_path=material_drift_path,
+            sam3_expected_sha256=sha256_file(material_drift_path),
+            correction_path=material_authority_path,
+            correction_expected_sha256=sha256_file(material_authority_path),
+            radio_checkpoint_sha256=SHA,
+        )
 
     fake_normalized_factorized_payload = _exact_factorized_payload(rows=2)
     fake_lifting = canonical_observation_contract(

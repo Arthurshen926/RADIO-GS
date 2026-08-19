@@ -1,0 +1,600 @@
+{
+  "schema_version": "attachment-recommendation-implementation-matrix-v1",
+  "generated_at": "2026-08-17T13:39:00+08:00",
+  "scope": {
+    "latest_attachment": "/root/.codex/attachments/e33ede87-e7c4-41c0-aeb1-969949115ff8/ChatGPT-项目瓶颈分析-20260817-1009.md",
+    "previous_attachment": "/root/.codex/attachments/ce55049c-4b43-43dc-9eaa-f4831cf6ee86/ChatGPT-项目瓶颈分析-20260816-2028.md",
+    "audit_question": "Whether the proposed Stage A-E object-topology design and both rounds of P-priority recommendations were actually implemented and passed their stated promotion gates.",
+    "frozen_authorities_modified": false
+  },
+  "status_definitions": {
+    "implemented": "The recommendation itself, rather than a weaker proxy, is implemented and its local contract is validated. This does not automatically mean benchmark promotion.",
+    "partial": "Some code, assets, benchmark subset, or a weaker diagnostic exists, but the recommendation is not closed as specified.",
+    "not_implemented": "The defining mechanism or required materialized asset is absent.",
+    "promotion_rule": "A result is promotable only when the exact recommended mechanism is evaluated under its preregistered gates without protocol leakage or regression of required metrics. Code availability and a positive pooled mIoU delta are insufficient."
+  },
+  "executive_conclusion": {
+    "all_attachment_recommendations_implemented": false,
+    "core_object_topology_problem_closed": false,
+    "reason_observed_gains_are_small": "The current experiments mostly add bounded boundary, neighborhood, or extent residuals to primitive identity scores. They do not yet build the query-independent multi-granularity SAM-derived 3D proposal hierarchy that the attachment identifies as the main missing object-membership representation.",
+    "most_important_missing_chain": [
+      "query-independent automatic source-view SAM mask hierarchy",
+      "probability-correct exact-MPR soft mask membership",
+      "joint-visibility-aware positive, negative, and unknown co-membership",
+      "source-trained low-dimensional affinity head",
+      "query-independent primitive/patch/object/group 3D hierarchy",
+      "proposal-level text identity selection with adaptive extent projection"
+    ],
+    "current_evidence_interpretation": "The small positive LERF2D, corrected LERF3D, and ScanNet development deltas support the identity-versus-extent diagnosis, but they are mechanism probes rather than validation of the complete proposed method.",
+    "current_lerf3d_promotion": {
+      "eligible": false,
+      "probability_correct_v2_full4_same_pipeline_sample_micro": {
+        "no_sam_peak_guard_miou": 0.484513323324231,
+        "candidate_miou": 0.49244371859,
+        "delta_miou": 0.007930395265038193,
+        "no_sam_peak_guard_acc_at_0p25": 0.7740384615384616,
+        "candidate_acc_at_0p25": 0.79807692308,
+        "no_sam_peak_guard_acc_at_0p50": 0.5288461538461539,
+        "candidate_acc_at_0p50": 0.54326923077,
+        "no_sam_peak_guard_boundary_f": 0.7120119473682001,
+        "candidate_boundary_f": 0.7053628174158243,
+        "no_sam_peak_guard_trimap_iou": 0.3767434252569309,
+        "candidate_trimap_iou": 0.36908081
+      },
+      "per_scene_miou_delta": {
+        "figurines": 0.03025984764099121,
+        "ramen": -0.024053722620010376,
+        "teatime": 0.031087398529052734,
+        "waldo_kitchen": -0.00778961181640625
+      },
+      "reason": "Boundary-F and trimap IoU regress, Ramen and Waldo regress in mIoU, and proposal generation uses benchmark query strings rather than a query-independent hierarchy.",
+      "no_sam_result_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_peak_retention_guard_full4_v2_bound",
+      "candidate_result_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_seeded_residual_probability_correct_v2_alpha025/eval"
+    },
+    "superseded_claim": "The LERF3D 0.48451 to 0.49513 v1 row in region_instance_prior_method_improvements_20260817.json is superseded by the SAM3 probability-tensor contract audit and must not be cited as the current result."
+  },
+  "recommendation_sets": {
+    "latest_attachment_object_topology_stages_A_to_E": [
+      {
+        "id": "stage_a",
+        "recommendation": "Run frozen official SAM on legal source RGB to produce an automatic multi-granularity mask hierarchy, with masked/context crop descriptors, scale, boundary confidence, SAM quality, and pose.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/build_sam3_automatic_mask_cache.py",
+          "radio_gs/models/sam3_multiscale_hierarchy.py",
+          "radio_gs/scripts/build_sam3_multiscale_hierarchy_cache.py",
+          "radio_gs/scripts/build_sam_mask_aligned_language_teacher.py",
+          "radio_gs/scripts/build_sam3_mpr_confirmed_mask_cache.py",
+          "radio_gs/scripts/build_source_official_sam_authority.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/region_instance_prior_query_independence_erratum_20260817.json",
+          "paper/artifacts/lerf_query_free_sparse_p0_grid12_coverage_20260817.json",
+          "paper/artifacts/lerf_figurines_mask_aligned_language_teacher_sparse_sentinel_result_20260817.json",
+          "paper/artifacts/sam3_query_free_multiscale_hierarchy_dense_figurines_sentinel_preregistration_20260817.json"
+        ],
+        "gaps": [
+          "No current LERF full4 query-independent automatic multi-scale mask hierarchy is materialized.",
+          "The reviewed Figurines query-free pilot is only eight source views with a single-scale 12x12 point grid: 67 proposals cover 7/21 field identity seeds in one view and 1/21 in two views.",
+          "A dense one-frame crop-pyramid sentinel now forms 13 proposals and five containment parent edges, and a sparse masked/context SigLIP2 teacher precursor exists; neither has yet been materialized across full legal source views or associated across views."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Reusable builders exist, but the defining current full4 assets do not."
+        }
+      },
+      {
+        "id": "stage_b",
+        "recommendation": "Lift mask probabilities with exact front-to-back marginal responsibility and construct co-membership with positive evidence, jointly-visible confident negative evidence, and unknown elsewhere.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/build_lerf_query_free_sam3_exact_mpr_memberships.py",
+          "radio_gs/scripts/audit_lerf_query_free_p0_exact_mpr_identity_seed_coverage.py",
+          "radio_gs/scripts/build_lerf_sam3_exact_mpr_memberships_v2.py",
+          "radio_gs/models/mask_tensor_contract.py",
+          "radio_gs/rendering/sparse_marginal_authority.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/lerf_query_free_sparse_p0_grid12_coverage_20260817.json",
+          "paper/artifacts/sam3_foundation_mask_semantics_consumer_audit_20260817.json",
+          "paper/artifacts/sam3_probability_contract_erratum_20260817.json"
+        ],
+        "gaps": [
+          "Probability-correct exact-MPR lifting now exists for a reviewed query-free eight-view sparse pilot, but not for the requested full multiscale hierarchy.",
+          "Joint visibility, mutually exclusive confident negatives, and explicit unknown pair labels are not implemented as the recommended Stage-B authority.",
+          "The original v1 lifting applied sigmoid twice and is invalid for quantitative comparison."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The corrected lifting primitive is valid, but the required source hierarchy and ternary co-membership contract are absent."
+        }
+      },
+      {
+        "id": "stage_c",
+        "recommendation": "Train a 16-32D affinity decoder from the existing latent state or a sparse-edge pair MLP using source-only same-instance supervision.",
+        "status": "partial",
+        "implementation_evidence": [
+          "paper/artifacts/source_only_region_comembership_v2_formal_result_20260807.json",
+          "paper/artifacts/lerf3d_region_comembership_native_v3_figurines_query_free_result_20260807.json"
+        ],
+        "result_evidence": [
+          "paper/artifacts/lerf3d_region_comembership_v2_figurines_formal_one_shot_result_20260807.json"
+        ],
+        "gaps": [
+          "A source-validation co-membership candidate passed its source gate, but the formal Figurines target readout was rejected: 0.33980 versus 0.47539 primitive O0 mIoU.",
+          "The rejected target construction produced singleton regions because accepted edges were unreachable.",
+          "The healthy query-free native-v3 topology artifact explicitly makes no benchmark-improvement claim and has not completed the recommended query/readout evaluation."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Source-only feasibility is established, but the target topology/readout failed and the complete Stage-C head is not promoted."
+        }
+      },
+      {
+        "id": "stage_d",
+        "recommendation": "Build a query-independent primitive, patch, object, and object-group 3D hierarchy with deterministic membership and pooled statistics.",
+        "status": "not_implemented",
+        "implementation_evidence": [
+          "radio_gs/querying/identity_seeded_object_topology.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/region_instance_prior_query_independence_erratum_20260817.json"
+        ],
+        "gaps": [
+          "The cited implementation is an identity-seeded bounded residual, not a persistent query-independent four-level hierarchy.",
+          "There is no materialized full4 membership, parent-child, geometry, and pooled-statistics authority derived from Stage A-C."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The defining hierarchy is absent."
+        }
+      },
+      {
+        "id": "stage_e",
+        "recommendation": "Score identity at proposal level, project proposal membership to Gaussians, preserve primitive fallback, and use adaptive reliability/query-conditioned fusion rather than fixed averaging.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/querying/identity_seeded_object_topology.py",
+          "radio_gs/scripts/build_lerf_identity_seeded_object_topology_scores.py"
+        ],
+        "result_evidence": [
+          "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_seeded_residual_probability_correct_v2_alpha025/eval",
+          "paper/artifacts/region_instance_prior_query_independence_erratum_20260817.json"
+        ],
+        "gaps": [
+          "The current implementation is a bounded query-conditioned extent residual, not proposal-level semantic selection over a query-independent hierarchy.",
+          "It lacks mask-aligned proposal descriptors, explicit primitive/patch/object/group candidates, and the proposed adaptive lambda contract.",
+          "Corrected same-pipeline full4 mIoU rises by 0.00793, but Boundary-F and trimap IoU regress and Ramen/Waldo regress in mIoU."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "It is a useful mechanism probe but fails both method-identity and all-metrics gates."
+        }
+      }
+    ],
+    "latest_attachment_object_topology_priorities_P0_to_P4": [
+      {
+        "id": "object_p0",
+        "recommendation": "Without retraining the field, build a query-independent source-SAM proposal oracle and report primitive, peak-connected, proposal, fallback, oracle IoU, purity, coverage, and sibling leakage.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/build_lerf_query_free_sam3_exact_mpr_memberships.py",
+          "radio_gs/scripts/audit_lerf_query_free_p0_exact_mpr_identity_seed_coverage.py",
+          "radio_gs/scripts/build_lerf_sam3_exact_mpr_memberships_v2.py",
+          "radio_gs/querying/identity_seeded_object_topology.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/lerf_query_free_sparse_p0_grid12_coverage_20260817.json",
+          "paper/artifacts/sam3_probability_contract_erratum_20260817.json",
+          "paper/artifacts/region_instance_prior_query_independence_erratum_20260817.json"
+        ],
+        "gaps": [
+          "A label-free query-independent coverage audit is now complete, but only for eight views and a single-scale grid12 proposal set.",
+          "Only 7/21 field-only identity seeds have one-view proposal coverage and 1/21 have two-view coverage, so a benchmark prediction would be dominated by proposal undercoverage.",
+          "Oracle IoU, purity, sibling leakage, full legal source-view coverage, and a multiscale proposal hierarchy remain incomplete."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The sparse coverage precursor is complete and explains the current undercoverage, but the specified full multiscale proposal/oracle experiment is not complete."
+        }
+      },
+      {
+        "id": "object_p1",
+        "recommendation": "Train a low-dimensional source-only co-membership head with same-mask positives, co-visible disjoint negatives, unknown ignored, boundary hard negatives, multiscale masks, and geometry regularization.",
+        "status": "partial",
+        "implementation_evidence": [
+          "paper/artifacts/source_only_region_comembership_v2_formal_result_20260807.json"
+        ],
+        "result_evidence": [
+          "paper/artifacts/lerf3d_region_comembership_v2_figurines_formal_one_shot_result_20260807.json"
+        ],
+        "gaps": [
+          "Source validation improved instance-macro IoU from 0.13326 to 0.16034 but contamination also increased from 0.25299 to 0.27193.",
+          "The formal target one-shot was rejected by a 0.13559 mIoU regression versus O0.",
+          "The full recommended negative/unknown/multiscale Stage-A mask contract is not bound."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The source head is a promising precursor, but the benchmark mechanism failed."
+        }
+      },
+      {
+        "id": "object_p2",
+        "recommendation": "Create a SAM-mask-aligned language teacher using masked and context-expanded crops to supervise region summary, response, sibling distinction, and part-whole hierarchy.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/build_sam_mask_aligned_language_teacher.py",
+          "radio_gs/scripts/extract_official_crop_summary_teacher.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/lerf_figurines_mask_aligned_language_teacher_sparse_sentinel_result_20260817.json"
+        ],
+        "gaps": [
+          "A source-only sparse sentinel materialized five masked and five context official SigLIP2 descriptors with three geometric containment candidates, but it is not backed by a full multiscale hierarchy.",
+          "The sentinel contains no sibling candidate, and no cross-view association, sibling/part-whole training, source gate, or benchmark evaluation is complete."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The mask-aligned descriptor precursor exists, but the defining multiscale supervision and trained/gated method are absent."
+        }
+      },
+      {
+        "id": "object_p3",
+        "recommendation": "Apply a bounded region-consistent categorical residual inside high-confidence SAM-derived ScanNet regions while retaining typed calibration and deterministic ties.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/run_scannet_instance_topology_scene.sh",
+          "radio_gs/scripts/run_scannet_sam_region_scene.sh"
+        ],
+        "result_evidence": [
+          "paper/artifacts/scannet_instance_topology_diagnostic_20260817.json",
+          "paper/artifacts/region_instance_prior_method_improvements_20260817.json"
+        ],
+        "gaps": [
+          "Current paper8 official source-SAM masks are absent; the evaluated topology is a RADIO-to-SAM/local-feature weak proxy.",
+          "Safe one-hop continuous topology improves full8 mIoU by only about 0.00013-0.00019; multi-hop propagation collapses.",
+          "The larger development residual is scene0000-selected and is not the requested SAM-derived region hierarchy."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "A weak categorical consistency diagnostic exists, but not the specified source-SAM regional residual."
+        }
+      },
+      {
+        "id": "object_p4",
+        "recommendation": "Add two-round points, box, coarse-mask, multiview lift-back SAM consensus for NVOS and SPIn, selected only by source/reference consistency.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/build_nvos_two_round_exact_consensus.py",
+          "radio_gs/scripts/predict_nvos_two_round_mask_prompt_sam3.py",
+          "paper/artifacts/nvos_method_v1_two_round_exact_consensus_sam3_preregistration_20260817.json"
+        ],
+        "result_evidence": [
+          "paper/artifacts/nvos_method_v1_two_round_exact_consensus_sam3_fern_sentinel_result_20260817.json"
+        ],
+        "gaps": [
+          "The frozen NVOS fern sentinel rejected round two; the round-two aggregate regressed the sealed one-shot parent by 0.01327 foreground IoU.",
+          "The preregistered stop rule correctly prevented a full8 rollout.",
+          "A matching SPIn two-round multiview-consensus implementation and full-nine gate are absent."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Implementation is partial and the only completed sentinel failed."
+        }
+      }
+    ],
+    "latest_attachment_general_priorities_P0_to_P6": [
+      {
+        "id": "general_p0",
+        "recommendation": "Freeze Universal Field capacity and losses until a same-readout exact-versus-D512 gap demonstrates a representation bottleneck.",
+        "status": "implemented",
+        "implementation_evidence": [
+          "CONTEXT.md",
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json"
+        ],
+        "result_evidence": [],
+        "gaps": [
+          "The final same-readout exact/compact table is still missing, so the freeze remains a sound experimental policy rather than a completed capacity conclusion."
+        ],
+        "promotion": {
+          "eligible": true,
+          "scope": "method-development policy and field/readout separation only"
+        }
+      },
+      {
+        "id": "general_p1",
+        "recommendation": "Unify reliability semantics and persistence, exact-marginal metadata, cold storage, and bitwise RADIO decode across all five benchmarks.",
+        "status": "partial",
+        "implementation_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json",
+          "paper/artifacts/universal_field_v1_asset_inventory_20260816.json"
+        ],
+        "result_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json"
+        ],
+        "gaps": [
+          "The 12 LERF and ScanNet D512/L512 migrations pass coefficient, in-memory RADIO, and serialized RADIO bitwise probes.",
+          "Equivalent Universal Field v1 inventory and cold-state receipts are not yet jointly verified for NVOS and SPIn.",
+          "The requested actual cold-storage and warm-memory five-benchmark table is incomplete."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Complete for the 12 LERF/ScanNet fields, not for the five-benchmark method identity."
+        }
+      },
+      {
+        "id": "general_p2",
+        "recommendation": "Complete TextPosteriorV2 with primitive likelihood, anchor co-membership, region hierarchy, reliability-conditioned extent, calibrated posterior, and conservative projection while the field stays frozen.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/five_benchmark_method_v1.py",
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json",
+          "radio_gs/querying/identity_seeded_object_topology.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json",
+          "paper/artifacts/region_instance_prior_query_independence_erratum_20260817.json"
+        ],
+        "gaps": [
+          "The typed interface and zero-initialization compatibility exist, but the independent source-trained candidate failed its source LOSO gate.",
+          "The current bounded extent residual is not the complete TextPosteriorV2 and is query conditioned.",
+          "Corrected LERF3D improves pooled mIoU, Acc@0.25, and Acc@0.50, but transfer is unstable, two scenes regress, and the three-level contract remains incomplete."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Interface completeness is not posterior-method completeness."
+        }
+      },
+      {
+        "id": "general_p3",
+        "recommendation": "After recovering coarse object extent, restore a source-trained LERF2D boundary residual and report coarse/refined, Boundary-F, trimap IoU, and LocAcc.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/run_lerf2d_current_field_sam_boundary_scene.sh"
+        ],
+        "result_evidence": [
+          "paper/artifacts/region_instance_prior_method_improvements_20260817.json"
+        ],
+        "gaps": [
+          "The full4 development proxy improves sample-micro mIoU from 0.34975 to 0.36152 and is positive in each scene.",
+          "The prerequisite complete TextPosteriorV2 extent has not been recovered.",
+          "The current result is development-selected and does not close the requested prospective boundary/trimap/LocAcc promotion table."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Positive weak-proxy evidence, but the prescribed sequence and full gate are incomplete."
+        }
+      },
+      {
+        "id": "general_p4",
+        "recommendation": "Complete CategoricalPosteriorV2 with zero-init typed residual, source-trained shrinkage, temperature/bias, deterministic ties, and protocol-appropriate rejection.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/five_benchmark_method_v1.py",
+          "radio_gs/scripts/screen_scannet_categorical_posterior_v2_cpu.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json"
+        ],
+        "gaps": [
+          "The typed interface and a development head exist.",
+          "Both independent source-transfer candidates failed frozen LOSO: the full head regressed macro mIoU by 0.17308 and the two-scalar head by 0.05959.",
+          "Primitive Readout-v0 therefore remains the eligible ScanNet control."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The transferable typed categorical readout has not passed source gates."
+        }
+      },
+      {
+        "id": "general_p5",
+        "recommendation": "Freeze TransientRGBSAMAdapterV2 with points, box, optional mask-logit, signed evidence, two-pass multiview consensus, and no target-metric selection for NVOS and SPIn.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/build_nvos_two_round_exact_consensus.py",
+          "radio_gs/scripts/predict_nvos_two_round_mask_prompt_sam3.py",
+          "paper/artifacts/nvos_method_v1_two_round_exact_consensus_sam3_preregistration_20260817.json"
+        ],
+        "result_evidence": [
+          "paper/artifacts/nvos_method_v1_two_round_exact_consensus_sam3_fern_sentinel_result_20260817.json",
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json"
+        ],
+        "gaps": [
+          "The one-shot NVOS signed-evidence SAM development result is available, but the upgraded two-round sentinel failed and was stopped.",
+          "The same frozen adapter and consensus contract is not complete for SPIn full-nine.",
+          "No unified five-benchmark adapter promotion exists."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The upgraded adapter is not frozen because its first formal sentinel failed."
+        }
+      },
+      {
+        "id": "general_p6",
+        "recommendation": "Run exact capability/MPR, D512/L512, and D256/L128 under the same TextPosteriorV2, CategoricalPosteriorV2, and PromptAdapterV2 readouts.",
+        "status": "partial",
+        "implementation_evidence": [
+          "paper/artifacts/spin9_exact_compact_same_compiler_ladder_results_20260805.json",
+          "paper/artifacts/nvos_exact_mpr_compact_same_compiler_ladder_results_20260805.json",
+          "paper/artifacts/canonical_factorized_radio_v1_source_only_adaptive_capacity_results_20260805.json"
+        ],
+        "result_evidence": [
+          "paper/artifacts/canonical_factorized_radio_v1_source_only_adaptive_capacity_results_20260805.json"
+        ],
+        "gaps": [
+          "Existing NVOS/SPIn ladders and source-capacity gates cover only subsets of the requested comparison.",
+          "D512 is the first source-only capacity passing the current fidelity gates, but there is no same-final-readout exact/D512/D256 table on LERF and ScanNet.",
+          "TextPosteriorV2 and CategoricalPosteriorV2 are not frozen, so the requested attribution of error to representation versus readout cannot yet be made."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The decisive controlled ladder is incomplete."
+        }
+      }
+    ],
+    "previous_attachment_priorities_P0_to_P6": [
+      {
+        "id": "previous_p0",
+        "recommendation": "Name the persistent representation Universal Field v1 and keep Primitive Readout-v0 as a separate permanent baseline.",
+        "status": "implemented",
+        "implementation_evidence": [
+          "CONTEXT.md",
+          "radio_gs/five_benchmark_method_v1.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json"
+        ],
+        "gaps": [],
+        "promotion": {
+          "eligible": true,
+          "scope": "method terminology, interface boundary, and baseline identity"
+        }
+      },
+      {
+        "id": "previous_p1",
+        "recommendation": "Repair exact-marginal authority, reliability persistence, checkpoint schema, field signature, scalar semantics, and cold-storage audit before new formal assets.",
+        "status": "partial",
+        "implementation_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json",
+          "paper/artifacts/universal_field_v1_asset_inventory_20260816.json"
+        ],
+        "result_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json"
+        ],
+        "gaps": [
+          "Completed and bitwise-audited for 12 LERF/ScanNet fields.",
+          "Not yet sealed as one five-benchmark Universal Field v1 inventory including NVOS and SPIn."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Subset-complete, not method-wide complete."
+        }
+      },
+      {
+        "id": "previous_p2",
+        "recommendation": "Train and validate TextPosteriorV2 on existing frozen fields with source-only supervision and strict LERF/ScanNet gates.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/five_benchmark_method_v1.py"
+        ],
+        "result_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json"
+        ],
+        "gaps": [
+          "Interface tests pass, but the independent source-trained TextPosterior candidate failed its source gate.",
+          "No accepted full4 LERF plus ScanNet shared-field typed-posterior row exists."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "No gated transferable posterior."
+        }
+      },
+      {
+        "id": "previous_p3",
+        "recommendation": "Restore a source-trained LERF2D boundary head only after TextPosteriorV2 restores object extent.",
+        "status": "partial",
+        "implementation_evidence": [
+          "radio_gs/scripts/run_lerf2d_current_field_sam_boundary_scene.sh"
+        ],
+        "result_evidence": [
+          "paper/artifacts/region_instance_prior_method_improvements_20260817.json"
+        ],
+        "gaps": [
+          "A bounded development boundary proxy improves full4 mIoU by 0.01176.",
+          "The prerequisite TextPosteriorV2 extent and prospective promotion gate remain incomplete."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Ordering and final gate are not satisfied."
+        }
+      },
+      {
+        "id": "previous_p4",
+        "recommendation": "Run the exact/D512/D256 representation ladder under the same new readout on LERF and ScanNet.",
+        "status": "partial",
+        "implementation_evidence": [
+          "paper/artifacts/spin9_exact_compact_same_compiler_ladder_results_20260805.json",
+          "paper/artifacts/nvos_exact_mpr_compact_same_compiler_ladder_results_20260805.json",
+          "paper/artifacts/canonical_factorized_radio_v1_source_only_adaptive_capacity_results_20260805.json"
+        ],
+        "result_evidence": [],
+        "gaps": [
+          "Partial ladders exist, but the requested same-readout LERF and ScanNet experiment does not."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The representation-versus-readout attribution remains unresolved."
+        }
+      },
+      {
+        "id": "previous_p5",
+        "recommendation": "Continue reusable NVOS work but stage SPIn through representative sentinels before unconditional full-nine materialization.",
+        "status": "partial",
+        "implementation_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json",
+          "radio_gs/scripts/run_spin9_priority_gpu4.sh"
+        ],
+        "result_evidence": [
+          "paper/artifacts/nvos_method_v1_two_round_exact_consensus_sam3_fern_sentinel_result_20260817.json"
+        ],
+        "gaps": [
+          "NVOS reusable fields and one-shot transient results are complete.",
+          "The operational staging recommendation was later superseded by the explicit user request to run all available SPIn scenes, and it is not itself a benchmark-method promotion."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "Operationally partial and superseded; not a scientific result."
+        }
+      },
+      {
+        "id": "previous_p6",
+        "recommendation": "Run a final unified five-benchmark row only after field schema, typed readouts, transient adapter, method identity, no-per-scene parameters, and cold rebuild receipts are frozen.",
+        "status": "not_implemented",
+        "implementation_evidence": [],
+        "result_evidence": [
+          "paper/artifacts/universal_field_v1_implementation_status_20260816.json"
+        ],
+        "gaps": [
+          "TextPosteriorV2 and CategoricalPosteriorV2 are not promoted.",
+          "Transient Adapter V2 is not frozen across NVOS and SPIn.",
+          "SPIn full-nine Method-v1 result and one cold-start same-identity five-benchmark receipt are absent."
+        ],
+        "promotion": {
+          "eligible": false,
+          "reason": "The entry conditions for the final joint row are not satisfied."
+        }
+      }
+    ]
+  },
+  "counts": {
+    "latest_attachment_object_topology_stages_A_to_E": {
+      "implemented": 0,
+      "partial": 4,
+      "not_implemented": 1,
+      "promotable": 0
+    },
+    "latest_attachment_object_topology_priorities_P0_to_P4": {
+      "implemented": 0,
+      "partial": 4,
+      "not_implemented": 1,
+      "promotable": 0
+    },
+    "latest_attachment_general_priorities_P0_to_P6": {
+      "implemented": 1,
+      "partial": 6,
+      "not_implemented": 0,
+      "promotable": 1
+    },
+    "previous_attachment_priorities_P0_to_P6": {
+      "implemented": 1,
+      "partial": 5,
+      "not_implemented": 1,
+      "promotable": 1
+    }
+  },
+  "next_decision": {
+    "highest_information_gain_experiment": "Implement latest-attachment object P0 exactly: automatic query-independent multi-scale source-SAM hierarchy, probability-correct exact-MPR lift, query-independent 3D proposals, and the complete oracle/purity/coverage/leakage table on frozen LERF fields before training another affinity or changing the Universal Field.",
+    "can_run_in_parallel_with_spin": true,
+    "reason": "It consumes existing frozen LERF fields and source RGB, does not depend on SPIn field completion, and directly tests whether the expected large gain from explicit object membership is achievable."
+  }
+}

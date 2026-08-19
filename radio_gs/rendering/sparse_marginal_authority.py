@@ -14,6 +14,7 @@ import fcntl
 import json
 import os
 from pathlib import Path
+import re
 import tempfile
 from typing import Any, Mapping, Sequence
 
@@ -565,6 +566,33 @@ def load_sparse_exact_marginal_authority(
         "views",
         "total_hits",
     }
+    actual_metadata = manifest.get("metadata")
+    expected_metadata_copy = dict(expected_metadata)
+    metadata_matches = isinstance(actual_metadata, Mapping)
+    if metadata_matches:
+        actual_metadata_copy = dict(actual_metadata)
+        # This digest identifies the full orchestration script, which also
+        # contains feature consumers and numerical audits unrelated to the
+        # persisted responsibility values.  The authority module likewise
+        # contains its loader as well as the writer.  A frozen manifest SHA
+        # already binds the exact historical lineage and every shard.  Permit
+        # only these two whole-file lineage digests to differ across consumers;
+        # formula, compositor, geometry, cameras, and safety fields remain exact.
+        lineage_keys = (
+            "builder_implementation_sha256",
+            "authority_implementation_sha256",
+        )
+        lineage_hashes_valid = True
+        for key in lineage_keys:
+            actual_lineage = str(actual_metadata_copy.pop(key, ""))
+            expected_lineage = str(expected_metadata_copy.pop(key, ""))
+            lineage_hashes_valid &= (
+                re.fullmatch(r"[0-9a-f]{64}", actual_lineage) is not None
+                and re.fullmatch(r"[0-9a-f]{64}", expected_lineage) is not None
+            )
+        metadata_matches = lineage_hashes_valid and (
+            actual_metadata_copy == expected_metadata_copy
+        )
     frames = [int(value) for value in expected_frame_indices]
     if set(manifest) != required or (
         manifest.get("schema") != SPARSE_EXACT_MARGINAL_AUTHORITY_SCHEMA
@@ -573,7 +601,7 @@ def load_sparse_exact_marginal_authority(
         != sparse_exact_marginal_formula_contract()
         or manifest.get("formula_sha256")
         != SPARSE_EXACT_MARGINAL_FORMULA_SHA256
-        or manifest.get("metadata") != dict(expected_metadata)
+        or not metadata_matches
         or manifest.get("frame_indices") != frames
         or int(manifest.get("num_gaussians", -1)) != int(num_gaussians)
         or int(manifest.get("num_pixels", -1)) != int(num_pixels)

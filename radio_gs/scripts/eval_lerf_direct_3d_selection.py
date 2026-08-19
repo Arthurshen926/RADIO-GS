@@ -63,6 +63,7 @@ from radio_gs.models.radio_adaptors import (
 from radio_gs.models.sam3_proposal_registration import (
     build_sam3_mask_memberships,
     fuse_scores_with_query_sam3_proposals,
+    fuse_scores_with_seeded_sam3_extent,
     fuse_scores_with_sam3_proposals,
 )
 from radio_gs.models.prompt_conditioned_mask_head import PromptConditionedMaskHead
@@ -2163,6 +2164,84 @@ def smooth_scores_with_sam3_training_view_proposals(
     stats["num_used_frames"] = len(used_frame_ids)
     stats["used_frame_ids"] = used_frame_ids
     stats["skipped_frames"] = int(stats.get("skipped_frames", 0))
+    return fused, stats
+
+
+def apply_seeded_exact_mpr_sam3_extent(
+    scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    cache_path: str | Path,
+    scene: str,
+    scene_categories: Sequence[str],
+    alpha: float,
+    proposal_mean_ratio: float,
+    seed_support_ratio: float,
+    minimum_views: int,
+    query_conditioned: bool,
+) -> tuple[torch.Tensor, Dict[str, Any]]:
+    """Apply a precomputed exact-MPR SAM extent cache to primitive scores."""
+
+    path = Path(cache_path).expanduser().resolve()
+    payload = torch.load(path, map_location="cpu")
+    if (
+        not isinstance(payload, Mapping)
+        or payload.get("schema") != "radio_gs.lerf_sam3_exact_mpr_memberships.v1"
+        or int(payload.get("schema_version", -1)) != 1
+        or str(payload.get("scene", "")) != str(scene)
+    ):
+        raise ValueError(f"exact-MPR SAM3 membership cache contract differs: {path}")
+    num_rows = int(payload.get("num_rows", -1))
+    num_proposals = int(payload.get("num_proposals", -1))
+    metadata = dict(payload.get("metadata", {}))
+    xyz_sha256 = tensor_sha256_float32(xyz.detach().float().cpu())
+    if (
+        num_rows != int(scores.shape[0])
+        or tuple(xyz.shape) != (num_rows, 3)
+        or str(metadata.get("xyz_sha256", "")) != xyz_sha256
+        or bool(metadata.get("benchmark_images_opened", True))
+        or bool(metadata.get("benchmark_masks_opened", True))
+        or bool(metadata.get("evaluation_rgb_opened", True))
+    ):
+        raise ValueError("exact-MPR SAM3 membership row or access authority differs")
+    rows = torch.as_tensor(payload.get("row_indices"), dtype=torch.long)
+    proposals = torch.as_tensor(payload.get("proposal_indices"), dtype=torch.long)
+    weights = torch.as_tensor(payload.get("weights"), dtype=torch.float32)
+    proposal_views = torch.as_tensor(payload.get("proposal_view_indices"), dtype=torch.long)
+    if proposal_views.shape != (num_proposals,):
+        raise ValueError("exact-MPR SAM3 proposal-view binding differs")
+    names = payload.get("proposal_query_names")
+    if not isinstance(names, list) or len(names) != num_proposals:
+        raise ValueError("exact-MPR SAM3 proposal-query names differ")
+    query_lookup = {
+        str(category).strip().lower(): index
+        for index, category in enumerate(scene_categories)
+    }
+    proposal_queries = torch.tensor(
+        [query_lookup.get(str(name).strip().lower(), -1) for name in names],
+        dtype=torch.long,
+    )
+    fused, stats = fuse_scores_with_seeded_sam3_extent(
+        scores,
+        rows.to(scores.device),
+        proposals.to(scores.device),
+        weights.to(scores.device),
+        proposal_views.to(scores.device),
+        proposal_query_indices=proposal_queries.to(scores.device),
+        alpha=alpha,
+        proposal_mean_ratio=proposal_mean_ratio,
+        seed_support_ratio=seed_support_ratio,
+        minimum_views=minimum_views,
+        query_conditioned=query_conditioned,
+    )
+    stats.update({
+        "cache": str(path),
+        "cache_sha256": sha256_file(path),
+        "xyz_sha256": xyz_sha256,
+        "source_view_count": int(metadata.get("source_view_count", 0)),
+        "membership_lifting": str(metadata.get("membership_lifting", "")),
+        "unmatched_proposal_queries": int((proposal_queries < 0).sum().item()),
+    })
     return fused, stats
 
 
@@ -6526,6 +6605,7 @@ class PromptConditionedSam3MaskHeadRefiner:
         coarse_dilate: int,
         coarse_threshold: float,
         min_quality: float,
+        feature_dir: str = "",
     ) -> None:
         self.model = model
         self.codec = codec
@@ -6566,6 +6646,7 @@ class PromptConditionedSam3MaskHeadRefiner:
         self.coarse_dilate = int(coarse_dilate)
         self.coarse_threshold = float(coarse_threshold)
         self.min_quality = float(min_quality)
+        self.feature_dir = Path(feature_dir).expanduser().resolve() if feature_dir else None
         self._normalised_text = {
             re.sub(r"\s+", " ", key.strip().lower()): value
             for key, value in self.text_embeddings.items()
@@ -6583,20 +6664,39 @@ class PromptConditionedSam3MaskHeadRefiner:
             if self._prompt_for_category(str(category)) is None
         ]
 
-    def set_frame(self, viewmat: torch.Tensor) -> Dict[str, Any]:
+    def set_frame(self, viewmat: torch.Tensor, frame_id: int | None = None) -> Dict[str, Any]:
         with torch.no_grad():
-            decoded = render_1280d(
-                self.model,
-                self.codec,
-                self.renderer,
-                self.sharpener,
-                self.refiner,
-                viewmat.unsqueeze(0),
-                is_hybrid=self.is_hybrid,
-                config=self.config,
-                device=self.device,
-                rgb_image=None,
-            )
+            if self.feature_dir is not None:
+                if frame_id is None:
+                    raise ValueError("frame_id is required with an external SAM feature directory")
+                feature_path = self.feature_dir / f"rgb_{int(frame_id)}.pt"
+                if not feature_path.is_file():
+                    feature_path = self.feature_dir / "backbone" / f"rgb_{int(frame_id)}.pt"
+                if not feature_path.is_file():
+                    raise FileNotFoundError(
+                        f"feature-only SAM3 boundary input is missing: {feature_path}"
+                    )
+                decoded = torch.load(feature_path, map_location=self.device).float()
+                if decoded.ndim == 3:
+                    decoded = decoded.unsqueeze(0)
+                if decoded.ndim != 4 or int(decoded.shape[1]) != 1280:
+                    raise ValueError(
+                        "feature-only SAM3 boundary input must have shape "
+                        f"[1,1280,H,W], got {tuple(decoded.shape)}"
+                    )
+            else:
+                decoded = render_1280d(
+                    self.model,
+                    self.codec,
+                    self.renderer,
+                    self.sharpener,
+                    self.refiner,
+                    viewmat.unsqueeze(0),
+                    is_hybrid=self.is_hybrid,
+                    config=self.config,
+                    device=self.device,
+                    rgb_image=None,
+                )
             decoded = F.interpolate(
                 decoded.float(),
                 size=self.target_size,
@@ -6933,7 +7033,10 @@ def evaluate_selection_spec(
             mask_refinement == "sam3_prompt_mask_head"
             and sam3_prompt_mask_head_refiner is not None
         ):
-            sam3_mask_head_state = sam3_prompt_mask_head_refiner.set_frame(viewmat)
+            sam3_mask_head_state = sam3_prompt_mask_head_refiner.set_frame(
+                viewmat,
+                frame_id=frame_id,
+            )
 
         active_cats = sorted({obj["category"] for obj in frame_objects})
         frame_scores: Dict[str, float] = {}
@@ -7670,6 +7773,12 @@ def evaluate_scene(
     sam3_proposal_registration_gate: str,
     sam3_proposal_registration_margin_threshold: float,
     sam3_proposal_registration_query_conditioned: bool,
+    sam3_exact_mpr_membership_cache: str,
+    sam3_seed_extent_alpha: float,
+    sam3_seed_extent_proposal_mean_ratio: float,
+    sam3_seed_extent_seed_support_ratio: float,
+    sam3_seed_extent_minimum_views: int,
+    sam3_seed_extent_query_conditioned: bool,
     selection_refinement: str,
     selection_min_ratio: float,
     selection_max_ratio: float,
@@ -7742,6 +7851,7 @@ def evaluate_scene(
     sam3_mask_head_min_initial_iou: float,
     sam3_mask_head_max_initial_area_fraction: float,
     sam3_prompt_mask_head_checkpoint: str,
+    sam3_prompt_mask_head_feature_dir: str,
     sam3_prompt_mask_head_text_embedding_cache: str,
     sam3_prompt_mask_head_logit_threshold: float,
     sam3_prompt_mask_head_min_initial_iou: float,
@@ -8087,6 +8197,7 @@ def evaluate_scene(
             coarse_dilate=sam3_prompt_mask_head_coarse_dilate,
             coarse_threshold=sam3_prompt_mask_head_coarse_threshold,
             min_quality=sam3_prompt_mask_head_min_quality,
+            feature_dir=sam3_prompt_mask_head_feature_dir,
         )
         missing_prompts = sam3_prompt_mask_head_refiner.missing_categories(scene_categories)
         if missing_prompts:
@@ -9009,6 +9120,37 @@ def evaluate_scene(
             margin_threshold=sam3_proposal_registration_margin_threshold,
             query_conditioned=sam3_proposal_registration_query_conditioned,
         )
+    sam3_seed_extent_stats: Dict[str, Any] = {
+        "enabled": False,
+        "mode": "seeded_exact_mpr_extent",
+        "cache": str(sam3_exact_mpr_membership_cache),
+        "alpha": float(sam3_seed_extent_alpha),
+        "proposal_mean_ratio": float(sam3_seed_extent_proposal_mean_ratio),
+        "seed_support_ratio": float(sam3_seed_extent_seed_support_ratio),
+        "minimum_views": int(sam3_seed_extent_minimum_views),
+        "query_conditioned": bool(sam3_seed_extent_query_conditioned),
+    }
+    if sam3_exact_mpr_membership_cache and sam3_seed_extent_alpha > 0:
+        print(
+            "  applying seed-conditioned exact-MPR SAM3 extent "
+            f"(alpha={sam3_seed_extent_alpha:g}, "
+            f"proposal_mean_ratio={sam3_seed_extent_proposal_mean_ratio:g}, "
+            f"seed_support_ratio={sam3_seed_extent_seed_support_ratio:g}, "
+            f"minimum_views={sam3_seed_extent_minimum_views}, "
+            f"query_conditioned={sam3_seed_extent_query_conditioned})"
+        )
+        scores, sam3_seed_extent_stats = apply_seeded_exact_mpr_sam3_extent(
+            scores,
+            model.get_xyz().detach().cpu(),
+            cache_path=sam3_exact_mpr_membership_cache,
+            scene=scene,
+            scene_categories=scene_categories,
+            alpha=sam3_seed_extent_alpha,
+            proposal_mean_ratio=sam3_seed_extent_proposal_mean_ratio,
+            seed_support_ratio=sam3_seed_extent_seed_support_ratio,
+            minimum_views=sam3_seed_extent_minimum_views,
+            query_conditioned=sam3_seed_extent_query_conditioned,
+        )
     if selection_refinement != "none":
         print(
             "  refining selections by voxel components "
@@ -9232,6 +9374,7 @@ def evaluate_scene(
         "registration": registration_stats,
         "proposal_smoothing": proposal_smoothing_stats,
         "sam3_proposal_registration": sam3_proposal_registration_stats,
+        "sam3_seed_extent": sam3_seed_extent_stats,
         "score_cache": score_cache_info,
         "direct_head_eval": direct_head_eval_status,
         "categories": scene_categories,
@@ -9556,6 +9699,12 @@ def main() -> None:
     parser.add_argument("--sam3_proposal_registration_gate", choices=["all", "low_margin"], default="low_margin", help="Apply SAM3 proposal fusion to all assigned primitives or only low-margin primitives")
     parser.add_argument("--sam3_proposal_registration_margin_threshold", type=float, default=0.05, help="Top1-top2 primitive score margin threshold for low-margin SAM3 proposal fusion")
     parser.add_argument("--sam3_proposal_registration_query_conditioned", action="store_true", help="Use only SAM3 training-view masks generated by the same text query for each query score")
+    parser.add_argument("--sam3_exact_mpr_membership_cache", default="", help="Exact-MPR source-SAM proposal membership cache used by the seeded extent readout")
+    parser.add_argument("--sam3_seed_extent_alpha", type=float, default=0.0, help="Blend from primitive identity scores to seed-selected SAM3 extent scores")
+    parser.add_argument("--sam3_seed_extent_proposal_mean_ratio", type=float, default=0.5, help="Minimum proposal mean text score as a fraction of the immutable seed peak")
+    parser.add_argument("--sam3_seed_extent_seed_support_ratio", type=float, default=0.8, help="High-response primitive basin used to associate source proposals without moving the immutable argmax")
+    parser.add_argument("--sam3_seed_extent_minimum_views", type=int, default=2, help="Minimum independent source views supporting a seeded SAM3 extent")
+    parser.add_argument("--sam3_seed_extent_query_conditioned", action="store_true", help="Require the source SAM3 proposal text prompt to match the evaluated query")
     parser.add_argument("--selection_refinement", choices=["none", "top_score_components", "largest_components", "seed_expand_components", "proposal_components"], default="none", help="GT-free connected-component filtering after score-based primitive selection")
     parser.add_argument("--component_support_ratio", type=float, default=0.05, help="Wider top-ratio support pool for seed_expand_components")
     parser.add_argument("--component_resolution", type=int, default=64, help="Voxel resolution for selection_refinement")
@@ -9666,7 +9815,15 @@ def main() -> None:
     )
     parser.add_argument(
         "--vala_post_mask_refinement",
-        choices=["none", "peak_component", "peak_component_retention_guard"],
+        choices=[
+            "none",
+            "peak_component",
+            "peak_component_retention_guard",
+            "sam3_adaptor_boundary",
+            "sam3_adaptor_grabcut",
+            "sam3_mask_head",
+            "sam3_prompt_mask_head",
+        ],
         default="none",
         help=(
             "Opt-in target-blind mask cleanup applied after a frozen VALA base "
@@ -9747,6 +9904,7 @@ def main() -> None:
     parser.add_argument("--sam3_mask_head_min_initial_iou", type=float, default=0.05, help="Minimum coarse-mask overlap required to accept a SAM3 mask-head candidate")
     parser.add_argument("--sam3_mask_head_max_initial_area_fraction", type=float, default=1.0, help="Skip SAM3 mask-head refinement when the coarse mask covers more than this image fraction")
     parser.add_argument("--sam3_prompt_mask_head_checkpoint", default="", help="Checkpoint from train_prompt_conditioned_sam3_mask_head for prompt-conditioned feature-only mask refinement")
+    parser.add_argument("--sam3_prompt_mask_head_feature_dir", default="", help="Optional current-field rendered 1280D feature directory used by the feature-only SAM3 boundary head")
     parser.add_argument("--sam3_prompt_mask_head_text_embedding_cache", default="", help="Text embedding cache for prompt-conditioned SAM3 mask head; defaults to --text_embedding_cache")
     parser.add_argument("--sam3_prompt_mask_head_logit_threshold", type=float, default=0.0, help="Logit threshold for prompt-conditioned SAM3 mask-head output")
     parser.add_argument("--sam3_prompt_mask_head_min_initial_iou", type=float, default=0.05, help="Minimum coarse-mask overlap required to accept prompt-conditioned SAM3 mask-head output")
@@ -10125,6 +10283,15 @@ def main() -> None:
             f"margin={args.sam3_proposal_registration_margin_threshold:g}, "
             f"query_conditioned={args.sam3_proposal_registration_query_conditioned}"
         )
+    if args.sam3_exact_mpr_membership_cache and args.sam3_seed_extent_alpha > 0:
+        print(
+            "SAM3 extent: "
+            f"exact-MPR seeded alpha={args.sam3_seed_extent_alpha:g}, "
+            f"proposal_mean_ratio={args.sam3_seed_extent_proposal_mean_ratio:g}, "
+            f"seed_support_ratio={args.sam3_seed_extent_seed_support_ratio:g}, "
+            f"minimum_views={args.sam3_seed_extent_minimum_views}, "
+            f"query_conditioned={args.sam3_seed_extent_query_conditioned}"
+        )
     print(f"Silhouette: > {args.silhouette_threshold}")
     if args.mask_refinement != "none":
         print(f"Mask ref.:  {args.mask_refinement}")
@@ -10226,6 +10393,12 @@ def main() -> None:
         sam3_proposal_registration_gate=args.sam3_proposal_registration_gate,
         sam3_proposal_registration_margin_threshold=args.sam3_proposal_registration_margin_threshold,
         sam3_proposal_registration_query_conditioned=args.sam3_proposal_registration_query_conditioned,
+        sam3_exact_mpr_membership_cache=args.sam3_exact_mpr_membership_cache,
+        sam3_seed_extent_alpha=args.sam3_seed_extent_alpha,
+        sam3_seed_extent_proposal_mean_ratio=args.sam3_seed_extent_proposal_mean_ratio,
+        sam3_seed_extent_seed_support_ratio=args.sam3_seed_extent_seed_support_ratio,
+        sam3_seed_extent_minimum_views=args.sam3_seed_extent_minimum_views,
+        sam3_seed_extent_query_conditioned=args.sam3_seed_extent_query_conditioned,
         selection_refinement=args.selection_refinement,
         selection_min_ratio=args.selection_min_ratio,
         selection_max_ratio=args.selection_max_ratio,
@@ -10298,6 +10471,7 @@ def main() -> None:
         sam3_mask_head_min_initial_iou=args.sam3_mask_head_min_initial_iou,
         sam3_mask_head_max_initial_area_fraction=args.sam3_mask_head_max_initial_area_fraction,
         sam3_prompt_mask_head_checkpoint=args.sam3_prompt_mask_head_checkpoint,
+        sam3_prompt_mask_head_feature_dir=args.sam3_prompt_mask_head_feature_dir,
         sam3_prompt_mask_head_text_embedding_cache=args.sam3_prompt_mask_head_text_embedding_cache,
         sam3_prompt_mask_head_logit_threshold=args.sam3_prompt_mask_head_logit_threshold,
         sam3_prompt_mask_head_min_initial_iou=args.sam3_prompt_mask_head_min_initial_iou,
@@ -10476,6 +10650,17 @@ def main() -> None:
             "sam3_proposal_registration_gate": args.sam3_proposal_registration_gate,
             "sam3_proposal_registration_margin_threshold": float(args.sam3_proposal_registration_margin_threshold),
             "sam3_proposal_registration_query_conditioned": bool(args.sam3_proposal_registration_query_conditioned),
+            "sam3_exact_mpr_membership_cache": args.sam3_exact_mpr_membership_cache,
+            "sam3_exact_mpr_membership_cache_sha256": (
+                sha256_file_if_exists(args.sam3_exact_mpr_membership_cache)
+                if args.sam3_exact_mpr_membership_cache
+                else ""
+            ),
+            "sam3_seed_extent_alpha": float(args.sam3_seed_extent_alpha),
+            "sam3_seed_extent_proposal_mean_ratio": float(args.sam3_seed_extent_proposal_mean_ratio),
+            "sam3_seed_extent_seed_support_ratio": float(args.sam3_seed_extent_seed_support_ratio),
+            "sam3_seed_extent_minimum_views": int(args.sam3_seed_extent_minimum_views),
+            "sam3_seed_extent_query_conditioned": bool(args.sam3_seed_extent_query_conditioned),
             "selection_refinement": args.selection_refinement,
             "selection_min_ratio": args.selection_min_ratio,
             "selection_max_ratio": args.selection_max_ratio,

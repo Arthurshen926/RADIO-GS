@@ -12,9 +12,13 @@ from pathlib import Path
 
 import torch
 import torch.nn.functional as F
+from torch.utils.checkpoint import checkpoint
 
 from radio_gs.config import load_config
-from radio_gs.field import load_factorized_canonical_field_checkpoint
+from radio_gs.field import (
+    CanonicalGaussianField,
+    load_factorized_canonical_field_checkpoint,
+)
 from radio_gs.interfaces.semantic_alignment import (
     GlobalRegionSummaryBridge,
     align_full_extent_feature_grid,
@@ -159,14 +163,21 @@ def _offloaded_adamw_step(
             state = optimizer.state[parameter]
             if not state:
                 state["step"] = torch.tensor(0.0)
+                moment_dtype = (
+                    torch.float32
+                    if parameter.dtype in {torch.float16, torch.bfloat16}
+                    else parameter.dtype
+                )
                 state["exp_avg"] = torch.zeros_like(
                     parameter,
                     device="cpu",
+                    dtype=moment_dtype,
                     memory_format=torch.preserve_format,
                 )
                 state["exp_avg_sq"] = torch.zeros_like(
                     parameter,
                     device="cpu",
+                    dtype=moment_dtype,
                     memory_format=torch.preserve_format,
                 )
             step_tensor = state["step"]
@@ -193,22 +204,130 @@ def _offloaded_adamw_step(
                 gradient_chunk = gradient_flat[start:stop]
                 exp_avg = exp_avg_cpu[start:stop].to(parameter.device)
                 exp_avg_sq = exp_avg_sq_cpu[start:stop].to(parameter.device)
-
-                parameter_chunk.mul_(1.0 - learning_rate * weight_decay)
-                exp_avg.mul_(beta1).add_(gradient_chunk, alpha=1.0 - beta1)
+                optimizer_gradient = gradient_chunk.to(dtype=exp_avg.dtype)
+                exp_avg.mul_(beta1).add_(optimizer_gradient, alpha=1.0 - beta1)
                 exp_avg_sq.mul_(beta2).addcmul_(
-                    gradient_chunk,
-                    gradient_chunk,
+                    optimizer_gradient,
+                    optimizer_gradient,
                     value=1.0 - beta2,
                 )
                 denominator = (
                     exp_avg_sq.sqrt().div_(bias_correction2_sqrt).add_(epsilon)
                 )
-                parameter_chunk.addcdiv_(
-                    exp_avg,
-                    denominator,
-                    value=-step_size,
+                if parameter_chunk.dtype == exp_avg.dtype:
+                    parameter_chunk.mul_(1.0 - learning_rate * weight_decay)
+                    parameter_chunk.addcdiv_(
+                        exp_avg,
+                        denominator,
+                        value=-step_size,
+                    )
+                else:
+                    updated = parameter_chunk.float().mul_(
+                        1.0 - learning_rate * weight_decay
+                    )
+                    updated.addcdiv_(
+                        exp_avg.float(),
+                        denominator.float(),
+                        value=-step_size,
+                    )
+                    parameter_chunk.copy_(updated.to(dtype=parameter_chunk.dtype))
+                exp_avg_cpu[start:stop].copy_(exp_avg)
+                exp_avg_sq_cpu[start:stop].copy_(exp_avg_sq)
+
+
+@torch.no_grad()
+def _offloaded_adamw_step_cpu_gradients(
+    optimizer: torch.optim.AdamW,
+    gradients: Mapping[torch.nn.Parameter, torch.Tensor],
+    *,
+    chunk_elements: int,
+) -> None:
+    """Apply AdamW from exact CPU gradients without a dense CUDA grad table."""
+
+    if int(chunk_elements) <= 0:
+        raise ValueError("optimizer-state chunk size must be positive")
+    for group in optimizer.param_groups:
+        if (
+            bool(group.get("amsgrad", False))
+            or bool(group.get("maximize", False))
+            or bool(group.get("capturable", False))
+            or bool(group.get("differentiable", False))
+            or bool(group.get("fused", False))
+        ):
+            raise ValueError("chunked offloaded AdamW received unsupported options")
+        beta1, beta2 = group["betas"]
+        learning_rate = float(group["lr"])
+        weight_decay = float(group["weight_decay"])
+        epsilon = float(group["eps"])
+        for parameter in group["params"]:
+            gradient = gradients.get(parameter)
+            if gradient is None:
+                continue
+            if gradient.device.type != "cpu" or gradient.shape != parameter.shape:
+                raise ValueError("external AdamW gradient must be CPU and parameter-aligned")
+            if not bool(torch.isfinite(gradient).all()):
+                raise ValueError("external AdamW gradient must be finite")
+            state = optimizer.state[parameter]
+            if not state:
+                state["step"] = torch.tensor(0.0)
+                moment_dtype = (
+                    torch.float32
+                    if parameter.dtype in {torch.float16, torch.bfloat16}
+                    else parameter.dtype
                 )
+                state["exp_avg"] = torch.zeros_like(
+                    parameter,
+                    device="cpu",
+                    dtype=moment_dtype,
+                    memory_format=torch.preserve_format,
+                )
+                state["exp_avg_sq"] = torch.zeros_like(
+                    parameter,
+                    device="cpu",
+                    dtype=moment_dtype,
+                    memory_format=torch.preserve_format,
+                )
+            step_tensor = state["step"]
+            if not torch.is_tensor(step_tensor) or step_tensor.device.type != "cpu":
+                raise ValueError("offloaded AdamW step must remain on CPU")
+            step_tensor.add_(1)
+            step = float(step_tensor.item())
+            bias_correction1 = 1.0 - beta1**step
+            bias_correction2_sqrt = (1.0 - beta2**step) ** 0.5
+            step_size = learning_rate / bias_correction1
+
+            parameter_flat = parameter.view(-1)
+            gradient_flat = gradient.contiguous().view(-1)
+            exp_avg_cpu = state["exp_avg"].view(-1)
+            exp_avg_sq_cpu = state["exp_avg_sq"].view(-1)
+            for start in range(0, parameter_flat.numel(), int(chunk_elements)):
+                stop = min(start + int(chunk_elements), parameter_flat.numel())
+                parameter_chunk = parameter_flat[start:stop]
+                optimizer_gradient = gradient_flat[start:stop].to(
+                    parameter.device, dtype=exp_avg_cpu.dtype
+                )
+                exp_avg = exp_avg_cpu[start:stop].to(parameter.device)
+                exp_avg_sq = exp_avg_sq_cpu[start:stop].to(parameter.device)
+                exp_avg.mul_(beta1).add_(optimizer_gradient, alpha=1.0 - beta1)
+                exp_avg_sq.mul_(beta2).addcmul_(
+                    optimizer_gradient,
+                    optimizer_gradient,
+                    value=1.0 - beta2,
+                )
+                denominator = (
+                    exp_avg_sq.sqrt().div_(bias_correction2_sqrt).add_(epsilon)
+                )
+                if parameter_chunk.dtype == exp_avg.dtype:
+                    parameter_chunk.mul_(1.0 - learning_rate * weight_decay)
+                    parameter_chunk.addcdiv_(exp_avg, denominator, value=-step_size)
+                else:
+                    updated = parameter_chunk.float().mul_(
+                        1.0 - learning_rate * weight_decay
+                    )
+                    updated.addcdiv_(
+                        exp_avg.float(), denominator.float(), value=-step_size
+                    )
+                    parameter_chunk.copy_(updated.to(dtype=parameter_chunk.dtype))
                 exp_avg_cpu[start:stop].copy_(exp_avg)
                 exp_avg_sq_cpu[start:stop].copy_(exp_avg_sq)
 
@@ -229,6 +348,24 @@ def _optimizer_state_offload_enabled(
     """Protect dense semantic stages from Adam-state/teacher GPU overlap."""
 
     return bool(requested) or bool(semantic_enabled)
+
+
+@torch.no_grad()
+def _move_direct_local_codes_(
+    field: CanonicalGaussianField, device: torch.device
+) -> None:
+    """Move only the direct L512 table across the capability boundary.
+
+    Column-staged rendering has already detached the complete 2-D coefficient
+    map, so the million-row primitive table is not part of the frozen-head
+    graph.  Offloading it while that graph is differentiated changes only
+    residency; the exact table is restored before raster-adjoint replay and
+    the AdamW update.
+    """
+
+    if field.fusion is not None:
+        raise ValueError("direct local-code offload forbids a fusion field")
+    field.local_codes.data = field.local_codes.data.to(device=device)
 
 
 def _staged_feature_branch_gradient(
@@ -263,6 +400,174 @@ def _backward_base_with_feature_gradient(
     torch.autograd.backward(
         (base_loss, feature_map),
         grad_tensors=(None, feature_gradient),
+    )
+
+
+def _move_frozen_modules(
+    modules: Mapping[str, torch.nn.Module], device: torch.device
+) -> None:
+    """Move a frozen capability bank without creating optimizer state."""
+
+    for module in modules.values():
+        module.to(device)
+
+
+def _render_direct_field_detached_by_columns(
+    renderer,
+    gaussian_geometry,
+    field,
+    viewmat: torch.Tensor,
+    *,
+    feature_height: int,
+    feature_width: int,
+    reliability_splat: bool,
+) -> dict[str, torch.Tensor]:
+    """Render a direct D512 table without retaining an N-by-D512 graph."""
+
+    if field.fusion is not None or field.decoder.basis.requires_grad:
+        raise ValueError("column staging requires a direct field and frozen basis")
+    chunk_size = int(renderer.max_channels_per_chunk)
+    coefficient_parts: list[torch.Tensor] = []
+    depth_map = None
+    alpha_map = None
+    confidence = field.primitive_confidence() if reliability_splat else None
+    with torch.no_grad():
+        for start in range(0, field.local_codes.shape[1], chunk_size):
+            stop = min(start + chunk_size, field.local_codes.shape[1])
+            rows = field.local_codes[:, start:stop].to(
+                dtype=field.decoder.basis.dtype
+            )
+            part = renderer.render_feature_rows(
+                gaussian_geometry,
+                viewmat,
+                rows,
+                feature_height=feature_height,
+                feature_width=feature_width,
+                alpha_normalize=True,
+                row_confidence=confidence,
+            )
+            coefficient_parts.append(part["feature_map"])
+            if depth_map is None:
+                depth_map = part["depth_map"]
+                alpha_map = part["alpha_map"]
+    if depth_map is None or alpha_map is None:
+        raise RuntimeError("column-staged renderer produced no coefficient chunks")
+    coefficient_map = torch.cat(coefficient_parts, dim=0).detach().requires_grad_(True)
+    return {
+        "coefficient_map": coefficient_map,
+        "feature_map": field.decoder.decode_map(coefficient_map),
+        "depth_map": depth_map,
+        "alpha_map": alpha_map,
+    }
+
+
+def _column_staged_direct_field_gradient(
+    renderer,
+    gaussian_geometry,
+    field,
+    viewmat: torch.Tensor,
+    coefficient_gradient: torch.Tensor,
+    *,
+    feature_height: int,
+    feature_width: int,
+    reliability_splat: bool,
+    selected_rows: torch.Tensor,
+    selected_row_gradient: torch.Tensor,
+    grad_clip: float,
+) -> tuple[torch.Tensor, float]:
+    """Replay linear raster chunks and assemble one exact CPU field gradient."""
+
+    if field.fusion is not None or field.decoder.basis.requires_grad:
+        raise ValueError("column staging requires a direct field and frozen basis")
+    if coefficient_gradient.shape != (
+        field.decoder.coefficient_dim,
+        int(feature_height),
+        int(feature_width),
+    ):
+        raise ValueError("coefficient-map gradient shape differs")
+    rows = torch.as_tensor(selected_rows, dtype=torch.long).cpu().reshape(-1)
+    row_gradient = torch.as_tensor(selected_row_gradient).detach().float().cpu()
+    if row_gradient.shape != (rows.numel(), field.local_codes.shape[1]):
+        raise ValueError("selected primitive gradient shape differs")
+    gradient_cpu = torch.empty(
+        field.local_codes.shape,
+        dtype=torch.float32,
+        device="cpu",
+    )
+    confidence = field.primitive_confidence() if reliability_splat else None
+    chunk_size = int(renderer.max_channels_per_chunk)
+    for start in range(0, field.local_codes.shape[1], chunk_size):
+        stop = min(start + chunk_size, field.local_codes.shape[1])
+        chunk_codes = (
+            field.local_codes[:, start:stop]
+            .detach()
+            .to(dtype=field.decoder.basis.dtype)
+            .requires_grad_(True)
+        )
+        rendered = renderer.render_feature_rows(
+            gaussian_geometry,
+            viewmat,
+            chunk_codes,
+            feature_height=feature_height,
+            feature_width=feature_width,
+            alpha_normalize=True,
+            row_confidence=confidence,
+        )
+        torch.autograd.backward(
+            rendered["feature_map"],
+            coefficient_gradient[start:stop],
+        )
+        if chunk_codes.grad is None:
+            raise RuntimeError("raster chunk did not produce a feature gradient")
+        gradient_cpu[:, start:stop].copy_(chunk_codes.grad.detach().cpu())
+        del rendered, chunk_codes
+        if coefficient_gradient.device.type == "cuda":
+            torch.cuda.empty_cache()
+    gradient_cpu.index_add_(0, rows, row_gradient)
+    squared_norm = 0.0
+    flat = gradient_cpu.view(-1)
+    norm_chunk = 16_777_216
+    for start in range(0, flat.numel(), norm_chunk):
+        block = flat[start : start + norm_chunk]
+        squared_norm += float(torch.dot(block, block))
+    gradient_norm = squared_norm**0.5
+    maximum = float(grad_clip)
+    if maximum > 0.0 and gradient_norm > maximum:
+        gradient_cpu.mul_(maximum / (gradient_norm + 1e-6))
+    return gradient_cpu, gradient_norm
+
+
+def _render_validation_field(
+    renderer,
+    gaussian_geometry,
+    field,
+    viewmat: torch.Tensor,
+    *,
+    feature_height: int,
+    feature_width: int,
+    reliability_splat: bool,
+    column_staged_direct: bool,
+) -> dict[str, torch.Tensor]:
+    """Use the same field, with bounded column residency for large scenes."""
+
+    if column_staged_direct:
+        return _render_direct_field_detached_by_columns(
+            renderer,
+            gaussian_geometry,
+            field,
+            viewmat,
+            feature_height=feature_height,
+            feature_width=feature_width,
+            reliability_splat=reliability_splat,
+        )
+    return render_canonical_radio(
+        renderer,
+        gaussian_geometry,
+        field,
+        viewmat,
+        feature_height=feature_height,
+        feature_width=feature_width,
+        use_reliability=reliability_splat,
     )
 
 
@@ -609,6 +914,7 @@ def _semantic_fidelity_losses(
     alpha_map: torch.Tensor,
     *,
     alpha_threshold: float,
+    pixel_chunk_size: int = 2048,
 ) -> tuple[torch.Tensor, torch.Tensor, int]:
     if predicted.ndim != 4 or predicted.shape[0] != 1:
         raise ValueError("predicted semantics must be [1,C,H,W]")
@@ -623,37 +929,100 @@ def _semantic_fidelity_losses(
         predicted_size,
         label="semantic teacher/prediction mismatch",
     )
-    valid = alpha_map >= float(alpha_threshold)
-    predicted_pixels = predicted[0].permute(1, 2, 0)[valid]
-    teacher_pixels = teacher.permute(1, 2, 0)[valid]
-    if predicted_pixels.numel() == 0:
+    if int(pixel_chunk_size) <= 0:
+        raise ValueError("pixel_chunk_size must be positive")
+    valid = (alpha_map >= float(alpha_threshold)).reshape(-1)
+    valid_indices = torch.nonzero(valid, as_tuple=False).reshape(-1)
+    if valid_indices.numel() == 0:
         zero = predicted.sum() * 0.0
         return zero, zero, 0
-    cosine = F.cosine_similarity(predicted_pixels, teacher_pixels, dim=-1, eps=1e-8)
-    predicted_centered = predicted_pixels - predicted_pixels.mean(dim=0, keepdim=True)
-    teacher_centered = teacher_pixels - teacher_pixels.mean(dim=0, keepdim=True)
-    centered_cosine = F.cosine_similarity(
-        predicted_centered, teacher_centered, dim=-1, eps=1e-8
-    )
+
+    # Keep the dense maps as strided views and gather only a small pixel block
+    # at a time.  A full 189x252x1536 float32 gather is about 280 MiB; keeping
+    # the absolute and centered variants alive together made the SPIn region
+    # stage exceed a 24 GiB card.  The two-pass computation below is exactly
+    # the same global centering objective, not a minibatch approximation.
+    predicted_flat = predicted[0].permute(1, 2, 0).reshape(-1, predicted.shape[1])
+    teacher_flat = teacher.permute(1, 2, 0).reshape(-1, teacher.shape[0])
+    chunks = valid_indices.split(int(pixel_chunk_size))
+    predicted_sum = predicted_flat.new_zeros((predicted_flat.shape[1],))
+    teacher_sum = teacher_flat.new_zeros((teacher_flat.shape[1],))
+    for indices in chunks:
+        predicted_sum = predicted_sum + predicted_flat.index_select(0, indices).sum(0)
+        teacher_sum = teacher_sum + teacher_flat.index_select(0, indices).sum(0)
+    count = int(valid_indices.numel())
+    predicted_mean = predicted_sum / float(count)
+    teacher_mean = teacher_sum / float(count)
+
+    def _chunk_cosine_sums(
+        predicted_rows: torch.Tensor,
+        teacher_rows: torch.Tensor,
+        indices: torch.Tensor,
+        predicted_global_mean: torch.Tensor,
+        teacher_global_mean: torch.Tensor,
+    ) -> torch.Tensor:
+        predicted_pixels = predicted_rows.index_select(0, indices)
+        teacher_pixels = teacher_rows.index_select(0, indices)
+        absolute_sum = F.cosine_similarity(
+            predicted_pixels, teacher_pixels, dim=-1, eps=1e-8
+        ).sum()
+        centered_sum = F.cosine_similarity(
+            predicted_pixels - predicted_global_mean,
+            teacher_pixels - teacher_global_mean,
+            dim=-1,
+            eps=1e-8,
+        ).sum()
+        return torch.stack((absolute_sum, centered_sum))
+
+    cosine_sums = predicted.new_zeros((2,))
+    use_checkpoint = bool(torch.is_grad_enabled() and predicted.requires_grad)
+    for indices in chunks:
+        if use_checkpoint:
+            values = checkpoint(
+                _chunk_cosine_sums,
+                predicted_flat,
+                teacher_flat,
+                indices,
+                predicted_mean,
+                teacher_mean,
+                use_reentrant=False,
+            )
+        else:
+            values = _chunk_cosine_sums(
+                predicted_flat,
+                teacher_flat,
+                indices,
+                predicted_mean,
+                teacher_mean,
+            )
+        cosine_sums = cosine_sums + values
     return (
-        1.0 - cosine.mean(),
-        1.0 - centered_cosine.mean(),
-        int(cosine.numel()),
+        1.0 - cosine_sums[0] / float(count),
+        1.0 - cosine_sums[1] / float(count),
+        count,
     )
 
 
 @torch.no_grad()
 def _view_cosine(
-    field, model, renderer, sample, device, *, reliability_splat: bool
+    field,
+    model,
+    renderer,
+    sample,
+    device,
+    *,
+    reliability_splat: bool,
+    column_staged_direct: bool = False,
 ) -> tuple[float, int]:
-    result = render_canonical_radio(
+    result = _render_validation_field(
         renderer,
         model,
         field,
         sample["pose_w2c"].to(device),
         feature_height=sample["radio_features"].shape[1],
         feature_width=sample["radio_features"].shape[2],
-        use_reliability=reliability_splat,
+        reliability_splat=reliability_splat,
+        column_staged_direct=column_staged_direct,
     )
     predicted = result["feature_map"].permute(1, 2, 0).float()
     teacher = sample["radio_features"].to(device).permute(1, 2, 0).float()
@@ -673,6 +1042,7 @@ def _mean_view_cosine(
     device,
     *,
     reliability_splat: bool,
+    column_staged_direct: bool = False,
 ) -> float:
     weighted = 0.0
     count = 0
@@ -685,6 +1055,7 @@ def _mean_view_cosine(
             dataset[frame_to_index[frame]],
             device,
             reliability_splat=reliability_splat,
+            column_staged_direct=column_staged_direct,
         )
         weighted += value * pixels
         count += pixels
@@ -707,6 +1078,7 @@ def _mean_multicapability_fidelity(
     capability_teacher_datasets: Mapping[str, SimpleRadioDataset] | None = None,
     capability_teacher_frame_to_index: Mapping[str, Mapping[int, int]] | None = None,
     projection_amp: bool = False,
+    column_staged_direct: bool = False,
 ) -> dict[str, float]:
     if (capability_teacher_datasets is None) != (
         capability_teacher_frame_to_index is None
@@ -730,14 +1102,15 @@ def _mean_multicapability_fidelity(
     field.eval()
     for frame in frames:
         sample = dataset[frame_to_index[frame]]
-        result = render_canonical_radio(
+        result = _render_validation_field(
             renderer,
             model,
             field,
             sample["pose_w2c"].to(device),
             feature_height=sample["radio_features"].shape[1],
             feature_width=sample["radio_features"].shape[2],
-            use_reliability=reliability_splat,
+            reliability_splat=reliability_splat,
+            column_staged_direct=column_staged_direct,
         )
         predicted = result["feature_map"][None].float()
         target = sample["radio_features"].to(device)[None].float()
@@ -799,6 +1172,36 @@ def _primitive_probe_cosine(
     return float(torch.cat(values).mean())
 
 
+def _project_semantics_on_frozen_module_device(
+    bridge: GlobalRegionSummaryBridge,
+    summary_head: torch.nn.Module,
+    radio_map: torch.Tensor,
+    *,
+    kernel_sizes: tuple[int, ...],
+    projection_batch_size: int,
+) -> torch.Tensor:
+    """Run the frozen region projector on its configured device.
+
+    The returned descriptor stays on the render device, so moving the frozen
+    bridge and official summary head to CPU changes only scheduling and memory
+    residency. Autograd still carries the feature-branch gradient back across
+    the device copies to the rendered RADIO map.
+    """
+
+    try:
+        projection_device = next(bridge.parameters()).device
+    except StopIteration:
+        projection_device = radio_map.device
+    projected = project_dense_region_semantics(
+        bridge,
+        summary_head,
+        radio_map.to(projection_device),
+        kernel_sizes=kernel_sizes,
+        projection_batch_size=projection_batch_size,
+    )
+    return projected.to(radio_map.device)
+
+
 @torch.no_grad()
 def _mean_semantic_view_metrics(
     field,
@@ -817,6 +1220,7 @@ def _mean_semantic_view_metrics(
     projection_batch_size: int,
     reliability_splat: bool,
     alpha_threshold: float,
+    column_staged_direct: bool = False,
 ) -> tuple[float, float]:
     absolute_weighted = 0.0
     centered_weighted = 0.0
@@ -824,16 +1228,17 @@ def _mean_semantic_view_metrics(
     field.eval()
     for frame in frames:
         sample = dataset[frame_to_index[frame]]
-        result = render_canonical_radio(
+        result = _render_validation_field(
             renderer,
             model,
             field,
             sample["pose_w2c"].to(device),
             feature_height=sample["radio_features"].shape[1],
             feature_width=sample["radio_features"].shape[2],
-            use_reliability=reliability_splat,
+            reliability_splat=reliability_splat,
+            column_staged_direct=column_staged_direct,
         )
-        predicted = project_dense_region_semantics(
+        predicted = _project_semantics_on_frozen_module_device(
             bridge,
             summary_head,
             gauge_separated_radio(result["feature_map"][None], feature_dim=1),
@@ -846,6 +1251,7 @@ def _mean_semantic_view_metrics(
             teacher,
             result["alpha_map"],
             alpha_threshold=alpha_threshold,
+            pixel_chunk_size=projection_batch_size,
         )
         absolute_weighted += (1.0 - float(absolute_loss)) * pixels
         centered_weighted += (1.0 - float(centered_loss)) * pixels
@@ -875,6 +1281,7 @@ def _mean_generic_text_response_metrics(
     reliability_splat: bool,
     alpha_threshold: float,
     text_bundle: FrozenGenericRegionTextBundle,
+    column_staged_direct: bool = False,
 ) -> dict[str, float]:
     totals = {
         "loss": 0.0,
@@ -888,16 +1295,17 @@ def _mean_generic_text_response_metrics(
     field.eval()
     for frame in frames:
         sample = dataset[frame_to_index[frame]]
-        result = render_canonical_radio(
+        result = _render_validation_field(
             renderer,
             model,
             field,
             sample["pose_w2c"].to(device),
             feature_height=sample["radio_features"].shape[1],
             feature_width=sample["radio_features"].shape[2],
-            use_reliability=reliability_splat,
+            reliability_splat=reliability_splat,
+            column_staged_direct=column_staged_direct,
         )
-        predicted = project_dense_region_semantics(
+        predicted = _project_semantics_on_frozen_module_device(
             bridge,
             summary_head,
             gauge_separated_radio(result["feature_map"][None], feature_dim=1),
@@ -944,6 +1352,13 @@ def _trainable_parameters(field, args: argparse.Namespace) -> list[torch.nn.Para
 
 def finetune(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
+    if bool(args.offload_capability_adaptors_after_gradient) and not bool(
+        args.staged_capability_gradient
+    ):
+        raise ValueError(
+            "--offload-capability-adaptors-after-gradient requires "
+            "--staged-capability-gradient"
+        )
     config = load_config(args.config)
     parent_field_path = Path(args.field_checkpoint).expanduser().resolve()
     # Hash before loading the multi-GiB state so lineage I/O never extends the
@@ -964,6 +1379,25 @@ def finetune(args: argparse.Namespace) -> dict:
     if expected_hash != _sha256_tensor_rows(model.get_xyz()):
         raise ValueError("canonical field and geometry rows differ")
     field = field.to(device)
+    local_code_training_dtype = str(
+        getattr(args, "local_code_training_dtype", "float32")
+    )
+    if local_code_training_dtype == "float16":
+        field.local_codes = torch.nn.Parameter(
+            field.local_codes.detach().to(dtype=torch.float16),
+            requires_grad=True,
+        )
+    column_staged_direct_backward = bool(args.column_staged_direct_field_backward)
+    if column_staged_direct_backward and (
+        field.fusion is not None
+        or bool(args.train_basis)
+        or bool(args.train_fusion)
+        or not bool(args.offload_optimizer_state)
+    ):
+        raise ValueError(
+            "column-staged direct-field backward requires no fusion, a frozen "
+            "basis, and --offload-optimizer-state"
+        )
     mpr_cache_path = str(args.mpr_cache or payload["mpr_cache"])
     consensus, mpr_cache = _load_consensus(mpr_cache_path)
     mpr_geometry_hash = str(
@@ -1098,10 +1532,15 @@ def finetune(args: argparse.Namespace) -> dict:
         semantic_bridge, _semantic_manifest = GlobalRegionSummaryBridge.from_checkpoint(
             args.semantic_bridge_checkpoint, map_location="cpu"
         )
-        semantic_bridge = semantic_bridge.to(device).eval()
+        semantic_projection_device = (
+            torch.device("cpu")
+            if args.semantic_projector_device == "cpu"
+            else device
+        )
+        semantic_bridge = semantic_bridge.to(semantic_projection_device).eval()
         semantic_summary_head = (
             SigLIP2SummaryHead.from_radio_checkpoint(args.radio_checkpoint)
-            .to(device)
+            .to(semantic_projection_device)
             .eval()
         )
         for module in (semantic_bridge, semantic_summary_head):
@@ -1145,11 +1584,22 @@ def finetune(args: argparse.Namespace) -> dict:
                         "xFormers capability projection requires CUDA AMP"
                     )
                 adaptor.enable_xformers_memory_efficient_attention()
+            token_mlp_chunk_size = int(
+                getattr(args, "capability_projection_token_mlp_chunk_size", 0)
+            )
+            if token_mlp_chunk_size > 0:
+                adaptor.enable_chunked_token_mlp(token_mlp_chunk_size)
         else:
             adaptor = load_radio_adaptor_from_checkpoint(
                 args.radio_checkpoint, name, kind="feature_projection"
             )
         adaptor = adaptor.to(device).eval()
+        if bool(args.capability_projection_amp) and device.type == "cuda":
+            # Official extraction evaluates these frozen weights under CUDA
+            # autocast.  Keeping that effective FP16 weight representation
+            # resident avoids rebuilding a full temporary half copy in every
+            # chunk of the exact custom VJP.
+            adaptor = adaptor.half()
         for parameter in adaptor.parameters():
             parameter.requires_grad_(False)
         capability_adaptors[name] = adaptor
@@ -1193,6 +1643,7 @@ def finetune(args: argparse.Namespace) -> dict:
         validation_frames,
         device,
         reliability_splat=reliability_splat,
+        column_staged_direct=column_staged_direct_backward,
     )
     best_validation = initial_validation
     initial_capability_validation = _mean_multicapability_fidelity(
@@ -1209,6 +1660,7 @@ def finetune(args: argparse.Namespace) -> dict:
         capability_teacher_datasets=capability_teacher_datasets,
         capability_teacher_frame_to_index=capability_teacher_frame_to_index,
         projection_amp=bool(args.capability_projection_amp),
+        column_staged_direct=column_staged_direct_backward,
     )
     best_capability_validation = dict(initial_capability_validation)
     initial_mpr_probe = _primitive_probe_cosine(
@@ -1237,6 +1689,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 projection_batch_size=int(args.semantic_projection_batch_size),
                 reliability_splat=reliability_splat,
                 alpha_threshold=float(args.alpha_threshold),
+                column_staged_direct=column_staged_direct_backward,
             )
         )
         initial_semantic_validation = 0.5 * (
@@ -1263,6 +1716,7 @@ def finetune(args: argparse.Namespace) -> dict:
             reliability_splat=reliability_splat,
             alpha_threshold=float(args.alpha_threshold),
             text_bundle=generic_text_bundle,
+            column_staged_direct=column_staged_direct_backward,
         )
         best_generic_text_response_validation = dict(
             initial_generic_text_response_validation
@@ -1292,15 +1746,29 @@ def finetune(args: argparse.Namespace) -> dict:
             preserve_buffers=False,
         )
         field.train()
-        result = render_canonical_radio(
-            renderer,
-            model,
-            field,
-            sample["pose_w2c"].to(device),
-            feature_height=sample["radio_features"].shape[1],
-            feature_width=sample["radio_features"].shape[2],
-            use_reliability=reliability_splat,
-        )
+        pose_w2c = sample["pose_w2c"].to(device)
+        feature_height = int(sample["radio_features"].shape[1])
+        feature_width = int(sample["radio_features"].shape[2])
+        if column_staged_direct_backward:
+            result = _render_direct_field_detached_by_columns(
+                renderer,
+                model,
+                field,
+                pose_w2c,
+                feature_height=feature_height,
+                feature_width=feature_width,
+                reliability_splat=reliability_splat,
+            )
+        else:
+            result = render_canonical_radio(
+                renderer,
+                model,
+                field,
+                pose_w2c,
+                feature_height=feature_height,
+                feature_width=feature_width,
+                use_reliability=reliability_splat,
+            )
         teacher = sample["radio_features"].to(device)[None]
         render_loss = normalized_render_reconstruction_loss(
             result["feature_map"][None],
@@ -1317,10 +1785,26 @@ def finetune(args: argparse.Namespace) -> dict:
                 generator=generator,
             )
         ]
-        predicted_rows = field.radio_features(chosen.to(device))
+        selected_local_codes = None
+        if column_staged_direct_backward:
+            selected_local_codes = (
+                field.local_codes.index_select(0, chosen.to(device))
+                .detach()
+                .to(dtype=field.decoder.basis.dtype)
+                .requires_grad_(True)
+            )
+            predicted_rows = field.decoder(selected_local_codes)
+        else:
+            predicted_rows = field.radio_features(chosen.to(device))
         mpr_loss, _mpr_stats = primitive_reconstruction_loss(
             predicted_rows, consensus, row_indices=chosen
         )
+        direct_local_codes_offloaded = False
+        if column_staged_direct_backward:
+            _move_direct_local_codes_(field, torch.device("cpu"))
+            direct_local_codes_offloaded = True
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
         teacher_capability_maps = None
         capability_alignment_loss = render_loss.detach() * 0.0
         capability_local_affinity_loss = render_loss.detach() * 0.0
@@ -1353,6 +1837,9 @@ def finetune(args: argparse.Namespace) -> dict:
                 local_balance_quantile=float(args.capability_local_balance_quantile),
                 teacher_capability_maps=teacher_capability_maps,
                 projection_amp=bool(args.capability_projection_amp),
+                projection_checkpoint=bool(
+                    getattr(args, "capability_projection_checkpoint", False)
+                ),
             )
         predicted_semantics = None
         semantic_teacher = None
@@ -1364,7 +1851,7 @@ def finetune(args: argparse.Namespace) -> dict:
         if semantic_enabled and (
             float(args.semantic_weight) > 0.0 or generic_text_response_enabled
         ):
-            predicted_semantics = project_dense_region_semantics(
+            predicted_semantics = _project_semantics_on_frozen_module_device(
                 semantic_bridge,
                 semantic_summary_head,
                 gauge_separated_radio(result["feature_map"][None], feature_dim=1),
@@ -1383,6 +1870,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 semantic_teacher,
                 result["alpha_map"],
                 alpha_threshold=float(args.alpha_threshold),
+                pixel_chunk_size=int(args.semantic_projection_batch_size),
             )
             semantic_loss = (
                 semantic_absolute_loss
@@ -1400,29 +1888,79 @@ def finetune(args: argparse.Namespace) -> dict:
                     alpha_threshold=float(args.alpha_threshold),
                 )
         capability_scale = sum(capability_weights.values())
-        base_loss = (
-            render_loss
-            + float(args.mpr_weight) * mpr_loss
-            + capability_scale * capability_alignment_loss
+        capability_branch_loss = (
+            capability_scale * capability_alignment_loss
             + capability_scale
             * float(args.capability_local_affinity_weight)
             * capability_local_affinity_loss
         )
+        base_loss = render_loss + float(args.mpr_weight) * mpr_loss
         feature_branch_loss = (
             float(args.semantic_weight) * semantic_loss
             + float(args.generic_text_response_weight) * generic_response_loss
         )
-        loss = (base_loss + feature_branch_loss).detach()
-        if semantic_enabled and (
-            float(args.semantic_weight) > 0.0 or generic_text_response_enabled
-        ):
-            feature_gradient = _staged_feature_branch_gradient(
-                feature_branch_loss,
-                result["feature_map"],
+        loss = (base_loss + capability_branch_loss + feature_branch_loss).detach()
+        if column_staged_direct_backward:
+            # Capability and semantic heads share only the rendered RADIO map.
+            # Collapse each frozen branch there first so neither large head
+            # remains resident while the affine decoder is differentiated.
+            staged_map_gradients: list[torch.Tensor] = []
+            if capability_adaptors:
+                staged_map_gradients.append(
+                    _staged_feature_branch_gradient(
+                        capability_branch_loss,
+                        result["feature_map"],
+                    )
+                )
+                teacher_capability_maps = None
+                if bool(args.offload_capability_adaptors_after_gradient):
+                    _move_frozen_modules(capability_adaptors, torch.device("cpu"))
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
+            if semantic_enabled and (
+                float(args.semantic_weight) > 0.0
+                or generic_text_response_enabled
+            ):
+                staged_map_gradients.append(
+                    _staged_feature_branch_gradient(
+                        feature_branch_loss,
+                        result["feature_map"],
+                    )
+                )
+                predicted_semantics = None
+                semantic_teacher = None
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
+            if not staged_map_gradients:
+                raise RuntimeError("column-staged field has no rendered capability branch")
+            rendered_gradient = staged_map_gradients[0]
+            for extra_gradient in staged_map_gradients[1:]:
+                rendered_gradient = rendered_gradient + extra_gradient
+            (coefficient_gradient,) = torch.autograd.grad(
+                (render_loss, result["feature_map"]),
+                result["coefficient_map"],
+                grad_outputs=(None, rendered_gradient),
+                retain_graph=False,
+                create_graph=False,
             )
-            # Preserve only scalar diagnostics. The full descriptor and
-            # teacher would otherwise survive until after the local-code
-            # gradient allocation.
+            del rendered_gradient, staged_map_gradients
+            if selected_local_codes is None:
+                raise RuntimeError("column-staged MPR codes are absent")
+            (selected_row_gradient,) = torch.autograd.grad(
+                float(args.mpr_weight) * mpr_loss,
+                selected_local_codes,
+                retain_graph=False,
+                create_graph=False,
+            )
+            capability_alignment_loss = capability_alignment_loss.detach()
+            capability_local_affinity_loss = capability_local_affinity_loss.detach()
+            capability_stats = {
+                name: {
+                    key: value.detach() if torch.is_tensor(value) else value
+                    for key, value in values.items()
+                }
+                for name, values in capability_stats.items()
+            }
             semantic_absolute_loss = semantic_absolute_loss.detach()
             semantic_centered_loss = semantic_centered_loss.detach()
             semantic_loss = semantic_loss.detach()
@@ -1431,27 +1969,128 @@ def finetune(args: argparse.Namespace) -> dict:
                 name: value.detach() if torch.is_tensor(value) else value
                 for name, value in generic_text_response_stats.items()
             }
+            render_loss = render_loss.detach()
+            mpr_loss = mpr_loss.detach()
+            base_loss = base_loss.detach()
+            teacher_capability_maps = None
             predicted_semantics = None
             semantic_teacher = None
-            del feature_branch_loss
+            teacher = None
+            predicted_rows = None
+            selected_local_codes = None
+            result["feature_map"] = torch.empty(0, device=device)
+            result["coefficient_map"] = torch.empty(0, device=device)
+            del capability_branch_loss, feature_branch_loss
+            if capability_adaptors and bool(
+                args.offload_capability_adaptors_after_gradient
+            ):
+                _move_frozen_modules(capability_adaptors, torch.device("cpu"))
             if device.type == "cuda":
                 torch.cuda.empty_cache()
-            _backward_base_with_feature_gradient(
-                base_loss,
-                result["feature_map"],
-                feature_gradient,
+            if direct_local_codes_offloaded:
+                _move_direct_local_codes_(field, device)
+                direct_local_codes_offloaded = False
+            field_gradient_cpu, _field_gradient_norm = (
+                _column_staged_direct_field_gradient(
+                    renderer,
+                    model,
+                    field,
+                    pose_w2c,
+                    coefficient_gradient.detach(),
+                    feature_height=feature_height,
+                    feature_width=feature_width,
+                    reliability_splat=reliability_splat,
+                    selected_rows=chosen,
+                    selected_row_gradient=selected_row_gradient,
+                    grad_clip=float(args.grad_clip),
+                )
             )
-            del feature_gradient
-        else:
-            base_loss.backward()
-        torch.nn.utils.clip_grad_norm_(field.parameters(), float(args.grad_clip))
-        if optimizer_state_offload:
-            _offloaded_adamw_step(
+            del coefficient_gradient, selected_row_gradient
+            _offloaded_adamw_step_cpu_gradients(
                 optimizer,
+                {field.local_codes: field_gradient_cpu},
                 chunk_elements=int(args.optimizer_state_chunk_elements),
             )
+            del field_gradient_cpu
+            if capability_adaptors and bool(
+                args.offload_capability_adaptors_after_gradient
+            ):
+                _move_frozen_modules(capability_adaptors, device)
         else:
-            optimizer.step()
+            staged_feature_gradients: list[torch.Tensor] = []
+            capability_modules_offloaded = False
+            if capability_adaptors and bool(args.staged_capability_gradient):
+                staged_feature_gradients.append(
+                    _staged_feature_branch_gradient(
+                        capability_branch_loss,
+                        result["feature_map"],
+                    )
+                )
+                capability_alignment_loss = capability_alignment_loss.detach()
+                capability_local_affinity_loss = capability_local_affinity_loss.detach()
+                capability_stats = {
+                    name: {
+                        key: value.detach() if torch.is_tensor(value) else value
+                        for key, value in values.items()
+                    }
+                    for name, values in capability_stats.items()
+                }
+                teacher_capability_maps = None
+                del capability_branch_loss
+                if bool(args.offload_capability_adaptors_after_gradient):
+                    _move_frozen_modules(capability_adaptors, torch.device("cpu"))
+                    capability_modules_offloaded = True
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
+            else:
+                base_loss = base_loss + capability_branch_loss
+            if semantic_enabled and (
+                float(args.semantic_weight) > 0.0 or generic_text_response_enabled
+            ):
+                staged_feature_gradients.append(
+                    _staged_feature_branch_gradient(
+                        feature_branch_loss,
+                        result["feature_map"],
+                    )
+                )
+                # Preserve only scalar diagnostics. The full descriptor and
+                # teacher would otherwise survive until after the local-code
+                # gradient allocation.
+                semantic_absolute_loss = semantic_absolute_loss.detach()
+                semantic_centered_loss = semantic_centered_loss.detach()
+                semantic_loss = semantic_loss.detach()
+                generic_response_loss = generic_response_loss.detach()
+                generic_text_response_stats = {
+                    name: value.detach() if torch.is_tensor(value) else value
+                    for name, value in generic_text_response_stats.items()
+                }
+                predicted_semantics = None
+                semantic_teacher = None
+                del feature_branch_loss
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
+            if staged_feature_gradients:
+                feature_gradient = staged_feature_gradients[0]
+                for extra_gradient in staged_feature_gradients[1:]:
+                    feature_gradient = feature_gradient + extra_gradient
+                _backward_base_with_feature_gradient(
+                    base_loss,
+                    result["feature_map"],
+                    feature_gradient,
+                )
+                del feature_gradient
+            else:
+                base_loss.backward()
+            if capability_modules_offloaded:
+                _move_frozen_modules(capability_adaptors, device)
+            torch.nn.utils.clip_grad_norm_(field.parameters(), float(args.grad_clip))
+            if optimizer_state_offload:
+                _offloaded_adamw_step(
+                    optimizer,
+                    chunk_elements=int(args.optimizer_state_chunk_elements),
+                )
+            else:
+                optimizer.step()
 
         should_validate = (
             (step + 1) % int(args.log_every) == 0
@@ -1468,6 +2107,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 validation_frames,
                 device,
                 reliability_splat=reliability_splat,
+                column_staged_direct=column_staged_direct_backward,
             )
             mpr_probe_cosine = _primitive_probe_cosine(
                 field, consensus, mpr_probe_rows, device
@@ -1486,6 +2126,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 capability_teacher_datasets=capability_teacher_datasets,
                 capability_teacher_frame_to_index=capability_teacher_frame_to_index,
                 projection_amp=bool(args.capability_projection_amp),
+                column_staged_direct=column_staged_direct_backward,
             )
             semantic_validation = None
             semantic_validation_absolute = None
@@ -1510,6 +2151,7 @@ def finetune(args: argparse.Namespace) -> dict:
                     projection_batch_size=int(args.semantic_projection_batch_size),
                     reliability_splat=reliability_splat,
                     alpha_threshold=float(args.alpha_threshold),
+                    column_staged_direct=column_staged_direct_backward,
                 )
                 semantic_validation = 0.5 * (
                     semantic_validation_absolute + semantic_validation_centered
@@ -1533,6 +2175,7 @@ def finetune(args: argparse.Namespace) -> dict:
                     reliability_splat=reliability_splat,
                     alpha_threshold=float(args.alpha_threshold),
                     text_bundle=generic_text_bundle,
+                    column_staged_direct=column_staged_direct_backward,
                 )
             if args.selection_policy == "final":
                 selected = True
@@ -1681,6 +2324,7 @@ def finetune(args: argparse.Namespace) -> dict:
         train_probe_frames,
         device,
         reliability_splat=reliability_splat,
+        column_staged_direct=column_staged_direct_backward,
     )
     field.eval().cpu()
     output = Path(args.output)
@@ -1740,6 +2384,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 str(Path(args.radio_checkpoint).resolve()) if semantic_enabled else ""
             ),
             "kernel_sizes": list(semantic_kernel_sizes),
+            "projector_device": str(args.semantic_projector_device),
             "weight": float(args.semantic_weight),
             "centered_weight": float(args.semantic_centered_weight),
             "selection_score": "mean(absolute_cosine, centered_cosine)",
@@ -1845,6 +2490,14 @@ def finetune(args: argparse.Namespace) -> dict:
             "optimizer_state_offload_requested": bool(
                 args.offload_optimizer_state
             ),
+            "local_code_training_dtype": local_code_training_dtype,
+            "staged_capability_gradient": bool(args.staged_capability_gradient),
+            "capability_adaptor_residency": (
+                "cpu_between_capability_and_field_backward"
+                if bool(args.offload_capability_adaptors_after_gradient)
+                else "field_device"
+            ),
+            "column_staged_direct_field_backward": column_staged_direct_backward,
             "optimizer_state_offload_auto_semantic": bool(
                 semantic_enabled and not bool(args.offload_optimizer_state)
             ),
@@ -1975,6 +2628,15 @@ def main() -> None:
     parser.add_argument("--semantic-kernel-sizes", default="3,7,15")
     parser.add_argument("--semantic-projection-batch-size", type=int, default=2048)
     parser.add_argument(
+        "--semantic-projector-device",
+        choices=("same", "cpu"),
+        default="same",
+        help=(
+            "Device for the frozen bridge and official summary head. CPU "
+            "offload is algebraically equivalent and reduces peak GPU memory."
+        ),
+    )
+    parser.add_argument(
         "--generic-text-response-weight",
         type=float,
         default=0.0,
@@ -2016,6 +2678,24 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--capability-projection-checkpoint",
+        action="store_true",
+        help=(
+            "Recompute the frozen full-grid adaptor during backward instead "
+            "of retaining its activations. This preserves the objective and "
+            "reduces peak memory for million-primitive fields."
+        ),
+    )
+    parser.add_argument(
+        "--capability-projection-token-mlp-chunk-size",
+        type=int,
+        default=0,
+        help=(
+            "Bound SigLIP2 token-wise feed-forward activations by evaluating "
+            "the same MLP in token chunks; global attention remains complete."
+        ),
+    )
+    parser.add_argument(
         "--release-validation-cuda-cache",
         action="store_true",
         help=(
@@ -2029,6 +2709,41 @@ def main() -> None:
         help=(
             "Keep AdamW moments on CPU during forward/backward and return "
             "them to the field device only for optimizer.step()."
+        ),
+    )
+    parser.add_argument(
+        "--local-code-training-dtype",
+        choices=("float32", "float16"),
+        default="float32",
+        help=(
+            "Storage/gradient dtype for the trainable L512 table. Decoding "
+            "and losses remain in the canonical FP32 coordinate system."
+        ),
+    )
+    parser.add_argument(
+        "--staged-capability-gradient",
+        action="store_true",
+        help=(
+            "Collapse the frozen capability branch to its exact feature-map "
+            "gradient before the dense primitive-field backward pass."
+        ),
+    )
+    parser.add_argument(
+        "--offload-capability-adaptors-after-gradient",
+        action="store_true",
+        help=(
+            "Temporarily move frozen capability adaptors to CPU after their "
+            "staged gradient has been computed. Requires "
+            "--staged-capability-gradient."
+        ),
+    )
+    parser.add_argument(
+        "--column-staged-direct-field-backward",
+        action="store_true",
+        help=(
+            "For a direct frozen-basis field, compute the complete 2D loss "
+            "gradient first and replay the linear rasterizer by channel "
+            "chunks, keeping the exact dense field gradient on CPU."
         ),
     )
     parser.add_argument(

@@ -26,6 +26,7 @@ class FoundationHeadCache:
     """Payload for one official foundation head cache."""
 
     mask_logits: torch.Tensor | None = None
+    mask_tensor_semantics: str | None = None
     tokens: torch.Tensor | None = None
     feature_map: torch.Tensor | None = None
     queries: tuple[str, ...] = ()
@@ -92,9 +93,12 @@ def _parse_head_cache(
     boxes_xyxy = None
     mask_query_indices = None
     mask_query_ranks = None
+    mask_tensor_semantics = None
     queries: tuple[str, ...] = ()
     if "mask_logits" in data:
         mask_logits = _require_tensor(name, "mask_logits", data["mask_logits"], 3)
+    if "mask_tensor_semantics" in data:
+        mask_tensor_semantics = str(data["mask_tensor_semantics"] or "") or None
     if "tokens" in data:
         tokens = _require_tensor(name, "tokens", data["tokens"], 2)
     if "feature_map" in data:
@@ -161,6 +165,7 @@ def _parse_head_cache(
     )
     return FoundationHeadCache(
         mask_logits=mask_logits,
+        mask_tensor_semantics=mask_tensor_semantics,
         tokens=tokens,
         feature_map=feature_map,
         queries=queries,

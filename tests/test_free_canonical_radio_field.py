@@ -46,6 +46,22 @@ def test_free_field_is_exact_identity_mpr_initialization(tmp_path) -> None:
     assert restored["render_ceiling"]["query_free"] is True
 
 
+def test_field_loader_promotes_fp16_local_code_storage_to_fp32(tmp_path) -> None:
+    payload = build_free_field_payload(
+        _mpr_payload(), source_path="mpr.pt", feature_signature=_SIGNATURE
+    )
+    expected = payload["state_dict"]["local_codes"].clone()
+    payload["state_dict"]["local_codes"] = expected.half()
+    checkpoint = tmp_path / "field-fp16-local-codes.pth"
+    torch.save(payload, checkpoint)
+
+    field, restored = load_canonical_field_checkpoint(checkpoint)
+
+    assert restored["state_dict"]["local_codes"].dtype == torch.float16
+    assert field.local_codes.dtype == torch.float32
+    torch.testing.assert_close(field.local_codes, expected, atol=1e-3, rtol=1e-3)
+
+
 def test_free_field_rejects_query_contaminated_mpr() -> None:
     payload = _mpr_payload()
     payload["metadata"]["text_queries_opened"] = True

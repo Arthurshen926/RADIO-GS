@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_joint_box_signed_points_sam3_preregistration",
+  "status": "frozen_before_first_joint_box_point_prediction",
+  "candidate_id": "nvos-method-v1-joint-box-signed-points-sam3-v1",
+  "date": "2026-08-17",
+  "hypothesis": "The field-derived box supplies object extent while positive and negative field points disambiguate identity inside the same official SAM3 interactive decode.",
+  "fixed_method": {
+    "persistent_input": "sealed Method-v1 signed target-view margin",
+    "target_rgb": "allowed query-transient official SAM3 input",
+    "box": "axis-aligned box of the nonnegative field margin after nearest resize, padded by 16 SAM pixels",
+    "trials": 10,
+    "positive_points_per_trial": 3,
+    "negative_points_per_trial": 3,
+    "point_sampler": "existing deterministic signed-evidence weighted-farthest policy",
+    "sam_interface": "one joint box plus signed points call per trial",
+    "multimask_output": false,
+    "aggregation": "mean of ten binary masks",
+    "threshold": 0.5,
+    "target_dependent_candidate_selection": false,
+    "graph_or_connected_component": false
+  },
+  "authorities": {
+    "dataset_manifest": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+      "sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea"
+    },
+    "signed_field_prompt_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/full8_20260816/signed_field_prompt/prediction_manifest.json",
+      "sha256": "fcc6d6b3263d19cf37ea46ac782c674840614f2949dc584b1746f8ad5db906ac"
+    },
+    "method_authority": {
+      "path": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json",
+      "sha256": "48e0d432f38ce9ad973e03a805e50a477c1e334ac78349f80eb6e6e02f6239c6"
+    },
+    "evaluation_contract": {
+      "path": "paper/artifacts/nvos_rgb_assisted_full8_method_v1_evaluation_contract_20260816.json",
+      "sha256": "e4a464e07e1fbcdb90708cc98be63058a91893a160e42511dec0f81a38e1268f"
+    },
+    "official_sam3_checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"
+  },
+  "pre_gt_barrier": "Seal and hash all eight predictions before opening any target mask for this candidate.",
+  "promotion_gate": {
+    "minimum_macro_foreground_iou": 0.8177621399957551,
+    "maximum_per_scene_regression": 0.02,
+    "comparison": "sealed one-shot box plus point-supermajority parent"
+  },
+  "claim_scope": "Follow-up development experiment; prior benchmark results were already known, but this candidate and its complete settings are frozen before its first prediction."
+}

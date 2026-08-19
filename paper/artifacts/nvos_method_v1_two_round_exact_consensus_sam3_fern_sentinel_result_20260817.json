@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_method_v1_two_round_exact_consensus_sam3_fern_sentinel_result",
+  "candidate_id": "nvos-method-v1-two-round-exact-logodds-sam3-v1",
+  "status": "completed_failed_sentinel",
+  "promotion": false,
+  "full8_executed": false,
+  "stop_rule": "stop_after_frozen_fern_sentinel_when_two_round_iou_is_below_the_sealed_one_shot_parent",
+  "scene_id": "fern",
+  "frame_id": "IMG_4027",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_method_v1_two_round_exact_consensus_sam3_preregistration_20260817.json",
+    "sha256": "2ce2cf0bf70f0bc22e3e1faa133179917c9da164361b5a60e7d8b6b4d9d27e9f"
+  },
+  "sealed_outputs": {
+    "exact_consensus_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1_sentinel/exact_consensus/consensus_manifest.json",
+      "sha256": "7fc4734653452d3458bce943ed5cfb354917da3d5378b7cdf1bac85f5ce3f8b2"
+    },
+    "exact_consensus_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1_sentinel/exact_consensus/receipts/fern.json",
+      "sha256": "cbc517769bb5e698b02ed756029cd94e453f561a0142db08cad46386bfd85277"
+    },
+    "rerender_probability": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1_sentinel/exact_consensus/rerender/fern/IMG_4027.npy",
+      "sha256": "158e32204a35bfe35422ae7fdd7322c8060b7c4c4c2887956ccb8152ebb661cf"
+    },
+    "primitive_consensus_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1_sentinel/exact_consensus/primitive_state/fern/IMG_4027.pt",
+      "sha256": "e6e29f20491f86e1e578ec5e362424987fab3131ee24eaf73fdc728553ba6e29"
+    },
+    "round2_prediction_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1_sentinel/round2/prediction_manifest.json",
+      "sha256": "93762a5f9e1d72dff155f36c87d7e8da19cfdbf91b4c5a7bed002ab26c54a457"
+    },
+    "round2_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1_sentinel/round2/receipts/fern.json",
+      "sha256": "84fd429f8dce5f6a6822b50e51bc80468bc9a154be9bfa0dab1135c73afeb990"
+    },
+    "round2_score": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1_sentinel/round2/scores/fern/IMG_4027.npy",
+      "sha256": "952c23bbe78c2875e7a44d02d58f0bf262960c2ac010b2c6099c5ce41e95d1a4"
+    },
+    "round2_trials": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1_sentinel/round2/trials/fern/IMG_4027.pt",
+      "sha256": "e507b9d8c59baee796864ccf3be147106eadd849631600f8fc2ea85081c3cd78"
+    }
+  },
+  "implementation": {
+    "exact_consensus": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_nvos_two_round_exact_consensus.py",
+      "sha256": "ca5b38dda3544f4e25f79f8d7890cb8bb2c9807ae18e06da021457f59eab5df8"
+    },
+    "round2_predictor": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/predict_nvos_two_round_mask_prompt_sam3.py",
+      "sha256": "8a5dd5117ffc56ee2761da0c3b30801d87a8d040ef77b89017e66c2b332e50fc"
+    },
+    "full8_scorer_retained_but_not_invoked": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_two_round_mask_prompt_sam3.py",
+      "sha256": "2a34fe396bcee77425001c218f1cb779db2732754ae9130c68262e73ed247158"
+    }
+  },
+  "exact_transport_statistics": {
+    "raster_shape_hw": [756, 1008],
+    "num_gaussians": 760715,
+    "accepted_hit_count": 69732384,
+    "visible_gaussians": 623025,
+    "supported_pixel_fraction": 1.0,
+    "rerender_probability_min": 0.04999994859099388,
+    "rerender_probability_max": 0.9499498605728149,
+    "rerender_probability_mean": 0.24157892167568207
+  },
+  "paired_fern_metrics": {
+    "sealed_field_box_parent": {
+      "foreground_iou": 0.8304732612835244,
+      "pixel_accuracy": 0.945636414331521,
+      "foreground_fraction_sam_raster": 0.29846282648862016
+    },
+    "sealed_one_shot_box_point_supermajority_parent": {
+      "foreground_iou": 0.8304732612835244,
+      "pixel_accuracy": 0.945636414331521,
+      "foreground_fraction_sam_raster": 0.29846282648862016
+    },
+    "exact_W_transpose_W_rerender_threshold": {
+      "foreground_iou": 0.823226711167782,
+      "pixel_accuracy": 0.9445676474194562,
+      "foreground_fraction_sam_raster": 0.2832524985302763,
+      "iou_to_one_shot_parent": 0.9369532731515061
+    },
+    "round2_mask_prompt_sam3": {
+      "foreground_iou": 0.8171995843855437,
+      "pixel_accuracy": 0.9409577246669657,
+      "foreground_fraction_sam_raster": 0.29842870790291426,
+      "iou_to_one_shot_parent": 0.9193781832452117
+    }
+  },
+  "loss_decomposition_foreground_iou": {
+    "exact_W_transpose_W_minus_one_shot": -0.007246550115742378,
+    "round2_self_prompt_minus_exact_rerender": -0.006027126782238268,
+    "round2_total_minus_one_shot": -0.013273676897980646,
+    "decomposition_closes": true
+  },
+  "round2_changed_pixel_diagnostic_at_ground_truth_resolution": {
+    "changed_pixels": 298434,
+    "changed_beneficial": 121362,
+    "changed_harmful": 177072,
+    "one_shot_only_pixels": 149577,
+    "round2_only_pixels": 148857,
+    "net_harmful_minus_beneficial": 55710
+  },
+  "round2_trial_stability": {
+    "trial_count": 10,
+    "foreground_iou_mean": 0.8164857665560012,
+    "foreground_iou_population_std": 0.001192744206189494,
+    "foreground_iou_min": 0.8152727792802164,
+    "foreground_iou_max": 0.8182231355349506,
+    "foreground_iou_range": 0.0029503562547342765,
+    "sam_quality_mean": 0.9359375,
+    "sam_quality_population_std": 0.0035801372616842495,
+    "sam_quality_vs_trial_iou_pearson": 0.8019191497477348,
+    "trials": [
+      {"trial": 0, "sam_quality": 0.9375, "foreground_fraction": 0.297768644494835, "foreground_iou": 0.8152727792802164, "iou_to_one_shot_parent": 0.9154370847526222},
+      {"trial": 1, "sam_quality": 0.94140625, "foreground_fraction": 0.30089836860670194, "foreground_iou": 0.8181270641532817, "iou_to_one_shot_parent": 0.9211100782758287},
+      {"trial": 2, "sam_quality": 0.94140625, "foreground_fraction": 0.2991123918703284, "foreground_iou": 0.8182231355349506, "iou_to_one_shot_parent": 0.9182659904293321},
+      {"trial": 3, "sam_quality": 0.9375, "foreground_fraction": 0.2995296884185773, "foreground_iou": 0.8180990592199149, "iou_to_one_shot_parent": 0.9217588961143021},
+      {"trial": 4, "sam_quality": 0.9296875, "foreground_fraction": 0.2978132611069119, "foreground_iou": 0.8155223289084399, "iou_to_one_shot_parent": 0.9165418893326979},
+      {"trial": 5, "sam_quality": 0.93359375, "foreground_fraction": 0.29680282606869907, "foreground_iou": 0.8153552575576267, "iou_to_one_shot_parent": 0.9174106010651788},
+      {"trial": 6, "sam_quality": 0.93359375, "foreground_fraction": 0.29698522927689597, "foreground_iou": 0.8157592615743635, "iou_to_one_shot_parent": 0.9167423490400659},
+      {"trial": 7, "sam_quality": 0.93359375, "foreground_fraction": 0.2970862727807172, "foreground_iou": 0.8157261478104152, "iou_to_one_shot_parent": 0.9159426530560552},
+      {"trial": 8, "sam_quality": 0.93359375, "foreground_fraction": 0.2966414189132443, "foreground_iou": 0.8156416166443645, "iou_to_one_shot_parent": 0.91730400923354},
+      {"trial": 9, "sam_quality": 0.9375, "foreground_fraction": 0.2985376249265138, "foreground_iou": 0.8171310148764387, "iou_to_one_shot_parent": 0.920433439146292}
+    ]
+  },
+  "full8_context_only_not_a_paired_two_round_result": {
+    "signed_field_box_sam3_macro_foreground_iou": 0.817616763357676,
+    "one_shot_box_point_supermajority_macro_foreground_iou": 0.8177621399957551,
+    "two_round_macro_foreground_iou": null,
+    "reason": "The frozen fern sentinel regressed, so the preregistered stop rule prevented full8 execution."
+  },
+  "conclusion": {
+    "mechanism": "The same-view exact W-transpose/W cycle smooths and shifts a high-quality one-shot SAM boundary, and the official mask self-prompt reinforces rather than repairs that transport error.",
+    "trial_variance_interpretation": "All ten trials are tightly clustered below the one-shot parent; the failure is systematic rather than prompt-sampling noise.",
+    "promotion_reason": "Both the transport-only rerender and round2 aggregate regress the sealed one-shot parent on the frozen sentinel."
+  },
+  "safety": {
+    "parameters_frozen_before_first_successful_sentinel_prediction": true,
+    "parameters_changed_after_sentinel_metric": false,
+    "target_rgb_opened_only_by_round2_query_adapter": true,
+    "target_mask_opened_only_after_exact_and_round2_sentinel_outputs_were_sealed": true,
+    "target_metric_used_for_prediction_or_selection": false,
+    "full8_target_masks_opened": false,
+    "second_persistent_semantic_field_created": false
+  },
+  "eligibility": {
+    "development_use_only": true,
+    "target_rgb_assisted": true,
+    "strict_unseen_protocol_eligible": false,
+    "sota_claim": false
+  }
+}

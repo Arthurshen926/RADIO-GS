@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_region_instance_prior_query_independence_erratum",
+  "date": "2026-08-17",
+  "status": "claim_scope_corrected_without_mutating_frozen_authorities",
+  "superseded_claim": "The 2026-08-17 typed authority described LERF source-view proposal construction as query independent.",
+  "correction": {
+    "proposal_geometry_lifting": "query independent: source-view masks are lifted with a frozen exact front-to-back marginal responsibility authority",
+    "proposal_generation": "query conditioned: the official SAM3 source caches were generated with the LERF benchmark query strings and bind every returned mask to mask_query_indices",
+    "valid_claim": "The current LERF experiment is a query-conditioned source-view SAM extent diagnostic, not the query-independent automatic multiscale SAM hierarchy proposed in the 2026-08-17 method analysis.",
+    "paper_mainline_eligible_as_query_independent_topology": false
+  },
+  "frozen_authorities_left_unchanged": [
+    {
+      "path": "paper/artifacts/typed_region_extent_readout_v1_authority_20260817.json",
+      "sha256": "8ce6155f39d391f685cc7090fad71c74a7184203ef146aa74cc885f97dbdb572"
+    },
+    {
+      "path": "paper/artifacts/region_instance_prior_method_improvements_20260817.json",
+      "sha256": "9c263e5a367766d423e70d41614be2a9beb1e91e978de1cf2981ca1e61798161"
+    }
+  ],
+  "direct_evidence": {
+    "official_sam3_source_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/foundation_cache_sam3_modelscope_mapped_trainviews/figurines/frame_00001.pt",
+      "sha256": "b401f285cff424aa0a99e5ac3d8045a424cd0a083ede8084e1080fcb64b7b7f2",
+      "queries": "the complete 21-category Figurines LERF query list",
+      "query_binding_fields": [
+        "heads.sam3.queries",
+        "heads.sam3.mask_query_indices",
+        "heads.sam3.mask_query_ranks"
+      ]
+    },
+    "lifted_membership_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam3_exact_mpr_memberships_v1/figurines.pt",
+      "sha256": "68fad9af25644e7dacfbd23dc5e17c245a2c2dc344d84b34a223facc83d27b20",
+      "query_binding_field": "proposal_query_names",
+      "geometry_metadata_field": "metadata.query_independent_geometry_lifting"
+    }
+  },
+  "coverage_diagnostic": {
+    "benchmark_categories": 67,
+    "categories_with_extent": 42,
+    "categories_without_extent_and_exact_fallback": 25,
+    "categories_improved_among_extent": 26,
+    "categories_regressed_among_extent": 16,
+    "sample_weighted_delta_among_extent": 0.0146288568,
+    "sample_weighted_delta_without_extent": 0.0,
+    "per_scene": {
+      "figurines": {
+        "categories": 21,
+        "categories_with_extent": 16,
+        "mean_selected_views": 3.380952381
+      },
+      "ramen": {
+        "categories": 14,
+        "categories_with_extent": 10,
+        "mean_selected_views": 3.928571429
+      },
+      "teatime": {
+        "categories": 14,
+        "categories_with_extent": 11,
+        "mean_selected_views": 4.0
+      },
+      "waldo_kitchen": {
+        "categories": 18,
+        "categories_with_extent": 5,
+        "mean_selected_views": 1.333333333
+      }
+    }
+  },
+  "method_gap": {
+    "stage_a_query_independent_automatic_multiscale_sam_hierarchy": "not implemented",
+    "stage_b_exact_mpr_soft_membership": "implemented for query-conditioned prompt masks only",
+    "stage_b_covisible_positive_negative_unknown_evidence": "not implemented",
+    "stage_c_low_dimensional_affinity_or_pair_head": "not integrated into the current field/readout",
+    "stage_d_cross_view_part_object_hierarchy": "not implemented",
+    "stage_e_mask_aligned_region_descriptor_and_proposal_identity_posterior": "not implemented"
+  },
+  "interpretation": "The small positive aggregate result establishes only that an identity-preserving bounded SAM extent residual can help. It does not validate the complete SAM-distilled hierarchical object-topology method."
+}

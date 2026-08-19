@@ -15,6 +15,7 @@ from typing import Mapping
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.checkpoint import checkpoint
 
 from radio_gs.utils.immutable_artifacts import (
     load_fixed_radio_checkpoint_payload,
@@ -166,6 +167,7 @@ def project_feature_map_with_adaptor(
     *,
     normalize: bool = True,
     amp: bool = False,
+    checkpoint_adaptor: bool = False,
 ) -> torch.Tensor:
     """Project ``[B, C, H, W]`` RADIO features through a frozen adaptor.
 
@@ -185,7 +187,14 @@ def project_feature_map_with_adaptor(
     if first_param is not None:
         tokens = tokens.to(dtype=first_param.dtype, device=first_param.device)
     with torch.cuda.amp.autocast(enabled=bool(amp and tokens.is_cuda)):
-        projected = adaptor(tokens)
+        if bool(checkpoint_adaptor and torch.is_grad_enabled() and tokens.requires_grad):
+            # The adaptor is frozen; recomputing its exact forward during
+            # backward avoids retaining two full-grid transformer activation
+            # stacks.  Only the gradient with respect to RADIO tokens is
+            # needed, and no stochastic layer is active in eval mode.
+            projected = checkpoint(adaptor, tokens, use_reentrant=False)
+        else:
+            projected = adaptor(tokens)
     projected = projected.permute(0, 2, 1).reshape(batch, -1, height, width)
     if normalize:
         projected = F.normalize(projected.float(), dim=1)

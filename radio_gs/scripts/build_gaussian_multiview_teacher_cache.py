@@ -1591,7 +1591,38 @@ def _sharded_support_weights_equivalent(
         return False
     if not torch.equal(lhs > 0, rhs > 0):
         return False
-    return bool(torch.allclose(lhs, rhs, rtol=1e-6, atol=1e-7))
+    # Long SPIn views can contribute millions of colliding atomic additions to
+    # one row.  Different legal CUDA launch orders then accumulate more than a
+    # handful of ULPs even though the exact sparse support is unchanged.  The
+    # frozen first-pass values remain the only denominator authority; this
+    # repeat is an integrity audit, so tolerate float32 reduction error while
+    # still rejecting any material mass drift.
+    return bool(torch.allclose(lhs, rhs, rtol=5e-5, atol=1e-6))
+
+
+def _sharded_support_weight_diagnostics(
+    observed: torch.Tensor,
+    reference: torch.Tensor,
+) -> dict[str, float | int]:
+    lhs = torch.as_tensor(observed).detach().float().cpu()
+    rhs = torch.as_tensor(reference).detach().float().cpu()
+    if lhs.shape != rhs.shape:
+        return {"shape_mismatch": 1}
+    finite = torch.isfinite(lhs) & torch.isfinite(rhs)
+    support_mismatch = (lhs > 0) != (rhs > 0)
+    active = finite & (rhs > 0)
+    absolute = (lhs - rhs).abs()
+    relative = absolute / rhs.abs().clamp_min(torch.finfo(torch.float32).tiny)
+    return {
+        "support_mismatch_count": int(support_mismatch.sum().item()),
+        "nonfinite_count": int((~finite).sum().item()),
+        "maximum_absolute_difference": float(
+            absolute[finite].max().item() if bool(finite.any()) else float("inf")
+        ),
+        "maximum_relative_difference": float(
+            relative[active].max().item() if bool(active.any()) else 0.0
+        ),
+    }
 
 
 def _stream_channel_sharded_contribution_mean_impl(
@@ -1807,9 +1838,13 @@ def _stream_channel_sharded_contribution_mean_impl(
             if not _sharded_support_weights_equivalent(
                 ignored_counts, registered_counts
             ):
+                diagnostics = _sharded_support_weight_diagnostics(
+                    ignored_counts, registered_counts
+                )
                 raise RuntimeError(
                     "channel-sharded accumulation support weights changed "
-                    "between the frozen count pass and feature pass"
+                    "between the frozen count pass and feature pass: "
+                    f"{diagnostics}"
                 )
 
             descriptor, temporary_name = tempfile.mkstemp(

@@ -205,6 +205,7 @@ def compute_radio_adaptor_masked_render_losses(
     teacher_capability_maps: Mapping[str, torch.Tensor] | None = None,
     gauge_separated: bool = True,
     projection_amp: bool = False,
+    projection_checkpoint: bool = False,
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, dict[str, torch.Tensor]]]:
     """Preserve official dense capability and local relations after rendering.
 
@@ -255,7 +256,10 @@ def compute_radio_adaptor_masked_render_losses(
     for name, weight in requested.items():
         adaptor = adaptors[name]
         predicted = project_feature_map_with_adaptor(
-            predicted_radio, adaptor, amp=bool(projection_amp)
+            predicted_radio,
+            adaptor,
+            amp=bool(projection_amp),
+            checkpoint_adaptor=bool(projection_checkpoint),
         )
         if teacher_capability_maps is None:
             with torch.no_grad():

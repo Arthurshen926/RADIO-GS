@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_sam3_foundation_mask_semantics_consumer_audit",
+  "date": "2026-08-17",
+  "status": "consumer_scope_audited_and_future_producer_contract_fixed",
+  "root_cause": {
+    "producer": "radio_gs/scripts/build_sam3_foundation_cache.py",
+    "official_output_key": "masks_logits",
+    "historical_cache_key": "heads.sam3.mask_logits",
+    "observed_tensor_semantics": "probability",
+    "historical_declared_semantics": null,
+    "observed_range": "[0,1]",
+    "double_sigmoid_range": "[0.5,0.7310586]",
+    "failure_mode": "background_probability_near_zero_becomes_probability_near_0.5"
+  },
+  "contract_closure": {
+    "new_producer_field": "heads.sam3.mask_tensor_semantics=probability",
+    "typed_loader_field": "FoundationHeadCache.mask_tensor_semantics",
+    "fail_closed_helper": "radio_gs/models/mask_tensor_contract.py",
+    "allowed_values": [
+      "probability",
+      "logit"
+    ],
+    "missing_semantics_policy": "reject; never infer from key or observed range",
+    "legacy_assets_mutated": false,
+    "tests": [
+      "tests/test_mask_tensor_contract.py",
+      "tests/test_build_sam3_foundation_cache.py",
+      "tests/test_build_lerf_sam3_exact_mpr_memberships_v2.py"
+    ],
+    "test_result": "25 passed"
+  },
+  "consumers": [
+    {
+      "consumer": "radio_gs/scripts/build_lerf_sam3_exact_mpr_memberships.py",
+      "reads_foundation_cache": true,
+      "historical_transform": "sigmoid(cache.mask_logits)",
+      "affected": true,
+      "resolution": "superseded by build_lerf_sam3_exact_mpr_memberships_v2.py; keep v1 immutable",
+      "must_rerun": true
+    },
+    {
+      "consumer": "radio_gs/models/sam3_proposal_registration.py::build_sam3_mask_memberships",
+      "reads_foundation_cache": false,
+      "api_semantics": "logit",
+      "affected": false,
+      "note": "the API is valid for logits; the LERF caller below violates it"
+    },
+    {
+      "consumer": "radio_gs/scripts/eval_lerf_direct_3d_selection.py::smooth_scores_with_sam3_training_view_proposals",
+      "reads_foundation_cache": true,
+      "historical_transform": "passes cache probability into logit API, which applies sigmoid",
+      "affected": true,
+      "resolution": "do not promote historical train-view proposal-registration rows; use an explicitly typed local v2"
+    },
+    {
+      "consumer": "radio_gs/models/foundation_cache.py::mask_logit_weight",
+      "reads_foundation_cache": true,
+      "historical_transform": "MSE(projected raw value, cached probability)",
+      "affected": true,
+      "note": "not a literal double sigmoid, but output and target spaces are inconsistent/ambiguous"
+    },
+    {
+      "consumer": "radio_gs/models/foundation_cache.py::mask_boundary_weight",
+      "reads_foundation_cache": true,
+      "historical_transform": "sigmoid(cached probability)",
+      "affected": true
+    },
+    {
+      "consumer": "radio_gs/models/foundation_cache.py::region_consistency_weight",
+      "reads_foundation_cache": true,
+      "historical_transform": "sigmoid(cached probability)",
+      "affected": true
+    },
+    {
+      "consumer": "radio_gs/models/foundation_cache.py::region_separation_weight",
+      "reads_foundation_cache": true,
+      "historical_transform": "sigmoid(cached probability)",
+      "affected": true
+    },
+    {
+      "consumer": "radio_gs/models/foundation_cache.py::feature_boundary_weight",
+      "reads_foundation_cache": true,
+      "historical_transform": "mask boundary computed after sigmoid(cached probability)",
+      "affected": true
+    },
+    {
+      "consumer": "radio_gs/scripts/train_prompt_conditioned_sam3_mask_head.py",
+      "reads_foundation_cache": true,
+      "affected": false,
+      "evidence": "all 25 materialized prompt-conditioned checkpoints bind target_activation=binary; current four LERF checkpoints additionally bind target_threshold=0.5",
+      "note": "a future target_activation=sigmoid run would be affected and must be rejected without semantics"
+    },
+    {
+      "consumer": "radio_gs/models/prompt_conditioned_mask_refinement.py and LERF evaluator prompt-head refinement",
+      "reads_foundation_cache": false,
+      "affected": false,
+      "reason": "sigmoid is applied to learned head output logits, not cached official masks"
+    },
+    {
+      "consumer": "LERF official box-prompt refiners",
+      "reads_foundation_cache": false,
+      "affected": false,
+      "reason": "normal path consumes output.masks",
+      "latent_issue": "fallback output.masks_logits > 0 lacks an explicit semantics contract and must not be used for a promoted row without a typed local v2"
+    },
+    {
+      "consumer": "NVOS source/reference and Method-v1 transient SAM3",
+      "reads_foundation_cache": false,
+      "affected": false,
+      "reason": "uses official predict_inst binary candidate masks; two-round mask input explicitly applies logit(probability) exactly once",
+      "latent_issue": "field-box fallback output.masks_logits > 0 is untyped, but output.masks is the normal path"
+    },
+    {
+      "consumer": "SPIn Available9 Method-v1 transient SAM3",
+      "reads_foundation_cache": false,
+      "affected": false,
+      "reason": "uses official predict_inst multimask binary outputs and vote aggregation"
+    },
+    {
+      "consumer": "ScanNet OVS instance topology/readout",
+      "reads_foundation_cache": false,
+      "affected": false,
+      "reason": "current path uses RADIO-to-SAM features or separate packed-boolean automatic-mask caches"
+    }
+  ],
+  "superseded_results": {
+    "mandatory": [
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam3_exact_mpr_memberships_v1/*.pt",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_sam_seed_*_v1",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_sam_gate_screen_*",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_sam_seed_basin_*_v2"
+    ],
+    "legacy_not_promotable_without_rerun": [
+      "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_direct3d_sam3_trainview_propreg_*",
+      "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/*official_sam3_boundary_ft*",
+      "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/*sam3_object_boundary_ft*",
+      "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_mutual_calib_*",
+      "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_siglip_dense*"
+    ]
+  },
+  "not_downgraded": [
+    "current Universal Field v1 assets: no foundation_cache_root/weight binding was found",
+    "LERF2D primitive-peak feature-SAM boundary full4 result: learned binary-target head path",
+    "NVOS 0.8176-class transient official-SAM result",
+    "SPIn transient official-SAM path",
+    "ScanNet current Method-v1/readout results",
+    "probability-correct LERF3D v2 exact-MPR residual results"
+  ],
+  "required_policy": {
+    "new_cache_generation": "write explicit mask_tensor_semantics",
+    "new_consumers": "call fail-closed mask_tensor_to_probability before interpolation, MPR, loss, fusion, or threshold",
+    "old_untyped_cache": "use only through a sealed local-v2 conversion that validates [0,1], records source SHA-256, and never mutates the old file",
+    "historical_results": "preserve for audit but mark superseded/legacy; do not silently relabel"
+  }
+}

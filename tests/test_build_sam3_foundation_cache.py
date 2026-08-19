@@ -95,6 +95,8 @@ def test_make_sam3_cache_payload_is_strict_official_cache():
 
     assert cache.frame_id == "rgb_000001"
     assert cache.heads["sam3"].mask_logits.shape == (2, 8, 8)
+    assert payload["heads"]["sam3"]["mask_tensor_semantics"] == "probability"
+    assert cache.heads["sam3"].mask_tensor_semantics == "probability"
     assert torch.equal(cache.heads["sam3"].mask_query_indices, torch.tensor([0, 0]))
     assert torch.equal(cache.heads["sam3"].mask_query_ranks, torch.tensor([0, 1]))
     assert cache.heads["sam3"].producer is not None

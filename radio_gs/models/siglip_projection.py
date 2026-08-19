@@ -65,6 +65,141 @@ def _xformers_attention_forward(
     return attention.proj_drop(projected)
 
 
+def _chunked_token_mlp_forward(mlp: nn.Module, x: torch.Tensor) -> torch.Tensor:
+    """Evaluate a timm token-wise MLP in exact bounded token blocks."""
+
+    chunk_size = int(getattr(mlp, "_radio_gs_token_chunk_size"))
+    if x.requires_grad and not any(
+        parameter.requires_grad for parameter in mlp.parameters()
+    ):
+        return _FrozenChunkedTokenMLP.apply(x, mlp, chunk_size)
+    return _run_token_mlp_chunks(mlp, x, chunk_size)
+
+
+def _run_token_mlp(mlp: nn.Module, token_chunk: torch.Tensor) -> torch.Tensor:
+    """Run one exact timm MLP block without dispatching its patched forward."""
+
+    token_chunk = mlp.fc1(token_chunk)
+    token_chunk = mlp.act(token_chunk)
+    token_chunk = mlp.drop1(token_chunk)
+    token_chunk = mlp.norm(token_chunk)
+    token_chunk = mlp.fc2(token_chunk)
+    return mlp.drop2(token_chunk)
+
+
+def _run_token_mlp_chunks(
+    mlp: nn.Module,
+    x: torch.Tensor,
+    chunk_size: int,
+) -> torch.Tensor:
+    outputs: list[torch.Tensor] = []
+    for token_chunk in x.split(chunk_size, dim=1):
+        outputs.append(_run_token_mlp(mlp, token_chunk))
+    return torch.cat(outputs, dim=1)
+
+
+class _FrozenChunkedTokenMLP(torch.autograd.Function):
+    """Exact frozen-MLP VJP with activation memory bounded by one chunk.
+
+    The official adaptor is frozen, so backward only needs ``dL/dx``.  A
+    conventional chunked forward still retains every chunk's hidden
+    activation until its enclosing transformer backward.  This function
+    stores only the MLP input, then recomputes and differentiates one chunk at
+    a time.  It changes execution order and residency, not the function or
+    first-order gradient.
+    """
+
+    @staticmethod
+    @torch.cuda.amp.custom_fwd
+    def forward(
+        ctx,
+        x: torch.Tensor,
+        mlp: nn.Module,
+        chunk_size: int,
+    ) -> torch.Tensor:
+        ctx.mlp = mlp
+        ctx.chunk_size = int(chunk_size)
+        ctx.save_for_backward(x)
+        return _run_token_mlp_chunks(mlp, x, int(chunk_size))
+
+    @staticmethod
+    @torch.cuda.amp.custom_bwd
+    def backward(ctx, grad_output: torch.Tensor):
+        (x,) = ctx.saved_tensors
+        input_gradients: list[torch.Tensor] = []
+        with torch.enable_grad():
+            for input_chunk, output_gradient_chunk in zip(
+                x.split(ctx.chunk_size, dim=1),
+                grad_output.split(ctx.chunk_size, dim=1),
+            ):
+                differentiable_input = input_chunk.detach().requires_grad_(True)
+                output_chunk = _run_token_mlp(ctx.mlp, differentiable_input)
+                (input_gradient,) = torch.autograd.grad(
+                    output_chunk,
+                    differentiable_input,
+                    output_gradient_chunk,
+                    retain_graph=False,
+                    create_graph=False,
+                )
+                input_gradients.append(input_gradient)
+        return torch.cat(input_gradients, dim=1), None, None
+
+
+def _run_output_mlp(
+    projection: "SigLIP2FeatureProjection",
+    token_chunk: torch.Tensor,
+) -> torch.Tensor:
+    return projection.mlp_final(projection.mlp_fc1(token_chunk))
+
+
+class _FrozenChunkedOutputMLP(torch.autograd.Function):
+    """Exact bounded VJP for the frozen final SigLIP2 projection MLP."""
+
+    @staticmethod
+    @torch.cuda.amp.custom_fwd
+    def forward(
+        ctx,
+        x: torch.Tensor,
+        projection: "SigLIP2FeatureProjection",
+        chunk_size: int,
+    ) -> torch.Tensor:
+        ctx.projection = projection
+        ctx.chunk_size = int(chunk_size)
+        ctx.save_for_backward(x)
+        return torch.cat(
+            [
+                _run_output_mlp(projection, chunk)
+                for chunk in x.split(int(chunk_size), dim=1)
+            ],
+            dim=1,
+        )
+
+    @staticmethod
+    @torch.cuda.amp.custom_bwd
+    def backward(ctx, grad_output: torch.Tensor):
+        (x,) = ctx.saved_tensors
+        input_gradients: list[torch.Tensor] = []
+        with torch.enable_grad():
+            for input_chunk, output_gradient_chunk in zip(
+                x.split(ctx.chunk_size, dim=1),
+                grad_output.split(ctx.chunk_size, dim=1),
+            ):
+                differentiable_input = input_chunk.detach().requires_grad_(True)
+                output_chunk = _run_output_mlp(
+                    ctx.projection,
+                    differentiable_input,
+                )
+                (input_gradient,) = torch.autograd.grad(
+                    output_chunk,
+                    differentiable_input,
+                    output_gradient_chunk,
+                    retain_graph=False,
+                    create_graph=False,
+                )
+                input_gradients.append(input_gradient)
+        return torch.cat(input_gradients, dim=1), None, None
+
+
 def _load_weights_only(path: str) -> object:
     payload, _, _ = load_torch_payload(
         path,
@@ -113,9 +248,30 @@ class SigLIP2FeatureProjection(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """x: [B, N, 1280] -> [B, N, 1536]."""
         x = self.blocks(x)
-        x = self.mlp_fc1(x)
-        x = self.mlp_final(x)
-        return x
+        chunk_size = int(getattr(self, "token_mlp_chunk_size", 0))
+        if chunk_size <= 0 or x.shape[1] <= chunk_size:
+            return self.mlp_final(self.mlp_fc1(x))
+        if x.requires_grad and not any(
+            parameter.requires_grad for parameter in self.parameters()
+        ):
+            return _FrozenChunkedOutputMLP.apply(x, self, chunk_size)
+        return torch.cat(
+            [self.mlp_final(self.mlp_fc1(chunk)) for chunk in x.split(chunk_size, dim=1)],
+            dim=1,
+        )
+
+    def enable_chunked_token_mlp(
+        self, chunk_size: int
+    ) -> "SigLIP2FeatureProjection":
+        """Bound token-wise MLP activations without changing token scope."""
+
+        if int(chunk_size) <= 0:
+            raise ValueError("SigLIP2 token MLP chunk size must be positive")
+        self.token_mlp_chunk_size = int(chunk_size)
+        for block in self.blocks:
+            block.mlp._radio_gs_token_chunk_size = int(chunk_size)
+            block.mlp.forward = MethodType(_chunked_token_mlp_forward, block.mlp)
+        return self
 
     def enable_xformers_memory_efficient_attention(
         self,

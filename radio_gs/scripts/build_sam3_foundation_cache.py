@@ -136,6 +136,10 @@ def make_sam3_cache_payload(
         raise ValueError("SAM3 masks must be [M,H,W]")
     head_payload: dict[str, Any] = {
         "mask_logits": masks.float().contiguous(),
+        # The official image processor currently exposes probability masks
+        # under its historical ``masks_logits`` output key.  The explicit
+        # contract prevents downstream code from applying a second sigmoid.
+        "mask_tensor_semantics": "probability",
         "producer": {
             "official": True,
             "backend": backend,

@@ -1,0 +1,75 @@
+{
+  "artifact": "sam3_probability_contract_erratum_20260817",
+  "status": "probability_contract_corrected_full4_completed_not_promoted_unstable_transfer",
+  "root_cause": {
+    "cache_key": "mask_logits",
+    "actual_semantics": "official_sam3_probability_in_[0,1]",
+    "v1_consumer_transform": "sigmoid",
+    "failure": "near_zero_background_becomes_approximately_0.5_and_enters_membership"
+  },
+  "figurines_memberships": {
+    "v1_pairs": 3174537,
+    "v2_pairs": 46407,
+    "reduction_factor": 68.40504622104424,
+    "v2_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam3_exact_mpr_memberships_v2_probability_correct/figurines.pt",
+    "v2_sha256": "7b58da981be5e3fa24e53d6b6f15fa2fadd8db7ce9b2440b72abca057b1c0d66"
+  },
+  "figurines_paired_fixed_readout": {
+    "guard_baseline_miou": 0.5765765309333801,
+    "v1_double_sigmoid_residual_miou": 0.5900672078132629,
+    "v2_probability_correct_residual_miou": 0.6068363785743713,
+    "v2_delta_over_baseline": 0.0302598476409912,
+    "v2_delta_over_v1": 0.0167691707611084,
+    "v2_acc025": 0.8928571428571429,
+    "v2_acc050": 0.75,
+    "v2_result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_seeded_residual_probability_correct_v2_alpha025/eval/figurines/figurines/lerf_direct_3d_selection_results.json"
+  },
+  "full4_same_pipeline_paired_result": {
+    "sample_count": 208,
+    "no_sam_peak_guard_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_peak_retention_guard_full4_v2_bound",
+    "v2_candidate_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_seeded_residual_probability_correct_v2_alpha025/eval",
+    "sample_micro": {
+      "no_sam_miou": 0.484513323324231,
+      "v2_miou": 0.4924437185892692,
+      "delta_miou": 0.007930395265038193,
+      "no_sam_acc025": 0.7740384615384616,
+      "v2_acc025": 0.7980769230769231,
+      "delta_acc025": 0.024038461538461564,
+      "no_sam_acc050": 0.5288461538461539,
+      "v2_acc050": 0.5432692307692307,
+      "delta_acc050": 0.014423076923076872,
+      "no_sam_boundary_f": 0.7120119473682001,
+      "v2_boundary_f": 0.7053628174158243,
+      "delta_boundary_f": -0.006649129952375765,
+      "no_sam_trimap_iou": 0.3767434252569309,
+      "v2_trimap_iou": 0.3690808131717719,
+      "delta_trimap_iou": -0.007662612085159004
+    },
+    "scene_macro_miou": {
+      "no_sam": 0.46538133919239044,
+      "v2": 0.47275731712579727,
+      "delta": 0.00737597793340683
+    },
+    "per_scene_miou_delta": {
+      "figurines": 0.03025984764099121,
+      "ramen": -0.024053722620010376,
+      "teatime": 0.031087398529052734,
+      "waldo_kitchen": -0.00778961181640625
+    },
+    "promotion": false,
+    "reason": "transfer is unstable; Ramen and Waldo regress in mIoU; Boundary-F and trimap IoU regress; proposals remain benchmark-query-conditioned"
+  },
+  "strong_replacement_diagnostic": {
+    "v1_miou": 0.11748630553483963,
+    "v2_miou": 0.47111013531684875,
+    "promotion": false,
+    "reason": "sparse mask absence is unknown, not negative"
+  },
+  "capability_track": "query_conditioned_source_sam_diagnostic_not_p0",
+  "query_independent_mask_hierarchy": false,
+  "implementation": "radio_gs/scripts/build_lerf_sam3_exact_mpr_memberships_v2.py",
+  "tests": [
+    "tests/test_build_lerf_sam3_exact_mpr_memberships_v2.py",
+    "tests/test_identity_seeded_object_topology.py"
+  ]
+}

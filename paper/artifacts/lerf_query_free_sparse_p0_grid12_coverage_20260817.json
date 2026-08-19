@@ -1,0 +1,68 @@
+{
+  "schema": "radio_gs.lerf_query_free_sparse_p0_grid12_coverage_receipt.v1",
+  "status": "complete_reviewed_sparse_p0_pilot_not_stage_a",
+  "scene": "figurines",
+  "artifact_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v5/figurines",
+  "construction_contract": {
+    "official_sam3_decoder": true,
+    "query_free_proposal_generation": true,
+    "source_views": 8,
+    "grid_size": 12,
+    "proposal_set_type": "single_scale_point_grid_multimask",
+    "multiscale_crop_pyramid": false,
+    "hierarchy_parent_edges_materialized": false,
+    "formal_stage_a_complete": false,
+    "benchmark_masks_opened": false,
+    "evaluation_rgb_opened": false,
+    "exact_mpr_formula_sha256": "a17a67f3fffcebd57c925e83eee249c97c24b4b2e56b0b0ac611530f570d85d4"
+  },
+  "proposal_counts_by_view": [5, 7, 9, 13, 9, 16, 4, 4],
+  "proposal_count": 67,
+  "exact_mpr_memberships": 44538,
+  "field_only_identity_seed_contract": {
+    "schema": "radio_gs.lerf_field_only_primitive_identity_scores.v1",
+    "region_membership_cache_opened": false,
+    "proposal_cache_opened": false,
+    "queries": 21
+  },
+  "coverage": {
+    "queries": 21,
+    "queries_with_at_least_one_covering_view": 7,
+    "one_view_coverage_fraction": 0.3333333333333333,
+    "queries_with_at_least_two_covering_views": 1,
+    "two_view_coverage_fraction": 0.047619047619047616,
+    "inside_membership_threshold": 0.5,
+    "prediction_constructed": false
+  },
+  "artifacts": {
+    "generation_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v5/figurines/official_sam3_masks/manifest.json",
+      "sha256": "0b08a3caccd033f01f7ac3d2ba6705533bad96fb87bb146eec8d4065260f3e98"
+    },
+    "preflight": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v5/figurines/preflight.json",
+      "sha256": "f55fa66960393161edc3d024593f4ce897644762f160b8dffaf914041775eafc"
+    },
+    "exact_mpr_memberships_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v5/figurines/query_free_exact_mpr_memberships_v2.pt",
+      "sha256": "6781633ac2c14a9ef7787153921a4a7502c23c2b9befa90f9debe787aef1cc57"
+    },
+    "field_only_identity_scores": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v5/figurines/field_only_primitive_identity_scores.pt",
+      "sha256": "bd32a904e03386a2e3132921d78fccd8bb5c10e9c88d519d00cd464ebafe38e6"
+    },
+    "coverage_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v5/figurines/field_identity_seed_coverage_v2.json",
+      "sha256": "630ee9ce664b797c184254fe44bcca1704ff57efd4c8e44b0e80f67b9dc3e778"
+    }
+  },
+  "superseded_artifact": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v5/figurines/query_free_exact_mpr_memberships.pt",
+    "sha256": "8ef88226179b918449a4d359d84a2dc622200d4d6d8d03d34bc1cc48d7590fd4",
+    "reason": "unclamped float32 accumulation produced a maximum membership of 1.0000007152557373; v2 explicitly clamps the probability ratio to [0,1] and retains the same thresholded support"
+  },
+  "promotion": false,
+  "promotion_reason": "This is a label-free coverage audit, not a benchmark prediction; the sparse single-scale eight-view pilot covers only 7/21 field identity seeds in one view and 1/21 in two views.",
+  "interpretation": "The result identifies proposal/view undercoverage in this sparse pilot. It is not evidence that a SAM region prior is ineffective and does not validate or refute the attachment's proposed multiscale hierarchy.",
+  "required_next_stage": "Implement true multiscale crop-pyramid automatic mask generation with dense coverage, explicit containment parent edges, and broader legal source-view support before evaluating an object-topology posterior."
+}

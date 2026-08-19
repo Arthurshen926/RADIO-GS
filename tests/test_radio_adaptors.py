@@ -102,3 +102,30 @@ def test_project_feature_map_with_adaptor_preserves_spatial_shape():
     assert projected.shape == (2, 3, 5, 7)
     norms = projected.norm(dim=1)
     assert torch.allclose(norms, torch.ones_like(norms), atol=1e-5)
+
+
+def test_checkpointed_frozen_adaptor_preserves_values_and_input_gradients():
+    torch.manual_seed(7)
+    adaptor = RadioMLPAdaptor(input_dim=4, hidden_dim=6, output_dim=3, num_blocks=2)
+    adaptor.eval()
+    for parameter in adaptor.parameters():
+        parameter.requires_grad_(False)
+    direct_input = torch.randn(1, 4, 5, 7, requires_grad=True)
+    checkpoint_input = direct_input.detach().clone().requires_grad_(True)
+
+    direct = project_feature_map_with_adaptor(direct_input, adaptor)
+    checkpointed = project_feature_map_with_adaptor(
+        checkpoint_input,
+        adaptor,
+        checkpoint_adaptor=True,
+    )
+    direct.square().sum().backward()
+    checkpointed.square().sum().backward()
+
+    assert torch.allclose(checkpointed, direct, atol=1e-7, rtol=1e-6)
+    assert torch.allclose(
+        checkpoint_input.grad,
+        direct_input.grad,
+        atol=1e-7,
+        rtol=1e-6,
+    )

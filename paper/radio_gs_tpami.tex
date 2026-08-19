@@ -409,6 +409,39 @@ per-scene thresholds, or test-set calibration.  RGB/depth discontinuities may
 condition the query-independent observation topology, but do not change a
 primitive's canonical query score.
 
+\subsection{Typed Identity--Extent and Instance Readouts}
+
+A single scalar similarity cannot simultaneously optimize sparse target
+identity and complete object extent.  We therefore preserve two typed outputs
+from the same persistent field.  For text query $q$, the canonical feature
+defines an identity unary $u_i(q)=\cos(e_i,t_q)$.  Query-independent official
+SAM proposals from legal source views are associated across views and lifted
+with exact marginal responsibilities to instance memberships $r_{ik}$.  The
+official SigLIP masked-crop representation scores proposal identity, giving
+\begin{equation}
+ p_i^{\mathrm{ext}}(q)=\sum_k p(k\mid q)r_{ik}.
+\end{equation}
+The extent branch is anchored to the field identity peak: it may complete the
+support containing that peak but cannot move the localization result.  Identity
+and extent maps are rendered and resized independently.  This readout adds no
+second persistent semantic field.
+
+Mutually exclusive categories require a different posterior.  On ScanNet, SAM
+affinity supplies only a bounded residual on rows whose top-two class margin is
+below a fixed threshold,
+\begin{equation}
+ \tilde p_i=p_i+\alpha\mathbf 1[m_i<\tau]
+ (L_{\mathrm{sam}}p-p)_i.
+\end{equation}
+High-margin class decisions are immutable, and SAM never creates category
+identity.  For registered NVOS and SPIn prompts, protocol-authorized transient
+RGB may be processed by frozen official SAM.  Box and signed-point hypotheses
+are decoded independently and combined after mask decoding using positive
+inclusion and negative exclusion.  We do not treat a joint box--point prompt as
+additive evidence: that control fails the frozen NVOS promotion gate.  These
+three interfaces share the same Universal Field v1 but respect the distinct
+statistical type of text, categorical, and registered-prompt queries.
+
 \section{Experiments}
 
 \subsection{Evaluation Protocol and Provenance}

@@ -602,7 +602,7 @@ def _run_with_scene_lock(
                 "--no-fusion-reliability",
                 "--freeze-basis",
                 "--basis-fit-device",
-                "cuda:0",
+                "cpu",
                 "--official-capability-loss",
                 "--capability-target-contract",
                 "matched_exact_marginal",
@@ -630,6 +630,8 @@ def _run_with_scene_lock(
                 "4096",
                 "--eval-batch-size",
                 "16384",
+                "--local-code-training-dtype",
+                "float16",
                 "--learning-rate",
                 "0.002",
                 "--weight-decay",
@@ -707,7 +709,7 @@ def _run_with_scene_lock(
         "--device",
         "cuda:0",
         "--steps",
-        "64",
+        "256",
         "--mpr-weight",
         "0.10",
         "--max-mpr-drop",
@@ -724,7 +726,19 @@ def _run_with_scene_lock(
         "official_extracted",
         "--capability-projection-amp",
         "--capability-projection-xformers",
+        "--capability-projection-checkpoint",
+        "--capability-projection-token-mlp-chunk-size",
+        # The token MLP is pointwise, so smaller exact chunks trade only
+        # runtime for peak activation memory.  This leaves enough headroom on
+        # shared 24-GiB workers for the complete-grid official adaptor.
+        "64",
+        "--staged-capability-gradient",
+        "--offload-capability-adaptors-after-gradient",
+        "--column-staged-direct-field-backward",
         "--release-validation-cuda-cache",
+        "--offload-optimizer-state",
+        "--local-code-training-dtype",
+        "float16",
         "--capability-local-affinity-weight",
         "0.25",
         "--capability-local-radius",
@@ -761,7 +775,6 @@ def _run_with_scene_lock(
         return {"scene": assets.scene, "completed_stage": STAGES[9]}
 
     semantic_common = [
-        "--offload-optimizer-state",
         "--semantic-weight",
         "0.05",
         "--semantic-centered-weight",
@@ -774,6 +787,13 @@ def _run_with_scene_lock(
         REGION_BRIDGE,
         "--semantic-kernel-sizes",
         "3,7,15",
+        # The official summary head is pointwise and CPU resident for SPIn.
+        # A large host batch is algebraically identical, avoids thousands of
+        # tiny GEMMs per view, and does not consume accelerator memory.
+        "--semantic-projection-batch-size",
+        "2048",
+        "--semantic-projector-device",
+        "cpu",
     ]
     if not _require_complete(
         region_field,

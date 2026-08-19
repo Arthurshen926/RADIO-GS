@@ -64,10 +64,13 @@ def variant_state(
 
 
 def _macro_for_model(
-    scenes: dict[str, dict[str, Any]], model: CategoricalPosteriorV2, chunk_size: int
+    scenes: dict[str, dict[str, Any]],
+    model: CategoricalPosteriorV2,
+    chunk_size: int,
+    device: torch.device,
 ) -> dict[str, Any]:
     baseline, calibrated = _metric_rows(
-        scenes, model, device=torch.device("cpu"), chunk_size=chunk_size
+        scenes, model, device=device, chunk_size=chunk_size
     )
     return {
         "baseline_all8": scene_macro(baseline, PAPER_SCENES),
@@ -81,6 +84,12 @@ def _macro_for_model(
 def run(args: argparse.Namespace) -> dict[str, Any]:
     torch.set_num_threads(int(args.cpu_threads))
     torch.set_num_interop_threads(1)
+    device = torch.device(args.device)
+    if device.type == "cuda" and not torch.cuda.is_available():
+        raise ValueError("CUDA exact replay requested but CUDA is unavailable")
+    shrinkage = tuple(float(value) for value in args.shrinkage.split(","))
+    if not shrinkage or any(value not in SHRINKAGE for value in shrinkage):
+        raise ValueError(f"shrinkage must be a subset of {SHRINKAGE}")
     inventory, inventory_sha, inventory_path = load_json_object(
         args.inventory, label="Method-v1 asset inventory"
     )
@@ -97,9 +106,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             inventory=inventory,
             universal_root=Path(args.universal_root).expanduser().resolve(),
             text=text,
-            device=torch.device("cpu"),
+            device=device,
             chunk_size=int(args.chunk_size),
-            require_exact_replay=False,
+            require_exact_replay=device.type == "cuda",
         )
         for scene in PAPER_SCENES
     }
@@ -111,14 +120,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     trained = checkpoint["state_dict"]
     variants: dict[str, Any] = {}
     for background in (False, True):
-        for alpha in SHRINKAGE:
+        for alpha in shrinkage:
             name = f"shrink_{alpha:g}_{'with_background' if background else 'class_only'}"
-            model = CategoricalPosteriorV2(num_classes=len(PAPER_CLASS_IDS))
+            model = CategoricalPosteriorV2(num_classes=len(PAPER_CLASS_IDS)).to(device)
             model.load_state_dict(
                 variant_state(trained, alpha=alpha, background=background), strict=True
             )
             model.eval()
-            variants[name] = _macro_for_model(scenes, model, int(args.chunk_size))
+            variants[name] = _macro_for_model(
+                scenes, model, int(args.chunk_size), device
+            )
     def objective(item: tuple[str, Any]) -> tuple[float, float, str]:
         name, metrics = item
         heldout = metrics["candidate_heldout6"]
@@ -143,6 +154,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "variants": "four fixed shrinkage strengths crossed with background enabled/disabled",
             "persistent_scene_state_added": False,
             "selection_objective": "maximize worst heldout6 mIoU across 19/15/10, then sum mIoU",
+        },
+        "execution": {
+            "device": str(device),
+            "cuda_exact_primitive_replay_required": device.type == "cuda",
+            "chunk_size": int(args.chunk_size),
         },
         "cpu_replay_audit": {
             scene: copy.deepcopy(data["primitive_replay"])
@@ -173,6 +189,8 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--cpu-threads", type=int, default=4)
     parser.add_argument("--chunk-size", type=int, default=8192)
+    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--shrinkage", default=",".join(str(value) for value in SHRINKAGE))
     args = parser.parse_args()
     if not 1 <= args.cpu_threads <= 16:
         parser.error("--cpu-threads must be in [1,16]")

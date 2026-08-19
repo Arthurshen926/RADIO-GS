@@ -4,7 +4,10 @@ import torch
 
 from radio_gs.scripts.eval_scannet_vala_gaussian_protocol import (
     assign_vala_pseudo_labels,
+    build_official_sam_region_graph,
     load_method_v1_external_query_features,
+    propagate_categorical_identity_over_instance_topology,
+    smooth_categorical_scores_with_region_graph,
     volume_weighted_split_metrics,
 )
 from radio_gs.utils.immutable_artifacts import sha256_file
@@ -103,3 +106,86 @@ def test_method_v1_external_query_features_are_sha_and_geometry_bound(tmp_path):
             expected_xyz=xyz + 1.0,
             expected_dim=3,
         )
+
+
+def test_sam_region_residual_changes_only_low_margin_rows():
+    scores = torch.tensor(
+        [[0.51, 0.49], [0.90, 0.10], [0.10, 0.90]], dtype=torch.float32
+    )
+    neighbors = torch.tensor([[1], [2], [1]])
+    weights = torch.ones(3, 1)
+
+    refined, stats = smooth_categorical_scores_with_region_graph(
+        scores,
+        neighbors,
+        weights,
+        alpha=1.0,
+        margin_threshold=0.05,
+        device=torch.device("cpu"),
+        chunk_size=2,
+    )
+
+    assert torch.allclose(refined[0], scores[1])
+    assert torch.allclose(refined[1:], scores[1:])
+    assert stats["changed_rows"] == 1
+
+
+def test_sam_region_graph_rejects_spatial_or_feature_boundary_edges():
+    xyz = np.array([[0.0, 0.0, 0.0], [0.01, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    features = torch.tensor([[1.0, 0.0], [-1.0, 0.0], [1.0, 0.0]])
+    indices, weights, stats = build_official_sam_region_graph(
+        xyz,
+        features,
+        torch.ones(3, dtype=torch.bool),
+        k=2,
+        radius=0.1,
+        similarity_threshold=0.5,
+        device=torch.device("cpu"),
+        chunk_size=2,
+    )
+
+    assert indices.shape == weights.shape
+    assert int((weights > 0).sum()) == 0
+    assert stats["edge_count"] == 0
+
+
+def test_sam_instance_topology_preserves_markers_and_extends_identity():
+    scores = torch.tensor(
+        [[0.90, 0.10], [0.505, 0.500], [0.10, 0.90]], dtype=torch.float32
+    )
+    neighbors = torch.tensor([[1], [0], [1]])
+    weights = torch.ones(3, 1)
+
+    refined, stats = propagate_categorical_identity_over_instance_topology(
+        scores,
+        neighbors,
+        weights,
+        seed_margin_threshold=0.05,
+        update_margin_threshold=0.01,
+        semantic_tolerance=0.01,
+        consensus_threshold=0.9,
+        iterations=1,
+    )
+
+    assert refined[0].argmax().item() == 0
+    assert refined[1].argmax().item() == 0
+    assert refined[2].argmax().item() == 1
+    assert torch.equal(refined[[0, 2]], scores[[0, 2]])
+    assert stats["seed_rows"] == 2
+
+
+def test_sam_instance_topology_rejects_semantically_implausible_marker():
+    scores = torch.tensor([[0.90, 0.10], [0.40, 0.50]], dtype=torch.float32)
+    refined, stats = propagate_categorical_identity_over_instance_topology(
+        scores,
+        torch.tensor([[1], [0]]),
+        torch.ones(2, 1),
+        seed_margin_threshold=0.05,
+        update_margin_threshold=0.2,
+        semantic_tolerance=0.01,
+        consensus_threshold=0.9,
+        iterations=1,
+    )
+
+    assert torch.equal(refined, scores)
+    assert stats["changed_rows"] == 0

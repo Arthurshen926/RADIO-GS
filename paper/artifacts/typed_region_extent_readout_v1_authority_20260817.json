@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_typed_region_extent_readout_v1_authority",
+  "status": "frozen_after_development_for_subsequent_confirmation",
+  "parent_method": {
+    "path": "paper/artifacts/five_benchmark_method_v1_authority_20260815.json",
+    "sha256": "48e0d432f38ce9ad973e03a805e50a477c1e334ac78349f80eb6e6e02f6239c6"
+  },
+  "common_invariants": {
+    "identity_authority": "canonical RADIO/SigLIP text posterior",
+    "identity_peak_may_move": false,
+    "region_role": ["extent", "co_membership", "boundary", "low_margin_topology"],
+    "region_may_define_independent_class_identity": false,
+    "second_persistent_high_dimensional_semantic_field": false,
+    "benchmark_mask_training": false
+  },
+  "typed_operators": {
+    "lerf2d": {
+      "operator": "primitive_peak_plus_feature_only_prompt_sam_boundary",
+      "target_rgb": false,
+      "initial_refinement": "peak_component",
+      "minimum_initial_iou": 0.5,
+      "refined_area_ratio": [0.7, 1.3],
+      "support_dilate": 12,
+      "coarse_dilate": 1,
+      "coarse_threshold": 0.5,
+      "minimum_heatmap_mean_ratio": 0.85,
+      "minimum_heatmap_mass_ratio": 0.25,
+      "require_identity_peak": true
+    },
+    "lerf3d": {
+      "operator": "identity_seeded_exact_mpr_source_sam_extent_residual",
+      "target_rgb": false,
+      "query_matched_source_proposals": true,
+      "proposal_mean_ratio": 0.0,
+      "seed_support_ratio": 0.8,
+      "minimum_views": 2,
+      "residual_alpha": 0.25,
+      "require_identity_peak": true
+    },
+    "scannet_ovs": {
+      "operator": "official_radio_to_sam_local_low_margin_categorical_residual",
+      "neighbors": 8,
+      "radius": 0.1,
+      "sam_cosine_threshold": 0.5,
+      "residual_alpha": 0.25,
+      "categorical_margin_threshold": 0.03,
+      "high_margin_rows_immutable": true
+    },
+    "nvos": {
+      "operator": "official_sam_field_box_plus_signed_point_supermajority",
+      "target_rgb_assisted": true,
+      "point_trial_count": 10,
+      "minimum_consensus_trials": 7,
+      "minimum_consensus_margin": 0.2,
+      "strict_unseen_retained_as_ablation": true
+    },
+    "spin_available9": {
+      "operator": "reference_calibrated_official_sam_signed_point_multimask",
+      "target_rgb_assisted": true,
+      "point_trial_count": 10,
+      "positive_points_per_trial": 3,
+      "negative_points_per_trial": 3,
+      "candidate_count": 3,
+      "reference_only_candidate_and_threshold_selection": true,
+      "target_metric_selection": false
+    }
+  },
+  "implementations": {
+    "sam_extent_model": {
+      "path": "radio_gs/models/sam3_proposal_registration.py",
+      "sha256": "cb35d4e6e4a7acecc19284f7fdb46095317f97d8ea9164da734f45f07b78d4e6"
+    },
+    "lerf2d": {
+      "path": "radio_gs/scripts/eval_lerf_grounding.py",
+      "sha256": "ad43604a641aaadb79512d08e3b77fc72ad00e0aef49db69330870ce3c7d2a1e"
+    },
+    "lerf3d": {
+      "path": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "88ca20aa3ef47d7e3502e097123b63eec5e490ad3087a31492d1399b2bdee8ae"
+    },
+    "scannet_ovs": {
+      "path": "radio_gs/scripts/eval_scannet_vala_gaussian_protocol.py",
+      "sha256": "1e5232c61152097b2a6a31cb364f9af445d493d3ddce32f7f299d81e7816318a"
+    },
+    "nvos": {
+      "path": "radio_gs/scripts/fuse_nvos_box_point_consensus.py",
+      "sha256": "cf0cdb5bab8cfd01f5a6e160e3f148d11a1146a6af1720adef0c4e1a519706aa"
+    },
+    "spin_available9": {
+      "path": "radio_gs/scripts/predict_spin9_method_v1_transient_sam.py",
+      "sha256": "9b263a82ad2396960a4f7c46768529480b495a842bf40c7603c9cb64f6058178"
+    }
+  },
+  "development_evidence": {
+    "path": "paper/artifacts/region_instance_prior_method_improvements_20260817.json",
+    "sha256": "9c263e5a367766d423e70d41614be2a9beb1e91e978de1cf2981ca1e61798161"
+  },
+  "claim_boundary": {
+    "development_outputs_already_opened": true,
+    "prospectively_blind": false,
+    "sota_claim_authorized": false,
+    "next_use": "fixed confirmation or cross-dataset transfer without retuning"
+  }
+}

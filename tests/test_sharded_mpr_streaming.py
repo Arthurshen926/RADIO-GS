@@ -13,6 +13,7 @@ import torch
 from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     _load_saved_responsibility_for_sharded_resume,
     _sharded_support_weights_equivalent,
+    _sharded_support_weight_diagnostics,
     _stream_channel_sharded_contribution_mean,
     accumulate_contribution_mean_channel_chunked,
     finalize_registered_mean_chunked,
@@ -404,7 +405,7 @@ def test_streamed_contribution_mean_matches_dense_and_resumes(
 def test_sharded_support_audit_accepts_cuda_reduction_roundoff_only() -> None:
     reference = torch.tensor([0.0, 1.0, 6.5, 12.0], dtype=torch.float32)
     observed = reference.clone()
-    observed[2] = torch.nextafter(observed[2], torch.tensor(float("inf")))
+    observed[2] *= 1.0 + 2e-5
 
     assert _sharded_support_weights_equivalent(observed, reference)
     assert not _sharded_support_weights_equivalent(
@@ -413,6 +414,12 @@ def test_sharded_support_audit_accepts_cuda_reduction_roundoff_only() -> None:
     assert not _sharded_support_weights_equivalent(
         torch.tensor([0.0, 1.0, 6.6, 12.0]), reference
     )
+    assert not _sharded_support_weights_equivalent(
+        torch.tensor([0.0, 1.0, 6.5065, 12.0]), reference
+    )
+    diagnostics = _sharded_support_weight_diagnostics(observed, reference)
+    assert diagnostics["support_mismatch_count"] == 0
+    assert 0.0 < diagnostics["maximum_relative_difference"] < 5e-5
 
 
 def _write_responsibility_fixture(path: Path, contract: dict) -> str:

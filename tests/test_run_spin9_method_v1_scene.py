@@ -28,6 +28,13 @@ def test_spin_source_features_use_all_rgb_at_frozen_grid() -> None:
     assert CAPABILITY_SHARD_CHANNELS == 512
 
 
+def test_spin_finetune_stages_use_exact_staged_capability_backward() -> None:
+    source = Path(spin.__file__).read_text(encoding="utf-8")
+    assert '"--staged-capability-gradient"' in source
+    assert '"--offload-capability-adaptors-after-gradient"' in source
+    assert '"--column-staged-direct-field-backward"' in source
+
+
 def test_spin_scene_outside_available_nine_fails_closed() -> None:
     with pytest.raises(ValueError, match="outside frozen SPIn Available-Nine"):
         resolve_scene_assets("flower")

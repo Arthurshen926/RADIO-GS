@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_official_sam_exact_mpr_dev4_confirmation_result",
+  "status": "rejected_after_independent_confirmation_stop_rule",
+  "hypothesis": "Official source-view SAM instances may change an ambiguous Gaussian class only when confident field markers agree across multiple proposals and independent views.",
+  "invariants": {
+    "class_identity_authority": "Method-v1 RADIO/SigLIP scores",
+    "sam_role": "instance equivalence only",
+    "query_free": true,
+    "persistent_second_semantic_field": false,
+    "benchmark_masks_used_for_prediction": false
+  },
+  "development": {
+    "scenes": ["scene0000_00", "scene0062_00", "scene0070_00", "scene0097_00"],
+    "variants_screened": 216,
+    "selected_settings": {
+      "seed_margin_threshold": 0.04,
+      "update_margin_threshold": 0.005,
+      "semantic_tolerance": 0.0001,
+      "consensus_threshold": 1.0,
+      "minimum_supporting_proposals": 4,
+      "minimum_supporting_views": 3,
+      "iterations": 1
+    },
+    "miou_delta": {"19": 0.0000313858, "15": 0.0000696136, "10": 0.0000486359},
+    "macc_delta": {"19": -0.0000001762, "15": 0.0000206234, "10": 0.0000380658},
+    "changed_rows_across_scene_split_pairs": 61,
+    "screen": {
+      "path": "paper/artifacts/scannet_sam_instance_consensus_dev4_screen_20260817.json",
+      "sha256": "4948286126ca050eb3932e9606dd2cb5b12ff2a2521646e440cd688658bbfaf1"
+    }
+  },
+  "confirmation": {
+    "planned_scenes": ["scene0140_00", "scene0347_00", "scene0400_00", "scene0590_00"],
+    "evaluated_before_stop": ["scene0140_00", "scene0347_00", "scene0400_00"],
+    "mean_miou_delta": {"19": -0.0000574276, "15": -0.0000696921, "10": -0.0000808552},
+    "mean_macc_delta": {"19": -0.0000253494, "15": -0.0000203886, "10": -0.0000545806},
+    "all_evaluated_scene_split_miou_deltas_negative": true,
+    "scene0590_prediction_evidence_built_without_opening_label": true,
+    "scene0590_membership": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_instance_v1/scene0590_00/official_sam3_exact_mpr_memberships.pt",
+      "sha256": "3759c17b7ff179d854c9b08d80058163d5e57474740b7e0ac7404b7914e8850c"
+    },
+    "results": {
+      "scene0140_00": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_exact_mpr_confirmation4_v2/scene0140_00/scannet_vala_gaussian_protocol_results.json", "sha256": "02cb90dff176b1f7f9d923007f41fa2225a01fbaedc9b3bd63d74c820bc2acbd"},
+      "scene0347_00": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_exact_mpr_confirmation4_v2/scene0347_00/scannet_vala_gaussian_protocol_results.json", "sha256": "078a9c88807574be29a0b76aff396d971406126754f173d543213004ed76ed09"},
+      "scene0400_00": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_exact_mpr_confirmation4_v2/scene0400_00/scannet_vala_gaussian_protocol_results.json", "sha256": "fce8a7fcaa5296e16e874ad0dd0340100e682791dec901850598a80a1c7685b3"}
+    }
+  },
+  "decision": {
+    "promotion": false,
+    "reason": "Perfect proposal consensus does not supply categorical identity; even tie-level class flips reverse on independent scenes.",
+    "retained_scannet_method": "official RADIO-to-SAM local low-margin residual",
+    "retained_full8_miou": {"19": 0.3380990921, "15": 0.3361657821, "10": 0.4254807298},
+    "retained_full8_miou_delta": {"19": 0.0027455741, "15": 0.0024706988, "10": 0.0033498330},
+    "retained_full8_summary": {
+      "path": "paper/artifacts/region_instance_prior_method_improvements_20260817.json",
+      "sha256": "9c263e5a367766d423e70d41614be2a9beb1e91e978de1cf2981ca1e61798161"
+    }
+  }
+}

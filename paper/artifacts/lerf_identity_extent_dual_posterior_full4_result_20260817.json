@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf_identity_extent_dual_posterior_full4_result",
+  "status": "complete_full4_development_result",
+  "method": {
+    "persistent_field": "Universal Field v1 D512/L512",
+    "typed_posterior": "official_sam3_siglip2_identity_extent_factorization_v3",
+    "identity_output": "field SigLIP2 relevancy rendered independently for localization",
+    "extent_output": "query-free source-view official SAM3 multiscale proposals, official SigLIP2 masked-crop identity, cross-view instance association, exact-MPR lifting, and field-peak anchoring",
+    "persistent_second_semantic_field": false,
+    "source_views_per_scene": 32,
+    "benchmark_images_opened_for_prediction": false,
+    "benchmark_masks_opened_for_prediction": false,
+    "evaluation_rgb_opened_for_prediction": false,
+    "query_text_opened_at_readout": true
+  },
+  "lerf2d": {
+    "baseline": "Method-v1 primitive readout",
+    "metric": "sample-micro mIoU at fixed posterior threshold 0.6",
+    "scenes": {
+      "figurines": {"baseline_miou": 0.3702112495, "candidate_miou": 0.4262441682, "delta_miou": 0.0560329187, "localization_accuracy": 0.9107142857},
+      "ramen": {"baseline_miou": 0.2198506482, "candidate_miou": 0.3721821717, "delta_miou": 0.1523315236, "localization_accuracy": 0.8591549296},
+      "teatime": {"baseline_miou": 0.3753573712, "candidate_miou": 0.3951439816, "delta_miou": 0.0197866104, "localization_accuracy": 0.8983050847},
+      "waldo_kitchen": {"baseline_miou": 0.3118674636, "candidate_miou": 0.3966808962, "delta_miou": 0.0848134326, "localization_accuracy": 0.8181818182}
+    },
+    "full4": {
+      "samples": 208,
+      "baseline_sample_micro_miou": 0.3141749764,
+      "candidate_sample_micro_miou": 0.3958417415,
+      "delta_sample_micro_miou": 0.0816667652,
+      "candidate_scene_macro_miou": 0.3975628044,
+      "baseline_localization_accuracy": 0.8798076923,
+      "candidate_localization_accuracy": 0.8798076923,
+      "delta_localization_accuracy": 0.0,
+      "positive_scene_count": 4
+    }
+  },
+  "lerf3d": {
+    "baseline": "Primitive Readout-v0 at threshold 0.6",
+    "candidate_postprocess": "query-independent peak-component retention guard",
+    "scenes": {
+      "figurines": {"baseline_miou": 0.4484009147, "candidate_miou": 0.5164960623, "delta_miou": 0.0680951476},
+      "ramen": {"baseline_miou": 0.2917341590, "candidate_miou": 0.3105587363, "delta_miou": 0.0188245773},
+      "teatime": {"baseline_miou": 0.3287052512, "candidate_miou": 0.4151353538, "delta_miou": 0.0864301026},
+      "waldo_kitchen": {"baseline_miou": 0.1981453747, "candidate_miou": 0.3216101527, "delta_miou": 0.1234647781}
+    },
+    "full4": {
+      "samples": 208,
+      "baseline_sample_micro_miou": 0.3345018489,
+      "candidate_before_component_guard_miou": 0.3757236885,
+      "candidate_sample_micro_miou": 0.3968358606,
+      "delta_sample_micro_miou": 0.0623340117,
+      "candidate_scene_macro_miou": 0.3909500763,
+      "baseline_acc025": 0.5769230769,
+      "candidate_acc025": 0.6153846154,
+      "baseline_acc050": 0.2740384615,
+      "candidate_acc050": 0.4086538462,
+      "positive_scene_count": 4
+    }
+  },
+  "implementation_correction": {
+    "issue": "The first dual-posterior evaluator upsampled the extent map but applied the 30x30 localization smoother to the low-resolution identity map.",
+    "fix": "Render and resize the identity localization heatmap independently before the unchanged paper localization operator.",
+    "equivalence_check": "On Figurines, the corrected identity path recovers localization accuracy 0.9107142857 exactly; the extent-disabled mIoU differs from the primitive reference by less than 1e-5.",
+    "superseded_runs": ["v6", "v7", "v8"],
+    "accepted_run": "v9_final_identity_extent"
+  },
+  "result_files": {
+    "lerf2d": {
+      "figurines": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v9_final_identity_extent/lerf2d/figurines_eval/lerf_ovs_results.json", "sha256": "b0274dc12fe8258c237b3503e4688b002a83b742de18c5acbeab2dceca67aa77"},
+      "ramen": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v9_final_identity_extent/lerf2d/ramen_eval/lerf_ovs_results.json", "sha256": "5a2d8d62513f1856561e05012045a89d8710f3cd307790de3cf0ed1f17b6680c"},
+      "teatime": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v9_final_identity_extent/lerf2d/teatime_eval/lerf_ovs_results.json", "sha256": "bf63315cda297cfebca6c18460a3c622267526bde01596ffe6760783a12153ee"},
+      "waldo_kitchen": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v9_final_identity_extent/lerf2d/waldo_kitchen_eval/lerf_ovs_results.json", "sha256": "918995e36781098aebf66eb7597569c3460cfcf6744a626581abdb613a64956b"}
+    },
+    "lerf3d": {
+      "figurines": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v9_final_identity_extent/lerf3d/figurines/figurines/lerf_direct_3d_selection_results.json", "sha256": "a802bc4af07bc51100dccebc1c197ac77eb63aabf4718b277d5f6757e2bdc32"},
+      "ramen": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v9_final_identity_extent/lerf3d/ramen/ramen/lerf_direct_3d_selection_results.json", "sha256": "9e60770a6648e2a080f016773bff6bf4e860ac282ac62ec06c0f658e6344bee4"},
+      "teatime": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v9_final_identity_extent/lerf3d/teatime/teatime/lerf_direct_3d_selection_results.json", "sha256": "38c83e0b4973972357b83b235a758ff9112f8ce0f338b1c763858985eff90343"},
+      "waldo_kitchen": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v9_final_identity_extent/lerf3d/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json", "sha256": "8a71a8305fbc0c7300f128ea218388ff1806c35a5734ead80595a2b7fc982695"}
+    }
+  },
+  "interpretation": {
+    "supported": "A single similarity posterior is not sufficient for both object identity localization and complete object extent. Keeping an identity unary and a separately rendered instance-extent posterior improves all four scenes while preserving localization exactly.",
+    "not_supported": "This development result is not prospectively blind and does not by itself authorize an SOTA claim.",
+    "method_promotion": true
+  }
+}

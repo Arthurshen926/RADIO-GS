@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_peak_retention_guard_binding_correction",
+  "status": "sealed_after_v1_failure_metrics_and_before_any_v2_gpu_execution",
+  "failed_execution": {
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/lerf3d_peak_retention_guard_full4_v1",
+    "disposition": "preserved_invalid_upstream_binding_diagnostic_not_candidate_evidence",
+    "root_cause": "The runner omitted --external_query_feature_cache, so the evaluator used the legacy renderer checkpoint's internal direct features instead of the Universal Field v1 primitive query cache.",
+    "secondary_identity_difference": "The runner also supplied frozen_protocol raw text and negative caches rather than the exact-official text and canonical caches used by the CPU replay sources.",
+    "scenes": {
+      "figurines": {
+        "miou": 0.01200220175087452,
+        "report_sha256": "9697cfb0b6626f384ff38a2e73aed94f01579ed0dc4f96e16cb2b62cff88d069"
+      },
+      "ramen": {
+        "miou": 0.04918844625353813,
+        "report_sha256": "569fdc2ad9298c48f9f3b9e3bc6ca5d7991c3ee5eff6bb66c3fb56effb6b92d5"
+      },
+      "teatime": {
+        "miou": 0.08143860101699829,
+        "report_sha256": "59d025c966251d875c477889ef395c16e0e2ac0d16e48147ebfcb9a076530511"
+      },
+      "waldo_kitchen": {
+        "miou": 0.08253772556781769,
+        "report_sha256": "3a36d66f2b4cf0ee3a62fba7597179146cafe4823b336daeeee1fafb468fd0de"
+      }
+    },
+    "common_observed_binding": {
+      "registration": {},
+      "external_query_feature_cache": "",
+      "score_source": "direct",
+      "score_postprocess": "vala_knn_minmax"
+    }
+  },
+  "corrected_execution": {
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_peak_retention_guard_full4_v2_bound",
+    "runner": "radio_gs/scripts/run_lerf3d_peak_retention_guard_full4.sh",
+    "preflight": "radio_gs/scripts/validate_lerf3d_peak_retention_inputs.py",
+    "must_explicitly_pass_external_query_feature_cache": true,
+    "text_cache_sha256": "2b8142252b541a585e248226d38efc30cde53cdef82d5b0ac371085102888e7b",
+    "canonical_cache_sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0",
+    "preflight_checks": [
+      "primitive query cache file SHA",
+      "Universal Field file SHA",
+      "renderer geometry file SHA",
+      "config file SHA",
+      "Method-v1 authority file SHA",
+      "summary head file SHA",
+      "text and canonical cache file SHAs",
+      "primitive cache tensor schema",
+      "primitive cache field, renderer, method and summary-head metadata bindings",
+      "query-independent and no-benchmark-information construction declarations"
+    ],
+    "existing_failed_output_overwrite_allowed": false,
+    "gpu_execution_started_at_seal_time": false
+  },
+  "claim_boundary": {
+    "v1_metrics_are_not_quarter_guard_evidence": true,
+    "cpu_replay_identity_unchanged": true,
+    "v2_remains_retrospective_development_evidence": true
+  }
+}

@@ -196,6 +196,12 @@ def _canonical_field_from_payload(
     expected_dtypes: dict[str, torch.dtype] = {
         key: torch.float32 for key in expected_shapes
     }
+    # Large direct fields may persist the trainable per-Gaussian codes in
+    # FP16.  This is a storage/training representation only: the loader below
+    # constructs the canonical FP32 module and load_state_dict promotes the
+    # values before any decode.  Keep every decoder, statistic, reliability,
+    # and fusion tensor on the original strict FP32 contract.
+    allowed_local_code_dtypes = {torch.float16, torch.float32}
     if spatial_spec is not None:
         levels = spatial_spec["num_levels"]
         features_per_level = spatial_spec["features_per_level"]
@@ -304,10 +310,16 @@ def _canonical_field_from_payload(
         raise ValueError("canonical field state_dict keys differ from architecture")
     for name, expected_shape in expected_shapes.items():
         tensor = state_dict[name]
+        if not torch.is_tensor(tensor):
+            raise ValueError(f"canonical field state tensor {name} differs")
+        dtype_matches = (
+            tensor.dtype in allowed_local_code_dtypes
+            if name == "local_codes"
+            else tensor.dtype == expected_dtypes[name]
+        )
         if (
-            not torch.is_tensor(tensor)
-            or tuple(tensor.shape) != expected_shape
-            or tensor.dtype != expected_dtypes[name]
+            tuple(tensor.shape) != expected_shape
+            or not dtype_matches
         ):
             raise ValueError(f"canonical field state tensor {name} differs")
         if tensor.dtype.is_floating_point and not bool(torch.isfinite(tensor).all()):

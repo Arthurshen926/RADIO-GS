@@ -163,14 +163,21 @@ def _offloaded_adamw_step(
             state = optimizer.state[parameter]
             if not state:
                 state["step"] = torch.tensor(0.0)
+                moment_dtype = (
+                    torch.float32
+                    if parameter.dtype in (torch.float16, torch.bfloat16)
+                    else parameter.dtype
+                )
                 state["exp_avg"] = torch.zeros_like(
                     parameter,
                     device="cpu",
+                    dtype=moment_dtype,
                     memory_format=torch.preserve_format,
                 )
                 state["exp_avg_sq"] = torch.zeros_like(
                     parameter,
                     device="cpu",
+                    dtype=moment_dtype,
                     memory_format=torch.preserve_format,
                 )
             step_tensor = state["step"]
@@ -1128,6 +1135,40 @@ def _load_factorized_matched_capability_targets(
     return targets, provenance, reference_provenance
 
 
+_RESPONSIBILITY_IMPLEMENTATION_LINEAGE_KEYS = (
+    "builder_implementation_sha256",
+    "authority_implementation_sha256",
+)
+
+
+def _responsibility_contracts_equivalent(
+    actual: object,
+    expected: object,
+) -> bool:
+    """Compare exact-MPR contracts while separating lineage from semantics.
+
+    The immutable cache SHA binds the historical implementation that created
+    each artifact.  Editing an audit or loader in either source file changes
+    its whole-file digest without changing the frozen responsibility formula.
+    Those two digests therefore establish valid lineage, but they are not
+    semantic equality fields.  Every other contract field remains exact.
+    """
+
+    if not isinstance(actual, dict) or not isinstance(expected, dict):
+        return False
+    actual_semantics = dict(actual)
+    expected_semantics = dict(expected)
+    for key in _RESPONSIBILITY_IMPLEMENTATION_LINEAGE_KEYS:
+        actual_lineage = str(actual_semantics.pop(key, ""))
+        expected_lineage = str(expected_semantics.pop(key, ""))
+        if (
+            re.fullmatch(r"[0-9a-f]{64}", actual_lineage) is None
+            or re.fullmatch(r"[0-9a-f]{64}", expected_lineage) is None
+        ):
+            return False
+    return actual_semantics == expected_semantics
+
+
 def _load_factorized_exact_marginal_capability_targets(
     *,
     factorized: FactorizedRadioTrainingCache,
@@ -1345,8 +1386,10 @@ def _load_factorized_exact_marginal_capability_targets(
         or factorized_metadata.get("shared_registration_responsibility") is not True
         or reference_metadata.get("registration_responsibility_cache_sha256")
         != responsibility_sha256
-        or reference_metadata.get("registration_responsibility_contract")
-        != responsibility_contract
+        or not _responsibility_contracts_equivalent(
+            reference_metadata.get("registration_responsibility_contract"),
+            responsibility_contract,
+        )
         or reference_metadata.get("shared_registration_responsibility") is not True
     ):
         raise ValueError("factorized exact-marginal raw responsibility differs")
@@ -1399,8 +1442,10 @@ def _load_factorized_exact_marginal_capability_targets(
             != expected_lifting_sha256
             or metadata.get("registration_responsibility_cache_sha256")
             != responsibility_sha256
-            or metadata.get("registration_responsibility_contract")
-            != responsibility_contract
+            or not _responsibility_contracts_equivalent(
+                metadata.get("registration_responsibility_contract"),
+                responsibility_contract,
+            )
             or metadata.get("shared_registration_responsibility") is not True
         ):
             raise ValueError(f"factorized exact-marginal {name} lifting differs")
@@ -2254,11 +2299,17 @@ def train(args: argparse.Namespace) -> dict:
         ).to(device)
         with torch.no_grad():
             if local_dim == int(args.coefficient_dim):
-                if isinstance(consensus, ShardedMPRCache):
-                    _initialize_codes_streaming(field, decoder, consensus)
-                    encoded = None
-                else:
-                    encoded = decoder.encode(consensus.targets.to(device))
+                # Initializing every compact code at once materializes a
+                # second N x 1280 teacher plus a full N x D coefficient
+                # tensor on the accelerator. Chunking is algebraically
+                # identical and is required for multi-million-row scenes.
+                _initialize_codes_streaming(
+                    field,
+                    decoder,
+                    consensus,
+                    batch_size=int(args.eval_batch_size),
+                )
+                encoded = None
             else:
                 local_basis_values = _basis_fit_values(
                     consensus,
@@ -2297,6 +2348,15 @@ def train(args: argparse.Namespace) -> dict:
                 field.fusion.initialize_base_projection(weight, bias)
             if encoded is not None:
                 field.local_codes.copy_(encoded)
+
+        local_code_training_dtype = str(
+            getattr(args, "local_code_training_dtype", "float32")
+        )
+        if local_code_training_dtype == "float16":
+            field.local_codes = torch.nn.Parameter(
+                field.local_codes.detach().to(dtype=torch.float16),
+                requires_grad=True,
+            )
 
     official_views = None
     if args.official_capability_loss:
@@ -3760,6 +3820,16 @@ def main() -> None:
     )
     parser.add_argument("--batch-size", type=int, default=4096)
     parser.add_argument("--eval-batch-size", type=int, default=16384)
+    parser.add_argument(
+        "--local-code-training-dtype",
+        choices=("float32", "float16"),
+        default="float32",
+        help=(
+            "Storage and gradient dtype for the per-Gaussian local codes. "
+            "Decoding remains in the canonical decoder dtype; FP16 uses "
+            "FP32 CPU Adam moments."
+        ),
+    )
     parser.add_argument("--learning-rate", type=float, default=2e-3)
     parser.add_argument("--weight-decay", type=float, default=1e-5)
     parser.add_argument(

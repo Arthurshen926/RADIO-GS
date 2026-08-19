@@ -1,0 +1,83 @@
+{
+  "artifact_type": "radio_gs_scannet_official_sam_hierarchy_rebuild_queue_receipt",
+  "status": "queued_waiting_for_non_spin_gpu_release",
+  "timestamp": "2026-08-17T12:53:49+08:00",
+  "scene_id": "scene0000_00",
+  "reason": "The old official-SAM hierarchy is fail-closed incompatible with the current exact-MPR frame and image identity contract.",
+  "reuse_audit": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_instance_v1/scene0000_00/old_hierarchy_reuse_audit.json",
+    "sha256": "265218c96248140561747b260e07e04613aed5c8131a6cec712ba2d448fadf78",
+    "status": "incompatible_fail_closed",
+    "old_frames": 120,
+    "current_frames": 120,
+    "shared_frames": 84,
+    "old_only_frames": 36,
+    "current_only_frames": 36,
+    "old_cache_image_hash_binding_complete": false
+  },
+  "immutable_current_inputs": {
+    "exact_mpr_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json",
+      "sha256": "6ca0110b0a97a67bccd94688870a9a7e51917eff3b5c05164378806b69b2922e"
+    },
+    "feature_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/source_only_siglip2_features/frame_manifest.json",
+      "sha256": "e6a332e04b484726b813e499d581ae333873ee1f23aca6391989d4127b2ec28c"
+    },
+    "official_sam_checkpoint": {
+      "path": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+      "sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"
+    },
+    "source_images": "120 exact-MPR-selected current source images; every byte SHA verified against the current feature manifest"
+  },
+  "rebuild": {
+    "runner": {
+      "path": "radio_gs/scripts/run_scannet_source_sam_hierarchy_rebuild_full.sh",
+      "sha256": "350d9a2cfafe3d9cc8f316eeae1487c362be79815deb07cf2a6c1358a2563971"
+    },
+    "worker": {
+      "path": "radio_gs/scripts/rebuild_scannet_source_sam_hierarchy.py",
+      "sha256": "1d8a7df33b251bac46b311c5d4083f987f73e0b78b87435388785c3629afeebb"
+    },
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_instance_v1/scene0000_00/rebuilt_official_sam3_masks",
+    "generation_contract": {
+      "official_decoder": true,
+      "query_free": true,
+      "resolution": 1008,
+      "grid_size": 12,
+      "minimum_quality": 0.7,
+      "minimum_area_fraction": 0.001,
+      "maximum_area_fraction": 0.8,
+      "nms_iou": 0.85,
+      "duplicate_minimum_area_ratio": 0.9,
+      "maximum_masks": 0
+    }
+  },
+  "scheduling": {
+    "automatic_launch": true,
+    "queue_session": "scannet_source_sam_rebuild_gpu4_queue",
+    "queue_runner": {
+      "path": "radio_gs/scripts/queue_scannet_source_sam_rebuild_gpu4.sh",
+      "sha256": "f8bfc03da97bc911624f2c73a8a2e8885e1fac7dda77d713188b2d0736eabb49"
+    },
+    "why_waiting": "GPU4 is owned by spin9_priority_gpu4 and the dependent full9 readout. The queue does not allocate CUDA or load SAM while either SPIn session exists.",
+    "launch_condition": "Both GPU4 SPIn sessions have ended and GPU4 remains below 512 MiB for three consecutive ten-second checks.",
+    "observed_active_sessions": [
+      "spin9_priority_gpu4",
+      "spin9_recovery4_room_gpu0",
+      "spin9_recovery3_fortress_gpu1",
+      "spin9_gpu2_precompute_queue",
+      "lerf_p0_gpu2",
+      "lerf_quality_gpu1"
+    ]
+  },
+  "post_rebuild_required_steps": [
+    "seal a current SHA-bound official-SAM inventory",
+    "lift mask hierarchy through the current exact-MPR authority",
+    "construct scale-ordered membership/co-membership relations on the current 81369 Gaussian rows",
+    "run source-only relation gates",
+    "seal scene0000 predictions before opening VALA labels",
+    "score the current D512/L512 scene0000 sentinel"
+  ],
+  "forbidden_shortcut": "The old D256/L128 sentinel and the incompatible old masks must not be reported as a current D512/L512 result."
+}

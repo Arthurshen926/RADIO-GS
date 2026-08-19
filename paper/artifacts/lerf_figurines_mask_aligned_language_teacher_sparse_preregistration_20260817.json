@@ -1,0 +1,73 @@
+{
+  "schema": "radio_gs.sam_mask_aligned_language_teacher_preregistration.v1",
+  "candidate_id": "lerf_figurines_source_only_sam_mask_aligned_siglip2_sparse_sentinel_v1",
+  "scene": "figurines",
+  "purpose": "Contract and materialization sentinel for a source-only SAM-mask-aligned language teacher; no benchmark metric or method promotion decision is authorized.",
+  "scope_limitation": "The input is the authoritative grid12 single-image interactive-multimask cache, not a completed automatic multiscale hierarchy. This sentinel therefore does not complete attachment Stage A or P2.",
+  "source_contract": {
+    "query_free": true,
+    "source_only": true,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_vocabulary_opened": false,
+    "evaluation_rgb_opened": false,
+    "text_queries_opened": false
+  },
+  "inputs": {
+    "source_image_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images",
+    "source_image_stems": [
+      "frame_00001"
+    ],
+    "mask_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v4/figurines/official_sam3_masks",
+    "mask_manifest": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_query_free_sam3_p0_grid12_authoritative_v4/figurines/official_sam3_masks/manifest.json",
+    "required_mask_generation_contract": {
+      "schema_version": 2,
+      "source": "official_sam3_interactive_grid_multimask_hierarchy",
+      "official_decoder": true,
+      "query_free": true,
+      "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+      "resolution": 1008,
+      "dtype": "bfloat16",
+      "grid_size": 12,
+      "minimum_quality": 0.7,
+      "minimum_area_fraction": 0.001,
+      "maximum_area_fraction": 0.8,
+      "nms_iou": 0.85,
+      "minimum_stability": 0.0,
+      "stability_offset": 1.0,
+      "deduplication": "containment_aware_near_duplicate_only",
+      "duplicate_minimum_area_ratio": 0.9,
+      "maximum_masks": 0
+    },
+    "radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "radio_repo": "/root/RADIO",
+    "radio_version": "c-radio_v4-h"
+  },
+  "descriptor_contract": {
+    "teacher_space": "official_siglip2_crop_summary",
+    "masked_background_rgb": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "context_expansion": 1.5,
+    "crop_resolution": 384,
+    "batch_size": 2,
+    "output_dtype": "float16"
+  },
+  "topology_contract": {
+    "containment_threshold": 0.95,
+    "maximum_child_parent_area_ratio": 0.8,
+    "sibling_maximum_iou": 0.05,
+    "semantic_assertion": "geometric_candidates_only"
+  },
+  "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_mask_aligned_language_teacher_sparse_p2_sentinel_v1/figurines",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_sam_mask_aligned_language_teacher.py",
+    "sha256": "4225f8d1f1cfa7270e307ef60f26923704486804350f77448090bedea835ce1e"
+  },
+  "pre_registered_before_descriptors_materialized": true,
+  "benchmark_metrics_authorized": false,
+  "method_promotion_authorized": false
+}

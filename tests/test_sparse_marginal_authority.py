@@ -33,6 +33,7 @@ def _metadata() -> dict[str, object]:
         "pose_sha256": "c" * 64,
         "intrinsics_sha256": "d" * 64,
         "builder_implementation_sha256": "e" * 64,
+        "authority_implementation_sha256": "1" * 64,
         "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
@@ -243,6 +244,26 @@ def test_sparse_marginal_authority_fails_closed_on_metadata_or_sha(tmp_path) -> 
             num_pixels=2,
             expected_sha256="f" * 64,
         )
+
+
+def test_sparse_marginal_authority_accepts_builder_lineage_only_drift(tmp_path) -> None:
+    path, digest = _write_authority(tmp_path)
+
+    assignments, observed, _source = load_sparse_exact_marginal_authority(
+        path,
+        expected_metadata={
+            **_metadata(),
+            "builder_implementation_sha256": "f" * 64,
+            "authority_implementation_sha256": "2" * 64,
+        },
+        expected_frame_indices=[3],
+        num_gaussians=3,
+        num_pixels=2,
+        expected_sha256=digest,
+    )
+
+    assert observed == digest
+    assert len(assignments) == 1
 
 
 def test_sparse_marginal_authority_is_no_clobber(tmp_path) -> None:

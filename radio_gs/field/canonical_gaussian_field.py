@@ -123,7 +123,13 @@ class CanonicalGaussianField(nn.Module):
         if self.fusion is None:
             if local.shape[1] != self.decoder.coefficient_dim:
                 raise RuntimeError("direct local code dimension must equal coefficient dimension")
-            return local
+            # Large-scene fine-tuning may keep the trainable local table in
+            # FP16 so its dense gradient fits the accelerator.  Decode in the
+            # canonical FP32 affine coordinate system; autograd casts the
+            # gradient back to the storage dtype without changing D512/L512.
+            return local.to(dtype=self.decoder.basis.dtype)
+        fusion_dtype = next(self.fusion.parameters()).dtype
+        local = local.to(dtype=fusion_dtype)
         coarse = None
         if self.coarse_dim:
             if self.spatial_encoder is None:

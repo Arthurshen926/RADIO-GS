@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_typed_instance_readout_method_promotion",
+  "date": "2026-08-19",
+  "persistent_scene_state": "Universal Field v1 D512/L512 plus five reliability scalars",
+  "second_persistent_semantic_field": false,
+  "promoted_interfaces": {
+    "lerf_text": {
+      "name": "identity_extent_posterior_v3",
+      "identity_owner": "field_siglip_unary",
+      "extent_owner": "query_independent_source_official_sam_instances",
+      "full4_lerf2d_miou": 0.3958417415,
+      "full4_lerf3d_miou": 0.3968358606,
+      "all_scene_positive": true
+    },
+    "scannet_categorical": {
+      "name": "bounded_low_margin_sam_affinity_residual_v1",
+      "class_identity_owner": "categorical_field_posterior",
+      "paper8_miou_19_15_10": [0.3380990921, 0.3361657821, 0.4254807298],
+      "all_split_miou_and_macc_positive": true
+    },
+    "nvos_registered_prompt": {
+      "name": "independent_box_signed_point_supermajority_v1",
+      "target_rgb_assisted": true,
+      "target_mask_used_for_prediction": false,
+      "full8_macro_foreground_iou": 0.8177621399957551
+    },
+    "spin_registered_prompt": {
+      "name": "independent_registered_prompt_official_sam_v1",
+      "status": "materializing_method_v1_full9_then_frozen_evaluation",
+      "completed_field_gates": 4,
+      "required_field_gates": 9,
+      "completed_scenes": ["horns", "leaves", "lego", "orchids"],
+      "active_scenes": ["fern", "fortress", "pinecone", "room", "truck"],
+      "full9_score": null,
+      "watchdog_contract": "one idempotent per-scene runner per assigned GPU until gate",
+      "frozen_readout_trigger": "automatic after 9/9 gates"
+    }
+  },
+  "rejected_controls": {
+    "unrestricted_sam_categorical_propagation": "failed_independent_confirmation",
+    "joint_box_signed_points_inside_sam": {
+      "nvos_macro_foreground_iou": 0.6825932008799297,
+      "passed": false
+    },
+    "historical_spin_carrier_as_method_v1": "forbidden_identity_substitution"
+  },
+  "claim_scope": "promoted development method; prospective blind and SOTA claims require frozen evaluation"
+}

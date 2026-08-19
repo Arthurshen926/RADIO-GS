@@ -1,0 +1,60 @@
+{
+  "artifact_type": "radio_gs_scannet_instance_topology_diagnostic",
+  "status": "diagnostic_not_promoted",
+  "asset_audit": {
+    "current_paper8_official_source_sam_masks": "absent",
+    "current_paper8_radio_to_sam_exact_mpr": "complete_8_of_8",
+    "historical_source_sam_authority": "paper/artifacts/source_sam_single_radio_paper8_rollout_inventory_20260810.json",
+    "historical_materialized_root": "/root/RADIO-GS/local_ssd_results/source_sam_single_radio_paper8_v2",
+    "historical_materialized_root_currently_exists": false,
+    "conclusion": "The current RADIO-to-SAM continuous adaptor cache is not an explicit source-mask membership hierarchy."
+  },
+  "method": {
+    "identity_authority": "immutable high-margin categorical text logits",
+    "extent_authority": "local spatial edges gated by exact-MPR RADIO-to-SAM cosine",
+    "propagation": "one-hop marker-controlled watershed with categorical plausibility",
+    "fixed_after_scene0000": {
+      "k": 12,
+      "radius_m": 0.1,
+      "sam_similarity_threshold": 0.7,
+      "seed_margin_threshold": 0.06,
+      "update_margin_threshold": 0.01,
+      "semantic_tolerance": 0.003,
+      "consensus_threshold": 0.97,
+      "iterations": 1
+    }
+  },
+  "full8": {
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_instance_topology_full8_v1/summary.json",
+    "baseline": {
+      "19": {"miou": 0.33535351797116164, "macc": 0.665254952558607},
+      "15": {"miou": 0.3336950833122655, "macc": 0.649541860965703},
+      "10": {"miou": 0.42213089674581106, "macc": 0.738714198965252}
+    },
+    "candidate": {
+      "19": {"miou": 0.3355432518133421, "macc": 0.6656425018042909},
+      "15": {"miou": 0.3338801429075633, "macc": 0.6499451791344111},
+      "10": {"miou": 0.42226513167188906, "macc": 0.738978008464495}
+    },
+    "all_six_aggregate_deltas_positive": true,
+    "promoted": false,
+    "reason": "The safe topology changes too few primitives and is weaker than the existing low-margin residual."
+  },
+  "failed_relaxation": {
+    "scene": "scene0000_00",
+    "parameters": "k12 radius0.1 sim0.65 seed0.04 update0.04 tolerance0.025 consensus0.70 iterations6",
+    "19_miou": 0.32937430182451166,
+    "15_miou": 0.30942008241549335,
+    "10_miou": 0.308527590520704,
+    "failure": "multi-hop continuous-feature propagation increases false-positive extent and sharply reduces mIoU"
+  },
+  "next_required_experiment": {
+    "action": "rebuild legal mapping-time query-free official SAM source masks and exact-MPR scale-ordered membership relations for the current D512/L512 fields",
+    "existing_implementation": [
+      "radio_gs/scripts/build_sam3_automatic_mask_cache.py",
+      "radio_gs/scripts/build_scannet_scale_ordered_relation_cache.py",
+      "radio_gs/scripts/build_source_official_sam_authority.py"
+    ],
+    "rationale": "A historical scene0000 official-mask relative teacher improved 19/15/10 mIoU by 0.00477/0.00516/0.00556, whereas the current continuous topology improves only 0.00019/0.00019/0.00013 on full8."
+  }
+}

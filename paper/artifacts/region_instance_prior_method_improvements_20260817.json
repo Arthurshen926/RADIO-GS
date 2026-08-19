@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_region_instance_prior_method_improvements",
+  "date": "2026-08-17",
+  "method_principle": {
+    "identity": "The canonical RADIO/SigLIP text score owns target identity and its peak is immutable.",
+    "extent": "Official-SAM or RADIO-to-SAM region evidence may supply only object co-membership, boundary, and low-margin topology.",
+    "fusion": "Region evidence is a bounded residual and may not create an independent persistent semantic classifier.",
+    "safety": "Source-view proposal construction is query independent; benchmark masks are scoring-only except for the explicitly reference-calibrated SPIn contract."
+  },
+  "lerf2d_full4_development": {
+    "candidate": "primitive peak plus source-SAM-trained feature-only prompt boundary head",
+    "target_rgb_used": false,
+    "baseline_sample_micro_miou": 0.3497530303,
+    "candidate_sample_micro_miou": 0.3615166259,
+    "delta_sample_micro_miou": 0.0117635956,
+    "baseline_scene_macro_miou": 0.3529628745,
+    "candidate_scene_macro_miou": 0.3627484388,
+    "delta_scene_macro_miou": 0.0097855643,
+    "scene_miou_deltas": {
+      "figurines": 0.006150040,
+      "ramen": 0.017879537,
+      "teatime": 0.013527015,
+      "waldo_kitchen": 0.001585665
+    },
+    "all_scene_miou_deltas_positive": true,
+    "selection_and_transfer": {
+      "selection_sentinel": "figurines",
+      "fixed_transfer_scenes": ["ramen", "teatime", "waldo_kitchen"],
+      "all_fixed_transfer_scene_miou_deltas_positive": true
+    },
+    "result_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf2d_primitive_peak_feature_sam_boundary_v2",
+    "baseline_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/joint_validation/lerf2d_peak_connected_primitive_v1"
+  },
+  "lerf3d_full4_development": {
+    "candidate": "identity-seeded exact-MPR source-SAM extent residual, query-matched, alpha 0.25",
+    "target_rgb_used": false,
+    "baseline_sample_micro_miou": 0.4845133233,
+    "candidate_sample_micro_miou": 0.4951333200,
+    "delta_sample_micro_miou": 0.0106199967,
+    "baseline_scene_macro_miou": 0.4653813392,
+    "candidate_scene_macro_miou": 0.4770382270,
+    "delta_scene_macro_miou": 0.0116568878,
+    "baseline_acc_at_0_25": 0.77403846,
+    "candidate_acc_at_0_25": 0.79326923,
+    "baseline_acc_at_0_50": 0.52884615,
+    "candidate_acc_at_0_50": 0.55288462,
+    "baseline_boundary": 0.71201195,
+    "candidate_boundary": 0.72767140,
+    "baseline_trimap": 0.37674343,
+    "candidate_trimap": 0.36946992,
+    "scene_miou_deltas": {
+      "figurines": 0.01349068,
+      "ramen": 0.00396195,
+      "teatime": 0.01433337,
+      "waldo_kitchen": 0.01484155
+    },
+    "all_scene_miou_deltas_positive": true,
+    "result_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_sam_seed_qmatched_alpha025_v1",
+    "baseline_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf3d_peak_retention_guard_full4_v2_bound"
+  },
+  "scannet_ovs_paper8_development": {
+    "candidate": "official RADIO-to-SAM local graph residual restricted to low-margin categorical rows",
+    "target_rgb_used": false,
+    "splits": {
+      "19": {
+        "baseline_miou": 0.3353535180,
+        "candidate_miou": 0.3380990921,
+        "delta_miou": 0.0027455741,
+        "baseline_macc": 0.6652549526,
+        "candidate_macc": 0.6680330956,
+        "delta_macc": 0.0027781430
+      },
+      "15": {
+        "baseline_miou": 0.3336950833,
+        "candidate_miou": 0.3361657821,
+        "delta_miou": 0.0024706988,
+        "baseline_macc": 0.6495418610,
+        "candidate_macc": 0.6519703443,
+        "delta_macc": 0.0024284833
+      },
+      "10": {
+        "baseline_miou": 0.4221308967,
+        "candidate_miou": 0.4254807298,
+        "delta_miou": 0.0033498330,
+        "baseline_macc": 0.7387141990,
+        "candidate_macc": 0.7423785479,
+        "delta_macc": 0.0036643489
+      }
+    },
+    "all_split_miou_and_macc_deltas_positive": true,
+    "scene0000_selected_transfer7": {
+      "fixed_after_scene": "scene0000_00",
+      "transfer_scene_count": 7,
+      "mean_delta_19_miou": 0.0031912229,
+      "mean_delta_19_macc": 0.0038259664,
+      "mean_delta_15_miou": 0.0028033604,
+      "mean_delta_15_macc": 0.0034666960,
+      "mean_delta_10_miou": 0.0035081981,
+      "mean_delta_10_macc": 0.0038289166,
+      "all_transfer_aggregate_deltas_positive": true
+    },
+    "fixed_parameters": {
+      "neighbors": 8,
+      "radius": 0.1,
+      "sam_cosine_threshold": 0.5,
+      "residual_alpha": 0.25,
+      "categorical_margin_threshold": 0.03
+    },
+    "result_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_sam_region_residual_full8_v1",
+    "baseline_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1"
+  },
+  "nvos_full8_development": {
+    "candidate": "official-SAM field box plus signed-point supermajority consensus",
+    "target_rgb_assisted": true,
+    "baseline_foreground_iou": 0.8176167634,
+    "candidate_foreground_iou": 0.8177621400,
+    "delta_foreground_iou": 0.0001453766,
+    "baseline_pixel_accuracy": 0.9702037228,
+    "candidate_pixel_accuracy": 0.9702167322,
+    "delta_pixel_accuracy": 0.0000130094,
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_box_point_supermajority_v1/result.json",
+    "result_sha256": "08b08a06b5ee496d8d0ee189aca6c27ab4914cfdf43ea59d0fae9c0e30cec746"
+  },
+  "interpretation": {
+    "supported": "Identity/extent separation is useful across open-vocabulary, categorical, and promptable segmentation contracts.",
+    "not_supported": "Unrestricted region averaging is not valid: it diluted sparse text identity and caused severe LERF regression.",
+    "remaining": "SPIn Available-Nine final D512/L512 materialization and its frozen official-SAM readout remain in progress."
+  },
+  "claim_scope": "Development evidence. Hyperparameters were inspected on benchmark development outputs, so a frozen rerun or held-out transfer is required for an unbiased paper main-result claim."
+}

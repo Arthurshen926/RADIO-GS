@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "registered_at": "2026-08-17T13:35:29+08:00",
+  "status": "completed_all_preregistered_query_free_structure_gates_passed",
+  "objective": "Determine without labels whether a denser query-free official-SAM3 crop pyramid retains multiple crop scales and forms non-trivial containment edges on one legal Figurines source view.",
+  "source_authority": {
+    "path": "paper/artifacts/lerf_figurines_stage_a_source_rgb_authority_smoke_20260817.json",
+    "sha256": "85f6ac1dc5c1e97d2087440ca354a21d7324671cdbcac83b75cecda97a0f5d46",
+    "image_id": "frame_00001"
+  },
+  "forbidden_inputs": [
+    "query text",
+    "benchmark ground truth",
+    "target or evaluation RGB",
+    "metric-selected thresholds"
+  ],
+  "configuration": {
+    "crop_layers_after_full_image": 2,
+    "crop_overlap_ratio": 0.25,
+    "points_per_side_full_image": 8,
+    "point_grid_downscale_factor": 2,
+    "grid_sides_by_layer": [8, 4, 2],
+    "expected_crop_count": 21,
+    "expected_prompt_count": 192,
+    "minimum_quality": 0.7,
+    "minimum_stability": 0.0,
+    "minimum_crop_area_fraction": 0.001,
+    "minimum_full_image_area_fraction": 0.0001,
+    "maximum_full_image_area_fraction": 0.9,
+    "artificial_crop_edge_policy": "reject within two pixels",
+    "dedup_iou": 0.85,
+    "dedup_near_equal_area_ratio": 0.9,
+    "maximum_masks": 256,
+    "containment_threshold": 0.9,
+    "minimum_parent_area_ratio": 1.05
+  },
+  "acceptance_gates": {
+    "execution": "official decoder completes one frame without OOM and output passes fail-closed identity validation",
+    "scale_coverage": "retained proposals include at least two crop layers",
+    "hierarchy": "at least one direct parent-child containment edge",
+    "edge_safety": "no retained proposal has an artificial crop-edge flag"
+  },
+  "diagnosis_if_gate_fails": "Report query-free counts by crop layer, quality, artificial-edge rejection, global deduplication, and containment edge construction. Do not tune using target labels.",
+  "resource_guard": {
+    "device": "cuda:0",
+    "preflight_used_mib": 8948,
+    "preflight_free_mib": 15134,
+    "two_poll_memory_growth_mib": 0,
+    "minimum_required_free_mib": 10240,
+    "timeout_minutes": 20,
+    "monitor": "sample total GPU0 memory and utilization every second; record maximum"
+  },
+  "output": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/sam3_multiscale_hierarchy_stage_a_dense_grid8_crop2_v1/figurines",
+    "manifest_name": "manifest_grid8_crop2.json"
+  },
+  "producer": {
+    "module_sha256": "71e42f61f03513ccda17773d9e80c3bfaa9cb34bc7c221b60fc296bcfc4d0f1d",
+    "runner_sha256": "54b544bb0bd0572e2f8baaac1bc2c35dba2cdf1a0e31c4635e4cd33436363fb8"
+  },
+  "result": {
+    "completed_at": "2026-08-17T13:38:00+08:00",
+    "exit_status": 0,
+    "wall_seconds": 82,
+    "frame_output": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/sam3_multiscale_hierarchy_stage_a_dense_grid8_crop2_v1/figurines/frame_00001.pt",
+      "sha256": "05bfd847c2368505ec9f222d3efa560a3b34513e1d531424217f232335f5e65c"
+    },
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/sam3_multiscale_hierarchy_stage_a_dense_grid8_crop2_v1/figurines/manifest_grid8_crop2.json",
+      "sha256": "bc89d92a403b074f02502d898d5e2b10ec19765f02fc7694ec3e9510711e5276",
+      "content_digest": "3c9a38951bf48177aed039c5ddf9b5ed8d8af3ee04866852d37a8c2f3b457b15"
+    },
+    "gpu_monitor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/sam3_multiscale_hierarchy_stage_a_dense_grid8_crop2_v1/figurines/gpu0_monitor.csv",
+      "sha256": "ed65d98b932b565cc52820bea504bf23acb133d2fce86de20689a61c63d98089",
+      "samples": 79,
+      "maximum_total_used_mib": 11439,
+      "minimum_total_free_mib": 12643,
+      "maximum_utilization_percent": 100,
+      "increment_over_preflight_used_mib": 2491
+    },
+    "counts": {
+      "crops": 21,
+      "prompts": 192,
+      "official_multimask_candidates_before_filtering": 576,
+      "artificial_crop_edge_rejections": 78,
+      "accepted_before_per_crop_deduplication": 37,
+      "before_global_deduplication": 13,
+      "retained_proposals": 13,
+      "retained_by_crop_layer": {
+        "0": 9,
+        "1": 1,
+        "2": 3
+      },
+      "parent_child_edges": 5,
+      "retained_artificial_crop_edge_flags": 0
+    },
+    "retained_quality": {
+      "minimum": 0.70703125,
+      "median": 0.765625,
+      "maximum": 0.84765625
+    },
+    "retained_stability": {
+      "minimum": 0.05666379630565643,
+      "median": 0.6971892714500427,
+      "maximum": 0.9358974099159241
+    },
+    "parent_containment_range": [
+      0.9853127598762512,
+      0.9989199638366699
+    ],
+    "gate_decisions": {
+      "execution": "pass",
+      "scale_coverage": "pass: all three crop layers retained proposals",
+      "hierarchy": "pass: five direct containment edges",
+      "edge_safety": "pass: zero retained artificial-edge flags"
+    },
+    "query_free_diagnosis": "Most reduction occurred within crops: 37 accepted masks became 13 after per-crop near-duplicate suppression, while global deduplication removed none. Artificial-edge rejection removed 78 otherwise eligible candidates and prevented crop truncations from entering the graph. The sole layer-1 proposal indicates weaker mid-scale survival than full-image and fine-crop scales, but the pre-registered gate passed and no threshold was changed.",
+    "method_interpretation": "The Stage-A precursor now demonstrates actual multiscale proposal retention and non-trivial part/object containment on one legal source view. Cross-view association, exact-MPR Gaussian lifting, proposal-language identity, and paired benchmark evaluation remain untested."
+  },
+  "benchmark_improvement_claimed": false
+}

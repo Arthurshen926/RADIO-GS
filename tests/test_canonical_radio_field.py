@@ -52,6 +52,19 @@ def test_stage_one_field_reads_local_coefficients_without_fusion():
     torch.testing.assert_close(field.coefficients(rows), field.local_codes[rows])
 
 
+def test_half_local_training_table_decodes_in_canonical_float_coordinates():
+    decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)
+    field = CanonicalGaussianField(6, decoder, _signature(), use_fusion=False)
+    field.local_codes = torch.nn.Parameter(field.local_codes.detach().half())
+
+    loss = field.radio_features(torch.tensor([1, 4])).square().mean()
+    loss.backward()
+
+    assert field.coefficients().dtype == torch.float32
+    assert field.local_codes.grad is not None
+    assert field.local_codes.grad.dtype == torch.float16
+
+
 def test_compact_spatial_field_is_primitive_and_batch_invariant():
     torch.manual_seed(11)
     decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)

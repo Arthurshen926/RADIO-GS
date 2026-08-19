@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_method_v1_two_round_exact_consensus_sam3_preregistration",
+  "candidate_id": "nvos-method-v1-two-round-exact-logodds-sam3-v1",
+  "status": "frozen_before_first_two_round_prediction_or_target_metric_access",
+  "frozen_scene_order": [
+    "fern",
+    "flower",
+    "fortress",
+    "horns_center",
+    "horns_left",
+    "leaves",
+    "orchids",
+    "trex"
+  ],
+  "evaluation_contract": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_rgb_assisted_full8_method_v1_evaluation_contract_20260816.json",
+    "sha256": "e4a464e07e1fbcdb90708cc98be63058a91893a160e42511dec0f81a38e1268f",
+    "contract_id": "nvos-rgb-assisted-full8-method-v1-v1"
+  },
+  "sealed_round1_parents": {
+    "signed_evidence_selected_box_sam3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_signed_points_sam3_candidate_20260816/prediction_manifest.json",
+      "sha256": "f439d36f2d6d0491d8276724beff833cf23289c00c1ba3281fe07019171bf254"
+    },
+    "signed_point_sam3_trials": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/full8_20260816/transient_sam/prediction_manifest.json",
+      "sha256": "a22dd30b856b4dbd0a6484a993a122b5dc57abc886fe5da818c7d0e9e9eda5e3"
+    },
+    "one_shot_supermajority_comparison": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_box_point_supermajority_v1/prediction_manifest.json",
+      "sha256": "1e93466bcf36414c836f6d7aae45d88b75b0f32f5a32e04f6b09ded21a38e333"
+    }
+  },
+  "fixed_method": {
+    "sam_raster_height": 756,
+    "sam_raster_width": 1008,
+    "exact_transport": "same_target_view_gsplat_exact_accepted_hits_front_to_back_W_transpose_and_W",
+    "adjoint_normalization": "W_transpose_probability_divided_by_W_transpose_one",
+    "observations": [
+      "field_signed_margin_as_unit_scale_logit",
+      "signed_evidence_selected_box_sam3_binary_probability",
+      "ten_trial_point_sam3_vote_probability"
+    ],
+    "probability_epsilon": 0.05,
+    "robust_consensus": "coordinatewise_median_of_three_visibility_normalized_logodds",
+    "rerender_normalization": "W_primitive_probability_divided_by_W_one",
+    "unsupported_pixel_fallback": "coordinatewise_median_of_three_pixel_logodds",
+    "round2_mask_input": "rerender_probability_bilinear_to_checkpoint_prompt_encoder_mask_input_size_288x288_then_clipped_logit",
+    "round2_box": "rerender_probability_ge_0.5_tight_xyxy_pad16",
+    "round2_points": "same_frozen_ten_trials_of_3_positive_and_3_negative_signed_field_points",
+    "round2_multimask_output": false,
+    "round2_candidate_selection": "none_exactly_one_candidate_per_trial",
+    "round2_aggregation": "mean_of_ten_official_binary_masks_minus_0.5",
+    "final_threshold": 0.0,
+    "scene_specific_parameter": false
+  },
+  "implementation": {
+    "exact_consensus": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_nvos_two_round_exact_consensus.py",
+      "sha256": "ca5b38dda3544f4e25f79f8d7890cb8bb2c9807ae18e06da021457f59eab5df8"
+    },
+    "round2_predictor": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/predict_nvos_two_round_mask_prompt_sam3.py",
+      "sha256": "8a5dd5117ffc56ee2761da0c3b30801d87a8d040ef77b89017e66c2b332e50fc"
+    },
+    "scorer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_two_round_mask_prompt_sam3.py",
+      "sha256": "2a34fe396bcee77425001c218f1cb779db2732754ae9130c68262e73ed247158"
+    },
+    "tests": {
+      "path": "/root/RADIO-GS/tests/test_nvos_two_round_exact_consensus.py",
+      "sha256": "0e697c9ad2f4c02e7034c876df6acee0c51c9fb79d266abf78886b2656b63cf5"
+    }
+  },
+  "execution_plan": {
+    "sentinel": "fern_contract_shape_and_hash_validation_without_target_mask_or_metric",
+    "freeze_after_sentinel": "no_parameter_change_permitted",
+    "full8": "seal_all_eight_predictions_before_first_target_mask_open",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/nvos_two_round_exact_consensus_sam3_v1"
+  },
+  "access_at_freeze": {
+    "new_candidate_prediction_generated": false,
+    "new_candidate_target_mask_opened": false,
+    "new_candidate_target_metric_opened": false,
+    "target_metric_available_to_predictor": false
+  },
+  "eligibility": {
+    "target_rgb_assisted": true,
+    "development_use_only": true,
+    "strict_unseen_protocol_eligible": false,
+    "sota_claim": false
+  }
+}

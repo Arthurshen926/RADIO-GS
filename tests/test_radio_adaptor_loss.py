@@ -93,7 +93,14 @@ def test_masked_render_losses_accept_exact_official_capability_maps() -> None:
 def test_masked_render_losses_forward_projection_amp(monkeypatch) -> None:
     seen: list[bool] = []
 
-    def _project(features, _adaptor, *, normalize=True, amp=False):
+    def _project(
+        features,
+        _adaptor,
+        *,
+        normalize=True,
+        amp=False,
+        checkpoint_adaptor=False,
+    ):
         seen.append(bool(amp))
         return torch.nn.functional.normalize(features, dim=1) if normalize else features
 

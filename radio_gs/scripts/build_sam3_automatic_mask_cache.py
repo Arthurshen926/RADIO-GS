@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
 import json
 from pathlib import Path
 
@@ -154,6 +156,68 @@ def _images(root: Path, pattern: str) -> list[Path]:
     return result
 
 
+def automatic_mask_generation_contract(
+    args: argparse.Namespace, *, checkpoint_sha256: str,
+) -> dict:
+    return {
+        "schema_version": 2,
+        "source": "official_sam3_interactive_grid_multimask_hierarchy",
+        "official_decoder": True,
+        "query_free": True,
+        "checkpoint_sha256": str(checkpoint_sha256),
+        "resolution": int(args.resolution),
+        "dtype": str(args.dtype),
+        "grid_size": int(args.grid_size),
+        "minimum_quality": float(args.minimum_quality),
+        "minimum_area_fraction": float(args.minimum_area_fraction),
+        "maximum_area_fraction": float(args.maximum_area_fraction),
+        "nms_iou": float(args.nms_iou),
+        "minimum_stability": float(args.minimum_stability),
+        "stability_offset": float(args.stability_offset),
+        "deduplication": "containment_aware_near_duplicate_only",
+        "duplicate_minimum_area_ratio": float(args.duplicate_minimum_area_ratio),
+        "maximum_masks": int(args.maximum_masks),
+        "proposal_set_type": "single_scale_point_grid_multimask",
+        "multiscale_crop_pyramid": False,
+        "hierarchy_parent_edges_materialized": False,
+    }
+
+
+def validate_automatic_mask_source_binding(
+    payload: dict,
+    image_path: Path,
+    *,
+    expected_generation_contract: dict | None = None,
+    source_image_sha256: str | None = None,
+) -> str:
+    """Fail closed unless a cache is byte-bound to its declared source RGB."""
+
+    metadata = dict(payload.get("metadata", {}))
+    resolved = Path(image_path).expanduser().resolve()
+    digest = (
+        str(source_image_sha256)
+        if source_image_sha256 is not None
+        else sha256_file(resolved)
+    )
+    if len(digest) != 64:
+        raise ValueError(f"automatic SAM3 source digest differs: {resolved}")
+    if (
+        metadata.get("source")
+        != "official_sam3_interactive_grid_multimask_hierarchy"
+        or metadata.get("official_decoder") is not True
+        or metadata.get("query_free") is not True
+        or Path(str(metadata.get("image", ""))).expanduser().resolve() != resolved
+        or str(metadata.get("source_image_sha256", "")) != digest
+    ):
+        raise ValueError(f"automatic SAM3 cache source binding differs: {resolved}")
+    if expected_generation_contract is not None and any(
+        metadata.get(key) != expected
+        for key, expected in expected_generation_contract.items()
+    ):
+        raise ValueError(f"automatic SAM3 generation contract differs: {resolved}")
+    return digest
+
+
 @torch.inference_mode()
 def automatic_masks(processor, image: Image.Image, args: argparse.Namespace) -> dict:
     state = processor.set_image(image)
@@ -254,57 +318,59 @@ def run(args: argparse.Namespace) -> dict:
         resolution=int(args.resolution), point_only=True,
     )
     checkpoint_sha256 = sha256_file(args.checkpoint_path)
+    generation_contract = automatic_mask_generation_contract(
+        args, checkpoint_sha256=checkpoint_sha256
+    )
     reports = []
     for image_path in image_paths:
+        # Read the source once and bind both hashing and RGB decoding to those
+        # exact bytes.  A hash-before/read/hash-after sequence still admits a
+        # same-content restoration race between operations.
+        source_bytes = image_path.read_bytes()
+        source_sha256 = hashlib.sha256(source_bytes).hexdigest()
         output = output_root / f"{image_path.stem}.pt"
         if output.exists() and args.skip_existing:
             existing = torch.load(output, map_location="cpu", weights_only=False)
-            metadata = existing.get("metadata")
             scores = torch.as_tensor(existing.get("scores"))
-            if (
-                not isinstance(metadata, dict)
-                or metadata.get("source")
-                != "official_sam3_interactive_grid_multimask_hierarchy"
-                or metadata.get("official_decoder") is not True
-                or metadata.get("query_free") is not True
-                or Path(str(metadata.get("image", ""))).resolve()
-                != image_path.resolve()
-            ):
-                raise ValueError(f"existing official-SAM cache differs: {output}")
+            source_sha256 = validate_automatic_mask_source_binding(
+                existing,
+                image_path,
+                expected_generation_contract=generation_contract,
+                source_image_sha256=source_sha256,
+            )
             reports.append({
                 "image": str(image_path), "output": str(output),
+                "source_image_sha256": source_sha256,
+                "output_sha256": sha256_file(output),
                 "masks": int(scores.numel()), "reused_after_validation": True,
             })
             continue
-        image = Image.open(image_path).convert("RGB")
+        image = Image.open(io.BytesIO(source_bytes)).convert("RGB")
         payload = automatic_masks(processor, image, args)
         payload["metadata"] = {
-            "schema_version": 2,
-            "source": "official_sam3_interactive_grid_multimask_hierarchy",
-            "official_decoder": True, "query_free": True,
+            **generation_contract,
             "image": str(image_path.resolve()),
-            "checkpoint_sha256": checkpoint_sha256,
-            "grid_size": int(args.grid_size),
-            "minimum_quality": float(args.minimum_quality),
-            "minimum_area_fraction": float(args.minimum_area_fraction),
-            "maximum_area_fraction": float(args.maximum_area_fraction),
-            "nms_iou": float(args.nms_iou),
-            "minimum_stability": float(args.minimum_stability),
-            "stability_offset": float(args.stability_offset),
-            "deduplication": "containment_aware_near_duplicate_only",
-            "duplicate_minimum_area_ratio": float(args.duplicate_minimum_area_ratio),
+            "source_image_sha256": source_sha256,
             "multimask_candidates_retained_before_deduplication": int(
                 payload["proposal_count_before_deduplication"]
             ),
             "decoder_logits_available": bool(payload["decoder_logits_available"]),
         }
         torch.save(payload, output)
-        reports.append({"image": str(image_path), "output": str(output),
-                        "masks": int(payload["scores"].numel())})
+        reports.append({
+            "image": str(image_path), "output": str(output),
+            "source_image_sha256": payload["metadata"]["source_image_sha256"],
+            "output_sha256": sha256_file(output),
+            "masks": int(payload["scores"].numel()),
+        })
     manifest_name = str(getattr(args, "manifest_name", "manifest.json"))
     if Path(manifest_name).name != manifest_name or not manifest_name.endswith(".json"):
         raise ValueError("manifest-name must be one JSON basename")
-    report = {"output_root": str(output_root.resolve()), "images": reports}
+    report = {
+        "output_root": str(output_root.resolve()),
+        "generation_contract": generation_contract,
+        "images": reports,
+    }
     manifest_path = output_root / manifest_name
     if manifest_path.exists():
         raise FileExistsError(f"official-SAM generation manifest exists: {manifest_path}")

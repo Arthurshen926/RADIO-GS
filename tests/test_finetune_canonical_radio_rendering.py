@@ -212,6 +212,41 @@ def test_semantic_fidelity_rejects_non_rounding_grid_mismatch() -> None:
         )
 
 
+def test_semantic_fidelity_chunking_matches_dense_objective_and_gradient() -> None:
+    predicted = torch.randn(1, 7, 9, 11, requires_grad=True)
+    teacher = torch.randn(7, 9, 11)
+    alpha = torch.rand(9, 11)
+    valid = alpha >= 0.2
+
+    absolute, centered, pixels = finetune._semantic_fidelity_losses(
+        predicted,
+        teacher,
+        alpha,
+        alpha_threshold=0.2,
+        pixel_chunk_size=13,
+    )
+    predicted_pixels = predicted[0].permute(1, 2, 0)[valid]
+    teacher_pixels = teacher.permute(1, 2, 0)[valid]
+    expected_absolute = 1.0 - torch.nn.functional.cosine_similarity(
+        predicted_pixels, teacher_pixels, dim=-1, eps=1e-8
+    ).mean()
+    expected_centered = 1.0 - torch.nn.functional.cosine_similarity(
+        predicted_pixels - predicted_pixels.mean(0, keepdim=True),
+        teacher_pixels - teacher_pixels.mean(0, keepdim=True),
+        dim=-1,
+        eps=1e-8,
+    ).mean()
+
+    torch.testing.assert_close(absolute, expected_absolute)
+    torch.testing.assert_close(centered, expected_centered)
+    assert pixels == int(valid.sum())
+    gradient = torch.autograd.grad(absolute + centered, predicted, retain_graph=True)[0]
+    expected_gradient = torch.autograd.grad(
+        expected_absolute + expected_centered, predicted
+    )[0]
+    torch.testing.assert_close(gradient, expected_gradient, rtol=1e-5, atol=1e-6)
+
+
 class _IdentityAdaptor(torch.nn.Module):
     def forward(self, values):
         return values
@@ -351,6 +386,21 @@ def test_chunked_offloaded_adamw_matches_single_tensor_update() -> None:
         assert chunked.state[chunked_parameter][name].device.type == "cpu"
 
 
+def test_chunked_offloaded_adamw_keeps_half_parameter_moments_float32() -> None:
+    parameter = torch.nn.Parameter(torch.linspace(-0.5, 0.5, 16).half())
+    optimizer = torch.optim.AdamW([parameter], lr=0.002, weight_decay=1e-5)
+    before = parameter.detach().clone()
+    parameter.grad = torch.linspace(-1.0, 1.0, 16).half()
+
+    finetune._offloaded_adamw_step(optimizer, chunk_elements=4)
+
+    state = optimizer.state[parameter]
+    assert state["exp_avg"].dtype == torch.float32
+    assert state["exp_avg_sq"].dtype == torch.float32
+    assert parameter.dtype == torch.float16
+    assert not torch.equal(parameter, before)
+
+
 def test_offloaded_optimizer_reuses_gradient_buffer() -> None:
     parameter = torch.nn.Parameter(torch.ones(8))
     optimizer = torch.optim.AdamW([parameter], lr=0.01)
@@ -391,6 +441,175 @@ def test_staged_feature_branch_backward_matches_joint_backward() -> None:
 
     torch.testing.assert_close(
         staged.weight.grad, reference.weight.grad, atol=1e-12, rtol=1e-12
+    )
+
+
+def test_two_staged_feature_branches_match_joint_backward() -> None:
+    torch.manual_seed(11)
+    reference = torch.nn.Linear(6, 5, bias=False).double()
+    staged = torch.nn.Linear(6, 5, bias=False).double()
+    staged.load_state_dict(reference.state_dict())
+    inputs = torch.randn(4, 6, dtype=torch.float64)
+
+    reference_feature = reference(inputs)
+    reference_base = reference_feature.square().mean()
+    reference_capability = torch.sin(reference_feature * 0.7).sum() * 0.04
+    reference_semantic = torch.cos(reference_feature * 1.3).sum() * 0.02
+    (reference_base + reference_capability + reference_semantic).backward()
+
+    staged_feature = staged(inputs)
+    staged_base = staged_feature.square().mean()
+    staged_capability = torch.sin(staged_feature * 0.7).sum() * 0.04
+    staged_semantic = torch.cos(staged_feature * 1.3).sum() * 0.02
+    capability_gradient = finetune._staged_feature_branch_gradient(
+        staged_capability, staged_feature
+    )
+    semantic_gradient = finetune._staged_feature_branch_gradient(
+        staged_semantic, staged_feature
+    )
+    finetune._backward_base_with_feature_gradient(
+        staged_base,
+        staged_feature,
+        capability_gradient + semantic_gradient,
+    )
+
+    torch.testing.assert_close(
+        staged.weight.grad, reference.weight.grad, atol=1e-12, rtol=1e-12
+    )
+
+
+def test_move_frozen_modules_preserves_values_and_grad_contract() -> None:
+    module = torch.nn.Linear(3, 2).eval()
+    for parameter in module.parameters():
+        parameter.requires_grad_(False)
+    expected = {name: value.detach().clone() for name, value in module.state_dict().items()}
+
+    finetune._move_frozen_modules({"fixture": module}, torch.device("cpu"))
+
+    assert all(not parameter.requires_grad for parameter in module.parameters())
+    for name, value in module.state_dict().items():
+        torch.testing.assert_close(value, expected[name])
+
+
+def test_cpu_gradient_offloaded_adamw_matches_native_step() -> None:
+    native_parameter = torch.nn.Parameter(torch.linspace(-1.0, 1.0, 12).reshape(3, 4))
+    staged_parameter = torch.nn.Parameter(native_parameter.detach().clone())
+    gradient = torch.linspace(0.2, -0.1, 12).reshape(3, 4)
+    native = torch.optim.AdamW(
+        [native_parameter], lr=0.003, weight_decay=0.01, betas=(0.8, 0.95)
+    )
+    staged = torch.optim.AdamW(
+        [staged_parameter], lr=0.003, weight_decay=0.01, betas=(0.8, 0.95)
+    )
+
+    native_parameter.grad = gradient.clone()
+    native.step()
+    finetune._offloaded_adamw_step_cpu_gradients(
+        staged,
+        {staged_parameter: gradient.clone()},
+        chunk_elements=5,
+    )
+
+    torch.testing.assert_close(staged_parameter, native_parameter, atol=1e-7, rtol=1e-7)
+    torch.testing.assert_close(
+        staged.state[staged_parameter]["exp_avg"],
+        native.state[native_parameter]["exp_avg"],
+    )
+    torch.testing.assert_close(
+        staged.state[staged_parameter]["exp_avg_sq"],
+        native.state[native_parameter]["exp_avg_sq"],
+    )
+
+
+def test_column_staged_direct_field_gradient_matches_joint_backward() -> None:
+    class IdentityDecoder(torch.nn.Module):
+        def __init__(self, dimension: int) -> None:
+            super().__init__()
+            self.coefficient_dim = dimension
+            self.basis = torch.nn.Parameter(
+                torch.eye(dimension), requires_grad=False
+            )
+
+        def decode_map(self, value: torch.Tensor) -> torch.Tensor:
+            return value
+
+    class DirectField(torch.nn.Module):
+        def __init__(self, values: torch.Tensor) -> None:
+            super().__init__()
+            self.local_codes = torch.nn.Parameter(values.clone())
+            self.decoder = IdentityDecoder(values.shape[1])
+            self.fusion = None
+
+        def primitive_confidence(self):
+            return None
+
+    class LinearRenderer:
+        max_channels_per_chunk = 2
+
+        def __init__(self, weights: torch.Tensor) -> None:
+            self.weights = weights
+
+        def render_feature_rows(self, _geometry, _viewmat, features, **_kwargs):
+            height, width = 2, 3
+            rendered = (self.weights @ features).transpose(0, 1).reshape(
+                features.shape[1], height, width
+            )
+            return {
+                "feature_map": rendered,
+                "alpha_map": torch.ones(height, width),
+                "depth_map": torch.zeros(height, width),
+            }
+
+    torch.manual_seed(19)
+    values = torch.randn(7, 6)
+    weights = torch.randn(6, 7)
+    selected = torch.tensor([1, 4, 1, 6])
+    renderer = LinearRenderer(weights)
+    reference = DirectField(values)
+    staged = DirectField(values)
+
+    reference_map = renderer.render_feature_rows(
+        None, torch.eye(4), reference.local_codes
+    )["feature_map"]
+    reference_render_loss = torch.sin(reference_map * 0.8).sum() * 0.03
+    reference_mpr_loss = reference.local_codes[selected].square().mean() * 0.2
+    (reference_render_loss + reference_mpr_loss).backward()
+
+    staged_result = finetune._render_direct_field_detached_by_columns(
+        renderer,
+        None,
+        staged,
+        torch.eye(4),
+        feature_height=2,
+        feature_width=3,
+        reliability_splat=False,
+    )
+    staged_render_loss = torch.sin(staged_result["feature_map"] * 0.8).sum() * 0.03
+    (coefficient_gradient,) = torch.autograd.grad(
+        staged_render_loss, staged_result["coefficient_map"]
+    )
+    selected_codes = staged.local_codes[selected].detach().requires_grad_(True)
+    staged_mpr_loss = selected_codes.square().mean() * 0.2
+    (selected_gradient,) = torch.autograd.grad(staged_mpr_loss, selected_codes)
+    staged_gradient, _norm = finetune._column_staged_direct_field_gradient(
+        renderer,
+        None,
+        staged,
+        torch.eye(4),
+        coefficient_gradient,
+        feature_height=2,
+        feature_width=3,
+        reliability_splat=False,
+        selected_rows=selected,
+        selected_row_gradient=selected_gradient,
+        grad_clip=1e6,
+    )
+
+    torch.testing.assert_close(
+        staged_result["feature_map"], reference_map.detach(), atol=0.0, rtol=0.0
+    )
+    torch.testing.assert_close(
+        staged_gradient, reference.local_codes.grad, atol=1e-7, rtol=1e-6
     )
 
 
