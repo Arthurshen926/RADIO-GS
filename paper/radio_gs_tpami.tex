@@ -426,6 +426,43 @@ support containing that peak but cannot move the localization result.  Identity
 and extent maps are rendered and resized independently.  This readout adds no
 second persistent semantic field.
 
+The corresponding calibrated latent-variable form includes an explicit null
+proposal,
+\begin{equation}
+ P(y_i=1\mid q,F)=\pi_0 p_i^{\mathrm{prim}}(q)
+ +\sum_{k=1}^{K}\pi_k r_{ik},\qquad \sum_{k=0}^{K}\pi_k=1.
+\end{equation}
+The null branch preserves primitive evidence when no proposal is sufficiently
+identified.  Cross-view edges are ternary (same, different, or unknown): an
+unobserved co-membership is never treated as a negative.  We use the frozen
+deterministic realization for the formal row.  Our analytic development
+realization assigns each valid proposal a continuous cross-view support
+$a_k$ and uses
+$\ell_k=8(s_k^{\mathrm{id}}-b_q)+\log a_k-\log K_q$ with null logit zero.
+The proposal-count prior prevents duplicated observations from overwhelming
+the null.  On LERF3D full4 this changes mIoU/Acc@0.25/Acc@0.50 from
+$0.39684/0.61538/0.40865$ to $0.43730/0.67788/0.48077$.  Because benchmark
+feedback was already available during development, this is not presented as
+an independent blind result; a learned calibrated replacement is reported
+only after source-only cross-scene validation.
+
+Soft membership is projected with the renderer's visibility measure,
+$P(y_x=1\mid q)=\sum_iT_i(x)\alpha_i(x)P(y_i=1\mid q)$, retaining the residual
+transmittance as background mass.  We do not alpha-normalize this probability,
+which would magnify low-opacity tails.  A subsequent boundary module is allowed
+to alter pixel support, but not proposal identity.
+When the source-trained current-field SAM boundary module is composed with the
+analytic latent posterior, LERF2D full-four sample-micro mIoU increases from
+$0.37080$ to $0.37818$ while localization remains $0.87981$.  This positive
+factorization diagnostic remains below the retained $0.39584$ readout and is
+therefore not promoted as an unconditional replacement.
+
+A label-opening full-four intervention ladder is used only for diagnosis.  Its
+largest jump occurs when the finite proposal-set constraint is removed, while
+oracle membership-threshold selection adds only about one sample-micro IoU
+point after association.  We therefore treat proposal coverage and cross-view
+association as method prerequisites and do not report oracle rows as results.
+
 Mutually exclusive categories require a different posterior.  On ScanNet, SAM
 affinity supplies only a bounded residual on rows whose top-two class margin is
 below a fixed threshold,
@@ -435,12 +472,18 @@ below a fixed threshold,
 \end{equation}
 High-margin class decisions are immutable, and SAM never creates category
 identity.  For registered NVOS and SPIn prompts, protocol-authorized transient
-RGB may be processed by frozen official SAM.  Box and signed-point hypotheses
-are decoded independently and combined after mask decoding using positive
-inclusion and negative exclusion.  We do not treat a joint box--point prompt as
-additive evidence: that control fails the frozen NVOS promotion gate.  These
-three interfaces share the same Universal Field v1 but respect the distinct
-statistical type of text, categorical, and registered-prompt queries.
+RGB may be processed by frozen official SAM.  The shared primary compiler
+freezes ten reference candidates, projects each through exact compositor
+adjoints into every registered camera, performs every view call independently,
+and symmetrically marginalizes all candidate/view evidence into one Gaussian
+posterior.  Thus view order is not a hidden state; incomplete candidates or
+views abstain instead of falling back.  A cheaper target-frame diagnostic
+decodes box and signed-point hypotheses independently and combines them after
+mask decoding using positive inclusion and negative exclusion.  We do not
+treat a joint box--point prompt as additive evidence: that control fails the
+frozen NVOS gate.  These three interfaces share the same Universal Field v1 but
+respect the distinct statistical type of text, categorical, and
+registered-prompt queries.
 
 \section{Experiments}
 

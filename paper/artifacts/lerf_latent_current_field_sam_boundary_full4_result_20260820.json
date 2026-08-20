@@ -1,0 +1,38 @@
+{
+  "artifact_type": "lerf_latent_current_field_sam_boundary_full4_development_result_v1",
+  "date": "2026-08-20",
+  "evaluation_status": "label-opened development; not an independent blind result",
+  "method": {
+    "identity_extent": "official_sam3_siglip2_latent_proposal_null_marginal_v1",
+    "boundary": "source-trained current-field prompt-conditioned SAM3 mask head",
+    "acceptance": "fixed conservative overlap, area-ratio, heatmap-mass, and peak-retention gates",
+    "persistent_second_semantic_field": false,
+    "evaluation_rgb_opened_by_boundary": true,
+    "evaluation_masks_opened_by_method": false
+  },
+  "full4": {
+    "sample_count": 208,
+    "sample_micro_miou": 0.37818387846065804,
+    "scene_macro_miou": 0.3816528903262662,
+    "localization_accuracy": 0.8798076923076923,
+    "latent_only_sample_micro_miou": 0.3707963169052026,
+    "primitive_sam_sample_micro_miou": 0.36151662592344763,
+    "retained_method_sample_micro_miou": 0.3958417415,
+    "delta_vs_latent_only": 0.00738756155545544,
+    "delta_vs_primitive_sam": 0.01666725253721041,
+    "delta_vs_retained_method": -0.01765786303934197
+  },
+  "scenes": {
+    "figurines": {"miou": 0.39113699927756623, "loc_acc": 0.9107142857142857, "samples": 56},
+    "ramen": {"miou": 0.37786216106673237, "loc_acc": 0.8591549295774648, "samples": 71},
+    "teatime": {"miou": 0.3584564460377921, "loc_acc": 0.8983050847457628, "samples": 59},
+    "waldo_kitchen": {"miou": 0.3991559549229741, "loc_acc": 0.8181818181818182, "samples": 22}
+  },
+  "result_files": {
+    "figurines": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260820/lerf_latent_current_field_sam_boundary_v1/figurines/lerf_ovs_results.json", "sha256": "57e4b3caec76a8fbe1230aa16c2b910e9291f7713d2efb25253d17945ceb9c77"},
+    "ramen": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260820/lerf_latent_current_field_sam_boundary_v1/ramen/lerf_ovs_results.json", "sha256": "6d0bbb9c6828785911334b53f23554f0f5ed165c0b11e345e53bdb6aa5c95281"},
+    "teatime": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260820/lerf_latent_current_field_sam_boundary_v1/teatime/lerf_ovs_results.json", "sha256": "17fcfc6f8aefd5abd09c632440b7dbad41637cffee05baf6a6e30fa336be72f3"},
+    "waldo_kitchen": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260820/lerf_latent_current_field_sam_boundary_v1/waldo_kitchen/lerf_ovs_results.json", "sha256": "d0c0ec499fa199f2a3de6244ea23dceb8748c2d8a87e8cf95218512ff5f421dc"}
+  },
+  "decision": "retain as a positive boundary-factorization diagnostic; do not replace the retained LERF2D row"
+}

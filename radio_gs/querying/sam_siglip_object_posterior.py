@@ -4,6 +4,10 @@ from __future__ import annotations
 
 import torch
 
+from radio_gs.querying.latent_proposal_posterior import (
+    latent_proposal_null_posterior,
+)
+
 
 def _scatter_amax(values: torch.Tensor, indices: torch.Tensor, size: int) -> torch.Tensor:
     result = values.new_zeros((int(size),))
@@ -41,6 +45,7 @@ def sam_siglip_object_posterior(
     minimum_cross_view_jaccard: float = 0.02,
     minimum_cross_view_overlap: float = 0.15,
     require_field_peak_anchor: bool = True,
+    latent_logit_temperature: float = 8.0,
 ) -> tuple[torch.Tensor, dict[str, object]]:
     """Factor proposal identity from object extent with per-query safe fallback.
 
@@ -91,7 +96,11 @@ def sam_siglip_object_posterior(
         raise ValueError("descriptor_listwise_margin must lie in [0,1]")
     if composition not in {"maximum", "noisy_or"}:
         raise ValueError("unsupported topology composition")
-    if association_mode not in {"none", "weighted_jaccard_components"}:
+    if association_mode not in {
+        "none",
+        "weighted_jaccard_components",
+        "latent_proposal_marginal",
+    }:
         raise ValueError("unsupported proposal association mode")
     if int(candidates_per_view) <= 0:
         raise ValueError("candidates_per_view must be positive")
@@ -101,6 +110,8 @@ def sam_siglip_object_posterior(
         raise ValueError("minimum cross-view Jaccard must lie in [0,1]")
     if not 0.0 <= float(minimum_cross_view_overlap) <= 1.0:
         raise ValueError("minimum cross-view overlap must lie in [0,1]")
+    if float(latent_logit_temperature) <= 0:
+        raise ValueError("latent logit temperature must be positive")
     valid = (
         (rows >= 0)
         & (rows < num_rows)
@@ -193,6 +204,91 @@ def sam_siglip_object_posterior(
             jaccard >= float(minimum_cross_view_jaccard)
             or overlap >= float(minimum_cross_view_overlap)
         )
+
+    def association_strength(left: int, right: int) -> float:
+        """Continuous source-only evidence for a cross-view identity edge."""
+
+        if int(views[left]) == int(views[right]):
+            return 0.0
+        a, b = support_sets[left], support_sets[right]
+        if not a or not b:
+            return 0.0
+        intersection = len(a.intersection(b))
+        if intersection == 0:
+            return 0.0
+        jaccard = intersection / max(len(a) + len(b) - intersection, 1)
+        overlap = intersection / max(min(len(a), len(b)), 1)
+        return max(float(jaccard), float(overlap))
+
+    if association_mode == "latent_proposal_marginal":
+        proposal_valid = torch.zeros(
+            (num_proposals, num_queries), dtype=torch.bool, device=base.device
+        )
+        proposal_logits = base.new_zeros((num_proposals, num_queries))
+        association = base.new_zeros((num_proposals,))
+        for left in range(num_proposals):
+            association[left] = max(
+                (
+                    association_strength(left, right)
+                    for right in range(num_proposals)
+                    if right != left
+                ),
+                default=0.0,
+            )
+        for query_index in range(num_queries):
+            eligible = torch.ones(num_proposals, dtype=torch.bool, device=base.device)
+            if proposal_area_fraction is not None:
+                eligible &= area.to(base.device) <= float(maximum_proposal_area_fraction)
+            descriptor_floor = float(minimum_descriptor_score)
+            if descriptor_gate == "query_listwise" and bool(eligible.any()):
+                descriptor_floor = float(
+                    descriptor[eligible.cpu(), query_index].max()
+                ) - float(descriptor_listwise_margin)
+            eligible &= descriptor[:, query_index].to(base.device) >= descriptor_floor
+            eligible &= association > 0
+            if require_field_peak_anchor:
+                eligible &= peak_membership[:, query_index].to(base.device) > 0
+            proposal_valid[:, query_index] = eligible
+            count = int(eligible.sum())
+            if count:
+                # A uniform prior over the complete proposal cohort prevents
+                # proposal multiplicity from defeating the explicit null.
+                evidence = (
+                    float(latent_logit_temperature)
+                    * (identity[:, query_index].to(base.device) - descriptor_floor)
+                    + torch.log(association.clamp_min(1e-8))
+                    - torch.log(base.new_tensor(float(count)))
+                )
+                proposal_logits[:, query_index] = evidence
+        marginal = latent_proposal_null_posterior(
+            base.clamp(0.0, 1.0),
+            rows,
+            props,
+            conditional.clamp(0.0, 1.0),
+            proposal_logits,
+            base.new_zeros((num_queries,)),
+            proposal_valid=proposal_valid,
+        )
+        probability = marginal.probability
+        probability[base < 0] = base[base < 0]
+        return probability, {
+            "enabled": True,
+            "mode": "official_sam3_siglip2_latent_proposal_null_marginal_v1",
+            "association_mode": association_mode,
+            "identity_authority": "official_mask_aligned_siglip2_plus_field_peak_core",
+            "extent_authority": "official_sam3_exact_mpr_probability",
+            "latent_logit_temperature": float(latent_logit_temperature),
+            "null_logit": 0.0,
+            "proposal_prior": "uniform_over_valid_complete_source_proposal_cohort",
+            "valid_proposal_counts": proposal_valid.sum(dim=0).tolist(),
+            "fallback_queries": (~proposal_valid.any(dim=0)).tolist(),
+            "fallback_query_count": int((~proposal_valid.any(dim=0)).sum()),
+            "null_probability": marginal.null_probability.tolist(),
+            "maximum_proposal_area_fraction": float(maximum_proposal_area_fraction),
+            "descriptor_gate": str(descriptor_gate),
+            "descriptor_listwise_margin": float(descriptor_listwise_margin),
+            "require_field_peak_anchor": bool(require_field_peak_anchor),
+        }
 
     for query_index in range(num_queries):
         eligible_area = torch.ones(num_proposals, dtype=torch.bool)

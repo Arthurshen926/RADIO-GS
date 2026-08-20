@@ -2219,6 +2219,7 @@ def evaluate_scene(
     feature_contribution_gamma: float = 1.0,
     primitive_valid_normalization: bool = False,
     primitive_valid_coverage_power: float = 0.0,
+    primitive_posterior_visibility_mass: bool = False,
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
 
@@ -2782,14 +2783,28 @@ def evaluate_scene(
                         ],
                         dim=1,
                     )
+                visibility_mass_projection = bool(
+                    render_readout == "primitive_posterior"
+                    and primitive_posterior_visibility_mass
+                )
                 support_render = renderer.render_feature_rows(
                     model,
                     viewmat.squeeze(0),
                     render_rows,
-                    alpha_normalize=True,
+                    alpha_normalize=not visibility_mass_projection,
                     contribution_gamma=feature_contribution_gamma,
                 )
-                if primitive_valid_normalization:
+                if visibility_mass_projection:
+                    # Preserve residual transmittance as the Bernoulli
+                    # background event: P(y_x=1)=sum_i T_i alpha_i P(y_i=1).
+                    # Alpha normalization would amplify transparent tails.
+                    rendered_semantics = support_render["feature_map"].float()
+                    if primitive_valid_normalization:
+                        semantic_coverage = rendered_semantics[-1]
+                        rendered_semantics = rendered_semantics[:-1]
+                    else:
+                        semantic_coverage = None
+                elif primitive_valid_normalization:
                     rendered_semantics, semantic_coverage = (
                         normalize_primitive_scores_by_valid_mass(
                             support_render["feature_map"].float(),
@@ -3376,6 +3391,14 @@ def main() -> None:
             "original total-alpha score."
         ),
     )
+    parser.add_argument(
+        "--primitive_posterior_visibility_mass",
+        action="store_true",
+        help=(
+            "Project primitive posterior as sum(T*alpha*P), retaining residual "
+            "transmittance as background. Valid only for primitive_posterior."
+        ),
+    )
     # Scene selection
     parser.add_argument("--scene", default="all",
                         help="Scene name or 'all' (default: all)")
@@ -3594,6 +3617,14 @@ def main() -> None:
         parser.error(
             "--primitive_valid_coverage_power requires "
             "--primitive_valid_normalization"
+        )
+    if (
+        args.primitive_posterior_visibility_mass
+        and args.render_readout != "primitive_posterior"
+    ):
+        parser.error(
+            "--primitive_posterior_visibility_mass requires "
+            "--render_readout primitive_posterior"
         )
     if args.gt_only and args.rendered_only:
         parser.error("--gt_only and --rendered_only are mutually exclusive")
@@ -4064,6 +4095,9 @@ def main() -> None:
             feature_contribution_gamma=args.feature_contribution_gamma,
             primitive_valid_normalization=args.primitive_valid_normalization,
             primitive_valid_coverage_power=args.primitive_valid_coverage_power,
+            primitive_posterior_visibility_mass=(
+                args.primitive_posterior_visibility_mass
+            ),
         )
         all_results[scene] = scene_results
 
@@ -4173,7 +4207,9 @@ def main() -> None:
         "prompt_templates": prompt_templates,
         "feature_observation_operator": {
             "type": (
-                "normalized_front_to_back_contribution_power"
+                "front_to_back_posterior_visibility_mass"
+                if args.primitive_posterior_visibility_mass
+                else "normalized_front_to_back_contribution_power"
                 if float(args.feature_contribution_gamma) != 1.0
                 else "alpha_normalized_mean"
             ),
@@ -4182,7 +4218,9 @@ def main() -> None:
                 args.primitive_valid_normalization
             ),
             "semantic_score_formula": (
-                "sum(w*v*s)/sum(w*v) * coverage**coverage_power"
+                "sum(w*v*s); residual_transmittance_is_background"
+                if args.primitive_posterior_visibility_mass
+                else "sum(w*v*s)/sum(w*v) * coverage**coverage_power"
                 if args.primitive_valid_normalization
                 else "sum(w*v*s)/sum(w)"
             ),

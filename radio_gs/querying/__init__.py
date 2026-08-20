@@ -122,6 +122,37 @@ _EXPORTS: Final[dict[str, tuple[str, str]]] = {
     ),
     "select_support_components": (".support_solver", "select_support_components"),
     "solve_primitive_support": (".support_solver", "solve_primitive_support"),
+    "DIFFERENT_RELATION": (".latent_proposal_posterior", "DIFFERENT_RELATION"),
+    "LatentProposalPosterior": (
+        ".latent_proposal_posterior",
+        "LatentProposalPosterior",
+    ),
+    "SAME_RELATION": (".latent_proposal_posterior", "SAME_RELATION"),
+    "UNKNOWN_RELATION": (".latent_proposal_posterior", "UNKNOWN_RELATION"),
+    "latent_proposal_null_posterior": (
+        ".latent_proposal_posterior",
+        "latent_proposal_null_posterior",
+    ),
+    "ternary_comembership_authority": (
+        ".latent_proposal_posterior",
+        "ternary_comembership_authority",
+    ),
+    "QueryAbstention": (
+        ".synchronous_multiview_candidate_marginal",
+        "QueryAbstention",
+    ),
+    "SynchronousMultiviewCandidateMarginal": (
+        ".synchronous_multiview_candidate_marginal",
+        "SynchronousMultiviewCandidateMarginal",
+    ),
+    "deterministic_visible_signed_points": (
+        ".synchronous_multiview_candidate_marginal",
+        "deterministic_visible_signed_points",
+    ),
+    "marginalize_synchronous_multiview_candidates": (
+        ".synchronous_multiview_candidate_marginal",
+        "marginalize_synchronous_multiview_candidates",
+    ),
 }
 
 __all__ = tuple(_EXPORTS)

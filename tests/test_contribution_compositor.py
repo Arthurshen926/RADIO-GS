@@ -1,6 +1,7 @@
 import torch
 
 from radio_gs.rendering.contribution_compositor import (
+    advance_front_to_back_chunk,
     build_compositing_variants,
     composite_feature_variants,
     contribution_rank,
@@ -23,6 +24,35 @@ def test_front_to_back_weights_reset_transmittance_per_pixel():
     torch.testing.assert_close(alphas[order], torch.tensor([0.2, 0.5, 0.5, 0.5]))
     torch.testing.assert_close(weights, torch.tensor([0.2, 0.4, 0.5, 0.25]))
     torch.testing.assert_close(accumulated, torch.tensor([0.6, 0.75]))
+
+
+def test_depth_chunk_recurrence_matches_whole_frame_compositing():
+    first_pixels = torch.tensor([1, 0])
+    first_alphas = torch.tensor([0.2, 0.5])
+    second_pixels = torch.tensor([0, 1])
+    second_alphas = torch.tensor([0.25, 0.4])
+    transmittance = torch.ones(2)
+
+    _, first_grouped, first_weights = advance_front_to_back_chunk(
+        first_pixels, first_alphas, transmittance
+    )
+    _, second_grouped, second_weights = advance_front_to_back_chunk(
+        second_pixels, second_alphas, transmittance
+    )
+
+    whole_pixels = torch.cat((first_pixels, second_pixels))
+    whole_alphas = torch.cat((first_alphas, second_alphas))
+    _, whole_grouped, whole_weights, whole_accumulated = front_to_back_weights(
+        whole_pixels, whole_alphas, num_pixels=2
+    )
+    chunk_pixels = torch.cat((first_grouped, second_grouped))
+    chunk_weights = torch.cat((first_weights, second_weights))
+    for pixel in range(2):
+        torch.testing.assert_close(
+            chunk_weights[chunk_pixels == pixel],
+            whole_weights[whole_grouped == pixel],
+        )
+    torch.testing.assert_close(transmittance, 1.0 - whole_accumulated)
 
 
 def test_contribution_rank_is_descending_within_each_pixel():

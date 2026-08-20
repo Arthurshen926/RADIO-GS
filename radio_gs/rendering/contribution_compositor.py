@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping
+from typing import Iterator, Mapping
 
 import torch
 
@@ -154,20 +154,62 @@ def front_to_back_weights(
     starts = torch.ones_like(grouped_pids, dtype=torch.bool)
     starts[1:] = grouped_pids[1:] != grouped_pids[:-1]
     start_indices = torch.nonzero(starts, as_tuple=False).flatten()
-    end_indices = torch.cat(
-        [start_indices[1:], torch.tensor([pids.numel()], device=pids.device)]
+    exclusive = torch.log1p(-grouped_alpha.double())
+    torch.cumsum(exclusive, dim=0, out=exclusive)
+    # For a group beginning at ``s``, the exclusive prefix baseline is the
+    # global inclusive prefix at ``s - 1`` (or zero for the first group).
+    # Indexing that baseline by pixel is algebraically identical to repeating
+    # per-group bases by every group length, but avoids several hit-sized
+    # float64 temporaries for high-overdraw views.
+    hit_chunk = 1_048_576
+    for start in range(0, int(exclusive.numel()), hit_chunk):
+        stop = min(start + hit_chunk, int(exclusive.numel()))
+        exclusive[start:stop].sub_(
+            torch.log1p(-grouped_alpha[start:stop].double())
+        )
+    base_by_pixel = torch.zeros(
+        num_pixels, dtype=torch.float64, device=pids.device
     )
-    lengths = end_indices - start_indices
-
-    log_survival = torch.log1p(-grouped_alpha.double())
-    inclusive = torch.cumsum(log_survival, dim=0)
-    exclusive_global = inclusive - log_survival
-    group_bases = exclusive_global[start_indices]
-    exclusive = exclusive_global - torch.repeat_interleave(group_bases, lengths)
-    weights = grouped_alpha * torch.exp(exclusive).float()
+    base_by_pixel[grouped_pids[start_indices]] = exclusive[start_indices]
+    for start in range(0, int(exclusive.numel()), hit_chunk):
+        stop = min(start + hit_chunk, int(exclusive.numel()))
+        exclusive[start:stop].sub_(
+            base_by_pixel[grouped_pids[start:stop]]
+        )
+    exclusive.exp_()
+    weights = exclusive.float()
+    weights.mul_(grouped_alpha)
     accumulated = torch.zeros(num_pixels, dtype=torch.float32, device=pids.device)
     accumulated.index_add_(0, grouped_pids, weights)
     return order, grouped_pids, weights, accumulated
+
+
+def advance_front_to_back_chunk(
+    pixel_ids: torch.Tensor,
+    alphas: torch.Tensor,
+    transmittance: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Composite one globally depth-ordered hit chunk into persistent rays.
+
+    Iterative gsplat rasterization emits the next depth interval for every
+    tile.  :func:`front_to_back_weights` evaluates transmittance local to that
+    interval; multiplying by the incoming per-pixel transmittance makes the
+    weights exactly global.  ``transmittance`` is updated in place so the next
+    interval continues the same front-to-back recurrence without retaining
+    earlier hits.
+    """
+
+    current = torch.as_tensor(transmittance).float().reshape(-1)
+    order, grouped_pids, local_weights, _ = front_to_back_weights(
+        pixel_ids, alphas, num_pixels=int(current.numel())
+    )
+    if grouped_pids.numel() == 0:
+        return order, grouped_pids, local_weights
+    weights = local_weights * current[grouped_pids]
+    consumed = torch.zeros_like(current)
+    consumed.index_add_(0, grouped_pids, weights)
+    current.sub_(consumed).clamp_(min=0.0, max=1.0)
+    return order, grouped_pids, weights
 
 
 def contribution_rank(
@@ -320,15 +362,30 @@ def gaussian_footprint_alphas(
         or int(gids.max()) >= opacity.shape[0]
     ):
         raise ValueError("gaussian id outside projected geometry")
-    x = (pids % int(width)).float() + 0.5
-    y = torch.div(pids, int(width), rounding_mode="floor").float() + 0.5
-    delta_x = means[gids, 0] - x
-    delta_y = means[gids, 1] - y
-    q = conic[gids]
-    sigma = 0.5 * (
-        q[:, 0] * delta_x.square() + q[:, 2] * delta_y.square()
-    ) + q[:, 1] * delta_x * delta_y
-    return (opacity[gids] * torch.exp(-sigma)).clamp(max=0.999)
+    # A high-overdraw view can contain hundreds of millions of accepted hits.
+    # The footprint equation is pointwise, so evaluate it in fixed chunks
+    # instead of materializing x/y/delta/conic arrays for every hit at once.
+    result = torch.empty(gids.numel(), dtype=torch.float32, device=gids.device)
+    hit_chunk = 1_048_576
+    for start in range(0, int(gids.numel()), hit_chunk):
+        stop = min(start + hit_chunk, int(gids.numel()))
+        chunk_gids = gids[start:stop]
+        chunk_pids = pids[start:stop]
+        x = (chunk_pids % int(width)).float() + 0.5
+        y = (
+            torch.div(chunk_pids, int(width), rounding_mode="floor").float()
+            + 0.5
+        )
+        delta_x = means[chunk_gids, 0] - x
+        delta_y = means[chunk_gids, 1] - y
+        q = conic[chunk_gids]
+        sigma = 0.5 * (
+            q[:, 0] * delta_x.square() + q[:, 2] * delta_y.square()
+        ) + q[:, 1] * delta_x * delta_y
+        result[start:stop] = (
+            opacity[chunk_gids] * torch.exp(-sigma)
+        ).clamp(max=0.999)
+    return result
 
 
 @torch.no_grad()
@@ -340,6 +397,7 @@ def rasterize_single_view_contributions(
     height: int,
     width: int,
     opacity_scale: torch.Tensor | None = None,
+    include_depths: bool = True,
 ) -> dict[str, torch.Tensor]:
     """Return exact accepted 3DGS hits and front-to-back contributions.
 
@@ -434,16 +492,146 @@ def rasterize_single_view_contributions(
         projected_depths = projected_depths[..., 0]
     if projected_depths.ndim == 2:
         projected_depths = projected_depths[0]
+    ordered_depths = (
+        projected_depths[gids[order]]
+        if bool(include_depths)
+        else torch.empty(0, dtype=torch.float32, device=device)
+    )
     return {
         "gaussian_ids": gids[order],
         "pixel_ids": grouped_pids,
         "alphas": hit_alphas[order],
         "weights": weights,
-        "depths": projected_depths[gids[order]],
+        "depths": ordered_depths,
         "accumulated_alpha": accumulated.reshape(int(height), int(width)),
         "rendered_alpha": rendered_alphas[0, ..., 0].float(),
         "rendered_depth": renders[0, ..., -1].float(),
     }
+
+
+def iter_single_view_contribution_chunks(
+    gaussian_model,
+    renderer,
+    viewmat: torch.Tensor,
+    *,
+    height: int,
+    width: int,
+    opacity_scale: torch.Tensor | None = None,
+    batch_per_iter: int = 1,
+) -> Iterator[dict[str, torch.Tensor]]:
+    """Yield exact globally weighted hits in bounded depth batches.
+
+    This is the memory-bounded equivalent of
+    :func:`rasterize_single_view_contributions`.  gsplat's iterative range API
+    supplies consecutive front-to-back intervals, and
+    :func:`advance_front_to_back_chunk` carries the exact per-pixel
+    transmittance between them.  Earlier hit tensors can therefore be reduced
+    and released before the next interval is materialized.
+    """
+
+    if bool(getattr(renderer, "use_2dgs", False)):
+        raise RuntimeError("controlled contribution audit currently supports 3DGS only")
+    if int(batch_per_iter) <= 0:
+        raise ValueError("batch_per_iter must be positive")
+    from gsplat import rasterization
+    from gsplat.cuda._wrapper import rasterize_to_indices_in_range
+
+    with torch.no_grad():
+        device = gaussian_model.get_xyz().device
+        means = gaussian_model.get_xyz().float()
+        quats = gaussian_model.get_rotation().float()
+        scales = gaussian_model.get_scaling().float()
+        opacities = gaussian_model.get_opacity().float().reshape(-1)
+        if opacity_scale is not None:
+            scale = torch.as_tensor(
+                opacity_scale, device=device, dtype=opacities.dtype
+            ).reshape(-1)
+            if scale.shape != opacities.shape:
+                raise ValueError("opacity_scale must align with Gaussian rows")
+            if not bool(torch.isfinite(scale).all()) or bool((scale < 0).any()):
+                raise ValueError("opacity_scale must be finite and non-negative")
+            opacities = opacities * scale.clamp(max=1.0)
+        view = torch.as_tensor(viewmat, device=device).float()
+        if view.shape != (4, 4):
+            raise ValueError("viewmat must be [4,4]")
+        colors = torch.zeros(means.shape[0], 1, device=device)
+        _renders, _rendered_alphas, info = rasterization(
+            means=means,
+            quats=quats,
+            scales=scales,
+            opacities=opacities,
+            colors=colors,
+            viewmats=view[None],
+            Ks=renderer.scaled_intrinsics(int(width), int(height)).float()[None],
+            width=int(width),
+            height=int(height),
+            near_plane=float(renderer.near_plane),
+            far_plane=float(renderer.far_plane),
+            backgrounds=torch.zeros(1, 1, device=device),
+            render_mode="RGB+ED",
+            packed=False,
+        )
+        total_intersections = int(info["flatten_ids"].numel())
+        if total_intersections == 0:
+            return
+        offsets = torch.cat(
+            (
+                info["isect_offsets"].reshape(-1),
+                torch.tensor(
+                    [total_intersections],
+                    dtype=info["isect_offsets"].dtype,
+                    device=device,
+                ),
+            )
+        )
+        maximum_tile_intersections = int((offsets[1:] - offsets[:-1]).max())
+        block_size = int(info["tile_size"]) ** 2
+        range_batches = (
+            maximum_tile_intersections + block_size - 1
+        ) // block_size
+        transmittance = torch.ones(
+            int(height) * int(width), dtype=torch.float32, device=device
+        )
+
+    for step in range(0, range_batches, int(batch_per_iter)):
+        with torch.no_grad():
+            gids, pids, camera_ids = rasterize_to_indices_in_range(
+                step,
+                min(step + int(batch_per_iter), range_batches),
+                transmittance.reshape(1, int(height), int(width)),
+                info["means2d"],
+                info["conics"],
+                info["opacities"],
+                int(width),
+                int(height),
+                info["tile_size"],
+                info["isect_offsets"],
+                info["flatten_ids"],
+            )
+            keep = camera_ids == 0
+            gids = gids[keep]
+            pids = pids[keep]
+            if gids.numel() == 0:
+                continue
+            hit_alphas = gaussian_footprint_alphas(
+                gids,
+                pids,
+                info["means2d"],
+                info["conics"],
+                info["opacities"],
+                width=int(width),
+            )
+            order, grouped_pids, weights = advance_front_to_back_chunk(
+                pids, hit_alphas, transmittance
+            )
+            chunk = {
+                "gaussian_ids": gids[order],
+                "pixel_ids": grouped_pids,
+                "alphas": hit_alphas[order],
+                "weights": weights,
+                "range_start": torch.tensor(step, device=device),
+            }
+        yield chunk
 
 
 def composite_feature_variants(

@@ -45,7 +45,11 @@ if [[ ! -s "$SCORES" ]]; then
     --descriptor-listwise-margin "${DESCRIPTOR_LISTWISE_MARGIN:-0.12}" \
     --view-identity-margin "${VIEW_IDENTITY_MARGIN:-0.12}" \
     --candidates-per-view "${CANDIDATES_PER_VIEW:-3}" \
+    --maximum-proposal-area-fraction "${MAXIMUM_PROPOSAL_AREA_FRACTION:-0.25}" \
     --extent-membership-floor "${EXTENT_MEMBERSHIP_FLOOR:-0.50}" \
+    --association-mode "${ASSOCIATION_MODE:-weighted_jaccard_components}" \
+    --latent-logit-temperature "${LATENT_LOGIT_TEMPERATURE:-8.0}" \
+    --knn-chunk-size "${KNN_CHUNK_SIZE:-8192}" \
     --device "$SCORE_DEVICE" \
     --output "$SCORES" \
     >"$RUN_ROOT/logs/${SCENE}_scores.log" 2>&1

@@ -60,3 +60,30 @@ def test_query_listwise_descriptor_gate_is_invariant_to_low_query_offset():
     assert absolute_stats["fallback_query_count"] == 1
     assert torch.equal(listwise[:, 0], torch.tensor([1.0, 1.0, 0.0, 0.0]))
     assert listwise_stats["fallback_query_count"] == 0
+
+
+def test_latent_proposal_marginal_keeps_explicit_null_and_is_probabilistic():
+    values = _inputs()
+    posterior, stats = sam_siglip_object_posterior(
+        *values,
+        minimum_object_views=2,
+        minimum_descriptor_score=0.5,
+        association_mode="latent_proposal_marginal",
+        require_field_peak_anchor=False,
+    )
+    assert bool(((posterior >= 0) & (posterior <= 1)).all())
+    assert 0.0 < stats["null_probability"][0] < 1.0
+    assert stats["fallback_query_count"] == 0
+
+
+def test_latent_proposal_marginal_falls_back_without_cross_view_evidence():
+    values = list(_inputs())
+    values[4] = torch.zeros(4, dtype=torch.long)
+    posterior, stats = sam_siglip_object_posterior(
+        *values,
+        minimum_descriptor_score=0.5,
+        association_mode="latent_proposal_marginal",
+        require_field_peak_anchor=False,
+    )
+    assert torch.equal(posterior, values[0])
+    assert stats["fallback_query_count"] == 1

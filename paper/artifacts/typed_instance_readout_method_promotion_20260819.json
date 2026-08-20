@@ -23,7 +23,9 @@
       "name": "independent_box_signed_point_supermajority_v1",
       "target_rgb_assisted": true,
       "target_mask_used_for_prediction": false,
-      "full8_macro_foreground_iou": 0.8177621399957551
+      "full8_macro_foreground_iou": 0.8177621399957551,
+      "result_role": "target_frame_rgb_assisted_sentinel",
+      "complete_primary_all_view_compiler": false
     },
     "spin_registered_prompt": {
       "name": "independent_registered_prompt_official_sam_v1",
@@ -32,10 +34,150 @@
       "required_field_gates": 9,
       "completed_scenes": ["horns", "leaves", "lego", "orchids"],
       "active_scenes": ["fern", "fortress", "pinecone", "room", "truck"],
+      "active_stage_snapshot_20260820": {
+        "fern": "region_step_96_of_256",
+        "fortress": "region_step_32_of_256",
+        "pinecone": "region_step_64_of_256",
+        "room": "region_step_128_of_256",
+        "truck": "base_field_cpu_basis_fit_then_gpu_training"
+      },
       "full9_score": null,
+      "result_role_when_complete": "new_field_target_frame_sentinel_pending_primary_all_view_compiler",
       "watchdog_contract": "one idempotent per-scene runner per assigned GPU until gate",
       "frozen_readout_trigger": "automatic after 9/9 gates"
     }
+  },
+  "registered_refinements": {
+    "registered2d_sam3_multiview_consensus": {
+      "candidate_count": 10,
+      "view_semantics": "independent_then_symmetric",
+      "registration": "exact_compositor_adjoint",
+      "failure": "query_abstention_no_fallback",
+      "boundary": "gaussian_posterior_greater_equal_0.5",
+      "core_implementation": "radio_gs/querying/synchronous_multiview_candidate_marginal.py",
+      "core_test": "tests/test_synchronous_multiview_candidate_marginal.py",
+      "core_status": "implemented_and_unit_verified",
+      "sam3_all_view_materializer_status": "pending",
+      "full8_full9_matched_pilot_status": "pending"
+    },
+    "calibrated_proposal_null_posterior": {
+      "equation": "pi_0 * primitive_posterior + sum_k pi_k * proposal_membership",
+      "cross_view_relation_states": [
+        "same",
+        "different",
+        "unknown"
+      ],
+      "training_contract": "shared_source_only_proper_scoring_rule",
+      "operator_implementation": "radio_gs/querying/latent_proposal_posterior.py",
+      "operator_test": "tests/test_latent_proposal_posterior.py",
+      "operator_status": "implemented_and_unit_verified",
+      "scorer_status": "untrained_registered_candidate",
+      "promotion_status": "pending_source_only_leave_one_scene_out_gate"
+    },
+    "monotone_reliability_precision": {
+      "creates_identity": false,
+      "allowed_role": "monotone_precision_weight_on_identity_and_extent_evidence",
+      "promotion_status": "pending_ablation"
+    },
+    "object_boundary_factorization": {
+      "object_support_owner": "field_plus_query_independent_proposal_posterior",
+      "pixel_boundary_owner": "contract_legal_transient_frozen_rgb_decoder",
+      "writes_persistent_scene_state": false
+    }
+  },
+  "oracle_diagnostics_20260820": {
+    "development_only": true,
+    "completed_scenes": [
+      "figurines",
+      "ramen",
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "rendered_fixed_iou_o2_association": [
+      0.4567397,
+      0.320112,
+      0.52725,
+      0.202482
+    ],
+    "rendered_fixed_iou_o3_membership": [
+      0.4732436,
+      0.327712,
+      0.543872,
+      0.204113
+    ],
+    "rendered_fixed_iou_o4_exact_adjoint": [
+      0.8363932,
+      0.859933,
+      0.886277,
+      0.819191
+    ],
+    "full4_sample_micro": {
+      "o0_current": 0.308613699,
+      "o1_single_proposal_identity": 0.272452612,
+      "o2_cross_view_association": 0.403210247,
+      "o3_membership_threshold": 0.41513535,
+      "o4_exact_adjoint_membership": 0.856758797,
+      "o5_pixel_boundary_threshold": 0.937839174
+    },
+    "conclusion": "proposal coverage and cross_view association dominate membership_threshold calibration",
+    "teatime_status": "complete_after_bounded_memory_streamed_depth_range_resume"
+  },
+  "dense_proposal_candidate_20260820": {
+    "scene": "figurines",
+    "source_views": 32,
+    "full_image_point_grid": 16,
+    "proposal_count": 579,
+    "exact_mpr_memberships": 323507,
+    "gaussian_rows_with_membership": 168791,
+    "official_crop_teacher_sha256": "917cef04ec81481ab78f78f1b9ce748da803940f4cf8883c78f333aa1ab567b1",
+    "mean_masked_context_cosine": 0.8192825317382812,
+    "figurines_lerf2d_miou": 0.4006480362094349,
+    "figurines_lerf3d_miou": 0.45401519536972046,
+    "current_listwise_lerf2d_miou": 0.3971916490417426,
+    "current_listwise_lerf3d_miou": 0.46574491262435913,
+    "absolute_score_arm_joint_gate_pass": false,
+    "absolute_score_arm_status": "rejected_lerf3d_regression",
+    "matched_query_listwise_lerf2d_miou": 0.3914346692720372,
+    "matched_query_listwise_lerf3d_miou": 0.420944482088089,
+    "matched_query_listwise_arm_joint_gate_pass": false,
+    "matched_query_listwise_arm_status": "rejected_both_endpoints_regress",
+    "status": "candidate_closed_after_sentinel",
+    "decision": "do_not_expand_to_remaining_scenes_before_calibrated_cross_view_association",
+    "development_only_until_full_frozen_gate": true
+  },
+  "analytic_latent_proposal_null_full4_20260820": {
+    "status": "promoted_lerf3d_development_readout",
+    "independent_blind_result": false,
+    "persistent_second_semantic_field": false,
+    "proposal_logit": "8*(identity-query_listwise_floor)+log(max_cross_view_jaccard_or_overlap)-log(valid_proposal_count)",
+    "null_logit": 0.0,
+    "invalid_proposal_policy": "exact_zero_mass",
+    "empty_valid_cohort_policy": "bitwise_primitive_fallback",
+    "previous_full4": {
+      "miou": 0.3968358605813522,
+      "acc025": 0.6153846153846154,
+      "acc050": 0.40865384615384615
+    },
+    "latent_full4": {
+      "miou": 0.437303824780079,
+      "acc025": 0.6778846153846154,
+      "acc050": 0.4807692307692308,
+      "samples": 208
+    },
+    "scene_miou": {
+      "figurines": 0.5840283632278442,
+      "ramen": 0.30291107296943665,
+      "teatime": 0.499703973531723,
+      "waldo_kitchen": 0.33019939064979553
+    },
+    "lerf2d_promotion": false,
+    "claim_boundary": "development method evidence after benchmark feedback; learned scorer still requires source-only LOSO and prospective confirmation"
+  },
+  "scannet_single_scene_transfer7_20260820": {
+    "status": "stopped_before_training",
+    "reason": "exact_primitive_replay_gate_failed_at_scene0347_numerical_top2_tie",
+    "checkpoint_selected": false,
+    "promoted_row_changed": false
   },
   "rejected_controls": {
     "unrestricted_sam_categorical_propagation": "failed_independent_confirmation",

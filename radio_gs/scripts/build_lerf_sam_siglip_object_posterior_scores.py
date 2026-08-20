@@ -232,6 +232,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         minimum_cross_view_jaccard=float(args.minimum_cross_view_jaccard),
         minimum_cross_view_overlap=float(args.minimum_cross_view_overlap),
         require_field_peak_anchor=not bool(args.allow_unanchored_component),
+        latent_logit_temperature=float(args.latent_logit_temperature),
     )
     posterior[~valid] = -1.0e4
     payload = {
@@ -319,7 +320,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--composition", choices=("maximum", "noisy_or"), default="maximum")
     parser.add_argument(
         "--association-mode",
-        choices=("none", "weighted_jaccard_components"),
+        choices=("none", "weighted_jaccard_components", "latent_proposal_marginal"),
         default="weighted_jaccard_components",
     )
     parser.add_argument("--candidates-per-view", type=int, default=3)
@@ -327,6 +328,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--minimum-cross-view-jaccard", type=float, default=0.02)
     parser.add_argument("--minimum-cross-view-overlap", type=float, default=0.15)
     parser.add_argument("--allow-unanchored-component", action="store_true")
+    parser.add_argument("--latent-logit-temperature", type=float, default=8.0)
     parser.add_argument("--chunk-size", type=int, default=8192)
     parser.add_argument("--knn-chunk-size", type=int, default=8192)
     parser.add_argument("--device", default="cpu")

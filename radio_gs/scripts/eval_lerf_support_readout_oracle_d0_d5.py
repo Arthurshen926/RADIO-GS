@@ -33,7 +33,7 @@ from radio_gs.interfaces.surface_region_selection import (
 )
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
 from radio_gs.rendering.contribution_compositor import (
-    rasterize_single_view_contributions,
+    iter_single_view_contribution_chunks,
 )
 from radio_gs.utils.immutable_artifacts import (
     canonical_json_sha256,
@@ -50,6 +50,7 @@ TEACHER_SCHEMA = "radio_gs.lerf_source_teacher_view_siglip_authority.v1"
 FIXED_THRESHOLD = 0.6
 POOL_SIZE = 1024
 MAX_UNION_REGIONS = 8
+TARGET_ADJOINT_HIT_CHUNK = 262_144
 
 
 def _require_file(path: str | Path, expected_sha256: str, label: str) -> Path:
@@ -72,6 +73,8 @@ def _primitive_query_metrics(
     target: torch.Tensor,
     observed: torch.Tensor,
     available: torch.Tensor,
+    *,
+    include_ranking_metrics: bool = True,
 ) -> dict[str, Any]:
     value = torch.as_tensor(scores).float().cpu()
     truth = torch.as_tensor(target).bool().cpu()
@@ -88,25 +91,35 @@ def _primitive_query_metrics(
             continue
         query_score = value[mask, query].numpy().astype(np.float64)
         query_target = truth[mask, query].numpy()
-        oracle_iou, oracle_threshold = _oracle_iou(query_score, query_target)
+        if bool(np.logical_or(query_score == 0.0, query_score == 1.0).all()):
+            one_iou = _binary_iou(query_score >= 1.0, query_target)
+            all_iou = _binary_iou(np.ones_like(query_target), query_target)
+            if one_iou >= all_iou:
+                oracle_iou, oracle_threshold = one_iou, 1.0
+            else:
+                oracle_iou, oracle_threshold = all_iou, 0.0
+        else:
+            oracle_iou, oracle_threshold = _oracle_iou(query_score, query_target)
         fixed_prediction = query_score >= FIXED_THRESHOLD
-        rows.append(
-            {
+        row = {
                 "query_index": int(query),
                 "observed_rows": int(mask.sum()),
                 "positive_rows": int(truth[mask, query].sum()),
                 "selected_rows": int(fixed_prediction.sum()),
                 "fixed_iou": _binary_iou(fixed_prediction, query_target),
-                "average_precision": _grouped_average_precision(
-                    query_score, query_target
-                ),
                 "oracle_threshold_iou": oracle_iou,
                 "oracle_threshold": oracle_threshold,
             }
-        )
+        if include_ranking_metrics:
+            row["average_precision"] = _grouped_average_precision(
+                query_score, query_target
+            )
+        rows.append(row)
     if not rows:
         raise RuntimeError("primitive diagnostic produced no evaluable queries")
-    keys = ("fixed_iou", "average_precision", "oracle_threshold_iou")
+    keys = ["fixed_iou", "oracle_threshold_iou"]
+    if include_ranking_metrics:
+        keys.append("average_precision")
     return {
         "query_count": len(rows),
         "aggregate_query_mean": {
@@ -159,6 +172,8 @@ def _render_membership_diagnostic(
     renderer: Any,
     dataset: Any,
     device: torch.device,
+    include_ranking_metrics: bool = True,
+    include_oracle_threshold: bool = True,
 ) -> dict[str, Any]:
     values = torch.as_tensor(membership).float()
     if values.shape != (int(model.get_xyz().shape[0]), len(categories)):
@@ -195,15 +210,12 @@ def _render_membership_diagnostic(
             union = int(np.logical_or(prediction, target).sum())
             positive = flattened[labels]
             negative = flattened[~labels]
-            oracle_iou, oracle_threshold = _oracle_iou(flattened, labels)
-            rows.append(
-                {
+            if include_oracle_threshold:
+                oracle_iou, oracle_threshold = _oracle_iou(flattened, labels)
+            row = {
                     "frame_id": int(frame_id),
                     "category": category,
                     "fixed_iou": float(intersection / union) if union else 1.0,
-                    "average_precision": _grouped_average_precision(flattened, labels),
-                    "oracle_threshold_iou": oracle_iou,
-                    "oracle_threshold": oracle_threshold,
                     "selected_purity": float(
                         intersection / max(int(prediction.sum()), 1)
                     ),
@@ -216,21 +228,31 @@ def _render_membership_diagnostic(
                     "within_scene_top1": float(
                         (resized.argmax(axis=0) == query)[target].mean()
                     ),
-                    "rank_correlation": _binary_midrank_correlation(flattened, labels),
                 }
-            )
+            if include_oracle_threshold:
+                row["oracle_threshold_iou"] = oracle_iou
+                row["oracle_threshold"] = oracle_threshold
+            if include_ranking_metrics:
+                row["average_precision"] = _grouped_average_precision(
+                    flattened, labels
+                )
+                row["rank_correlation"] = _binary_midrank_correlation(
+                    flattened, labels
+                )
+            rows.append(row)
     if not rows:
         raise RuntimeError(f"{name} renderer produced no labeled samples")
-    keys = (
+    keys = [
         "fixed_iou",
-        "average_precision",
-        "oracle_threshold_iou",
         "selected_purity",
         "positive_coverage",
         "positive_negative_margin",
         "within_scene_top1",
-        "rank_correlation",
-    )
+    ]
+    if include_oracle_threshold:
+        keys.append("oracle_threshold_iou")
+    if include_ranking_metrics:
+        keys.extend(("average_precision", "rank_correlation"))
     return {
         "name": name,
         "sample_count": len(rows),
@@ -273,32 +295,46 @@ def _materialize_target_membership(
             .to(device)
         )
         with torch.inference_mode():
-            hits = rasterize_single_view_contributions(
-                model, renderer, pose, height=height, width=width
-            )
-            operator = _grouped_csr(
-                hits["gaussian_ids"],
-                hits["pixel_ids"],
-                hits["weights"],
-                num_pixels=pixels,
-                num_gaussians=count,
-            )
             target = target_cpu.to(device=device, dtype=torch.float32)
-            row_foreground = torch.sparse.mm(operator.transpose(0, 1), target)
-            row_total = torch.sparse.mm(
-                operator.transpose(0, 1),
-                torch.ones(pixels, 1, dtype=torch.float32, device=device),
+            # This is exactly A^T @ target and A^T @ 1 for the sparse
+            # contribution operator A.  Both rasterization and the reductions
+            # are streamed over consecutive front-to-back depth intervals, so
+            # memory is bounded independently of whole-frame overdraw.
+            row_foreground = torch.zeros(
+                count, len(indices), dtype=torch.float32, device=device
             )
+            row_total = torch.zeros(count, dtype=torch.float32, device=device)
+            hit_count = 0
+            for hits in iter_single_view_contribution_chunks(
+                model,
+                renderer,
+                pose,
+                height=height,
+                width=width,
+                batch_per_iter=1,
+            ):
+                chunk_count = int(hits["weights"].numel())
+                hit_count += chunk_count
+                for start in range(0, chunk_count, TARGET_ADJOINT_HIT_CHUNK):
+                    stop = min(start + TARGET_ADJOINT_HIT_CHUNK, chunk_count)
+                    gids = hits["gaussian_ids"][start:stop]
+                    pids = hits["pixel_ids"][start:stop]
+                    weights = hits["weights"][start:stop]
+                    row_total.index_add_(0, gids, weights)
+                    row_foreground.index_add_(
+                        0, gids, target[pids] * weights[:, None]
+                    )
+                del hits
             foreground[:, indices] += row_foreground
-            total[:, indices] += row_total
+            total[:, indices] += row_total[:, None]
         frames.append(
             {
                 "frame_id": int(frame_id),
                 "active_queries": active,
-                "exact_hits": int(hits["weights"].numel()),
+                "exact_hits": int(hit_count),
             }
         )
-        del hits, operator, target, row_foreground, row_total
+        del target, row_foreground, row_total
         torch.cuda.empty_cache()
     observed = total > 1e-12
     probability = torch.where(

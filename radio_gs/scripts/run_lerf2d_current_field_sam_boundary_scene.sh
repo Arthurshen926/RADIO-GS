@@ -6,6 +6,11 @@ ROOT=/root/RADIO-GS
 SCENE=${SCENE:?set SCENE}
 PHYSICAL_GPU=${PHYSICAL_GPU:?set PHYSICAL_GPU}
 OUT_ROOT=${OUT_ROOT:-/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf2d_primitive_peak_feature_sam_boundary_v1}
+RENDER_READOUT=${RENDER_READOUT:-primitive_score}
+PRIMITIVE_SCORE_CACHE=${PRIMITIVE_SCORE_CACHE:-}
+IOU_THRESHOLD=${IOU_THRESHOLD:-0.5}
+THRESHOLD_MODE=${THRESHOLD_MODE:-absolute}
+PRIMITIVE_VALID_NORMALIZATION=${PRIMITIVE_VALID_NORMALIZATION:-0}
 METHOD_ROOT=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1
 GEOMETRY_ROOT=/mnt/pool/sqy/results/RADIO-GS/output/radio_gs
 
@@ -66,13 +71,24 @@ done
 
 mkdir -p "$OUTPUT"
 cd "$ROOT"
+READOUT_ARGS=(--render_readout "$RENDER_READOUT")
+if [[ "$RENDER_READOUT" == primitive_posterior ]]; then
+  [[ -r "$PRIMITIVE_SCORE_CACHE" ]] || {
+    echo "primitive posterior cache is absent: $PRIMITIVE_SCORE_CACHE" >&2
+    exit 4
+  }
+  READOUT_ARGS+=(--primitive_score_cache "$PRIMITIVE_SCORE_CACHE")
+  if [[ "$PRIMITIVE_VALID_NORMALIZATION" == 1 ]]; then
+    READOUT_ARGS+=(--primitive_valid_normalization)
+  fi
+fi
 CUDA_VISIBLE_DEVICES="$PHYSICAL_GPU" \
   bash radio_gs/scripts/run_repo_python.sh \
   -m radio_gs.scripts.eval_lerf_grounding \
   --config "$CONFIG" \
   --checkpoint "$CHECKPOINT" \
   --rendered_only \
-  --render_readout primitive_score \
+  "${READOUT_ARGS[@]}" \
   --primitive_query_cache "$PRIMITIVE" \
   --primitive_confidence none \
   --primitive_fallback_blend direct \
@@ -88,8 +104,8 @@ CUDA_VISIBLE_DEVICES="$PHYSICAL_GPU" \
   --protocol_preset none \
   --scoring relevancy \
   --relevancy_temp 0.1 \
-  --threshold_mode absolute \
-  --iou_threshold 0.5 \
+  --threshold_mode "$THRESHOLD_MODE" \
+  --iou_threshold "$IOU_THRESHOLD" \
   --heatmap_upsample 1 \
   --eval_at_image_resolution \
   --localization_mode bbox_smoothed_peak \

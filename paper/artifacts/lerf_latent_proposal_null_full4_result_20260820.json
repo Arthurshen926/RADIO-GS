@@ -1,0 +1,51 @@
+{
+  "schema": "radio_gs.lerf_latent_proposal_null_full4_result.v1",
+  "status": "complete_promoted_lerf3d_development_readout",
+  "claim_boundary": "development evidence after benchmark feedback; not an independent blind or SOTA claim",
+  "method": {
+    "association_mode": "latent_proposal_marginal",
+    "descriptor_gate": "query_listwise",
+    "descriptor_listwise_margin": 0.12,
+    "latent_logit_temperature": 8.0,
+    "null_logit": 0.0,
+    "proposal_prior": "uniform_over_valid_complete_source_proposal_cohort",
+    "persistent_second_semantic_field": false
+  },
+  "lerf3d_full4": {
+    "samples": 208,
+    "previous": {
+      "miou": 0.3968358605813522,
+      "acc025": 0.6153846153846154,
+      "acc050": 0.40865384615384615
+    },
+    "latent": {
+      "miou": 0.437303824780079,
+      "acc025": 0.6778846153846154,
+      "acc050": 0.4807692307692308
+    },
+    "scene_miou": {
+      "figurines": 0.5840283632278442,
+      "ramen": 0.30291107296943665,
+      "teatime": 0.499703973531723,
+      "waldo_kitchen": 0.33019939064979553
+    }
+  },
+  "lerf2d_full4_control": {
+    "samples": 208,
+    "latent_miou": 0.3707963169052026,
+    "latent_localization_accuracy": 0.8798076923076923,
+    "retained_miou": 0.3958417415,
+    "promoted": false
+  },
+  "result_sha256": {
+    "figurines_lerf3d": "6d9bdb86d142f22ec6e5fe97427ff35c6276a383a2c67e8bc5b8579bb6f665c8",
+    "ramen_lerf3d": "6226f1e1ea6c563337e230524294a72b340c54bc63fcba1f676a34e151cfaf96",
+    "teatime_lerf3d": "66ee2bb7ad5241df7232d698dff7e9d2623a5616932b191a165d3f849531f901",
+    "waldo_kitchen_lerf3d": "81fc839f01a4cdfc5fde8d93d73b516f5c204292289fb39dcfd3c56803d2ed8d",
+    "figurines_lerf2d": "67e3cc56ffdc348fc47de049770e3ad579df15d9a6a1661d50f2c6b0fc5ba03b",
+    "ramen_lerf2d": "34b39dbdab53ec089c837da23e4b16309586e76fdb7b652d9208a2689ad430c0",
+    "teatime_lerf2d": "a98024ead8aa18437ca55142827dcb2108fccef012fc7614d497d949f796f5d1",
+    "waldo_kitchen_lerf2d": "f7de59ac182a574f356adaf4dc378fc9fd8a5d2a5e4fd0b7f20604588699b19b"
+  },
+  "run_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260820/lerf_latent_proposal_null_marginal_v1"
+}

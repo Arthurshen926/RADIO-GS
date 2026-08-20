@@ -2141,6 +2141,17 @@ def train(args: argparse.Namespace) -> dict:
     factorized_field_signature = (
         FactorizedRadioFieldSignature.create(signature) if factorized_mode else None
     )
+    local_code_training_dtype = str(
+        getattr(args, "local_code_training_dtype", "float32")
+    )
+
+    def prepare_local_code_dtype(module: CanonicalGaussianField) -> None:
+        if local_code_training_dtype == "float16":
+            module.local_codes = torch.nn.Parameter(
+                module.local_codes.detach().to(dtype=torch.float16),
+                requires_grad=True,
+            )
+
     initial_field_provenance: dict = {}
     if str(args.initial_field_checkpoint).strip():
         initial_path = Path(args.initial_field_checkpoint)
@@ -2216,6 +2227,10 @@ def train(args: argparse.Namespace) -> dict:
             # no learned state or query signal is introduced.
             with torch.no_grad():
                 field.reliability.copy_(consensus.reliability)
+        # Cast while the checkpoint remains on CPU.  Casting an N x L512
+        # parameter after its FP32 copy reaches CUDA temporarily requires both
+        # complete tensors and can OOM on multi-million-row scenes.
+        prepare_local_code_dtype(field)
         field = field.to(device)
         basis_fit_report = dict(initial_payload.get("basis_fit_report", {}))
         initial_field_provenance = {
@@ -2296,7 +2311,12 @@ def train(args: argparse.Namespace) -> dict:
             hidden_dim=int(args.hidden_dim),
             fusion_residual_blocks=int(getattr(args, "fusion_residual_blocks", 0)),
             use_fusion=use_fusion,
-        ).to(device)
+        )
+        # Establish the training dtype before the first CUDA allocation.  The
+        # streaming initializer copies FP32 decoder batches into this parameter
+        # with the same elementwise cast as the former full-tensor conversion.
+        prepare_local_code_dtype(field)
+        field = field.to(device)
         with torch.no_grad():
             if local_dim == int(args.coefficient_dim):
                 # Initializing every compact code at once materializes a
@@ -2349,13 +2369,12 @@ def train(args: argparse.Namespace) -> dict:
             if encoded is not None:
                 field.local_codes.copy_(encoded)
 
-        local_code_training_dtype = str(
-            getattr(args, "local_code_training_dtype", "float32")
-        )
-        if local_code_training_dtype == "float16":
-            field.local_codes = torch.nn.Parameter(
-                field.local_codes.detach().to(dtype=torch.float16),
-                requires_grad=True,
+        if (
+            local_code_training_dtype == "float16"
+            and field.local_codes.dtype != torch.float16
+        ):
+            raise RuntimeError(
+                "local-code training dtype was not established before CUDA initialization"
             )
 
     official_views = None
