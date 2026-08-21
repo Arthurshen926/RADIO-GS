@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_class_count_aware_unknown_rejection_screen",
+  "status": "stopped_fail_closed_incomplete_full8",
+  "eligibility": {
+    "development_only": true,
+    "benchmark_pseudo_labels_opened": true,
+    "paper_or_sota_claim_eligible": false
+  },
+  "frozen_rule": {
+    "class_shared": true,
+    "per_class_parameters": false,
+    "if_num_classes_at_least_15": {
+      "alpha": 1.0,
+      "normalized_margin_threshold": 0.2,
+      "normalized_entropy_threshold": 0.85
+    },
+    "if_num_classes_below_15": {
+      "alpha": 0.0,
+      "behavior": "exact_primitive_replay"
+    },
+    "additional_parameter_search": false
+  },
+  "completed_scene_delta_miou_19_15_10": {
+    "scene0000_00": [0.013203901106003557, 0.007899951166926322, 0.0],
+    "scene0062_00": [0.010873515128895339, 0.017620895890114008, 0.0],
+    "scene0070_00": [-0.00035260053285690596, -0.007002751677748942, 0.0],
+    "scene0097_00": [0.025677729084739476, 0.005115987677661471, 0.0],
+    "scene0140_00": [-0.0000678279915457547, 0.0032097520011049596, 0.0]
+  },
+  "strict_replay": {
+    "split10_completed_scenes_exact": true,
+    "scene0347_00": "failed Primitive Readout-v0 exact replay at a numerical top-two tie",
+    "action": "stopped without weakening replay authority"
+  },
+  "not_completed": ["scene0347_00", "scene0400_00", "scene0590_00"],
+  "decision": "not_promoted",
+  "conclusion": "Class-count awareness removes the known split10 regression by exact fallback, but the frozen fine-split rejection still regresses scene0070 on both 19/15 and scene0140 on 19; strict full8 replay additionally fails closed at scene0347."
+}

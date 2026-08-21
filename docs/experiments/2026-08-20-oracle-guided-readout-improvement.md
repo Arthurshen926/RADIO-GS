@@ -178,13 +178,101 @@ development evidence, but it is not the previously frozen all-view primary
 compiler.  The primary NVOS/SPIn contract freezes ten reference candidates,
 processes every registered captured RGB independently with official SAM3,
 registers masks with exact compositor adjoints, and marginalizes candidates and
-views symmetrically.  Its deterministic signed-point sampler and convex,
-digest-canonicalized marginal are now implemented in
-`radio_gs/querying/synchronous_multiview_candidate_marginal.py`; four contract
-tests cover order invariance, probability normalization, signed support, and
-fail-closed incomplete K.  The complete RGB/SAM3/adjoint materializer and dual
+views symmetrically.  Its deterministic signed-point sampler requires explicit
+authorized signs rather than treating low posterior as negative evidence.
+Registered views use a digest-canonicalized robust log-odds marginal with
+bounded Huber influence, while candidates remain a proper probability-space
+marginal.  Six contract tests cover order invariance, probability
+normalization, explicit signed support, outlier-view robustness, and fail-closed
+incomplete K.  The complete RGB/SAM3/adjoint materializer and dual
 full8/full9 experiment remain open, so neither `0.81776` nor the pending SPIn
 target-frame full9 sentinel is represented as that final all-view method.
+
+## Identity-supported SAM extent development closure
+
+The target-frame NVOS sentinel exposed a concrete extent failure: one accepted
+SAM mask can contain several disconnected instances even when its identity
+peak is correct.  The new development candidate keeps a connected component
+only if it contains a frozen positive selector point or covers at least `0.05`
+of the sealed coarse identity support.  It only deletes foreground and cannot
+move or create an identity peak.
+
+Across full8, macro foreground IoU increases from `0.81761676` to
+`0.86857521` (`+0.05095845`) and pixel accuracy from `0.97020372` to
+`0.97674758`.  The strongest changes are horns_left (`+0.24996`), leaves
+(`+0.06832`), and orchids (`+0.06172`).  This is not equivalent to keeping the
+largest component: orchids retains four identity-supported components, while a
+largest-only diagnostic falls to approximately `0.565` IoU.  The result is
+therefore direct mechanism evidence for identity-constrained extent.
+
+The `0.05` fraction was selected during target-opened development.  The
+reference cohort cannot support LOO selection because every scene supplies
+scribbles rather than a complete reference mask.  A fail-closed authority
+audit instead found that all eight pre-metric signed-evidence SAM receipts had
+already frozen the same `0.05` minimum coarse-overlap floor.  Binding the
+component rule to that inherited authority replays bitwise-equivalent full8
+metrics.  This freezes the numeric parameter without target feedback, but the
+component rule itself remains development-derived and requires a future
+independent confirmation.  The sealed result is recorded in
+`paper/artifacts/nvos_identity_supported_components_dev_full8_20260820.json`.
+
+### Independent correction: component-local identity density
+
+The global coarse-mass denominator did not survive cross-benchmark checking.
+It improves SPIn lego by `0.01503`, but regresses orchids by `0.01116` and the
+untouched horns/leaves holdout by `0.00636` scene-macro.  Fragmented foreground
+objects can contain many legitimate small components, none of which owns five
+percent of the entire object's coarse support.
+
+The corrected parameter-free structural choice divides overlap by the area of
+the component being tested.  The `0.05` floor is unchanged and no threshold
+grid was run.  NVOS full8 development improves from `0.81762` to `0.82651`.
+SPIn lego/orchids development improves by `0.00215/0.00299`.  The rule and all
+parent hashes were then frozen before opening horns or leaves metrics.  On that
+independent holdout, horns improves by `0.00121` and leaves by `0.00267`; the
+two-scene macro gain is `0.00194`.  All four currently gated SPIn scenes improve
+and their macro changes from `0.72279` to `0.72504` (`+0.00225`).  This is a
+stable range-decontamination correction, not a replacement for the identity
+unary.  Frozen authority and holdout results are recorded in
+`paper/artifacts/identity_component_local_density_holdout_authority_20260821.json`
+and
+`paper/artifacts/identity_component_local_density_spin_holdout_result_20260821.json`.
+
+### LERF per-proposal authority closure
+
+The source32 caches were sufficient to reconstruct a hash-bound authority with
+per-query/per-proposal probabilities, null mass, masked-crop and field-peak
+agreement, and same/different/unknown cross-view association statistics.  A
+parameter-free reliable-component sentinel raises the two-scene LERF3D
+weighted mIoU from latent `0.42685` to `0.42943` and repairs ramen, but lowers
+LERF2D from `0.39602` to `0.39433`; it is not expanded to full4.
+
+The remaining blocker is data rather than compute.  No source-heldout outcome
+in the same proposal domain labels a semantically wrong but geometrically
+consistent high-confidence instance.  Training from geometry-only consistency
+would reinforce exactly that failure.  The readiness audit is sealed in
+`paper/artifacts/lerf_source32_proposal_outcome_readiness_audit_20260821.json`.
+
+## Parallel typed-readout rejection screens
+
+Two bounded LERF candidates were rejected.  An absorbing Gaussian-wise union
+improved figurines 2D IoU by `0.01592` but regressed ramen by `0.00503` and
+regressed both 3D scenes relative to the latent proposal marginal.  A
+count-corrected query-level null gate regressed both 2D scenes and ramen 3D.
+Together these results localize the missing operation to per-proposal identity
+reliability: neither primitive union nor whole-query switching can distinguish
+an incorrect high-confidence instance.  The next authority must persist
+per-proposal probability, same/different/unknown association stability, and
+crop-to-field-peak agreement.
+
+For ScanNet, direct proposal-consensus residuals regressed all three class
+splits.  A class-shared margin/entropy background rejection improved the
+four-scene development macro for 19/15 classes by `0.01235/0.00591`, but
+regressed 10 classes by `0.00362`.  Replaying 10 classes exactly avoids that
+loss, yet the 19/15 rule still regresses individual confirmation scenes and the
+paper8 replay stops fail-closed at the known scene0347 numerical tie.  It is
+therefore mechanism evidence for split-granularity-aware unknown rejection,
+not a promoted categorical posterior.
 
 ## Analytic latent proposal/null full4 closure
 

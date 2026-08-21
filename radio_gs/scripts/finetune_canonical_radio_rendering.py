@@ -1378,15 +1378,19 @@ def finetune(args: argparse.Namespace) -> dict:
     expected_hash = str(payload.get("geometry_fingerprint", {}).get("xyz_sha256", ""))
     if expected_hash != _sha256_tensor_rows(model.get_xyz()):
         raise ValueError("canonical field and geometry rows differ")
-    field = field.to(device)
     local_code_training_dtype = str(
         getattr(args, "local_code_training_dtype", "float32")
     )
     if local_code_training_dtype == "float16":
+        # Convert on the CPU before moving the field.  Converting an already
+        # resident float32 [N,L] parameter briefly requires both copies on the
+        # accelerator and can add nearly 1 GiB for large SPIn carriers.  The
+        # resulting parameter is bitwise the same float16 tensor.
         field.local_codes = torch.nn.Parameter(
-            field.local_codes.detach().to(dtype=torch.float16),
+            field.local_codes.detach().to(device="cpu", dtype=torch.float16),
             requires_grad=True,
         )
+    field = field.to(device)
     column_staged_direct_backward = bool(args.column_staged_direct_field_backward)
     if column_staged_direct_backward and (
         field.fusion is not None

@@ -45,10 +45,6 @@ from radio_gs.scripts.build_sam3_foundation_cache import (
     sam3_autocast_context,
     set_requested_cuda_device,
 )
-from radio_gs.scripts.materialize_spin9_method_v1_signed_field import (
-    DEFAULT_OUTPUT_ROOT as DEFAULT_SIGNED_ROOT,
-    READOUT_PREREGISTRATION,
-)
 from radio_gs.scripts.predict_nvos_method_v1_transient_sam import (
     DEFAULT_SAM3_CHECKPOINT,
     FROZEN_SAM3_CHECKPOINT_SHA256,
@@ -64,6 +60,11 @@ from radio_gs.utils.immutable_artifacts import load_json_object, sha256_file
 
 
 DEFAULT_OUTPUT_ROOT = DEFAULT_RUN_ROOT / "method_v1_readout/transient_sam"
+DEFAULT_SIGNED_ROOT = DEFAULT_RUN_ROOT / "method_v1_readout/signed_field"
+READOUT_PREREGISTRATION = (
+    Path(__file__).resolve().parents[2]
+    / "paper/artifacts/spin9_method_v1_transient_readout_preregistration_20260816.json"
+)
 
 
 def _sha256_array(value: np.ndarray) -> str:
@@ -133,8 +134,14 @@ def verify_signed_full9_before_rgb(
     signed_root: Path,
     dataset_manifest: Path = DATASET_MANIFEST,
     method_authority: Path = METHOD_AUTHORITY,
+    scene_ids: Sequence[str] | None = None,
 ) -> dict[str, Any]:
-    """Verify every scalar/field receipt without reading any RGB or target mask."""
+    """Verify requested scalar/field receipts without reading RGB or target masks.
+
+    The default remains the preregistered full Available-Nine barrier.  An
+    explicit scene list is a development-only subset barrier and is labelled as
+    such in the returned metadata and prediction manifest.
+    """
 
     dataset, dataset_sha, dataset_path = load_json_object(
         dataset_manifest, label="SPIn Available-Nine dataset manifest"
@@ -151,6 +158,18 @@ def verify_signed_full9_before_rgb(
     ]
     if normalized_order != manifest_order or set(method_scenes) != set(manifest_order):
         raise ValueError("SPIn Method-v1 and dataset Available-Nine cohorts differ")
+    if scene_ids is None:
+        requested_order = manifest_order
+        development_subset = False
+    else:
+        requested_order = [str(value) for value in scene_ids]
+        if not requested_order or len(requested_order) != len(set(requested_order)):
+            raise ValueError("development subset scenes must be non-empty and unique")
+        unknown = sorted(set(requested_order) - set(manifest_order))
+        if unknown:
+            raise ValueError(f"unknown SPIn development subset scenes: {unknown}")
+        requested_order = [value for value in manifest_order if value in requested_order]
+        development_subset = len(requested_order) != len(manifest_order)
     prereg, prereg_sha, prereg_path = load_json_object(
         READOUT_PREREGISTRATION, label="SPIn Method-v1 readout preregistration"
     )
@@ -159,7 +178,7 @@ def verify_signed_full9_before_rgb(
 
     normalized_index = {str(row["scene_id"]): row for row in normalized["scenes"]}
     verified: dict[str, Any] = {}
-    for scene_id in manifest_order:
+    for scene_id in requested_order:
         receipt_path = (signed_root / "scenes" / scene_id / "receipt.json").resolve(
             strict=True
         )
@@ -212,7 +231,8 @@ def verify_signed_full9_before_rgb(
         "method_authority_sha256": authority_sha,
         "readout_preregistration": prereg_path,
         "readout_preregistration_sha256": prereg_sha,
-        "scene_order": manifest_order,
+        "scene_order": requested_order,
+        "development_subset": development_subset,
         "verified": verified,
         "all_signed_margins_and_fields_verified_before_first_rgb_open": True,
     }
@@ -308,7 +328,10 @@ def predict(args: argparse.Namespace) -> dict[str, Any]:
     manifest_path = output_root / "prediction_manifest.json"
     if manifest_path.exists():
         raise FileExistsError(manifest_path)
-    barrier = verify_signed_full9_before_rgb(signed_root=signed_root)
+    requested_scenes = args.scene_ids if args.scene_ids else None
+    barrier = verify_signed_full9_before_rgb(
+        signed_root=signed_root, scene_ids=requested_scenes
+    )
     output_root.mkdir(parents=True, exist_ok=True)
     set_requested_cuda_device(args.device)
     if str(args.device).startswith("cuda") and not torch.cuda.is_available():
@@ -550,7 +573,8 @@ def predict(args: argparse.Namespace) -> dict[str, Any]:
         "evaluation_performed": False,
         "target_mask_opened": False,
         "target_metric_opened": False,
-        "all_nine_scene_predictions_sealed": True,
+        "development_subset": barrier["development_subset"],
+        "all_nine_scene_predictions_sealed": not barrier["development_subset"],
     }
     _write_json(manifest_path, manifest)
     return {**manifest, "prediction_manifest": str(manifest_path)}
@@ -565,6 +589,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--expected-checkpoint-sha256", default=FROZEN_SAM3_CHECKPOINT_SHA256
     )
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument(
+        "--scene",
+        dest="scene_ids",
+        action="append",
+        help=(
+            "Explicit development-only subset scene (repeatable). The default "
+            "retains the preregistered full Available-Nine barrier."
+        ),
+    )
     return parser
 
 

@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_class_shared_uncertainty_residual_dev4",
+  "status": "complete_development_only_not_promoted",
+  "eligibility": {
+    "benchmark_pseudo_labels_opened": true,
+    "scene0000_used_for_parameter_selection": true,
+    "confirmation_scenes_used_for_parameter_selection": false,
+    "paper_or_sota_claim_eligible": false
+  },
+  "method_constraints": {
+    "per_class_parameters": false,
+    "class_permutation_equivariant": true,
+    "proposal_permutation_equivariant": true,
+    "persistent_scene_state_added": false,
+    "zero_alpha_primitive_replay": true
+  },
+  "proposal_consensus_candidate": {
+    "decision": "rejected",
+    "fixed_parameters": {
+      "alpha": 0.1,
+      "row_margin_threshold": 0.04,
+      "proposal_margin_scale": 0.02,
+      "minimum_row_mass": 0.5
+    },
+    "dev_scene0000_delta_miou_19_15_10": [
+      -0.00009294604923665295,
+      -0.0005546508232011638,
+      -0.0012607757688560262
+    ],
+    "dev4_macro_delta_miou_19_15_10": [
+      -0.0005528130977381521,
+      -0.0003689496713978003,
+      -0.0017758581877372377
+    ],
+    "conclusion": "Direct proposal-mean class evidence is not transferable; SAM instances cannot supply category identity."
+  },
+  "uncertainty_background_candidate": {
+    "decision": "mechanism_supported_for_19_and_15_but_rejected_jointly",
+    "fixed_after_scene0000_parameters": {
+      "alpha": 1.0,
+      "normalized_margin_threshold": 0.2,
+      "normalized_entropy_threshold": 0.85
+    },
+    "scene0000_delta_miou_19_15_10": [
+      0.013203901106003557,
+      0.007899951166926322,
+      0.004034556313372906
+    ],
+    "confirmation": {
+      "scene0062_00": [
+        0.010873515128895339,
+        0.017620895890114008,
+        -0.0038187312817093977
+      ],
+      "scene0070_00": [
+        -0.00035260053285690596,
+        -0.007002751677748942,
+        -0.0021435542574516075
+      ],
+      "scene0097_00": [
+        0.025677729084739476,
+        0.005115987677661471,
+        -0.012560581508883284
+      ]
+    },
+    "dev4_macro_baseline_miou_19_15_10": [
+      0.305478113531427,
+      0.3000744022802344,
+      0.3759115565914656
+    ],
+    "dev4_macro_candidate_miou_19_15_10": [
+      0.3178287497280965,
+      0.3059829235438674,
+      0.3722894794089652
+    ],
+    "dev4_macro_delta_miou_19_15_10": [
+      0.012350636196669498,
+      0.005908521263633001,
+      -0.003622077182500401
+    ],
+    "conclusion": "A class-shared unknown detector has substantial 19/15-class headroom, but the frozen rule is not jointly stable: every confirmation scene regresses on split10 and scene0070 also regresses on 19/15."
+  },
+  "implementation": {
+    "module": "radio_gs/querying/scannet_shared_region_residual.py",
+    "tests": "tests/test_scannet_shared_region_residual.py",
+    "test_result": "4 passed"
+  }
+}

@@ -169,6 +169,15 @@ def test_signed_full9_barrier_verifies_every_scene_before_rgb(tmp_path: Path) ->
     assert barrier["scene_order"] == scene_order
     assert list(barrier["verified"]) == scene_order
 
+    subset = verify_signed_full9_before_rgb(
+        signed_root=signed_root, scene_ids=["lego", "orchids"]
+    )
+    assert subset["development_subset"] is True
+    # The dataset cohort order remains authoritative even if CLI arguments are
+    # supplied in a different order.
+    assert subset["scene_order"] == ["orchids", "lego"]
+    assert list(subset["verified"]) == ["orchids", "lego"]
+
 
 def test_score_full9_barrier_verifies_predictions_before_gt(tmp_path: Path) -> None:
     dataset = json.loads(DATASET_MANIFEST.read_text(encoding="utf-8"))

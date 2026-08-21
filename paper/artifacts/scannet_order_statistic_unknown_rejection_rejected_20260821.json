@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_class_shared_order_statistic_unknown_rejection",
+  "status": "complete_bounded_development_screen_rejected",
+  "eligibility": {
+    "benchmark_pseudo_labels_opened": true,
+    "scene0000_used_for_small_parameter_screen": true,
+    "confirmation_labels_used_for_parameter_selection": false,
+    "paper_or_sota_claim_eligible": false
+  },
+  "replay_diagnostic": {
+    "scene": "scene0347_00",
+    "cpu_mismatch_count": 0,
+    "cuda_mismatch_count": 1,
+    "cuda_mismatch_row": 33352,
+    "computed_nyu40_id": 12,
+    "frozen_nyu40_id": 3,
+    "top_two_gap": 3.725290298461914e-08,
+    "decision": "retain frozen authority and use the exact CPU replay path; do not alter tie breaking"
+  },
+  "candidate": {
+    "per_class_parameters": false,
+    "class_permutation_equivariant": true,
+    "class_count_dependence": "analytic Gaussian order statistic 1-Phi(z_max)^C",
+    "fixed_parameters_after_scene0000": {
+      "null_tail_threshold": 0.3,
+      "normalized_entropy_threshold": 0.8
+    },
+    "additional_grid_after_freeze": false
+  },
+  "development_scene0000_delta_miou_19_15_10": [
+    0.027191219762581487,
+    0.036385050944038044,
+    0.02252587651821525
+  ],
+  "independent_confirmation_delta_miou_19_15_10": {
+    "scene0062_00": [
+      0.009422045516097433,
+      -0.003777605424703734,
+      -0.050349185573350996
+    ],
+    "scene0070_00": [
+      -0.03551662357454122,
+      -0.04486564444280283,
+      0.010328918379475804
+    ],
+    "scene0097_00": [
+      0.09869449342515768,
+      0.08696264858502267,
+      -0.054663511774168505
+    ]
+  },
+  "decision": "rejected_no_further_search",
+  "conclusion": "Analytic correction for the number of competing classes is insufficient. Score ambiguity is not a scene-invariant proxy for unknown/background: the same rule rejects many true positives and causes large mAcc loss. Remaining value is low without a legal source authority containing explicit unknown/background outcomes or an independent region-supported rejection signal."
+}

@@ -58,15 +58,20 @@ def deterministic_visible_signed_points(
     probability: np.ndarray,
     visibility: np.ndarray,
     *,
+    positive_authority: np.ndarray | None = None,
+    negative_authority: np.ndarray | None = None,
     candidate_digest: str,
     view_digest: str,
     points_per_sign: int = 3,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Select stable positive/negative SAM points from one projected candidate.
 
-    Pixel priority depends only on row-major id, candidate identity, view
-    identity, and a sign-specific frozen salt.  It is independent of process
-    RNG state and view traversal order.
+    The sign of a point must come from explicit authorized query evidence.  In
+    particular, low candidate posterior is not negative scribble evidence: it
+    can equally mean occlusion or unknown support.  Pixel priority depends only
+    on row-major id, candidate identity, view identity, and a sign-specific
+    frozen salt.  It is independent of process RNG state and view traversal
+    order.
     """
 
     posterior = np.asarray(probability)
@@ -75,6 +80,14 @@ def deterministic_visible_signed_points(
         raise QueryAbstention("projected probability and visibility axes differ")
     if not np.isfinite(posterior).all() or np.any((posterior < 0) | (posterior > 1)):
         raise QueryAbstention("projected probability is not finite in [0,1]")
+    if positive_authority is None or negative_authority is None:
+        raise QueryAbstention("explicit signed authority is required")
+    positive = np.asarray(positive_authority, dtype=bool)
+    negative = np.asarray(negative_authority, dtype=bool)
+    if positive.shape != posterior.shape or negative.shape != posterior.shape:
+        raise QueryAbstention("signed authority axes differ")
+    if bool((positive & negative).any()):
+        raise QueryAbstention("positive and negative authority overlap")
     if int(points_per_sign) <= 0:
         raise ValueError("points_per_sign must be positive")
     candidate = _validate_digests((candidate_digest,), 1, "candidate")[0]
@@ -83,8 +96,8 @@ def deterministic_visible_signed_points(
 
     selected: list[np.ndarray] = []
     for population, salt in (
-        (visible & (posterior >= 0.5), POSITIVE_POINT_SALT),
-        (visible & (posterior < 0.5), NEGATIVE_POINT_SALT),
+        (visible & positive, POSITIVE_POINT_SALT),
+        (visible & negative, NEGATIVE_POINT_SALT),
     ):
         pixel_ids = np.flatnonzero(population.reshape(-1)).astype(np.uint64)
         if pixel_ids.size < int(points_per_sign):
@@ -112,13 +125,19 @@ def marginalize_synchronous_multiview_candidates(
     candidate_digests: Sequence[str],
     view_digests: Sequence[str],
     expected_candidates: int = 10,
+    view_huber_delta: float = 2.0,
+    probability_logit_clip: float = 12.0,
 ) -> SynchronousMultiviewCandidateMarginal:
     """Marginalize every complete candidate and registered view symmetrically.
 
     Inputs have shape ``[K,V,N]``, ``[K,V]``, and ``[K]``.  Canonical digest
     sorting makes both candidate and view traversal order semantically inert.
     Every candidate/view is mandatory: missing calls abstain rather than
-    changing K or silently falling back to a reference-only method.
+    changing K or silently falling back to a reference-only method.  Views are
+    fused in log-odds space around a precision-weighted median with a bounded
+    Huber influence.  This keeps mutually corroborating views decisive while
+    preventing one occluded or failed view from linearly diluting the field.
+    Candidate uncertainty is then marginalized in probability space.
     """
 
     fields = torch.as_tensor(candidate_view_probability)
@@ -137,6 +156,10 @@ def marginalize_synchronous_multiview_candidates(
         raise QueryAbstention("candidate-view probabilities are not finite in [0,1]")
     if not bool(torch.isfinite(precision).all()) or not bool(torch.isfinite(logits).all()):
         raise QueryAbstention("candidate likelihood contains missing/nonfinite evidence")
+    if not np.isfinite(view_huber_delta) or float(view_huber_delta) <= 0:
+        raise ValueError("view_huber_delta must be finite and positive")
+    if not np.isfinite(probability_logit_clip) or float(probability_logit_clip) <= 0:
+        raise ValueError("probability_logit_clip must be finite and positive")
 
     candidate_ids = _validate_digests(candidate_digests, candidates, "candidate")
     view_ids = _validate_digests(view_digests, views, "view")
@@ -149,7 +172,22 @@ def marginalize_synchronous_multiview_candidates(
     sorted_views = tuple(view_ids[index] for index in view_order)
 
     view_probability = torch.softmax(precision, dim=1)
-    candidate_field = torch.einsum("kv,kvn->kn", view_probability, fields)
+    clip = float(probability_logit_clip)
+    eps = torch.sigmoid(fields.new_tensor(-clip))
+    view_log_odds = torch.logit(fields.clamp(eps, 1.0 - eps))
+    sorted_log_odds, sorted_indices = torch.sort(view_log_odds, dim=1)
+    expanded_weights = view_probability[:, :, None].expand_as(view_log_odds)
+    sorted_weights = torch.gather(expanded_weights, 1, sorted_indices)
+    cumulative_weights = torch.cumsum(sorted_weights, dim=1)
+    median_index = (cumulative_weights < 0.5).sum(dim=1, keepdim=True).clamp_max(views - 1)
+    median_log_odds = torch.gather(sorted_log_odds, 1, median_index).squeeze(1)
+    bounded_residual = (view_log_odds - median_log_odds[:, None, :]).clamp(
+        -float(view_huber_delta), float(view_huber_delta)
+    )
+    candidate_log_odds = median_log_odds + torch.einsum(
+        "kv,kvn->kn", view_probability, bounded_residual
+    )
+    candidate_field = torch.sigmoid(candidate_log_odds)
     candidate_probability = torch.softmax(logits, dim=0)
     probability = torch.einsum("k,kn->n", candidate_probability, candidate_field)
     tolerance = 16 * torch.finfo(probability.dtype).eps

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_identity_component_local_density_holdout_authority",
+  "status": "frozen_before_first_horns_or_leaves_target_metric",
+  "method": {
+    "operation": "delete_disconnected_sam_extent_components_only",
+    "admission": "positive_point_anchor_or_overlap_with_coarse_identity_over_component_area_at_least_0.05",
+    "minimum_local_identity_density": 0.05,
+    "threshold_grid_search": false,
+    "adds_foreground": false
+  },
+  "inherited_threshold_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/identity_component_threshold_authority_20260821/authority.json",
+    "sha256": "5b8b2f597476cb6b684b1168adab934bf0967149ae6bd36848a5fd19fc57edf9"
+  },
+  "implementation": {
+    "nvos_and_rule_path": "radio_gs/scripts/filter_nvos_sam3_components_by_identity_support.py",
+    "nvos_and_rule_sha256": "c545bc369e4e1df8b2be577d02a7204cd23356f464459881879c5650ba123b86",
+    "spin_producer_path": "radio_gs/scripts/filter_spin9_sam3_components_by_identity_support.py",
+    "spin_producer_sha256": "94b0db0b828909a2f26d511e97598a88a7e46ec9317ee4ba216b8ba04d118305",
+    "unit_test_path": "tests/test_filter_nvos_sam3_components_by_identity_support.py",
+    "unit_test_sha256": "53c8acceeb2e5786e822394d960bf5572e1bb37b3ffaa01b4323c14833182ee1",
+    "unit_tests_passed": 8
+  },
+  "development_evidence": {
+    "nvos_full8": {
+      "baseline_iou": 0.817616763357676,
+      "candidate_iou": 0.8265075707970202,
+      "delta_iou": 0.0088908074393442,
+      "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/component_local_density_dev_20260821/result.json",
+      "result_sha256": "d1c09126035a4617e5b53e566b529d8b496f8e0c8e6ea630eb6167e47d336f92"
+    },
+    "spin_lego": {
+      "baseline_iou": 0.771016001707158,
+      "candidate_iou": 0.7731679458607842,
+      "delta_iou": 0.002151944153626184,
+      "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/method_v1_readout/component_local_density_dev_lego_20260821/result.json",
+      "result_sha256": "15fda4a8396476be31e6f409292e55915f0f9c1905cd595a8ba23951d9f0e277"
+    },
+    "spin_orchids": {
+      "baseline_iou": 0.7225477146796677,
+      "candidate_iou": 0.7255350699030826,
+      "delta_iou": 0.002987355223414867,
+      "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260816/core_method_v1/spin9/method_v1_readout/component_local_density_dev_orchids_20260821/result.json",
+      "result_sha256": "5c906ed8cdabc44795a430627bee05c1dc657f4211ed748db57b0a96c6379902"
+    }
+  },
+  "holdout": {
+    "scenes": ["horns", "leaves"],
+    "target_masks_opened_before_freeze": false,
+    "target_metrics_opened_before_freeze": false,
+    "required_prediction_variants": ["global_coarse_mass", "component_local_density"],
+    "score_only_after_both_variants_are_sealed_for_both_scenes": true
+  }
+}

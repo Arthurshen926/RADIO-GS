@@ -430,6 +430,13 @@ def _run_with_scene_lock(
     final_field = run_root / "generic_text_response_w005_s0_64.pth"
     stop_index = STAGES.index(args.stop_after)
 
+    # Execution-only microbatching for the largest carrier.  This does not
+    # alter the D512/L512 objective, data, epochs, or gates; it prevents an
+    # otherwise repeatable 2.46-GiB backward allocation failure on shared
+    # 24-GiB workers.  All other scenes retain the preregistered default.
+    base_batch_size = "2048" if assets.scene == "truck" else "4096"
+    base_eval_batch_size = "8192" if assets.scene == "truck" else "16384"
+
     if not (feature_dir / "frame_manifest.json").is_file():
         _run_spin_stage(
             args,
@@ -627,9 +634,9 @@ def _run_with_scene_lock(
                 "--min-epochs",
                 "20",
                 "--batch-size",
-                "4096",
+                base_batch_size,
                 "--eval-batch-size",
-                "16384",
+                base_eval_batch_size,
                 "--local-code-training-dtype",
                 "float16",
                 "--learning-rate",

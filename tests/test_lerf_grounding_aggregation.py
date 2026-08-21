@@ -10,11 +10,22 @@ from radio_gs.scripts.eval_lerf_grounding import (
     blend_strongest_source,
     neutralize_invalid_primitive_scores_for_render,
     normalize_primitive_scores_by_valid_mass,
+    monotonic_logit_calibration,
     validate_primitive_support_cache,
     validate_primitive_unary_cache,
     validate_primitive_posterior_cache,
     validate_primitive_posterior_identity_cache,
 )
+
+
+def test_monotonic_logit_calibration_is_identity_and_order_preserving() -> None:
+    values = torch.tensor([0.0, 0.1, 0.5, 0.9, 1.0])
+    torch.testing.assert_close(monotonic_logit_calibration(values), values)
+    calibrated = monotonic_logit_calibration(values, scale=0.7, bias=0.2)
+    assert torch.equal(calibrated[[0, -1]], values[[0, -1]])
+    assert bool((calibrated[1:] >= calibrated[:-1]).all())
+    with pytest.raises(ValueError, match="calibration inputs"):
+        monotonic_logit_calibration(values, scale=0.0)
 
 
 def test_lerf_aggregation_separates_sample_scene_and_category_means() -> None:

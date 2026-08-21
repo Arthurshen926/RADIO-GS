@@ -1,0 +1,55 @@
+{
+  "schema": "radio_gs.lerf_source32_proposal_outcome_readiness_audit.v1",
+  "schema_version": 1,
+  "date": "2026-08-21",
+  "status": "blocked_missing_same_domain_source_heldout_semantic_outcome",
+  "available_same_domain_authority": {
+    "figurines": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_proposal_identity_reliability_authority_v1/figurines.pt",
+      "sha256": "5106ec0c55aab998573c49221a86190e9e6525b34a7c8c64b7d5351f7a9da820",
+      "proposals": 277,
+      "queries": 21,
+      "ternary_edges": {"same": 1477, "different": 3685, "unknown": 31803}
+    },
+    "ramen": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_proposal_identity_reliability_authority_v1/ramen.pt",
+      "sha256": "3b795ee560eed37d2859ac26e1a6a124fe260276021526119a5ad5a14556d4c3",
+      "proposals": 221,
+      "queries": 14,
+      "ternary_edges": {"same": 2461, "different": 1876, "unknown": 19210}
+    }
+  },
+  "available_predictors": [
+    "official_SAM3_source_view_proposal",
+    "exact_MPR_Gaussian_membership",
+    "bidirectional_source_view_visibility",
+    "masked_crop_SigLIP2_identity_and_context",
+    "field_tail_core_and_peak_consistency",
+    "proposal_logit_probability_and_explicit_null"
+  ],
+  "missing_outcome": [
+    "scene_disjoint_source_heldout_text_to_instance_identity_label",
+    "source_heldout label that marks a semantically wrong high-confidence SAM proposal as wrong",
+    "same-domain null outcome when no source32 proposal corresponds to the text query"
+  ],
+  "rejected_substitutes": {
+    "cross_view_geometry_self_consistency": "Can label same/different/unknown geometry but cannot distinguish the wrong object that is consistently visible in many views.",
+    "masked_crop_text_score": "It is already a predictor and cannot also serve as an independent proper-scoring outcome.",
+    "LERF_target_masks": "Forbidden for training, calibration, threshold choice, or source gate.",
+    "scene0001_to_scene0004_missing_core_tables": {
+      "reason": "They use source instance labels and canonical-region/native-V3 missing-support units, not source32 official-SAM proposals or LERF text-instance outcomes.",
+      "prior_result": {
+        "path": "/root/RADIO-GS/paper/artifacts/source_heldout_missing_support_direct_pair_result_20260807.json",
+        "sha256": "06b4e30092502f7e710e1d57ffdee3ea1e461e4ac716cc820e665b23bd7678bc",
+        "status": "sealed_source_cross_scene_promotion_failure"
+      }
+    }
+  },
+  "decision": {
+    "train_set_equivariant_proposal_null_scorer": false,
+    "reason": "No independent same-domain proper-scoring outcome exists; training on self-consistency would reinforce a wrong but multi-view-consistent instance.",
+    "additional_benchmark_evaluation": false,
+    "next_required_data": "Source-only object identity annotations or an independently labelled source-heldout text-instance correspondence cohort generated on the exact source32 proposal domain."
+  },
+  "value_assessment": "The proposal reliability direction remains high-value for LERF3D, where the frozen reliable-component sentinel improved the two-scene weighted mIoU over both deterministic and latent controls. Its remaining blocker is supervision identity, not proposal features, field capacity, or compute."
+}

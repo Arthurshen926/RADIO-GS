@@ -253,6 +253,41 @@ def apply_primitive_semantic_confidence(
     return scores * values[:, None]
 
 
+def monotonic_logit_calibration(
+    probabilities: torch.Tensor,
+    *,
+    scale: float = 1.0,
+    bias: float = 0.0,
+    eps: float = 1e-6,
+) -> torch.Tensor:
+    """Apply an order-preserving Platt map to a typed Bernoulli posterior.
+
+    ``scale`` is constrained to be strictly positive, so this operation can
+    calibrate an output domain without changing proposal identity, ranking, or
+    the shared Gaussian posterior's topology.  Exact zero and one endpoints
+    remain endpoints; this matters for explicit absence and certain support.
+    """
+
+    values = torch.as_tensor(probabilities)
+    if (
+        not values.is_floating_point()
+        or not bool(torch.isfinite(values).all())
+        or bool(((values < 0.0) | (values > 1.0)).any())
+        or not math.isfinite(float(scale))
+        or float(scale) <= 0.0
+        or not math.isfinite(float(bias))
+        or not 0.0 < float(eps) < 0.5
+    ):
+        raise ValueError("monotonic posterior calibration inputs differ")
+    interior = values.clamp(float(eps), 1.0 - float(eps))
+    calibrated = torch.sigmoid(
+        float(scale) * torch.logit(interior) + float(bias)
+    )
+    calibrated = torch.where(values == 0.0, torch.zeros_like(calibrated), calibrated)
+    calibrated = torch.where(values == 1.0, torch.ones_like(calibrated), calibrated)
+    return calibrated
+
+
 def blend_primary_with_uncovered_fallback(
     primary_heatmaps: torch.Tensor,
     fallback_heatmaps: torch.Tensor,
@@ -2220,6 +2255,8 @@ def evaluate_scene(
     primitive_valid_normalization: bool = False,
     primitive_valid_coverage_power: float = 0.0,
     primitive_posterior_visibility_mass: bool = False,
+    primitive_posterior_calibration_scale: float = 1.0,
+    primitive_posterior_calibration_bias: float = 0.0,
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
 
@@ -2725,6 +2762,12 @@ def evaluate_scene(
             elif mode == "rendered" and render_readout in {"primitive_support", "primitive_unary", "primitive_posterior"}:
                 assert primitive_support_rows is not None
                 support_rows = primitive_support_rows[:, active_indices]
+                if render_readout == "primitive_posterior":
+                    support_rows = monotonic_logit_calibration(
+                        support_rows,
+                        scale=primitive_posterior_calibration_scale,
+                        bias=primitive_posterior_calibration_bias,
+                    )
                 support_rows = neutralize_invalid_primitive_scores_for_render(
                     support_rows,
                     primitive_support_valid,
@@ -3397,6 +3440,24 @@ def main() -> None:
         help=(
             "Project primitive posterior as sum(T*alpha*P), retaining residual "
             "transmittance as background. Valid only for primitive_posterior."
+        ),
+    )
+    parser.add_argument(
+        "--primitive_posterior_calibration_scale",
+        type=float,
+        default=1.0,
+        help=(
+            "Positive output-domain Platt scale applied to the shared Gaussian "
+            "posterior before rendering; one with zero bias is identity."
+        ),
+    )
+    parser.add_argument(
+        "--primitive_posterior_calibration_bias",
+        type=float,
+        default=0.0,
+        help=(
+            "Output-domain Platt bias applied without changing Gaussian/proposal "
+            "ranking; it must be source-trained for a formal benchmark claim."
         ),
     )
     # Scene selection
@@ -4098,6 +4159,12 @@ def main() -> None:
             primitive_posterior_visibility_mass=(
                 args.primitive_posterior_visibility_mass
             ),
+            primitive_posterior_calibration_scale=(
+                args.primitive_posterior_calibration_scale
+            ),
+            primitive_posterior_calibration_bias=(
+                args.primitive_posterior_calibration_bias
+            ),
         )
         all_results[scene] = scene_results
 
@@ -4229,6 +4296,12 @@ def main() -> None:
                 if args.primitive_valid_normalization
                 else None
             ),
+            "posterior_monotonic_calibration": {
+                "family": "positive_scale_platt",
+                "scale": float(args.primitive_posterior_calibration_scale),
+                "bias": float(args.primitive_posterior_calibration_bias),
+                "changes_proposal_selection": False,
+            },
             "typed_text_readout": (
                 {
                     "levels": ["primitive", "region_summary"],

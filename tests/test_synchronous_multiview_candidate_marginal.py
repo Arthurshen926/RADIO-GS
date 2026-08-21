@@ -64,9 +64,13 @@ def test_signed_points_are_stable_and_have_xy_label_order():
         dtype=np.float32,
     )
     visible = np.ones_like(posterior, dtype=bool)
+    positive = posterior >= 0.7
+    negative = posterior <= 0.3
     first = deterministic_visible_signed_points(
         posterior,
         visible,
+        positive_authority=positive,
+        negative_authority=negative,
         candidate_digest=_digest(11),
         view_digest=_digest(22),
         points_per_sign=3,
@@ -74,6 +78,8 @@ def test_signed_points_are_stable_and_have_xy_label_order():
     second = deterministic_visible_signed_points(
         posterior.copy(),
         visible.copy(),
+        positive_authority=positive.copy(),
+        negative_authority=negative.copy(),
         candidate_digest=_digest(11),
         view_digest=_digest(22),
         points_per_sign=3,
@@ -81,7 +87,8 @@ def test_signed_points_are_stable_and_have_xy_label_order():
     assert np.array_equal(first[0], second[0])
     assert first[1].tolist() == [1, 1, 1, 0, 0, 0]
     for (x, y), label in zip(*first):
-        assert bool(posterior[int(y), int(x)] >= 0.5) == bool(label)
+        authority = positive if label else negative
+        assert bool(authority[int(y), int(x)])
 
 
 def test_signed_points_abstain_when_a_sign_is_not_visible():
@@ -89,6 +96,32 @@ def test_signed_points_abstain_when_a_sign_is_not_visible():
         deterministic_visible_signed_points(
             np.ones((3, 3), dtype=np.float32),
             np.ones((3, 3), dtype=bool),
+            positive_authority=np.ones((3, 3), dtype=bool),
+            negative_authority=np.zeros((3, 3), dtype=bool),
             candidate_digest=_digest(1),
             view_digest=_digest(2),
         )
+
+
+def test_signed_points_require_explicit_authority_not_posterior_complement():
+    with pytest.raises(QueryAbstention, match="explicit signed authority"):
+        deterministic_visible_signed_points(
+            np.linspace(0, 1, 16, dtype=np.float32).reshape(4, 4),
+            np.ones((4, 4), dtype=bool),
+            candidate_digest=_digest(1),
+            view_digest=_digest(2),
+        )
+
+
+def test_robust_log_odds_fusion_bounds_one_bad_view():
+    fields = torch.tensor([[[0.8], [0.8], [0.8], [0.001]]], dtype=torch.float32)
+    result = marginalize_synchronous_multiview_candidates(
+        fields,
+        torch.zeros((1, 4)),
+        torch.zeros(1),
+        candidate_digests=[_digest(1)],
+        view_digests=[_digest(2), _digest(3), _digest(4), _digest(5)],
+        expected_candidates=1,
+    )
+    assert result.probability.item() > fields.mean().item()
+    assert result.probability.item() > 0.7

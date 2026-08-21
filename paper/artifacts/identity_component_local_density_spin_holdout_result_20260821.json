@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_identity_component_local_density_spin_holdout_result",
+  "status": "complete_independent_two_scene_confirmation",
+  "authority": {
+    "path": "paper/artifacts/identity_component_local_density_holdout_authority_20260821.json",
+    "sha256": "27e0c061791dea74f7813ee398382a14f8bac5eb33d8ecc77fe530cb74fa90ac"
+  },
+  "protocol": {
+    "holdout_scenes": ["horns", "leaves"],
+    "all_global_and_local_predictions_sealed_before_first_holdout_mask": true,
+    "target_metrics_used_for_rule_or_threshold_selection": false,
+    "minimum_local_identity_density": 0.05,
+    "threshold_grid_search": false
+  },
+  "scene_results": {
+    "horns": {
+      "target_frames": 61,
+      "baseline_iou": 0.7546576361602262,
+      "global_coarse_mass_iou": 0.7519181604773094,
+      "global_delta_iou": -0.00273947568291677,
+      "component_local_density_iou": 0.7558678462327213,
+      "local_delta_iou": 0.0012102100724951104,
+      "local_frame_counts": {"improved": 61, "unchanged": 0, "worse": 0},
+      "global_result_sha256": "cf4ed2d1cd531ef252541edf21a40053e36b73abf7de17e92653b7e818be83c8",
+      "local_result_sha256": "259a227d16df64c3b4b2807468ad80e7cd1327c4a0a40abe4fca45c86512bc0e"
+    },
+    "leaves": {
+      "target_frames": 25,
+      "baseline_iou": 0.6429287684101258,
+      "global_coarse_mass_iou": 0.632948031637062,
+      "global_delta_iou": -0.00998073677306377,
+      "component_local_density_iou": 0.6455937959431973,
+      "local_delta_iou": 0.002665027533071518,
+      "local_frame_counts": {"improved": 20, "unchanged": 3, "worse": 2},
+      "global_result_sha256": "b81e10097bed05019e3f3973f5673f9c6bb16a2e27259400167ea81956ba181b",
+      "local_result_sha256": "dd68153c463d8c9b32185832386779c15f9a494acd72cad5e294fb3a187beedc"
+    }
+  },
+  "two_scene_macro": {
+    "baseline_iou": 0.6987932022851759,
+    "global_coarse_mass_iou": 0.6924330960571857,
+    "global_delta_iou": -0.006360106227990214,
+    "component_local_density_iou": 0.7007308210879593,
+    "local_delta_iou": 0.0019376188027833141
+  },
+  "conclusion": {
+    "component_local_density_independently_confirmed": true,
+    "global_coarse_mass_rule_rejected_as_unstable": true,
+    "claim_scope": "development method evidence; not full Available-Nine final result"
+  }
+}

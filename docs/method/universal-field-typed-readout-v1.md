@@ -129,6 +129,29 @@ the method seam used by the source-trained scorer; implementing the exact
 probability operator does not by itself promote an untrained scorer or change
 the reported benchmark rows.
 
+The learned seam is implemented by
+`radio_gs/models/proposal_null_scorer.py`.  It is proposal-permutation
+equivariant, has an explicit DeepSets null head, and zero-initializes both
+output heads.  Its exchangeable prior subtracts $\log K_q$ from proposal
+logits, so epoch zero assigns one half of the mass to null and shares the other
+half across the complete valid proposal cohort regardless of proposal count.
+Training uses a categorical log score plus multiclass Brier score; occluded or
+unsupported queries are marked unknown and excluded rather than converted to
+null negatives.  This implementation is not promoted until a source-only,
+scene-disjoint authority supplies its checkpoint and calibration gates.
+
+LERF2D and LERF3D must consume the same Gaussian-domain posterior.  An output
+domain may apply only an order-preserving Platt map
+
+\[
+C_d(p)=\sigma(a_d\operatorname{logit}(p)+b_d),\qquad a_d>0,
+\]
+
+before its legal projection.  This cannot change proposal selection, Gaussian
+ranking, or topology.  The evaluator implements the seam with identity
+defaults $a_d=1,b_d=0$; non-identity values require source-heldout calibration
+and may not be selected from LERF masks.
+
 ### Reliability and boundary ownership
 
 The five persistent reliability scalars are evidence precision, not an
@@ -208,13 +231,18 @@ candidates into one Gaussian query posterior.  Missing candidates, views, or
 registration lineage, and any nonfinite evidence produce query abstention, not a
 reference-only fallback.
 
-The core deterministic point sampler and order-invariant convex marginal are
+The core deterministic point sampler and order-invariant robust marginal are
 implemented in
 `radio_gs/querying/synchronous_multiview_candidate_marginal.py`.  Candidate and
-view SHA-256 identities are canonicalized before accumulation, all probability
-weights normalize explicitly, and the final fixed boundary is posterior
-`>=0.5`.  The SAM3 invocation and exact multi-camera adjoint materializer must
-still close the full8/full9 pilot before this compiler has a reportable score.
+view SHA-256 identities are canonicalized before accumulation.  Point signs
+must come from explicit authorized positive and negative evidence; the
+complement of an uncertain projected posterior is never treated as a negative
+scribble.  Registered views are combined in log-odds space around a
+precision-weighted median with bounded Huber influence, then candidate
+uncertainty is marginalized in probability space.  The final fixed boundary
+is posterior `>=0.5`.  The SAM3 invocation and exact multi-camera adjoint
+materializer must still close the full8/full9 pilot before this compiler has a
+reportable score.
 
 The already completed target-frame sentinel first seals positive and negative
 field support.  Frozen official SAM then decodes box and signed-point
@@ -228,6 +256,37 @@ target-frame selector reaches `0.81776` versus the field-only `0.52687`, without
 using target masks for prediction.  It is valid RGB-assisted development
 evidence, but it is an incomplete all-view-contract sentinel and does not
 replace the primary shared compiler.
+
+A subsequent identity-supported extent candidate applies the same separation
+inside the decoded mask.  Official SAM supplies extent, while the sealed field
+unary and its frozen positive points supply identity.  A connected SAM
+component is retained only when it contains a positive point or explains a
+minimum fraction of coarse identity support; the operator may delete instance
+leakage but can never add foreground.  On the NVOS full8 development cohort it
+changes macro IoU from `0.81762` to `0.86858`.  The current support fraction
+(`0.05`) was inspected after development metrics were available, so this is
+mechanism evidence rather than a promoted frozen rule.  Source/reference LOO
+cannot identify the fraction because NVOS reference authority contains
+scribbles rather than full masks.  The numerical floor is instead bound by
+analytic inheritance from the `0.05` minimum coarse overlap already frozen in
+all eight pre-metric SAM selector receipts.  This supplies a target-independent
+parameter authority for future evaluation, but does not retroactively make the
+development-derived component rule prospective.
+
+Independent SPIn confirmation rejects that first global-mass denominator: it
+removes real fragmented support in orchids, horns, and leaves.  The corrected
+rule measures identity density locally inside each connected component,
+
+`overlap(component, coarse identity) / area(component) >= 0.05`,
+
+or retains the component when a frozen positive point anchors it.  This rule is
+scale-local, adds no foreground, and inherits the same pre-metric `0.05`
+authority without a new threshold search.  After freezing on NVOS plus SPIn
+lego/orchids development evidence, the untouched horns/leaves holdout improves
+scene-macro IoU from `0.69879` to `0.70073`; both scenes improve.  Across all
+four currently gated SPIn scenes, the local rule improves scene-macro IoU from
+`0.72279` to `0.72504`.  Component-local identity density therefore replaces
+the rejected global-mass rule in the development method.
 
 SPIn field-gated evaluation uses the same current sentinel after all nine
 Method-v1 fields pass their gates.  Its full9 result diagnoses the new field,
