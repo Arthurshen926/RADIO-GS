@@ -6,6 +6,7 @@ from typing import Mapping
 
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 from .basis_decoder import AffineBasisDecoder
 from .field_signature import FeatureSpaceSignature
@@ -40,6 +41,12 @@ class CanonicalGaussianField(nn.Module):
         self.signature = signature
         local_dim = decoder.coefficient_dim if local_dim is None else int(local_dim)
         self.local_codes = nn.Parameter(torch.zeros(self.num_gaussians, local_dim))
+        # Execution-only escape hatch for multi-million-row base-field
+        # construction.  The stored parameter and forward values are
+        # unchanged; only autograd's representation of the row-gather
+        # gradient becomes sparse.  The training entry point enables this
+        # only together with its exact, CPU-moment AdamW implementation.
+        self.sparse_local_code_gradients = False
         nn.init.normal_(self.local_codes, mean=0.0, std=0.01)
         self.coarse_dim = int(coarse_dim)
         if self.coarse_dim < 0:
@@ -119,7 +126,11 @@ class CanonicalGaussianField(nn.Module):
         indices: torch.Tensor | None = None,
     ) -> torch.Tensor:
         rows = self._indices(indices)
-        local = self.local_codes[rows]
+        local = (
+            F.embedding(rows, self.local_codes, sparse=True)
+            if self.sparse_local_code_gradients and self.training
+            else self.local_codes[rows]
+        )
         if self.fusion is None:
             if local.shape[1] != self.decoder.coefficient_dim:
                 raise RuntimeError("direct local code dimension must equal coefficient dimension")

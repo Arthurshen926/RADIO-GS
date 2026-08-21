@@ -241,6 +241,11 @@ def test_primitive_posterior_cache_enforces_typed_information_contract() -> None
     identity = validate_primitive_posterior_identity_cache(payload, xyz, ["bowl"])
     assert identity is not None
     torch.testing.assert_close(identity, torch.tensor([[1.0], [0.4]]))
+    payload["metadata"]["typed_posterior"] = (
+        "object_aware_universal_field_v2_text_object_posterior_v1"
+    )
+    scores, valid = validate_primitive_posterior_cache(payload, xyz, ["bowl"])
+    assert scores.shape == (2, 1) and bool(valid.all())
     payload["metadata"]["benchmark_masks_opened"] = True
     with pytest.raises(ValueError, match="forbidden"):
         validate_primitive_posterior_cache(payload, xyz, ["bowl"])

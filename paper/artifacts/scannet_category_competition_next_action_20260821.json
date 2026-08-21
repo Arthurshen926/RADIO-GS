@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_category_competition_next_action",
+  "status": "no_high_value_compliant_candidate_with_current_source_authority",
+  "retained_method": "bounded local SAM-affinity categorical residual",
+  "evidence": {
+    "learned_compact_affinity": {
+      "path": "paper/artifacts/scannet_learned_compact_affinity_pilot_20260821.json",
+      "source_gate_passed": true,
+      "canonical_relation_auc_heldout": 1.0,
+      "confirmation_macro_delta_miou_19_15_10": [
+        0.0000612390,
+        0.0000753256,
+        -0.0000624646
+      ],
+      "conclusion": "pairwise object-affinity ranking is not the remaining categorical bottleneck"
+    },
+    "per_class_source_calibration": {
+      "path": "paper/artifacts/categorical_posterior_v2_independent_source_gate_result_20260816.json",
+      "source_loso_macro_delta_miou": -0.1730767190,
+      "source_class_coverage": "10 of 19 classes have any labeled mass in the frozen fit scenes",
+      "conclusion": "per-class parameters do not define a transferable rule for unseen classes"
+    },
+    "class_shared_marginal_calibration": {
+      "path": "paper/artifacts/marginal_categorical_posterior_v2_independent_source_gate_result_20260816.json",
+      "source_loso_macro_delta_miou": -0.0595894655,
+      "conclusion": "score marginals are not stable enough across source scenes"
+    },
+    "class_shared_background_rejection": {
+      "path": "docs/experiments/2026-08-20-oracle-guided-readout-improvement.md",
+      "conclusion": "development 19/15 gains coexist with split10 and individual-scene regressions; class-count replay is forbidden post-metric branching"
+    }
+  },
+  "first_principles_boundary": {
+    "shared_positive_temperature": "cannot change categorical argmax",
+    "self_distillation_from_primitive_predictions": "cannot identify or correct systematic class competition errors without independent semantic outcomes",
+    "background_rejection": "the evaluator ignores non-evaluation ground-truth labels, so source-trained abstention optimizes a mismatched outcome",
+    "per_class_calibration": "requires broader independent source semantic coverage before it can be defined for all evaluation classes"
+  },
+  "decision": {
+    "launch_another_current_asset_calibration_screen": false,
+    "reason": "all bounded identifiable families are either argmax-invariant or already fail independent source LOSO; further variants would be metric-guided readout tuning",
+    "minimum_new_authority_for_reopening": "independent source scenes with affirmative foreground labels covering every evaluation class, or an external class-complete semantic teacher with frozen provenance",
+    "current_best_action": "retain the already accepted bounded local SAM-affinity residual and prioritize benchmarks or authorities with independent identity/extent supervision"
+  }
+}

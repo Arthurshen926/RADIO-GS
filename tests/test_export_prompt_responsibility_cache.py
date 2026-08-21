@@ -17,6 +17,16 @@ SHA_C = "c" * 64
 SHA_D = "d" * 64
 
 
+def test_commit_local_artifact_is_complete_and_fail_closed(tmp_path: Path):
+    local = tmp_path / "local.pt"
+    local.write_bytes((b"exact-W" * 1024) + b"tail")
+    remote = tmp_path / "remote" / "cache.pt"
+    exporter._commit_local_artifact(local, remote, overwrite=False)
+    assert remote.read_bytes() == local.read_bytes()
+    with pytest.raises(FileExistsError):
+        exporter._commit_local_artifact(local, remote, overwrite=False)
+
+
 class _HeaderOnlyImage:
     """Any attempt to cross the PIL lazy-header boundary fails the test."""
 

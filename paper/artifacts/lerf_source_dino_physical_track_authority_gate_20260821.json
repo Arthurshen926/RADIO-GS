@@ -1,0 +1,155 @@
+{
+  "schema": "radio_gs.lerf_source_dino_physical_track_authority_gate_result.v1",
+  "schema_version": 1,
+  "date": "2026-08-21",
+  "status": "nested_source_gate_pass_single_paired_joint_gate_fail",
+  "formal_stage_a_complete": true,
+  "information_contract": {
+    "source_scenes": [
+      "ramen",
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "heldout_benchmark_scene": "figurines",
+    "figurines_assets_opened_before_source_gate": false,
+    "figurines_metrics_opened_before_source_gate": false,
+    "figurines_metrics_opened_after_nested_source_gate": true,
+    "benchmark_pilot_runs": 1,
+    "labels_use_gaussian_geometry_overlap": false,
+    "labels_use_target_metrics": false
+  },
+  "teacher": {
+    "proposal_authority": "official query-free SAM3 source proposals",
+    "correspondence_authority": "frozen RADIO DINOv3 dense mutual matching plus fundamental-matrix RANSAC",
+    "same": "adjacent three-view transport cycle; every minimum-overlap is at least 0.5 and the cycle returns to the exact seed proposal",
+    "different": "zero mask intersection in a view with affirmative transported same-object support",
+    "visible_null": "nonempty transported foreground has zero intersection with every query-free proposal",
+    "occlusion_unknown": "no transport inlier, partial-overlap granularity conflict, or a non-closing cycle",
+    "threshold_provenance": "fixed structural rules selected before any figurines result; no benchmark threshold tuning"
+  },
+  "calibrator": {
+    "inputs": [
+      "masked SigLIP2 crop descriptor cosine",
+      "context SigLIP2 descriptor cosine",
+      "negative absolute log2 area ratio",
+      "minimum source SAM quality"
+    ],
+    "forbidden_inputs_absent": [
+      "DINO transport score",
+      "Gaussian geometry overlap",
+      "benchmark labels",
+      "figurines data"
+    ],
+    "loss": "class-balanced Bernoulli log proper score",
+    "gate": "every source scene heldout-view AUC > 0.5 and balanced log score < log(2)"
+  },
+  "source_authorities": {
+    "ramen": {
+      "three_view_closed_cycles": 16,
+      "same_edges": 41,
+      "different_edges": 179,
+      "visible_null_outcomes": 67,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_dino_physical_track_authority/ramen.pt",
+      "sha256": "1fba469c4dd81181c87d64bd76f6ff929804c1bda53f257c2fa4b78f2103c3a1"
+    },
+    "teatime": {
+      "three_view_closed_cycles": 11,
+      "same_edges": 29,
+      "different_edges": 189,
+      "visible_null_outcomes": 97,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_dino_physical_track_authority/teatime.pt",
+      "sha256": "0464c566c5079aaaa0846571a37ea1053977367b4292197616c6f6af53007e7d"
+    },
+    "waldo_kitchen": {
+      "three_view_closed_cycles": 4,
+      "same_edges": 11,
+      "different_edges": 39,
+      "visible_null_outcomes": 50,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_dino_physical_track_authority/waldo_kitchen.pt",
+      "sha256": "c57623ad67e912c24230dc6d5ec917fa6ce5f637791639369405b6254b954d6d"
+    }
+  },
+  "source_heldout_proper_gate": {
+    "ramen": {
+      "known_edges": 91,
+      "same_edges": 17,
+      "different_edges": 74,
+      "auc": 0.931637519872814,
+      "balanced_log_score": 0.33246469497680664,
+      "epoch0_balanced_log_score": 0.6931471805599453,
+      "pass": true
+    },
+    "teatime": {
+      "known_edges": 113,
+      "same_edges": 15,
+      "different_edges": 98,
+      "auc": 0.9795918367346939,
+      "balanced_log_score": 0.2292170524597168,
+      "epoch0_balanced_log_score": 0.6931471805599453,
+      "pass": true
+    },
+    "waldo_kitchen": {
+      "known_edges": 21,
+      "same_edges": 5,
+      "different_edges": 16,
+      "auc": 0.8875,
+      "balanced_log_score": 0.7692629098892212,
+      "epoch0_balanced_log_score": 0.6931471805599453,
+      "pass": false
+    },
+    "initial_decision": "fail before bounded nested calibration rescue; do not open figurines at this stage"
+  },
+  "bounded_nested_calibration_rescue": {
+    "selection_information": "inner source-only folds; figurines unopened",
+    "outer_holdout": "edge touches source view index mod 4 equal to 3",
+    "inner_holdout": "within outer training, edge touches source view index mod 4 equal to 2",
+    "fixed_temperature_grid": [0.5, 1.0, 2.0, 4.0, 8.0],
+    "fixed_jeffreys_strength_grid": [0.0, 0.25, 0.5, 1.0, 2.0],
+    "selected_temperature": 4.0,
+    "selected_jeffreys_strength": 0.0,
+    "inner_macro_balanced_log_score": 0.4953167835871379,
+    "outer_gate": {
+      "ramen": {"auc": 0.931637519872814, "balanced_log_score": 0.5148900747299194, "pass": true},
+      "teatime": {"auc": 0.9795918367346939, "balanced_log_score": 0.45754072070121765, "pass": true},
+      "waldo_kitchen": {"auc": 0.8875, "balanced_log_score": 0.5700641870498657, "pass": true}
+    },
+    "decision": "pass; authorize exactly one fixed figurines paired pilot",
+    "artifact": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_dino_physical_track_authority/global_physical_track_calibrator_nested.pt",
+      "sha256": "19b2e265277b49a1eb71e7dd0ffdf39d2bb704b907566a700d94a9fec3008adf"
+    }
+  },
+  "single_fixed_figurines_paired_pilot": {
+    "lerf2d": {
+      "primitive_baseline_miou": 0.41423949953158423,
+      "geometry_proxy_miou": 0.421010860623679,
+      "physical_track_miou": 0.42656691805732905,
+      "delta_vs_primitive": 0.01232741852574482,
+      "delta_vs_geometry_proxy": 0.005556057433650039,
+      "localization_accuracy": 0.9107142857142857
+    },
+    "lerf3d": {
+      "primitive_baseline_miou": 0.5720701217651367,
+      "geometry_proxy_miou": 0.5544633865356445,
+      "physical_track_miou": 0.515439510345459,
+      "delta_vs_primitive": -0.056630611419677734,
+      "delta_vs_geometry_proxy": -0.03902387619018555,
+      "acc025": 0.7321428571428571,
+      "acc050": 0.6071428571428571
+    },
+    "decision": "joint_gate_fail_do_not_promote_or_expand_to_full4",
+    "interpretation": "Independent physical-track authority improves rendered 2D object coverage beyond both Primitive and the geometry proxy, but its soft associations remain insufficiently pure for direct 3D object selection. This is mechanism evidence for identity/extent factorization, not a jointly valid final readout."
+  },
+  "calibrator_artifact": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_dino_physical_track_authority/global_physical_track_calibrator.pt",
+    "sha256": "342a52fc53f2dc02b41eb511b90a4bdff2ddfdbdd200ff726eef4aeccd001120"
+  },
+  "paired_pilot_artifacts": {
+    "figurines_inference_features": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_dino_physical_track_authority/figurines_inference_features.pt", "sha256": "52482ecbdb7387f65e3de81983ceceff36dbacbcc94a2f39a0416a94bbf2d1eb"},
+    "posterior": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/lerf_visibility_track_physical_nested_v1.pt", "sha256": "2a21a01d110502f5cf9d3ff5b2b20c21d81a002b86e7d38912c2d267a0a21b2b"},
+    "lerf2d": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/physical_nested_lerf2d/lerf_ovs_results.json", "sha256": "2c8f863ee2a71724a035216918024c9b2214236c2c93b6628f56a75e21f6acf4"},
+    "lerf3d": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/physical_nested_lerf3d/figurines/lerf_direct_3d_selection_results.json", "sha256": "5642e441b97cb17a6d0b6a7e45ba80150b4b4801d78e2771a2a9f1d6cf84e356"}
+  },
+  "promotion_boundary": "The experiment is a single-scene development pilot authorized only after a three-scene source proper gate. It is neither a full4 result nor evidence of cross-scene benchmark promotion. No further figurines tuning is permitted on this branch.",
+  "conclusion": "Independent DINO transport removes the geometry-label tautology, and nested source-only temperature calibration closes the source proper gate. The single fixed pilot then gives the strongest object-aware LERF2D result in this branch but substantially harms LERF3D. The remaining bottleneck is track purity at the Gaussian-selection level, not probability temperature or 2D extent coverage; this branch is stopped without full4 expansion."
+}

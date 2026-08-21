@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_class_complete_source_semantic_authority_audit",
+  "status": "blocked_no_class_complete_independent_source_semantic_authority",
+  "audit_contract": {
+    "purpose": "Determine whether current local assets can define a hash-bound, source-only semantic authority covering all 19 ScanNet OVS classes without invoking a new foundation model.",
+    "paper8_target_labels_opened": false,
+    "paper8_target_metrics_opened": false,
+    "metric_guided_calibration_executed": false,
+    "new_foundation_model_invoked": false
+  },
+  "eligible_registered_source_assets": {
+    "scene0001_00": {
+      "partition": "source_fit_pilot",
+      "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1",
+      "registered_sens_and_field_present": true,
+      "official_semantic_annotation_chain_present": false
+    },
+    "scene0002_00": {
+      "partition": "source_train",
+      "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00",
+      "registered_sens_and_field_present": true,
+      "factorized_state_sha256": "7036ae2e0ab581c684f9c43c76923836659b666d30bdddcc7790f139d77fdfbe",
+      "official_semantic_annotation_chain_present": false
+    },
+    "scene0003_00": {
+      "partition": "source_development",
+      "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00",
+      "registered_sens_and_field_present": true,
+      "factorized_state_sha256": "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd",
+      "official_semantic_annotation_chain_present": false
+    },
+    "scene0004_00": {
+      "partition": "source_validation",
+      "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00",
+      "registered_sens_and_field_present": true,
+      "factorized_state_sha256": "edfaab08aa4ebe1c7850931578ffb941a1e7439c428c4521019fb7c1ce8aa7d4",
+      "official_semantic_annotation_chain_present": false
+    },
+    "scene0005_00": {
+      "partition": "source_train",
+      "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00",
+      "registered_sens_and_field_present": true,
+      "factorized_state_sha256": "2caf90693fd4da1baaea138e0385e82dd748bc2e122a9c4e4fcbfe6f0bb745e8",
+      "official_semantic_annotation_chain_present": false
+    },
+    "scene0008_00": {
+      "partition": "source_validation",
+      "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00",
+      "registered_sens_and_field_present": true,
+      "factorized_state_sha256": "ab19362055999cfdf0d4b3559b85a32f0071074ef1706686cf29cf218d15e84a",
+      "official_semantic_annotation_chain_present": false
+    }
+  },
+  "semantic_authority_audit": {
+    "existing_adapter": "/root/RADIO-GS/radio_gs/data/scannet_source_region_semantics.py",
+    "required_chain": [
+      "official source mesh vertices",
+      "official *.segs.json vertex-to-segment assignment",
+      "official *.aggregation.json segment-group raw labels",
+      "scannetv2-labels.combined.tsv raw-label to NYU40 mapping"
+    ],
+    "missing_from_the_six_registered_source_bundles": [
+      "official source mesh",
+      "*.segs.json",
+      "*.aggregation.json",
+      "scannetv2-labels.combined.tsv"
+    ],
+    "sens_is_not_semantic_authority": "The mounted .sens streams provide registered RGB/depth/camera observations but do not provide the official raw-label-to-NYU40 semantic chain.",
+    "historical_materialized_sidecars": "Referenced under /root/RADIO-GS/local_ssd_results/source_post_spatial_text_posterior_v2, but that local-SSD authority is absent on this host and therefore cannot be revalidated or reused.",
+    "agile3d_fallback": "The available PLY label property is an instance identifier. The local object_ids/object_classes mapping contains zero entries for all six eligible clean source scenes, so it cannot convert these registered fields into semantic authority.",
+    "historical_coverage": {
+      "fit_scenes": [
+        "scene0001_00",
+        "scene0002_00",
+        "scene0005_00"
+      ],
+      "classes_with_nonzero_labeled_mass": 10,
+      "required_classes": 19,
+      "source": "paper/artifacts/categorical_posterior_v2_independent_source_gate_result_20260816.json",
+      "qualification": "This proves the old three-scene fit authority was not class-complete; it does not imply that the currently unlabeled six-scene union covers the remaining classes."
+    }
+  },
+  "conditional_execution_decision": {
+    "minimal_class_complete_split_materialized": false,
+    "coverage_gate_executed": false,
+    "loso_identifiability_gate_executed": false,
+    "reason": "Class labels and hence 19-class coverage are not independently observable from the mounted eligible source assets. Constructing a split or fitting a calibrator would silently substitute an unverified authority.",
+    "fail_closed": true
+  },
+  "minimum_completion_path": [
+    "Restore the four official semantic-chain assets for the six clean source scenes and record content hashes before conversion.",
+    "Run the existing source-region semantic adapter to produce mesh/region-to-NYU40 sidecars bound to the registered geometry and factorized-field hashes.",
+    "Perform a label-only union-coverage scan over source scenes; require nonzero support for every one of the 19 evaluation classes.",
+    "If the six-scene union is incomplete, select the smallest additional independent ScanNet train scenes that close coverage, then require their registered geometry and compatible field assets before proceeding.",
+    "Freeze a class-complete fit/development split and execute scene-disjoint LOSO identifiability gates before any paper8 evaluation or calibration promotion."
+  ],
+  "cost_boundary": {
+    "if_official_annotations_for_existing_six_are_restored": "No new foundation model is required. The remaining work is CPU-side annotation conversion, geometry association, hash/manifest I/O, coverage counting, and LOSO training/evaluation.",
+    "if_existing_six_do_not_cover_all_19_classes": "Additional source scenes are required. Annotation-only coverage selection is cheap, but scenes lacking already-compatible registered fields create a material extraction/field-build cost and cannot be filled by metric tuning.",
+    "gpu_requirement_for_this_audit": "none"
+  },
+  "conclusion": "The host has six usable independent source geometry/field carriers, but not a locally verifiable class-complete semantic authority. The high-value next action is restoring and hash-binding official source annotations, not another category calibration variant."
+}

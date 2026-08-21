@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_ludvig_carrier_native_bridge_readiness_audit",
+  "status": "assets_sufficient_execution_deferred_for_gpu_and_host_memory_safety",
+  "pilot_scene": "fern",
+  "available_assets": {
+    "native_ludvig_geometry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/fern/sam/gaussians.ply",
+      "rows": 560636,
+      "sha256": "50b13419f71cab460359508fd828bc7150f0c1f8d245a1ef488091365e712cc4"
+    },
+    "native_ludvig_scalar": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/fern/sam/features.npy",
+      "shape": [560636, 1],
+      "dtype": "float32",
+      "sha256": "0acf54769c1163bd46078200ee201b873290d438d969b406596658bd63932c29"
+    },
+    "registered_camera_authority": {
+      "current_config": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/fern/gaussfm_main_track.yaml",
+      "current_native_resolution": [2988, 3985],
+      "current_intrinsics_fxfycxcy": [3260.5263328805895, 3260.5263328805895, 1992.5, 1494.0],
+      "ludvig_registered_views": 20,
+      "pose_equivalence_tolerance": 1e-12,
+      "ludvig_staging": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/staging/colmap_pinhole_undistorted"
+    },
+    "current_reference_exact_assignment": {
+      "path": "/root/RADIO-GS/output/optimization_20260803/nvos_exact_prompt_responsibility_dino_completion_v1/cache/fern.pt",
+      "frame_id": "IMG_4038",
+      "triplets": 69256531,
+      "num_gaussians": 760715,
+      "bytes": 1391220123,
+      "sha256": "cc2dbc08ef06ae5a8573413145d72675fe7181ccf7fb3cbae6cb4d5a14ca3db1",
+      "tensor_keys": ["gaussian_ids", "pixel_ids", "weights", "visible_mass"]
+    },
+    "project_renderer_primitives": [
+      "radio_gs.models.explicit_gaussian.ExplicitFeatureGaussian.load_from_ply",
+      "radio_gs.rendering.feature_renderer.FeatureFieldRenderer.render_feature_rows",
+      "radio_gs.scripts.build_nvos_two_round_exact_consensus.exact_adjoint_probability"
+    ]
+  },
+  "missing_persisted_asset": {
+    "native_scalar_reference_render": "No LUDVIG scalar render for IMG_4038 is cached; existing rendered selectors contain only the evaluation target.",
+    "current_target_sparse_assignment": "The earlier two-round target compositor was discarded after producing primitive_probability and visible_mass; gaussian_ids/pixel_ids/weights were not persisted.",
+    "upstream_checkout": "The historical /root/baselines/LUDVIG checkout is absent on this host, although the project-native ExplicitFeatureGaussian/FeatureFieldRenderer path is sufficient for a one-channel render."
+  },
+  "shortest_exact_source_route": [
+    "Load the audited native LUDVIG PLY and scalar rows without row remapping.",
+    "Render the scalar directly with the current IMG_4038 pose and current-camera intrinsics scaled to 756x1008, so both carriers share one registered pixel coordinate system.",
+    "Load the frozen current-carrier IMG_4038 exact sparse assignment and compute normalized W-transpose scalar over W-transpose one.",
+    "Persist the resulting 760715-row query-transient primitive probability plus geometry/camera/input hashes.",
+    "Use the normal current-carrier renderer for downstream registered views; do not copy native rows or create a second persistent scene field."
+  ],
+  "why_not_executed_now": {
+    "gpu": "All six physical GPUs currently carry active workloads, including the resumed SPIn fern job; launching an additional native render would interfere with in-scope queues.",
+    "host_memory": "A read-only attempt to load the 1.39 GB exact reference cache while four SPIn region jobs held host-memory slots did not complete; the bridge must use a bounded/streamed cache loader or wait for a host-memory slot.",
+    "automatic_retry_or_queue_started": false
+  },
+  "readiness_conclusion": {
+    "camera_and_assignment_authority_complete": true,
+    "algorithmic_gap": "one bounded native-scalar render plus streamed exact-adjoint materializer",
+    "new_foundation_model_call_required": false,
+    "new_ludvig_uplift_required": false,
+    "nearest_neighbor_transfer_required": false,
+    "estimated_gpu_work": "one scalar registered-view render for the pilot, followed by current-carrier rendering only"
+  },
+  "eligibility": {
+    "audit_only": true,
+    "pilot_executed": false,
+    "development_use_only": true,
+    "target_rgb_assisted_sidecar": true,
+    "strict_unseen_eligible": false
+  }
+}

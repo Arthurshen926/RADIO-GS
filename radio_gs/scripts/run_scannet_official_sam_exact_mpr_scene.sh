@@ -20,6 +20,9 @@ EXTRA_EVAL_ARGS=()
 if [[ "${SAVE_DEVELOPMENT_SCORE_CACHE:-0}" == "1" ]]; then
   EXTRA_EVAL_ARGS+=(--save_development_score_cache)
 fi
+if [[ "${SCORE_CACHE_ONLY:-0}" == "1" ]]; then
+  EXTRA_EVAL_ARGS+=(--score_cache_only)
+fi
 
 case "$SCENE" in
   scene0000_00) SHORT=0000; QUERY_SHA=bd8d0f9e448ab2954edef02db2a6240eea85c98f984d6388139b201c3ba99c52; CHECKPOINT_TAG=scene0000_00_v14 ;;

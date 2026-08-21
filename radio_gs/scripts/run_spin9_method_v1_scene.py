@@ -639,6 +639,11 @@ def _run_with_scene_lock(
                 base_eval_batch_size,
                 "--local-code-training-dtype",
                 "float16",
+                *(
+                    ["--sparse-local-code-gradients"]
+                    if assets.scene == "truck"
+                    else []
+                ),
                 "--learning-rate",
                 "0.002",
                 "--weight-decay",

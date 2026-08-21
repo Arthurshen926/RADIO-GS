@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_ludvig_carrier_native_bridge_full8_result",
+  "status": "complete_development_full8",
+  "fixed_method": {
+    "source": "released_all_view_LUDVIG_seed0_scalar",
+    "transfer": "registered_prompt_render_then_normalized_exact_W_transpose",
+    "target_readout": "current_carrier_alpha_normalized_render",
+    "threshold": 0.29411764705882354,
+    "threshold_parameter": 75.0,
+    "operator": "method_v1_foreground_intersection_carrier_native_bridge_foreground",
+    "threshold_search": false,
+    "scene_specific_parameters": false,
+    "nearest_neighbor_transfer": false
+  },
+  "per_scene": {
+    "fern": {
+      "method_v1": 0.8305524432704189,
+      "fixed_intersection": 0.8371255052806221,
+      "delta": 0.0065730620102032455,
+      "bridge": 0.8046295990001251,
+      "native_selector": 0.8447952301482711,
+      "bridge_native_agreement": 0.9308609532320299,
+      "reliability_authorized": false,
+      "diagnostic_sha256": "389518aed39378b951cf3281f581cdc0078ef83282fdeae23dba96aef67be366"
+    },
+    "flower": {
+      "method_v1": 0.9680876596056049,
+      "fixed_intersection": 0.9704962001041108,
+      "delta": 0.0024085404985058068,
+      "bridge": 0.9332632270601835,
+      "native_selector": 0.9772797222575816,
+      "bridge_native_agreement": 0.9451033140320085,
+      "reliability_authorized": true,
+      "diagnostic_sha256": "5331993122a918d39ed707a2623f7a64d5c02b5bd86cbc7fe0caddc3bf8c5a01"
+    },
+    "fortress": {
+      "method_v1": 0.9754861243467738,
+      "fixed_intersection": 0.9747448130416725,
+      "delta": -0.0007413113051013553,
+      "bridge": 0.9754531367701778,
+      "native_selector": 0.9846456126049694,
+      "bridge_native_agreement": 0.9836172770930159,
+      "reliability_authorized": false,
+      "diagnostic_sha256": "30f7a5a1060c373642aee7079bf6f60154240b2ec75cc956e3ba778ac518cfc4"
+    },
+    "horns_center": {
+      "method_v1": 0.6968475303059835,
+      "fixed_intersection": 0.9741603224577531,
+      "delta": 0.2773127921517696,
+      "bridge": 0.9197380648457735,
+      "native_selector": 0.9784775485460175,
+      "bridge_native_agreement": 0.9231958689761813,
+      "reliability_authorized": true,
+      "diagnostic_sha256": "9cd1b50522c7c5ff05a83e4b71d1a7cac21583f17ae510b2a00028471935f46d"
+    },
+    "horns_left": {
+      "method_v1": 0.6898442330908984,
+      "fixed_intersection": 0.9149218521615576,
+      "delta": 0.22507761907065926,
+      "bridge": 0.8666326580614844,
+      "native_selector": 0.9433678093336437,
+      "bridge_native_agreement": 0.8883918059806922,
+      "reliability_authorized": true,
+      "diagnostic_sha256": "fa1613d985be1f306920dad0dcc039b2d64be0068a54edf88fa8a26a53e0442a"
+    },
+    "leaves": {
+      "method_v1": 0.638640420844728,
+      "fixed_intersection": 0.9234762083372834,
+      "delta": 0.28483578749255534,
+      "bridge": 0.8959692926773133,
+      "native_selector": 0.9665015933402205,
+      "bridge_native_agreement": 0.881224155344246,
+      "reliability_authorized": true,
+      "diagnostic_sha256": "4c5c6884208fb4ddb587266f018546c69a7033d0cc42505d0d231033d71cd76c"
+    },
+    "orchids": {
+      "method_v1": 0.8776062815036751,
+      "fixed_intersection": 0.7251810207274855,
+      "delta": -0.15242526077618967,
+      "bridge": 0.720725472453105,
+      "native_selector": 0.7470299104043512,
+      "bridge_native_agreement": 0.9418933623503809,
+      "reliability_authorized": false,
+      "diagnostic_sha256": "32d669b36ba5c5b0f360d1e4620e0d90aaf8069c7c999af2a5205019f342d625"
+    },
+    "trex": {
+      "method_v1": 0.8646831351368737,
+      "fixed_intersection": 0.8631109901387246,
+      "delta": -0.001572144998149061,
+      "bridge": 0.8331774484315059,
+      "native_selector": 0.87529623148093,
+      "bridge_native_agreement": 0.9131430909276874,
+      "reliability_authorized": true,
+      "diagnostic_sha256": "67d5c0b069b7677caedab702a35da6cec7756f3a7bc52b56d01ab21e777fdd47"
+    }
+  },
+  "aggregate": {
+    "method_v1_macro_foreground_iou": 0.8177184785131195,
+    "fixed_intersection_macro_foreground_iou": 0.8979021140311513,
+    "fixed_intersection_delta": 0.08018363551803176,
+    "fixed_intersection_scenes_improved": 5,
+    "fixed_intersection_scenes_regressed": 3,
+    "bridge_macro_foreground_iou": 0.8686986124124586,
+    "native_selector_macro_foreground_iou": 0.9146742072644982,
+    "bridge_native_agreement_macro_iou": 0.9259287284920303,
+    "preexisting_reliability_gated_macro_foreground_iou": 0.9162263027900371,
+    "preexisting_reliability_gated_delta": 0.09850782427691762,
+    "preexisting_reliability_gated_scenes_improved": 4,
+    "preexisting_reliability_gated_scenes_unchanged": 3,
+    "preexisting_reliability_gated_scenes_regressed": 1
+  },
+  "numerical_gates": {
+    "all_eight_exact_W_caches_hash_bound": true,
+    "all_eight_visible_mass_recomputations_exact": true,
+    "all_eight_constant_conservation_max_abs_error": 0.0,
+    "streamed_adjoint_linearity_unit_gate": true,
+    "target_scores_frozen_before_target_selector_or_mask": true
+  },
+  "implementation": {
+    "streaming_adjoint_sha256": "45756b6471c9aa56de715c1f96a506075ff6b87514046dcc7f8da8d90c204769",
+    "exact_W_exporter_sha256": "64c2829cde942642afc880732de448f94d19d3c2fb830a5ed76fbb00790f2809",
+    "bridge_materializer_sha256": "daef5ec06f2e17e7fced5ee894e5c00e27475c77bd16884ff219f5fb3acfe50a",
+    "paired_evaluator_sha256": "fa5a8e3604e5b627032f6af6a9ed5c0c4e0458d47b3b3f7a15bb1d19ebf6ec0f",
+    "queue_runner_sha256": "80c8b28c67a56709538751c55edbafc8dbbf39625506245f6328f31ea48d97a7",
+    "tests": "23 passed"
+  },
+  "method_judgment": {
+    "core_claim_supported": "Independent region extent materially resolves identity-versus-extent ambiguity after a legal exact transfer to the current carrier.",
+    "unconditional_operator_not_promoted": "The fixed intersection improves macro IoU but has an orchids failure and three scene regressions.",
+    "risk_gate_supported": "The previously fixed prediction-time reliability gate is necessary to replay Method-v1 when region authority is unreliable; it raises the carrier-native full8 macro more than unconditional intersection.",
+    "remaining_gap": "Single prompt-camera adjoint loses target boundary/visibility information relative to the native all-view carrier, and the upstream region authority can itself be wrong.",
+    "next_method_step": "Replace single-view transfer with robust multi-registered-view exact adjoints and independently calibrated proposal reliability; do not tune per-scene thresholds."
+  },
+  "eligibility": {
+    "development_only": true,
+    "upstream_target_rgb_all_view_assisted": true,
+    "strict_unseen_eligible": false,
+    "postmetric_context_already_exposed": true,
+    "paper_or_sota_claim_supported": false
+  }
+}

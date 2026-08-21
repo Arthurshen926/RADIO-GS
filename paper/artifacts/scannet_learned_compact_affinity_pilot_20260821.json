@@ -1,0 +1,529 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_learned_compact_affinity_pilot",
+  "status": "complete_rejected_no_threshold_retuning",
+  "authority": {
+    "training_scene": "scene0000_00",
+    "confirmation_scenes": [
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00"
+    ],
+    "object_dim": 16,
+    "relation_logit_scale": 8.0,
+    "source_same_probability": 0.23499999940395355,
+    "source_reliability_gate": "heldout learned log-score and Brier strictly improve canonical-feature baseline and AUC does not regress",
+    "fallback": "whole-scene, all-split bitwise primitive replay decided before category metrics",
+    "metric_or_class_count_tuning": false
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_learned_compact_affinity_v1/global_compact_affinity_16d.pt",
+    "sha256": "bcc80bdd69e5a5b054a045de5b7927d5088cf2585ce1eddc0c66f73b0dc160d5"
+  },
+  "best_training_loss": 0.018396247178316116,
+  "scenes": {
+    "scene0000_00": {
+      "source_gate": {
+        "admitted": true,
+        "baseline_heldout": {
+          "balanced_log_score": 3.1649928092956543,
+          "balanced_brier": 0.4979935586452484,
+          "auc": 1.0
+        },
+        "learned_heldout": {
+          "balanced_log_score": 0.2880149483680725,
+          "balanced_brier": 0.0795740932226181,
+          "auc": 1.0
+        }
+      },
+      "relation": {
+        "construction": "source_exact_mpr_ternary_proposal_relation_v1",
+        "same_soft_cosine": 0.5,
+        "different_soft_cosine": 0.05,
+        "minimum_area_ratio": 0.25,
+        "same_edges": 821,
+        "different_edges": 950,
+        "unknown_policy": "excluded_not_negative"
+      },
+      "tracks": {
+        "construction": "learned_compact_affinity_tracks_v1",
+        "relation_logit_scale": 8.0,
+        "minimum_same_probability": 0.23499999940395355,
+        "candidate_edges": 15660,
+        "accepted_edges": 743,
+        "num_tracks": 25,
+        "tracked_proposals": 768,
+        "maximum_track_views": 51,
+        "membership_count": 187519
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.34441250540865453,
+            "macc": 0.7096695413172915
+          },
+          "candidate": {
+            "miou": 0.34436926302520293,
+            "macc": 0.7096695413172915
+          },
+          "delta": {
+            "miou": -4.3242383451602695e-05,
+            "macc": 0.0
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 25,
+            "membership_count": 187519,
+            "eligible_rows": 21678,
+            "changed_rows": 5,
+            "mean_mixing": 0.0001943546230904758,
+            "maximum_mixing": 0.025426756590604782
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.32312889733315964,
+            "macc": 0.7252924702094872
+          },
+          "candidate": {
+            "miou": 0.3231318937650575,
+            "macc": 0.7252959446538267
+          },
+          "delta": {
+            "miou": 2.996431897883678e-06,
+            "macc": 3.47444433956845e-06
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 25,
+            "membership_count": 187519,
+            "eligible_rows": 9375,
+            "changed_rows": 20,
+            "mean_mixing": 0.0005449623567983508,
+            "maximum_mixing": 0.03481132909655571
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.35115527219744364,
+            "macc": 0.7999072499006008
+          },
+          "candidate": {
+            "miou": 0.3511477848784652,
+            "macc": 0.7999072499006008
+          },
+          "delta": {
+            "miou": -7.487318978427471e-06,
+            "macc": 0.0
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 25,
+            "membership_count": 187519,
+            "eligible_rows": 3494,
+            "changed_rows": 9,
+            "mean_mixing": 0.00022307856124825776,
+            "maximum_mixing": 0.04230194538831711
+          }
+        }
+      },
+      "interface": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_learned_compact_affinity_v1/scene0000_00/learned_compact_affinity_tracks.pt",
+        "sha256": "924d78891eecb9580854b8d2b1e365aa2ca30b039494f14b2278dcf8eddc4539"
+      }
+    },
+    "scene0062_00": {
+      "source_gate": {
+        "admitted": true,
+        "baseline_heldout": {
+          "balanced_log_score": 3.137967348098755,
+          "balanced_brier": 0.4977550208568573,
+          "auc": 1.0
+        },
+        "learned_heldout": {
+          "balanced_log_score": 0.9451791644096375,
+          "balanced_brier": 0.18988515436649323,
+          "auc": 1.0
+        }
+      },
+      "relation": {
+        "construction": "source_exact_mpr_ternary_proposal_relation_v1",
+        "same_soft_cosine": 0.5,
+        "different_soft_cosine": 0.05,
+        "minimum_area_ratio": 0.25,
+        "same_edges": 107,
+        "different_edges": 111,
+        "unknown_policy": "excluded_not_negative"
+      },
+      "tracks": {
+        "construction": "learned_compact_affinity_tracks_v1",
+        "relation_logit_scale": 8.0,
+        "minimum_same_probability": 0.23499999940395355,
+        "candidate_edges": 732,
+        "accepted_edges": 117,
+        "num_tracks": 16,
+        "tracked_proposals": 133,
+        "maximum_track_views": 18,
+        "membership_count": 67240
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.27886809095941145,
+            "macc": 0.6814476737615666
+          },
+          "candidate": {
+            "miou": 0.2788631938153587,
+            "macc": 0.6824266252071328
+          },
+          "delta": {
+            "miou": -4.897144052773417e-06,
+            "macc": 0.0009789514455662562
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 16,
+            "membership_count": 67240,
+            "eligible_rows": 26685,
+            "changed_rows": 173,
+            "mean_mixing": 0.01295613031834364,
+            "maximum_mixing": 0.16088931262493134
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.2782054442692071,
+            "macc": 0.6825191522414215
+          },
+          "candidate": {
+            "miou": 0.2782287091271927,
+            "macc": 0.683569101275503
+          },
+          "delta": {
+            "miou": 2.32648579855943e-05,
+            "macc": 0.0010499490340815099
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 16,
+            "membership_count": 67240,
+            "eligible_rows": 26645,
+            "changed_rows": 154,
+            "mean_mixing": 0.012463387101888657,
+            "maximum_mixing": 0.15661035478115082
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.3637523379563964,
+            "macc": 0.6709930736507548
+          },
+          "candidate": {
+            "miou": 0.3636823430764673,
+            "macc": 0.6721958119048845
+          },
+          "delta": {
+            "miou": -6.99948799290917e-05,
+            "macc": 0.0012027382541297538
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 16,
+            "membership_count": 67240,
+            "eligible_rows": 25713,
+            "changed_rows": 103,
+            "mean_mixing": 0.01397559605538845,
+            "maximum_mixing": 0.15522794425487518
+          }
+        }
+      },
+      "interface": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_learned_compact_affinity_v1/scene0062_00/learned_compact_affinity_tracks.pt",
+        "sha256": "958455f3cd10fbc147ed28c502976c7141fd6158453b6334a729dc2ccc85f037"
+      }
+    },
+    "scene0070_00": {
+      "source_gate": {
+        "admitted": true,
+        "baseline_heldout": {
+          "balanced_log_score": 3.116950750350952,
+          "balanced_brier": 0.497882604598999,
+          "auc": 1.0
+        },
+        "learned_heldout": {
+          "balanced_log_score": 1.1865146160125732,
+          "balanced_brier": 0.27405449748039246,
+          "auc": 1.0
+        }
+      },
+      "relation": {
+        "construction": "source_exact_mpr_ternary_proposal_relation_v1",
+        "same_soft_cosine": 0.5,
+        "different_soft_cosine": 0.05,
+        "minimum_area_ratio": 0.25,
+        "same_edges": 145,
+        "different_edges": 158,
+        "unknown_policy": "excluded_not_negative"
+      },
+      "tracks": {
+        "construction": "learned_compact_affinity_tracks_v1",
+        "relation_logit_scale": 8.0,
+        "minimum_same_probability": 0.23499999940395355,
+        "candidate_edges": 2386,
+        "accepted_edges": 198,
+        "num_tracks": 15,
+        "tracked_proposals": 213,
+        "maximum_track_views": 27,
+        "membership_count": 159755
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.28825407499929284,
+            "macc": 0.49546485410670155
+          },
+          "candidate": {
+            "miou": 0.28830414598521514,
+            "macc": 0.49540056460668086
+          },
+          "delta": {
+            "miou": 5.0070985922301414e-05,
+            "macc": -6.428950002068667e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 15,
+            "membership_count": 159755,
+            "eligible_rows": 50404,
+            "changed_rows": 74,
+            "mean_mixing": 0.004316616337746382,
+            "maximum_mixing": 0.05432534217834473
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.3054103439191188,
+            "macc": 0.4485655046183309
+          },
+          "candidate": {
+            "miou": 0.30548380923080803,
+            "macc": 0.44848179969601754
+          },
+          "delta": {
+            "miou": 7.346531168922477e-05,
+            "macc": -8.370492231335458e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 15,
+            "membership_count": 159755,
+            "eligible_rows": 49834,
+            "changed_rows": 82,
+            "mean_mixing": 0.004317629616707563,
+            "maximum_mixing": 0.05519966781139374
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.3235697631963776,
+            "macc": 0.6980924486402161
+          },
+          "candidate": {
+            "miou": 0.323553929386664,
+            "macc": 0.6980924486402161
+          },
+          "delta": {
+            "miou": -1.5833809713594604e-05,
+            "macc": 0.0
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 15,
+            "membership_count": 159755,
+            "eligible_rows": 40832,
+            "changed_rows": 20,
+            "mean_mixing": 0.0011218080762773752,
+            "maximum_mixing": 0.03884434700012207
+          }
+        }
+      },
+      "interface": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_learned_compact_affinity_v1/scene0070_00/learned_compact_affinity_tracks.pt",
+        "sha256": "4bf5eb1422a0f247a61b3947712bf54413c7d4d9d34582923bb2018cb450c8b5"
+      }
+    },
+    "scene0097_00": {
+      "source_gate": {
+        "admitted": true,
+        "baseline_heldout": {
+          "balanced_log_score": 3.2002041339874268,
+          "balanced_brier": 0.49809861183166504,
+          "auc": 1.0
+        },
+        "learned_heldout": {
+          "balanced_log_score": 1.0249881744384766,
+          "balanced_brier": 0.2987581193447113,
+          "auc": 1.0
+        }
+      },
+      "relation": {
+        "construction": "source_exact_mpr_ternary_proposal_relation_v1",
+        "same_soft_cosine": 0.5,
+        "different_soft_cosine": 0.05,
+        "minimum_area_ratio": 0.25,
+        "same_edges": 401,
+        "different_edges": 713,
+        "unknown_policy": "excluded_not_negative"
+      },
+      "tracks": {
+        "construction": "learned_compact_affinity_tracks_v1",
+        "relation_logit_scale": 8.0,
+        "minimum_same_probability": 0.23499999940395355,
+        "candidate_edges": 1330,
+        "accepted_edges": 260,
+        "num_tracks": 39,
+        "tracked_proposals": 299,
+        "maximum_track_views": 19,
+        "membership_count": 193864
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.31037779209086525,
+            "macc": 0.7275121473035912
+          },
+          "candidate": {
+            "miou": 0.3105163352587893,
+            "macc": 0.7275356677962328
+          },
+          "delta": {
+            "miou": 0.00013854316792405452,
+            "macc": 2.3520492641648794e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 39,
+            "membership_count": 193864,
+            "eligible_rows": 27444,
+            "changed_rows": 94,
+            "mean_mixing": 0.004920887760818005,
+            "maximum_mixing": 0.1518740952014923
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.2935529486643127,
+            "macc": 0.7060828847284887
+          },
+          "candidate": {
+            "miou": 0.2936821952877071,
+            "macc": 0.7061103380486364
+          },
+          "delta": {
+            "miou": 0.00012924662339441895,
+            "macc": 2.7453320147752258e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 39,
+            "membership_count": 193864,
+            "eligible_rows": 25218,
+            "changed_rows": 69,
+            "mean_mixing": 0.004853838589042425,
+            "maximum_mixing": 0.14526642858982086
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.4651688638048354,
+            "macc": 0.6922279325242683
+          },
+          "candidate": {
+            "miou": 0.4650672986873256,
+            "macc": 0.692246002031209
+          },
+          "delta": {
+            "miou": -0.00010156511750980535,
+            "macc": 1.806950694072107e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 39,
+            "membership_count": 193864,
+            "eligible_rows": 17976,
+            "changed_rows": 75,
+            "mean_mixing": 0.0059373765252530575,
+            "maximum_mixing": 0.15865841507911682
+          }
+        }
+      },
+      "interface": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_learned_compact_affinity_v1/scene0097_00/learned_compact_affinity_tracks.pt",
+        "sha256": "cbfb81909aaf44ad2ce07ebc78c1d950e459ebc39bbbea1e711063c21c155344"
+      }
+    }
+  },
+  "confirmation_macro_delta": {
+    "19": {
+      "miou": 6.123900326452751e-05,
+      "macc": 0.00031272747939573947
+    },
+    "15": {
+      "miou": 7.5325597689746e-05,
+      "macc": 0.00033123247730530253
+    },
+    "10": {
+      "miou": -6.246460238416389e-05,
+      "macc": 0.00040693592035682496
+    }
+  },
+  "decision": {
+    "promotion": false,
+    "source_gate_passed": true,
+    "aggregate_gate_passed": false,
+    "split10_miou_regression_scenes": [
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00"
+    ],
+    "split10_macc_regression_scenes": [],
+    "reason": "source-heldout proper calibration improves, but canonical affinity already has AUC 1.0 and learned track voting regresses confirmation split10 mIoU",
+    "rule": "no analytic affinity threshold retuning and no post-metric fallback"
+  }
+}

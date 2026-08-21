@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_ludvig_region_reliability_gate_preregistration",
+  "status": "rule_frozen_before_candidate_materialization_metadata_corrected_after_execution",
+  "metadata_correction_after_execution": {
+    "rule_payload_changed": false,
+    "reason": "Renamed confirmation scope to record that prior fixed-intersection outcomes had already been exposed; no gate threshold, branch, scene cohort, or promotion arithmetic changed."
+  },
+  "candidate_id": "nvos-method-v1-ludvig-region-reliability-gate-v1",
+  "development_scenes": ["horns_left", "orchids"],
+  "pre_fixed_execution_confirmation_scenes_after_prior_outcome_exposure": ["flower", "leaves"],
+  "rule": {
+    "official_sam_quality_threshold": 0.5,
+    "field_proposal_overlap_threshold": 0.5,
+    "use_region_agreement_when": "official_sam_selected_score >= 0.5 OR best_initial_overlap < 0.5",
+    "region_agreement": "method_v1_foreground AND ludvig_fixed_threshold_foreground",
+    "fallback": "unchanged_method_v1_foreground",
+    "threshold_rationale": "0.5 is the neutral probability boundary for official proposal quality and the majority-overlap boundary for field/proposal agreement; neither threshold was selected from target IoU",
+    "scene_specific_parameter": false,
+    "target_mask_or_metric_input": false,
+    "nearest_neighbor_carrier_transfer": false,
+    "carrier_modified": false
+  },
+  "gate_interpretation": {
+    "high_sam_quality": "A strong official 2D proposal supplies extent authority, so independent LUDVIG agreement can veto identity false positives.",
+    "low_field_overlap": "A proposal that disagrees with most coarse-field support is identity-uncertain, so a second region authority is required.",
+    "low_quality_high_overlap": "The current proposal and field already agree while official proposal quality is weak; preserve Method-v1 rather than allow an uncertain sidecar to erode object extent."
+  },
+  "frozen_inputs": {
+    "method_v1_prediction_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_signed_points_sam3_candidate_20260816/prediction_manifest.json",
+      "sha256": "f439d36f2d6d0491d8276724beff833cf23289c00c1ba3281fe07019171bf254"
+    },
+    "ludvig_asset_inventory": {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_ludvig_published_compatible_asset_audit_20260804.json",
+      "sha256": "93af6ff74879f306f1f1dfeb6d65e9efe6cf5d208a68f99f7006df7d554a5582",
+      "seed": 0,
+      "selector": "rendered_binary_selector"
+    }
+  },
+  "promotion_gate": {
+    "development_orchids_no_regression": true,
+    "development_horns_left_improves": true,
+    "both_pre_fixed_execution_confirmation_scenes_no_regression": true,
+    "at_least_one_pre_fixed_execution_confirmation_scene_improves": true,
+    "full8_only_after_pair_gate": true
+  },
+  "eligibility": {
+    "development_use_only": true,
+    "postmetric": true,
+    "outcome_blind_confirmation": false,
+    "prior_fixed_intersection_outcomes_already_exposed": true,
+    "target_rgb_assisted": true,
+    "strict_unseen_eligible": false,
+    "paper_result": false
+  }
+}

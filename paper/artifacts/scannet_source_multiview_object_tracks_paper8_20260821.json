@@ -1,0 +1,903 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_source_multiview_object_tracks_pilot",
+  "status": "development_and_prefixed_confirmation_complete_not_promoted",
+  "authority": {
+    "association_inputs": "official source-view SAM exact-MPR Gaussian memberships and source view IDs only",
+    "association": "different-view reciprocal-best soft-cosine overlap >= 0.5; strongest-first union with unique-view constraint",
+    "track_membership": "clipped union of source proposal memberships",
+    "category_authority": "primitive RADIO logits only after query-independent tracks are frozen",
+    "class_permutation_equivariant_with_thing_stuff_roles": true,
+    "proposal_permutation_equivariant": true,
+    "gt_or_target_metric_used_for_association": false,
+    "development_scenes": [
+      "scene0000_00"
+    ],
+    "confirmation_scenes_prefixed": [
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00",
+      "scene0140_00",
+      "scene0347_00",
+      "scene0400_00",
+      "scene0590_00"
+    ],
+    "per_class_parameters": false,
+    "unknown_background_branch": false
+  },
+  "results": {
+    "scene0000_00": {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_dev4_score_cache_v1/scene0000_00/development/scene0000_00_scores.npz",
+        "sha256": "165b8b8a76ba514ac69b26d8940f415b0b3f3212dbf754a8d6b7c80593da1bb7"
+      },
+      "tracks": {
+        "construction": "cross_view_reciprocal_soft_overlap_tracks_v1",
+        "minimum_soft_cosine": 0.5,
+        "candidate_edges": 821,
+        "accepted_edges": 358,
+        "num_tracks": 123,
+        "tracked_proposals": 481,
+        "maximum_track_views": 17,
+        "membership_count": 113376
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.34441250540865453,
+            "macc": 0.7096695413172915
+          },
+          "candidate": {
+            "miou": 0.3456350764606627,
+            "macc": 0.7131723487987898
+          },
+          "delta": {
+            "miou": 0.0012225710520081812,
+            "macc": 0.003502807481498227
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 123,
+            "membership_count": 113376,
+            "eligible_rows": 27939,
+            "changed_rows": 284,
+            "mean_mixing": 0.0069391848519444466,
+            "maximum_mixing": 0.1610340178012848
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.32312889733315964,
+            "macc": 0.7252924702094872
+          },
+          "candidate": {
+            "miou": 0.3230360425619122,
+            "macc": 0.7272613530949391
+          },
+          "delta": {
+            "miou": -9.285477124743036e-05,
+            "macc": 0.001968882885451939
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 123,
+            "membership_count": 113376,
+            "eligible_rows": 26698,
+            "changed_rows": 215,
+            "mean_mixing": 0.006792639847844839,
+            "maximum_mixing": 0.17106172442436218
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.35115527219744364,
+            "macc": 0.7999072499006008
+          },
+          "candidate": {
+            "miou": 0.3505370652888498,
+            "macc": 0.7999470106289015
+          },
+          "delta": {
+            "miou": -0.0006182069085938213,
+            "macc": 3.976072830069732e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 123,
+            "membership_count": 113376,
+            "eligible_rows": 23204,
+            "changed_rows": 127,
+            "mean_mixing": 0.0059526227414608,
+            "maximum_mixing": 0.15794441103935242
+          }
+        }
+      }
+    },
+    "scene0062_00": {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_dev4_score_cache_v1/scene0062_00/development/scene0062_00_scores.npz",
+        "sha256": "35b5adf6128485025d45262bb587291c3e395c19d9d03e75a27124eddd00a49e"
+      },
+      "tracks": {
+        "construction": "cross_view_reciprocal_soft_overlap_tracks_v1",
+        "minimum_soft_cosine": 0.5,
+        "candidate_edges": 107,
+        "accepted_edges": 55,
+        "num_tracks": 27,
+        "tracked_proposals": 82,
+        "maximum_track_views": 6,
+        "membership_count": 42195
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.27886809095941145,
+            "macc": 0.6814476737615666
+          },
+          "candidate": {
+            "miou": 0.279445781839739,
+            "macc": 0.6909426114727456
+          },
+          "delta": {
+            "miou": 0.0005776908803275527,
+            "macc": 0.009494937711179041
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 27,
+            "membership_count": 42195,
+            "eligible_rows": 17593,
+            "changed_rows": 88,
+            "mean_mixing": 0.009429428726434708,
+            "maximum_mixing": 0.16375650465488434
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.2782054442692071,
+            "macc": 0.6825191522414215
+          },
+          "candidate": {
+            "miou": 0.27961132236528613,
+            "macc": 0.6927633080800956
+          },
+          "delta": {
+            "miou": 0.0014058780960790052,
+            "macc": 0.010244155838674107
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 27,
+            "membership_count": 42195,
+            "eligible_rows": 17575,
+            "changed_rows": 79,
+            "mean_mixing": 0.009324976243078709,
+            "maximum_mixing": 0.16341839730739594
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.3637523379563964,
+            "macc": 0.6709930736507548
+          },
+          "candidate": {
+            "miou": 0.3634752304061325,
+            "macc": 0.67228152390277
+          },
+          "delta": {
+            "miou": -0.00027710755026388867,
+            "macc": 0.001288450252015183
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 27,
+            "membership_count": 42195,
+            "eligible_rows": 16526,
+            "changed_rows": 43,
+            "mean_mixing": 0.009192968718707561,
+            "maximum_mixing": 0.16209040582180023
+          }
+        }
+      }
+    },
+    "scene0070_00": {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_dev4_score_cache_v1/scene0070_00/development/scene0070_00_scores.npz",
+        "sha256": "45777109bdafa97e58fe7a5d938eea7be1a9bfe286148b006f7d1deb80d98c02"
+      },
+      "tracks": {
+        "construction": "cross_view_reciprocal_soft_overlap_tracks_v1",
+        "minimum_soft_cosine": 0.5,
+        "candidate_edges": 145,
+        "accepted_edges": 77,
+        "num_tracks": 36,
+        "tracked_proposals": 113,
+        "maximum_track_views": 9,
+        "membership_count": 80102
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.28825407499929284,
+            "macc": 0.49546485410670155
+          },
+          "candidate": {
+            "miou": 0.2882029094064189,
+            "macc": 0.49528289011594
+          },
+          "delta": {
+            "miou": -5.1165592873936294e-05,
+            "macc": -0.00018196399076153558
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 36,
+            "membership_count": 80102,
+            "eligible_rows": 38022,
+            "changed_rows": 116,
+            "mean_mixing": 0.006637140642851591,
+            "maximum_mixing": 0.11766856908798218
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.3054103439191188,
+            "macc": 0.4485655046183309
+          },
+          "candidate": {
+            "miou": 0.3061592876748036,
+            "macc": 0.4482947362585833
+          },
+          "delta": {
+            "miou": 0.0007489437556847944,
+            "macc": -0.0002707683597475974
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 36,
+            "membership_count": 80102,
+            "eligible_rows": 37643,
+            "changed_rows": 130,
+            "mean_mixing": 0.007011997513473034,
+            "maximum_mixing": 0.13620612025260925
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.3235697631963776,
+            "macc": 0.6980924486402161
+          },
+          "candidate": {
+            "miou": 0.3238535479175638,
+            "macc": 0.6991271898003538
+          },
+          "delta": {
+            "miou": 0.000283784721186231,
+            "macc": 0.0010347411601376866
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 36,
+            "membership_count": 80102,
+            "eligible_rows": 33697,
+            "changed_rows": 158,
+            "mean_mixing": 0.007024123799055815,
+            "maximum_mixing": 0.12129536271095276
+          }
+        }
+      }
+    },
+    "scene0097_00": {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_dev4_score_cache_v1/scene0097_00/development/scene0097_00_scores.npz",
+        "sha256": "15a90659b62a304295e50bf3953ba504162e5c506d948bdc7b625e0c87de9668"
+      },
+      "tracks": {
+        "construction": "cross_view_reciprocal_soft_overlap_tracks_v1",
+        "minimum_soft_cosine": 0.5,
+        "candidate_edges": 401,
+        "accepted_edges": 159,
+        "num_tracks": 58,
+        "tracked_proposals": 217,
+        "maximum_track_views": 11,
+        "membership_count": 136673
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.31037779209086525,
+            "macc": 0.7275121473035912
+          },
+          "candidate": {
+            "miou": 0.3105153441049035,
+            "macc": 0.7276932176197082
+          },
+          "delta": {
+            "miou": 0.0001375520140382558,
+            "macc": 0.00018107031611702684
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 58,
+            "membership_count": 136673,
+            "eligible_rows": 26267,
+            "changed_rows": 118,
+            "mean_mixing": 0.006525288801640272,
+            "maximum_mixing": 0.1744227111339569
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.2935529486643127,
+            "macc": 0.7060828847284887
+          },
+          "candidate": {
+            "miou": 0.29370858756929913,
+            "macc": 0.7061277034351842
+          },
+          "delta": {
+            "miou": 0.00015563890498643262,
+            "macc": 4.4818706695481936e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 58,
+            "membership_count": 136673,
+            "eligible_rows": 24007,
+            "changed_rows": 70,
+            "mean_mixing": 0.0061903768219053745,
+            "maximum_mixing": 0.1724361926317215
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.4651688638048354,
+            "macc": 0.6922279325242683
+          },
+          "candidate": {
+            "miou": 0.46509538247743376,
+            "macc": 0.692246002031209
+          },
+          "delta": {
+            "miou": -7.34813274016477e-05,
+            "macc": 1.806950694072107e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 58,
+            "membership_count": 136673,
+            "eligible_rows": 15345,
+            "changed_rows": 37,
+            "mean_mixing": 0.005216978956013918,
+            "maximum_mixing": 0.1579166054725647
+          }
+        }
+      }
+    },
+    "scene0140_00": {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_object_tracks_paper8_score_cache_v1/scene0140_00/development/scene0140_00_scores.npz",
+        "sha256": "5445426e9b66486ec917010a68878610128154b5ce579a72b49b18d9be3bc1c4"
+      },
+      "tracks": {
+        "construction": "cross_view_reciprocal_soft_overlap_tracks_v1",
+        "minimum_soft_cosine": 0.5,
+        "candidate_edges": 1381,
+        "accepted_edges": 472,
+        "num_tracks": 125,
+        "tracked_proposals": 597,
+        "maximum_track_views": 17,
+        "membership_count": 860808
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.3174495406139346,
+            "macc": 0.6328583597657127
+          },
+          "candidate": {
+            "miou": 0.3175372975460499,
+            "macc": 0.6333884263359832
+          },
+          "delta": {
+            "miou": 8.775693211532376e-05,
+            "macc": 0.0005300665702705487
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 125,
+            "membership_count": 860808,
+            "eligible_rows": 186252,
+            "changed_rows": 384,
+            "mean_mixing": 0.0063562579452991486,
+            "maximum_mixing": 0.12843792140483856
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.36366127904045303,
+            "macc": 0.6011600878915399
+          },
+          "candidate": {
+            "miou": 0.36407748547288765,
+            "macc": 0.6020303070430206
+          },
+          "delta": {
+            "miou": 0.0004162064324346182,
+            "macc": 0.0008702191514807778
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 125,
+            "membership_count": 860808,
+            "eligible_rows": 148263,
+            "changed_rows": 312,
+            "mean_mixing": 0.005362534895539284,
+            "maximum_mixing": 0.13723772764205933
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.4186607796076096,
+            "macc": 0.7231577315776514
+          },
+          "candidate": {
+            "miou": 0.4190589687094346,
+            "macc": 0.723704105629984
+          },
+          "delta": {
+            "miou": 0.0003981891018249861,
+            "macc": 0.0005463740523325988
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 125,
+            "membership_count": 860808,
+            "eligible_rows": 126878,
+            "changed_rows": 158,
+            "mean_mixing": 0.004903532564640045,
+            "maximum_mixing": 0.182203471660614
+          }
+        }
+      }
+    },
+    "scene0347_00": {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_object_tracks_paper8_score_cache_v1/scene0347_00/development/scene0347_00_scores.npz",
+        "sha256": "3668b7ff997d89b8f276b13c6efc645d080186dab295391e539e92b1b25b923c"
+      },
+      "tracks": {
+        "construction": "cross_view_reciprocal_soft_overlap_tracks_v1",
+        "minimum_soft_cosine": 0.5,
+        "candidate_edges": 354,
+        "accepted_edges": 153,
+        "num_tracks": 66,
+        "tracked_proposals": 219,
+        "maximum_track_views": 10,
+        "membership_count": 136463
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.369299625709103,
+            "macc": 0.7120063864215093
+          },
+          "candidate": {
+            "miou": 0.36942547149658705,
+            "macc": 0.7129490576825893
+          },
+          "delta": {
+            "miou": 0.00012584578748403574,
+            "macc": 0.0009426712610800525
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 66,
+            "membership_count": 136463,
+            "eligible_rows": 39236,
+            "changed_rows": 281,
+            "mean_mixing": 0.0116802416741848,
+            "maximum_mixing": 0.1416594535112381
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.3519190423524534,
+            "macc": 0.6838289926320837
+          },
+          "candidate": {
+            "miou": 0.35087040583852275,
+            "macc": 0.6841361124528694
+          },
+          "delta": {
+            "miou": -0.0010486365139306675,
+            "macc": 0.000307119820785684
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 66,
+            "membership_count": 136463,
+            "eligible_rows": 37555,
+            "changed_rows": 160,
+            "mean_mixing": 0.009201549924910069,
+            "maximum_mixing": 0.15942564606666565
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.6451350662280869,
+            "macc": 0.7815794392502539
+          },
+          "candidate": {
+            "miou": 0.6445348365885656,
+            "macc": 0.7816235387371123
+          },
+          "delta": {
+            "miou": -0.0006002296395213325,
+            "macc": 4.40994868584621e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 66,
+            "membership_count": 136463,
+            "eligible_rows": 25038,
+            "changed_rows": 94,
+            "mean_mixing": 0.008741187863051891,
+            "maximum_mixing": 0.1658359318971634
+          }
+        }
+      }
+    },
+    "scene0400_00": {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_object_tracks_paper8_score_cache_v1/scene0400_00/development/scene0400_00_scores.npz",
+        "sha256": "b2170a7956846959534b4ff9990dcb1cb6f2d23e21ab0921c8c6e69564f4cc2d"
+      },
+      "tracks": {
+        "construction": "cross_view_reciprocal_soft_overlap_tracks_v1",
+        "minimum_soft_cosine": 0.5,
+        "candidate_edges": 390,
+        "accepted_edges": 203,
+        "num_tracks": 72,
+        "tracked_proposals": 275,
+        "maximum_track_views": 12,
+        "membership_count": 392133
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.4212058192307812,
+            "macc": 0.6852922576751569
+          },
+          "candidate": {
+            "miou": 0.4203073643475948,
+            "macc": 0.6856721578451646
+          },
+          "delta": {
+            "miou": -0.0008984548831864059,
+            "macc": 0.0003799001700076632
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 72,
+            "membership_count": 392133,
+            "eligible_rows": 39882,
+            "changed_rows": 186,
+            "mean_mixing": 0.0031335402745753527,
+            "maximum_mixing": 0.13803954422473907
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.39972191257933076,
+            "macc": 0.6910995122920394
+          },
+          "candidate": {
+            "miou": 0.3993346917681682,
+            "macc": 0.6914278824396065
+          },
+          "delta": {
+            "miou": -0.0003872208111625475,
+            "macc": 0.00032837014756714744
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 72,
+            "membership_count": 392133,
+            "eligible_rows": 38449,
+            "changed_rows": 122,
+            "mean_mixing": 0.003011011518537998,
+            "maximum_mixing": 0.14363759756088257
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.37690261861630936,
+            "macc": 0.8020481731561279
+          },
+          "candidate": {
+            "miou": 0.3769804536830786,
+            "macc": 0.8021125957266092
+          },
+          "delta": {
+            "miou": 7.783506676922736e-05,
+            "macc": 6.442257048133726e-05
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 72,
+            "membership_count": 392133,
+            "eligible_rows": 31539,
+            "changed_rows": 74,
+            "mean_mixing": 0.003582972101867199,
+            "maximum_mixing": 0.17617380619049072
+          }
+        }
+      }
+    },
+    "scene0590_00": {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_object_tracks_paper8_score_cache_v1/scene0590_00/development/scene0590_00_scores.npz",
+        "sha256": "ed312b17a2a3b3737d58a6b0c5ae79b44121d10c06a4d953646021feb96f7c97"
+      },
+      "tracks": {
+        "construction": "cross_view_reciprocal_soft_overlap_tracks_v1",
+        "minimum_soft_cosine": 0.5,
+        "candidate_edges": 834,
+        "accepted_edges": 337,
+        "num_tracks": 100,
+        "tracked_proposals": 437,
+        "maximum_track_views": 16,
+        "membership_count": 512530
+      },
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.35296022940982724,
+            "macc": 0.6777883213808161
+          },
+          "candidate": {
+            "miou": 0.35362476437288853,
+            "macc": 0.6784082802829685
+          },
+          "delta": {
+            "miou": 0.0006645349630612918,
+            "macc": 0.0006199589021523844
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 100,
+            "membership_count": 512530,
+            "eligible_rows": 112015,
+            "changed_rows": 333,
+            "mean_mixing": 0.006354986689984798,
+            "maximum_mixing": 0.16668081283569336
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.35396085650274095,
+            "macc": 0.6577862454549604
+          },
+          "candidate": {
+            "miou": 0.35505725186920367,
+            "macc": 0.6584166924220536
+          },
+          "delta": {
+            "miou": 0.0010963953664627213,
+            "macc": 0.0006304469670931345
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 100,
+            "membership_count": 512530,
+            "eligible_rows": 95316,
+            "changed_rows": 263,
+            "mean_mixing": 0.006071152165532112,
+            "maximum_mixing": 0.18996919691562653
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.43270245313738515,
+            "macc": 0.7417074524869207
+          },
+          "candidate": {
+            "miou": 0.433413252645572,
+            "macc": 0.7415846097453832
+          },
+          "delta": {
+            "miou": 0.0007107995081868657,
+            "macc": -0.00012284274153750996
+          },
+          "voting": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 100,
+            "membership_count": 512530,
+            "eligible_rows": 81275,
+            "changed_rows": 313,
+            "mean_mixing": 0.0077171484008431435,
+            "maximum_mixing": 0.17704033851623535
+          }
+        }
+      }
+    }
+  },
+  "macro": {
+    "development": {
+      "19": {
+        "baseline": {
+          "miou": 0.34441250540865453,
+          "macc": 0.7096695413172915
+        },
+        "candidate": {
+          "miou": 0.3456350764606627,
+          "macc": 0.7131723487987898
+        },
+        "delta": {
+          "miou": 0.0012225710520081812,
+          "macc": 0.003502807481498227
+        }
+      },
+      "15": {
+        "baseline": {
+          "miou": 0.32312889733315964,
+          "macc": 0.7252924702094872
+        },
+        "candidate": {
+          "miou": 0.3230360425619122,
+          "macc": 0.7272613530949391
+        },
+        "delta": {
+          "miou": -9.285477124743036e-05,
+          "macc": 0.001968882885451939
+        }
+      },
+      "10": {
+        "baseline": {
+          "miou": 0.35115527219744364,
+          "macc": 0.7999072499006008
+        },
+        "candidate": {
+          "miou": 0.3505370652888498,
+          "macc": 0.7999470106289015
+        },
+        "delta": {
+          "miou": -0.0006182069085938213,
+          "macc": 3.976072830069732e-05
+        }
+      }
+    },
+    "confirmation": {
+      "19": {
+        "baseline": {
+          "miou": 0.3340593104304594,
+          "macc": 0.6589100000592935
+        },
+        "candidate": {
+          "miou": 0.3341512761591688,
+          "macc": 0.6606195201935856
+        },
+        "delta": {
+          "miou": 9.196572870944537e-05,
+          "macc": 0.0017095201342921687
+        }
+      },
+      "15": {
+        "baseline": {
+          "miou": 0.3352045467610881,
+          "macc": 0.6387203399798377
+        },
+        "candidate": {
+          "miou": 0.3355455760797387,
+          "macc": 0.6404566774473447
+        },
+        "delta": {
+          "miou": 0.0003410293186506224,
+          "macc": 0.0017363374675069623
+        }
+      },
+      "10": {
+        "baseline": {
+          "miou": 0.4322702689352858,
+          "macc": 0.7299723216123134
+        },
+        "candidate": {
+          "miou": 0.43234452463254014,
+          "macc": 0.7303827950819174
+        },
+        "delta": {
+          "miou": 7.425569725434875e-05,
+          "macc": 0.0004104734696040684
+        }
+      }
+    }
+  },
+  "decision": {
+    "promotion": false,
+    "reason": "confirmation macro improves all 19/15/10 mIoU and mAcc metrics, but the frozen rule still causes per-scene split10 regressions and therefore fails the no-regression safety gate",
+    "split10_miou_regression_scenes": [
+      "scene0000_00",
+      "scene0062_00",
+      "scene0097_00",
+      "scene0347_00"
+    ],
+    "split10_macc_regression_scenes": [
+      "scene0590_00"
+    ],
+    "stop_rule": "do not add a post-metric class-count fallback or tune overlap/residual thresholds; stop the analytic track-voting branch",
+    "next_bridge": "replace reciprocal mask-overlap tracks by the learned compact object-affinity head while retaining this exact typed-voting interface"
+  }
+}

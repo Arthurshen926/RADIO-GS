@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_fern_matched_ludvig_ladder_audit",
+  "status": "complete_reuse_only_single_scene_attribution",
+  "created_at": "2026-08-21T20:40:00+08:00",
+  "scope": {
+    "benchmark": "NVOS",
+    "scene": "fern",
+    "reference_frame": "IMG_4038",
+    "target_frame": "IMG_4027",
+    "metric": "foreground_iou",
+    "development_only": true,
+    "new_gpu_execution_performed": false,
+    "reason_for_reuse": "Every ladder arm was already sealed and scored on the same NVOS fern reference/target pair; re-execution would add no attribution information."
+  },
+  "input_contract": {
+    "authorized_query": "full reference mask",
+    "target_rgb_for_sam_arms": true,
+    "target_mask_during_prediction": false,
+    "target_mask_only_after_prediction_persistence": true,
+    "same_native_target_metric": true,
+    "same_gaussian_carrier": false,
+    "carrier_warning": "The reproduced LUDVIG scalar field and Universal Field use different Gaussian carriers. This is a same-input/output ladder, not a primitive-row ablation. A faithful carrier attribution requires scalar rendering plus exact image-space adjoint, never nearest-neighbour row transfer."
+  },
+  "arms": [
+    {
+      "name": "method_v1_registered_prompt_field_only",
+      "foreground_iou": 0.5554917144936644,
+      "target_rgb_sam": false,
+      "source": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/full8_20260816/method_v1_nvos_full8_results.json",
+        "sha256": "1ea32f2c981630570d0a439712530f70870727115800f92138aa8ef70c225808"
+      }
+    },
+    {
+      "name": "formal_exact_capability_mpr_same_compiler",
+      "foreground_iou": 0.7568215050785277,
+      "target_rgb_sam": false,
+      "delta_from_previous": 0.2013297905848633,
+      "source": {
+        "path": "/root/RADIO-GS/paper/artifacts/nvos_exact_mpr_compact_same_compiler_ladder_results_20260805.json",
+        "sha256": "853180ffac2c308f64eea1c70b20f72bf35b0133200cb11dd5e3ebbdbdb62446"
+      }
+    },
+    {
+      "name": "method_v1_field_box_sam3",
+      "foreground_iou": 0.8304732612835244,
+      "target_rgb_sam": true,
+      "delta_from_previous": 0.0736517562049967,
+      "source": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_sam3_candidate_20260816/result.json",
+        "sha256": "3b97f997c6a5ad2a7b9ceddfbed6fda93d30f2837d2bf30c9458efbe6e5de71e"
+      }
+    },
+    {
+      "name": "method_v1_independent_box_signed_points_sam3",
+      "foreground_iou": 0.8304732612835244,
+      "target_rgb_sam": true,
+      "delta_from_previous": 0.0,
+      "source": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_signed_points_sam3_candidate_20260816/result.json",
+        "sha256": "a4871a714ae233ae362f9e9caaf09bf063847ba805f2310a4bf802e70e268b12"
+      }
+    },
+    {
+      "name": "method_v1_component_local_identity_filter",
+      "foreground_iou": 0.8297472983940559,
+      "target_rgb_sam": true,
+      "delta_from_previous": -0.0007259628894685,
+      "source": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/component_local_density_dev_20260821/result.json",
+        "sha256": "d1c09126035a4617e5b53e566b529d8b496f8e0c8e6ea630eb6167e47d336f92"
+      }
+    },
+    {
+      "name": "reproduced_ludvig_online_all_view_sam_seed0",
+      "foreground_iou": 0.8447952301482711,
+      "target_rgb_sam": true,
+      "delta_from_method_v1_component_local": 0.0150479317542152,
+      "source": {
+        "path": "/root/RADIO-GS/paper/artifacts/nvos_ludvig_published_compatible_asset_audit_20260804.json",
+        "sha256": "93af6ff74879f306f1f1dfeb6d65e9efe6cf5d208a68f99f7006df7d554a5582"
+      }
+    }
+  ],
+  "attribution": {
+    "field_only_to_exact_capability_delta": 0.2013297905848633,
+    "exact_capability_to_method_v1_sam_delta": 0.0736517562049967,
+    "method_v1_sam_to_ludvig_delta": 0.0143219688647467,
+    "component_filter_delta_on_fern": -0.0007259628894685,
+    "conclusion": "On fern, most recoverable error is removed before or at the first target-RGB SAM extent stage. The remaining LUDVIG gap is only 1.43 IoU points, while independent signed points and component-local filtering add nothing on this scene. The next matched experiment should replace only candidate generation and all-view uplifting/fusion, not tune the component threshold."
+  },
+  "next_exact_ablation": {
+    "operation": "Render each cached LUDVIG scalar field through its native registered cameras, exact-adjoint the scalar observations onto the frozen Method-v1 carrier, and run the same renderer/reference selector.",
+    "nearest_xyz_transfer_forbidden": true,
+    "repeated_sam_call_required": false
+  }
+}

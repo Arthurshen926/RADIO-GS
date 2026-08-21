@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_ludvig_region_reliability_gate_full8_result",
+  "status": "completed_postmetric_development_and_pre_fixed_execution_confirmation",
+  "candidate_id": "nvos-method-v1-ludvig-region-reliability-gate-v1",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_ludvig_region_reliability_gate_preregistration_20260821.json",
+    "sha256": "2233863dc35c9256d4a89b6aa69230989fd4ac835a234149e431e549aac7f1b4"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_nvos_ludvig_region_reliability_gate.py",
+    "sha256": "b16169bfdee54618da252ba11273bed241997ce94a5cdc48347f4431e183d84a"
+  },
+  "rule": {
+    "authorize_region_agreement": "official_sam_selected_score >= 0.5 OR best_initial_overlap < 0.5",
+    "authorized_output": "method_v1_foreground AND ludvig_seed0_fixed_threshold_foreground",
+    "otherwise": "unchanged_method_v1_foreground",
+    "thresholds_selected_from_target_metric": false,
+    "scene_specific_parameter": false,
+    "target_mask_or_metric_used_for_prediction": false,
+    "nearest_neighbor_carrier_transfer": false,
+    "carrier_modified": false
+  },
+  "sealed_prediction_batches": {
+    "development": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_region_reliability_gate_v1_dev/prediction_manifest.json",
+      "sha256": "e206367a4f1b7e3223b6e4c7b3a712b9b9bd3dfda552fd370f1ef72634a7297b"
+    },
+    "pre_fixed_execution_confirmation_after_prior_outcome_exposure": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_region_reliability_gate_v1_confirm/prediction_manifest.json",
+      "sha256": "a6c262cedf353454e940cab73563850ea4771629c1959288137a472cfb59230c"
+    },
+    "full8": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_region_reliability_gate_v1_full8/prediction_manifest.json",
+      "sha256": "3d0fe7c589c6eb4c762bb85c76bb2210733b3900f8ed04c70f544c08ef5512ea"
+    }
+  },
+  "development_gate": {
+    "passed": true,
+    "horns_left": {
+      "branch": "foreground_intersection",
+      "baseline_foreground_iou": 0.6898833651238061,
+      "candidate_foreground_iou": 0.9522206162761503,
+      "delta": 0.2623372511523442
+    },
+    "orchids": {
+      "branch": "method_v1_unchanged",
+      "baseline_foreground_iou": 0.8774377080309890,
+      "candidate_foreground_iou": 0.8774377080309890,
+      "delta": 0.0
+    }
+  },
+  "pre_fixed_execution_confirmation": {
+    "passed": true,
+    "outcome_blind": false,
+    "prior_fixed_intersection_outcomes_already_exposed": true,
+    "flower": {
+      "branch": "foreground_intersection",
+      "baseline_foreground_iou": 0.9680178415225879,
+      "candidate_foreground_iou": 0.9736872468243960,
+      "delta": 0.0056694053018082
+    },
+    "leaves": {
+      "branch": "foreground_intersection",
+      "baseline_foreground_iou": 0.6386020952997714,
+      "candidate_foreground_iou": 0.9237238417265594,
+      "delta": 0.2851217464267880
+    }
+  },
+  "full8": {
+    "baseline_method_v1_macro_foreground_iou": 0.8176167633576760,
+    "candidate_macro_foreground_iou": 0.9223273413026870,
+    "delta_macro_foreground_iou": 0.1047105779450110,
+    "ludvig_three_seed_context_macro_foreground_iou": 0.9125768502741802,
+    "per_scene": {
+      "fern": {"branch": "method_v1_unchanged", "baseline": 0.8304732612835244, "candidate": 0.8304732612835244, "delta": 0.0},
+      "flower": {"branch": "foreground_intersection", "baseline": 0.9680178415225879, "candidate": 0.9736872468243960, "delta": 0.0056694053018082},
+      "fortress": {"branch": "method_v1_unchanged", "baseline": 0.9754431952966958, "candidate": 0.9754431952966958, "delta": 0.0},
+      "horns_center": {"branch": "foreground_intersection", "baseline": 0.6968090986196901, "candidate": 0.9730603832109586, "delta": 0.2762512845912685},
+      "horns_left": {"branch": "foreground_intersection", "baseline": 0.6898833651238061, "candidate": 0.9522206162761503, "delta": 0.2623372511523442},
+      "leaves": {"branch": "foreground_intersection", "baseline": 0.6386020952997714, "candidate": 0.9237238417265594, "delta": 0.2851217464267880},
+      "orchids": {"branch": "method_v1_unchanged", "baseline": 0.8774377080309890, "candidate": 0.8774377080309890, "delta": 0.0},
+      "trex": {"branch": "foreground_intersection", "baseline": 0.8642675416843430, "candidate": 0.8725724777722230, "delta": 0.0083049360878800}
+    },
+    "minimum_scene_delta": 0.0,
+    "scenes_improved": 5,
+    "scenes_unchanged": 3,
+    "scenes_regressed": 0
+  },
+  "conclusion": {
+    "core_problem_touched": "Independent region/instance authority resolves the identity-versus-extent ambiguity that remained after compact field reconstruction.",
+    "reliability_result": "Proposal quality plus field/proposal majority consistency prevents the destructive orchids sidecar branch while retaining the large horns/leaves gains.",
+    "remaining_method_gap": "The present bridge operates on cached target-image selectors. A carrier-native typed posterior still requires native scalar rendering in registered views followed by normalized exact image-space adjoint onto current primitives."
+  },
+  "eligibility": {
+    "development_use_only": true,
+    "postmetric": true,
+    "outcome_blind_confirmation": false,
+    "prior_fixed_intersection_outcomes_already_exposed": true,
+    "target_rgb_assisted": true,
+    "strict_unseen_eligible": false,
+    "paper_result": false,
+    "sota_claim_supported": false
+  }
+}

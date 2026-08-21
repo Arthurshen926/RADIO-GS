@@ -1,0 +1,46 @@
+{
+  "schema": "radio_gs.lerf_source_conservative_gaussian_core_pareto_result.v1",
+  "schema_version": 1,
+  "date": "2026-08-21",
+  "status": "source_coverage_gate_fail_no_benchmark_authorized",
+  "figurines_opened": false,
+  "method": {
+    "identity": "nested-calibrated source-only soft physical-track probability",
+    "gaussian_support": "exact-MPR membership at probability at least 0.5",
+    "support_confidence": "Wilson 95 percent lower confidence bound of shared Gaussian support normalized by the smaller proposal support",
+    "reciprocal_endpoint": "per-target-view reciprocal best plus minimum of association probability and Gaussian-support LCB",
+    "strict_endpoint": "complete reciprocal triangle spanning three source views plus the minimum association and Gaussian-support LCB across all three edges",
+    "unknown": "unidirectional pair, partial boundary shell, single-view support, incomplete triangle, or zero shared Gaussian support"
+  },
+  "heldout_source_results": {
+    "ramen": {
+      "soft_at_0p5": {"purity": 0.5172413793103449, "positive_coverage": 0.8823529411764706},
+      "reciprocal_positive_support": {"purity": 1.0, "positive_coverage": 0.5294117647058824},
+      "strict_triangle_positive_support": {"purity": 1.0, "positive_coverage": 0.5294117647058824},
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_conservative_gaussian_core/ramen_pareto_v2.pt",
+      "sha256": "9eb0915b3f19a166c9abd9df2c3c408bcc4294f9652a0a6168c9d76f24ca54f1"
+    },
+    "teatime": {
+      "soft_at_0p5": {"purity": 0.5555555555555556, "positive_coverage": 1.0},
+      "reciprocal_positive_support": {"purity": 1.0, "positive_coverage": 0.5333333333333333},
+      "strict_triangle_positive_support": {"purity": 1.0, "positive_coverage": 0.4666666666666667},
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_conservative_gaussian_core/teatime_pareto_v2.pt",
+      "sha256": "e2ce171646d69f773ac1e55a6d7ec94e6b7af83cc53e5e9edc732d0f62ee8d4a"
+    },
+    "waldo_kitchen": {
+      "soft_at_0p5": {"purity": 1.0, "positive_coverage": 0.2},
+      "reciprocal_positive_support": {"purity": 0.0, "positive_coverage": 0.0},
+      "strict_triangle_positive_support": {"purity": 0.0, "positive_coverage": 0.0},
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_conservative_gaussian_core/waldo_kitchen_pareto_v2.pt",
+      "sha256": "71cb56bc3205c34c3f78c9ad6cfb9105c2468c746854f599429dfefc55ca79d6"
+    }
+  },
+  "gate": {
+    "purity_requirement": "material improvement over soft association on source-heldout edges",
+    "coverage_requirement": "nonzero coverage in every source scene and no scene-level collapse",
+    "purity_result": "pass on ramen and teatime",
+    "coverage_result": "fail: waldo_kitchen collapses to zero for both reciprocal and strict endpoints",
+    "decision": "reject current conservative core; do not build a figurines posterior and do not request another benchmark pilot"
+  },
+  "conclusion": "The conservative core removes every observed false positive on ramen and teatime, so mutual Gaussian support is a valid precision signal. It is not a deployable authority because Waldo has no heldout DINO-positive edge that is simultaneously reciprocal and shares thresholded exact-MPR Gaussian support. The next prerequisite is denser source proposal coverage or correspondence-lifted probabilistic Gaussian support that preserves uncertainty; relaxing reciprocal or visibility evidence after this result would merely trade the diagnosed purity problem back for coverage and is not justified."
+}

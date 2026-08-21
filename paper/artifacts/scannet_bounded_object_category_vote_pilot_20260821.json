@@ -1,0 +1,455 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_bounded_object_category_vote_pilot",
+  "status": "development_and_frozen_confirmation_complete",
+  "method": {
+    "category_authority": "primitive_RADIO_logits_only",
+    "object_authority": "official_source_SAM_exact_MPR_membership",
+    "thing_stuff_policy": "NYU40 wall_floor_ceiling primitive fallback",
+    "lambda": "0.25 * reliable_coverage * object_margin * exp(-primitive_margin)",
+    "per_class_parameters": false,
+    "class_permutation_equivariant_with_roles": true,
+    "proposal_permutation_equivariant": true,
+    "zero_strength_bitwise_replay": true,
+    "target_threshold_search": false,
+    "unknown_background_branch": false
+  },
+  "development_scene": [
+    "scene0000_00"
+  ],
+  "confirmation_scenes": [
+    "scene0062_00",
+    "scene0070_00",
+    "scene0097_00"
+  ],
+  "scene_results": {
+    "scene0000_00": {
+      "cache_sha256": "165b8b8a76ba514ac69b26d8940f415b0b3f3212dbf754a8d6b7c80593da1bb7",
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.344412514972523,
+            "macc": 0.7096695420630795
+          },
+          "candidate": {
+            "miou": 0.34633343886517476,
+            "macc": 0.7132289650888015
+          },
+          "delta": {
+            "miou": 0.0019209238926517491,
+            "macc": 0.003559423025721986
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 777,
+            "membership_count": 402213,
+            "eligible_rows": 38309,
+            "changed_rows": 391,
+            "mean_mixing": 0.010506129823625088,
+            "maximum_mixing": 0.17320694029331207
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.3231288953748252,
+            "macc": 0.7252924681576804
+          },
+          "candidate": {
+            "miou": 0.3237718431337307,
+            "macc": 0.7272984402270398
+          },
+          "delta": {
+            "miou": 0.0006429477589054988,
+            "macc": 0.002005972069359374
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 777,
+            "membership_count": 402213,
+            "eligible_rows": 36157,
+            "changed_rows": 299,
+            "mean_mixing": 0.009988435544073582,
+            "maximum_mixing": 0.17288285493850708
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.3511552771875167,
+            "macc": 0.7999072412524935
+          },
+          "candidate": {
+            "miou": 0.3503105438856172,
+            "macc": 0.7999959811369726
+          },
+          "delta": {
+            "miou": -0.0008447333018994918,
+            "macc": 8.873988447910541e-05
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 777,
+            "membership_count": 402213,
+            "eligible_rows": 30977,
+            "changed_rows": 198,
+            "mean_mixing": 0.009121152572333813,
+            "maximum_mixing": 0.15544064342975616
+          }
+        }
+      }
+    },
+    "scene0062_00": {
+      "cache_sha256": "35b5adf6128485025d45262bb587291c3e395c19d9d03e75a27124eddd00a49e",
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.2788680758223143,
+            "macc": 0.6814477032077529
+          },
+          "candidate": {
+            "miou": 0.27959111484705573,
+            "macc": 0.6909751747783403
+          },
+          "delta": {
+            "miou": 0.000723039024741412,
+            "macc": 0.00952747157058731
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 143,
+            "membership_count": 140038,
+            "eligible_rows": 26383,
+            "changed_rows": 115,
+            "mean_mixing": 0.012801465578377247,
+            "maximum_mixing": 0.17284554243087769
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.27820543960092803,
+            "macc": 0.6825191753195772
+          },
+          "candidate": {
+            "miou": 0.279175868107177,
+            "macc": 0.6920453433194109
+          },
+          "delta": {
+            "miou": 0.0009704285062489548,
+            "macc": 0.009526167999833746
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 143,
+            "membership_count": 140038,
+            "eligible_rows": 26359,
+            "changed_rows": 106,
+            "mean_mixing": 0.012428726069629192,
+            "maximum_mixing": 0.16272194683551788
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.36375232699067706,
+            "macc": 0.6709930932413302
+          },
+          "candidate": {
+            "miou": 0.36334639919388845,
+            "macc": 0.6724839284684316
+          },
+          "delta": {
+            "miou": -0.0004059277967886077,
+            "macc": 0.0014908352271014724
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 143,
+            "membership_count": 140038,
+            "eligible_rows": 25069,
+            "changed_rows": 91,
+            "mean_mixing": 0.015221552923321724,
+            "maximum_mixing": 0.16688965260982513
+          }
+        }
+      }
+    },
+    "scene0070_00": {
+      "cache_sha256": "45777109bdafa97e58fe7a5d938eea7be1a9bfe286148b006f7d1deb80d98c02",
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.28825407097164146,
+            "macc": 0.495464852749656
+          },
+          "candidate": {
+            "miou": 0.2880253596983793,
+            "macc": 0.4949383246527563
+          },
+          "delta": {
+            "miou": -0.0002287112732621832,
+            "macc": -0.0005265280968997366
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 222,
+            "membership_count": 285228,
+            "eligible_rows": 49009,
+            "changed_rows": 140,
+            "mean_mixing": 0.008200318552553654,
+            "maximum_mixing": 0.1402236372232437
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.3054103238317792,
+            "macc": 0.4485655052711388
+          },
+          "candidate": {
+            "miou": 0.30583830794939054,
+            "macc": 0.4478860995570178
+          },
+          "delta": {
+            "miou": 0.00042798411761135746,
+            "macc": -0.0006794057141210064
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 222,
+            "membership_count": 285228,
+            "eligible_rows": 48525,
+            "changed_rows": 147,
+            "mean_mixing": 0.008593890815973282,
+            "maximum_mixing": 0.14319802820682526
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.32356976142444827,
+            "macc": 0.6980924368082628
+          },
+          "candidate": {
+            "miou": 0.32351106131875923,
+            "macc": 0.6978211901436366
+          },
+          "delta": {
+            "miou": -5.870010568903572e-05,
+            "macc": -0.0002712466646261902
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 222,
+            "membership_count": 285228,
+            "eligible_rows": 42915,
+            "changed_rows": 179,
+            "mean_mixing": 0.008158134296536446,
+            "maximum_mixing": 0.17816153168678284
+          }
+        }
+      }
+    },
+    "scene0097_00": {
+      "cache_sha256": "15a90659b62a304295e50bf3953ba504162e5c506d948bdc7b625e0c87de9668",
+      "splits": {
+        "19": {
+          "baseline": {
+            "miou": 0.31037779235922935,
+            "macc": 0.7275121668415501
+          },
+          "candidate": {
+            "miou": 0.31039341208268023,
+            "macc": 0.7277533580948127
+          },
+          "delta": {
+            "miou": 1.5619723450877032e-05,
+            "macc": 0.00024119125326260704
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 327,
+            "membership_count": 525960,
+            "eligible_rows": 31140,
+            "changed_rows": 210,
+            "mean_mixing": 0.00973290205001831,
+            "maximum_mixing": 0.182188481092453
+          }
+        },
+        "15": {
+          "baseline": {
+            "miou": 0.2935529503134053,
+            "macc": 0.7060828919868901
+          },
+          "candidate": {
+            "miou": 0.2937280509238894,
+            "macc": 0.7061632534103529
+          },
+          "delta": {
+            "miou": 0.00017510061048414682,
+            "macc": 8.036142346279362e-05
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 327,
+            "membership_count": 525960,
+            "eligible_rows": 28465,
+            "changed_rows": 89,
+            "mean_mixing": 0.007476514670997858,
+            "maximum_mixing": 0.17994745075702667
+          }
+        },
+        "10": {
+          "baseline": {
+            "miou": 0.46516886076321856,
+            "macc": 0.6922279404444768
+          },
+          "candidate": {
+            "miou": 0.465076311054836,
+            "macc": 0.6922294797848697
+          },
+          "delta": {
+            "miou": -9.254970838257215e-05,
+            "macc": 1.5393403929309102e-06
+          },
+          "operator": {
+            "construction": "bounded_thing_object_vote_v1",
+            "enabled": true,
+            "strength": 1.0,
+            "residual_budget": 0.25,
+            "proposal_count": 327,
+            "membership_count": 525960,
+            "eligible_rows": 19764,
+            "changed_rows": 47,
+            "mean_mixing": 0.006372631527483463,
+            "maximum_mixing": 0.16165286302566528
+          }
+        }
+      }
+    }
+  },
+  "macro": {
+    "development": {
+      "19": {
+        "baseline": {
+          "miou": 0.344412514972523,
+          "macc": 0.7096695420630795
+        },
+        "candidate": {
+          "miou": 0.34633343886517476,
+          "macc": 0.7132289650888015
+        },
+        "delta": {
+          "miou": 0.0019209238926517491,
+          "macc": 0.003559423025721986
+        }
+      },
+      "15": {
+        "baseline": {
+          "miou": 0.3231288953748252,
+          "macc": 0.7252924681576804
+        },
+        "candidate": {
+          "miou": 0.3237718431337307,
+          "macc": 0.7272984402270398
+        },
+        "delta": {
+          "miou": 0.0006429477589054988,
+          "macc": 0.002005972069359374
+        }
+      },
+      "10": {
+        "baseline": {
+          "miou": 0.3511552771875167,
+          "macc": 0.7999072412524935
+        },
+        "candidate": {
+          "miou": 0.3503105438856172,
+          "macc": 0.7999959811369726
+        },
+        "delta": {
+          "miou": -0.0008447333018994918,
+          "macc": 8.873988447910541e-05
+        }
+      }
+    },
+    "confirmation": {
+      "19": {
+        "baseline": {
+          "miou": 0.2924999797177284,
+          "macc": 0.6348082409329864
+        },
+        "candidate": {
+          "miou": 0.29266996220937175,
+          "macc": 0.6378889525086363
+        },
+        "delta": {
+          "miou": 0.00016998249164336862,
+          "macc": 0.00308071157565006
+        }
+      },
+      "15": {
+        "baseline": {
+          "miou": 0.2923895712487042,
+          "macc": 0.6123891908592021
+        },
+        "candidate": {
+          "miou": 0.2929140756601523,
+          "macc": 0.6153648987622605
+        },
+        "delta": {
+          "miou": 0.0005245044114481531,
+          "macc": 0.002975707903058511
+        }
+      },
+      "10": {
+        "baseline": {
+          "miou": 0.38416364972611466,
+          "macc": 0.6871044901646899
+        },
+        "candidate": {
+          "miou": 0.38397792385582785,
+          "macc": 0.6875115327989794
+        },
+        "delta": {
+          "miou": -0.0001857258702867385,
+          "macc": 0.0004070426342894044
+        }
+      }
+    }
+  },
+  "decision": {
+    "promotion": false,
+    "reason": "frozen confirmation improves 19/15 mIoU and all-split mAcc but consistently regresses split10 mIoU",
+    "mechanism_supported": "object-level voting can denoise primitive thing labels when the category inventory is sufficiently complete",
+    "remaining_limit": "source-view masks are not stable cross-view object tracks; subset category competition can change the object winner"
+  }
+}

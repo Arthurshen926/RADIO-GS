@@ -1,5 +1,10 @@
 # Universal Field v1 with typed instance-aware readouts
 
+The source-SAM-distilled structural upgrade is specified separately as the
+opt-in [Object-Aware Universal Field v2 candidate](object-aware-universal-field-v2.md).
+V1 remains the frozen baseline until that field-frozen pilot passes its full
+promotion gate.
+
 ## Method boundary
 
 Every Gaussian stores one query-independent D512/L512 Canonical Capability

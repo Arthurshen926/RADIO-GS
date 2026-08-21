@@ -16,8 +16,11 @@ import fcntl
 import gc
 import hashlib
 import json
+import os
 from pathlib import Path
 import resource
+import shutil
+import tempfile
 
 from PIL import Image
 import torch
@@ -302,6 +305,35 @@ def _telemetry_peak_temperature(path: str | None) -> int | None:
     return max(temperatures) if temperatures else None
 
 
+def _commit_local_artifact(
+    local_path: Path, remote_path: Path, *, overwrite: bool
+) -> None:
+    """Sequentially commit a locally hashed artifact without re-reading NFS."""
+
+    remote_path.parent.mkdir(parents=True, exist_ok=True)
+    if remote_path.exists() and not overwrite:
+        raise FileExistsError(remote_path)
+    descriptor, name = tempfile.mkstemp(
+        prefix=f".{remote_path.name}.", suffix=".tmp", dir=remote_path.parent
+    )
+    os.close(descriptor)
+    temporary = Path(name)
+    try:
+        with local_path.open("rb") as source, temporary.open("wb") as target:
+            shutil.copyfileobj(source, target, length=16 * 1024 * 1024)
+            target.flush()
+            os.fsync(target.fileno())
+        if temporary.stat().st_size != local_path.stat().st_size:
+            raise IOError("remote responsibility copy size differs from local artifact")
+        if overwrite:
+            os.replace(temporary, remote_path)
+        else:
+            os.link(temporary, remote_path)
+            temporary.unlink()
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 @torch.inference_mode()
 def export(args: argparse.Namespace) -> dict[str, object]:
     device = torch.device(args.device)
@@ -323,6 +355,20 @@ def export(args: argparse.Namespace) -> dict[str, object]:
     for path in (config_path, checkpoint_path, camera_map_path):
         if not path.is_file():
             raise FileNotFoundError(path)
+    checkpoint_load_path = checkpoint_path
+    if args.geometry_checkpoint_local_copy:
+        checkpoint_load_path = Path(args.geometry_checkpoint_local_copy).resolve()
+        if not checkpoint_load_path.is_file():
+            raise FileNotFoundError(checkpoint_load_path)
+        expected_checkpoint_sha256 = str(
+            args.expected_geometry_checkpoint_sha256 or ""
+        )
+        if (
+            len(expected_checkpoint_sha256) != 64
+            or sha256_file(checkpoint_load_path) != expected_checkpoint_sha256
+            or checkpoint_load_path.stat().st_size != checkpoint_path.stat().st_size
+        ):
+            raise ValueError("local geometry checkpoint copy differs from authority")
 
     prompt_authority = _native_prompt_header_authority(
         scene,
@@ -353,7 +399,7 @@ def export(args: argparse.Namespace) -> dict[str, object]:
     model, _codec, renderer, _sharpener, refiner, _field_config, _is_hybrid = (
         load_render_pipeline(
             str(config_path),
-            str(checkpoint_path),
+            str(checkpoint_load_path),
             device,
             strict_checkpoint_contract=True,
             load_ply_rgb_features=False,
@@ -398,6 +444,12 @@ def export(args: argparse.Namespace) -> dict[str, object]:
         "geometry_checkpoint": sha256_file(checkpoint_path),
         **prompt_source_sha256,
     }
+    if (
+        args.geometry_checkpoint_local_copy
+        and source_sha256["geometry_checkpoint"]
+        != str(args.expected_geometry_checkpoint_sha256)
+    ):
+        raise ValueError("geometry checkpoint authority changed after local staging")
     authority = PromptResponsibilityAuthority(
         scene_id=str(args.scene_id),
         frame_id=prompt_frame,
@@ -428,9 +480,27 @@ def export(args: argparse.Namespace) -> dict[str, object]:
         )
         del gids, pids, weights, model
         torch.cuda.empty_cache()
-        artifact = save_prompt_responsibility_cache(
-            cache, args.output, overwrite=bool(args.overwrite)
-        )
+        if args.local_artifact_staging_dir:
+            staging_root = Path(args.local_artifact_staging_dir).resolve(strict=True)
+            if not staging_root.is_dir():
+                raise NotADirectoryError(staging_root)
+            with tempfile.TemporaryDirectory(
+                prefix=f"nvos_exact_w_{args.scene_id}_", dir=staging_root
+            ) as staging_name:
+                local_artifact = Path(staging_name) / "responsibility.pt"
+                artifact = save_prompt_responsibility_cache(cache, local_artifact)
+                remote_artifact = Path(args.output).expanduser().absolute()
+                _commit_local_artifact(
+                    local_artifact, remote_artifact, overwrite=bool(args.overwrite)
+                )
+                artifact_path = str(remote_artifact)
+                artifact_file_sha256 = artifact.file_sha256
+        else:
+            artifact = save_prompt_responsibility_cache(
+                cache, args.output, overwrite=bool(args.overwrite)
+            )
+            artifact_path = artifact.path
+            artifact_file_sha256 = artifact.file_sha256
         tensor_digests = dict(cache.tensor_sha256)
         triplet_count = int(cache.weights.numel())
         visible_gaussians = int((cache.visible_mass > 0).sum())
@@ -438,8 +508,8 @@ def export(args: argparse.Namespace) -> dict[str, object]:
         del cache
         gc.collect()
     report = {
-        "artifact_path": artifact.path,
-        "file_sha256": artifact.file_sha256,
+        "artifact_path": artifact_path,
+        "file_sha256": artifact_file_sha256,
         "authority": authority.to_dict(),
         "authority_sha256": artifact.authority_sha256,
         "tensor_sha256": tensor_digests,
@@ -458,6 +528,10 @@ def export(args: argparse.Namespace) -> dict[str, object]:
             args.telemetry_log
         ),
         "process_peak_rss_kib": int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss),
+        "geometry_checkpoint_loaded_from_verified_local_copy": bool(
+            args.geometry_checkpoint_local_copy
+        ),
+        "artifact_hashed_before_remote_commit": bool(args.local_artifact_staging_dir),
     }
     if prompt_authority.prompt_type == "reference_binary_mask":
         report["reference_mask_header_authority"] = _reference_mask_report_metadata(
@@ -478,6 +552,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", required=True)
     parser.add_argument("--report")
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--geometry-checkpoint-local-copy")
+    parser.add_argument("--expected-geometry-checkpoint-sha256")
+    parser.add_argument("--local-artifact-staging-dir")
     parser.add_argument(
         "--cpu-staging-lock",
         help="optional flock path serializing native CPU triplets across exporters",

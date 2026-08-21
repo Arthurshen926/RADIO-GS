@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_source_multiview_object_tracks_authority",
+  "status": "paper8_score_and_frozen_track_evaluation_complete_branch_stopped",
+  "method_authority": {
+    "association_inputs": [
+      "official source-view SAM masks",
+      "exact-MPR Gaussian membership weights",
+      "source view identifiers"
+    ],
+    "forbidden_inputs": [
+      "primitive category logits",
+      "GT categories or instances",
+      "benchmark masks",
+      "target metrics",
+      "scene-specific thresholds"
+    ],
+    "association_rule": "For every pair of source views, connect reciprocal-best proposal pairs whose soft membership cosine is at least 0.5. Consume edges strongest-first while requiring disjoint source-view sets, so a track contains at most one proposal observation per view.",
+    "threshold_authority": "0.5 is the preregistered majority-overlap identity boundary inherited from exact-MPR membership; it was not selected using ScanNet labels or metrics.",
+    "singleton_policy": "A proposal without independent source-view confirmation remains untracked and cannot drive object voting.",
+    "track_membership": "clipped sum/union of source proposal memberships",
+    "typed_readout": "primitive RADIO logits plus bounded thing-only object-track vote; wall/floor/ceiling and low-confidence rows retain primitive fallback",
+    "class_permutation_equivariant_with_roles": true,
+    "proposal_permutation_equivariant": true,
+    "persistent_second_semantic_field": false,
+    "future_object_affinity_compatibility": "The typed voter consumes only sparse Gaussian-track membership, so a learned compact object-affinity head can replace this analytic bridge without changing category logic."
+  },
+  "assets": {
+    "membership_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_instance_v1",
+    "score_cache_roots": [
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/scannet_official_sam_dev4_score_cache_v1",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/scannet_object_tracks_paper8_score_cache_v1"
+    ],
+    "camera_asset_audit": "Raw dataset camera/RGB roots referenced by historical configs are not mounted at dataset/scannet_og on this host. This does not block the bridge because each completed exact-MPR membership bundle is already camera/geometry registered and stores source view IDs. Reprojection or new mask extraction would require remounting the raw dataset.",
+    "scenes": {
+      "scene0000_00": {"rows": 81369, "proposals": 777, "memberships": 402213, "source_views": 120, "membership_sha256": "1753d2cc4bd5bce4a7ceb7bacfb3ba89910ce16809d5d5c971b5ce1e120dff03", "raw_score_cache": true},
+      "scene0062_00": {"rows": 51610, "proposals": 143, "memberships": 140038, "source_views": 33, "membership_sha256": "b7e5e38817a78e5895bbfc94d9e750f4423c00b694d576ac26b5a784364aa7d7", "raw_score_cache": true},
+      "scene0070_00": {"rows": 109380, "proposals": 222, "memberships": 285228, "source_views": 63, "membership_sha256": "cfbd261542b3ba5335db5701bb645a5ad45473ba4805f8c779436dbe19831e54", "raw_score_cache": true},
+      "scene0097_00": {"rows": 72007, "proposals": 327, "memberships": 525960, "source_views": 34, "membership_sha256": "aa6294bb855592f205985e107b9da0cfe14bca907f03b320907e8d87835eced8", "raw_score_cache": true},
+      "scene0140_00": {"rows": 372941, "proposals": 996, "memberships": 3127584, "source_views": 120, "membership_sha256": "90f8be82c2c32d4c39dd2542f684edfd3068bed966a0f91aff7f266f22692242", "raw_score_cache": true},
+      "scene0347_00": {"rows": 67984, "proposals": 359, "memberships": 496767, "source_views": 50, "membership_sha256": "2e2ae87e2ca29587eff2d35fd6d11ec7f54568aa181f80e473eef8bf73d40be1", "raw_score_cache": true},
+      "scene0400_00": {"rows": 155959, "proposals": 403, "memberships": 1270871, "source_views": 57, "membership_sha256": "225f9284cc9a14bdd8196bac17906730d16e867bc99826ed3499373f82c861e2", "raw_score_cache": true},
+      "scene0590_00": {"rows": 222957, "proposals": 692, "memberships": 1997142, "source_views": 120, "membership_sha256": "3759c17b7ff179d854c9b08d80058163d5e57474740b7e0ac7404b7914e8850c", "raw_score_cache": true}
+    }
+  },
+  "evaluation_partition": {
+    "development": ["scene0000_00"],
+    "confirmation": ["scene0062_00", "scene0070_00", "scene0097_00", "scene0140_00", "scene0347_00", "scene0400_00", "scene0590_00"],
+    "unopened": []
+  },
+  "pilot_result": {
+    "path": "paper/artifacts/scannet_source_multiview_object_tracks_paper8_20260821.json",
+    "development_delta_miou_19_15_10": [0.0012225711, -0.0000928548, -0.0006182069],
+    "development_delta_macc_19_15_10": [0.0035028075, 0.0019688829, 0.0000397607],
+    "confirmation_macro_delta_miou_19_15_10": [0.0000919657, 0.0003410293, 0.0000742557],
+    "confirmation_macro_delta_macc_19_15_10": [0.0017095201, 0.0017363375, 0.0004104735],
+    "split10_miou_regression_scenes": ["scene0000_00", "scene0062_00", "scene0097_00", "scene0347_00"],
+    "split10_macc_regression_scenes": ["scene0590_00"],
+    "promotion": false,
+    "reason": "All seven-scene confirmation macro metrics are positive, but the frozen rule fails the per-scene split10 no-regression safety gate."
+  },
+  "shortest_full8_bridge": {
+    "required_work": "complete",
+    "completed": true,
+    "new_sam_or_mpr_build_required": false,
+    "new_field_training_required": false,
+    "execution": "The remaining four raw score banks were materialized and the unchanged CPU track compiler/voter was evaluated on all paper8 scenes."
+  },
+  "decision": "Stop the analytic track-voting branch without post-metric class-count fallback or threshold retuning. Retain it only as the typed interface test and evidence for a learned source-only compact object-affinity head."
+}

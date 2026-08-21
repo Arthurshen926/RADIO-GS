@@ -54,6 +54,53 @@ def test_offloaded_optimizer_reuses_gradient_buffer() -> None:
     assert parameter.grad is None
 
 
+def test_sparse_row_offloaded_adamw_matches_dense_update() -> None:
+    initial = torch.linspace(-0.8, 0.9, 18, dtype=torch.float64).reshape(6, 3)
+    reference_parameter = torch.nn.Parameter(initial.clone())
+    sparse_parameter = torch.nn.Parameter(initial.clone())
+    kwargs = {
+        "lr": 0.002,
+        "betas": (0.9, 0.999),
+        "eps": 1e-8,
+        "weight_decay": 1e-5,
+        "foreach": False,
+    }
+    reference = torch.optim.AdamW([reference_parameter], **kwargs)
+    sparse = torch.optim.AdamW([sparse_parameter], **kwargs)
+
+    for rows in ([1, 4], [0, 4, 5]):
+        dense_gradient = torch.zeros_like(initial)
+        values = torch.arange(
+            1, len(rows) * initial.shape[1] + 1, dtype=initial.dtype
+        ).reshape(len(rows), initial.shape[1]) / 10.0
+        dense_gradient[rows] = values
+        reference_parameter.grad = dense_gradient
+        sparse_parameter.grad = torch.sparse_coo_tensor(
+            torch.tensor([rows]), values, size=initial.shape
+        )
+        reference.step()
+        trainer._offloaded_adamw_step(sparse, chunk_elements=6)
+
+    assert torch.equal(sparse_parameter, reference_parameter)
+    for name in ("step", "exp_avg", "exp_avg_sq"):
+        assert torch.equal(
+            sparse.state[sparse_parameter][name],
+            reference.state[reference_parameter][name],
+        )
+
+
+def test_sparse_gradient_buffer_is_released_between_batches() -> None:
+    parameter = torch.nn.Parameter(torch.ones(6, 3))
+    optimizer = torch.optim.AdamW([parameter], lr=0.01)
+    parameter.grad = torch.sparse_coo_tensor(
+        torch.tensor([[2]]), torch.ones(1, 3), size=parameter.shape
+    )
+
+    trainer._zero_optimizer_gradients(optimizer, preserve_buffers=True)
+
+    assert parameter.grad is None
+
+
 def test_chunked_offloaded_adamw_rejects_invalid_chunk_size() -> None:
     parameter = torch.nn.Parameter(torch.ones(2))
     optimizer = torch.optim.AdamW([parameter], lr=0.01)

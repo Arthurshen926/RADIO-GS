@@ -491,8 +491,14 @@ def validate_primitive_posterior_cache(
         raise ValueError("Primitive posterior query order mismatch")
     if metadata.get("query_family") != "text_object_extent":
         raise ValueError("primitive_posterior requires text_object_extent query family")
-    if not str(metadata.get("typed_posterior", "")).startswith(
-        "official_sam3_siglip2_identity_extent_factorization_"
+    typed_posterior = str(metadata.get("typed_posterior", ""))
+    if not (
+        typed_posterior.startswith(
+            "official_sam3_siglip2_identity_extent_factorization_"
+        )
+        or typed_posterior.startswith(
+            "object_aware_universal_field_v2_text_object_posterior_"
+        )
     ):
         raise ValueError("primitive_posterior method identity differs")
     if metadata.get("persistent_second_semantic_field") is not False:

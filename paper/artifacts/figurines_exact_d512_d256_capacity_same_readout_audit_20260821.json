@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_figurines_exact_d512_d256_capacity_same_readout_audit",
+  "status": "two_matched_edges_complete_full_three_arm_triangle_not_available",
+  "scene": "figurines",
+  "question": "Does compact RADIO capacity, rather than typed object readout, explain the remaining LERF gap?",
+  "gpu_execution": {
+    "performed": false,
+    "reason": "All required evidence was already materialized. GPU4 had 17148/24564 MiB allocated and 86 percent utilization; a new long field build was neither needed nor safe."
+  },
+  "matched_benchmark_edge": {
+    "arms": [
+      "historical D256/L128 compact field",
+      "full-1280 exact MPR teacher"
+    ],
+    "same_contract": {
+      "query_count": 21,
+      "gaussian_rows": 168791,
+      "registered_rows_each_arm": 82603,
+      "scale_ids": ["0.25", "0.45", "0.7"],
+      "text_mapping": "sigmoid(10 * (positive_cosine - max_four_canonical_negative_cosines))",
+      "readout": "unchanged VALA kNN10, raw-smoothed-peak scale selection, per-level min-max, fixed 0.6 threshold, selected-only-alpha projection",
+      "evaluation": "OpenGaussian-style LERF direct 3D primitive selection on the same four official Figurines frames"
+    },
+    "compact_query_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_query_scores_v2/figurines.pt",
+      "sha256": "3366c96839fe392d6cc1f6d55939691787e095491581c63006f74e44862d4cac",
+      "bytes": 23468195
+    },
+    "exact_query_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/lerf_full_teacher_capacity_v1/query_scores/figurines_full_mpr_teacher.pt",
+      "sha256": "34e11ac5622cb53584abdaa2f05d82649325c82c825e7deb9291b1556c59037d",
+      "bytes": 23468195
+    },
+    "metrics": {
+      "d256_l128_miou": 0.4753371775,
+      "exact_mpr_1280_miou": 0.4800066352,
+      "exact_minus_d256_miou": 0.0046694577,
+      "d256_l128_acc025": 0.8035714286,
+      "exact_mpr_1280_acc025": 0.8214285714,
+      "d256_l128_acc050": 0.5357142857,
+      "exact_mpr_1280_acc050": 0.5535714286
+    },
+    "source_result": "paper/artifacts/lerf3d_full_mpr_teacher_canonical_negative_results_20260805.json"
+  },
+  "matched_source_capacity_edge": {
+    "arms": ["D256/L128", "D512/L512"],
+    "same_contract": "same source-only top1 lifting cohort, trainable PCA-initialized affine basis, 20 epochs, raw/DINO/SAM gates; benchmark targets unopened",
+    "d256_l128": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/fields/trainable_basis_d256_l128.pth",
+      "sha256": "d9808669bbfb62909274a7285ea81c20a84976b74d8481b36b56e5ec5df196aa",
+      "bytes": 88331963,
+      "valid_rows": 34669,
+      "direction_mean_cosine": 0.9645817876,
+      "direction_p05_cosine": 0.9218639135,
+      "dino_mean_cosine": 0.9812839627,
+      "sam_mean_cosine": 0.9568658471,
+      "all_source_gates_passed": false
+    },
+    "d512_l512": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/fields/trainable_basis_d512_l512.pth",
+      "sha256": "600d1e3e9e8eb430980ce5e8c0159188d9eaa6671fd4e717c447886487fef7db",
+      "bytes": 350182721,
+      "valid_rows": 34669,
+      "direction_mean_cosine": 0.9909697175,
+      "direction_p05_cosine": 0.9808671474,
+      "dino_mean_cosine": 0.9876253605,
+      "sam_mean_cosine": 0.9820842743,
+      "all_source_gates_passed": true
+    },
+    "d512_minus_d256": {
+      "direction_mean_cosine": 0.0263879299,
+      "direction_p05_cosine": 0.0590032339,
+      "dino_mean_cosine": 0.0063413978,
+      "sam_mean_cosine": 0.0252184272,
+      "checkpoint_storage_multiplier": 3.9643938087
+    },
+    "source_result": "paper/artifacts/canonical_factorized_radio_v1_source_only_adaptive_capacity_results_20260805.json"
+  },
+  "missing_matched_edge": {
+    "edge": "D512/L512 versus exact MPR under the same current identity-extent posterior and identical row authority",
+    "available_d512_exact_mpr_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal_visibility_safe_v1.pth",
+      "sha256": "bd203f881105dd864bed01e0a9b919acf69daf5305650e50b8f90c502167c4c7",
+      "bytes": 350185281,
+      "valid_rows": 96879
+    },
+    "available_exact_teacher": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/raw_radio_matched_exact_marginal.pt",
+      "sha256": "9c82f3d33101cb1e088af3cdf021df89130166a4b49e4005378f5d672108fb7c",
+      "bytes": 437009607
+    },
+    "why_not_comparable": [
+      "The current Method-v1 primitive query cache is hash-bound to the 2026-08-15 generic-response D512 field, not either 2026-08-05 arm.",
+      "The materialized old D512 exact-MPR query cache has 96879 valid rows, whereas the existing exact-teacher same-readout cache has 82603 rows.",
+      "The D256/L128 checkpoint is top1-lifted with 34669 valid rows; no D256/L128 checkpoint exists under the exact-marginal visibility-safe 96879-row authority.",
+      "Therefore mixing the three reported rows would change lifting, support, field stage, and readout identity simultaneously."
+    ],
+    "required_to_close": "Materialize D512 and exact teacher query scores from one frozen row-domain compiler, or intersect both to a predeclared common row authority. A true D256 exact-MPR arm would require a new field build and was intentionally not started."
+  },
+  "construction_cost": {
+    "storage": {
+      "d256_l128_checkpoint_mib": 84.24,
+      "d512_l512_checkpoint_mib": 333.96,
+      "exact_mpr_raw_teacher_mib": 416.76
+    },
+    "known_steps": {
+      "compact": "exact/top1 observation lifting, PCA/basis fit, 20-epoch factorized field optimization, query-score materialization",
+      "exact_teacher": "exact marginal observation lifting and direct query-score materialization; no field optimization"
+    },
+    "wall_time": "Historical logs do not contain authoritative elapsed time; filesystem mtimes are not used as runtime measurements."
+  },
+  "conclusion": {
+    "capacity_selection": "D512/L512 remains justified as the smallest registered capacity that passes all source-only capability gates.",
+    "benchmark_bottleneck": "Even replacing a D256/L128 compact descriptor by the full exact 1280-D MPR teacher improves matched Figurines LERF3D mIoU by only 0.00467. Thus compact feature capacity is not the dominant benchmark bottleneck.",
+    "next_action": "Do not spend GPUs on D256 retraining now. Prioritize learned object affinity/tracks and typed object posterior; close the exact-D512 edge later as a paper ablation with one frozen compiler."
+  }
+}

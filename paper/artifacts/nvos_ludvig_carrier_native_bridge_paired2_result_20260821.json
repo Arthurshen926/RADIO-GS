@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_ludvig_carrier_native_bridge_paired2_result",
+  "status": "complete_development_mechanism_confirmation",
+  "method": {
+    "source": "released_all_view_LUDVIG_seed0_scalar",
+    "carrier_transfer": "registered_prompt_render_then_normalized_exact_W_transpose",
+    "target_readout": "current_carrier_alpha_normalized_render",
+    "threshold_parameter": 75.0,
+    "threshold_probability": 0.29411764705882354,
+    "operator": "method_v1_foreground_intersection_carrier_native_bridge_foreground",
+    "threshold_search": false,
+    "nearest_neighbor_transfer": false
+  },
+  "implementation": {
+    "streaming_adjoint": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/streaming_prompt_adjoint.py",
+      "sha256": "45756b6471c9aa56de715c1f96a506075ff6b87514046dcc7f8da8d90c204769"
+    },
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_nvos_ludvig_carrier_native_bridge.py",
+      "sha256": "41b645beac4adc904925e167e2f94e16346a78f86e0e586ac70de4569657b31a"
+    },
+    "paired_evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/evaluate_nvos_ludvig_carrier_native_bridge.py",
+      "sha256": "a2e1966791381c6ad529e3929693a53b6fa785bb42102c39d735775851b9b766"
+    }
+  },
+  "per_scene": {
+    "fern": {
+      "exact_hits": 69256531,
+      "visible_gaussians": 616723,
+      "visible_mass_max_abs_error": 0.0,
+      "constant_conservation_max_abs_error": 0.0,
+      "bridge_foreground_iou": 0.8046295990001251,
+      "native_image_space_selector_foreground_iou": 0.8447952301482711,
+      "bridge_vs_native_coarse_iou": 0.9308609532320299,
+      "method_v1_foreground_iou": 0.8305524432704189,
+      "intersection_foreground_iou": 0.8371255052806221,
+      "delta_foreground_iou": 0.0065730620102032,
+      "bridge_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_carrier_native_bridge_v1/fern/receipt.json",
+        "sha256": "45fde77c6de495504114257e944ca6965e1c0c6a62b37a969a4dfcd9c2b1817a"
+      },
+      "target_diagnostic": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_carrier_native_bridge_target_v1/fern_fixed/target_diagnostic.json",
+        "sha256": "389518aed39378b951cf3281f581cdc0078ef83282fdeae23dba96aef67be366"
+      }
+    },
+    "horns_left": {
+      "exact_hits": 61564103,
+      "visible_gaussians": 357391,
+      "visible_mass_max_abs_error": 0.0,
+      "constant_conservation_max_abs_error": 0.0,
+      "bridge_foreground_iou": 0.8666326580614844,
+      "native_image_space_selector_foreground_iou": 0.9433678093336437,
+      "bridge_vs_native_coarse_iou": 0.8883918059806922,
+      "method_v1_foreground_iou": 0.6898442330908984,
+      "intersection_foreground_iou": 0.9149218521615576,
+      "delta_foreground_iou": 0.2250776190706592,
+      "bridge_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_carrier_native_bridge_v1/horns_left/receipt.json",
+        "sha256": "b3855566d5e918144d54347f0d679d0ded27aba8851fa1a4d687c6fb7fe5c74a"
+      },
+      "target_diagnostic": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_carrier_native_bridge_target_v1/horns_left/target_diagnostic.json",
+        "sha256": "fa1613d985be1f306920dad0dcc039b2d64be0068a54edf88fa8a26a53e0442a"
+      }
+    }
+  },
+  "paired_macro": {
+    "method_v1_foreground_iou": 0.7601983381806586,
+    "intersection_foreground_iou": 0.8760236787210899,
+    "delta_foreground_iou": 0.11582534054043125,
+    "bridge_foreground_iou": 0.8356311285308047,
+    "native_image_space_selector_foreground_iou": 0.8940815197409574,
+    "bridge_vs_native_coarse_iou": 0.9096263796063611,
+    "scenes_improved": 2,
+    "scenes_regressed": 0
+  },
+  "conclusion": {
+    "mechanism_confirmed": "Independent region extent remains useful after exact image-space transfer to the current carrier; the gain is not an invalid primitive-row correspondence artifact.",
+    "remaining_loss": "One registered prompt render/adjoint followed by target rendering loses boundary and visibility detail relative to the native all-view carrier.",
+    "next_step": "Run the same fixed operator on the remaining six NVOS scenes without scene-specific branching or threshold tuning."
+  },
+  "eligibility": {
+    "development_only": true,
+    "upstream_target_rgb_all_view_assisted": true,
+    "strict_unseen_eligible": false,
+    "paper_or_sota_claim_supported": false,
+    "postmetric_context_already_exposed": true
+  }
+}

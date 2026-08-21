@@ -979,6 +979,14 @@ def main() -> None:
         help="Save raw categorical logits and SAM graph for development sweeps.",
     )
     parser.add_argument(
+        "--score_cache_only",
+        action="store_true",
+        help=(
+            "Materialize raw logits plus a validated SAM topology without applying "
+            "a proposal/category postprocessor. Requires --save_development_score_cache."
+        ),
+    )
+    parser.add_argument(
         "--radio_checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
     )
@@ -992,6 +1000,8 @@ def main() -> None:
     split_names = _parse_splits(args.class_splits)
     if split_names != ["19", "15", "10"]:
         raise ValueError("This audit currently requires class_splits=19,15,10")
+    if args.score_cache_only and not args.save_development_score_cache:
+        raise ValueError("--score_cache_only requires --save_development_score_cache")
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     projection = _load_projection(args, device)
@@ -1140,7 +1150,9 @@ def main() -> None:
             compact_feature_key=args.compact_feature_key,
             external_query_features=external_query_features,
             sam_region_graph=sam_region_graph,
-            sam_proposal_memberships=sam_proposal_memberships,
+            sam_proposal_memberships=(
+                None if args.score_cache_only else sam_proposal_memberships
+            ),
             sam_region_alpha=args.sam_region_alpha,
             sam_region_margin_threshold=args.sam_region_margin_threshold,
             instance_topology_settings=topology_settings,

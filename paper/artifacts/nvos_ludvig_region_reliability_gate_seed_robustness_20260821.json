@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_ludvig_region_reliability_gate_seed_robustness",
+  "status": "completed_frozen_gate_three_seed_development_diagnostic",
+  "candidate_id": "nvos-method-v1-ludvig-region-reliability-gate-v1",
+  "frozen_gate_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_ludvig_region_reliability_gate_full8_result_20260821.json",
+    "sha256": "98e1e9a8ee5d8e69c0e13dd05358366af4a3fa9d3f1d9f28e9eec61969d32fbe"
+  },
+  "rule_changed_between_seeds": false,
+  "seed_or_branch_selected_from_results": false,
+  "sealed_prediction_manifests": {
+    "0": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_region_reliability_gate_v1_full8/prediction_manifest.json", "sha256": "3d0fe7c589c6eb4c762bb85c76bb2210733b3900f8ed04c70f544c08ef5512ea"},
+    "1": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_region_reliability_gate_v1_seed1_full8/prediction_manifest.json", "sha256": "cd6ad1aa6e0256e33f7179116eabec25a4d01da6e143930ff25f059bdc0242b9"},
+    "2": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_region_reliability_gate_v1_seed2_full8/prediction_manifest.json", "sha256": "2546749a66732e6c486fd037f2327c4a646672a4a71c9ae5f0c0fa7c1b33b72a"}
+  },
+  "macro_foreground_iou": {
+    "by_seed": [0.9223273413026870, 0.9223366622151550, 0.9226341719927640],
+    "mean": 0.9224327251702019,
+    "population_std": 0.0001424952317157,
+    "worst_seed": 0.9223273413026870
+  },
+  "per_scene": {
+    "fern": {"mean": 0.8304732612835245, "population_std": 0.0000000000000001, "worst": 0.8304732612835244},
+    "flower": {"mean": 0.9737511592229190, "population_std": 0.0000570725376614, "worst": 0.9736872468243960},
+    "fortress": {"mean": 0.9754431952966959, "population_std": 0.0000000000000001, "worst": 0.9754431952966958},
+    "horns_center": {"mean": 0.9729909820294788, "population_std": 0.0000940751996912, "worst": 0.9728579817856249},
+    "horns_left": {"mean": 0.9521827980935772, "population_std": 0.0000316236536142, "worst": 0.9521432148154381},
+    "leaves": {"mean": 0.9237403291157676, "population_std": 0.0000195596827497, "worst": 0.9237238417265594},
+    "orchids": {"mean": 0.8774377080309890, "population_std": 0.0, "worst": 0.8774377080309890},
+    "trex": {"mean": 0.8734423682886643, "population_std": 0.0012497995710027, "worst": 0.8725448472926886}
+  },
+  "conclusion": {
+    "seed_robust": true,
+    "interpretation": "The frozen reliability gate is insensitive to the three independently uplifted LUDVIG scalar seeds; macro population standard deviation is 0.014 IoU points.",
+    "largest_seed_sensitive_scene": "trex",
+    "worst_seed_still_above_method_v1_macro": true
+  },
+  "eligibility": {
+    "development_use_only": true,
+    "postmetric": true,
+    "outcome_blind": false,
+    "target_rgb_assisted": true,
+    "strict_unseen_eligible": false,
+    "paper_result": false,
+    "sota_claim_supported": false
+  }
+}

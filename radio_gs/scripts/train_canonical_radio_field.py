@@ -156,8 +156,6 @@ def _offloaded_adamw_step(
             gradient = parameter.grad
             if gradient is None:
                 continue
-            if gradient.is_sparse:
-                raise RuntimeError("AdamW does not support sparse gradients")
             if parameter.is_complex():
                 raise ValueError("chunked offloaded AdamW forbids complex parameters")
             state = optimizer.state[parameter]
@@ -190,7 +188,21 @@ def _offloaded_adamw_step(
             step_size = learning_rate / bias_correction1
 
             parameter_flat = parameter.view(-1)
-            gradient_flat = gradient.view(-1)
+            sparse_row_gradient = None
+            if gradient.is_sparse:
+                if parameter.ndim != 2 or gradient.ndim != 2:
+                    raise ValueError(
+                        "sparse offloaded AdamW only supports a two-dimensional row table"
+                    )
+                coalesced = gradient.coalesce()
+                if coalesced.indices().shape[0] != 1:
+                    raise ValueError("sparse local-code gradient must be row sparse")
+                sparse_row_gradient = (
+                    coalesced.indices()[0], coalesced.values()
+                )
+                gradient_flat = None
+            else:
+                gradient_flat = gradient.view(-1)
             exp_avg_cpu = state["exp_avg"].view(-1)
             exp_avg_sq_cpu = state["exp_avg_sq"].view(-1)
             if (
@@ -201,7 +213,25 @@ def _offloaded_adamw_step(
             for start in range(0, parameter_flat.numel(), int(chunk_elements)):
                 stop = min(start + int(chunk_elements), parameter_flat.numel())
                 parameter_chunk = parameter_flat[start:stop]
-                gradient_chunk = gradient_flat[start:stop]
+                if sparse_row_gradient is None:
+                    assert gradient_flat is not None
+                    gradient_chunk = gradient_flat[start:stop]
+                else:
+                    row_width = int(parameter.shape[1])
+                    if start % row_width or stop % row_width:
+                        raise ValueError(
+                            "optimizer-state chunk elements must align to local-code rows"
+                        )
+                    row_start = start // row_width
+                    row_stop = stop // row_width
+                    sparse_rows, sparse_values = sparse_row_gradient
+                    gradient_chunk = torch.zeros_like(parameter_chunk)
+                    keep = (sparse_rows >= row_start) & (sparse_rows < row_stop)
+                    if bool(keep.any()):
+                        local_rows = sparse_rows[keep] - row_start
+                        gradient_chunk.view(-1, row_width).index_copy_(
+                            0, local_rows, sparse_values[keep]
+                        )
                 exp_avg = exp_avg_cpu[start:stop].to(parameter.device)
                 exp_avg_sq = exp_avg_sq_cpu[start:stop].to(parameter.device)
 
@@ -231,7 +261,14 @@ def _zero_optimizer_gradients(
 ) -> None:
     """Reuse the giant local-code gradient instead of reallocating it."""
 
-    optimizer.zero_grad(set_to_none=not bool(preserve_buffers))
+    has_sparse = any(
+        parameter.grad is not None and parameter.grad.is_sparse
+        for group in optimizer.param_groups
+        for parameter in group["params"]
+    )
+    optimizer.zero_grad(
+        set_to_none=has_sparse or not bool(preserve_buffers)
+    )
 LEGACY_FACTORIZED_CAPABILITY_RECEIPT_EXPERIMENT = (
     "canonical-factorized-radio-v1-label-free-source-gate"
 )
@@ -2784,6 +2821,17 @@ def train(args: argparse.Namespace) -> dict:
         lr=float(args.learning_rate),
         weight_decay=float(args.weight_decay),
     )
+    if bool(args.sparse_local_code_gradients):
+        if field.fusion is not None:
+            raise ValueError(
+                "sparse local-code gradients require the direct D512/L512 field"
+            )
+        chunk_elements = int(args.optimizer_state_chunk_elements)
+        if chunk_elements % int(field.local_codes.shape[1]):
+            raise ValueError(
+                "optimizer-state chunk elements must align to local-code rows"
+            )
+        field.sparse_local_code_gradients = True
     history: list[dict[str, float]] = []
     for epoch in range(int(args.epochs)):
         epoch_order = training_rows[
@@ -3859,6 +3907,15 @@ def main() -> None:
             "Maximum number of AdamW moment elements staged on the field "
             "device at once. Moments remain on CPU; the update is otherwise "
             "identical to the configured AdamW optimizer."
+        ),
+    )
+    parser.add_argument(
+        "--sparse-local-code-gradients",
+        action="store_true",
+        help=(
+            "Represent direct local-table gather gradients sparsely and apply "
+            "the identical dense AdamW update through CPU moment chunks. This "
+            "changes only peak training memory, not the field or objective."
         ),
     )
     parser.add_argument("--validation-fraction", type=float, default=0.05)

@@ -1,0 +1,307 @@
+{
+  "schema": "radio_gs.lerf_object_aware_universal_field_v2_figurines_pilot_result.v1",
+  "schema_version": 1,
+  "date": "2026-08-21",
+  "status": "source_gate_pass_all_posterior_candidates_joint_gate_fail_branch_stopped",
+  "scene": "figurines",
+  "information_contract": {
+    "training_inputs": [
+      "source32 official SAM3 query-independent masks",
+      "exact-MPR Gaussian-to-proposal memberships",
+      "source-only masked and context SigLIP2 crop descriptors"
+    ],
+    "benchmark_masks_opened_during_training_or_selection": false,
+    "target_metrics_opened_before_source_gate": false,
+    "field_frozen": true,
+    "heldout_source_views_used_in_teacher_loss": false,
+    "view_split": "source_view_index_mod_4_eq_3 held out"
+  },
+  "representation": {
+    "object_affinity_dim": 16,
+    "gaussian_rows": 168791,
+    "persistent_object_code_dtype": "float16",
+    "checkpoint_bytes": 6389357,
+    "relation_score": "class-balanced Bernoulli log score",
+    "relation_logit": "8_times_cosine",
+    "unknown_relation": "excluded_from_loss",
+    "scale_conditioning": "four fixed mask-area bins",
+    "language_teacher": "normalize(0.75_masked_crop_plus_0.25_context_crop)"
+  },
+  "source_gate": {
+    "train_proposals": 227,
+    "heldout_proposals": 50,
+    "train_known_edges": 3394,
+    "heldout_known_edges": 185,
+    "initial_heldout_relation_auc": 0.6453448534011841,
+    "final_heldout_relation_auc": 0.8412069082260132,
+    "relation_auc_delta": 0.1958620548248291,
+    "initial_heldout_language_cosine": 0.003893620101734996,
+    "final_heldout_language_cosine": 0.3180854618549347,
+    "language_cosine_delta": 0.3141918417531997,
+    "final_train_relation_auc": 0.9999097585678101,
+    "decision": "pass"
+  },
+  "matched_benchmark_result": {
+    "lerf2d": {
+      "baseline_miou": 0.41423949953158423,
+      "candidate_miou": 0.4131928683489508,
+      "delta_miou": -0.0010466311826334285,
+      "baseline_locacc": 0.9107142857142857,
+      "candidate_locacc": 0.9107142857142857
+    },
+    "lerf3d": {
+      "baseline_miou": 0.5720701217651367,
+      "candidate_miou": 0.5555180907249451,
+      "delta_miou": -0.01655203104019165,
+      "baseline_acc025": 0.8571428571428571,
+      "candidate_acc025": 0.8035714285714286,
+      "baseline_acc050": 0.6964285714285714,
+      "candidate_acc050": 0.6428571428571429
+    },
+    "decision": "reject_current_text_posterior_composition"
+  },
+  "identity_seeded_track_correction": {
+    "status": "source_structure_gate_pass_paired_joint_gate_fail",
+    "operator": {
+      "seed_admission": "identity_only_argmax_among_source_valid_proposals",
+      "member_admission": "seed_direct_one_hop_affinity_without_query_valid",
+      "per_view_bound": "one_highest_affinity_proposal",
+      "scale_bound": "candidate_area_within_one_octave_of_seed_area",
+      "transitive_closure": false,
+      "null": "sigmoid_8_times_track_mean_object_language_relevancy_minus_0.5",
+      "fallback": "bitwise_v1_when_no_seed_no_reliable_edge_or_single_view"
+    },
+    "source_structure_audit": {
+      "fallback_queries": 12,
+      "nonfallback_queries": 9,
+      "selected_proposal_count_min": 13,
+      "selected_proposal_count_max": 18,
+      "fixed_cap_saturated": false
+    },
+    "lerf2d": {
+      "baseline_miou": 0.41423949953158423,
+      "candidate_miou": 0.4202423397042553,
+      "delta_miou": 0.006002840172671053,
+      "baseline_locacc": 0.9107142857142857,
+      "candidate_locacc": 0.9107142857142857
+    },
+    "lerf3d": {
+      "baseline_miou": 0.5720701217651367,
+      "candidate_miou": 0.5216711759567261,
+      "delta_miou": -0.050398945808410645,
+      "baseline_acc025": 0.8571428571428571,
+      "candidate_acc025": 0.7857142857142857,
+      "baseline_acc050": 0.6964285714285714,
+      "candidate_acc050": 0.5714285714285714
+    },
+    "decision": "reject_joint_promotion_keep_as_mechanism_evidence",
+    "diagnosis": "Identity-only seed plus bounded affinity expansion improves rendered 2D extent without moving localization, but lifted track membership remains too impure for direct 3D selection. The next missing authority is source-heldout track precision or signed different-instance veto, not a target-selected track size."
+  },
+  "affirmative_multiview_consensus_final_pilot": {
+    "status": "lerf2d_mechanism_positive_joint_gate_fail",
+    "rule": "A Gaussian receives extent evidence only after positive support from at least two independent selected source views; missing or one-view support remains unknown and preserves v1. Known-different source edges veto track membership.",
+    "lerf2d": {
+      "baseline_miou": 0.41423949953158423,
+      "candidate_miou": 0.4255024498907217,
+      "delta_miou": 0.011262950359137491,
+      "baseline_locacc": 0.9107142857142857,
+      "candidate_locacc": 0.9107142857142857
+    },
+    "lerf3d": {
+      "baseline_miou": 0.5720701217651367,
+      "candidate_miou": 0.5542278289794922,
+      "delta_miou": -0.01784229278564453,
+      "baseline_acc025": 0.8571428571428571,
+      "candidate_acc025": 0.8035714285714286,
+      "baseline_acc050": 0.6964285714285714,
+      "candidate_acc050": 0.6428571428571429
+    },
+    "decision": "do_not_promote_or_expand_single_scene",
+    "conclusion": "Affirmative multiview consensus recovers 0.03256 LERF3D mIoU relative to the one-view bounded track diagnostic and improves LERF2D by 0.01126 over the matched baseline, validating the positive-only consensus mechanism. It still fails the shared 2D/3D posterior gate, so further same-scene adjustment is stopped."
+  },
+  "soft_association_exact_visibility_pilot": {
+    "status": "mechanism_positive_lerf2d_joint_gate_fail",
+    "formal_stage_a_complete": false,
+    "method": {
+      "association": "per-source-view proposal categorical marginal with explicit null and exchangeable minus-log-K prior",
+      "same_different_unknown": "known same/different use signed fixed-scale Bernoulli logits; unknown uses source-trained affinity logit",
+      "scale": "continuous negative absolute log2 mask-area ratio prior",
+      "extent": "association-weighted raw exact membership numerator divided by association-weighted exact view-denominator visibility mass",
+      "absence_without_visibility": "unknown",
+      "fixed_K": false,
+      "graph_transitive_closure": false,
+      "target_threshold": false
+    },
+    "source_audit": {
+      "fallback_queries": 12,
+      "association_nonnull_mean": 0.19931495189666748,
+      "raw_membership_probability_preserved": true,
+      "proposal_max_normalization": false
+    },
+    "lerf2d": {
+      "baseline_miou": 0.41423949953158423,
+      "candidate_miou": 0.41749042492085225,
+      "delta_miou": 0.0032509253892680223,
+      "baseline_locacc": 0.9107142857142857,
+      "candidate_locacc": 0.9107142857142857
+    },
+    "lerf3d": {
+      "baseline_miou": 0.5720701217651367,
+      "candidate_miou": 0.5538763403892517,
+      "delta_miou": -0.01819378137588501,
+      "baseline_acc025": 0.8571428571428571,
+      "candidate_acc025": 0.8035714285714286,
+      "baseline_acc050": 0.6964285714285714,
+      "candidate_acc050": 0.6428571428571429
+    },
+    "decision": "do_not_promote",
+    "minimum_remaining_gap": "A scene-disjoint source track authority that labels complete cross-view physical-object tracks and null/occlusion outcomes in the same source32 proposal domain. The current heuristic relation labels plus single-scene heldout calibration cannot establish track purity for direct 3D extent.",
+    "value_assessment": "The exact visibility denominator is theoretically correct and gives a small 2D gain without localization loss, but current data authority is insufficient for the shared 2D/3D promotion gate. Further same-scene readout changes have low value."
+  },
+  "scene_disjoint_geometry_cycle_proxy_final": {
+    "status": "proxy_loso_pass_paired_joint_gate_fail_branch_stopped",
+    "formal_stage_a_complete": false,
+    "authority_boundary": {
+      "training_scenes": [
+        "ramen",
+        "teatime",
+        "waldo_kitchen"
+      ],
+      "heldout_scene": "figurines",
+      "heldout_edge_labels_read_by_posterior_builder": false,
+      "heldout_edge_features_read_by_posterior_builder": true,
+      "explicit_null_labels_available": false,
+      "external_video_or_human_physical_track_authority_available": false,
+      "warning": "The source proxy labels are deterministically derived from geometry-cycle overlap while the calibrator inputs include the same geometry quantities. High proxy LOSO AUC therefore measures reproduction of the heuristic across scenes, not recovery of true physical-object identity, occlusion, or null outcomes. It is not evidence that formal Stage A is complete."
+    },
+    "source_proxy_loso": {
+      "ramen": {
+        "known_edges": 12019,
+        "auc": 0.9140177279,
+        "balanced_log_score": 0.37279877,
+        "epoch0_balanced_log_score": 0.693147
+      },
+      "teatime": {
+        "known_edges": 18895,
+        "auc": 0.9407493912,
+        "balanced_log_score": 0.29601216,
+        "epoch0_balanced_log_score": 0.693147
+      },
+      "waldo_kitchen": {
+        "known_edges": 2553,
+        "auc": 0.8937908979,
+        "balanced_log_score": 0.48794228,
+        "epoch0_balanced_log_score": 0.693147
+      },
+      "global_train_auc": 0.9237448752,
+      "global_train_balanced_log_score": 0.10243496,
+      "interpretation": "proxy reproduction only; circular with respect to the geometry-cycle heuristic"
+    },
+    "posterior_audit": {
+      "fallback_queries": 12,
+      "association_nonnull_mean": 0.070609048,
+      "figurines_edge_label_values_used": false,
+      "raw_exact_membership_preserved": true,
+      "invisible_absence_is_unknown": true
+    },
+    "lerf2d": {
+      "baseline_miou": 0.41423949953158423,
+      "candidate_miou": 0.421010860623679,
+      "delta_miou": 0.006771361092094761,
+      "baseline_locacc": 0.9107142857142857,
+      "candidate_locacc": 0.9107142857142857
+    },
+    "lerf3d": {
+      "baseline_miou": 0.5720701217651367,
+      "candidate_miou": 0.5544633865356445,
+      "delta_miou": -0.017606735229492188,
+      "baseline_acc025": 0.8571428571428571,
+      "candidate_acc025": 0.8035714285714286,
+      "baseline_acc050": 0.6964285714285714,
+      "candidate_acc050": 0.6428571428571429
+    },
+    "decision": "do_not_promote_stop_geometry_cycle_proxy_branch",
+    "conclusion": "Scene-disjoint calibration does not close the identity-authority gap: it preserves the recurring small LERF2D extent gain but degrades LERF3D object selection. The remaining high-value prerequisite is independent source-domain physical/video track supervision with explicit null and occlusion outcomes; absent that authority, further posterior tuning on this proxy has low expected value."
+  },
+  "diagnosis": {
+    "positive": "Compact source-SAM object codes learn cross-view object relation and mask-aligned language structure on unseen source views.",
+    "negative": "Filling unknown proposal edges and equal-fusing distilled language into the existing reliable-component posterior does not translate the source gains into paired LERF2D/LERF3D gains.",
+    "important_observation": "The selected proposal counts remained identical to the reliable-component baseline, showing that its query-valid traversal prevents affinity-only neighboring proposals from contributing extent.",
+    "next_method_change": "Do not continue tuning geometry-cycle posterior variants. A future restart requires independent source-domain physical/video object-track authority with explicit null and occlusion outcomes; this is a data-authority prerequisite, not another readout hyperparameter."
+  },
+  "field_fidelity": {
+    "status": "bitwise_unchanged_by_construction",
+    "reason": "The trainer never loads or mutates the D512/L512 field checkpoint; it only reads immutable source authorities and writes a new v2 side-by-side pilot artifact.",
+    "radio_capability_gate": "not_applicable_field_frozen"
+  },
+  "artifacts": {
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/object_field_v2_d16_bernoulli.pt",
+      "sha256": "8d7988b4cfc908efc899c64bfdbdd8d2f037516821451604e7d1853961fd3581"
+    },
+    "gaussian_posterior": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/lerf_text_posterior.pt",
+      "sha256": "6ac30e48dcd7baaf3b1655b8fea4d6b2aa3dd43894a987740b2aa69f027a488a"
+    },
+    "lerf2d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/lerf2d/lerf_ovs_results.json",
+      "sha256": "4f4cb74530c2a73d4aef8cc683f064f8be638949205f65d42b307b903cc7cd94"
+    },
+    "lerf3d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/lerf3d/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "c3314746ce72db14e0fc082e2f99ae5effb0180985e5ef7e1147f8370cb5655d"
+    },
+    "bounded_track_posterior": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/lerf_text_track_posterior_v4_scale.pt",
+      "sha256": "f59aa3eb6c97050e3000669f20c09c612ff89e7ca7c9ef16ab5c84e2bffcdabe"
+    },
+    "bounded_track_lerf2d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/track_v3_scale_lerf2d/lerf_ovs_results.json",
+      "sha256": "05f113c51d76eebdce5f07f28ecf99793c162002de235b9631cd868207778b15"
+    },
+    "bounded_track_lerf3d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/track_v3_scale_lerf3d/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "847d5ef2749e9ac4e203b92f829f690fa40b0e8c34f1d811977d7047d10ace7b"
+    },
+    "consensus_track_posterior": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/lerf_text_track_posterior_v5_consensus.pt",
+      "sha256": "fb7beb8e270243c3cafba53a55ba6f5a3650aec4d4f4c02af98620e870b0b649"
+    },
+    "consensus_track_lerf2d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/track_v5_consensus_lerf2d/lerf_ovs_results.json",
+      "sha256": "e362f237547f5d5f21432dfa67d421c515b98d3f6b9c260efedab76dd998aba6"
+    },
+    "consensus_track_lerf3d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/track_v5_consensus_lerf3d/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "73409d02efd81364de775a20ce28c7768a788e974e5cc5dae2b9f44596ff7ff6"
+    },
+    "visibility_track_posterior": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/lerf_visibility_track_posterior.pt",
+      "sha256": "8f152a9b287696d30e304e418d9abcdec4edb75966d82e692c35fa3cc95c6e5d"
+    },
+    "visibility_track_lerf2d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/visibility_track_lerf2d/lerf_ovs_results.json",
+      "sha256": "958f7e875d37354a5fcb2a96688561c14f0d81cb9407ce7419942cd084c9639d"
+    },
+    "visibility_track_lerf3d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/visibility_track_lerf3d/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "79967511bb33fe993fafa8a1ef3e4df152fa5ab458ebef38e260785f830b79de"
+    },
+    "scene_disjoint_track_calibrator": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/lerf_source_geometry_cycle_track_authority/global_track_calibrator.pt",
+      "sha256": "fe234f3c18918e9386bf9f4ac191d5f51b575346cfbb39fbbc04da7ea00fb226"
+    },
+    "scene_disjoint_proxy_posterior": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/lerf_visibility_track_scene_disjoint_proxy_v2.pt",
+      "sha256": "2d58d86cd7dd13fc34fd95b079228726b588855cc349eebb663646d8ce3422f9"
+    },
+    "scene_disjoint_proxy_lerf2d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/scene_disjoint_proxy_lerf2d/lerf_ovs_results.json",
+      "sha256": "7fd349ddd708cee55f80964caee649de14239c9c8ca34dc1c42d41e1ad8ca3a7"
+    },
+    "scene_disjoint_proxy_lerf3d": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/object_aware_universal_field_v2_pilot/figurines/scene_disjoint_proxy_lerf3d/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "10ae5a93a124cd60cf4ab138ee801a8257fd602fe5ea8ed604c892abb3232a34"
+    }
+  }
+}

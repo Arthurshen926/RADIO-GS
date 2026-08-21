@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_ludvig_carrier_native_bridge_full8_coverage",
+  "status": "complete_after_building_six_registered_prompt_exact_W_caches",
+  "requested_scene_order": [
+    "fern",
+    "flower",
+    "fortress",
+    "horns_center",
+    "horns_left",
+    "leaves",
+    "orchids",
+    "trex"
+  ],
+  "completed": {
+    "fern": {
+      "exact_W": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/nvos_exact_prompt_responsibility_dino_completion_v1/cache/fern.pt",
+      "exact_W_sha256": "cc2dbc08ef06ae5a8573413145d72675fe7181ccf7fb3cbae6cb4d5a14ca3db1",
+      "target_diagnostic": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_carrier_native_bridge_target_v1/fern_fixed/target_diagnostic.json"
+    },
+    "horns_left": {
+      "exact_W": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/nvos_exact_prompt_responsibility_dino_completion_v1/cache/horns_left.pt",
+      "exact_W_sha256": "c56fc72d858c23f11c6237cf5e330d949bc1d8be709e3932cb4ccd287e0ebfe0",
+      "target_diagnostic": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_carrier_native_bridge_target_v1/horns_left/target_diagnostic.json"
+    }
+  },
+  "initially_missing_registered_prompt_exact_W": [
+    "flower",
+    "fortress",
+    "horns_center",
+    "leaves",
+    "orchids",
+    "trex"
+  ],
+  "remaining_missing_registered_prompt_exact_W": [],
+  "cache_directory_observation": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/nvos_exact_prompt_responsibility_dino_completion_v1/cache",
+    "initial_present_scene_files": ["fern.pt", "horns_left.pt"],
+    "initial_present_count": 2,
+    "new_cache_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260821/nvos_ludvig_carrier_native_bridge_exact_w_full8_v1",
+    "new_scene_files": ["flower.pt", "fortress.pt", "horns_center.pt", "leaves.pt", "orchids.pt", "trex.pt"],
+    "final_present_count": 8,
+    "required_count": 8
+  },
+  "forbidden_substitutes": [
+    "nearest-neighbour primitive-row transfer",
+    "a responsibility cache from another scene or camera",
+    "a target mask or target metric-derived assignment"
+  ],
+  "unblocking_action": "Completed: built and hash-bound the six missing registered prompt-view exact responsibility caches, then replayed the fixed 75/255 bridge and intersection operator.",
+  "eligibility": {
+    "development_only": true,
+    "upstream_target_rgb_all_view_assisted": true,
+    "strict_unseen_eligible": false
+  }
+}

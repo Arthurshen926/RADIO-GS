@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_method_v1_ludvig_agreement_full8_development",
+  "status": "completed_postmetric_development_diagnostic_not_paper_result",
+  "method": {
+    "operator": "pixelwise_foreground_intersection",
+    "definition": "prediction = method_v1_signed_point_sam3_mask AND ludvig_seed0_fixed_threshold_binary_selector",
+    "interpretation": "retain foreground only where the current Method-v1 identity-selected SAM proposal and the independent LUDVIG all-view scalar-uplift authority agree",
+    "scene_specific_parameter": false,
+    "component_threshold_tuning": false,
+    "nearest_neighbor_row_transfer": false,
+    "carrier_modified": false,
+    "second_persistent_field_created": false,
+    "execution_domain": "query_transient_target_image_space"
+  },
+  "inputs": {
+    "method_v1_prediction_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/nvos/method_v1_readout/field_box_signed_points_sam3_candidate_20260816/prediction_manifest.json",
+      "sha256": "f439d36f2d6d0491d8276724beff833cf23289c00c1ba3281fe07019171bf254"
+    },
+    "ludvig_asset_inventory": {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_ludvig_published_compatible_asset_audit_20260804.json",
+      "sha256": "93af6ff74879f306f1f1dfeb6d65e9efe6cf5d208a68f99f7006df7d554a5582",
+      "seed": 0,
+      "selector": "rendered_binary_selector",
+      "fixed_threshold_parameter": 75
+    },
+    "resize": "nearest_to_official_ground_truth_shape",
+    "thresholds": {
+      "method_v1_margin": 0.0,
+      "ludvig": "already_frozen_binary_selector"
+    }
+  },
+  "sentinel_pair": {
+    "development_scene": "fern",
+    "independent_confirmation_scene_fixed_before_scoring": "flower",
+    "both_improved": true,
+    "results": {
+      "fern": {
+        "method_v1": 0.8304732612835244,
+        "agreement": 0.8375497699668509,
+        "delta": 0.0070765086833265
+      },
+      "flower": {
+        "method_v1": 0.9680178415225879,
+        "agreement": 0.9737883706886318,
+        "delta": 0.0057705291660439
+      }
+    }
+  },
+  "full8": {
+    "method_v1_macro_foreground_iou": 0.817616763357676,
+    "ludvig_seed0_macro_foreground_iou": 0.9146742072644981,
+    "agreement_macro_foreground_iou": 0.9042500206835287,
+    "agreement_delta_vs_method_v1": 0.0866332573258527,
+    "agreement_delta_vs_ludvig_seed0": -0.0104241865809694,
+    "per_scene": {
+      "fern": {"method_v1": 0.8304732612835244, "ludvig_seed0": 0.8447952301482711, "agreement": 0.8375497699668509, "delta_vs_method_v1": 0.0070765086833265},
+      "flower": {"method_v1": 0.9680178415225879, "ludvig_seed0": 0.9772797222575816, "agreement": 0.9737883706886318, "delta_vs_method_v1": 0.0057705291660439},
+      "fortress": {"method_v1": 0.9754431952966958, "ludvig_seed0": 0.9846456126499482, "agreement": 0.9741912806418069, "delta_vs_method_v1": -0.0012519146548889},
+      "horns_center": {"method_v1": 0.6968090986196901, "ludvig_seed0": 0.9784775490888041, "agreement": 0.9729774485744493, "delta_vs_method_v1": 0.2761683499547592},
+      "horns_left": {"method_v1": 0.6898833651238061, "ludvig_seed0": 0.9433678085612598, "agreement": 0.9522013070281531, "delta_vs_method_v1": 0.2623179419043470},
+      "leaves": {"method_v1": 0.6386020952997714, "ludvig_seed0": 0.9665015933402205, "agreement": 0.9237554432906751, "delta_vs_method_v1": 0.2851533479909037},
+      "orchids": {"method_v1": 0.8774377080309890, "ludvig_seed0": 0.7470299101787785, "agreement": 0.7248013197598427, "delta_vs_method_v1": -0.1526363882711463},
+      "trex": {"method_v1": 0.8642675416843430, "ludvig_seed0": 0.8752962310361209, "agreement": 0.8747352254918187, "delta_vs_method_v1": 0.0104676838074757}
+    }
+  },
+  "conclusion": {
+    "high_value_signal_confirmed": "The LUDVIG all-view SAM scalar uplift supplies a strong independent region/instance authority; fixed agreement raises the Method-v1 full8 macro by 8.66 IoU points.",
+    "not_final_fusion": "The agreement rule is not uniformly safe: orchids loses 15.26 points and fortress loses 0.13 points, and LUDVIG seed0 alone is 1.04 macro points above agreement.",
+    "next_method_step": "Transport the cached native LUDVIG scalar through registered image space with an exact adjoint onto the current carrier, then derive a query-time reliability from source/registered-view agreement rather than selecting intersection versus union from target metrics.",
+    "asset_gap": "Only target rendered selectors are cached. A full canonical bridge still requires rendering each cached native scalar uplift in registered views and applying normalized exact W-transpose on the current carrier."
+  },
+  "eligibility": {
+    "development_use_only": true,
+    "postmetric": true,
+    "target_rgb_assisted": true,
+    "strict_unseen_eligible": false,
+    "paper_result": false,
+    "sota_claim_supported": false
+  }
+}
