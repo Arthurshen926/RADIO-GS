@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_capability_before_mpr_three_scene_result",
+  "status": "three_scene_mechanism_and_source_gate_pass_full8_pending",
+  "method": {
+    "teacher_order": "per_view_frozen_siglip_summary_head_then_exact_mpr",
+    "deployable_order": "normalize(d512_descriptor+scene_global_decoder(l512))",
+    "query_independent": true,
+    "per_gaussian_parameters_added": false,
+    "benchmark_labels_opened_during_fit": false,
+    "benchmark_masks_opened_during_fit": false,
+    "benchmark_text_queries_opened_during_fit": false,
+    "evaluation_rgb_opened_during_fit": false
+  },
+  "scenes": {
+    "scene0000_00": {
+      "baseline_miou": {"19": 0.344412514972523, "15": 0.3231288953748252, "10": 0.3511552771875167},
+      "direct_miou": {"19": 0.3599225605725027, "15": 0.33841698641544077, "10": 0.3832514818870257},
+      "restored_miou": {"19": 0.359906460591999, "15": 0.337594701455995, "10": 0.38528106080072727},
+      "source_gate": {
+        "status": "source_gate_pass",
+        "baseline_mean_cosine": 0.9900644421577454,
+        "baseline_p05_cosine": 0.9777764081954956,
+        "decoder_mean_cosine": 0.9979611039161682,
+        "decoder_p05_cosine": 0.9956800937652588
+      },
+      "direct_target_sha256": "fcd71373226287ef1b48f0e6280f3d41be673b198027878f15a6728ad66a8d63",
+      "decoder_sha256": "1021a885e31f7c4ea04d3bd7d45cd2b65dc024102c491a4787d67d599a629851",
+      "restored_query_cache_sha256": "10051e2e136f979335556dd27a2f0f40f3dbd79c704f4edb5aab752012cdcbda",
+      "direct_result_sha256": "e2ce712c78f6fb34a06c001a7608c9aaaa17dbc31384bc6c53fb7d0c8b7be511",
+      "restored_result_sha256": "e092a89733e3974da6e8a00762defd3488d4807d0d524a9c9b6f3163d2f82cdd"
+    },
+    "scene0062_00": {
+      "baseline_miou": {"19": 0.2788680758223143, "15": 0.27820543960092803, "10": 0.36375232699067706},
+      "direct_miou": {"19": 0.30049688664652613, "15": 0.3003689619124346, "10": 0.39741316373487834},
+      "restored_miou": {"19": 0.29996509281412836, "15": 0.3002904072067541, "10": 0.3974495281291727},
+      "source_gate": {
+        "status": "source_gate_pass",
+        "baseline_mean_cosine": 0.9961066842079163,
+        "baseline_p05_cosine": 0.9916439056396484,
+        "decoder_mean_cosine": 0.998928427696228,
+        "decoder_p05_cosine": 0.9976534843444824
+      },
+      "direct_target_sha256": "4bc1320484bc3d51480e81c45cfe49edfd2ad529ab7b9fda98588890acae4c50",
+      "decoder_sha256": "99dd9ae9e0657e1de61d811e44e44dd3160eacd8a1a058b4d76f8b95a8e5561f",
+      "restored_query_cache_sha256": "d53579ecf024664768e4751a9fedd5ec9861d4ed588b089627a8dffbf5ea32a6",
+      "direct_result_sha256": "3a07095bc254f28250cc74064b1fcbf7cb0e544e37571703585e5086b9089af9",
+      "restored_result_sha256": "95f2b9f0c1aad63dae2f1cba9d594c784cdf0f9fa4d0ad07e14cdcb9d77ab91b"
+    },
+    "scene0070_00": {
+      "baseline_miou": {"19": 0.28825407097164146, "15": 0.3054103238317792, "10": 0.32356976142444827},
+      "direct_miou": {"19": 0.30177150619713305, "15": 0.3240608327313479, "10": 0.3541577617216422},
+      "restored_miou": {"19": 0.3002764586413018, "15": 0.32225562585168754, "10": 0.3544649425955318},
+      "source_gate": {
+        "status": "source_gate_pass",
+        "baseline_mean_cosine": 0.9917057752609253,
+        "baseline_p05_cosine": 0.9818264245986938,
+        "decoder_mean_cosine": 0.9981105327606201,
+        "decoder_p05_cosine": 0.9955430030822754
+      },
+      "direct_target_sha256": "74a779b4ebde93bb83b1d6331de34d1a305b0d34e12435313e348f08b09a1671",
+      "decoder_sha256": "9714e4fa519c50a67a136874b9a708ca126e860c1b08f991e161159292014fd7",
+      "restored_query_cache_sha256": "42699a8a19d7654c5ced0dacae9f5217cd4e92501a45813e71d15f953b6d34d0",
+      "direct_result_sha256": "b96ae07f5026ea6956a5bb8a7363c00a2f6efd9bee702f2b92c3371a3257e03e",
+      "restored_result_sha256": "2cb033b51749a307cb68076336492aeb4e392f87836a608b161c79722a8cf175"
+    }
+  },
+  "three_scene_macro": {
+    "baseline_miou": {"19": 0.3038448872554929, "15": 0.30224821960251075, "10": 0.3461591218675473},
+    "direct_miou": {"19": 0.3207303178053873, "15": 0.3209489270197411, "10": 0.3782741357811821},
+    "restored_miou": {"19": 0.32004933734914304, "15": 0.3200469115048122, "10": 0.37906517717514393},
+    "restored_delta": {"19": 0.016204450093650125, "15": 0.017798691902301433, "10": 0.032906055307596604},
+    "all_nine_scene_split_comparisons_improve": true
+  },
+  "promotion": {
+    "three_scene_mechanism_gate": true,
+    "three_scene_source_gate": true,
+    "paper8_complete": false,
+    "paper8_reportable": false
+  }
+}

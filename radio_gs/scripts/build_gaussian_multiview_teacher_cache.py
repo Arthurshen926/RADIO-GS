@@ -1415,8 +1415,10 @@ def _gate_exact_marginal_assignments_by_raw_amplitude(
         raise ValueError("raw amplitude gate views and assignments do not align")
     geometric_view_counts = torch.zeros(int(num_gaussians), dtype=torch.long)
     semantic_assignments: list[dict[str, torch.Tensor]] = []
-    for frame_index, assignment in zip(
-        selected_frame_indices, responsibility_assignments
+    for frame_index, assignment in tqdm(
+        zip(selected_frame_indices, responsibility_assignments),
+        total=len(selected_frame_indices),
+        desc="gate exact-MPR by raw RADIO support",
     ):
         gaussian_ids = assignment.get("gaussian_ids")
         pixel_ids = assignment.get("pixel_ids")
@@ -1438,13 +1440,20 @@ def _gate_exact_marginal_assignments_by_raw_amplitude(
             feature_size=feature_size,
             tensor_records=tensor_records,
             normalize=False,
-            output_dtype=torch.float32,
+            # The gate only tests whether a finite 1280-D source vector is
+            # exactly zero.  Retaining the bundle dtype avoids an otherwise
+            # needless fp16 -> fp32 expansion of every full-resolution view.
+            output_dtype=torch.float16,
         )
         if tuple(raw_map.shape) != (1, 1280, *tuple(feature_size)):
             raise ValueError("raw amplitude gate feature grid differs")
-        raw_amplitude = torch.linalg.vector_norm(raw_map[0], dim=0).reshape(-1)
-        positive = raw_amplitude[pids] > 0
-        del raw_map, raw_amplitude
+        # For finite vectors, ||x||_2 > 0 iff any component is nonzero.  The
+        # bundle loader already rejects non-finite tensors, so a Boolean
+        # reduction is an exact support test and avoids 1280 squares plus a
+        # square root per pixel.
+        positive_pixels = (raw_map[0] != 0).any(dim=0).reshape(-1)
+        positive = positive_pixels[pids]
+        del raw_map, positive_pixels
         filtered: dict[str, torch.Tensor] = {}
         for name, value in assignment.items():
             if not torch.is_tensor(value) or value.reshape(-1).shape != gids.shape:
@@ -4110,7 +4119,13 @@ def _build_cache(args: argparse.Namespace) -> dict:
         "registration_responsibility_cache_sha256": responsibility_cache_sha256,
         "shared_registration_responsibility": bool(responsibility_cache_sha256),
         "registration_responsibility_contract": responsibility_contract,
-        "capability_projection_before_mpr": feature_space in {"dino_v3", "sam3"},
+        # ``siglip_summary`` is projected from every 2D RADIO token before the
+        # shared sparse compositor authority is applied.  Omitting it here
+        # made the receipt contradict the actual operator order (and the
+        # observation-lifting contract) even though the emitted tensor was
+        # correct.
+        "capability_projection_before_mpr": feature_space
+        in {"siglip_summary", "dino_v3", "sam3"},
         "capability_cpu_memory_preflight": (capability_cpu_memory_preflight),
         "custom_adaptor_head": False,
         "source": (

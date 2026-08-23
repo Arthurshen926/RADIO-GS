@@ -7,9 +7,11 @@ for every candidate/view pair.  This program lifts those rasters with ``W.T``,
 robustly fuses registered views in log-odds space, checkpoints each completed
 candidate, and finally marginalizes candidates in probability space.
 
-Only one candidate's ``V x N`` tensor is resident at a time.  This is the
-resume boundary needed by the million-row NVOS carriers; a complete ``K x V x
-N`` allocation is never made.
+Exact assignments are query-independent and identical across candidates, so
+each registered view is hash-verified and loaded once.  Only one candidate's
+``V x N`` tensor is resident at a time.  This is the resume boundary needed by
+the million-row NVOS carriers; a complete ``K x V x N`` allocation is never
+made.
 """
 
 from __future__ import annotations
@@ -27,6 +29,7 @@ import torch
 
 from radio_gs.querying.synchronous_multiview_candidate_marginal import (
     QueryAbstention,
+    fuse_positive_unknown_views,
     marginalize_synchronous_multiview_candidates,
 )
 from radio_gs.scripts.build_nvos_two_round_exact_consensus import (
@@ -35,6 +38,7 @@ from radio_gs.scripts.build_nvos_two_round_exact_consensus import (
 
 
 ARTIFACT_TYPE = "nvos_synchronous_multiview_sam3_exact_adjoint_inventory_v1"
+BOX_ARTIFACT_TYPE = "nvos_synchronous_multiview_box_sam3_exact_adjoint_inventory_v1"
 OUTPUT_TYPE = "nvos_synchronous_multiview_candidate_marginal_v1"
 
 
@@ -112,16 +116,28 @@ def _load_assignment(record: Mapping[str, Any]) -> Mapping[str, torch.Tensor]:
 
 
 def lift_candidate_views(
-    view_records: Sequence[Mapping[str, Any]], *, num_gaussians: int
+    view_records: Sequence[Mapping[str, Any]],
+    *,
+    num_gaussians: int,
+    assignment_cache: Mapping[str, Mapping[str, torch.Tensor]] | None = None,
+    device: str | torch.device = "cpu",
 ) -> tuple[torch.Tensor, torch.Tensor, tuple[str, ...]]:
-    """Lift one complete candidate across views without retaining assignments."""
+    """Lift one complete candidate, optionally reusing sealed view assignments."""
 
     lifted: list[torch.Tensor] = []
     precision: list[float] = []
     digests: list[str] = []
+    torch_device = torch.device(device)
     for record in view_records:
-        probability = _load_probability(record["probability"])
-        assignment = _load_assignment(record["assignment"])
+        probability = _load_probability(record["probability"]).to(torch_device)
+        view_digest = str(record["view_digest"])
+        assignment = (
+            _load_assignment(record["assignment"])
+            if assignment_cache is None
+            else assignment_cache.get(view_digest)
+        )
+        if assignment is None:
+            raise QueryAbstention("registered view assignment cache is incomplete")
         primitive, visible_mass = exact_adjoint_probability(
             assignment["gaussian_ids"],
             assignment["pixel_ids"],
@@ -132,15 +148,15 @@ def lift_candidate_views(
         # Invisible rows are neutral evidence.  Precision is a scalar authority
         # fixed upstream from query-independent view reliability.
         primitive[visible_mass <= 0] = 0.5
-        lifted.append(primitive.cpu())
+        lifted.append(primitive)
         precision.append(float(record["log_precision"]))
-        digests.append(str(record["view_digest"]))
-        del assignment, probability, primitive, visible_mass
+        digests.append(view_digest)
+        del probability, primitive, visible_mass
     if not lifted:
         raise QueryAbstention("candidate has no registered view")
     return (
         torch.stack(lifted, dim=0),
-        torch.tensor(precision, dtype=torch.float32),
+        torch.tensor(precision, dtype=torch.float32, device=torch_device),
         tuple(digests),
     )
 
@@ -152,8 +168,16 @@ def fuse_one_candidate(
     candidate_digest: str,
     view_digests: Sequence[str],
     view_huber_delta: float = 2.0,
+    view_fusion: str = "robust_log_odds",
 ) -> torch.Tensor:
-    """Reuse the canonical robust view operator for a single candidate."""
+    """Fuse one candidate with one explicitly recorded observation model."""
+
+    if view_fusion == "positive_unknown_noisy_or":
+        return fuse_positive_unknown_views(
+            candidate_view_probability, view_log_precision
+        ).cpu()
+    if view_fusion != "robust_log_odds":
+        raise ValueError("unknown candidate view fusion")
 
     result = marginalize_synchronous_multiview_candidates(
         candidate_view_probability[None],
@@ -176,7 +200,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     expected_candidates = int(args.expected_candidates)
     num_gaussians = int(inventory.get("num_gaussians", 0))
     if (
-        inventory.get("artifact_type") != ARTIFACT_TYPE
+        inventory.get("artifact_type") not in {ARTIFACT_TYPE, BOX_ARTIFACT_TYPE}
         or not isinstance(candidates, list)
         or len(candidates) != expected_candidates
         or num_gaussians <= 0
@@ -188,6 +212,31 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
     output = Path(args.output_dir).expanduser().resolve()
     output.mkdir(parents=True, exist_ok=True)
+    first_views = candidates[0].get("views", [])
+    if not isinstance(first_views, list) or not first_views:
+        raise QueryAbstention("candidate has no registered view cohort")
+    assignment_cache: dict[str, Mapping[str, torch.Tensor]] = {}
+    assignment_identity: dict[str, Mapping[str, Any]] = {}
+    for record in first_views:
+        view_digest = str(record.get("view_digest", ""))
+        if not view_digest or view_digest in assignment_cache:
+            raise QueryAbstention("registered view assignment identity is ambiguous")
+        assignment_identity[view_digest] = dict(record["assignment"])
+        loaded = _load_assignment(record["assignment"])
+        assignment_cache[view_digest] = {
+            name: torch.as_tensor(loaded[name]).to(args.device)
+            for name in ("gaussian_ids", "pixel_ids", "weights")
+        }
+    canonical_views = tuple(sorted(assignment_cache))
+    for candidate in candidates[1:]:
+        records = candidate.get("views", [])
+        if not isinstance(records, list) or tuple(
+            sorted(str(record.get("view_digest", "")) for record in records)
+        ) != canonical_views:
+            raise QueryAbstention("candidate registered-view cohort differs")
+        for record in records:
+            if dict(record["assignment"]) != assignment_identity[str(record["view_digest"])]:
+                raise QueryAbstention("candidate exact assignment differs by view")
     fields: list[torch.Tensor] = []
     logits: list[float] = []
     candidate_digests: list[str] = []
@@ -197,12 +246,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         checkpoint = output / "candidates" / f"candidate_{rank:03d}.pt"
         if checkpoint.is_file():
             cached = torch.load(checkpoint, map_location="cpu", weights_only=False)
-            if cached.get("candidate_digest") != digest:
+            if (
+                cached.get("candidate_digest") != digest
+                or cached.get("view_fusion") != args.view_fusion
+            ):
                 raise ValueError("resume candidate identity differs")
             field = torch.as_tensor(cached["candidate_field"]).float().reshape(-1)
         else:
             views, precision, view_digests = lift_candidate_views(
-                candidate.get("views", []), num_gaussians=num_gaussians
+                candidate.get("views", []),
+                num_gaussians=num_gaussians,
+                assignment_cache=assignment_cache,
+                device=args.device,
             )
             field = fuse_one_candidate(
                 views,
@@ -210,12 +265,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 candidate_digest=digest,
                 view_digests=view_digests,
                 view_huber_delta=args.view_huber_delta,
+                view_fusion=args.view_fusion,
             )
             _write_torch_noclobber(
                 checkpoint,
                 {
                     "candidate_digest": digest,
                     "candidate_field": field,
+                    "view_fusion": args.view_fusion,
                     "num_views": int(views.shape[0]),
                     "num_gaussians": num_gaussians,
                 },
@@ -241,6 +298,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "probability": probability,
             "candidate_probability": weights,
             "candidate_digests": [candidate_digests[index] for index in order],
+            "view_fusion": args.view_fusion,
             "num_gaussians": num_gaussians,
         },
     )
@@ -249,9 +307,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "artifact_type": OUTPUT_TYPE,
         "scene_id": inventory.get("scene_id"),
         "inventory": {"path": str(inventory_path), "sha256": args.expected_inventory_sha256},
+        "inventory_artifact_type": inventory.get("artifact_type"),
         "candidate_checkpoints": candidate_records,
         "result": {"path": str(result_path), "sha256": result_sha},
-        "resident_tensor_bound": "one_candidate_times_all_views_times_num_gaussians",
+        "resident_tensor_bound": (
+            "all_registered_exact_assignments_plus_one_candidate_times_"
+            "all_views_times_num_gaussians"
+        ),
+        "assignment_io": "one_hash_verified_load_per_registered_view",
+        "adjoint_device": str(args.device),
+        "view_fusion": args.view_fusion,
         "resume_boundary": "one_completed_candidate",
         "target_mask_opened": False,
         "target_metric_opened": False,
@@ -268,6 +333,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--expected-candidates", type=int, default=10)
     parser.add_argument("--view-huber-delta", type=float, default=2.0)
+    parser.add_argument(
+        "--view-fusion",
+        choices=("robust_log_odds", "positive_unknown_noisy_or"),
+        default="robust_log_odds",
+    )
+    parser.add_argument("--device", default="cpu")
     report = run(parser.parse_args(argv))
     print(json.dumps({"receipt": report["receipt"]}, sort_keys=True))
     return 0

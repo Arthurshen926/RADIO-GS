@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf_frozen_l512_membership_source_gate_result",
+  "status": "all_source32_and_grid16_decoder_variants_rejected",
+  "scene": "figurines",
+  "gate": {"minimum_heldout_iou": 0.2, "minimum_gain": 0.02},
+  "authority": {
+    "fit_views": "source views whose index modulo four is nonzero",
+    "heldout_views": "source views whose index modulo four is zero",
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false,
+    "evaluation_rgb_opened": false,
+    "field_frozen": true,
+    "per_gaussian_parameters_added": false
+  },
+  "baseline": {"primitive_similarity_heldout_macro_iou": 0.11763972789049149},
+  "variants": {
+    "text_to_membership_hard_exact_mpr": {
+      "heldout_macro_iou": 0.12760651111602783,
+      "delta": 0.009966783225536346,
+      "training_iou": 0.5144906992546294,
+      "status": "source_gate_fail",
+      "checkpoint_sha256": "d7d381dbc335063330c2a0fc12814acb7ef00b3d26114851152b58ebaefb8f75"
+    },
+    "text_to_membership_cross_view_track_augmented": {
+      "heldout_macro_iou": 0.11677251011133194,
+      "delta": -0.0008672177791595459,
+      "training_iou": 0.4930562319450445,
+      "tracks": 14,
+      "tracked_proposals": 41,
+      "status": "source_gate_fail",
+      "checkpoint_sha256": "28d20187f50bd22fccd26b343fb98624e7e18967b2c9bfe7ac11a0b07a163fc2"
+    },
+    "text_to_membership_soft_exact_mpr": {
+      "heldout_macro_iou": 0.11793612688779831,
+      "delta": 0.00029639899730682373,
+      "training_iou": 0.542908936665906,
+      "status": "source_gate_fail",
+      "checkpoint_sha256": "85ea6b37c5184027272f59ab2b6d0b88a3766a35818cc5fdff5b03f0345d2761"
+    },
+    "identity_seeded_gaussian_pair_relation": {
+      "heldout_macro_iou": 0.04718894138932228,
+      "delta": -0.0704507865011692,
+      "identity_seed_hit_rate": 0.3404255319148936,
+      "training_relation_iou": 0.10247818692131686,
+      "training_same_pairs": 4032,
+      "training_different_pairs": 9544,
+      "status": "source_gate_fail",
+      "checkpoint_sha256": "e6226e3d7727561f6bd6d5edaf7bcd4f5d232ff06a7c469389d795024910c1ad"
+    },
+    "grid16_text_to_membership_hard_exact_mpr": {
+      "proposal_count": 579,
+      "heldout_macro_iou": 0.12269477546215057,
+      "delta": 0.027792707085609436,
+      "training_iou": 0.3019821840611281,
+      "status": "source_gate_fail",
+      "checkpoint_sha256": "08abc0f5a21c43451c53edf7c90f9be335986ca8cf34bc2b5fd9c9b6ee13cb7a"
+    },
+    "grid16_identity_seeded_gaussian_pair_relation": {
+      "proposal_count": 579,
+      "heldout_macro_iou": 0.060162629932165146,
+      "delta": -0.03473943844437599,
+      "identity_seed_hit_rate": 0.28,
+      "training_relation_iou": 0.083153929043956,
+      "training_same_pairs": 14276,
+      "training_different_pairs": 55636,
+      "status": "source_gate_fail",
+      "checkpoint_sha256": "442828430c6da0035275857b293c348717b8767365e63a2f340486c381685a3c"
+    }
+  },
+  "implementation_correction": {
+    "old_problem": "torch.isin over million-row visible and support tensors made evaluation appear hung",
+    "replacement": "dense boolean visible_membership_target lookup with O(N+support) work",
+    "million_row_smoke_seconds": 0.54,
+    "result_interpretation_changed": false
+  },
+  "conclusion": "Frozen L512 contains weak learnable proposal association, but neither source32 nor the sealed 579-proposal grid16 carrier reaches the fixed heldout source gate. The grid16 direct decoder gains 0.02779 over its weaker primitive baseline but remains only 0.12269 absolute IoU; the Gaussian-pair relation regresses. No decoder variant is promoted and no benchmark threshold search is opened.",
+  "next_control": "Close the unchanged, already-positive grid16 identity-extent readout on all four LERF scenes. This tests proposal coverage as a query-independent carrier improvement without further decoder tuning."
+}

@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_capability_before_mpr_paper8_result",
+  "status": "paper8_source_gate_and_fixed_protocol_pass",
+  "method": {
+    "teacher_order": "per_view_frozen_siglip_summary_head_then_exact_mpr",
+    "deployable_order": "normalize(d512_descriptor+scene_global_decoder(l512))",
+    "query_independent": true,
+    "per_gaussian_parameters_added": false,
+    "second_persistent_field_added": false,
+    "benchmark_labels_opened_during_fit": false,
+    "benchmark_masks_opened_during_fit": false,
+    "benchmark_text_queries_opened_during_fit": false,
+    "evaluation_rgb_opened_during_fit": false
+  },
+  "paper8_macro": {
+    "baseline": {
+      "miou": {"19": 0.33535351797116164, "15": 0.3336950833122655, "10": 0.42213089674581106},
+      "macc": {"19": 0.665254952558607, "15": 0.6495418609657029, "10": 0.7387141989652519}
+    },
+    "direct_capability_ceiling": {
+      "miou": {"19": 0.3553483067914821, "15": 0.3517987626674386, "10": 0.4576892368003457},
+      "macc": {"19": 0.6695218636992689, "15": 0.662352582415131, "10": 0.7623981754444759}
+    },
+    "restored_deployable": {
+      "miou": {"19": 0.35613496241957665, "15": 0.35299786940264727, "10": 0.45953638211954173},
+      "macc": {"19": 0.6697521872873458, "15": 0.6626078732908041, "10": 0.7635596741577994}
+    },
+    "restored_minus_baseline": {
+      "miou": {"19": 0.020781444448414996, "15": 0.019302786090381725, "10": 0.037405485373730674},
+      "macc": {"19": 0.004497234728738815, "15": 0.013066012325101156, "10": 0.02484547519254733}
+    }
+  },
+  "scenes": {
+    "scene0000_00": {
+      "miou": {"baseline": [0.344412514972523, 0.3231288953748252, 0.3511552771875167], "direct": [0.3599225605725027, 0.33841698641544077, 0.3832514818870257], "restored": [0.359906460591999, 0.337594701455995, 0.38528106080072727]},
+      "source_gate": {"baseline_mean_cosine": 0.9900644421577454, "baseline_p05_cosine": 0.9777764081954956, "decoder_mean_cosine": 0.9979611039161682, "decoder_p05_cosine": 0.9956800937652588},
+      "sha256": {"direct_target": "fcd71373226287ef1b48f0e6280f3d41be673b198027878f15a6728ad66a8d63", "decoder": "1021a885e31f7c4ea04d3bd7d45cd2b65dc024102c491a4787d67d599a629851", "restored_cache": "10051e2e136f979335556dd27a2f0f40f3dbd79c704f4edb5aab752012cdcbda", "direct_result": "e2ce712c78f6fb34a06c001a7608c9aaaa17dbc31384bc6c53fb7d0c8b7be511", "restored_result": "e092a89733e3974da6e8a00762defd3488d4807d0d524a9c9b6f3163d2f82cdd"}
+    },
+    "scene0062_00": {
+      "miou": {"baseline": [0.2788680758223143, 0.27820543960092803, 0.36375232699067706], "direct": [0.30049688664652613, 0.3003689619124346, 0.39741316373487834], "restored": [0.29996509281412836, 0.3002904072067541, 0.3974495281291727]},
+      "source_gate": {"baseline_mean_cosine": 0.9961066842079163, "baseline_p05_cosine": 0.9916439056396484, "decoder_mean_cosine": 0.998928427696228, "decoder_p05_cosine": 0.9976534843444824},
+      "sha256": {"direct_target": "4bc1320484bc3d51480e81c45cfe49edfd2ad529ab7b9fda98588890acae4c50", "decoder": "99dd9ae9e0657e1de61d811e44e44dd3160eacd8a1a058b4d76f8b95a8e5561f", "restored_cache": "d53579ecf024664768e4751a9fedd5ec9861d4ed588b089627a8dffbf5ea32a6", "direct_result": "3a07095bc254f28250cc74064b1fcbf7cb0e544e37571703585e5086b9089af9", "restored_result": "95f2b9f0c1aad63dae2f1cba9d594c784cdf0f9fa4d0ad07e14cdcb9d77ab91b"}
+    },
+    "scene0070_00": {
+      "miou": {"baseline": [0.28825407097164146, 0.3054103238317792, 0.32356976142444827], "direct": [0.30177150619713305, 0.3240608327313479, 0.3541577617216422], "restored": [0.3002764586413018, 0.32225562585168754, 0.3544649425955318]},
+      "source_gate": {"baseline_mean_cosine": 0.9917057752609253, "baseline_p05_cosine": 0.9818264245986938, "decoder_mean_cosine": 0.9981105327606201, "decoder_p05_cosine": 0.9955430030822754},
+      "sha256": {"direct_target": "74a779b4ebde93bb83b1d6331de34d1a305b0d34e12435313e348f08b09a1671", "decoder": "9714e4fa519c50a67a136874b9a708ca126e860c1b08f991e161159292014fd7", "restored_cache": "42699a8a19d7654c5ced0dacae9f5217cd4e92501a45813e71d15f953b6d34d0", "direct_result": "b96ae07f5026ea6956a5bb8a7363c00a2f6efd9bee702f2b92c3371a3257e03e", "restored_result": "2cb033b51749a307cb68076336492aeb4e392f87836a608b161c79722a8cf175"}
+    },
+    "scene0097_00": {
+      "miou": {"baseline": [0.31037779235922935, 0.2935529503134053, 0.46516886076321856], "direct": [0.33902071979207715, 0.3211400911705444, 0.5146923624652823], "restored": [0.3401927101856221, 0.3230213421677601, 0.517206008561716]},
+      "source_gate": {"baseline_mean_cosine": 0.9954806566238403, "baseline_p05_cosine": 0.9895178079605103, "decoder_mean_cosine": 0.9988283514976501, "decoder_p05_cosine": 0.9973503947257996},
+      "sha256": {"direct_target": "1c4cec33e1a1bb1e54aa78064072a89cd48b4815b730289c7bf32f0ceb50adda", "decoder": "1f9d8bb629f7b8d006ab33774da4668e0fceadfb014b1589c2a37e1552579242", "restored_cache": "51b9bae2717de3e0d11b0b1d08adc2d617bababc2ad440c388db5992bd9008a9", "direct_result": "91bcf257c455cb4ceddeb6677957834eb9e1f80b595c0e5e0d57e562d3afbda3", "restored_result": "ff75b9fb3a70f2b284a111412a0409f69986c3610a42c43ce0787afe634b47da"}
+    },
+    "scene0140_00": {
+      "miou": {"baseline": [0.3174495379450043, 0.36366125993476334, 0.41866077843228067], "direct": [0.3358269602104786, 0.38795104488472243, 0.44612269795939935], "restored": [0.3363995734724502, 0.3906919895044197, 0.4486774866561884]},
+      "source_gate": {"baseline_mean_cosine": 0.9924638271331787, "baseline_p05_cosine": 0.9827702641487122, "decoder_mean_cosine": 0.9981439709663391, "decoder_p05_cosine": 0.9957495331764221},
+      "sha256": {"direct_target": "dbd0985f96f9451697b4056f3aea741906c0ba6fc859286ee01963f2da09497f", "decoder": "0e1584d66c655c5a37be2edab07d6782aa84de3f77acd6b1d3d8c39b8bd067c5", "restored_cache": "523cdc237a4760dc01e42c7ea46e07aaffe99f22a6ca54590dff5791d76eb63a", "direct_result": "5c875984a4a2bfcfb2cbca4683e389fbc0aa1cebe4166460952bbb08ed64c431", "restored_result": "b943f2ff4c283654a23c0f08fe0f4ac6f49d038f4510dd67dd4d0530c9ffe4f4"}
+    },
+    "scene0347_00": {
+      "miou": {"baseline": [0.36930010703529764, 0.351919038937559, 0.6451350776956573], "direct": [0.3996841369596816, 0.3688003338261094, 0.6931201676081873], "restored": [0.398836707557885, 0.3687907557840813, 0.6962221427582479]},
+      "source_gate": {"baseline_mean_cosine": 0.994040846824646, "baseline_p05_cosine": 0.9866011738777161, "decoder_mean_cosine": 0.9984568953514099, "decoder_p05_cosine": 0.9964383244514465},
+      "sha256": {"direct_target": "0dd1ef3d711a50ed0e2d7b30d61910c11cd4c01796e15858f3eb3f626e431cd0", "decoder": "48d15441ec5031e1c812b301145a6e10ea4ffda276d86172f6a8cce2cf8fecc8", "restored_cache": "35139e0b8efa7ca09c34e6d3daacea770032aa00dc1aac0fe2f17766b37aed5d", "direct_result": "8d02117b8d4710a4542e9f0ba1a575749e6286a25a8190534eafe26a5d7ef9f4", "restored_result": "25d31570ba60dd022e4a2cd22847838395075e15e80beff1abd0dcffcdabf324"}
+    },
+    "scene0400_00": {
+      "miou": {"baseline": [0.4212058076825665, 0.39972190082028414, 0.3769026194618603], "direct": [0.4399350319596921, 0.4025823763860884, 0.40204867823599905], "restored": [0.4462612913866482, 0.40975638421281335, 0.4067107261932421]},
+      "source_gate": {"baseline_mean_cosine": 0.9948768019676208, "baseline_p05_cosine": 0.9884133338928223, "decoder_mean_cosine": 0.9986074566841125, "decoder_p05_cosine": 0.9968230128288269},
+      "sha256": {"direct_target": "af19f3e4571b308b0cbd97c4986f16b1f09bd8b76730ea2b64063480927f4770", "decoder": "45558dae85f91451b733c2c8fd9eca340738993be8de5f4fab078a0b1ad0e632", "restored_cache": "e01280fa8ed764ffc17efaf93e474e68c6a706c7b4029a5b2d3227578517c589", "direct_result": "3cd57dc31246868d7b451cfd2e188eca23088f9ed5445ef11742ee91c68463b1", "restored_result": "81e3e2ecc9c513eff8d4a85791c729453ab08a5c934928357805f53a2ccdab46"}
+    },
+    "scene0590_00": {
+      "miou": {"baseline": [0.3529602369807165, 0.35396085768458, 0.43270247201082956], "direct": [0.3661286519937654, 0.37106947401282087, 0.470707580790351], "restored": [0.3672414047065784, 0.3715817490376669, 0.47027916126150765]},
+      "source_gate": {"baseline_mean_cosine": 0.9930590987205505, "baseline_p05_cosine": 0.9850336313247681, "decoder_mean_cosine": 0.9984962344169617, "decoder_p05_cosine": 0.9966142773628235},
+      "sha256": {"direct_target": "cd6226f4843ac1baba1ebdafe077672a863f1c2c6da5211b64bf57c80d875525", "decoder": "c0ba09aa685c8b3cff583c46e339f39fddc8b416d06f03e08c4604eb9fad428c", "restored_cache": "f16bae335688048a1bf1a54ecca7ecd4f00629c83918569ba88d4a7aa41ae827", "direct_result": "5dc8bdc55a395978a3d1b34366c5a41a3db244df5b8ad53f2228cdee13e74f5b", "restored_result": "74ef6e50437e86e0e076fc857a761e44b02d06892eb4e24b98a7c0bf1f5f3a0e"}
+    }
+  },
+  "promotion": {
+    "all_eight_source_gates_pass": true,
+    "all_three_macro_miou_splits_improve": true,
+    "all_three_macro_macc_splits_improve": true,
+    "fixed_protocol_paper8_complete": true,
+    "promoted_as_typed_categorical_compiler": true,
+    "sota_claimed": false
+  },
+  "miou_array_order": ["19", "15", "10"]
+}

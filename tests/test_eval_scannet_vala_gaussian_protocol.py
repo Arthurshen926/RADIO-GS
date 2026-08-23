@@ -5,6 +5,7 @@ import torch
 from radio_gs.scripts.eval_scannet_vala_gaussian_protocol import (
     assign_vala_pseudo_labels,
     build_official_sam_region_graph,
+    load_direct_language_score_cache,
     load_method_v1_external_query_features,
     propagate_categorical_identity_over_instance_topology,
     smooth_categorical_scores_with_region_graph,
@@ -105,6 +106,53 @@ def test_method_v1_external_query_features_are_sha_and_geometry_bound(tmp_path):
             expected_sha256=sha256_file(path),
             expected_xyz=xyz + 1.0,
             expected_dim=3,
+        )
+
+
+def test_direct_language_score_cache_is_explicitly_label_open_and_geometry_bound(
+    tmp_path,
+):
+    path = tmp_path / "direct_language_scores.pt"
+    xyz = torch.tensor([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]])
+    torch.save(
+        {
+            "schema": "radio_gs.scannet_direct_language_score_cache.v1",
+            "xyz": xyz,
+            "valid": torch.ones(2, dtype=torch.bool),
+            "direct_observed": torch.tensor([True, False]),
+            "scores_split_19": torch.zeros(2, 19),
+            "scores_split_15": torch.zeros(2, 15),
+            "scores_split_10": torch.zeros(2, 10),
+            "metadata": {
+                "artifact_type": "radio_gs_scannet_direct_language_score_cache",
+                "construction": "test",
+                "query_independent": False,
+                "evaluation_diagnostic_only": True,
+                "benchmark_masks_opened": False,
+                "benchmark_labels_opened": True,
+                "text_queries_opened": True,
+                "postprocessing": "none",
+            },
+        },
+        path,
+    )
+
+    scores, record = load_direct_language_score_cache(
+        path,
+        expected_sha256=sha256_file(path),
+        expected_xyz=xyz,
+        split_names=["19", "15", "10"],
+    )
+
+    assert scores["19"].shape == (2, 19)
+    assert record["evaluation_diagnostic_only"] is True
+    assert record["direct_observed_rows"] == 1
+    with pytest.raises(ValueError, match="xyz mismatch"):
+        load_direct_language_score_cache(
+            path,
+            expected_sha256=sha256_file(path),
+            expected_xyz=xyz + 1.0,
+            split_names=["19", "15", "10"],
         )
 
 

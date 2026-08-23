@@ -230,7 +230,13 @@ def test_exact_marginal_semantic_gate_is_shared_pre_adaptor_raw(
 ) -> None:
     raw = torch.zeros(1, 1280, 1, 2)
     raw[0, 0, 0, 1] = 2.0
-    monkeypatch.setattr(builder, "_load_bundle_feature_maps", lambda **_kwargs: raw)
+    load_arguments = {}
+
+    def load_raw(**kwargs):
+        load_arguments.update(kwargs)
+        return raw
+
+    monkeypatch.setattr(builder, "_load_bundle_feature_maps", load_raw)
     geometric = [
         {
             "gaussian_ids": torch.tensor([0, 1]),
@@ -252,6 +258,7 @@ def test_exact_marginal_semantic_gate_is_shared_pre_adaptor_raw(
     )
 
     assert geometric_counts.tolist() == [1, 1]
+    assert load_arguments["output_dtype"] == torch.float16
     assert semantic[0]["gaussian_ids"].tolist() == [1]
     purity = builder._exact_marginal_visibility_purity(
         semantic,

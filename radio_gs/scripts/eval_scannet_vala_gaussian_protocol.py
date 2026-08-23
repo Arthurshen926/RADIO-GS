@@ -338,6 +338,7 @@ def _predict_gaussian_labels(
     chunk_size: int,
     compact_feature_key: str,
     external_query_features: torch.Tensor | None = None,
+    external_score_banks: dict[str, torch.Tensor] | None = None,
     sam_region_graph: tuple[torch.Tensor, torch.Tensor] | None = None,
     sam_proposal_memberships: tuple[
         torch.Tensor, torch.Tensor, torch.Tensor, int, torch.Tensor
@@ -348,43 +349,55 @@ def _predict_gaussian_labels(
     instance_topology_stats_out: dict[str, object] | None = None,
     raw_score_banks_out: dict[str, torch.Tensor] | None = None,
 ) -> dict[str, np.ndarray]:
-    score_banks = {
-        split: torch.empty(
-            (model.num_gaussians, len(OPENGAUSSIAN_NYU40_CLASS_SPLITS[split])),
-            dtype=torch.float32,
-        )
-        for split in split_names
-    }
-    for start in tqdm(
-        range(0, model.num_gaussians, int(chunk_size)),
-        desc="Gaussian text classification",
-    ):
-        end = min(start + int(chunk_size), model.num_gaussians)
-        indices = torch.arange(start, end, device=device, dtype=torch.long)
-        with torch.no_grad():
-            if external_query_features is None:
-                decoded = _decode_gaussian_indices_1280(
-                    model,
-                    codec,
-                    indices,
-                    points_xyz=None,
-                    compact_feature_key=compact_feature_key,
-                )
-                visual = F.normalize(
-                    projection(decoded.unsqueeze(0)).squeeze(0).float(), dim=-1
-                )
-            else:
-                visual = external_query_features[start:end].to(
-                    device=device, dtype=torch.float32
-                )
-            for split in split_names:
-                class_ids = np.asarray(
-                    OPENGAUSSIAN_NYU40_CLASS_SPLITS[split], dtype=np.int32
-                )
-                logits = cosine_bank_torch(
-                    visual, split_text_embeddings[split].to(device)
-                )
-                score_banks[split][start:end] = logits.detach().float().cpu()
+    if external_score_banks is not None:
+        if external_query_features is not None or set(external_score_banks) != set(split_names):
+            raise ValueError("external score and feature caches are mutually exclusive")
+        score_banks = {
+            split: torch.as_tensor(external_score_banks[split]).detach().cpu().float().clone()
+            for split in split_names
+        }
+        for split, scores in score_banks.items():
+            expected = (
+                model.num_gaussians,
+                len(OPENGAUSSIAN_NYU40_CLASS_SPLITS[split]),
+            )
+            if scores.shape != expected or not bool(torch.isfinite(scores).all()):
+                raise ValueError(f"external split{split} score bank differs")
+    else:
+        score_banks = {
+            split: torch.empty(
+                (model.num_gaussians, len(OPENGAUSSIAN_NYU40_CLASS_SPLITS[split])),
+                dtype=torch.float32,
+            )
+            for split in split_names
+        }
+        for start in tqdm(
+            range(0, model.num_gaussians, int(chunk_size)),
+            desc="Gaussian text classification",
+        ):
+            end = min(start + int(chunk_size), model.num_gaussians)
+            indices = torch.arange(start, end, device=device, dtype=torch.long)
+            with torch.no_grad():
+                if external_query_features is None:
+                    decoded = _decode_gaussian_indices_1280(
+                        model,
+                        codec,
+                        indices,
+                        points_xyz=None,
+                        compact_feature_key=compact_feature_key,
+                    )
+                    visual = F.normalize(
+                        projection(decoded.unsqueeze(0)).squeeze(0).float(), dim=-1
+                    )
+                else:
+                    visual = external_query_features[start:end].to(
+                        device=device, dtype=torch.float32
+                    )
+                for split in split_names:
+                    logits = cosine_bank_torch(
+                        visual, split_text_embeddings[split].to(device)
+                    )
+                    score_banks[split][start:end] = logits.detach().float().cpu()
     predictions: dict[str, np.ndarray] = {}
     for split in split_names:
         scores = score_banks[split]
@@ -861,6 +874,12 @@ def load_method_v1_external_query_features(
         or metadata.get("postprocessing") != "none"
     ):
         raise ValueError("external query feature cache is not a Method-v1 cache")
+    if (
+        metadata.get("feature_space")
+        == "global_decoder_restored_direct_siglip_descriptor"
+        and metadata.get("source_gate_passed") is not True
+    ):
+        raise ValueError("restored capability cache did not pass its source gate")
     features = payload.get("summary_features", payload.get("features"))
     xyz = payload.get("xyz")
     valid = payload.get("valid")
@@ -891,6 +910,72 @@ def load_method_v1_external_query_features(
         "num_gaussians": int(features.shape[0]),
         "method_id": metadata["method_id"],
         "construction": metadata.get("construction", ""),
+    }
+
+
+def load_direct_language_score_cache(
+    path: str | Path,
+    *,
+    expected_sha256: str,
+    expected_xyz: torch.Tensor,
+    split_names: list[str],
+) -> tuple[dict[str, torch.Tensor], dict[str, object]]:
+    """Load a label-open direct-language attribution control, never a field."""
+
+    source = Path(path).expanduser().resolve()
+    if len(expected_sha256) != 64 or sha256_file(source) != expected_sha256:
+        raise ValueError("external direct-language score cache SHA-256 mismatch")
+    payload = load_trusted_checkpoint(source, map_location="cpu")
+    if not isinstance(payload, dict):
+        raise TypeError("direct-language score cache must be a mapping")
+    metadata = payload.get("metadata")
+    if (
+        payload.get("schema") != "radio_gs.scannet_direct_language_score_cache.v1"
+        or not isinstance(metadata, dict)
+        or metadata.get("artifact_type")
+        != "radio_gs_scannet_direct_language_score_cache"
+        or metadata.get("query_independent") is not False
+        or metadata.get("evaluation_diagnostic_only") is not True
+        or metadata.get("benchmark_masks_opened") is not False
+        or metadata.get("benchmark_labels_opened") is not True
+        or metadata.get("text_queries_opened") is not True
+        or metadata.get("postprocessing") != "none"
+    ):
+        raise ValueError("direct-language score-cache access contract differs")
+    xyz = payload.get("xyz")
+    valid = payload.get("valid")
+    if not isinstance(xyz, torch.Tensor) or xyz.shape != expected_xyz.shape:
+        raise ValueError("direct-language score-cache xyz shape differs")
+    if not isinstance(valid, torch.Tensor) or valid.shape != (expected_xyz.shape[0],):
+        raise ValueError("direct-language score-cache valid mask differs")
+    if not bool(valid.bool().all()):
+        raise ValueError("direct-language totality cache must define every row")
+    max_xyz_error = float(
+        (xyz.float() - expected_xyz.detach().cpu().float()).norm(dim=-1).max()
+    )
+    if max_xyz_error > 1e-6:
+        raise ValueError(f"direct-language score-cache xyz mismatch: {max_xyz_error:.3e}")
+    scores: dict[str, torch.Tensor] = {}
+    for split in split_names:
+        value = payload.get(f"scores_split_{split}")
+        expected_shape = (
+            int(expected_xyz.shape[0]),
+            len(OPENGAUSSIAN_NYU40_CLASS_SPLITS[split]),
+        )
+        if not isinstance(value, torch.Tensor) or value.shape != expected_shape:
+            raise ValueError(f"direct-language split{split} score shape differs")
+        value = value.detach().cpu().float()
+        if not bool(torch.isfinite(value).all()):
+            raise ValueError(f"direct-language split{split} scores are non-finite")
+        scores[split] = value
+    return scores, {
+        "path": str(source),
+        "sha256": expected_sha256,
+        "construction": metadata.get("construction", ""),
+        "evaluation_diagnostic_only": True,
+        "direct_observed_rows": int(
+            torch.as_tensor(payload.get("direct_observed")).bool().sum()
+        ),
     }
 
 
@@ -947,6 +1032,19 @@ def main() -> None:
         "--expected_external_query_feature_cache_sha256",
         default="",
         help="Required SHA-256 when one external cache is evaluated.",
+    )
+    parser.add_argument(
+        "--external_query_score_cache",
+        default="",
+        help=(
+            "One-scene, SHA-bound direct-language score attribution cache; "
+            "diagnostic only and mutually exclusive with a feature cache."
+        ),
+    )
+    parser.add_argument(
+        "--expected_external_query_score_cache_sha256",
+        default="",
+        help="Required SHA-256 for --external_query_score_cache.",
     )
     parser.add_argument(
         "--sam_region_feature_cache",
@@ -1041,12 +1139,18 @@ def main() -> None:
         gaussian_opacity = model.get_opacity().detach().float().cpu().numpy().reshape(-1)
         external_query_features = None
         external_query_feature_record = None
+        external_score_banks = None
+        external_score_record = None
         sam_region_graph = None
         sam_region_record = None
         sam_proposal_memberships = None
         sam_proposal_record = None
         if args.sam_region_feature_cache and args.sam_proposal_membership_cache:
             raise ValueError("select either SAM feature graph or exact proposal memberships")
+        if args.external_query_feature_cache and args.external_query_score_cache:
+            raise ValueError(
+                "external query feature and direct-language score caches are mutually exclusive"
+            )
         if args.external_query_feature_cache:
             if len(scenes) != 1:
                 raise ValueError(
@@ -1061,6 +1165,20 @@ def main() -> None:
                     expected_sha256=args.expected_external_query_feature_cache_sha256,
                     expected_xyz=model.get_xyz(),
                     expected_dim=int(split_text_embeddings[split_names[0]].shape[1]),
+                )
+            )
+        if args.external_query_score_cache:
+            if len(scenes) != 1:
+                raise ValueError(
+                    "SHA-bound direct-language scores currently require one scene per run"
+                )
+            score_path = _format_scene_path(args.external_query_score_cache, scene)
+            external_score_banks, external_score_record = (
+                load_direct_language_score_cache(
+                    score_path,
+                    expected_sha256=args.expected_external_query_score_cache_sha256,
+                    expected_xyz=model.get_xyz(),
+                    split_names=split_names,
                 )
             )
         if args.sam_region_feature_cache:
@@ -1149,6 +1267,7 @@ def main() -> None:
             chunk_size=args.feature_chunk_size,
             compact_feature_key=args.compact_feature_key,
             external_query_features=external_query_features,
+            external_score_banks=external_score_banks,
             sam_region_graph=sam_region_graph,
             sam_proposal_memberships=(
                 None if args.score_cache_only else sam_proposal_memberships
@@ -1250,9 +1369,13 @@ def main() -> None:
             "opengaussian_row_unweighted": row_metrics,
             "prediction_npz": str(prediction_path),
             "query_feature_source": (
-                external_query_feature_record
-                if external_query_feature_record is not None
-                else {"source": "decoded_geometry_checkpoint"}
+                external_score_record
+                if external_score_record is not None
+                else (
+                    external_query_feature_record
+                    if external_query_feature_record is not None
+                    else {"source": "decoded_geometry_checkpoint"}
+                )
             ),
             "sam_region_readout": (
                 {
@@ -1290,9 +1413,13 @@ def main() -> None:
             "text_encoder": args.text_encoder,
             "prompt_templates": prompt_templates,
             "primitive_readout": (
-                "external_method_v1_query_feature_cache"
-                if args.external_query_feature_cache
-                else "decoded_geometry_checkpoint"
+                "external_direct_language_score_attribution_cache"
+                if args.external_query_score_cache
+                else (
+                    "external_method_v1_query_feature_cache"
+                    if args.external_query_feature_cache
+                    else "decoded_geometry_checkpoint"
+                )
             ),
         },
         "args": {key: str(value) for key, value in vars(args).items()},

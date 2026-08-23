@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_native_all_view_box_full8_result",
+  "status": "complete_development_cold_start_compiler_closure",
+  "claim_boundary": {
+    "development_only": true,
+    "target_rgb_assisted": true,
+    "target_masks_used_for_prediction": false,
+    "sota_claim": false,
+    "historical_ludvig_authority_used": false
+  },
+  "method": {
+    "identity_owner": "sealed_method_v1_signed_field",
+    "extent_owner": "frozen_official_sam3_200_box_proposals_per_registered_view",
+    "proposal_selection": "signed_evidence_then_coarse_overlap_then_sam_score_without_target_metric",
+    "registration": "exact_image_space_adjoint_to_current_gaussian_carrier",
+    "unconditional_view_fusion": "positive_unknown_noisy_or",
+    "risk_limiter": "frozen_component_local_identity_density_0.05_delete_only",
+    "persistent_query_state": false
+  },
+  "same_run_target_only": {
+    "macro_foreground_iou": 0.8174280204569635,
+    "per_scene_foreground_iou": {
+      "fern": 0.8306126687217542,
+      "flower": 0.9682032428286974,
+      "fortress": 0.9753480688500596,
+      "horns_center": 0.6968327630571213,
+      "horns_left": 0.6848395933049336,
+      "leaves": 0.6382292018376816,
+      "orchids": 0.8804198409289341,
+      "trex": 0.8649387841265262
+    }
+  },
+  "native_unconditional_all_view": {
+    "macro_foreground_iou": 0.8138508785749956,
+    "macro_pixel_accuracy": 0.9690566393964016,
+    "delta_iou_vs_same_run_target_only": -0.0035771418819679,
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/nvos_native_all_view_box_v1/full8_result.json",
+      "sha256": "f82e5557b6d20861b21eaa42f582c09c9edf6e0931a7325508c5cbf4083a0d45"
+    },
+    "promotion": false,
+    "decision": "complete native compiler evidence, but unconditional source-view union regresses the macro"
+  },
+  "native_all_view_component_local": {
+    "macro_foreground_iou": 0.8262392400974579,
+    "macro_pixel_accuracy": 0.9707803443726006,
+    "delta_iou_vs_unconditional_all_view": 0.0123883615224623,
+    "delta_iou_vs_same_run_target_only": 0.0088112196404944,
+    "per_scene_foreground_iou": {
+      "fern": 0.8331677196915965,
+      "flower": 0.9673829373002283,
+      "fortress": 0.98053579821123,
+      "horns_center": 0.6879196003408691,
+      "horns_left": 0.6828796792058276,
+      "leaves": 0.7240690778380068,
+      "orchids": 0.8800930686086741,
+      "trex": 0.8538660395832299
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/nvos_native_all_view_box_component_local_authority_replay_v1/full8_result.json",
+      "sha256": "9014bd4a066e056133558bd27c944d55037b0b328c6d4254381ec184f8ef57ec"
+    },
+    "chronology": "authority-bound deterministic replay after the unconditional development metrics were opened",
+    "operator_and_threshold_pre_frozen": true,
+    "prediction_batch_fully_sealed_before_first_target_mask_open": false,
+    "promotion": false,
+    "decision": "positive mechanism evidence, but it does not beat the already retained target-only component-local development row and has scene regressions"
+  },
+  "historical_controls": {
+    "target_only_box_macro_iou": 0.817616763357676,
+    "target_only_component_local_macro_iou": 0.8265075707970202,
+    "ludvig_assisted_reliability_gated_macro_iou": 0.91623
+  },
+  "conclusion": "The missing native all-view execution seam is closed. Official SAM regions plus field identity recover the 0.81-0.83 regime without LUDVIG, and the frozen local identity limiter removes source-view instance leakage. The remaining 0.09 gap to the historical ceiling is candidate identity/transport authority; unconditional registered-view fusion is not promoted."
+}

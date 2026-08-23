@@ -36,6 +36,47 @@ class SynchronousMultiviewCandidateMarginal:
     view_digests: tuple[str, ...]
 
 
+def fuse_positive_unknown_views(
+    view_probability: torch.Tensor,
+    view_log_precision: torch.Tensor,
+    *,
+    decision_boundary: float = 0.5,
+) -> torch.Tensor:
+    """Fuse complementary positive detections while preserving unknown.
+
+    A registered view contributes positive object support only where its SAM
+    posterior crosses the frozen binary decision boundary.  A lower value is
+    not automatically background evidence: the object can be occluded or the
+    proposal can miss a visible part.  Positive detections are independent
+    coverage events and are therefore composed by noisy-OR.  Query-independent
+    exact-renderer precision is used as relative reliability without forcing
+    the views to divide one unit of authority between them.
+    """
+
+    fields = torch.as_tensor(view_probability)
+    precision = torch.as_tensor(
+        view_log_precision, device=fields.device, dtype=fields.dtype
+    )
+    if fields.ndim != 2 or not fields.is_floating_point() or fields.shape[0] <= 0:
+        raise QueryAbstention("view probabilities must be floating [V,N]")
+    if precision.shape != (fields.shape[0],):
+        raise QueryAbstention("view precision axis differs")
+    if not bool(torch.isfinite(fields).all()) or bool(
+        ((fields < 0) | (fields > 1)).any()
+    ):
+        raise QueryAbstention("view probabilities are not finite in [0,1]")
+    if not bool(torch.isfinite(precision).all()):
+        raise QueryAbstention("view precision is absent or nonfinite")
+    if not 0.0 < float(decision_boundary) < 1.0:
+        raise ValueError("decision_boundary must lie in (0,1)")
+    relative_reliability = torch.exp(precision - precision.max()).clamp(0, 1)
+    positive = torch.where(
+        fields >= float(decision_boundary), fields, torch.zeros_like(fields)
+    )
+    positive = positive * relative_reliability[:, None]
+    return (1.0 - torch.prod(1.0 - positive, dim=0)).clamp(0, 1)
+
+
 def _validate_digests(values: Sequence[str], count: int, label: str) -> tuple[str, ...]:
     digests = tuple(str(value).lower() for value in values)
     if len(digests) != count or len(set(digests)) != count:
@@ -209,5 +250,6 @@ __all__ = [
     "QueryAbstention",
     "SynchronousMultiviewCandidateMarginal",
     "deterministic_visible_signed_points",
+    "fuse_positive_unknown_views",
     "marginalize_synchronous_multiview_candidates",
 ]

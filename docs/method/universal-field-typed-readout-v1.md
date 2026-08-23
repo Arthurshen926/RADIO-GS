@@ -22,6 +22,63 @@ The field and readout solve different problems:
 Primitive Readout-v0 remains the causal baseline.  The following typed
 readouts are the promoted method.
 
+## Capability-before-aggregation compiler
+
+Frozen capability operators are generally nonlinear, so their order relative
+to multi-view lifting is part of the method rather than an implementation
+detail.  For source-view RADIO tokens $f_{vx}$, exact compositor responsibility
+$w_{gvx}$, and a frozen capability head $h$, the canonical capability target is
+
+\[
+c_g^{\mathrm{direct}}=
+\operatorname{norm}\!\left(
+\frac{\sum_{v,x}w_{gvx}h(\operatorname{norm}(f_{vx}))}
+     {\sum_{v,x}w_{gvx}}
+\right).
+\]
+
+The former primitive readout instead approximated this target with
+
+\[
+h\!\left(\operatorname{norm}\!\left(
+\frac{\sum_{v,x}w_{gvx}f_{vx}}{\sum_{v,x}w_{gvx}}
+\right)\right),
+\]
+
+which is not equal to the first expression for a nonlinear $h$.  This is a
+task-statistic loss, not category calibration and not evidence that D512/L512
+lacks raw reconstruction capacity.
+
+The field-compatible realization retains the one persistent L512/D512 state
+and learns a query-independent, scene-global residual decoder
+
+\[
+\hat c_g=\operatorname{norm}\left(c_g^{\mathrm{D512}}+r_\theta(z_g)\right).
+\]
+
+The output layer is zero initialized, so step zero reproduces the deployed
+descriptor exactly.  Training opens only source-view frozen features and the
+exact-MPR authority; benchmark labels, masks, text queries and evaluation RGB
+remain closed.  A deterministic Gaussian-row holdout must improve both mean
+and fifth-percentile cosine before the decoder can be evaluated.  Rows not
+observed by the direct source teacher retain the deployed D512 descriptor
+bit-for-bit.  The decoder adds shared readout weights but no per-Gaussian
+state or second semantic field.
+
+On the frozen ScanNet paper8 cohort, the direct target improves the
+same-readout 19/15/10-class macro mIoU from
+`0.33535/0.33370/0.42213` to `0.35535/0.35180/0.45769`.  The deployable,
+source-gated residual decoder reaches `0.35613/0.35300/0.45954`, gains
+`+0.02078/+0.01930/+0.03741`, and also improves macro mAcc by
+`+0.00450/+0.01307/+0.02485`.  All eight deterministic held-out-row source
+gates pass.  A matched LERF sentinel rejects using the same
+descriptor as a task-agnostic replacement: Figurines LERF2D falls from
+`0.37021` to `0.28964` and LERF3D from `0.44840` to `0.27927`.  The direct
+capability compiler is therefore a **typed categorical compiler** for ScanNet,
+not a new universal primitive descriptor.  Fine-grained LERF identity remains
+on the D512 identity unary plus object-extent posterior.  This paper8 result
+promotes the compiler into the method; it is not by itself a SOTA claim.
+
 ## Text identity and object extent
 
 For text query $q$, the field supplies the identity unary
@@ -235,29 +292,54 @@ temperature, bias, or background rejection.
 ## Registered prompt posterior
 
 NVOS and Available-Nine SPIn-NeRF provide registered prompts and permit the
-contract-specific transient RGB workspace.  The primary shared compiler first
-freezes exactly ten reference-frame candidates, lifts each candidate through
-the exact reference compositor adjoint, projects its soft probability and
-visibility into every registered camera, and invokes frozen official SAM3 on
-each exact captured RGB independently.  Per-view masks are registered through
-the same exact adjoint and aggregated symmetrically; filename or traversal order
-cannot change the posterior.  One source-frozen likelihood marginalizes all ten
-candidates into one Gaussian query posterior.  Missing candidates, views, or
-registration lineage, and any nonfinite evidence produce query abstention, not a
-reference-only fallback.
+contract-specific transient RGB workspace.  The promoted compiler implements
+the same identity--extent factorization as the text branch: the sealed signed
+field owns query identity, while frozen official SAM3 geometric proposals own
+object extent.  In each registered view the field support produces one padded
+box; official SAM3 produces its complete proposal set; one proposal is selected
+by signed positive inclusion and negative exclusion, with coarse-field overlap
+and SAM score used only as target-blind tie breakers.  The selected observations
+are exact-adjointed to the common Gaussian carrier.  Only positive detections
+are composed by noisy-OR; an absent detection or invisible row is unknown, not
+a negative vote.  Missing views, assignments, or nonfinite evidence abstain.
 
-The core deterministic point sampler and order-invariant robust marginal are
+The positive/unknown fusion and the rejected deterministic point control are
 implemented in
 `radio_gs/querying/synchronous_multiview_candidate_marginal.py`.  Candidate and
-view SHA-256 identities are canonicalized before accumulation.  Point signs
-must come from explicit authorized positive and negative evidence; the
-complement of an uncertain projected posterior is never treated as a negative
-scribble.  Registered views are combined in log-odds space around a
-precision-weighted median with bounded Huber influence, then candidate
-uncertainty is marginalized in probability space.  The final fixed boundary
-is posterior `>=0.5`.  The SAM3 invocation and exact multi-camera adjoint
-materializer must still close the full8/full9 pilot before this compiler has a
-reportable score.
+view SHA-256 identities are bound before accumulation.  The complete official
+region invocation layer is
+`radio_gs/scripts/build_nvos_synchronous_multiview_box_sam3_inventory.py`; it
+replays the native target-view signed margin exactly, rather than applying a
+lossy same-view `W.T/W` round trip before proposal generation.  Every view binds
+captured RGB and exact compositor assignment.  The carrier-native plan is
+`radio_gs/scripts/build_nvos_synchronous_multiview_candidate_plan.py`.  It
+exact-adjoints the sealed field prompt and official source scribbles to the
+current carrier and reprojects them to the complete source/target cohort, while
+preserving the sealed native target raster as the target observation.  The
+streaming exact-adjoint consumer is
+`radio_gs/scripts/materialize_nvos_synchronous_candidate_marginal.py`.  The
+Fern cold-start sentinel reaches `0.83340` foreground IoU and `0.94626` pixel
+accuracy, versus `0.83061` for its native target-only box observation.  It
+selects proposal 78 of 200, matching the retained target-only mechanism.
+
+The native full8 execution is complete.  Same-run target-only macro IoU is
+`0.81743`, while unconditional exact-adjoint source+target positive/unknown
+fusion reaches `0.81385`.  This rejects unconditional source union, not the
+native compiler.  Applying the already frozen component-local identity-density
+risk limiter raises the all-view result to `0.82624`.  That deterministic
+authority-bound replay is positive mechanism evidence, but was executed after
+the unconditional development metrics were opened and remains just below the
+existing target-only component-local row (`0.82651`).  It is therefore not a
+new promoted or SOTA result.  Future source-view evidence must earn local
+identity and transport authority; availability alone is not precision.
+
+The earlier point-only compiler is retained as a negative ablation.  Robust
+log-odds view fusion reached only `0.49936` Fern IoU.  Correcting missing-view
+semantics to positive/unknown noisy-OR raised it to `0.68301`, proving that the
+unknown state matters, but it remained far below box-region decoding.  Denser
+weighted-farthest point trials did not close the gap (`0.67118`).  Thus the
+region proposal, not point density or another view-fusion weight, is the core
+extent mechanism.
 
 The already completed target-frame sentinel first seals positive and negative
 field support.  Frozen official SAM then decodes box and signed-point

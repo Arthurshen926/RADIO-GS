@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf_capability_before_mpr_figurines_rejection",
+  "status": "complete_rejected_cross_task_sentinel",
+  "scene": "figurines",
+  "single_factor": "replace observed D512 query descriptors with source-view SigLIP2 summary descriptors projected before exact-MPR; retain D512 bitwise on unobserved rows",
+  "authority": {
+    "direct_target": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_direct_capability/figurines/direct_siglip_summary_exact_mpr.pt",
+      "sha256": "19a75e1dd0405ce7a902971bcfcc8afc0737b13f7029b1504f8a05b68ad13552"
+    },
+    "query_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_direct_capability/figurines/primitive_query_direct_capability.pt",
+      "sha256": "ce0f0352eb4e30c84f8e009ee9de1b36dca0b050799beabe14ab04d5484ff8d2"
+    },
+    "direct_observed_rows": 96879,
+    "fallback_rows": 71912,
+    "total_rows": 168791
+  },
+  "lerf2d": {
+    "baseline": {
+      "sample_micro_miou": 0.3702112495056312,
+      "localization_accuracy": 0.9107142857142857,
+      "result_sha256": "48e3675f769b91ae867d0512b6cd82426f17a2a0edead03e05a7b3ace47fadac"
+    },
+    "candidate": {
+      "sample_micro_miou": 0.2896353149097742,
+      "localization_accuracy": 0.8928571428571429,
+      "result_sha256": "22a05e128344fbd44b882419fb177b83ba26ce21b4ebedcba3f5570c2791d78c"
+    },
+    "delta_miou": -0.080575934595857,
+    "delta_localization_accuracy": -0.0178571428571428
+  },
+  "lerf3d": {
+    "baseline": {
+      "miou": 0.44840091466903687,
+      "acc025": 0.7857142857142857,
+      "acc050": 0.44642857142857145,
+      "result_sha256": "ac583bd03183e47cf3eafd83d0d47648df3f2997eafe393e90e4efffa28c4f73"
+    },
+    "candidate": {
+      "miou": 0.27926889061927795,
+      "acc025": 0.5357142857142857,
+      "acc050": 0.25,
+      "result_sha256": "8ce224b044857cc806ae059779ee18367998754347588545e81e73406390b83d"
+    },
+    "delta_miou": -0.16913202404975892,
+    "delta_acc025": -0.25,
+    "delta_acc050": -0.19642857142857145
+  },
+  "decision": {
+    "promote_for_lerf": false,
+    "train_lerf_residual_decoder": false,
+    "retain_for_scannet_categorical_compiler": true,
+    "interpretation": "nonlinear capability order is task-statistic dependent; broad category evidence does not replace sparse fine-grained instance identity"
+  },
+  "safety": {
+    "benchmark_masks_used_for_target_or_cache": false,
+    "text_queries_used_for_target_or_cache": false,
+    "evaluation_rgb_used_for_target_or_cache": false,
+    "same_readout_and_threshold": true
+  }
+}

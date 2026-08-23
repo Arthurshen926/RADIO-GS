@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "artifact_type": "lerf_grid16_proposal_density_full4_rejection",
+  "status": "complete_full4_rejected_joint_2d_3d_gate",
+  "single_factor": {
+    "name": "official_sam3_full_image_points_per_side",
+    "candidate": 16,
+    "unchanged": [
+      "source_view_count_32",
+      "exact_marginal_mpr",
+      "official_siglip2_crop_summary_teacher",
+      "identity_extent_typed_posterior",
+      "fixed_threshold_0.6",
+      "evaluation_contract"
+    ]
+  },
+  "full4": {
+    "samples": 208,
+    "lerf2d": {
+      "retained_sample_micro_miou": 0.3958417415,
+      "grid16_sample_micro_miou": 0.38884351030574404,
+      "delta_sample_micro_miou": -0.006998231194255944,
+      "retained_scene_macro_miou": 0.3975628044,
+      "grid16_scene_macro_miou": 0.3910995287232405,
+      "delta_scene_macro_miou": -0.006463275676759473,
+      "sample_micro_localization_accuracy": 0.8798076923076923,
+      "localization_delta": 0.0
+    },
+    "lerf3d": {
+      "retained_sample_micro_miou": 0.3968358606,
+      "grid16_sample_micro_miou": 0.3565743307654674,
+      "delta_sample_micro_miou": -0.04026152983453263,
+      "retained_scene_macro_miou": 0.3909500763,
+      "grid16_scene_macro_miou": 0.3553703874349594,
+      "delta_scene_macro_miou": -0.03557968886504059,
+      "grid16_acc025": 0.5576923076923077,
+      "grid16_acc050": 0.35096153846153844
+    }
+  },
+  "scenes": {
+    "figurines": {
+      "samples": 56,
+      "lerf2d_miou": 0.4006480362094349,
+      "lerf2d_delta_vs_retained": -0.025596131990565096,
+      "lerf3d_miou": 0.45401519536972046,
+      "lerf3d_delta_vs_retained": -0.062480866930279544,
+      "lerf2d_report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260820/lerf_sam_siglip_object_posterior_grid16_v1/lerf2d/figurines_eval/lerf_ovs_results.json", "sha256": "01a97e03d2991b36f0643d07c3adf9a2d15f37030508ec5cde44eb2d4835e26f"},
+      "lerf3d_report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260820/lerf_sam_siglip_object_posterior_grid16_v1/lerf3d/figurines/figurines/lerf_direct_3d_selection_results.json", "sha256": "baf738ead7572977724f11cd0b9c0cf18571078f5ff5b35b56cd995c01560f94"}
+    },
+    "ramen": {
+      "samples": 71,
+      "lerf2d_miou": 0.37114713871030286,
+      "lerf2d_delta_vs_retained": -0.0010350329896971489,
+      "lerf3d_miou": 0.29687774181365967,
+      "lerf3d_delta_vs_retained": -0.013680994486340359,
+      "lerf2d_report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_sam_siglip_object_posterior_grid16_v1/lerf2d/ramen_eval/lerf_ovs_results.json", "sha256": "8075b540b068ef111035bb247986b7d519d58d7048c5d8491549f622bab787ce"},
+      "lerf3d_report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_sam_siglip_object_posterior_grid16_v1/lerf3d/ramen/ramen/lerf_direct_3d_selection_results.json", "sha256": "91903090920524d531fcf886c2670cca736a1099c914802ca6c8f40cc14749c9"}
+    },
+    "teatime": {
+      "samples": 59,
+      "lerf2d_miou": 0.39606617805470207,
+      "lerf2d_delta_vs_retained": 0.00092219645470204,
+      "lerf3d_miou": 0.3489551544189453,
+      "lerf3d_delta_vs_retained": -0.06618019938105468,
+      "lerf2d_report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_sam_siglip_object_posterior_grid16_v1/lerf2d/teatime_eval/lerf_ovs_results.json", "sha256": "d7f86fd463ea54eb78bfeb6d8e06b625a5da5c5431c6cebd959e6ee30011dfdc"},
+      "lerf3d_report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_sam_siglip_object_posterior_grid16_v1/lerf3d/teatime/teatime/lerf_direct_3d_selection_results.json", "sha256": "3b0d65e773a937476e0dc6373376a908985d189116d26e323ac15eaa6a436ea6"}
+    },
+    "waldo_kitchen": {
+      "samples": 22,
+      "lerf2d_miou": 0.39653676191852205,
+      "lerf2d_delta_vs_retained": -0.00014413428147797003,
+      "lerf3d_miou": 0.3216334581375122,
+      "lerf3d_delta_vs_retained": 0.000023305437512222138,
+      "lerf2d_report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_sam_siglip_object_posterior_grid16_v1/lerf2d/waldo_kitchen_eval/lerf_ovs_results.json", "sha256": "8fd16b524e91dd12bbccf8ab0993d4493269f893e95c1cf1ae15a933c7318008"},
+      "lerf3d_report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_sam_siglip_object_posterior_grid16_v1/lerf3d/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json", "sha256": "16dff001cb36775b4a3412fb8e80e640e1a4765d3e21ccf84268efd14368d9fb"}
+    }
+  },
+  "decision": "reject_and_keep_retained_source32_identity_extent_posterior",
+  "conclusion": "Increasing query-independent SAM proposal density does not repair instance identity. It preserves localization but increases ambiguous extents, with a 4.03-point LERF3D sample-mIoU regression. Proposal coverage is no longer a high-value optimization variable without a calibrated membership authority."
+}
