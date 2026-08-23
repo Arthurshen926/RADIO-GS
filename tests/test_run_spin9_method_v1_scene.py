@@ -8,6 +8,8 @@ import radio_gs.scripts.run_spin9_method_v1_scene as spin
 
 from radio_gs.scripts.run_spin9_method_v1_scene import (
     CAPABILITY_SHARD_CHANNELS,
+    _finetune_memory_arguments,
+    _resolve_finetune_memory_profile,
     _write_cohort_authority,
     source_feature_command,
     resolve_scene_assets,
@@ -28,11 +30,73 @@ def test_spin_source_features_use_all_rgb_at_frozen_grid() -> None:
     assert CAPABILITY_SHARD_CHANNELS == 512
 
 
-def test_spin_finetune_stages_use_exact_staged_capability_backward() -> None:
-    source = Path(spin.__file__).read_text(encoding="utf-8")
-    assert '"--staged-capability-gradient"' in source
-    assert '"--offload-capability-adaptors-after-gradient"' in source
-    assert '"--column-staged-direct-field-backward"' in source
+def test_spin_balanced_finetune_avoids_legacy_column_replay(monkeypatch) -> None:
+    monkeypatch.delenv(spin.FINETUNE_MEMORY_PROFILE_ENV, raising=False)
+    profile = _resolve_finetune_memory_profile(SimpleNamespace())
+    arguments = _finetune_memory_arguments(profile)
+
+    assert profile == "balanced"
+    assert "--staged-capability-gradient" in arguments
+    assert "--offload-capability-adaptors-after-gradient" in arguments
+    assert "--offload-optimizer-state" in arguments
+    assert "--column-staged-direct-field-backward" not in arguments
+    assert arguments[
+        arguments.index("--capability-projection-token-mlp-chunk-size") + 1
+    ] == "512"
+
+
+def test_spin_legacy_column_replay_is_explicit_opt_in(monkeypatch) -> None:
+    monkeypatch.setenv(
+        spin.FINETUNE_MEMORY_PROFILE_ENV, "legacy_low_memory"
+    )
+    profile = _resolve_finetune_memory_profile(SimpleNamespace())
+    arguments = _finetune_memory_arguments(profile)
+
+    assert profile == "legacy_low_memory"
+    assert "--column-staged-direct-field-backward" in arguments
+    assert arguments[
+        arguments.index("--capability-projection-token-mlp-chunk-size") + 1
+    ] == "64"
+
+
+def test_spin_finetune_steps_match_completed_available_nine_cohort() -> None:
+    assert spin.FINETUNE_STEPS == 64
+
+
+def test_gpu_memory_gate_waits_until_balanced_stage_has_headroom(
+    monkeypatch, capsys
+) -> None:
+    readings = iter([4096, 18432])
+    sleeps = []
+    monkeypatch.delenv(spin.MIN_FREE_GPU_MIB_ENV, raising=False)
+    monkeypatch.setattr(
+        spin, "_query_free_gpu_mib", lambda _gpu: next(readings)
+    )
+    monkeypatch.setattr(spin.time, "sleep", sleeps.append)
+
+    spin._wait_for_gpu_memory(
+        scene="fixture", stage="region_stage", gpu=3
+    )
+
+    assert sleeps == [10.0]
+    output = capsys.readouterr().out
+    assert "4096 MiB free < 18432 MiB required" in output
+    assert "memory gate passed" in output
+
+
+def test_gpu_memory_gate_does_not_block_non_finetune_stage(monkeypatch) -> None:
+    monkeypatch.setattr(
+        spin,
+        "_query_free_gpu_mib",
+        lambda _gpu: pytest.fail("non-finetune stage queried GPU memory"),
+    )
+    spin._wait_for_gpu_memory(
+        scene="fixture", stage="source_features", gpu=0
+    )
+
+
+def test_gpu_memory_gate_covers_base_field() -> None:
+    assert "base_field" in spin.GPU_MEMORY_GUARDED_STAGES
 
 
 def test_spin_scene_outside_available_nine_fails_closed() -> None:
@@ -83,7 +147,9 @@ def test_host_memory_heavy_stage_lock_wraps_only_declared_stages(
             (stage, gpu)
         ),
     )
-    args = SimpleNamespace(scene="fixture")
+    monkeypatch.setattr(spin, "_wait_for_gpu_memory", lambda **_kwargs: None)
+    monkeypatch.setattr(spin, "_query_free_gpu_mib", lambda _gpu: 65536)
+    args = SimpleNamespace(scene="fixture", gpu=0)
 
     spin._run_spin_stage(
         args, "region_stage", ["command"], gpu=True, log_dir=tmp_path

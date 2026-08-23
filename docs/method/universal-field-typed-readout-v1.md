@@ -222,6 +222,16 @@ paper8/heldout evaluation scenes.  It is mechanism evidence for constrained
 class competition, not a promoted result.  A replacement must learn one
 shared rule from legal source scenes and pass a leave-one-scene-out gate.
 
+The subsequent scene-redundant categorical-calibration branch is rejected as
+a method direction.  Its first legal three-scene LOSO test regressed source
+mIoU by `0.24576/0.26730/0.23732`, and adding scenes would improve parameter
+identifiability without addressing object membership.  The unified
+replacement is query-independent region/instance co-membership distilled into
+the Canonical Capability Feature.  ScanNet class prediction remains normalized
+text similarity plus argmax; a region operator may alter membership support or
+bounded low-margin consistency, but it may not introduce class-specific
+temperature, bias, or background rejection.
+
 ## Registered prompt posterior
 
 NVOS and Available-Nine SPIn-NeRF provide registered prompts and permit the

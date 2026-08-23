@@ -26,6 +26,19 @@ RADIO_REPO="${RADIO_REPO:-/root/RADIO}"
 RADIO_CHECKPOINT="${RADIO_CHECKPOINT:-/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar}"
 RADIO_RESOLUTION_SCALE="${RADIO_RESOLUTION_SCALE:-0.5}"
 RADIO_BATCH_SIZE="${RADIO_BATCH_SIZE:-2}"
+MPR_RENDER_BATCH_SIZE="${MPR_RENDER_BATCH_SIZE:-4}"
+MPR_VIEW_CHUNK_SIZE="${MPR_VIEW_CHUNK_SIZE:-8}"
+MPR_POINT_CHUNK_SIZE="${MPR_POINT_CHUNK_SIZE:-4096}"
+MPR_PROJECTION_BATCH_SIZE="${MPR_PROJECTION_BATCH_SIZE:-2}"
+MPR_ADJOINT_CHANNEL_CHUNK_SIZE="${MPR_ADJOINT_CHANNEL_CHUNK_SIZE:-32}"
+MPR_RASTER_CHANNEL_CHUNK_SIZE="${MPR_RASTER_CHANNEL_CHUNK_SIZE:-256}"
+FIELD_TRAIN_BATCH_SIZE="${FIELD_TRAIN_BATCH_SIZE:-4096}"
+FIELD_EVAL_BATCH_SIZE="${FIELD_EVAL_BATCH_SIZE:-16384}"
+FIELD_LOCAL_CODE_DTYPE="${FIELD_LOCAL_CODE_DTYPE:-float32}"
+FINETUNE_MPR_BATCH_SIZE="${FINETUNE_MPR_BATCH_SIZE:-4096}"
+FINETUNE_MPR_VALIDATION_ROWS="${FINETUNE_MPR_VALIDATION_ROWS:-32768}"
+FINETUNE_SEMANTIC_PROJECTION_BATCH_SIZE="${FINETUNE_SEMANTIC_PROJECTION_BATCH_SIZE:-2048}"
+CAPABILITY_VIEW_BATCH_SIZE="${CAPABILITY_VIEW_BATCH_SIZE:-2048}"
 # The default preserves the frozen low-resolution baseline.  The explicit
 # official_extracted route materializes C-RADIO's native DINO/SAM maps before
 # they are resampled for Gaussian registration; it is a versioned field
@@ -96,6 +109,8 @@ WRITE_TERMINAL="${WRITE_TERMINAL:-1}"
 # completed.  A per-scene terminal makes the queue resume-safe after pruning.
 PRUNE_REGENERABLE_INTERMEDIATES="${PRUNE_REGENERABLE_INTERMEDIATES:-0}"
 GPU_IDLE_CONFIRMATIONS="${GPU_IDLE_CONFIRMATIONS:-2}"
+GPU_START_MAX_USED_MIB="${GPU_START_MAX_USED_MIB:-1200}"
+GPU_START_MAX_UTIL_PERCENT="${GPU_START_MAX_UTIL_PERCENT:-10}"
 
 case "$PRUNE_REGENERABLE_INTERMEDIATES" in
   0|false|False|FALSE)
@@ -113,12 +128,44 @@ case "$PRUNE_REGENERABLE_INTERMEDIATES" in
     exit 2
     ;;
 esac
-if (( GPU_IDLE_CONFIRMATIONS <= 0 )); then
-  echo "GPU_IDLE_CONFIRMATIONS must be positive" >&2
+integer_knobs=(
+  GPU_IDLE_CONFIRMATIONS GPU_START_MAX_USED_MIB GPU_START_MAX_UTIL_PERCENT
+  RADIO_BATCH_SIZE MPR_RENDER_BATCH_SIZE MPR_VIEW_CHUNK_SIZE
+  MPR_POINT_CHUNK_SIZE MPR_PROJECTION_BATCH_SIZE
+  MPR_ADJOINT_CHANNEL_CHUNK_SIZE MPR_RASTER_CHANNEL_CHUNK_SIZE
+  FIELD_TRAIN_BATCH_SIZE FIELD_EVAL_BATCH_SIZE FINETUNE_MPR_BATCH_SIZE
+  FINETUNE_MPR_VALIDATION_ROWS FINETUNE_SEMANTIC_PROJECTION_BATCH_SIZE
+  CAPABILITY_VIEW_BATCH_SIZE
+)
+for knob in "${integer_knobs[@]}"; do
+  value="${!knob}"
+  if [[ ! "$value" =~ ^[0-9]+$ ]] || (( value <= 0 )); then
+    echo "$knob must be a positive integer" >&2
+    exit 2
+  fi
+done
+if (( GPU_START_MAX_UTIL_PERCENT > 101 )); then
+  echo "GPU_START_MAX_UTIL_PERCENT must be at most 101" >&2
   exit 2
 fi
+case "$FIELD_LOCAL_CODE_DTYPE" in
+  float32|float16) ;;
+  *)
+    echo "FIELD_LOCAL_CODE_DTYPE must be float32 or float16" >&2
+    exit 2
+    ;;
+esac
 
 mkdir -p "$RUN_ROOT/logs" "$GEOMETRY_ROOT" "$FEATURE_ROOT" "$CONTRACT_ROOT" "$FIELD_OUTPUT_ROOT"
+
+mpr_resource_args=(
+  --render-batch-size "$MPR_RENDER_BATCH_SIZE"
+  --view-chunk-size "$MPR_VIEW_CHUNK_SIZE"
+  --point-chunk-size "$MPR_POINT_CHUNK_SIZE"
+  --projection-batch-size "$MPR_PROJECTION_BATCH_SIZE"
+  --adjoint-channel-chunk-size "$MPR_ADJOINT_CHANNEL_CHUNK_SIZE"
+  --raster-channel-chunk-size "$MPR_RASTER_CHANNEL_CHUNK_SIZE"
+)
 
 wait_for_gpu_on() {
   local device="${1:?set a physical GPU index}"
@@ -130,7 +177,7 @@ wait_for_gpu_on() {
     util="${values##*,}"
     used="${used// /}"
     util="${util// /}"
-    if (( used < 1200 && util < 10 )); then
+    if (( used < GPU_START_MAX_USED_MIB && util < GPU_START_MAX_UTIL_PERCENT )); then
       available=$((available + 1))
     else
       available=0
@@ -178,6 +225,7 @@ by_name = {
     for item in adaptors
     if isinstance(item, dict)
 }
+
 for name in ("dino_v3_7b", "sam3"):
     item = by_name.get(name)
     if item is None:
@@ -186,6 +234,48 @@ for name in ("dino_v3_7b", "sam3"):
     if not subdir or not (root / subdir).is_dir():
         raise SystemExit(f"official {name} adaptor directory is missing")
 PY
+}
+
+sha256_file() {
+  sha256sum -- "$1" | awk '{print $1}'
+}
+
+seal_and_print_feature_bundle_sha256() {
+  local feature_dir="${1:?set a RADIO feature directory}"
+  local manifest="$feature_dir/frame_manifest.json"
+  local bundle_sha
+  bundle_sha="$(
+    FEATURE_MANIFEST="$manifest" bash radio_gs/scripts/run_repo_python.sh - <<'PY'
+import json
+import os
+from pathlib import Path
+payload = json.loads(Path(os.environ["FEATURE_MANIFEST"]).read_text(encoding="utf-8"))
+print(str(payload.get("output_bundle_sha256", "")))
+PY
+  )"
+  if [[ ! "$bundle_sha" =~ ^[0-9a-f]{64}$ ]]; then
+    local manifest_sha
+    manifest_sha="$(sha256_file "$manifest")"
+    bash radio_gs/scripts/run_repo_python.sh \
+      radio_gs/scripts/seal_legacy_radio_feature_bundle.py \
+      --feature-dir "$feature_dir" \
+      --expected-legacy-manifest-sha256 "$manifest_sha" \
+      >"$feature_dir/legacy_reseal.log" 2>&1
+    bundle_sha="$(
+      FEATURE_MANIFEST="$manifest" bash radio_gs/scripts/run_repo_python.sh - <<'PY'
+import json
+import os
+from pathlib import Path
+payload = json.loads(Path(os.environ["FEATURE_MANIFEST"]).read_text(encoding="utf-8"))
+print(str(payload.get("output_bundle_sha256", "")))
+PY
+    )"
+  fi
+  if [[ ! "$bundle_sha" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "feature bundle did not yield a formal SHA-256 authority: $feature_dir" >&2
+    return 2
+  fi
+  printf '%s\n' "$bundle_sha"
 }
 
 mapfile -t SCENES < <(
@@ -357,6 +447,7 @@ for scene in "${SCENES[@]}"; do
       "${radio_args[@]}" >"$RUN_ROOT/logs/${scene}.radio.log" 2>&1
   fi
   validate_feature_manifest "$feature_dir"
+  feature_bundle_sha256="$(seal_and_print_feature_bundle_sha256 "$feature_dir")"
 
   validation_frames="$(
     bash radio_gs/scripts/run_repo_python.sh \
@@ -408,6 +499,7 @@ PY
       --observation-contract "$OBSERVATION_CONTRACT" \
       >"$RUN_ROOT/logs/${scene}.render_contract.log" 2>&1
   fi
+  geometry_checkpoint_sha256="$(sha256_file "$checkpoint")"
 
   # PFPR's fixed 5 cm candidate domain is public and geometry-only.  Audit
   # the all-Gaussian ceiling after the render contract exists but before any
@@ -458,9 +550,15 @@ PY
       --observation-contract "$MPR_OBSERVATION_CONTRACT" \
       --feature-space radio \
       --exclude-frame-ids "$validation_frames" \
+      --expected-feature-scene "$scene" \
+      --expected-feature-image-dir "$scene_root/color" \
+      --expected-feature-output-bundle-sha256 "$feature_bundle_sha256" \
+      --expected-geometry-checkpoint-sha256 "$geometry_checkpoint_sha256" \
       --save-responsibility-cache "$responsibility" \
+      "${mpr_resource_args[@]}" \
       >"$RUN_ROOT/logs/${scene}.mpr_raw.log" 2>&1
   fi
+  responsibility_sha256="$(sha256_file "$responsibility")"
 
   # A geometry rebuild must prove that all of its Gaussian support can cover
   # the released 5 cm scene domain *before* we spend GPU time reconstructing
@@ -533,7 +631,13 @@ PY
       --radio-checkpoint "$RADIO_CHECKPOINT" \
       --capability-map-source "$CAPABILITY_MAP_SOURCE" \
       --exclude-frame-ids "$validation_frames" \
+      --expected-feature-scene "$scene" \
+      --expected-feature-image-dir "$scene_root/color" \
+      --expected-feature-output-bundle-sha256 "$feature_bundle_sha256" \
+      --expected-geometry-checkpoint-sha256 "$geometry_checkpoint_sha256" \
       --responsibility-cache "$responsibility" \
+      --expected-responsibility-cache-sha256 "$responsibility_sha256" \
+      "${mpr_resource_args[@]}" \
       >"$RUN_ROOT/logs/${scene}.mpr_dino.log" 2>&1 &
     dino_pid=$!
     CUDA_VISIBLE_DEVICES="$CAPABILITY_MPR_PARALLEL_GPU" bash radio_gs/scripts/run_repo_python.sh \
@@ -547,7 +651,13 @@ PY
       --radio-checkpoint "$RADIO_CHECKPOINT" \
       --capability-map-source "$CAPABILITY_MAP_SOURCE" \
       --exclude-frame-ids "$validation_frames" \
+      --expected-feature-scene "$scene" \
+      --expected-feature-image-dir "$scene_root/color" \
+      --expected-feature-output-bundle-sha256 "$feature_bundle_sha256" \
+      --expected-geometry-checkpoint-sha256 "$geometry_checkpoint_sha256" \
       --responsibility-cache "$responsibility" \
+      --expected-responsibility-cache-sha256 "$responsibility_sha256" \
+      "${mpr_resource_args[@]}" \
       >"$RUN_ROOT/logs/${scene}.mpr_sam3.log" 2>&1 &
     sam3_pid=$!
     dino_status=0
@@ -573,7 +683,13 @@ PY
       --radio-checkpoint "$RADIO_CHECKPOINT" \
       --capability-map-source "$CAPABILITY_MAP_SOURCE" \
       --exclude-frame-ids "$validation_frames" \
+      --expected-feature-scene "$scene" \
+      --expected-feature-image-dir "$scene_root/color" \
+      --expected-feature-output-bundle-sha256 "$feature_bundle_sha256" \
+      --expected-geometry-checkpoint-sha256 "$geometry_checkpoint_sha256" \
       --responsibility-cache "$responsibility" \
+      --expected-responsibility-cache-sha256 "$responsibility_sha256" \
+      "${mpr_resource_args[@]}" \
       >"$RUN_ROOT/logs/${scene}.mpr_dino.log" 2>&1
   fi
 
@@ -590,7 +706,13 @@ PY
       --radio-checkpoint "$RADIO_CHECKPOINT" \
       --capability-map-source "$CAPABILITY_MAP_SOURCE" \
       --exclude-frame-ids "$validation_frames" \
+      --expected-feature-scene "$scene" \
+      --expected-feature-image-dir "$scene_root/color" \
+      --expected-feature-output-bundle-sha256 "$feature_bundle_sha256" \
+      --expected-geometry-checkpoint-sha256 "$geometry_checkpoint_sha256" \
       --responsibility-cache "$responsibility" \
+      --expected-responsibility-cache-sha256 "$responsibility_sha256" \
+      "${mpr_resource_args[@]}" \
       >"$RUN_ROOT/logs/${scene}.mpr_sam3.log" 2>&1
   fi
 
@@ -609,6 +731,9 @@ PY
       --official-capability-loss \
       --dino-mpr-cache "$dino_mpr" \
       --sam3-mpr-cache "$sam3_mpr" \
+      --batch-size "$FIELD_TRAIN_BATCH_SIZE" \
+      --eval-batch-size "$FIELD_EVAL_BATCH_SIZE" \
+      --local-code-training-dtype "$FIELD_LOCAL_CODE_DTYPE" \
       --epochs 20 \
       --min-epochs 5 \
       --target-cosine 0.985 \
@@ -634,6 +759,9 @@ PY
       --capability-local-affinity-weight "$CAPABILITY_LOCAL_AFFINITY_WEIGHT" \
       --capability-local-radius "$CAPABILITY_LOCAL_RADIUS" \
       --capability-local-balance-quantile "$CAPABILITY_LOCAL_BALANCE_QUANTILE" \
+      --mpr-batch-size "$FINETUNE_MPR_BATCH_SIZE" \
+      --mpr-validation-rows "$FINETUNE_MPR_VALIDATION_ROWS" \
+      --semantic-projection-batch-size "$FINETUNE_SEMANTIC_PROJECTION_BATCH_SIZE" \
       --train-fusion \
       --validation-frame-ids "$validation_frames" \
       --selection-policy "$FIELD_SELECTION_POLICY" \
@@ -651,7 +779,7 @@ PY
       --mpr-cache "$raw_mpr" \
       --radio-checkpoint "$RADIO_CHECKPOINT" \
       --output "$capability" \
-      --batch-size 2048 \
+      --batch-size "$CAPABILITY_VIEW_BATCH_SIZE" \
       --device cuda:0 \
       >"$RUN_ROOT/logs/${scene}.capability.log" 2>&1
   fi

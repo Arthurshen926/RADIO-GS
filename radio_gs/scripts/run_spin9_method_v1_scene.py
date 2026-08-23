@@ -17,6 +17,7 @@ import fcntl
 import json
 import os
 from pathlib import Path
+import subprocess
 import time
 from typing import Iterable
 
@@ -63,7 +64,20 @@ CAPABILITY_SHARD_CHANNELS = 512
 HOST_MEMORY_STAGE_LOCK = Path("/tmp/radio_gs_spin9_host_memory_stage.lock")
 SCENE_RUN_LOCK_NAME = ".run_spin9_method_v1_scene.lock"
 HOST_MEMORY_STAGE_SLOTS_ENV = "RADIO_GS_SPIN9_HOST_MEMORY_SLOTS"
+FINETUNE_MEMORY_PROFILE_ENV = "RADIO_GS_SPIN9_FINETUNE_MEMORY_PROFILE"
+MIN_FREE_GPU_MIB_ENV = "RADIO_GS_SPIN9_MIN_FREE_GPU_MIB"
 DEFAULT_HOST_MEMORY_STAGE_SLOTS = 2
+DEFAULT_FINETUNE_MEMORY_PROFILE = "balanced"
+# A one-step pilot fit with roughly 10 GiB free, but a 64-step run later lost
+# headroom when the co-resident workload expanded. Admit only on a nearly free
+# 24-GiB device; this leaves room for both the measured field peak and normal
+# allocator/external-process variation.
+DEFAULT_MIN_FREE_GPU_MIB = 18432
+FINETUNE_STEPS = 64
+FINETUNE_MEMORY_PROFILES = frozenset({"balanced", "legacy_low_memory"})
+GPU_MEMORY_GUARDED_STAGES = frozenset(
+    {"base_field", "siglip_stage", "region_stage", "generic_stage"}
+)
 HOST_MEMORY_HEAVY_STAGES = frozenset(
     {
         "factorized_mpr",
@@ -89,6 +103,110 @@ class SceneAssets:
     feature_height: int
     feature_width: int
     resolution_scale: float = 1.0
+
+
+def _resolve_finetune_memory_profile(args: argparse.Namespace) -> str:
+    """Choose the execution profile without silently enabling legacy replay.
+
+    ``legacy_low_memory`` exists only to reproduce the old 24-GiB emergency
+    route.  It re-rasterizes every coefficient column group during backward
+    and is therefore intentionally opt-in.  The balanced profile retains the
+    exact staged frozen-head gradient and CPU Adam moments, but uses one normal
+    autograd raster graph and keeps the local-code table resident on the GPU.
+    """
+
+    requested = getattr(args, "finetune_memory_profile", None)
+    profile = str(
+        requested
+        or os.environ.get(
+            FINETUNE_MEMORY_PROFILE_ENV, DEFAULT_FINETUNE_MEMORY_PROFILE
+        )
+    )
+    if profile not in FINETUNE_MEMORY_PROFILES:
+        choices = ", ".join(sorted(FINETUNE_MEMORY_PROFILES))
+        raise ValueError(
+            f"finetune memory profile must be one of {choices}; got {profile!r}"
+        )
+    return profile
+
+
+def _finetune_memory_arguments(profile: str) -> list[str]:
+    """Return numerically equivalent memory/runtime controls for one profile."""
+
+    if profile not in FINETUNE_MEMORY_PROFILES:
+        raise ValueError(f"unknown finetune memory profile: {profile}")
+    token_chunk = "512" if profile == "balanced" else "64"
+    arguments = [
+        "--capability-projection-token-mlp-chunk-size",
+        token_chunk,
+        "--staged-capability-gradient",
+        "--offload-capability-adaptors-after-gradient",
+        "--release-validation-cuda-cache",
+        "--offload-optimizer-state",
+        "--local-code-training-dtype",
+        "float16",
+    ]
+    if profile == "legacy_low_memory":
+        arguments.append("--column-staged-direct-field-backward")
+    return arguments
+
+
+def _minimum_free_gpu_mib() -> int:
+    raw_value = os.environ.get(
+        MIN_FREE_GPU_MIB_ENV, str(DEFAULT_MIN_FREE_GPU_MIB)
+    )
+    try:
+        value = int(raw_value)
+    except ValueError as exc:
+        raise ValueError(f"{MIN_FREE_GPU_MIB_ENV} must be an integer") from exc
+    if value < 0:
+        raise ValueError(f"{MIN_FREE_GPU_MIB_ENV} must be non-negative")
+    return value
+
+
+def _query_free_gpu_mib(gpu: int) -> int:
+    output = subprocess.check_output(
+        [
+            "nvidia-smi",
+            f"--id={gpu}",
+            "--query-gpu=memory.free",
+            "--format=csv,noheader,nounits",
+        ],
+        text=True,
+    )
+    values = [line.strip() for line in output.splitlines() if line.strip()]
+    if len(values) != 1:
+        raise RuntimeError(
+            f"expected one memory.free value for physical GPU {gpu}; got {values}"
+        )
+    return int(values[0])
+
+
+def _wait_for_gpu_memory(*, scene: str, stage: str, gpu: int) -> None:
+    """Avoid launching a balanced finetune into another process' allocation."""
+
+    if stage not in GPU_MEMORY_GUARDED_STAGES:
+        return
+    required = _minimum_free_gpu_mib()
+    announced = False
+    while True:
+        free = _query_free_gpu_mib(gpu)
+        if free >= required:
+            if announced:
+                print(
+                    f"{scene}: GPU {gpu} memory gate passed "
+                    f"({free} MiB free >= {required} MiB)",
+                    flush=True,
+                )
+            return
+        if not announced:
+            print(
+                f"{scene}: waiting for GPU {gpu} memory before {stage} "
+                f"({free} MiB free < {required} MiB required)",
+                flush=True,
+            )
+            announced = True
+        time.sleep(10.0)
 
 
 def _image_files(image_dir: Path) -> list[Path]:
@@ -233,8 +351,28 @@ def _run_spin_stage(
     gpu: bool,
     log_dir: Path,
 ) -> None:
-    with _host_memory_stage_boundary(scene=str(args.scene), stage=stage):
-        _run(args, stage, command, gpu=gpu, log_dir=log_dir)
+    while True:
+        if gpu:
+            _wait_for_gpu_memory(
+                scene=str(args.scene), stage=stage, gpu=int(args.gpu)
+            )
+        with _host_memory_stage_boundary(scene=str(args.scene), stage=stage):
+            # A host-memory slot may not be immediately available. Recheck the
+            # physical GPU after acquiring it so another process cannot fill
+            # the device in the admission-check race window.
+            if gpu and stage in GPU_MEMORY_GUARDED_STAGES:
+                free = _query_free_gpu_mib(int(args.gpu))
+                required = _minimum_free_gpu_mib()
+                if free < required:
+                    print(
+                        f"{args.scene}: GPU {args.gpu} memory changed while "
+                        f"waiting for host slot ({free} MiB free < "
+                        f"{required} MiB); retrying admission",
+                        flush=True,
+                    )
+                    continue
+            _run(args, stage, command, gpu=gpu, log_dir=log_dir)
+            return
 
 
 def resolve_scene_assets(scene: str) -> SceneAssets:
@@ -711,6 +849,11 @@ def _run_with_scene_lock(
     if stop_index == 8:
         return {"scene": assets.scene, "completed_stage": STAGES[8]}
 
+    finetune_memory_profile = _resolve_finetune_memory_profile(args)
+    print(
+        f"{assets.scene}: finetune memory profile={finetune_memory_profile}",
+        flush=True,
+    )
     finetune_common = [
         "--config",
         config,
@@ -721,7 +864,7 @@ def _run_with_scene_lock(
         "--device",
         "cuda:0",
         "--steps",
-        "256",
+        str(FINETUNE_STEPS),
         "--mpr-weight",
         "0.10",
         "--max-mpr-drop",
@@ -739,18 +882,7 @@ def _run_with_scene_lock(
         "--capability-projection-amp",
         "--capability-projection-xformers",
         "--capability-projection-checkpoint",
-        "--capability-projection-token-mlp-chunk-size",
-        # The token MLP is pointwise, so smaller exact chunks trade only
-        # runtime for peak activation memory.  This leaves enough headroom on
-        # shared 24-GiB workers for the complete-grid official adaptor.
-        "64",
-        "--staged-capability-gradient",
-        "--offload-capability-adaptors-after-gradient",
-        "--column-staged-direct-field-backward",
-        "--release-validation-cuda-cache",
-        "--offload-optimizer-state",
-        "--local-code-training-dtype",
-        "float16",
+        *_finetune_memory_arguments(finetune_memory_profile),
         "--capability-local-affinity-weight",
         "0.25",
         "--capability-local-radius",
@@ -919,6 +1051,15 @@ def main() -> None:
     parser.add_argument("--gpu", type=int, required=True)
     parser.add_argument("--run-root", default=str(DEFAULT_RUN_ROOT))
     parser.add_argument("--stop-after", choices=STAGES, default=STAGES[-1])
+    parser.add_argument(
+        "--finetune-memory-profile",
+        choices=sorted(FINETUNE_MEMORY_PROFILES),
+        default=None,
+        help=(
+            "balanced is the default fast path; legacy_low_memory explicitly "
+            "re-enables column-staged raster replay for constrained workers"
+        ),
+    )
     args = parser.parse_args()
     print(json.dumps(run(args), indent=2))
 
