@@ -69,6 +69,13 @@ def test_query_memory_makes_internal_and_canonical_levels_explicit():
         ),
         field.radio_features(rows) @ projection,
     )
+    contract = field.query_memory_contract(
+        representation="coefficients", field_sha256="a" * 64,
+        canonicalizer_sha256="b" * 64,
+    )
+    assert contract["dimension"] == 4
+    assert contract["representation"] == "coefficients"
+    assert contract["canonicalizer_sha256"] == "b" * 64
 
 
 def test_half_local_training_table_decodes_in_canonical_float_coordinates():

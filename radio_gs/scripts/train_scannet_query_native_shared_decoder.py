@@ -544,6 +544,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                     prediction_margin >= baseline_margin + float(args.decision_minimum_margin_gain)
                 )
             candidate = torch.where(selected[:, None], prediction, data["baseline"][split_index])
+            # Preserve the frozen decoder counterfactual before any eligibility
+            # decision.  A downstream selective-risk model must learn whether
+            # adopting this candidate helps; training it on already selected
+            # scores would leak the old gate into its labels.
+            score_values[f"raw_candidate_scores_split_{split}"] = prediction.float().contiguous()
+            score_values[f"baseline_scores_split_{split}"] = data["baseline"][split_index].float().contiguous()
+            score_values[f"teacher_scores_split_{split}"] = data["target"][split_index].float().contiguous()
             score_values[f"scores_split_{split}"] = candidate.float().contiguous()
             changed = _active_changed(data, split_index, bool(args.decision_preserving))[validation]
             baseline_mae = float((data["baseline"][split_index][validation][changed] - data["target"][split_index][validation][changed]).abs().mean()) if bool(changed.any()) else 0.0
@@ -611,6 +618,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "benchmark_masks_opened": False, "benchmark_labels_opened": False,
                 "text_queries_opened": True, "postprocessing": "none",
                 "source_gate_passed": False, "query_native": True,
+                "contains_frozen_counterfactual_triplet": True,
+                "counterfactual_triplet_semantics": (
+                    "baseline_raw_candidate_source_teacher_before_selection"
+                ),
                 "shared_cross_scene_decoder": file_record(model_path), "inputs": data["inputs"],
             },
         })

@@ -2,6 +2,7 @@ import torch
 
 from radio_gs.interfaces.query_packet import QueryPacket
 from radio_gs.models.query_native_gaussian_memory import (
+    CounterfactualSelectiveRiskEstimator,
     GaussianGeometry,
     LowRankSceneCanonicalizer,
     ModalityQueryAdapter,
@@ -228,3 +229,17 @@ def test_membership_training_keeps_unlabeled_visible_rows_unknown() -> None:
     assert 4 not in rows.tolist()
     assert 5 not in rows.tolist()
     assert 6 not in rows.tolist()
+
+
+def test_counterfactual_risk_estimator_has_three_explicit_outcomes() -> None:
+    estimator = CounterfactualSelectiveRiskEstimator(
+        latent_dim=7, reliability_dim=5, decision_feature_dim=9, hidden_dim=11,
+    )
+    logits = estimator(torch.randn(4, 7), torch.randn(4, 5), torch.randn(4, 9))
+    assert logits.shape == (4, 3)
+    try:
+        estimator(torch.randn(4, 8), torch.randn(4, 5), torch.randn(4, 9))
+    except ValueError as error:
+        assert "latent input differs" in str(error)
+    else:
+        raise AssertionError("bad risk-estimator latent domain was accepted")

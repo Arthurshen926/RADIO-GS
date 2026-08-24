@@ -200,6 +200,36 @@ class CanonicalGaussianField(nn.Module):
             raise ValueError("RADIO query-memory projection has incompatible shape")
         return self.radio_features(rows) @ projection
 
+    def query_memory_contract(
+        self, *, representation: str = "coefficients",
+        field_sha256: str, canonicalizer_sha256: str | None = None,
+        projected_dim: int | None = None,
+    ) -> dict[str, object]:
+        """Return the hash-bound schema for a query-facing memory tensor."""
+
+        if len(field_sha256) != 64 or any(c not in "0123456789abcdef" for c in field_sha256):
+            raise ValueError("query-memory field SHA-256 differs")
+        if canonicalizer_sha256 is not None and (
+            len(canonicalizer_sha256) != 64
+            or any(c not in "0123456789abcdef" for c in canonicalizer_sha256)
+        ):
+            raise ValueError("query-memory canonicalizer SHA-256 differs")
+        dimensions = {
+            "local_codes": int(self.local_codes.shape[1]),
+            "coefficients": int(self.decoder.coefficient_dim),
+            "radio_projected": int(projected_dim or 0),
+        }
+        if representation not in dimensions or dimensions[representation] <= 0:
+            raise ValueError("query-memory contract representation/dimension differs")
+        return {
+            "schema": "radio_gs.query_memory_contract.v1",
+            "representation": representation,
+            "dimension": dimensions[representation],
+            "num_gaussians": self.num_gaussians,
+            "field_sha256": field_sha256,
+            "canonicalizer_sha256": canonicalizer_sha256,
+        }
+
     def get_features(self) -> torch.Tensor:
         """Renderer-compatible compact coefficient rows."""
 

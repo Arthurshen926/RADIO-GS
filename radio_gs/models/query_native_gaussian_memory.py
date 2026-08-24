@@ -94,6 +94,38 @@ class LowRankSceneCanonicalizer(nn.Module):
         return latent.float() * (1.0 + scale) + shift
 
 
+class CounterfactualSelectiveRiskEstimator(nn.Module):
+    """Predict beneficial/harmful/neutral risk for a frozen score candidate.
+
+    This module never changes semantic scores.  It only estimates the
+    counterfactual risk of adopting a separately frozen candidate, keeping
+    scoring and selective deployment as identifiable components.
+    """
+
+    def __init__(
+        self, latent_dim: int = 512, reliability_dim: int = 5,
+        decision_feature_dim: int = 9, hidden_dim: int = 128,
+    ) -> None:
+        super().__init__()
+        self.latent_dim = int(latent_dim)
+        self.reliability_dim = int(reliability_dim)
+        self.decision_feature_dim = int(decision_feature_dim)
+        self.network = nn.Sequential(
+            nn.LayerNorm(self.latent_dim + self.reliability_dim + self.decision_feature_dim),
+            nn.Linear(self.latent_dim + self.reliability_dim + self.decision_feature_dim, hidden_dim),
+            nn.GELU(), nn.Linear(hidden_dim, hidden_dim), nn.GELU(), nn.Linear(hidden_dim, 3),
+        )
+
+    def forward(self, latent: torch.Tensor, reliability: torch.Tensor, decision_features: torch.Tensor) -> torch.Tensor:
+        if latent.ndim != 2 or latent.shape[1] != self.latent_dim:
+            raise ValueError("risk-estimator latent input differs")
+        if reliability.shape != (latent.shape[0], self.reliability_dim):
+            raise ValueError("risk-estimator reliability input differs")
+        if decision_features.shape != (latent.shape[0], self.decision_feature_dim):
+            raise ValueError("risk-estimator decision feature input differs")
+        return self.network(torch.cat((latent.float(), reliability.float(), decision_features.float()), dim=1))
+
+
 class QuerySetCategoricalDecoder(nn.Module):
     """Class-set-equivariant residual decoder for arbitrary text queries.
 
