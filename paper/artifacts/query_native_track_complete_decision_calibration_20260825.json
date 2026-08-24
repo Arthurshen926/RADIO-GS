@@ -1,0 +1,42 @@
+{
+  "status": "source_image_gate_pass_text_gate_fail",
+  "information_contract": {
+    "source_only": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_vocabulary_opened_for_training": false,
+    "field_frozen": true
+  },
+  "method": {
+    "track_complete_supervision": true,
+    "track_disjoint_split": true,
+    "full_source_observed_domain_audit": true,
+    "decision_calibrated_identity": true,
+    "identity_center": 0.6805,
+    "identity_scale": 0.05,
+    "primitive_threshold": 0.0,
+    "posterior_threshold": 0.5
+  },
+  "passed_image_candidate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_track_complete_extent_fixed_decision_v1/center0p6805_s20260826.pt",
+    "sha256": "e2fcbae54d2e4526b4238fbe70fa1025f2d306f87bc1461b861579042f2c8837",
+    "dev_macro_delta": 0.004664065937201182,
+    "audit_macro_delta": 0.01882311189547181,
+    "audit_scene_deltas": {
+      "ramen": 0.027729734778404236,
+      "teatime": 0.020877540111541748,
+      "waldo_kitchen": 0.00786206079646945
+    }
+  },
+  "text_diagnostics": {
+    "oracle_image_anchor_macro_delta": -0.021733323112130165,
+    "text_local_anchor_macro_delta": -0.038374371205767,
+    "track_consistent_attribute_authority_promoted": false,
+    "reason": "semantically incorrect phrases and zero heldout Waldo-track coverage"
+  },
+  "rejected_ablation": {
+    "extent_without_row_identity_audit_macro_delta": -0.030805575506140787,
+    "text_training_weight_0p25_image_audit_macro_delta": -0.04900294185305635,
+    "text_training_weight_0p5_image_audit_macro_delta": -0.10856973581636946
+  }
+}

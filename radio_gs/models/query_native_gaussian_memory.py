@@ -530,9 +530,13 @@ class AnchorConditionedExtentDecoder(nn.Module):
     """
 
     def __init__(self, latent_dim: int = 512, reliability_dim: int = 5,
-                 key_dim: int = 128, hidden_dim: int = 128) -> None:
+                 key_dim: int = 128, hidden_dim: int = 128,
+                 gauge_normalize_identity: bool = False,
+                 use_identity_conditioning: bool = True) -> None:
         super().__init__()
         self.latent_dim=int(latent_dim); self.reliability_dim=int(reliability_dim); self.key_dim=int(key_dim)
+        self.gauge_normalize_identity=bool(gauge_normalize_identity)
+        self.use_identity_conditioning=bool(use_identity_conditioning)
         self.latent_norm=nn.LayerNorm(self.latent_dim); self.reliability_norm=nn.LayerNorm(self.reliability_dim)
         self.gaussian_key=nn.Linear(self.latent_dim,self.key_dim)
         self.extent=nn.Sequential(
@@ -550,7 +554,17 @@ class AnchorConditionedExtentDecoder(nn.Module):
         if authority is not None and authority.shape!=(latent.shape[0],): raise ValueError("anchor extent authority differs")
         key=F.normalize(self.gaussian_key(self.latent_norm(latent.float())),dim=-1)
         anchor_rows=anchors.rows.to(key.device); anchor_keys=key[anchor_rows]
-        anchor_scores=anchors.scores.to(key.device).float(); anchor_weight=torch.softmax(anchor_scores/0.05,dim=0)
+        anchor_scores=anchors.scores.to(key.device).float()
+        extent_identity=identity.float()
+        relation_scores=anchor_scores
+        if self.gauge_normalize_identity:
+            center=anchor_scores.mean()
+            scale=anchor_scores.std(unbiased=False).clamp_min(1e-6)
+            relation_scores=(anchor_scores-center)/scale
+            extent_identity=(extent_identity-center)/scale
+        if not self.use_identity_conditioning:
+            extent_identity=torch.zeros_like(extent_identity)
+        anchor_weight=torch.softmax(relation_scores/(1.0 if self.gauge_normalize_identity else 0.05),dim=0)
         relation_weight=torch.softmax(key@anchor_keys.T/0.07+anchor_weight.clamp_min(1e-8).log()[None,:],dim=1)
         anchor=relation_weight@anchor_keys
         xyz=geometry.xyz.to(device=key.device,dtype=key.dtype); anchor_xyz=xyz[anchor_rows]
@@ -559,12 +573,12 @@ class AnchorConditionedExtentDecoder(nn.Module):
         anchor_scale=scale[anchor_rows]
         mahalanobis=torch.sqrt((delta.square()/anchor_scale[None].square()).sum(-1).clamp_min(1e-8))
         scale_ratio=(scale.log().mean(-1,keepdim=True)-anchor_scale.log().mean(-1)[None,:]).abs()
-        feature_relation=key@anchor_keys.T; confidence=torch.sigmoid(anchor_scores)[None,:].expand_as(distance)
+        feature_relation=key@anchor_keys.T; confidence=torch.sigmoid(relation_scores)[None,:].expand_as(distance)
         relation=torch.cat((delta,distance[...,None],mahalanobis[...,None],scale_ratio[...,None],feature_relation[...,None],confidence[...,None]),dim=-1)
         geometry_relation=(relation*relation_weight[...,None]).sum(1)
         opacity=(geometry.opacity.to(device=key.device,dtype=key.dtype).reshape(-1,1) if geometry.opacity is not None else torch.ones((key.shape[0],1),device=key.device,dtype=key.dtype))
         geometry_relation=torch.cat((geometry_relation,opacity),dim=1)
-        extent_input=torch.cat((key,anchor,self.reliability_norm(reliability.float()),identity.float()[:,None],geometry_relation),dim=1)
+        extent_input=torch.cat((key,anchor,self.reliability_norm(reliability.float()),extent_identity[:,None],geometry_relation),dim=1)
         residual=self.extent(extent_input).squeeze(-1)
         if authority is not None: residual=residual*authority.to(device=residual.device,dtype=residual.dtype).clamp(0,1)
         logits=identity.float()+residual

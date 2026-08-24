@@ -15,13 +15,25 @@ from radio_gs.utils.immutable_artifacts import file_record, write_frozen_json, w
 
 
 def compile_authority(episodes,teacher,bank,topk,minimum_margin,sibling_weight):
-    query=torch.as_tensor(episodes["episode_query_proposal"]).long();target=torch.as_tensor(episodes["episode_target_proposal"]).long();descriptor=F.normalize(torch.as_tensor(teacher["descriptors"]).float(),dim=-1);text=F.normalize(torch.as_tensor(bank["embeddings"]).float(),dim=-1)
-    qscore=descriptor[query]@text.T;tscore=descriptor[target]@text.T;offset=torch.as_tensor(episodes["negative_proposal_offsets"]).long();negative=torch.as_tensor(episodes["negative_proposals"]).long();has_sibling=torch.zeros(query.numel(),dtype=torch.bool);sibling_max=torch.zeros_like(qscore)
-    for index in range(query.numel()):
-        rows=negative[offset[index]:offset[index+1]]
-        if rows.numel(): has_sibling[index]=True;sibling_max[index]=(descriptor[rows]@text.T).max(0).values
-    shared=torch.minimum(qscore,tscore);objective=shared-float(sibling_weight)*sibling_max;best=objective.topk(2,dim=1);selected=best.indices[:,0];margin=best.values[:,0]-best.values[:,1];k=min(int(topk),text.shape[0]);qtop=qscore.topk(k,dim=1).indices;ttop=tscore.topk(k,dim=1).indices;eligible=(qtop==selected[:,None]).any(1)&(ttop==selected[:,None]).any(1)&(margin>=float(minimum_margin))
-    return {"schema":"radio_gs.lerf_source_instance_attribute_authority.v1","schema_version":1,"episode_query_proposal":query,"episode_target_proposal":target,"episode_target_view":torch.as_tensor(episodes["episode_target_view"]).long(),"episode_object_id":torch.as_tensor(episodes["episode_object_id"]).long(),"selected_text_index":selected,"selected_text_embedding":text[selected].half().contiguous(),"selected_text_query":[str(bank["queries"][int(i)]) for i in selected],"shared_similarity":shared.gather(1,selected[:,None]).squeeze(1),"sibling_similarity":sibling_max.gather(1,selected[:,None]).squeeze(1),"shared_margin":margin,"has_explicit_sibling":has_sibling,"eligible":eligible,"metadata":{"source_only":True,"benchmark_vocabulary_opened":False,"benchmark_images_opened":False,"benchmark_masks_opened":False,"evaluation_rgb_opened":False,"text_bank_split":str(bank["split"]),"description_type":"color_material_shape_or_adjective_plus_noun","pairing":"cross_view_min_similarity_minus_explicit_sibling_similarity","sibling_weight":float(sibling_weight),"topk":k,"minimum_margin":float(minimum_margin),"eligible_count":int(eligible.sum()),"episode_count":int(query.numel())}}
+    query=torch.as_tensor(episodes["episode_query_proposal"]).long();target=torch.as_tensor(episodes["episode_target_proposal"]).long();objects=torch.as_tensor(episodes["episode_object_id"]).long();descriptor=F.normalize(torch.as_tensor(teacher["descriptors"]).float(),dim=-1);text=F.normalize(torch.as_tensor(bank["embeddings"]).float(),dim=-1)
+    qscore=descriptor[query]@text.T;tscore=descriptor[target]@text.T;offset=torch.as_tensor(episodes["negative_proposal_offsets"]).long();negative=torch.as_tensor(episodes["negative_proposals"]).long();selected=torch.empty(query.numel(),dtype=torch.long);margin=torch.empty(query.numel());has_sibling=torch.zeros(query.numel(),dtype=torch.bool);sibling_max=torch.zeros_like(qscore)
+    # One description is selected for the physical track, not independently
+    # for each view pair.  The minimum across confirmed views enforces
+    # cross-view persistence; explicit different-instance proposals enforce
+    # sibling discriminability.
+    for object_id in torch.unique(objects,sorted=True).tolist():
+        episode_rows=torch.where(objects==int(object_id))[0];proposals=torch.unique(torch.cat((query[episode_rows],target[episode_rows])))
+        persistent=(descriptor[proposals]@text.T).min(0).values
+        siblings=[]
+        for index in episode_rows.tolist():
+            values=negative[offset[index]:offset[index+1]]
+            if values.numel(): siblings.append(values)
+        if siblings:
+            sibling_proposals=torch.unique(torch.cat(siblings));sibling=(descriptor[sibling_proposals]@text.T).max(0).values;has_sibling[episode_rows]=True
+        else: sibling=torch.zeros_like(persistent)
+        objective=persistent-float(sibling_weight)*sibling;best=objective.topk(2);choice=best.indices[0];selected[episode_rows]=choice;margin[episode_rows]=best.values[0]-best.values[1];sibling_max[episode_rows]=sibling
+    shared=torch.minimum(qscore,tscore);k=min(int(topk),text.shape[0]);qtop=qscore.topk(k,dim=1).indices;ttop=tscore.topk(k,dim=1).indices;eligible=(qtop==selected[:,None]).any(1)&(ttop==selected[:,None]).any(1)&(margin>=float(minimum_margin))
+    return {"schema":"radio_gs.lerf_source_instance_attribute_authority.v2","schema_version":2,"episode_query_proposal":query,"episode_target_proposal":target,"episode_target_view":torch.as_tensor(episodes["episode_target_view"]).long(),"episode_object_id":objects,"selected_text_index":selected,"selected_text_embedding":text[selected].half().contiguous(),"selected_text_query":[str(bank["queries"][int(i)]) for i in selected],"shared_similarity":shared.gather(1,selected[:,None]).squeeze(1),"sibling_similarity":sibling_max.gather(1,selected[:,None]).squeeze(1),"shared_margin":margin,"has_explicit_sibling":has_sibling,"eligible":eligible,"metadata":{"source_only":True,"benchmark_vocabulary_opened":False,"benchmark_images_opened":False,"benchmark_masks_opened":False,"evaluation_rgb_opened":False,"text_bank_split":str(bank["split"]),"description_type":"color_material_shape_or_adjective_plus_noun","pairing":"track_minimum_cross_view_similarity_minus_explicit_sibling_similarity","track_consistent_description":True,"sibling_weight":float(sibling_weight),"topk":k,"minimum_margin":float(minimum_margin),"eligible_count":int(eligible.sum()),"episode_count":int(query.numel())}}
 
 
 def main():

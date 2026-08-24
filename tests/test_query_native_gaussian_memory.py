@@ -204,6 +204,40 @@ def test_scene_canonicalizer_is_zero_init_and_not_gaussian_indexed() -> None:
     assert parameter_count == 3 * 4 + 2 * 6 * 2
 
 
+def test_anchor_extent_conditioning_is_invariant_to_positive_identity_gauge() -> None:
+    torch.manual_seed(29)
+    decoder = AnchorConditionedExtentDecoder(
+        latent_dim=4, reliability_dim=2, key_dim=3, hidden_dim=5,
+        gauge_normalize_identity=True,
+    )
+    with torch.no_grad():
+        decoder.extent[-1].weight.normal_()
+    latent, reliability, xyz = torch.randn(7, 4), torch.randn(7, 2), torch.randn(7, 3)
+    identity = torch.linspace(-0.3, 0.6, 7)
+    rows = torch.tensor([4, 5, 6])
+    first = AnchorPacket(rows, identity[rows], 6, 0.5)
+    transformed = 3.7 * identity + 1.2
+    second = AnchorPacket(rows, transformed[rows], 6, 0.5)
+    first_residual = decoder(latent, reliability, identity, first, GaussianGeometry(xyz)) - identity
+    second_residual = decoder(latent, reliability, transformed, second, GaussianGeometry(xyz)) - transformed
+    assert torch.allclose(first_residual, second_residual, atol=2e-5)
+
+
+def test_anchor_extent_can_exclude_row_identity_from_completion() -> None:
+    torch.manual_seed(31)
+    decoder = AnchorConditionedExtentDecoder(
+        latent_dim=4, reliability_dim=2, key_dim=3, hidden_dim=5,
+        use_identity_conditioning=False,
+    )
+    with torch.no_grad(): decoder.extent[-1].weight.normal_()
+    latent,reliability,xyz=torch.randn(7,4),torch.randn(7,2),torch.randn(7,3)
+    first=torch.linspace(-.2,.5,7);second=first.clone();second[:4]+=torch.tensor([.4,-.3,.2,-.1])
+    rows=torch.tensor([4,5,6]);packet=AnchorPacket(rows,first[rows],6,.5)
+    first_residual=decoder(latent,reliability,first,packet,GaussianGeometry(xyz))-first
+    second_residual=decoder(latent,reliability,second,packet,GaussianGeometry(xyz))-second
+    assert torch.allclose(first_residual,second_residual,atol=1e-6)
+
+
 def test_identity_prior_is_replayed_before_extent_training() -> None:
     torch.manual_seed(11)
     decoder = QueryNativeGaussianPosteriorDecoder(
