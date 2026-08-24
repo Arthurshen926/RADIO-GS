@@ -67,6 +67,105 @@
     "scene_query_holdout_total": 24,
     "strict_unseen_query_gate_passed": false
   },
+  "scannet_memory_coordinate_ablation_paper8": {
+    "control": "raw L512 local code in the per-scene h256-p96 decoder",
+    "candidate": "post-fusion D512 coefficient in the same decoder and training/evaluation protocol",
+    "control_miou": {
+      "19": 0.3655671403897025,
+      "15": 0.3618055546494921,
+      "10": 0.46728304851285307
+    },
+    "candidate_miou": {
+      "19": 0.3658389466209741,
+      "15": 0.36154807181246795,
+      "10": 0.4671781563131811
+    },
+    "candidate_macc": {
+      "19": 0.6742169919702634,
+      "15": 0.6678134019749615,
+      "10": 0.7674349445834713
+    },
+    "delta_miou": {
+      "19": 0.0002718062312715963,
+      "15": -0.00025748283702416264,
+      "10": -0.00010489219967194075
+    },
+    "strict_three_split_gate_passed": false,
+    "conclusion": "post-fusion coordinates address an explicit gauge concern but do not resolve the categorical decision bottleneck"
+  },
+  "scannet_shared_scene_canonicalizer_development": {
+    "protocol": "coefficient memory; scene-query hash holdout 1/4; validation-only decoder and gate checkpointing; 24 scene-split changed-row gates",
+    "control": {
+      "rank": 0,
+      "seed": 20260824,
+      "heldout_pairs_improved": 17,
+      "heldout_pairs_total": 21,
+      "mean_heldout_mae_delta": -0.006164637172505969,
+      "changed_row_gates_passed": 24,
+      "strict_gate_passed": false,
+      "source_gate_sha256": "23195583bcdad284f9c13623dc49acfba4a9c2d50dd4aca1e9de161f450864ad"
+    },
+    "rank8_seeds": [
+      {
+        "seed": 20260824,
+        "heldout_pairs_improved": 20,
+        "mean_heldout_mae_delta": -0.008974611847883179,
+        "failed_pairs": ["scene0062_00/split15"],
+        "source_gate_sha256": "b487e4ad5898383f2c000e765df1760b5e7edf8bc0dc8aafc5ba824021ca31e9"
+      },
+      {
+        "seed": 20260825,
+        "heldout_pairs_improved": 20,
+        "mean_heldout_mae_delta": -0.00881636253602448,
+        "failed_pairs": ["scene0062_00/split15"],
+        "source_gate_sha256": "2e5855dec1ecb6291f97a2f66ffa8c9f677c8bea952a622404cbdc84dc374a02"
+      },
+      {
+        "seed": 20260826,
+        "heldout_pairs_improved": 19,
+        "mean_heldout_mae_delta": -0.008492570902620043,
+        "failed_pairs": ["scene0062_00/split10", "scene0062_00/split15"],
+        "source_gate_sha256": "e78b6bea172481d9118b33366ee36842014d4edfd18406c284760b2961ecc417"
+      }
+    ],
+    "heldout_identities_for_scene0062": ["chair", "toilet"],
+    "conclusion": "low-rank scene gauge alignment is reproducibly useful, but class-set competition remains unresolved",
+    "benchmark_evaluation_authorized": false
+  },
+  "scannet_shared_factorized_identity_competition_paper8": {
+    "memory_representation": "post-fusion D512 coefficient",
+    "scene_canonicalizer_rank": 8,
+    "identity_branch": "pair-local Gaussian-query interaction",
+    "competition_branch": "centered permutation-equivariant query-set correction",
+    "source_gate": {
+      "heldout_pairs_improved": 21,
+      "heldout_pairs_total": 21,
+      "mean_heldout_mae_delta": -0.0096675395699484,
+      "changed_row_gates_passed": 24,
+      "changed_row_gates_total": 24,
+      "passed": true,
+      "sha256": "e4c68412f7a86b4c83b77abf4096be2b225fee25fded61cf49cd57fb2aebbecf"
+    },
+    "paper8_macro": {
+      "miou": {
+        "19": 0.3627456975647768,
+        "15": 0.3592183869113244,
+        "10": 0.4653314842977913
+      },
+      "macc": {
+        "19": 0.6729289589549877,
+        "15": 0.6666931693502623,
+        "10": 0.7664949177483747
+      },
+      "delta_vs_retained_compact_miou": {
+        "19": -0.001259375673610118,
+        "15": -0.002668753729103655,
+        "10": -0.001833254502966782
+      }
+    },
+    "strict_promotion_gate_passed": false,
+    "conclusion": "identity-competition factorization resolves source query transfer, but score-space source gates remain insufficient surrogates for weighted 3D mIoU"
+  },
   "lerf_figurines_source_heldout": {
     "primitive_similarity": 0.12457308918237686,
     "learned_identity_siglip": 0.04839559644460678,
@@ -75,6 +174,20 @@
     "identity_prior_siglip": 0.06404352933168411,
     "identity_prior_siglip_dino": 0.0436355397105217,
     "gate_passed": false
+  },
+  "lerf_figurines_v2_proposal_generalization": {
+    "protocol": "train_validation_heldout_views_disjoint; explicit competing proposal negatives only; all other rows unknown",
+    "primitive_similarity": 0.1291297823190689,
+    "raw_local_k6": 0.06122279167175293,
+    "post_fusion_coefficient_k4": 0.06769409775733948,
+    "post_fusion_coefficient_k6": 0.06678517907857895,
+    "post_fusion_coefficient_k8": 0.07064224779605865,
+    "fixed_radio_projection_k6": 0.07096731662750244,
+    "post_fusion_coefficient_dino_query_k6": 0.08518523722887039,
+    "representation_conclusion": "coefficient and fixed decoded coordinates recover signal over raw scene-gauged local codes",
+    "supervision_conclusion": "unseen proposals do not provide same-object cross-view extent authority",
+    "gate_passed": false,
+    "heldout_rows_now_development_observed": true
   },
   "claim_boundary": {
     "development_only": true,

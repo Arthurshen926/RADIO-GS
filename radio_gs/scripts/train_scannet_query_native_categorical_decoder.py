@@ -145,7 +145,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         baseline_payload.get("summary_features", baseline_payload.get("features"))
     ).float(), dim=-1)
     xyz = torch.as_tensor(baseline_payload["xyz"]).float().contiguous()
-    latent = field.local_codes.detach().cpu().float().contiguous()
+    with torch.inference_mode():
+        latent = field.query_memory(
+            representation=str(args.memory_representation)
+        ).detach().cpu().float().contiguous()
     reliability = torch.as_tensor(universal.get("reliability")).float().contiguous()
     num_rows = int(membership["num_rows"])
     if (
@@ -411,6 +414,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "field_frozen": True, "per_gaussian_parameters_added": False,
             "class_indexed_parameters": False, "query_set_permutation_equivariant": True,
             "query_cardinality_dynamic": True, "teacher_features_decoded": False,
+            "memory_representation": str(args.memory_representation),
             "benchmark_labels_opened": False, "benchmark_masks_opened": False,
             "source_only": True, "inputs": inputs,
         },
@@ -471,6 +475,10 @@ def main() -> None:
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--hidden-dim", type=int, default=192)
     parser.add_argument("--pair-hidden-dim", type=int, default=48)
+    parser.add_argument(
+        "--memory-representation", choices=("local_codes", "coefficients"),
+        default="coefficients",
+    )
     parser.add_argument("--steps", type=int, default=900)
     parser.add_argument("--batch-size", type=int, default=8192)
     parser.add_argument("--learning-rate", type=float, default=2e-3)

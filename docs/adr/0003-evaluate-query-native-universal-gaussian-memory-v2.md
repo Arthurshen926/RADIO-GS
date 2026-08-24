@@ -41,6 +41,14 @@ invariants:
 - source-native teachers supervise scores, rankings, masks, calibration and
   cross-modal posterior consistency at the variable actually consumed;
 - scene adaptation, if required, is constant-size and query-independent.
+- the default query-facing memory is the post-fusion coefficient; raw local
+  codes and fixed projections of decoded RADIO are matched ablations;
+- identity similarity uses a bounded learned temperature, and extent uses
+  multiple identity anchors plus finite Gaussian geometry;
+- binary object supervision is positive/negative/unknown, with unmatched and
+  part/whole-conflicted support excluded from the loss;
+- train, validation and final source-heldout views are disjoint, and test
+  views never select a checkpoint or threshold.
 
 The first categorical sentinel is intentionally transitional: it consumes an
 existing scalar baseline response as an identity prior, but never emits a

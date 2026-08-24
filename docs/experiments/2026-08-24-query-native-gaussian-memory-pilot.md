@@ -106,6 +106,148 @@ not remove the need for reliable cross-view object supervision.  Independent
 same-view SAM masks teach proposal appearance and local support, not complete
 physical-object extent.  Larger adapters or more loss weights are stopped.
 
+## LERF v2 implementation audit
+
+The first implementation was not a fair Query-Native test. It read raw
+`local_codes`, divided normalized cosine similarity by `sqrt(query_dim)`, used
+one scene-global anchor, had no 3D geometry, treated every visible row outside
+one SAM proposal as negative, and selected checkpoints by the lowest observed
+training loss. These are now corrected on the v2 branch:
+
+- explicit raw-local / post-fusion coefficient / fixed RADIO-projection reads;
+- learned cosine temperature constrained to `[0.02,0.2]`;
+- top-K identity anchors, finite xyz/scale/opacity relations, and peak
+  preservation;
+- positive/explicit-negative/unknown supervision;
+- disjoint train/validation/heldout view partitions and validation-only model
+  selection/calibration;
+- cached proposal-negative relations and GPU-resident identity-prior scoring.
+
+The corrected figurines proposal-generalization sentinel remains negative:
+
+| memory/query arm | heldout proposal IoU |
+|---|---:|
+| primitive similarity control | `0.12913` |
+| raw local, K=6 | `0.06122` |
+| post-fusion coefficient, K=6 | `0.06679` |
+| post-fusion coefficient, K=4 | `0.06769` |
+| post-fusion coefficient, K=8 | `0.07064` |
+| fixed projected RADIO, K=6 | `0.07097` |
+| post-fusion coefficient + DINO appearance, K=6 | `0.08519` |
+
+Thus post-fusion memory, decoded-coordinate alignment, and appearance queries
+all recover signal, but none closes the gap to the unchanged primitive prior.
+This is evidence against field capacity being the primary LERF bottleneck.
+It strengthens the requirement for real query-view to target-view same-object
+episodes; unseen independent proposals are not a substitute. These heldout
+proposal rows have now been observed during architecture development and are
+not a clean final promotion gate.
+
+## Memory-coordinate ablation on ScanNet paper8
+
+The larger per-scene decoder was replayed with the post-fusion D512
+coefficient as its memory coordinate instead of the raw L512 local code.  All
+eight scenes completed under the unchanged evaluator and training budget:
+
+| split | raw local | post-fusion coefficient | delta |
+|---|---:|---:|---:|
+| 19 | `0.36557` | `0.36584` | `+0.00027` |
+| 15 | `0.36181` | `0.36155` | `-0.00026` |
+| 10 | `0.46728` | `0.46718` | `-0.00010` |
+
+The coefficient coordinate is therefore not promoted.  It removes one
+obvious scene-gauge concern but does not improve all class splits.  Together
+with the LERF representation ablation, this says that memory coordinates
+matter at second order while supervision and query identity remain the
+first-order bottlenecks.  A scene canonicalizer should only be tested inside
+the shared cross-scene decoder, where gauge alignment is actually required;
+adding it to independent per-scene models would not test that hypothesis.
+
+The shared coefficient experiment consequently adds a rank-8 scene FiLM with
+no Gaussian-indexed state and exact identity initialization.  Checkpoints and
+the eligibility gate are selected on a fixed validation sample spanning all
+8 scenes and all 3 class sets, rather than the last training minibatch.  On a
+predeclared scene-query holdout, the results are:
+
+| shared memory | heldout pairs improved | mean heldout MAE delta | all changed-row gates |
+|---|---:|---:|---:|
+| coefficient, no canonicalizer | `17/21` | `-0.00616` | `24/24` |
+| coefficient + rank-8, seed 24 | `20/21` | `-0.00897` | `24/24` |
+| coefficient + rank-8, seed 25 | `20/21` | `-0.00882` | `24/24` |
+| coefficient + rank-8, seed 26 | `19/21` | `-0.00849` | `24/24` |
+
+This validates scene-gauge alignment as a real shared-model improvement, but
+not as a complete solution.  Every seed still fails the strict unseen-query
+gate, consistently on `scene0062/split15`; the heldout identities there are
+`chair` and `toilet`.  The same identities are mostly successful in split10,
+so the remaining error is query-set competition/calibration rather than a
+missing per-query identity alone.  No benchmark cache from these failed gates
+is promoted or evaluated as a formal result.
+
+Factoring the decoder into a pair-local identity residual and a centered,
+permutation-equivariant query-set competition residual closes that source
+gate on the predeclared seed: `21/21` heldout pairs and `24/24` changed-row
+gates improve, with mean heldout MAE delta `-0.00967`.  This directly supports
+the identity/competition separation; it is not a threshold-only change.
+
+The authorized paper8 replay is nevertheless below the retained compact row:
+
+| split | factorized shared mIoU | retained compact mIoU | delta |
+|---|---:|---:|---:|
+| 19 | `0.36275` | `0.36401` | `-0.00126` |
+| 15 | `0.35922` | `0.36189` | `-0.00267` |
+| 10 | `0.46533` | `0.46716` | `-0.00183` |
+
+The factorization is retained as positive mechanism evidence but the weights
+are not promoted.  Source score MAE and replay consistency are not sufficient
+surrogates for opacity-volume-weighted categorical mIoU.  The next ScanNet
+gate must add a source-only decision-preserving objective (top-class margin
+and weighted confusion), while keeping benchmark labels closed.
+
+## High-value gap closure: physical episodes and decision risk
+
+The LERF trainer now consumes genuine directed episodes: a query crop in view
+A is paired with a target proposal in view B only when frozen DINO mutual
+matching, fundamental-matrix RANSAC and a three-view cycle confirm the same
+physical object.  The target is B-view continuous exact-MPR Gaussian
+membership.  Negatives require an explicit cross-view `different` proposal in
+B; every other row remains unknown.  This replaces same-proposal
+self-reconstruction with the requested query-view to target-view supervision.
+
+| source scene | primitive heldout IoU | cross-view posterior | delta |
+|---|---:|---:|---:|
+| ramen | `0.25182` | `0.50093` | `+0.24912` |
+| teatime | `0.46042` | `0.48275` | `+0.02233` |
+| waldo_kitchen | `0.50968` | `0.00117` | `-0.50852` |
+
+Ramen and Teatime pass.  Waldo has only 5 train, 3 validation and 2 heldout
+directed episodes.  Initializing from Teatime raises Waldo to `0.45968`; also
+freezing the transferred query adapter raises it to `0.49129`, but the strict
+gate still fails by `0.01840`.  No Figurines benchmark was opened.  The next
+LERF implementation must jointly train the three source scenes with a small
+scene canonicalizer; further Waldo threshold or schedule tuning is stopped.
+
+A separate continuous-support audit confirms that hard membership was not the
+only Waldo failure: fuzzy exact-MPR support preserves Ramen/Teatime purity and
+coverage, but Waldo still has no reciprocal proposal-level identity edge.
+Direct DINO-cycle episodes, rather than a learned reciprocal proposal scorer,
+are therefore the correct supervision authority.
+
+For ScanNet, eight query-independent caches now bind each Gaussian's
+`opacity * scale.prod()` without opening labels or masks.  Training adds
+class-mass-balanced weighted top-class CE and weighted soft-IoU, and eligibility
+truth is restricted to rows where the source teacher changes the final class.
+A vacuous `threshold=1.01` replay was detected and the gate now requires
+nonzero changed-row selection and positive weighted decision improvement.
+
+The decision model improves every source scene/split containing a changed
+decision and selects thousands of rows, but regresses already-correct heldout
+queries.  Fixed low-margin (`0.04`) and minimum-margin-gain (`0.04`) risk
+limits reduce activation to 1,444 rows but still fail strict query transfer.
+No paper8 evaluation is authorized.  The remaining ScanNet component is a
+selective-risk estimator trained with explicit beneficial/harmful
+counterfactual labels; another global threshold sweep is not justified.
+
 ## Current decision
 
 The architecture remains a promising v2 candidate for categorical text

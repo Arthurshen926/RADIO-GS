@@ -161,6 +161,45 @@ class CanonicalGaussianField(nn.Module):
     ) -> torch.Tensor:
         return self.decoder(self.coefficients(indices))
 
+    def query_memory(
+        self,
+        indices: torch.Tensor | None = None,
+        *,
+        representation: str = "coefficients",
+        radio_projection: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        """Read the frozen field at an explicit query-facing abstraction level.
+
+        ``local_codes`` are an internal, scene-gauged parameterization and are
+        retained only as an ablation.  ``coefficients`` are the canonical
+        post-fusion D512 memory.  ``radio_projected`` decodes the affine RADIO
+        feature and applies one caller-supplied, globally fixed projection.
+        Requiring the projection explicitly prevents a scene-specific learned
+        shortcut from being mislabeled as a field representation.
+        """
+
+        rows = self._indices(indices)
+        level = str(representation)
+        if level == "local_codes":
+            return self.local_codes[rows]
+        if level == "coefficients":
+            return self.coefficients(rows)
+        if level != "radio_projected":
+            raise ValueError(
+                "query memory representation must be local_codes, coefficients, "
+                "or radio_projected"
+            )
+        if radio_projection is None:
+            raise ValueError("radio_projected query memory requires a fixed projection")
+        projection = torch.as_tensor(
+            radio_projection,
+            device=self.local_codes.device,
+            dtype=self.decoder.basis.dtype,
+        )
+        if projection.ndim != 2 or projection.shape[0] != self.decoder.feature_dim:
+            raise ValueError("RADIO query-memory projection has incompatible shape")
+        return self.radio_features(rows) @ projection
+
     def get_features(self) -> torch.Tensor:
         """Renderer-compatible compact coefficient rows."""
 

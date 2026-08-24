@@ -52,6 +52,25 @@ def test_stage_one_field_reads_local_coefficients_without_fusion():
     torch.testing.assert_close(field.coefficients(rows), field.local_codes[rows])
 
 
+def test_query_memory_makes_internal_and_canonical_levels_explicit():
+    decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)
+    field = CanonicalGaussianField(6, decoder, _signature(), use_fusion=False)
+    rows = torch.tensor([1, 4])
+    assert torch.equal(
+        field.query_memory(rows, representation="local_codes"), field.local_codes[rows]
+    )
+    assert torch.equal(
+        field.query_memory(rows, representation="coefficients"), field.coefficients(rows)
+    )
+    projection = torch.randn(decoder.feature_dim, 3)
+    assert torch.allclose(
+        field.query_memory(
+            rows, representation="radio_projected", radio_projection=projection
+        ),
+        field.radio_features(rows) @ projection,
+    )
+
+
 def test_half_local_training_table_decodes_in_canonical_float_coordinates():
     decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)
     field = CanonicalGaussianField(6, decoder, _signature(), use_fusion=False)

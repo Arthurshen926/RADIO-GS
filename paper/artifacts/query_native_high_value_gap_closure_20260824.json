@@ -1,0 +1,29 @@
+{
+  "schema": "radio_gs.query_native_high_value_gap_closure.v1",
+  "status": "mechanism_validated_joint_gates_open",
+  "lerf_cross_view_authority": {
+    "definition": "DINO mutual RANSAC three-view-cycle same-object query proposal to target-view exact-MPR membership; explicit different negatives; otherwise unknown",
+    "source_results": {
+      "ramen": {"primitive_iou": 0.25181615352630615, "posterior_iou": 0.5009348392486572, "delta": 0.24911868572235107, "passed": true, "report_sha256": "ceed883cbffb2ede0c26ece0b05a84196be9e0e7692b948dc175d3fa25fafbb1"},
+      "teatime": {"primitive_iou": 0.460420697927475, "posterior_iou": 0.482750803232193, "delta": 0.022330105304718018, "passed": true, "report_sha256": "96b93a7c98a4d03a2a97c0c3691a592099086c25251f8180593053ea3d4e81ef"},
+      "waldo_kitchen": {"primitive_iou": 0.5096847414970398, "posterior_iou": 0.001166711444966495, "delta": -0.5085180300520733, "passed": false, "train_validation_heldout_episodes": [5, 3, 2], "report_sha256": "652da1c253e61109c99f46361828c74e47af7b362b0a35f845e6c9b8fd95c940"}
+    },
+    "waldo_cross_scene_transfer": {"teatime_initialized_frozen_adapter_iou": 0.491289347410202, "delta_vs_primitive": -0.01839539408683777, "passed": false, "report_sha256": "2fe110d32b5d3806a4700f40aa008eda4089a337992036de1af0cb60f547a4fe"},
+    "figurines_benchmark_authorized": false,
+    "next_gate": "joint three-source-scene training with constant-size scene canonicalizer"
+  },
+  "scannet_decision_preserving_source_objective": {
+    "metric_weight_authority": "query-independent activated opacity times activated scale product, complete paper8 8/8",
+    "loss": "class-mass-balanced weighted top-class cross entropy plus weighted soft IoU",
+    "nonvacuous_gate_fix": "requires nonzero changed-row selection and positive weighted decision improvement",
+    "risk_limits": {"baseline_margin_cap": 0.04, "minimum_candidate_margin_gain": 0.04},
+    "selected_changed_rows": 1444,
+    "changed_scene_splits_improved": 21,
+    "changed_scene_splits_total": 21,
+    "heldout_query_gate_passed": false,
+    "source_gate_sha256": "ad6411fa7fd092785610a2733bdd5355fbc2b04aec85754b8c6d515fb520c7d4",
+    "paper8_benchmark_authorized": false,
+    "next_gate": "prediction-time selective-risk estimator with explicit beneficial versus harmful source counterfactual supervision"
+  },
+  "claim_boundary": {"development_only": true, "universal_field_v2_promoted": false, "sota_claim": false}
+}
