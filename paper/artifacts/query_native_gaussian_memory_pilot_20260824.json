@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_query_native_gaussian_memory_pilot",
+  "status": "development_candidate_partial_gate",
+  "architecture": {
+    "persistent_field": "unchanged Universal Field v1 L512 plus five reliability scalars",
+    "query_boundary": "model-independent QueryPacket",
+    "categorical_decoder": "query-set-equivariant direct score residual",
+    "categorical_identity_prior": "retained v1 scalar baseline response; transitional bridge",
+    "posterior_decoder": "identity retrieval plus identity-preserving extent residual",
+    "teacher_features_decoded_as_output": false,
+    "fully_feature_decode_free_unseen_query": false,
+    "per_gaussian_parameters_added": false,
+    "benchmark_labels_or_masks_used_for_fit": false
+  },
+  "scannet_per_scene_v2_paper8": {
+    "miou": {
+      "19": 0.3655671403897025,
+      "15": 0.3618055546494921,
+      "10": 0.46728304851285307
+    },
+    "macc": {
+      "19": 0.6738719475312298,
+      "15": 0.6679783066110484,
+      "10": 0.7673830535004489
+    },
+    "delta_vs_restored_baseline_miou": {
+      "19": 0.009432177970125799,
+      "15": 0.008807685246844832,
+      "10": 0.007746666393311286
+    },
+    "delta_vs_retained_fixed_head_miou": {
+      "19": 0.001562067151315627,
+      "15": -0.00008158599093593955,
+      "10": 0.00011830971209492169
+    },
+    "strict_promotion_gate_passed": false,
+    "result_sha256": {
+      "scene0000_00": "89c452403baf1a4f59268e7ccb76fe39fc795890c883c90b66fdcd6b906d297f",
+      "scene0062_00": "dbc036c16f61c61c6028d6599752420511ac792bc51a6dd587ad0d39abf1fabd",
+      "scene0070_00": "7c8795870d6fb735e3debded5df573e313bb97c4c01cab856ba5b35f2b64839e",
+      "scene0097_00": "a27ef1034ca619b45116bfbd60466f6a4e5d3d409443b39bc1778664cf9b74f7",
+      "scene0140_00": "b8a26e4145859fd83c03abcdfb4857e8b8c7efc676eab8d9a10b2b0b43e5ca39",
+      "scene0347_00": "b2f1638f6ddbad2d8c394074ee6e6a9d5dfe6643dc626fab7c5f621e45734964",
+      "scene0400_00": "e2ca96bbc2caa62d1d2def71fc9c797160aac88b3a4e1eb1d58469a2f63cb9e7",
+      "scene0590_00": "7ca6e3bd85324bf91b71f6e6f31e0b00d06dd5d197bafeed0abbdb09df767fa4"
+    }
+  },
+  "scannet_shared_cross_scene_paper8": {
+    "miou": {
+      "19": 0.36118013557244805,
+      "15": 0.3608412313492721,
+      "10": 0.4643411370731786
+    },
+    "macc": {
+      "19": 0.6721459745519301,
+      "15": 0.6674629214793677,
+      "10": 0.7659630193664736
+    },
+    "delta_vs_restored_baseline_miou": {
+      "19": 0.005045173152871285,
+      "15": 0.007843361946624827,
+      "10": 0.004804754953636858
+    },
+    "source_scene_split_noninferior": 24,
+    "scene_query_holdout_improved": 21,
+    "scene_query_holdout_total": 24,
+    "strict_unseen_query_gate_passed": false
+  },
+  "lerf_figurines_source_heldout": {
+    "primitive_similarity": 0.12457308918237686,
+    "learned_identity_siglip": 0.04839559644460678,
+    "learned_identity_siglip_dino": 0.05173787847161293,
+    "learned_identity_q256": 0.029428187757730484,
+    "identity_prior_siglip": 0.06404352933168411,
+    "identity_prior_siglip_dino": 0.0436355397105217,
+    "gate_passed": false
+  },
+  "claim_boundary": {
+    "development_only": true,
+    "universal_field_v2_promoted": false,
+    "sota_claim": false,
+    "outcome_blind_final_test": false
+  }
+}

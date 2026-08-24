@@ -28,6 +28,13 @@ _Avoid_: deployment dependency, hidden scene state
 A query-independent working representation derived from the Canonical Capability Feature for semantic, appearance, or boundary reasoning.
 _Avoid_: capability bank, task descriptor
 
+**Query-Native Universal Gaussian Memory Candidate**:
+The proposed v2 representation contract in which one persistent Gaussian
+latent is supervised at query-response/posterior level and is not required to
+decode into a named foundation-model feature space.  It remains a candidate
+until ADR 0003 promotion gates pass.
+_Avoid_: Universal Field v2, promoted field, multi-feature field
+
 ## Querying
 
 **Authorized Query Input**:
@@ -41,6 +48,12 @@ _Avoid_: online scene memory, persistent prompt cache
 **Canonical Query Interface**:
 The shared boundary that turns Authorized Query Input and the field into one Gaussian-domain result before output conversion.
 _Avoid_: benchmark query path, task head
+
+**QueryPacket**:
+A model-independent, query-transient packet containing adapter-aligned tokens,
+confidence, optional registered seed probability and spatial metadata.  It is
+the replaceable query-encoder boundary for the Query-Native candidate.
+_Avoid_: raw VFM feature, persistent query cache, zero-shot arbitrary encoder
 
 **Primitive Readout-v0**:
 The frozen minimal causal baseline that converts primitive similarity into output with fixed thresholds and no learned extent, boundary completion, or category rejection.
