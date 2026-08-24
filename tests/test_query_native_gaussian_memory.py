@@ -8,6 +8,7 @@ from radio_gs.models.query_native_gaussian_memory import (
     LowRankSceneCanonicalizer,
     ModalityQueryAdapter,
     QueryNativeGaussianPosteriorDecoder,
+    QueryPairEligibilityGate,
     QuerySetCategoricalDecoder,
     QuerySetEligibilityGate,
 )
@@ -17,6 +18,10 @@ from radio_gs.scripts.train_evaluate_query_native_membership_decoder import (
     _proposal_pairs,
 )
 from radio_gs.scripts.train_scannet_query_native_shared_decoder import _loss as _categorical_loss
+from radio_gs.scripts.train_lerf_query_native_joint_cross_scene_decoder import (
+    _blend_score,
+    _calibrate_selective_blend,
+)
 
 
 def test_cross_view_episode_uses_confirmed_target_and_explicit_negatives_only() -> None:
@@ -33,6 +38,20 @@ def test_cross_view_episode_uses_confirmed_target_and_explicit_negatives_only() 
     assert list(zip(query.tolist(), target.tolist())) == [(0, 1), (1, 0)]
     assert torch.equal(negatives[0], torch.tensor([4, 5]))
     assert negatives[1].numel() == 0
+
+
+def test_selective_text_blend_contains_exact_primitive_fallback() -> None:
+    truth = torch.tensor([1.0, 1.0, 0.0, 0.0])
+    posterior = [[(torch.tensor([0.2, 0.1, 0.9, 0.8]), truth)]]
+    primitive = [[(torch.tensor([0.8, 0.7, 0.2, 0.1]), truth)]]
+    calibration = _calibrate_selective_blend(
+        posterior, primitive, 0.5, 0.5, 3, 0.0,
+    )
+    assert calibration["weight"] == 0.0
+    signed = _blend_score(
+        posterior[0][0][0], primitive[0][0][0], calibration, 0.5, 0.5,
+    )
+    assert torch.equal(signed >= 0, primitive[0][0][0] >= 0.5)
 
 
 def test_query_set_decoder_is_permutation_equivariant_and_cardinality_free() -> None:
@@ -84,7 +103,7 @@ def test_decision_preserving_loss_is_finite_and_backpropagates() -> None:
     }
     loss = _categorical_loss(
         model, None, data, 0, 0, torch.arange(8), torch.randn(3, 6),
-        3.0, 0.25, True, 0.25, 0.25, torch.device("cpu"),
+        3.0, 0.25, True, 0.25, 0.25, 1.0, torch.device("cpu"),
     )
     assert torch.isfinite(loss)
     loss.backward()
@@ -99,6 +118,18 @@ def test_query_set_gate_is_permutation_invariant() -> None:
     permutation = torch.tensor([3, 0, 4, 1, 2])
     assert torch.allclose(
         gate(latent, reliability, query, baseline),
+        gate(latent, reliability, query[permutation], baseline[:, permutation]), atol=1e-6,
+    )
+
+
+def test_query_pair_gate_is_permutation_equivariant() -> None:
+    torch.manual_seed(6)
+    gate = QueryPairEligibilityGate(latent_dim=4, reliability_dim=2, query_dim=6, hidden_dim=5)
+    latent, reliability = torch.randn(7, 4), torch.randn(7, 2)
+    query, baseline = torch.randn(5, 6), torch.randn(7, 5)
+    permutation = torch.tensor([3, 0, 4, 1, 2])
+    assert torch.allclose(
+        gate(latent, reliability, query, baseline)[:, permutation],
         gate(latent, reliability, query[permutation], baseline[:, permutation]), atol=1e-6,
     )
 

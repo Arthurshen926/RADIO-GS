@@ -1,0 +1,43 @@
+{
+  "schema": "radio_gs.query_authority_high_value_closure.v1",
+  "date": "2026-08-24",
+  "benchmark_scope": ["LERF2D", "LERF3D", "ScanNet OVS", "NVOS"],
+  "lerf": {
+    "generic_text_protocol": "imagenet1k_siglip2_fit_train_dev_calibration_audit_gate",
+    "benchmark_vocabulary_opened_during_training": false,
+    "episode_counts": {
+      "ramen": {"fit": 76, "dev": 66, "audit": 78, "total": 82},
+      "teatime": {"fit": 54, "dev": 54, "audit": 54, "total": 58},
+      "waldo_kitchen": {"fit": 14, "dev": 14, "audit": 18, "total": 22}
+    },
+    "learned_projection_six_seed_gate_passes": 0,
+    "fixed_projection_six_seed_gate_passes": 0,
+    "best_fixed_text_audit_macro_delta": 0.05823,
+    "best_fixed_text_audit_scene_deltas": {
+      "ramen": 0.1006,
+      "teatime": 0.0905,
+      "waldo_kitchen": -0.0164
+    },
+    "strict_text_positive_seed_macro_delta": 0.01211,
+    "strict_text_positive_seed_image_gate_passed": false,
+    "promoted": false
+  },
+  "scannet": {
+    "benchmark_labels_opened_during_training": false,
+    "benchmark_masks_opened_during_training": false,
+    "checkpoint_metric": "query_independent_weighted_source_top1_recovery_minus_harm",
+    "replay_weights_tested": [1.0, 2.0, 5.0, 10.0],
+    "row_counterfactual_gate_seed_passes": 0,
+    "pair_counterfactual_gate_configuration_passes": 0,
+    "pair_gate_seen_scene_split_noninferior_configurations": 6,
+    "pair_gate_query_holdout_noninferior_configurations": 0,
+    "promoted": false
+  },
+  "retained_development_rows": {
+    "lerf2d_full4_miou": 0.39584,
+    "lerf3d_full4_miou": 0.43730,
+    "scannet_19_15_10_miou": [0.36401, 0.36189, 0.46716],
+    "nvos_rgb_assisted_full8_macro_iou": 0.92555
+  },
+  "conclusion": "Generic class-token extent is not a stable complete-instance authority, and score-error gates are not sufficient proxies for categorical top-1 utility."
+}

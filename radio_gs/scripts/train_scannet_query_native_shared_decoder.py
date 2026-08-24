@@ -22,7 +22,7 @@ from radio_gs.field import load_factorized_canonical_field_checkpoint
 from radio_gs.models.query_native_gaussian_memory import (
     LowRankSceneCanonicalizer,
     QuerySetCategoricalDecoder,
-    QuerySetEligibilityGate,
+    QueryPairEligibilityGate,
 )
 from radio_gs.scannet_constants import NYU40_ID_TO_NAME, OPENGAUSSIAN_NYU40_CLASS_SPLITS
 from radio_gs.scripts.train_scannet_frozen_l512_native_categorical_score_decoder import (
@@ -186,6 +186,7 @@ def _loss(
     decision_preserving: bool,
     decision_cross_entropy_weight: float,
     decision_iou_weight: float,
+    decision_replay_weight: float,
     device: torch.device,
 ) -> torch.Tensor:
     latent = data["latent"][sampled].to(device)
@@ -229,11 +230,82 @@ def _loss(
         present = weighted_truth.sum(0) > 0
         soft_iou = 1.0 - (intersection[present] / union[present].clamp_min(1e-12)).mean()
         loss = loss + decision_cross_entropy_weight * cross_entropy + decision_iou_weight * soft_iou
+        baseline = data["baseline"][split_index][sampled].to(device)[:, query_mask]
+        baseline_class = baseline.argmax(1)
+        stable = baseline_class == target_class
+        if bool(stable.any()):
+            replay_ce = F.cross_entropy(
+                local_prediction[stable] / temperature, baseline_class[stable], reduction="none",
+            )
+            baseline_top2 = baseline[stable].topk(2, dim=1).values
+            prediction_top2 = local_prediction[stable].topk(2, dim=1).values
+            margin_replay = F.relu(
+                (baseline_top2[:, 0] - baseline_top2[:, 1])
+                - (prediction_top2[:, 0] - prediction_top2[:, 1])
+            )
+            stable_weight = significance[stable]
+            stable_weight = stable_weight / stable_weight.mean().clamp_min(1e-12)
+            loss = loss + decision_replay_weight * (
+                ((replay_ce + margin_replay) * stable_weight).mean()
+            )
     return loss
 
 
 def _active_changed(data: dict[str, Any], split_index: int, decision_preserving: bool) -> torch.Tensor:
     return data["decision_changed" if decision_preserving else "changed"][split_index]
+
+
+@torch.inference_mode()
+def _validation_counterfactual_metrics(
+    model: QuerySetCategoricalDecoder,
+    canonicalizer: LowRankSceneCanonicalizer | None,
+    datasets: list[dict[str, Any]],
+    queries: list[torch.Tensor],
+    holdout_stride: int,
+    holdout_residue: int,
+    maximum_rows: int,
+    device: torch.device,
+) -> dict[str, Any]:
+    """Measure source-only recoveries and regressions against the distilled teacher.
+
+    This deliberately uses neither ScanNet labels nor masks.  The teacher top-1
+    is the mapping-time decision authority, while the restored primitive is the
+    counterfactual baseline whose correct decisions must not be destroyed.
+    """
+    per_scene: dict[str, dict[str, float]] = {}
+    for scene_index, data in enumerate(datasets):
+        rows = torch.arange(data["latent"].shape[0])
+        rows = rows[rows % holdout_stride == holdout_residue][:maximum_rows]
+        recovered_mass = 0.0; harmed_mass = 0.0; total_mass = 0.0
+        for split_index, query in enumerate(queries):
+            latent = data["latent"][rows].to(device)
+            if canonicalizer is not None:
+                latent = canonicalizer(latent, scene_index)
+            prediction = model(
+                latent, data["reliability"][rows].to(device), query.to(device),
+                data["baseline"][split_index][rows].to(device),
+            )
+            query_mask = ~data["query_holdout"][split_index].to(device)
+            prediction_class = prediction[:, query_mask].argmax(1)
+            target_class = data["target"][split_index][rows].to(device)[:, query_mask].argmax(1)
+            baseline_class = data["baseline"][split_index][rows].to(device)[:, query_mask].argmax(1)
+            weight = data["significance"][rows].to(device).clamp_min(1e-12)
+            recovered_mass += float(weight[(baseline_class != target_class) & (prediction_class == target_class)].sum())
+            harmed_mass += float(weight[(baseline_class == target_class) & (prediction_class != target_class)].sum())
+            total_mass += float(weight.sum())
+        denominator = max(total_mass, 1e-12)
+        per_scene[data["scene"]] = {
+            "recovery_rate": recovered_mass / denominator,
+            "harm_rate": harmed_mass / denominator,
+            "net_rate": (recovered_mass - harmed_mass) / denominator,
+        }
+    return {
+        "per_scene": per_scene,
+        "macro_recovery_rate": sum(value["recovery_rate"] for value in per_scene.values()) / len(per_scene),
+        "macro_harm_rate": sum(value["harm_rate"] for value in per_scene.values()) / len(per_scene),
+        "macro_net_rate": sum(value["net_rate"] for value in per_scene.values()) / len(per_scene),
+        "minimum_scene_net_rate": min(value["net_rate"] for value in per_scene.values()),
+    }
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
@@ -287,6 +359,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         key: value.detach().cpu().clone() for key, value in canonicalizer.state_dict().items()
     }
     best_loss = float("inf")
+    best_selection_key: tuple[float, float, float, float, float] | None = None
+    best_counterfactual_metrics: dict[str, Any] | None = None
     history: list[dict[str, float | int]] = []
     for step in range(1, int(args.steps) + 1):
         scene_index = (step - 1) % len(datasets)
@@ -314,7 +388,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             model, canonicalizer, data, scene_index, split_index, sampled,
             queries[split_index], float(args.changed_row_weight),
             float(args.margin_weight), bool(args.decision_preserving),
-            float(args.decision_cross_entropy_weight), float(args.decision_iou_weight), device,
+            float(args.decision_cross_entropy_weight), float(args.decision_iou_weight),
+            float(args.decision_replay_weight), device,
         )
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
@@ -336,13 +411,31 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                             float(args.changed_row_weight), float(args.margin_weight),
                             bool(args.decision_preserving),
                             float(args.decision_cross_entropy_weight),
-                            float(args.decision_iou_weight), device,
+                            float(args.decision_iou_weight),
+                            float(args.decision_replay_weight), device,
                         ))
                 validation_loss = float(torch.stack(validation_losses).mean())
+            counterfactual = _validation_counterfactual_metrics(
+                model, canonicalizer, datasets, queries,
+                int(args.holdout_stride), int(args.holdout_residue),
+                int(args.validation_rows_per_scene_split), device,
+            )
+            minimum_net = float(counterfactual["minimum_scene_net_rate"])
+            selection_key = (
+                float(minimum_net >= -float(args.checkpoint_counterfactual_tolerance)),
+                minimum_net,
+                float(counterfactual["macro_net_rate"]),
+                float(counterfactual["macro_recovery_rate"]),
+                -validation_loss,
+            )
             history.append({"step": step, "training_loss": float(loss.detach()),
-                            "validation_loss": validation_loss})
-            if validation_loss < best_loss:
+                            "validation_loss": validation_loss,
+                            "counterfactual_macro_net_rate": float(counterfactual["macro_net_rate"]),
+                            "counterfactual_macro_harm_rate": float(counterfactual["macro_harm_rate"])})
+            if best_selection_key is None or selection_key > best_selection_key:
+                best_selection_key = selection_key
                 best_loss = validation_loss
+                best_counterfactual_metrics = counterfactual
                 best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
                 if canonicalizer is not None:
                     best_canonicalizer_state = {
@@ -354,7 +447,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         canonicalizer.load_state_dict(best_canonicalizer_state)
         canonicalizer.requires_grad_(False)
 
-    gate = QuerySetEligibilityGate(hidden_dim=int(args.gate_hidden_dim)).to(device)
+    decoded: dict[tuple[int, int], torch.Tensor] = {}
+    for scene_index, data in enumerate(datasets):
+        for split_index in range(len(SPLITS)):
+            prediction = _decode(
+                model, data, queries[split_index], split_index, scene_index,
+                canonicalizer, device, int(args.eval_chunk_size),
+            )
+            decoded[(scene_index, split_index)] = prediction
+
+    gate = QueryPairEligibilityGate(hidden_dim=int(args.gate_hidden_dim)).to(device)
     gate_optimizer = torch.optim.AdamW(
         gate.parameters(), lr=float(args.gate_learning_rate), weight_decay=float(args.weight_decay)
     )
@@ -364,24 +466,24 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         scene_index = (step - 1) % len(datasets)
         split_index = ((step - 1) // len(datasets)) % len(SPLITS)
         data = datasets[scene_index]
-        rows = torch.arange(data["latent"].shape[0])
-        training = rows % int(args.holdout_stride) != int(args.holdout_residue)
-        sampled_pool = rows[training]
-        sampled = sampled_pool[torch.randint(
-            sampled_pool.numel(), (min(int(args.batch_size), sampled_pool.numel()),),
-            generator=generator,
-        )]
-        active_changed = _active_changed(data, split_index, bool(args.decision_preserving))
-        truth = active_changed[sampled].float().to(device)
-        positive = float(active_changed[training].float().mean())
-        pos_weight = torch.tensor((1.0 - positive) / max(positive, 1e-6), device=device)
+        rows = torch.arange(data["latent"].shape[0]); training = rows % int(args.holdout_stride) != int(args.holdout_residue)
+        sampled_pool=rows[training]; sampled=sampled_pool[torch.randint(sampled_pool.numel(),(min(int(args.batch_size),sampled_pool.numel()),),generator=generator)]
+        query_train=(~data["query_holdout"][split_index]).to(device)
+        prediction=decoded[(scene_index,split_index)][sampled].to(device)[:,query_train]
+        baseline=data["baseline"][split_index][sampled].to(device)[:,query_train]
+        target=data["target"][split_index][sampled].to(device)[:,query_train]
+        prediction_error=(prediction-target).abs(); baseline_error=(baseline-target).abs()
+        decisive=(prediction_error-baseline_error).abs()>float(args.gate_pair_minimum_error_difference)
+        if not bool(decisive.any()): continue
+        truth=(prediction_error<baseline_error).float(); positive=float(truth[decisive].mean())
+        pos_weight=torch.tensor((1.0-positive)/positive if 0.0<positive<1.0 else 1.0,device=device)
         logits = gate(
             canonicalizer(data["latent"][sampled].to(device), scene_index)
             if canonicalizer is not None else data["latent"][sampled].to(device),
             data["reliability"][sampled].to(device),
             queries[split_index].to(device), data["baseline"][split_index][sampled].to(device),
         )
-        loss = F.binary_cross_entropy_with_logits(logits, truth, pos_weight=pos_weight)
+        loss = F.binary_cross_entropy_with_logits(logits[:,query_train][decisive], truth[decisive], pos_weight=pos_weight)
         gate_optimizer.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(gate.parameters(), 5.0)
@@ -403,20 +505,20 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                             queries[validation_split_index].to(device),
                             validation_data["baseline"][validation_split_index][validation_rows].to(device),
                         )
-                        validation_truth = _active_changed(
-                            validation_data, validation_split_index,
-                            bool(args.decision_preserving),
-                        )[validation_rows].float().to(device)
-                        validation_losses.append(F.binary_cross_entropy_with_logits(
-                            validation_logits, validation_truth
-                        ))
+                        query_train=(~validation_data["query_holdout"][validation_split_index]).to(device)
+                        prediction=decoded[(validation_scene_index,validation_split_index)][validation_rows].to(device)[:,query_train]
+                        baseline=validation_data["baseline"][validation_split_index][validation_rows].to(device)[:,query_train]
+                        target=validation_data["target"][validation_split_index][validation_rows].to(device)[:,query_train]
+                        prediction_error=(prediction-target).abs(); baseline_error=(baseline-target).abs(); decisive=(prediction_error-baseline_error).abs()>float(args.gate_pair_minimum_error_difference)
+                        if bool(decisive.any()):
+                            validation_truth=(prediction_error<baseline_error).float()
+                            validation_losses.append(F.binary_cross_entropy_with_logits(validation_logits[:,query_train][decisive],validation_truth[decisive]))
                 validation_loss = float(torch.stack(validation_losses).mean())
             if validation_loss < best_gate_loss:
                 best_gate_loss = validation_loss
                 best_gate_state = {key: value.detach().cpu().clone() for key, value in gate.state_dict().items()}
     gate.load_state_dict(best_gate_state)
 
-    decoded: dict[tuple[int, int], torch.Tensor] = {}
     validation_records: dict[str, Any] = {}
     threshold_candidates = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.975, 0.99, 1.01)
     threshold_objective = {value: 0.0 for value in threshold_candidates}
@@ -426,11 +528,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         rows = torch.arange(data["latent"].shape[0])
         validation = rows % int(args.holdout_stride) == int(args.holdout_residue)
         for split_index, split in enumerate(SPLITS):
-            prediction = _decode(
-                model, data, queries[split_index], split_index, scene_index,
-                canonicalizer, device, int(args.eval_chunk_size)
-            )
-            decoded[(scene_index, split_index)] = prediction
+            prediction = decoded[(scene_index, split_index)]
             with torch.inference_mode():
                 probability_parts: list[torch.Tensor] = []
                 for start in range(0, rows.numel(), int(args.eval_chunk_size)):
@@ -448,15 +546,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 if bool(args.decision_preserving):
                     baseline_top2 = data["baseline"][split_index][validation].topk(2, dim=1).values
                     baseline_margin = baseline_top2[:, 0] - baseline_top2[:, 1]
-                    selected &= baseline_margin <= float(args.decision_baseline_margin_cap)
+                    selected &= (baseline_margin <= float(args.decision_baseline_margin_cap))[:,None]
                     prediction_top2 = prediction[validation].topk(2, dim=1).values
                     prediction_margin = prediction_top2[:, 0] - prediction_top2[:, 1]
                     changes_top1 = prediction[validation].argmax(1) != data["baseline"][split_index][validation].argmax(1)
-                    selected &= (~changes_top1) | (
+                    selected &= ((~changes_top1) | (
                         prediction_margin >= baseline_margin + float(args.decision_minimum_margin_gain)
-                    )
+                    ))[:,None]
                 candidate = torch.where(
-                    selected[:, None], prediction[validation], data["baseline"][split_index][validation]
+                    selected, prediction[validation], data["baseline"][split_index][validation]
                 )
                 target = data["target"][split_index][validation]
                 if bool(args.decision_preserving):
@@ -469,7 +567,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                         data, split_index, True
                     )[validation]
                     threshold_selected_changed[threshold] += int(
-                        (selected & changed_validation).sum()
+                        (selected.any(1) & changed_validation).sum()
                     )
                 else:
                     threshold_objective[threshold] += float((candidate - target).abs().mean())
@@ -497,6 +595,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "scene_canonicalizer_rank": int(args.scene_canonicalizer_rank),
             "factorized_identity_competition": bool(args.factorized_identity_competition),
             "decision_preserving_source_objective": bool(args.decision_preserving),
+            "checkpoint_selection": "source_only_counterfactual_net_recovery",
+            "checkpoint_counterfactual_tolerance": float(args.checkpoint_counterfactual_tolerance),
+            "eligibility_authority": "source_only_per_query_candidate_error_reduction",
+            "eligibility_granularity": "gaussian_query_pair",
             "decision_baseline_margin_cap": float(args.decision_baseline_margin_cap),
             "decision_minimum_margin_gain": float(args.decision_minimum_margin_gain),
             "metric_weight_root": str(args.metric_weight_root),
@@ -536,14 +638,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             if bool(args.decision_preserving):
                 baseline_top2 = data["baseline"][split_index].topk(2, dim=1).values
                 baseline_margin = baseline_top2[:, 0] - baseline_top2[:, 1]
-                selected &= baseline_margin <= float(args.decision_baseline_margin_cap)
+                selected &= (baseline_margin <= float(args.decision_baseline_margin_cap))[:,None]
                 prediction_top2 = prediction.topk(2, dim=1).values
                 prediction_margin = prediction_top2[:, 0] - prediction_top2[:, 1]
                 changes_top1 = prediction.argmax(1) != data["baseline"][split_index].argmax(1)
-                selected &= (~changes_top1) | (
+                selected &= ((~changes_top1) | (
                     prediction_margin >= baseline_margin + float(args.decision_minimum_margin_gain)
-                )
-            candidate = torch.where(selected[:, None], prediction, data["baseline"][split_index])
+                ))[:,None]
+            candidate = torch.where(selected, prediction, data["baseline"][split_index])
             # Preserve the frozen decoder counterfactual before any eligibility
             # decision.  A downstream selective-risk model must learn whether
             # adopting this candidate helps; training it on already selected
@@ -642,6 +744,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "heldout_scene_query_noninferior": heldout_noninferior,
         "decision_improved_every_scene_split": decision_improved,
         "selected_changed_rows": threshold_selected_changed[threshold],
+        "checkpoint_counterfactual": best_counterfactual_metrics,
         "validation": validation_records, "history": history,
         "model": file_record(model_path),
     }
@@ -677,12 +780,15 @@ def main() -> None:
     parser.add_argument("--query-holdout-residue", type=int, default=0)
     parser.add_argument("--minimum-replay-agreement", type=float, default=0.995)
     parser.add_argument("--gate-hidden-dim", type=int, default=128)
+    parser.add_argument("--gate-pair-minimum-error-difference", type=float, default=1e-4)
     parser.add_argument("--scene-canonicalizer-rank", type=int, default=0)
     parser.add_argument("--factorized-identity-competition", action="store_true")
     parser.add_argument("--decision-preserving", action="store_true")
     parser.add_argument("--metric-weight-root", default="")
     parser.add_argument("--decision-cross-entropy-weight", type=float, default=0.25)
     parser.add_argument("--decision-iou-weight", type=float, default=0.25)
+    parser.add_argument("--decision-replay-weight", type=float, default=1.0)
+    parser.add_argument("--checkpoint-counterfactual-tolerance", type=float, default=0.0)
     parser.add_argument("--decision-baseline-margin-cap", type=float, default=0.04)
     parser.add_argument("--decision-minimum-margin-gain", type=float, default=0.04)
     parser.add_argument("--validation-interval", type=int, default=100)

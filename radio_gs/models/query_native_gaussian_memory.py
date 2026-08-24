@@ -287,6 +287,32 @@ class QuerySetEligibilityGate(nn.Module):
         return self.network(value).squeeze(-1)
 
 
+class QueryPairEligibilityGate(nn.Module):
+    """Permutation-equivariant authority for each Gaussian/query residual pair."""
+
+    def __init__(self, latent_dim: int = 512, reliability_dim: int = 5,
+                 query_dim: int = 1536, hidden_dim: int = 96) -> None:
+        super().__init__()
+        self.latent_dim=int(latent_dim); self.reliability_dim=int(reliability_dim); self.query_dim=int(query_dim)
+        self.latent_norm=nn.LayerNorm(self.latent_dim); self.reliability_norm=nn.LayerNorm(self.reliability_dim); self.query_norm=nn.LayerNorm(self.query_dim)
+        self.latent_projection=nn.Linear(self.latent_dim+self.reliability_dim,int(hidden_dim))
+        self.query_projection=nn.Linear(self.query_dim,int(hidden_dim))
+        self.network=nn.Sequential(nn.Linear(7,int(hidden_dim)),nn.GELU(),nn.Linear(int(hidden_dim),1))
+
+    def forward(self, latent: torch.Tensor, reliability: torch.Tensor,
+                query_tokens: torch.Tensor, baseline_scores: torch.Tensor) -> torch.Tensor:
+        if latent.ndim!=2 or latent.shape[1]!=self.latent_dim: raise ValueError("pair-gate latent input differs")
+        if reliability.shape!=(latent.shape[0],self.reliability_dim): raise ValueError("pair-gate reliability input differs")
+        if query_tokens.ndim!=2 or query_tokens.shape[1]!=self.query_dim: raise ValueError("pair-gate query input differs")
+        if baseline_scores.shape!=(latent.shape[0],query_tokens.shape[0]): raise ValueError("pair-gate baseline input differs")
+        gaussian=F.normalize(self.latent_projection(torch.cat((self.latent_norm(latent.float()),self.reliability_norm(reliability.float())),dim=1)),dim=-1)
+        query=F.normalize(self.query_projection(self.query_norm(query_tokens.float())),dim=-1)
+        interaction=gaussian@query.T; baseline=baseline_scores.float(); mean=baseline.mean(1,keepdim=True); centered=baseline-mean
+        std=baseline.std(1,keepdim=True,unbiased=False); maximum=baseline.max(1,keepdim=True).values; context=query@query.mean(0)
+        features=torch.stack((interaction,baseline,centered,mean.expand_as(baseline),std.expand_as(baseline),maximum.expand_as(baseline),context[None,:].expand_as(baseline)),dim=-1)
+        return self.network(features).squeeze(-1)
+
+
 class QueryNativeGaussianPosteriorDecoder(nn.Module):
     """Multi-anchor geometry-aware decoder from a query to Gaussian logits."""
 
