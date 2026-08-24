@@ -68,7 +68,11 @@ def compile_episodes(membership: dict[str, Any], authority: dict[str, Any], thre
                 and relation.get((q, candidate), -1) == 0
                 and hard[candidate].numel() > 0
             ]
-            if not negatives or hard[t].numel() == 0:
+            # A confirmed same-object target remains a valid positive-only
+            # episode when no explicit different-instance edge exists.  The
+            # absent negative evidence is unknown, not a reason to discard the
+            # positive cross-view observation.
+            if hard[t].numel() == 0:
                 continue
             query.append(q); target.append(t)
             object_id.append(root_to_object[find(q)])
@@ -77,8 +81,8 @@ def compile_episodes(membership: dict[str, Any], authority: dict[str, Any], thre
     if not query:
         raise ValueError("episode compiler produced no supervised episodes")
     return {
-        "schema": "radio_gs.lerf_cross_view_object_episodes.v1",
-        "schema_version": 1,
+        "schema": "radio_gs.lerf_cross_view_object_episodes.v2",
+        "schema_version": 2,
         "episode_query_proposal": torch.tensor(query, dtype=torch.long),
         "episode_target_proposal": torch.tensor(target, dtype=torch.long),
         "episode_target_view": views[torch.tensor(target)],

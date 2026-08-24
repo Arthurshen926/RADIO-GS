@@ -90,7 +90,9 @@ def _load_scene(seed_model_path: str, seed_sha: str, episode_path: str, episode_
 
 
 def _split(data: dict[str, Any], stride: int, validation_residue: int, heldout_residue: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    valid = torch.tensor([x.numel() > 0 for x in data["negative_support"]])
+    # Compiled same-object episodes may legitimately be positive-only; missing
+    # explicit negatives remain unknown and do not invalidate the episode.
+    valid = torch.ones(data["episode_query"].numel(), dtype=torch.bool)
     validation = (data["episode_view"] % stride == validation_residue) & valid
     heldout = (data["episode_view"] % stride == heldout_residue) & valid
     training = (~validation) & (~heldout) & valid
@@ -110,15 +112,25 @@ def _sample(data: dict[str, Any], sample: int, generator: torch.Generator, posit
 
 
 @torch.inference_mode()
-def _score(data: dict[str, Any], scene_index: int, sample: int, adapter: ModalityQueryAdapter, decoder: QueryNativeGaussianPosteriorDecoder, canonicalizer: LowRankSceneCanonicalizer, device: torch.device) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def _device_cache(data: dict[str, Any], scene_index: int, canonicalizer: LowRankSceneCanonicalizer, device: torch.device) -> dict[str, torch.Tensor]:
+    return {
+        "latent": canonicalizer(data["latent"].to(device), scene_index),
+        "reliability": data["reliability"].to(device), "xyz": data["xyz"].to(device),
+        "baseline": data["baseline"].to(device), "semantic": data["semantic"].to(device),
+    }
+
+
+@torch.inference_mode()
+def _score(data: dict[str, Any], scene_index: int, sample: int, adapter: ModalityQueryAdapter, decoder: QueryNativeGaussianPosteriorDecoder, canonicalizer: LowRankSceneCanonicalizer, device: torch.device, cache: dict[str, torch.Tensor] | None = None) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     query = int(data["episode_query"][sample]); target = int(data["episode_target"][sample])
     visible = torch.where(data["observed"][int(data["views"][target])])[0]
-    latent = canonicalizer(data["latent"][visible].to(device), scene_index)
-    prior = data["baseline"][visible].to(device) @ data["semantic"][query].to(device)
+    cached = cache if cache is not None else _device_cache(data, scene_index, canonicalizer, device)
+    latent = cached["latent"][visible]
+    prior = cached["baseline"][visible] @ cached["semantic"][query]
     token = adapter(data["query"][query:query + 1].to(device))
-    logits, _ = decoder(latent, data["reliability"][visible].to(device), QueryPacket(token, "image"), identity_prior=prior, geometry=GaussianGeometry(data["xyz"][visible].to(device)))
+    logits, _ = decoder(latent, cached["reliability"][visible], QueryPacket(token, "image"), identity_prior=prior, geometry=GaussianGeometry(cached["xyz"][visible]))
     truth = visible_membership_target(visible, data["hard_support"][target], num_rows=data["latent"].shape[0])
-    primitive = _similarity_scores_for_proposal(data["baseline"], data["semantic"][query], visible, device=device, chunk_size=32768, features_are_normalized=True)
+    primitive = (cached["baseline"][visible] @ cached["semantic"][query]).cpu()
     return torch.sigmoid(logits).cpu(), primitive, truth
 
 
@@ -155,6 +167,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         buckets = {int(obj): torch.where(training & (data["episode_object"] == obj))[0] for obj in torch.unique(data["episode_object"][training]).tolist()}
         object_buckets.append({key: value for key, value in buckets.items() if value.numel()})
     best_loss = float("inf"); best_state = None
+    best_selection_key: tuple[float, float, float, float] | None = None
+    best_selection_report: dict[str, Any] | None = None
     for step in range(args.steps):
         scene_index = step % len(datasets); data = datasets[scene_index]
         keys = sorted(object_buckets[scene_index]); object_id = keys[(step // len(datasets)) % len(keys)]
@@ -187,8 +201,30 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                         local_losses.append(F.binary_cross_entropy_with_logits(logits, t.to(device)))
                     losses.append(torch.stack(local_losses).mean())
             validation_loss = float(torch.stack(losses).mean())
-            if validation_loss < best_loss:
+            posterior_sets=[]; primitive_sets=[]
+            for si,(scene,(_, validation, _)) in enumerate(zip(datasets,splits)):
+                scene_cache = _device_cache(scene, si, canonicalizer, device)
+                pset=[]; bset=[]
+                for sample_index in torch.where(validation)[0].tolist():
+                    score, primitive, truth = _score(
+                        scene, si, sample_index, adapter, decoder, canonicalizer, device, scene_cache,
+                    )
+                    pset.append((score,truth)); bset.append((primitive,truth))
+                posterior_sets.append(pset); primitive_sets.append(bset)
+                del scene_cache
+                if device.type == "cuda": torch.cuda.empty_cache()
+            selection_threshold, selection_macro = _global_threshold(posterior_sets,args.threshold_candidates)
+            selection_primitive_threshold, selection_primitive_macro = _global_threshold(primitive_sets,args.threshold_candidates)
+            scene_deltas=[]
+            for pset,bset in zip(posterior_sets,primitive_sets):
+                posterior_iou=float(torch.tensor([_iou_from_scores(score,truth,selection_threshold) for score,truth in pset]).mean())
+                primitive_iou=float(torch.tensor([_iou_from_scores(score,truth,selection_primitive_threshold) for score,truth in bset]).mean())
+                scene_deltas.append(posterior_iou-primitive_iou)
+            selection_key=(float(min(scene_deltas)>=-args.scene_noninferiority_tolerance),min(scene_deltas),selection_macro-selection_primitive_macro,-validation_loss)
+            if best_selection_key is None or selection_key > best_selection_key:
+                best_selection_key=selection_key
                 best_loss = validation_loss
+                best_selection_report={"step":step+1,"threshold":selection_threshold,"scene_deltas":scene_deltas,"scene_macro_delta":selection_macro-selection_primitive_macro,"scene_macro_bce":validation_loss}
                 best_state = {"adapter": {k:v.detach().cpu().clone() for k,v in adapter.state_dict().items()}, "decoder": {k:v.detach().cpu().clone() for k,v in decoder.state_dict().items()}, "canonicalizer": {k:v.detach().cpu().clone() for k,v in canonicalizer.state_dict().items()}}
             adapter.train(); decoder.train(); canonicalizer.train()
     if best_state is None: raise RuntimeError("joint LERF optimization did not complete")
@@ -196,17 +232,21 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     adapter.eval(); decoder.eval(); canonicalizer.eval()
     posterior_validation=[]; primitive_validation=[]
     for si,(data,(_,validation,_)) in enumerate(zip(datasets,splits)):
+        scene_cache = _device_cache(data, si, canonicalizer, device)
         p=[]; b=[]
         for sample in torch.where(validation)[0].tolist():
-            score, primitive, truth = _score(data,si,sample,adapter,decoder,canonicalizer,device); p.append((score,truth)); b.append((primitive,truth))
+            score, primitive, truth = _score(data,si,sample,adapter,decoder,canonicalizer,device,scene_cache); p.append((score,truth)); b.append((primitive,truth))
         posterior_validation.append(p); primitive_validation.append(b)
+        del scene_cache
+        if device.type == "cuda": torch.cuda.empty_cache()
     threshold, validation_iou = _global_threshold(posterior_validation,args.threshold_candidates)
     primitive_threshold, primitive_validation_iou = _global_threshold(primitive_validation,args.threshold_candidates)
     results={}; scene_pass=[]
     for si,(data,(_,_,heldout)) in enumerate(zip(datasets,splits)):
+        scene_cache = _device_cache(data, si, canonicalizer, device)
         posterior=[]; primitive=[]; briers=[]; purities=[]; coverages=[]
         for sample in torch.where(heldout)[0].tolist():
-            score, base, truth = _score(data,si,sample,adapter,decoder,canonicalizer,device)
+            score, base, truth = _score(data,si,sample,adapter,decoder,canonicalizer,device,scene_cache)
             posterior.append(_iou_from_scores(score,truth,threshold)); primitive.append(_iou_from_scores(base,truth,primitive_threshold))
             briers.append(float(F.mse_loss(score,truth)))
             predicted=score>=threshold; positive=truth>0.5
@@ -215,11 +255,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         post=float(torch.tensor(posterior).mean()); base=float(torch.tensor(primitive).mean())
         passed=post >= base-args.scene_noninferiority_tolerance
         scene_pass.append(passed); results[data["scene"]]={"episodes":len(posterior),"primitive_iou":base,"posterior_iou":post,"delta":post-base,"brier":sum(briers)/len(briers),"purity":sum(purities)/len(purities),"coverage":sum(coverages)/len(coverages),"noninferior":passed}
+        del scene_cache
+        if device.type == "cuda": torch.cuda.empty_cache()
     macro_post=sum(x["posterior_iou"] for x in results.values())/len(results); macro_base=sum(x["primitive_iou"] for x in results.values())/len(results)
     passed=all(scene_pass) and macro_post>=macro_base+args.minimum_macro_gain
     output=Path(args.output).expanduser().resolve()
     write_torch_noclobber(output,{"schema":"radio_gs.lerf_joint_query_native_extent.v1","schema_version":1,"adapter_state_dict":best_state["adapter"],"decoder_state_dict":best_state["decoder"],"scene_canonicalizer_state_dict":best_state["canonicalizer"],"threshold":threshold,"metadata":{"source_only":True,"field_frozen":True,"per_gaussian_parameters_added":False,"memory_representation":"coefficients","shared_cross_scene_decoder":True,"scene_canonicalizer_rank":args.scene_canonicalizer_rank,"scene_balanced":True,"object_track_balanced":True,"unknown_excluded_from_loss":True,"scene_specs":specs}})
-    report={"status":"source_gate_pass" if passed else "source_gate_fail","best_validation_scene_macro_bce":best_loss,"validation":{"posterior_threshold":threshold,"posterior_scene_macro_iou":validation_iou,"primitive_threshold":primitive_threshold,"primitive_scene_macro_iou":primitive_validation_iou},"source_heldout":results,"source_heldout_scene_macro":{"primitive_iou":macro_base,"posterior_iou":macro_post,"delta":macro_post-macro_base},"gate":{"all_scenes_noninferior":all(scene_pass),"minimum_macro_gain":args.minimum_macro_gain,"passed":passed},"output":file_record(output)}
+    report={"status":"source_gate_pass" if passed else "source_gate_fail","best_validation_scene_macro_bce":best_loss,"checkpoint_selection":best_selection_report,"validation":{"posterior_threshold":threshold,"posterior_scene_macro_iou":validation_iou,"primitive_threshold":primitive_threshold,"primitive_scene_macro_iou":primitive_validation_iou},"source_heldout":results,"source_heldout_scene_macro":{"primitive_iou":macro_base,"posterior_iou":macro_post,"delta":macro_post-macro_base},"gate":{"all_scenes_noninferior":all(scene_pass),"minimum_macro_gain":args.minimum_macro_gain,"passed":passed},"output":file_record(output)}
     write_frozen_json(output.with_suffix(output.suffix+".json"),report); return report
 
 
