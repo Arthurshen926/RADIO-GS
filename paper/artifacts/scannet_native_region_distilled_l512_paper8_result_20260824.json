@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_native_region_distilled_l512_paper8_result",
+  "status": "paper8_development_macro_pass_with_one_scene_regression",
+  "method": {
+    "persistent_gaussian_state": "unchanged Universal Field v1 L512",
+    "teacher": "source-only native SAM3 extent plus native SigLIP2 masked/context region identity",
+    "student": "scene-global residual decoder over frozen L512 and restored categorical descriptor",
+    "per_gaussian_parameters_added": false,
+    "benchmark_labels_or_masks_used_for_fit": false,
+    "fixed_steps": 400,
+    "fixed_hidden_dim": 512
+  },
+  "paper8_macro": {
+    "restored_baseline": {
+      "miou": {"19": 0.35613496241957665, "15": 0.3529978694026472, "10": 0.45953638211954173},
+      "macc": {"19": 0.6697521872873459, "15": 0.6626078732908041, "10": 0.7635596741577992}
+    },
+    "distilled_l512": {
+      "miou": {"19": 0.36027430499747315, "15": 0.35957421439414955, "10": 0.4662550118853776},
+      "macc": {"19": 0.673356874702713, "15": 0.6681306315230101, "10": 0.7683276688567346}
+    },
+    "delta": {
+      "miou": {"19": 0.004139342577896499, "15": 0.006576344991502336, "10": 0.006718629765835871},
+      "macc": {"19": 0.003604687415367125, "15": 0.005522758232206049, "10": 0.004767994698935407}
+    },
+    "positive_scenes_out_of_8": {"miou_19_15_10": [7, 7, 7], "macc_19_15_10": [7, 7, 7]},
+    "regressing_scene": "scene0400_00"
+  },
+  "comparison_to_exact_native_sidecar": {
+    "native_sidecar_miou": {"19": 0.3663013461319396, "15": 0.363008642997915, "10": 0.46865739184508276},
+    "interpretation": "The frozen-L512 student retains a real aggregate gain but does not fully preserve the query margins of the exact native region teacher."
+  },
+  "result_files": {
+    "scene0000_00": {"sha256": "a17ba53f7ed7cc0e97972838d237f2b39b65fa78ae56ce01ad98bf70aafaaedb"},
+    "scene0062_00": {"sha256": "29fa649daa809d67d206b8a174e07a1ff3d22a90df42c1613605345961990335"},
+    "scene0070_00": {"sha256": "68366bb6972829d77f8265fd44f8328c1fc8e42ed4277deeee5a3b9dc37df5c4"},
+    "scene0097_00": {"sha256": "41f77c4656129064fd8dbb6f69115095585f208f3cea276d93bb3ebef7c098d3"},
+    "scene0140_00": {"sha256": "0b412616648d8724417d5729e2265ebf06bfcf5549fa37bd9b1500558aafcc2d"},
+    "scene0347_00": {"sha256": "26d982c65a42829e82cbd9bcfba1f756186f3cc8cec9e532c552dd49e2f55b58"},
+    "scene0400_00": {"sha256": "03e9afa4d6780a4a6096513832afe6664fb49f06334e7d806b4d7072b34644fa"},
+    "scene0590_00": {"sha256": "cb7de6892e8a27483541fc21abff53074b5344f9a212e451f664025499045881"}
+  },
+  "claim_boundary": {
+    "development_result": true,
+    "sota_claim": false,
+    "exact_native_teacher_fully_compressed_claim": false,
+    "per_scene_pareto_dominance_claim": false
+  }
+}

@@ -1085,6 +1085,15 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--allow_topology_free_score_cache",
+        action="store_true",
+        help=(
+            "Save only raw category scores, pseudo labels, and significance when "
+            "an independently SHA-bound topology is consumed by a downstream "
+            "evaluator. Requires --score_cache_only."
+        ),
+    )
+    parser.add_argument(
         "--radio_checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
     )
@@ -1100,6 +1109,8 @@ def main() -> None:
         raise ValueError("This audit currently requires class_splits=19,15,10")
     if args.score_cache_only and not args.save_development_score_cache:
         raise ValueError("--score_cache_only requires --save_development_score_cache")
+    if args.allow_topology_free_score_cache and not args.score_cache_only:
+        raise ValueError("topology-free score cache requires --score_cache_only")
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     projection = _load_projection(args, device)
@@ -1319,7 +1330,11 @@ def main() -> None:
             **{f"pred_split_{split}": predictions[split] for split in split_names},
         )
         if args.save_development_score_cache:
-            if sam_region_graph is None and sam_proposal_memberships is None:
+            if (
+                sam_region_graph is None
+                and sam_proposal_memberships is None
+                and not args.allow_topology_free_score_cache
+            ):
                 raise ValueError("development score cache requires a SAM topology")
             score_cache_path = output_dir / "development" / f"{scene}_scores.npz"
             score_cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1336,6 +1351,8 @@ def main() -> None:
                     "sam_num_proposals": np.asarray(sam_proposal_memberships[3]),
                     "sam_proposal_view_indices": sam_proposal_memberships[4].numpy(),
                 }
+                if sam_proposal_memberships is not None
+                else {}
             )
             np.savez_compressed(
                 score_cache_path,

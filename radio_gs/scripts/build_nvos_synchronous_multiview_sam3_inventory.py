@@ -137,6 +137,7 @@ def validate_plan(
         raise QueryAbstention("candidate cohort identity is incomplete or non-unique")
     canonical_views: tuple[str, ...] | None = None
     trial_ranks: list[int] = []
+    verified_assignments: dict[str, dict[str, Any]] = {}
     for candidate in candidates:
         rank = candidate.get("trial_rank")
         if not isinstance(rank, int) or isinstance(rank, bool):
@@ -163,7 +164,16 @@ def validate_plan(
             assignment = view.get("assignment")
             if not isinstance(assignment, Mapping):
                 raise QueryAbstention("exact assignment lineage is absent")
-            _load_bound(assignment, label="exact assignment")
+            view_digest = str(view.get("view_digest", ""))
+            identity = dict(assignment)
+            prior = verified_assignments.get(view_digest)
+            if prior is None:
+                _load_bound(identity, label="exact assignment")
+                verified_assignments[view_digest] = identity
+            elif identity != prior:
+                raise QueryAbstention(
+                    "exact assignment lineage differs across candidates"
+                )
     if canonical_views is None:
         raise QueryAbstention("registered-view cohort is empty")
     if sorted(trial_ranks) != list(range(int(expected_candidates))):

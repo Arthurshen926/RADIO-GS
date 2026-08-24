@@ -114,3 +114,15 @@ def test_positive_unknown_fusion_noisy_or_corroborating_detection():
         view_fusion="positive_unknown_noisy_or",
     )
     assert torch.allclose(result, torch.tensor([0.96]))
+
+
+def test_positive_unknown_fusion_does_not_promote_neutral_invisible_rows():
+    views = torch.tensor([[0.9, 0.5], [0.5, 0.5]])
+    result = fuse_one_candidate(
+        views,
+        torch.zeros(2),
+        candidate_digest=f"{9:064x}",
+        view_digests=(f"{10:064x}", f"{11:064x}"),
+        view_fusion="positive_unknown_noisy_or",
+    )
+    assert torch.allclose(result, torch.tensor([0.9, 0.0]))

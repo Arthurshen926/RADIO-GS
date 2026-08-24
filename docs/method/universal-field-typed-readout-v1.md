@@ -273,6 +273,33 @@ SAM cosine threshold 0.5, $\alpha=0.25$, and margin threshold 0.03.  On paper8,
 `0.33810/0.33617/0.42548`; all corresponding mAcc values also improve.
 Unrestricted SAM categorical propagation is explicitly excluded.
 
+The stronger native object-statistic residual is now also promoted on top of
+the capability-before-MPR L512 decoder.  Query-free source RGB is processed by
+official SAM3 to obtain region extent and by the paired native SigLIP2 vision
+encoder on masked plus expanded-context crops to obtain category identity.
+Proposal evidence is averaged once per source view, so nested-mask count cannot
+change a view's authority.  Only rows with at least two agreeing source views
+are eligible; wall, floor and ceiling replay the primitive categorical score.
+For all classes and scenes the residual is the same centered interpolation
+
+\[
+  \tilde p_i=\operatorname{norm}
+  \left(0.75\,\bar p_i+0.25\,a_i\bar r_i\right),
+\]
+
+where bars denote class-centered normalized score vectors and $a_i$ is the
+cross-view label agreement.  The fixed `0.25` weight was selected on
+scene0000/0062/0070/0097 before scene0140/0347/0400/0590 was evaluated.  On the
+four-scene confirmation cohort, 19/15/10-class macro mIoU improves by
+`+0.00825/+0.00731/+0.00742` and macro mAcc by
+`+0.00281/+0.00363/+0.00207`.  On paper8, the current deployable baseline
+`0.35613/0.35300/0.45954` becomes `0.36630/0.36301/0.46866`; macro mAcc gains
+`+0.00460/+0.00612/+0.00453`.  All 24 scene-by-split mIoU changes are positive.
+Two of 24 scene-by-split mAcc changes are slightly negative, so this is a
+positive fixed-cohort compiler rather than a claim of per-scene Pareto
+dominance.  It adds no class-, scene- or Gaussian-indexed parameter and opens
+no benchmark mask for prediction.
+
 A stronger class-temperature/bias shrinkage screen reaches development mIoU
 `0.41023/0.43269/0.52560`, but its parent and variant were selected with
 paper8/heldout evaluation scenes.  It is mechanism evidence for constrained

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import torch
+from torch.nn import functional as F
 
 from radio_gs.querying.latent_proposal_posterior import (
     latent_proposal_null_posterior,
@@ -26,6 +27,7 @@ def sam_siglip_object_posterior(
     proposal_descriptor_scores: torch.Tensor,
     proposal_context_scores: torch.Tensor,
     *,
+    proposal_appearance_features: torch.Tensor | None = None,
     proposal_quality: torch.Tensor | None = None,
     proposal_area_fraction: torch.Tensor | None = None,
     positive_core_ratio: float = 0.80,
@@ -38,12 +40,14 @@ def sam_siglip_object_posterior(
     parent_identity_tolerance: float = 0.05,
     parent_field_peak_ratio: float = 0.75,
     extent_membership_floor: float = 0.50,
+    association_membership_floor: float | None = None,
     composition: str = "maximum",
     association_mode: str = "weighted_jaccard_components",
     candidates_per_view: int = 3,
     maximum_proposal_area_fraction: float = 0.25,
     minimum_cross_view_jaccard: float = 0.02,
     minimum_cross_view_overlap: float = 0.15,
+    minimum_cross_view_appearance_cosine: float = -1.0,
     require_field_peak_anchor: bool = True,
     latent_logit_temperature: float = 8.0,
 ) -> tuple[torch.Tensor, dict[str, object]]:
@@ -84,6 +88,13 @@ def sam_siglip_object_posterior(
         raise ValueError("proposal quality must align with proposals")
     if proposal_area_fraction is not None and torch.as_tensor(proposal_area_fraction).shape != (num_proposals,):
         raise ValueError("proposal area must align with proposals")
+    appearance = None
+    if proposal_appearance_features is not None:
+        appearance = F.normalize(
+            torch.as_tensor(proposal_appearance_features).float(), dim=-1, eps=1e-8
+        )
+        if appearance.ndim != 2 or appearance.shape[0] != num_proposals:
+            raise ValueError("proposal appearance must align with proposals")
     if not 0.0 < float(positive_core_ratio) <= 1.0:
         raise ValueError("positive_core_ratio must lie in (0,1]")
     if int(minimum_object_views) <= 0 or int(maximum_object_views) < int(minimum_object_views):
@@ -96,9 +107,17 @@ def sam_siglip_object_posterior(
         raise ValueError("descriptor_listwise_margin must lie in [0,1]")
     if composition not in {"maximum", "noisy_or"}:
         raise ValueError("unsupported topology composition")
+    association_floor = (
+        float(extent_membership_floor)
+        if association_membership_floor is None
+        else float(association_membership_floor)
+    )
+    if not 0.0 < association_floor <= 1.0:
+        raise ValueError("association_membership_floor must lie in (0,1]")
     if association_mode not in {
         "none",
         "weighted_jaccard_components",
+        "field_peak_anchored_star",
         "latent_proposal_marginal",
     }:
         raise ValueError("unsupported proposal association mode")
@@ -110,6 +129,10 @@ def sam_siglip_object_posterior(
         raise ValueError("minimum cross-view Jaccard must lie in [0,1]")
     if not 0.0 <= float(minimum_cross_view_overlap) <= 1.0:
         raise ValueError("minimum cross-view overlap must lie in [0,1]")
+    if not -1.0 <= float(minimum_cross_view_appearance_cosine) <= 1.0:
+        raise ValueError("minimum appearance cosine must lie in [-1,1]")
+    if appearance is None and float(minimum_cross_view_appearance_cosine) > -1.0:
+        raise ValueError("appearance gate requested without proposal appearance teacher")
     if float(latent_logit_temperature) <= 0:
         raise ValueError("latent logit temperature must be positive")
     valid = (
@@ -178,6 +201,8 @@ def sam_siglip_object_posterior(
     selected_proposal_identity_scores: list[list[float]] = []
     selected_component_view_counts: list[int] = []
     selected_component_edge_counts: list[int] = []
+    pre_ascent_proposal_indices: list[list[int]] = []
+    parent_appearance_rejections: list[int] = []
     unique_views = torch.unique(views, sorted=True)
 
     # A proposal is an object observation only if another source view sees a
@@ -185,7 +210,10 @@ def sam_siglip_object_posterior(
     # pair similarities are evaluated lazily because a query uses only the top
     # few identity candidates from each view.
     support_sets: list[set[int]] = [set() for _ in range(num_proposals)]
-    support_keep = conditional >= float(extent_membership_floor)
+    # Association uses a separately controllable high-purity core.  Extent
+    # composition may still use the broader proposal membership after an
+    # identity track has been accepted.
+    support_keep = conditional >= association_floor
     for row, proposal in zip(rows[support_keep].tolist(), props[support_keep].tolist()):
         support_sets[int(proposal)].add(int(row))
 
@@ -197,6 +225,10 @@ def sam_siglip_object_posterior(
             return False
         intersection = len(a.intersection(b))
         if intersection == 0:
+            return False
+        if appearance is not None and float(
+            torch.dot(appearance[left], appearance[right])
+        ) < float(minimum_cross_view_appearance_cosine):
             return False
         jaccard = intersection / max(len(a) + len(b) - intersection, 1)
         overlap = intersection / max(min(len(a), len(b)), 1)
@@ -344,7 +376,68 @@ def sam_siglip_object_posterior(
         ]
 
         component_edge_count = 0
-        if association_mode == "weighted_jaccard_components" and candidate_nodes:
+        association_anchor: int | None = None
+        if association_mode == "field_peak_anchored_star" and candidate_nodes:
+            # Connected-component transitivity is not a physical identity
+            # relation: A may overlap B and B may overlap C even when A and C
+            # are different adjacent instances.  A conservative star admits a
+            # source observation only when it is directly associated with the
+            # immutable field-peak observation for this query.
+            anchors = [
+                proposal
+                for proposal in candidate_nodes
+                if float(peak_membership[proposal, query_index]) > 0.0
+            ]
+            if anchors:
+                anchor = max(
+                    anchors,
+                    key=lambda proposal: (
+                        float(identity[proposal, query_index]),
+                        float(peak_membership[proposal, query_index]),
+                        -int(proposal),
+                    ),
+                )
+                association_anchor = int(anchor)
+                directly_linked = [
+                    proposal
+                    for proposal in candidate_nodes
+                    if proposal == anchor or associated(anchor, proposal)
+                ]
+                component_edge_count = len(directly_linked) - 1
+                by_view: dict[int, int] = {}
+                for proposal in directly_linked:
+                    view = int(views[proposal])
+                    proposal_rank = (
+                        float(torch.dot(appearance[anchor], appearance[proposal]))
+                        if appearance is not None
+                        else float(identity[proposal, query_index])
+                    )
+                    current = by_view.get(view)
+                    current_rank = (
+                        float(torch.dot(appearance[anchor], appearance[current]))
+                        if appearance is not None and current is not None
+                        else (
+                            float(identity[current, query_index])
+                            if current is not None
+                            else float("-inf")
+                        )
+                    )
+                    if (
+                        current is None
+                        or proposal_rank > current_rank
+                        or (
+                            proposal_rank == current_rank
+                            and float(identity[proposal, query_index])
+                            > float(identity[current, query_index])
+                        )
+                    ):
+                        by_view[view] = proposal
+                component = list(by_view.values())
+                if len(component) < int(minimum_object_views):
+                    component = []
+            else:
+                component = []
+        elif association_mode == "weighted_jaccard_components" and candidate_nodes:
             roots = list(range(len(candidate_nodes)))
 
             def find(index: int) -> int:
@@ -416,6 +509,8 @@ def sam_siglip_object_posterior(
                     by_view[view] = proposal
             component = list(by_view.values())
 
+        pre_ascent_proposal_indices.append([int(value) for value in component])
+        appearance_rejections = 0
         per_view: list[tuple[float, int, int]] = []
         for original in component:
             selected = int(original)
@@ -426,6 +521,21 @@ def sam_siglip_object_posterior(
                 if parent in seen or int(views[parent]) != int(views[original]):
                     break
                 seen.add(parent)
+                parent_changes_native_identity = False
+                if (
+                    appearance is not None
+                    and association_anchor is not None
+                    and float(minimum_cross_view_appearance_cosine) > -1.0
+                ):
+                    # Association is established on the discriminant child
+                    # proposal.  SAM parent ascent changes the actual extent
+                    # used by the posterior, so it must preserve that same
+                    # native-DINO physical-identity authority.  Otherwise a
+                    # valid child edge can silently expand into an unrelated
+                    # enclosing object/background parent.
+                    parent_changes_native_identity = float(
+                        torch.dot(appearance[association_anchor], appearance[parent])
+                    ) < float(minimum_cross_view_appearance_cosine)
                 if (
                     (
                         proposal_area_fraction is not None
@@ -441,13 +551,16 @@ def sam_siglip_object_posterior(
                     < float(descriptor[selected, query_index]) - float(parent_identity_tolerance)
                     or float(field_tail[parent, query_index])
                     < float(field_tail[selected, query_index]) * float(parent_field_peak_ratio)
+                    or parent_changes_native_identity
                 ):
+                    appearance_rejections += int(parent_changes_native_identity)
                     break
                 selected = parent
                 ascent += 1
             per_view.append((float(identity[selected, query_index]), selected, ascent))
         per_view.sort(key=lambda value: (-value[0], value[1]))
         selected = per_view[: int(maximum_object_views)]
+        parent_appearance_rejections.append(appearance_rejections)
         if len(selected) < int(minimum_object_views):
             selected_counts.append(len(selected))
             accepted_views.append(0)
@@ -513,11 +626,20 @@ def sam_siglip_object_posterior(
         "parent_identity_tolerance": float(parent_identity_tolerance),
         "parent_field_peak_ratio": float(parent_field_peak_ratio),
         "extent_membership_floor": float(extent_membership_floor),
+        "association_membership_floor": association_floor,
         "association_mode": str(association_mode),
         "candidates_per_view": int(candidates_per_view),
         "maximum_proposal_area_fraction": float(maximum_proposal_area_fraction),
         "minimum_cross_view_jaccard": float(minimum_cross_view_jaccard),
         "minimum_cross_view_overlap": float(minimum_cross_view_overlap),
+        "minimum_cross_view_appearance_cosine": float(
+            minimum_cross_view_appearance_cosine
+        ),
+        "proposal_appearance_authority": (
+            "independent_native_dinov2_mask_pool"
+            if appearance is not None
+            else "none"
+        ),
         "require_field_peak_anchor": bool(require_field_peak_anchor),
         "selected_proposal_counts": selected_counts,
         "accepted_view_counts": accepted_views,
@@ -530,4 +652,6 @@ def sam_siglip_object_posterior(
         "selected_proposal_identity_scores": selected_proposal_identity_scores,
         "selected_component_view_counts": selected_component_view_counts,
         "selected_component_edge_counts": selected_component_edge_counts,
+        "pre_ascent_proposal_indices": pre_ascent_proposal_indices,
+        "parent_appearance_rejections": parent_appearance_rejections,
     }

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Encode multiscale source-SAM3 masks with official SigLIP2 crop summaries.
+"""Encode multiscale source-SAM3 masks with RADIO or native SigLIP2 crops.
 
 This is the direct SAM+CLIP-style identity path: official SAM3 fixes the mask,
-the masked RGB crop is encoded by the frozen official C-RADIOv4 SigLIP2-G
-summary adaptor, and an expanded unmasked crop supplies contextual evidence.
+the masked RGB crop is encoded either by the frozen official C-RADIOv4
+SigLIP2-G summary adaptor (control) or the independent native SigLIP2 image
+tower (candidate), and an expanded unmasked crop supplies contextual evidence.
 All descriptors are constructed query-free from sealed source RGB.
 """
 
@@ -20,6 +21,7 @@ from typing import Any
 
 from PIL import Image
 import torch
+from torch.nn import functional as F
 from torchvision.transforms.functional import pil_to_tensor
 
 from radio_gs.interfaces.frozen_radio_views import OfficialCropSummaryRuntime
@@ -31,7 +33,73 @@ from radio_gs.scripts.build_sam_mask_aligned_language_teacher import (
 from radio_gs.utils.immutable_artifacts import sha256_file
 
 
-SCHEMA = "radio_gs.multiscale_sam_mask_aligned_crop_summary_teacher.v1"
+RADIO_SCHEMA = "radio_gs.multiscale_sam_mask_aligned_crop_summary_teacher.v1"
+NATIVE_SCHEMA = "radio_gs.multiscale_sam_mask_aligned_crop_summary_teacher.v2"
+
+
+class NativeSiglip2Runtime:
+    """Frozen native SigLIP2 vision tower in its paired text embedding space."""
+
+    def __init__(self, model: torch.nn.Module, *, device: torch.device, bundle: dict[str, Any]):
+        self.model = model
+        self.device = device
+        self.bundle = bundle
+
+    @classmethod
+    def load(cls, path: Path, *, device: torch.device) -> "NativeSiglip2Runtime":
+        from transformers import SiglipVisionModel
+
+        root = path.expanduser().resolve(strict=True)
+        required = (
+            "config.json",
+            "model.safetensors.index.json",
+            "model-00001-of-00002.safetensors",
+            "model-00002-of-00002.safetensors",
+            "preprocessor_config.json",
+        )
+        records = []
+        for name in required:
+            source = root / name
+            resolved = source.resolve(strict=True)
+            if not resolved.is_file():
+                raise ValueError(f"native SigLIP2 bundle lacks {name}")
+            records.append(
+                {
+                    "name": name,
+                    "resolved_path": str(resolved),
+                    "bytes": resolved.stat().st_size,
+                    "sha256": sha256_file(resolved),
+                }
+            )
+        digest = hashlib.sha256(
+            json.dumps(records, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        dtype = torch.float16 if device.type == "cuda" else torch.float32
+        model = SiglipVisionModel.from_pretrained(
+            str(root),
+            local_files_only=True,
+            torch_dtype=dtype,
+        ).to(device).eval()
+        model.requires_grad_(False)
+        return cls(
+            model,
+            device=device,
+            bundle={"path": str(root), "sha256": digest, "files": records},
+        )
+
+    @torch.inference_mode()
+    def encode(self, crops: torch.Tensor) -> torch.Tensor:
+        values = torch.as_tensor(crops, device=self.device).float()
+        if values.ndim != 4 or values.shape[1:] != (3, 384, 384):
+            raise ValueError("native SigLIP2 crops must be [B,3,384,384]")
+        # Frozen processor contract: input RGB is already in [0,1] and resized;
+        # only SigLIP's 0.5/0.5 normalization remains.
+        pixel_values = ((values - 0.5) / 0.5).to(
+            dtype=next(self.model.parameters()).dtype
+        )
+        output = self.model(pixel_values=pixel_values, return_dict=True)
+        descriptor = F.normalize(output.pooler_output.float(), dim=-1, eps=1e-8)
+        return descriptor
 
 
 def _load_manifest(path: Path) -> tuple[dict, bytes]:
@@ -97,18 +165,40 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     if list(records) != selected_ids:
         raise ValueError("multiscale manifest image order differs")
 
-    checkpoint = Path(args.radio_checkpoint).expanduser().resolve()
-    if sha256_file(checkpoint) != str(args.radio_checkpoint_sha256):
-        raise ValueError("official C-RADIO checkpoint SHA-256 differs")
     device = torch.device(args.device)
-    runtime = OfficialCropSummaryRuntime.load(
-        checkpoint_path=str(checkpoint),
-        radio_repo=str(Path(args.radio_repo).expanduser().resolve()),
-        version=str(args.radio_version),
-        device=device,
-    )
-    if runtime.radio_checkpoint_sha256 != str(args.radio_checkpoint_sha256):
-        raise ValueError("loaded official C-RADIO checkpoint identity differs")
+    if str(args.encoder_backend) == "radio_siglip2_summary":
+        checkpoint = Path(args.radio_checkpoint).expanduser().resolve()
+        if not args.radio_checkpoint or sha256_file(checkpoint) != str(args.radio_checkpoint_sha256):
+            raise ValueError("official C-RADIO checkpoint SHA-256 differs")
+        runtime = OfficialCropSummaryRuntime.load(
+            checkpoint_path=str(checkpoint),
+            radio_repo=str(Path(args.radio_repo).expanduser().resolve()),
+            version=str(args.radio_version),
+            device=device,
+        )
+        if runtime.radio_checkpoint_sha256 != str(args.radio_checkpoint_sha256):
+            raise ValueError("loaded official C-RADIO checkpoint identity differs")
+        teacher_space = "official_c_radio_siglip2_crop_summary"
+        text_compatibility = "official_siglip2_g_text_space"
+        encoder_binding: dict[str, Any] = {
+            "backend": str(args.encoder_backend),
+            "radio_checkpoint": str(checkpoint),
+            "radio_checkpoint_sha256": runtime.radio_checkpoint_sha256,
+        }
+    elif str(args.encoder_backend) == "native_siglip2_vision":
+        if int(args.crop_resolution) != 384:
+            raise ValueError("native SigLIP2 candidate is frozen to 384x384 crops")
+        runtime = NativeSiglip2Runtime.load(
+            Path(args.native_siglip2_model), device=device
+        )
+        teacher_space = "independent_native_siglip2_vision_pooler"
+        text_compatibility = "native_siglip2_paired_text_tower_space"
+        encoder_binding = {
+            "backend": str(args.encoder_backend),
+            "native_siglip2_bundle": runtime.bundle,
+        }
+    else:
+        raise ValueError("unknown crop encoder backend")
 
     masked_chunks: list[torch.Tensor] = []
     context_chunks: list[torch.Tensor] = []
@@ -135,6 +225,24 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         if image.size != (width, height):
             raise ValueError("source RGB and multiscale mask raster differ")
         image_tensor = pil_to_tensor(image).float().div_(255.0)
+        frame_id = int(image_id[6:])
+        if int(masks.shape[0]) == 0:
+            # Query-free SAM is allowed to reject every proposal in one
+            # source frame.  That frame still belongs to the immutable source
+            # authority, but it contributes no row to the proposal axis.
+            output_records.append(
+                {
+                    "image_id": image_id,
+                    "frame_id": frame_id,
+                    "source_view_index": view_index,
+                    "source_image": str(image_path),
+                    "source_image_sha256": str(source["sha256"]),
+                    "mask_cache": str(mask_path),
+                    "mask_cache_sha256": str(record["output_sha256"]),
+                    "proposal_count": 0,
+                }
+            )
+            continue
         masked_crops, context_crops = build_crop_pairs(
             image_tensor,
             masks,
@@ -159,7 +267,6 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         masked_chunks.append(masked)
         context_chunks.append(context)
         proposal_views.extend([view_index] * count)
-        frame_id = int(image_id[6:])
         proposal_frames.extend([frame_id] * count)
         output_records.append(
             {
@@ -176,8 +283,13 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     descriptors = torch.cat(masked_chunks)
     contexts = torch.cat(context_chunks)
     paired_cosine = (descriptors.float() * contexts.float()).sum(dim=-1)
+    output_schema = (
+        RADIO_SCHEMA
+        if str(args.encoder_backend) == "radio_siglip2_summary"
+        else NATIVE_SCHEMA
+    )
     payload_out = {
-        "schema": SCHEMA,
+        "schema": output_schema,
         "schema_version": 1,
         "scene": str(args.scene),
         "descriptors": descriptors,
@@ -186,10 +298,10 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "proposal_view_indices": torch.tensor(proposal_views, dtype=torch.long),
         "proposal_frame_indices": torch.tensor(proposal_frames, dtype=torch.long),
         "metadata": {
-            "teacher_space": "official_siglip2_crop_summary",
-            "text_compatibility": "official_siglip2_g_text_space",
-            "descriptor_formula": "official_c_radio_v4_h_siglip2_summary(masked_tight_crop)",
-            "context_formula": "official_c_radio_v4_h_siglip2_summary(1.5x_context_crop)",
+            "teacher_space": teacher_space,
+            "text_compatibility": text_compatibility,
+            "descriptor_formula": f"{args.encoder_backend}(masked_tight_crop)",
+            "context_formula": f"{args.encoder_backend}(1.5x_context_crop)",
             "masked_background_rgb": [0.5, 0.5, 0.5],
             "context_expansion": float(args.context_expansion),
             "crop_resolution": int(args.crop_resolution),
@@ -201,8 +313,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "benchmark_vocabulary_opened": False,
             "evaluation_rgb_opened": False,
             "text_queries_opened": False,
-            "radio_checkpoint": str(checkpoint),
-            "radio_checkpoint_sha256": runtime.radio_checkpoint_sha256,
+            "encoder_binding": encoder_binding,
             "multiscale_manifest": str(manifest_path),
             "multiscale_manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
             "source_records": output_records,
@@ -213,7 +324,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     torch.save(payload_out, temporary)
     os.replace(temporary, output)
     report = {
-        "schema": SCHEMA,
+        "schema": output_schema,
         "status": "complete",
         "scene": str(args.scene),
         "output": str(output),
@@ -221,6 +332,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "source_view_count": len(selected_ids),
         "proposal_count": int(descriptors.shape[0]),
         "descriptor_dim": int(descriptors.shape[1]),
+        "encoder_backend": str(args.encoder_backend),
         "mean_masked_context_cosine": float(paired_cosine.mean()),
     }
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
@@ -232,10 +344,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scene", required=True)
     parser.add_argument("--mask-root", required=True)
     parser.add_argument("--manifest-name", default="manifest.json")
-    parser.add_argument("--radio-checkpoint", required=True)
-    parser.add_argument("--radio-checkpoint-sha256", required=True)
+    parser.add_argument(
+        "--encoder-backend",
+        choices=("radio_siglip2_summary", "native_siglip2_vision"),
+        default="radio_siglip2_summary",
+    )
+    parser.add_argument("--radio-checkpoint", default="")
+    parser.add_argument("--radio-checkpoint-sha256", default="")
     parser.add_argument("--radio-repo", default="/root/RADIO")
     parser.add_argument("--radio-version", default="c-radio_v4-h")
+    parser.add_argument("--native-siglip2-model", default="")
     parser.add_argument("--context-expansion", type=float, default=1.5)
     parser.add_argument("--crop-resolution", type=int, default=384)
     parser.add_argument("--batch-size", type=int, default=2)

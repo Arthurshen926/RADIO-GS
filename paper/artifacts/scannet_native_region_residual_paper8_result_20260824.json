@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_native_sam_siglip_region_residual_paper8_result",
+  "status": "fixed_confirmation_pass_typed_categorical_compiler_promoted",
+  "method": {
+    "persistent_field": "Universal Field v1 D512/L512",
+    "primitive_categorical_feature": "promoted source-gated direct-capability L512 decoder",
+    "region_extent": "official native SAM3 query-free source masks lifted by exact marginal responsibility",
+    "region_identity": "paired native SigLIP2 masked plus expanded-context crop descriptor",
+    "aggregation": "equal authority per source view then class-symmetric centered fusion",
+    "minimum_source_views": 2,
+    "minimum_view_agreement": 0.5,
+    "structural_primitive_replay_nyu40_ids": [1, 2, 22],
+    "fixed_blend_weight": 0.25,
+    "per_class_parameter": false,
+    "per_scene_parameter": false,
+    "per_gaussian_parameter_added": false,
+    "second_persistent_gaussian_field": false
+  },
+  "selection_protocol": {
+    "development_scenes": [
+      "scene0000_00",
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00"
+    ],
+    "confirmation_scenes_opened_after_weight_freeze": [
+      "scene0140_00",
+      "scene0347_00",
+      "scene0400_00",
+      "scene0590_00"
+    ],
+    "candidate_weights_seen_on_development": [0.25, 0.5, 1.0],
+    "confirmation_weight": 0.25,
+    "benchmark_labels_or_masks_used_for_fit": false,
+    "benchmark_masks_used_for_prediction": false,
+    "source_rgb_used_for_native_teachers": true
+  },
+  "development4_delta": {
+    "miou": {
+      "19": 0.012078404950477684,
+      "15": 0.01270728813374987,
+      "10": 0.010824297560754162
+    },
+    "macc": {
+      "19": 0.006380480357050938,
+      "15": 0.008612487250615475,
+      "10": 0.006999940090229501
+    },
+    "positive_scene_counts": {
+      "miou_19_15_10": [4, 4, 4],
+      "macc_19_15_10": [4, 4, 4]
+    }
+  },
+  "confirmation4_delta": {
+    "miou": {
+      "19": 0.008254370655027668,
+      "15": 0.007314274501134102,
+      "10": 0.007417725599930661
+    },
+    "macc": {
+      "19": 0.002812093222426121,
+      "15": 0.003632170221375325,
+      "10": 0.0020651706763122613
+    },
+    "positive_scene_counts": {
+      "miou_19_15_10": [4, 4, 4],
+      "macc_19_15_10": [3, 4, 3]
+    }
+  },
+  "paper8_macro": {
+    "restored_deployable_baseline": {
+      "miou": {
+        "19": 0.3561349583291869,
+        "15": 0.35299786168047315,
+        "10": 0.4595363802647403
+      },
+      "macc": {
+        "19": 0.6697521773658337,
+        "15": 0.6626078564172957,
+        "10": 0.7635596699384162
+      }
+    },
+    "native_region_residual": {
+      "miou": {
+        "19": 0.3663013461319396,
+        "15": 0.363008642997915,
+        "10": 0.46865739184508276
+      },
+      "macc": {
+        "19": 0.6743484641555723,
+        "15": 0.6687301851532911,
+        "10": 0.7680922253216871
+      }
+    },
+    "native_region_minus_restored": {
+      "miou": {
+        "19": 0.010166387802752676,
+        "15": 0.010010781317441986,
+        "10": 0.009121011580342411
+      },
+      "macc": {
+        "19": 0.0045962867897385296,
+        "15": 0.0061223287359954,
+        "10": 0.004532555383270881
+      }
+    },
+    "native_region_minus_original_method_v1": {
+      "miou": {
+        "19": 0.030947828160777957,
+        "15": 0.029313559685649526,
+        "10": 0.0465264950992717
+      },
+      "macc": {
+        "19": 0.009093511596965254,
+        "15": 0.0191883241875882,
+        "10": 0.02937802635643516
+      }
+    },
+    "scene_level_signs": {
+      "miou_positive_out_of_24": 24,
+      "macc_positive_out_of_24": 22,
+      "minimum_miou_delta": 0.0005821832167269836,
+      "minimum_macc_delta": -0.0019760806671140774
+    }
+  },
+  "result_files": {
+    "scene0000_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip_restored_baseline/native_sam_siglip_region_vote_on_restored.json",
+      "sha256": "f5e667787f86d496f3bf2ee6a961856c8e50f0b9d82ab97b0bfb133b978c2e50"
+    },
+    "scene0062_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0062_00/native_sam_siglip_restored_baseline/native_sam_siglip_region_vote_on_restored.json",
+      "sha256": "bb2bc5b94aef889b7a47e5f319c5bd8d53b2ca3b379175161f1ef75349350711"
+    },
+    "scene0070_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0070_00/native_sam_siglip_restored_baseline/native_sam_siglip_region_vote_on_restored.json",
+      "sha256": "68a9456cc84f070e8c96d687edcc4f76b0a31f1367b0028a19e193700746d0ea"
+    },
+    "scene0097_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0097_00/native_sam_siglip_restored_baseline/native_sam_siglip_region_vote_on_restored.json",
+      "sha256": "599a2d1d32d2c3f88a2a722f539279cdd2785dd63487f005c4a9c1c5f9261385"
+    },
+    "scene0140_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0140_00/native_sam_siglip_restored_baseline/native_sam_siglip_region_vote_on_restored.json",
+      "sha256": "277fa4bc794aef50edeee18b09009ad448ab21e8f962da07018610a87ffed0d4"
+    },
+    "scene0347_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0347_00/native_sam_siglip_restored_baseline/native_sam_siglip_region_vote_on_restored.json",
+      "sha256": "43d1c061b129930cbdee29d1e365dc86aeacb64628c0d78977f0cf21c07fef49"
+    },
+    "scene0400_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0400_00/native_sam_siglip_restored_baseline/native_sam_siglip_region_vote_on_restored.json",
+      "sha256": "bd548faa23c6a0447f0edd40cc6ed63399da970f8d9d15b07df98bbbc086968b"
+    },
+    "scene0590_00": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0590_00/native_sam_siglip_restored_baseline/native_sam_siglip_region_vote_on_restored.json",
+      "sha256": "e1e293c2f2571c084f86b075dede8429ada843c70ce18f7b9104386e6084f4fa"
+    }
+  },
+  "claim_boundary": {
+    "development_result": true,
+    "fixed_confirmation_transfer": true,
+    "sota_claim": false,
+    "per_scene_pareto_dominance_claim": false,
+    "interpretation": "Correct-level native region identity and extent add information complementary to the compact RADIO capability decoder. The fixed residual improves paper8 macro mIoU and mAcc on every split, while two small scene-level mAcc regressions preclude a stronger per-scene claim."
+  }
+}

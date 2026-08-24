@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import numpy as np
 import torch
 
 from radio_gs.scripts.build_nvos_synchronous_multiview_candidate_plan import (
+    expand_to_all_registered_views,
     exchangeable_candidates,
     exclusive_projected_authority,
 )
@@ -52,3 +56,36 @@ def test_exchangeable_candidate_identity_binds_plan() -> None:
     assert [row["candidate_digest"] for row in left] != [
         row["candidate_digest"] for row in right
     ]
+
+
+def test_expand_registered_views_preserves_protocol_roles(tmp_path: Path) -> None:
+    mapping = []
+    colmap = {}
+    for rank, name in enumerate(("source", "middle", "target")):
+        rgb = tmp_path / f"{name}.jpg"
+        rgb.write_bytes(bytes([rank + 1]))
+        colmap_path = Path("images") / rgb.name
+        mapping.append(
+            {
+                "rgb_camera_name": name,
+                "rgb_path": str(rgb),
+                "colmap_camera_name": name,
+                "colmap_file_path": str(colmap_path),
+                "match_rule": "exact_case_sensitive_basename_stem",
+            }
+        )
+        c2w = np.eye(4, dtype=np.float32)
+        c2w[0, 3] = float(rank)
+        colmap[name] = (str(colmap_path), c2w)
+    protocol = [
+        {"frame_id": "source", "camera_name": "source", "role": "prompt"},
+        {"frame_id": "target", "camera_name": "target", "role": "evaluation"},
+    ]
+    views = expand_to_all_registered_views(protocol, mapping, colmap)
+    assert [view["frame_id"] for view in views] == ["source", "middle", "target"]
+    assert [view["role"] for view in views] == [
+        "prompt",
+        "registered_mapping",
+        "evaluation",
+    ]
+    assert np.allclose(views[1]["w2c"][0, 3], -1.0)

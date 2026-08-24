@@ -130,6 +130,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         not in {
             "radio_gs.sam_mask_aligned_siglip2_spatial_teacher.v1",
             "radio_gs.multiscale_sam_mask_aligned_crop_summary_teacher.v1",
+            "radio_gs.multiscale_sam_mask_aligned_crop_summary_teacher.v2",
         }
         or descriptors.shape != (num_proposals, 1536)
         or context_descriptors.shape != descriptors.shape
@@ -141,6 +142,8 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         not in {
             "official_siglip2_g_spatial_mask_aligned_pool",
             "official_siglip2_crop_summary",
+            "official_c_radio_siglip2_crop_summary",
+            "independent_native_siglip2_vision_pooler",
         }
         or teacher_metadata.get("query_independent") is not True
         or teacher_metadata.get("source_only") is not True
@@ -157,6 +160,38 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         )
     ):
         raise ValueError("mask-aligned official SigLIP2 proposal teacher differs")
+
+    appearance_path = (
+        Path(args.proposal_appearance_teacher).expanduser().resolve()
+        if args.proposal_appearance_teacher
+        else None
+    )
+    appearance = None
+    if appearance_path is not None:
+        appearance_teacher = torch.load(
+            appearance_path, map_location="cpu", weights_only=False
+        )
+        appearance_metadata = dict(appearance_teacher.get("metadata", {}))
+        appearance = torch.as_tensor(
+            appearance_teacher.get("descriptors")
+        ).float().cpu()
+        if (
+            appearance_teacher.get("schema")
+            != "radio_gs.multiscale_sam_mask_aligned_native_dinov2_teacher.v1"
+            or appearance.ndim != 2
+            or appearance.shape[0] != num_proposals
+            or not torch.equal(
+                torch.as_tensor(
+                    appearance_teacher.get("proposal_view_indices")
+                ).long(),
+                torch.as_tensor(membership.get("proposal_view_indices")).long(),
+            )
+            or appearance_metadata.get("source_only") is not True
+            or appearance_metadata.get("query_independent") is not True
+            or appearance_metadata.get("benchmark_masks_opened") is not False
+            or appearance_metadata.get("c_radio_or_radio_adaptor_used") is not False
+        ):
+            raise ValueError("proposal native-DINO appearance teacher differs")
 
     text_path = Path(args.text_embedding_cache).expanduser().resolve()
     canonical_path = Path(args.canonical_embedding_cache).expanduser().resolve()
@@ -211,6 +246,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         torch.as_tensor(membership.get("proposal_parent_index")),
         proposal_scores,
         context_scores,
+        proposal_appearance_features=appearance,
         proposal_quality=torch.as_tensor(membership.get("proposal_scores")),
         proposal_area_fraction=torch.as_tensor(
             membership.get("proposal_area_fraction")
@@ -225,12 +261,16 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         parent_identity_tolerance=float(args.parent_identity_tolerance),
         parent_field_peak_ratio=float(args.parent_field_peak_ratio),
         extent_membership_floor=float(args.extent_membership_floor),
+        association_membership_floor=float(args.association_membership_floor),
         composition=str(args.composition),
         association_mode=str(args.association_mode),
         candidates_per_view=int(args.candidates_per_view),
         maximum_proposal_area_fraction=float(args.maximum_proposal_area_fraction),
         minimum_cross_view_jaccard=float(args.minimum_cross_view_jaccard),
         minimum_cross_view_overlap=float(args.minimum_cross_view_overlap),
+        minimum_cross_view_appearance_cosine=float(
+            args.minimum_cross_view_appearance_cosine
+        ),
         require_field_peak_anchor=not bool(args.allow_unanchored_component),
         latent_logit_temperature=float(args.latent_logit_temperature),
     )
@@ -263,6 +303,12 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "membership_cache_sha256": sha256_file(membership_path),
             "proposal_teacher": str(teacher_path),
             "proposal_teacher_sha256": sha256_file(teacher_path),
+            "proposal_appearance_teacher": (
+                str(appearance_path) if appearance_path is not None else None
+            ),
+            "proposal_appearance_teacher_sha256": (
+                sha256_file(appearance_path) if appearance_path is not None else None
+            ),
             "text_embedding_cache": str(text_path),
             "text_embedding_cache_sha256": sha256_file(text_path),
             "canonical_embedding_cache": str(canonical_path),
@@ -300,6 +346,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--primitive-query-cache", required=True)
     parser.add_argument("--membership-cache", required=True)
     parser.add_argument("--proposal-teacher", required=True)
+    parser.add_argument("--proposal-appearance-teacher", default="")
     parser.add_argument("--text-embedding-cache", required=True)
     parser.add_argument("--canonical-embedding-cache", required=True)
     parser.add_argument("--query-names", required=True)
@@ -317,16 +364,25 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--parent-identity-tolerance", type=float, default=0.05)
     parser.add_argument("--parent-field-peak-ratio", type=float, default=0.75)
     parser.add_argument("--extent-membership-floor", type=float, default=0.50)
+    parser.add_argument("--association-membership-floor", type=float, default=0.50)
     parser.add_argument("--composition", choices=("maximum", "noisy_or"), default="maximum")
     parser.add_argument(
         "--association-mode",
-        choices=("none", "weighted_jaccard_components", "latent_proposal_marginal"),
+        choices=(
+            "none",
+            "weighted_jaccard_components",
+            "field_peak_anchored_star",
+            "latent_proposal_marginal",
+        ),
         default="weighted_jaccard_components",
     )
     parser.add_argument("--candidates-per-view", type=int, default=3)
     parser.add_argument("--maximum-proposal-area-fraction", type=float, default=0.25)
     parser.add_argument("--minimum-cross-view-jaccard", type=float, default=0.02)
     parser.add_argument("--minimum-cross-view-overlap", type=float, default=0.15)
+    parser.add_argument(
+        "--minimum-cross-view-appearance-cosine", type=float, default=-1.0
+    )
     parser.add_argument("--allow-unanchored-component", action="store_true")
     parser.add_argument("--latent-logit-temperature", type=float, default=8.0)
     parser.add_argument("--chunk-size", type=int, default=8192)

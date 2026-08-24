@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_official_scribble_sam3_video_full8_result",
+  "status": "complete_full8_mechanism_positive_but_unconditional_video_rejected",
+  "method": {
+    "identity": "official positive and negative prompt scribble, eight deterministic farthest points per sign",
+    "extent": "official SAM3 video memory",
+    "path": "shorter cyclic path over every registered RGB between prompt and target",
+    "prompt_box": false,
+    "target_mask_used_for_prediction": false,
+    "persistent_gaussian_state_added": false,
+    "rgb_assisted": true,
+    "strict_unseen_eligible": false
+  },
+  "full8": {
+    "macro_foreground_iou": 0.8112294765498695,
+    "macro_pixel_accuracy": 0.9648188440147277,
+    "same_chain_target_only_macro_foreground_iou": 0.8174280204569635,
+    "delta_vs_target_only": -0.006198543907094,
+    "per_scene_foreground_iou": {
+      "fern": 0.8470468016168298,
+      "flower": 0.7579947695198901,
+      "fortress": 0.6782549879838058,
+      "horns_center": 0.9740324665139155,
+      "horns_left": 0.94933682699763,
+      "leaves": 0.9504566037994369,
+      "orchids": 0.441507756048645,
+      "trex": 0.8912055999188038
+    },
+    "delta_vs_same_chain_target_only": {
+      "fern": 0.01643413289507556,
+      "flower": -0.21020847330880732,
+      "fortress": -0.29709308086625386,
+      "horns_center": 0.27719970345679423,
+      "horns_left": 0.2644972336926964,
+      "leaves": 0.31222740196175525,
+      "orchids": -0.4389120848802891,
+      "trex": 0.02626681579227752
+    }
+  },
+  "interpretation": {
+    "positive_mechanism": "Registered prompt identity plus transient memory resolves large target-only over-segmentation on both horns and leaves.",
+    "failure": "Point-only prompt initialization can select an object part; unconditional video propagation then under-segments flower, fortress and orchids.",
+    "next_gate": "Use full signed-scribble-selected native SAM proposal extent at the prompt before temporal propagation, then require query-side reliability without target labels."
+  },
+  "claim_boundary": {
+    "development_only": true,
+    "promoted_full8": false,
+    "sota_claim": false
+  }
+}

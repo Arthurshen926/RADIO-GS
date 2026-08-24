@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_native_multiteacher_pilot",
+  "status": "scannet_promoted_dense_dino_and_lerf_membership_rejected",
+  "decision": {
+    "supported": "RADIO is a shared anchor rather than an exclusive sufficient intermediary; native teachers should supervise the variable and semantic level consumed by each typed readout.",
+    "rejected": "Naively updating the shared L512 table with a native-DINO reconstruction loss, or adding proposal-mean DINO appearance to the current LERF membership carrier.",
+    "universal_field_v1_redefined": false,
+    "second_persistent_gaussian_field_added": false
+  },
+  "native_dinov2_abc": {
+    "contract": "same L512 capacity, geometry, source views, random decoder initialization, minibatches and 800 steps; disjoint source-heldout evaluation",
+    "scenes": {
+      "figurines": {
+        "heldout_native_mean_cosine": {"A": 0.7567473649978638, "B": 0.7475491762161255, "C": 0.7475333213806152},
+        "radio_mean_cosine": {"A": 1.0, "B": 0.9998437762260437, "C": 0.9998395442962646},
+        "result": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/figurines/native_dinov2_abc_matched_v2/abc_summary.json",
+          "sha256": "ce308281b1da526018b11072431021451860f48c2d8284d641bb809152f2eb31"
+        }
+      },
+      "scene0000_00": {
+        "heldout_native_mean_cosine": {"A": 0.7134764790534973, "B": 0.7040004134178162, "C": 0.7039570808410645},
+        "radio_mean_cosine": {"A": 1.0, "B": 0.9996504783630371, "C": 0.9996064901351929},
+        "result": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_dinov2_abc_matched_v2/abc_summary.json",
+          "sha256": "bf35dc4d3a193abc37c08826bd899fc13d7f6dcc360d2fe900fb0be87df0163d"
+        }
+      },
+      "nvos_fern": {
+        "heldout_native_mean_cosine": {"A": 0.8679700493812561, "B": 0.8667296171188354, "C": 0.8667294979095459},
+        "radio_mean_cosine": {"A": 1.0, "B": 0.999995231628418, "C": 0.999995231628418},
+        "result": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/nvos_fern/native_dinov2_abc_matched_v2/abc_summary.json",
+          "sha256": "289e9fd61b850d16b0217b30378180da786af6e4077bcef42527c529ba757d0d"
+        }
+      }
+    },
+    "decision": "Arm A wins all three sentinels; stop native-DINO-driven latent rebuild."
+  },
+  "scannet_native_region": {
+    "paper8_miou": {"19": 0.3663013461319396, "15": 0.363008642997915, "10": 0.46865739184508276},
+    "delta_over_current_deployable_miou": {"19": 0.010166387802752676, "15": 0.010010781317441986, "10": 0.009121011580342411},
+    "delta_over_current_deployable_macc": {"19": 0.0045962867897385296, "15": 0.0061223287359954, "10": 0.004532555383270881},
+    "positive_scene_split_miou": "24/24",
+    "positive_scene_split_macc": "22/24",
+    "fixed_confirmation_pass": true,
+    "promoted": true,
+    "aggregate_artifact": "paper/artifacts/scannet_native_region_residual_paper8_result_20260824.json"
+  },
+  "lerf": {
+    "native_dino_parent_guard": {
+      "figurines_lerf2d_miou": 0.40943403,
+      "figurines_lerf3d_miou": 0.521266639,
+      "promoted": false,
+      "reason": "Correctly prevents appearance-changing parent ascent but remains below fallback controls.",
+      "results": {
+        "lerf2d": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/figurines32_dino60_parent_guard/lerf2d/figurines_eval/lerf_ovs_results.json",
+          "sha256": "6e445c4448ad64801578d91396e3fd6d91222f532fd36b005d6e5cccf6c85f81"
+        },
+        "lerf3d": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/figurines32_dino60_parent_guard/lerf3d/figurines/figurines/lerf_direct_3d_selection_results.json",
+          "sha256": "4497d129df901cc552304ac2117ac2b86f0b42ed28fb85829a7c872fff27f07b"
+        }
+      }
+    },
+    "native_siglip2_dinov2_membership_decoder": {
+      "primitive_similarity_iou": 0.1245727464556694,
+      "decoder_iou": 0.13556629419326782,
+      "delta": 0.01099354773759842,
+      "gate": "fail_below_0.20_and_plus_0.02",
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/figurines32/source_membership_gate/native_siglip2_dinov2_frozen_l512.pt.json",
+        "sha256": "39454a8d2d4f4cc642e1aa4590a3a7df9e26a17f5bbaf98be6353b3e080675bc"
+      }
+    },
+    "disjoint_view_proposal_retrieval": {
+      "calibration_selected": "native_siglip2_plus_dinov2_top2",
+      "calibration_iou": 0.13836705684661865,
+      "evaluation_iou": 0.08783324062824249,
+      "same_topk_siglip2_evaluation_iou": 0.10315919667482376,
+      "gate": "fail",
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/figurines32/source_membership_gate/native_proposal_retrieval_gate.json",
+        "sha256": "e208ce013f3b3ede43661d996de5ee1f4b9d57ffcc3a6b53e39b90e106272795"
+      }
+    },
+    "conclusion": "The remaining LERF error is unstable complete-instance support across source views, not missing dense-DINO capacity or another proposal-mean appearance descriptor."
+  },
+  "nvos": {
+    "new_benchmark_metric_this_round": false,
+    "retained_native_all_view_component_local_macro_iou": 0.8262392400974579,
+    "interpretation": "Native DINO latent retraining is independently rejected on Fern; registered field identity plus authorized RGB/SAM extent remains the correct branch."
+  },
+  "spin_available9": {
+    "final_method_v1_gates": "5/9",
+    "complete": ["orchids", "leaves", "horns", "pinecone", "lego"],
+    "not_complete": ["fern", "room", "fortress", "truck"],
+    "blocks_this_decision": false
+  },
+  "claim_boundary": {
+    "development_evidence": true,
+    "sota_claim": false,
+    "five_benchmark_final_closed": false
+  }
+}

@@ -220,7 +220,7 @@ def train_and_materialize(args: argparse.Namespace) -> dict[str, object]:
             "query_independent": True,
             "field_frozen": True,
             "per_gaussian_parameters_added": False,
-            "teacher_order": "per_view_summary_head_then_exact_mpr",
+            "teacher_order": str(args.teacher_order),
             "view_split": "source_only_teacher_then_fixed_gaussian_row_holdout",
             "benchmark_images_opened": False,
             "benchmark_masks_opened": False,
@@ -300,10 +300,14 @@ def main() -> None:
     parser.add_argument("--holdout-residue", type=int, default=7)
     parser.add_argument("--minimum-mean-gain", type=float, default=1e-4)
     parser.add_argument("--maximum-p05-drop", type=float, default=0.002)
+    parser.add_argument(
+        "--teacher-order",
+        default="per_view_summary_head_then_exact_mpr",
+        help="Hash-recorded source-teacher construction order for this decoder.",
+    )
     parser.add_argument("--seed", type=int, default=20260823)
     print(json.dumps(train_and_materialize(parser.parse_args()), indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
     main()
-

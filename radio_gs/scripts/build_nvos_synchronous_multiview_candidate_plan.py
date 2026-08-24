@@ -28,6 +28,7 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.config import load_config
+from radio_gs.data.lerf_dataset import _parse_colmap_sparse
 from radio_gs.evaluation.promptable_segmentation import load_ground_truth_mask
 from radio_gs.rendering.contribution_compositor import (
     rasterize_single_view_contributions,
@@ -44,7 +45,10 @@ from radio_gs.scripts.predict_nvos_method_v1_transient_sam import (
     SAM_WIDTH,
     load_signed_field_prompt,
 )
-from radio_gs.scripts.render_promptable_nvs_features import resolve_protocol_views
+from radio_gs.scripts.render_promptable_nvs_features import (
+    resolve_protocol_views,
+    validate_locked_camera_mapping,
+)
 from radio_gs.scripts.run_nvos_method_v1_scene import (
     DATASET_MANIFEST,
     NVOS_AUTHORITY,
@@ -61,6 +65,107 @@ DEFAULT_FIELD_ROOT = Path(
     "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/"
     "core_method_v1/nvos"
 )
+
+
+def expand_to_all_registered_views(
+    protocol_views: Sequence[Mapping[str, Any]],
+    mapping_records: Sequence[Mapping[str, Any]],
+    colmap_by_stem: Mapping[str, tuple[str, np.ndarray]],
+) -> list[dict[str, Any]]:
+    """Expand prompt/evaluation views to every queue-locked RGB camera.
+
+    The locked camera map, rather than directory enumeration, owns the view
+    cohort.  Protocol roles are preserved exactly; every other registered RGB
+    is a mapping-time observation and cannot become a new prompt/evaluation
+    view by ordering or filename convention.
+    """
+
+    protocol_by_camera: dict[str, dict[str, Any]] = {}
+    for raw in protocol_views:
+        view = dict(raw)
+        camera = str(view.get("camera_name", ""))
+        if not camera or camera in protocol_by_camera:
+            raise ValueError("protocol camera identity is empty or repeated")
+        protocol_by_camera[camera] = view
+    output: list[dict[str, Any]] = []
+    used_frames: set[str] = set()
+    used_colmap: set[str] = set()
+    for raw in mapping_records:
+        record = dict(raw)
+        camera = str(record.get("rgb_camera_name", ""))
+        colmap_camera = str(record.get("colmap_camera_name", ""))
+        rgb_path = Path(str(record.get("rgb_path", ""))).expanduser().resolve()
+        if (
+            not camera
+            or not colmap_camera
+            or colmap_camera not in colmap_by_stem
+            or not rgb_path.is_file()
+            or rgb_path.is_symlink()
+            or colmap_camera in used_colmap
+        ):
+            raise ValueError("registered RGB/camera authority differs")
+        colmap_path, c2w = colmap_by_stem[colmap_camera]
+        locked_colmap_path = Path(str(record.get("colmap_file_path", "")))
+        if Path(colmap_path) != locked_colmap_path:
+            raise ValueError("locked registered COLMAP path changed")
+        protocol = protocol_by_camera.get(camera)
+        frame_id = str(protocol["frame_id"]) if protocol is not None else camera
+        if frame_id in used_frames:
+            raise ValueError("registered frame identity is repeated")
+        used_frames.add(frame_id)
+        used_colmap.add(colmap_camera)
+        output.append(
+            {
+                "frame_id": frame_id,
+                "camera_name": camera,
+                "colmap_camera_name": colmap_camera,
+                "camera_match_rule": str(record.get("match_rule", "")),
+                "role": (
+                    str(protocol["role"])
+                    if protocol is not None
+                    else "registered_mapping"
+                ),
+                "colmap_file_path": str(colmap_path),
+                "rgb_path": str(rgb_path),
+                "w2c": np.linalg.inv(np.asarray(c2w, dtype=np.float32)).astype(
+                    np.float32
+                ),
+            }
+        )
+    if set(protocol_by_camera) - {str(row["camera_name"]) for row in output}:
+        raise ValueError("protocol camera is absent from complete registered cohort")
+    return output
+
+
+def _load_assignment(
+    record: Mapping[str, Any],
+    *,
+    num_gaussians: int,
+    geometry_sha256: str,
+) -> dict[str, torch.Tensor]:
+    path = Path(str(record.get("path", ""))).expanduser().resolve(strict=True)
+    if sha256_file(path) != str(record.get("sha256", "")):
+        raise ValueError("exact assignment SHA-256 differs")
+    value = torch.load(path, map_location="cpu", weights_only=False)
+    if not isinstance(value, Mapping):
+        raise ValueError("exact assignment is not one mapping")
+    if (
+        int(value.get("num_gaussians", -1)) != int(num_gaussians)
+        or str(value.get("geometry_xyz_sha256", "")) != str(geometry_sha256)
+        or value.get("compositor_mode") != COMPOSITOR_MODE
+    ):
+        raise ValueError("exact assignment carrier identity differs")
+    tensors = {
+        key: torch.as_tensor(value.get(key)).cpu()
+        for key in ("gaussian_ids", "pixel_ids", "weights")
+    }
+    if (
+        tensors["gaussian_ids"].ndim != 1
+        or tensors["pixel_ids"].shape != tensors["gaussian_ids"].shape
+        or tensors["weights"].shape != tensors["gaussian_ids"].shape
+    ):
+        raise ValueError("exact assignment triplet axes differ")
+    return tensors
 
 
 def _canonical_digest(value: Mapping[str, Any]) -> str:
@@ -293,7 +398,23 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "prompt",
         "evaluation",
     }:
-        raise ValueError("NVOS native all-view cohort must contain source and target")
+        raise ValueError("NVOS protocol cohort must contain source and target")
+    if bool(args.all_registered_views):
+        colmap = _parse_colmap_sparse(Path(str(config.scene_root)).resolve())
+        colmap_by_stem: dict[str, tuple[str, np.ndarray]] = {}
+        for file_path, c2w in zip(colmap["file_paths"], colmap["c2w_list"]):
+            stem = Path(str(file_path)).stem
+            if stem in colmap_by_stem:
+                raise ValueError("registered COLMAP camera identity is repeated")
+            colmap_by_stem[stem] = (
+                str(file_path),
+                np.asarray(c2w, dtype=np.float32),
+            )
+        views = expand_to_all_registered_views(
+            views,
+            validate_locked_camera_mapping(camera_mapping, scene_id=scene_id),
+            colmap_by_stem,
+        )
 
     device = torch.device(args.device)
     if device.type != "cuda" or not torch.cuda.is_available():
@@ -310,7 +431,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     num_gaussians = int(model.get_xyz().shape[0])
     geometry_sha = _float32_rows_sha256(model.get_xyz())
 
-    assignments: dict[str, dict[str, torch.Tensor]] = {}
+    assignment_records: dict[str, dict[str, str]] = {}
     static_records: dict[str, dict[str, Any]] = {}
     for view in views:
         frame_id = str(view["frame_id"])
@@ -343,7 +464,11 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         pixel_mass.index_add_(
             0, assignment["pixel_ids"], assignment["weights"]
         )
-        rgb_path = _frame_rgb(raw_scene, frame_id)
+        rgb_path = (
+            Path(str(view["rgb_path"])).expanduser().resolve(strict=True)
+            if view.get("rgb_path")
+            else _frame_rgb(raw_scene, frame_id)
+        )
         rgb_sha = sha256_file(rgb_path)
         pose_sha = hashlib.sha256(
             np.asarray(view["w2c"], dtype="<f4").tobytes()
@@ -358,23 +483,33 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             }
         )
         precision = math.log(max(float(pixel_mass.mean()), 1e-8))
-        assignments[frame_id] = assignment
+        assignment_records[frame_id] = {
+            "path": str(assignment_path),
+            "sha256": assignment_sha,
+        }
         static_records[frame_id] = {
             "frame_id": frame_id,
+            "role": str(view["role"]),
             "view_digest": view_digest,
             "rgb": {"path": str(rgb_path), "sha256": rgb_sha},
-            "assignment": {
-                "path": str(assignment_path),
-                "sha256": assignment_sha,
-            },
+            "assignment": dict(assignment_records[frame_id]),
             "log_precision": precision,
             "query_independent_precision": "log_mean_exact_pixel_visible_mass",
         }
+        del assignment, hits, keep, pixel_mass
 
     prompt_view = next(view for view in views if view["role"] == "prompt")
     target_view = next(view for view in views if view["role"] == "evaluation")
-    prompt_assignment = assignments[str(prompt_view["frame_id"])]
-    target_assignment = assignments[str(target_view["frame_id"])]
+    prompt_assignment = _load_assignment(
+        assignment_records[str(prompt_view["frame_id"])],
+        num_gaussians=num_gaussians,
+        geometry_sha256=geometry_sha,
+    )
+    target_assignment = _load_assignment(
+        assignment_records[str(target_view["frame_id"])],
+        num_gaussians=num_gaussians,
+        geometry_sha256=geometry_sha,
+    )
     target_margin = _resize_probability(
         np.asarray(source["signed_margin"], dtype=np.float32),
         (SAM_HEIGHT, SAM_WIDTH),
@@ -423,12 +558,18 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         primitive_probability[primitive_negative > primitive_positive],
         torch.tensor(0.05),
     )
+    del prompt_assignment, target_assignment, prompt_visible
 
     view_records: list[dict[str, Any]] = []
+    skipped_registered_views: list[dict[str, Any]] = []
     zeros = torch.zeros(SAM_HEIGHT * SAM_WIDTH, dtype=torch.float32)
     for view in views:
         frame_id = str(view["frame_id"])
-        assignment = assignments[frame_id]
+        assignment = _load_assignment(
+            assignment_records[frame_id],
+            num_gaussians=num_gaussians,
+            geometry_sha256=geometry_sha,
+        )
         if frame_id == str(target_view["frame_id"]):
             # The sealed signed field prompt was rendered in this registered
             # view.  Preserve that observation exactly instead of applying a
@@ -476,9 +617,22 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         if min(int(positive_authority.sum()), int(negative_authority.sum())) < int(
             args.points_per_sign
         ):
-            raise ValueError(
-                f"{scene_id}/{frame_id} lacks projected explicit signed support"
+            if str(view["role"]) != "registered_mapping":
+                raise ValueError(
+                    f"{scene_id}/{frame_id} lacks projected explicit signed support"
+                )
+            skipped_registered_views.append(
+                {
+                    "frame_id": frame_id,
+                    "reason": "insufficient_projected_explicit_signed_support",
+                    "positive_pixels": int(positive_authority.sum()),
+                    "negative_pixels": int(negative_authority.sum()),
+                }
             )
+            del assignment, projected, pixel_mass
+            del projected_positive, projected_negative, visibility
+            del positive_authority, negative_authority
+            continue
         records: dict[str, dict[str, str]] = {}
         for label, value in (
             ("projected_probability", projected.numpy().astype(np.float32)),
@@ -495,6 +649,9 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 "projected_probability_semantics": projection_semantics,
             }
         )
+        del assignment, projected, pixel_mass
+        del projected_positive, projected_negative, visibility
+        del positive_authority, negative_authority
 
     plan_identity = {
         "scene_id": scene_id,
@@ -518,6 +675,8 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "geometry_xyz_sha256": geometry_sha,
         "candidate_count": len(candidates),
         "view_count": len(view_records),
+        "registered_camera_count": len(views),
+        "skipped_registered_views": skipped_registered_views,
         "candidates": candidates,
         "candidate_semantics": (
             "exchangeable_deterministic_signed_point_trials_equal_logit"
@@ -559,13 +718,22 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         },
         "all_candidate_view_inputs_sealed": True,
         "candidate_selection": False,
-        "view_selection": False,
+        "view_selection": (
+            "explicit_signed_support_eligibility_before_sam"
+            if skipped_registered_views
+            else False
+        ),
+        "registered_view_contract": (
+            "complete_queue_locked_rgb_camera_map"
+            if bool(args.all_registered_views)
+            else "protocol_prompt_and_evaluation_only"
+        ),
         "registered_rgb_decoded_by_plan_producer": False,
         "target_mask_opened": False,
         "target_metric_opened": False,
     }
     plan_sha = _atomic_json(plan_path, plan)
-    del model, renderer, assignments
+    del model, renderer, assignment_records
     gc.collect()
     torch.cuda.empty_cache()
     return {
@@ -592,6 +760,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--candidates", type=int, default=10)
     parser.add_argument("--points-per-sign", type=int, default=3)
+    parser.add_argument("--all-registered-views", action="store_true")
     parser.add_argument("--device", default="cuda:0")
     return parser
 

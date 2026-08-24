@@ -70,8 +70,14 @@ def fuse_positive_unknown_views(
     if not 0.0 < float(decision_boundary) < 1.0:
         raise ValueError("decision_boundary must lie in (0,1)")
     relative_reliability = torch.exp(precision - precision.max()).clamp(0, 1)
+    # Exactly-at-boundary values are the explicit unknown state produced for
+    # primitives that are invisible in one registered view.  They must not be
+    # converted into a half-strength positive detection: doing so makes every
+    # additional view expand foreground over all of its unobserved carrier
+    # rows.  Only evidence strictly above the Bernoulli decision boundary is
+    # affirmative support.
     positive = torch.where(
-        fields >= float(decision_boundary), fields, torch.zeros_like(fields)
+        fields > float(decision_boundary), fields, torch.zeros_like(fields)
     )
     positive = positive * relative_reliability[:, None]
     return (1.0 - torch.prod(1.0 - positive, dim=0)).clamp(0, 1)

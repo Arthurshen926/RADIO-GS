@@ -131,11 +131,15 @@ def lift_candidate_views(
     for record in view_records:
         probability = _load_probability(record["probability"]).to(torch_device)
         view_digest = str(record["view_digest"])
-        assignment = (
-            _load_assignment(record["assignment"])
-            if assignment_cache is None
-            else assignment_cache.get(view_digest)
-        )
+        if assignment_cache is None:
+            loaded = _load_assignment(record["assignment"])
+            assignment = {
+                name: torch.as_tensor(loaded[name]).to(torch_device)
+                for name in ("gaussian_ids", "pixel_ids", "weights")
+            }
+            del loaded
+        else:
+            assignment = assignment_cache.get(view_digest)
         if assignment is None:
             raise QueryAbstention("registered view assignment cache is incomplete")
         primitive, visible_mass = exact_adjoint_probability(
@@ -151,7 +155,7 @@ def lift_candidate_views(
         lifted.append(primitive)
         precision.append(float(record["log_precision"]))
         digests.append(view_digest)
-        del probability, primitive, visible_mass
+        del probability, primitive, visible_mass, assignment
     if not lifted:
         raise QueryAbstention("candidate has no registered view")
     return (
@@ -215,19 +219,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     first_views = candidates[0].get("views", [])
     if not isinstance(first_views, list) or not first_views:
         raise QueryAbstention("candidate has no registered view cohort")
-    assignment_cache: dict[str, Mapping[str, torch.Tensor]] = {}
     assignment_identity: dict[str, Mapping[str, Any]] = {}
     for record in first_views:
         view_digest = str(record.get("view_digest", ""))
-        if not view_digest or view_digest in assignment_cache:
+        if not view_digest or view_digest in assignment_identity:
             raise QueryAbstention("registered view assignment identity is ambiguous")
         assignment_identity[view_digest] = dict(record["assignment"])
-        loaded = _load_assignment(record["assignment"])
-        assignment_cache[view_digest] = {
-            name: torch.as_tensor(loaded[name]).to(args.device)
-            for name in ("gaussian_ids", "pixel_ids", "weights")
-        }
-    canonical_views = tuple(sorted(assignment_cache))
+    canonical_views = tuple(sorted(assignment_identity))
     for candidate in candidates[1:]:
         records = candidate.get("views", [])
         if not isinstance(records, list) or tuple(
@@ -256,7 +254,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             views, precision, view_digests = lift_candidate_views(
                 candidate.get("views", []),
                 num_gaussians=num_gaussians,
-                assignment_cache=assignment_cache,
+                assignment_cache=None,
                 device=args.device,
             )
             field = fuse_one_candidate(
@@ -311,10 +309,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "candidate_checkpoints": candidate_records,
         "result": {"path": str(result_path), "sha256": result_sha},
         "resident_tensor_bound": (
-            "all_registered_exact_assignments_plus_one_candidate_times_"
+            "one_registered_exact_assignment_plus_one_candidate_times_"
             "all_views_times_num_gaussians"
         ),
-        "assignment_io": "one_hash_verified_load_per_registered_view",
+        "assignment_io": "streamed_one_hash_verified_load_per_registered_view",
         "adjoint_device": str(args.device),
         "view_fusion": args.view_fusion,
         "resume_boundary": "one_completed_candidate",

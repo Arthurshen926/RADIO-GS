@@ -87,3 +87,84 @@ def test_latent_proposal_marginal_falls_back_without_cross_view_evidence():
     )
     assert torch.equal(posterior, values[0])
     assert stats["fallback_query_count"] == 1
+
+
+def test_field_peak_anchored_star_rejects_transitive_identity_bridge():
+    base = torch.tensor([[1.0], [0.8], [0.2], [0.1]])
+    # Proposal supports form P0--P1--P2, but P0 and P2 are disjoint.  Ordinary
+    # connected components would merge all three; the peak-anchored star must
+    # retain only P0 and P1.
+    rows = torch.tensor([0, 1, 1, 2, 2, 3])
+    props = torch.tensor([0, 0, 1, 1, 2, 2])
+    weights = torch.ones(6)
+    views = torch.tensor([0, 1, 2])
+    parents = torch.full((3,), -1)
+    descriptor = torch.full((3, 1), 0.8)
+    context = torch.zeros_like(descriptor)
+    posterior, stats = sam_siglip_object_posterior(
+        base,
+        rows,
+        props,
+        weights,
+        views,
+        parents,
+        descriptor,
+        context,
+        minimum_object_views=2,
+        minimum_descriptor_score=0.5,
+        view_identity_margin=0.3,
+        association_mode="field_peak_anchored_star",
+        minimum_cross_view_jaccard=0.2,
+        minimum_cross_view_overlap=0.4,
+    )
+    assert torch.equal(posterior[:, 0], torch.tensor([1.0, 1.0, 1.0, 0.0]))
+    assert stats["selected_proposal_indices"] == [[0, 1]]
+    assert stats["fallback_query_count"] == 0
+
+
+def test_native_appearance_gate_rejects_geometric_false_association():
+    values = _inputs()
+    appearance = torch.tensor(
+        [
+            [1.0, 0.0],
+            [1.0, 0.0],
+            [0.0, 1.0],
+            [0.0, 1.0],
+        ]
+    )
+    posterior, stats = sam_siglip_object_posterior(
+        *values,
+        proposal_appearance_features=appearance,
+        minimum_object_views=2,
+        minimum_descriptor_score=0.5,
+        association_mode="field_peak_anchored_star",
+        minimum_cross_view_appearance_cosine=0.8,
+    )
+    assert torch.equal(posterior, values[0])
+    assert stats["fallback_query_count"] == 1
+
+
+def test_native_appearance_gate_is_preserved_during_parent_ascent():
+    values = _inputs()
+    # Child proposals 0 and 2 are the same physical instance.  Parent 1 is an
+    # enclosing but appearance-inconsistent mask; parent 3 preserves identity.
+    appearance = torch.tensor(
+        [
+            [1.0, 0.0],
+            [0.0, 1.0],
+            [1.0, 0.0],
+            [1.0, 0.0],
+        ]
+    )
+    posterior, stats = sam_siglip_object_posterior(
+        *values,
+        proposal_appearance_features=appearance,
+        minimum_object_views=2,
+        minimum_descriptor_score=0.5,
+        association_mode="field_peak_anchored_star",
+        minimum_cross_view_appearance_cosine=0.8,
+    )
+    assert torch.equal(posterior[:, 0], torch.tensor([1.0, 1.0, 0.0, 0.0]))
+    assert stats["pre_ascent_proposal_indices"] == [[0, 2]]
+    assert stats["selected_proposal_indices"] == [[0, 3]]
+    assert stats["parent_appearance_rejections"] == [1]

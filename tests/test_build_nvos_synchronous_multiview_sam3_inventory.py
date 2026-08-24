@@ -13,6 +13,7 @@ import torch
 from radio_gs.querying.synchronous_multiview_candidate_marginal import (
     QueryAbstention,
 )
+from radio_gs.scripts import build_nvos_synchronous_multiview_sam3_inventory as module
 from radio_gs.scripts.build_nvos_synchronous_multiview_sam3_inventory import (
     INVENTORY_TYPE,
     PLAN_TYPE,
@@ -168,4 +169,32 @@ def test_plan_rejects_non_systematic_or_mismatched_trial_rank(tmp_path: Path) ->
     plan, _ = _plan(tmp_path)
     plan["candidates"][4]["views"][0]["candidate_trial_rank"] = 3
     with pytest.raises(QueryAbstention, match="trial rank differs"):
+        validate_plan(plan, expected_candidates=10)
+
+
+def test_plan_hash_verifies_each_shared_assignment_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plan, _ = _plan(tmp_path)
+    original = module._load_bound
+    calls = []
+
+    def counted(record, *, label):
+        calls.append((dict(record), label))
+        return original(record, label=label)
+
+    monkeypatch.setattr(module, "_load_bound", counted)
+    validate_plan(plan, expected_candidates=10)
+    assert len(calls) == 2
+
+
+def test_plan_rejects_assignment_lineage_change_across_candidates(
+    tmp_path: Path,
+) -> None:
+    plan, _ = _plan(tmp_path)
+    plan["candidates"][1]["views"][0]["assignment"] = {
+        **plan["candidates"][1]["views"][0]["assignment"],
+        "sha256": "0" * 64,
+    }
+    with pytest.raises(QueryAbstention, match="lineage differs"):
         validate_plan(plan, expected_candidates=10)

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_nvos_sam3_prompt_proposal_video_reliability_full8_result",
+  "status": "complete_full8_development_method_promoted",
+  "method": {
+    "identity": "official positive/negative registered prompt scribble",
+    "prompt_extent": "200 official SAM3 box-conditioned prompt proposals selected by full signed-scribble adherence",
+    "transport": "official SAM3 video memory over the shorter cyclic registered-RGB path",
+    "reliability_rule": "target official-SAM selected score >= 0.5 OR target proposal/field overlap < 0.5",
+    "reliability_rule_origin": "pre-existing frozen NVOS region reliability authority",
+    "fallback": "sealed Method-v1 target-only signed-evidence SAM3 prediction",
+    "target_mask_or_metric_used_for_prediction": false,
+    "ludvig_used": false,
+    "persistent_gaussian_state_added": false
+  },
+  "full8": {
+    "macro_foreground_iou": 0.9255494657965473,
+    "macro_pixel_accuracy": 0.9855318513461382,
+    "method_v1_target_only_macro_foreground_iou": 0.817616763357676,
+    "delta_vs_method_v1_target_only": 0.10793270243887132,
+    "raw_prompt_proposal_video_macro_foreground_iou": 0.9054712332469853,
+    "per_scene_foreground_iou": {
+      "fern": 0.8304732612835244,
+      "flower": 0.970687993804627,
+      "fortress": 0.9754431952966958,
+      "horns_center": 0.9520141826492634,
+      "horns_left": 0.9585092661362352,
+      "leaves": 0.9533745541413489,
+      "orchids": 0.877437708030989,
+      "trex": 0.8864555650296948
+    },
+    "video_branches": ["flower", "horns_center", "horns_left", "leaves", "trex"],
+    "target_only_fallback_branches": ["fern", "fortress", "orchids"],
+    "scenes_regressed_vs_method_v1_target_only": 0
+  },
+  "bound_outputs": {
+    "prediction_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/nvos_sam3_video_reliability_gate_v1/prediction_manifest.json",
+      "sha256": "5080cdc9a5ab149a0c2c16845c0f57f571d7d2045d81fcc1293901a41b603d91"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/nvos_sam3_video_reliability_gate_v1/result.json",
+      "sha256": "b8bbc91648e5ccb2d180fdb2e08cae3293751f6c9fd9a6e32e0dc56b217f0595"
+    }
+  },
+  "claim_boundary": {
+    "development_only": true,
+    "target_rgb_assisted": true,
+    "strict_unseen_eligible": false,
+    "sota_claim": false,
+    "all_eight_predictions_sealed_before_gate_scoring": true,
+    "outcome_blind_confirmation": false
+  },
+  "conclusion": "The missing registered-prompt closure is identity, complete prompt-side region extent, transport memory, and an independent reliability veto. Extra persistent Gaussian mask features are not required for this RGB-assisted NVOS contract."
+}

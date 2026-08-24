@@ -86,6 +86,24 @@ def _sample_without_replacement(
     return values[order]
 
 
+def compose_membership_query_features(
+    language: torch.Tensor, appearance: torch.Tensor | None = None
+) -> torch.Tensor:
+    """Compose object semantics and physical appearance without scale bias."""
+
+    semantic = F.normalize(torch.as_tensor(language).float(), dim=-1, eps=1e-8)
+    if semantic.ndim != 2:
+        raise ValueError("membership language features must be one matrix")
+    if appearance is None:
+        return semantic
+    physical = F.normalize(torch.as_tensor(appearance).float(), dim=-1, eps=1e-8)
+    if physical.ndim != 2 or physical.shape[0] != semantic.shape[0]:
+        raise ValueError("membership appearance proposal axis differs")
+    # Unit-normalize after concatenation so adding the second native teacher
+    # does not change query amplitude or silently alter optimizer scale.
+    return F.normalize(torch.cat((semantic, physical), dim=-1), dim=-1, eps=1e-8)
+
+
 def build_training_pairs(
     *,
     supports: list[torch.Tensor],
@@ -198,20 +216,68 @@ def track_augmented_training_targets(
 
 
 @torch.inference_mode()
-def _scores_for_proposal(
+def _encode_gaussian_table(
     model: FrozenLatentMembershipDecoder,
     latent: torch.Tensor,
+    *,
+    device: torch.device,
+    chunk_size: int,
+) -> torch.Tensor:
+    """Encode every frozen Gaussian once for all held-out proposals."""
+
+    output: list[torch.Tensor] = []
+    for local in latent.split(int(chunk_size)):
+        output.append(model.encode_gaussian(local.to(device)).cpu())
+    return torch.cat(output)
+
+
+@torch.inference_mode()
+def _scores_for_proposal(
+    model: FrozenLatentMembershipDecoder,
+    encoded_latent: torch.Tensor,
     query: torch.Tensor,
     rows: torch.Tensor,
     *,
     device: torch.device,
     chunk_size: int,
 ) -> torch.Tensor:
-    output = []
-    identity = query[None].to(device)
+    output: list[torch.Tensor] = []
+    # One proposal owns one identity vector.  Encoding it once is numerically
+    # equivalent to expanding the raw query before the row-wise MLP, while
+    # avoiding millions of duplicate 1536/2304D matrix multiplications.
+    identity = model.encode_query(query[None].to(device))
     for chunk in rows.split(int(chunk_size)):
-        local = latent[chunk].to(device)
-        output.append(torch.sigmoid(model(local, identity.expand(local.shape[0], -1))).cpu())
+        gaussian = encoded_latent.index_select(0, chunk).to(device)
+        output.append(
+            torch.sigmoid(
+                model.score_encoded(
+                    gaussian, identity.expand(gaussian.shape[0], -1)
+                )
+            ).cpu()
+        )
+    return torch.cat(output)
+
+
+@torch.inference_mode()
+def _similarity_scores_for_proposal(
+    features: torch.Tensor,
+    query: torch.Tensor,
+    rows: torch.Tensor,
+    *,
+    device: torch.device,
+    chunk_size: int,
+    features_are_normalized: bool = False,
+) -> torch.Tensor:
+    """Evaluate the frozen primitive cosine control on the selected device."""
+
+    identity = F.normalize(torch.as_tensor(query).float(), dim=-1, eps=1e-8).to(device)
+    output: list[torch.Tensor] = []
+    for chunk in torch.as_tensor(rows).long().split(int(chunk_size)):
+        source_index = chunk.to(features.device)
+        local = features.index_select(0, source_index).to(device).float()
+        if not bool(features_are_normalized):
+            local = F.normalize(local, dim=-1, eps=1e-8)
+        output.append((local @ identity).cpu())
     return torch.cat(output)
 
 
@@ -279,6 +345,14 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
     query_cache, query_record = _load_mapping(
         args.query_cache, args.expected_query_cache_sha256, "primitive query cache"
     )
+    appearance: dict[str, Any] | None = None
+    appearance_record: dict[str, str] | None = None
+    if args.appearance_teacher:
+        appearance, appearance_record = _load_mapping(
+            args.appearance_teacher,
+            args.expected_appearance_teacher_sha256,
+            "source mask appearance teacher",
+        )
     field_path = Path(args.field).expanduser().resolve(strict=True)
     field, _payload, _signature = load_factorized_canonical_field_checkpoint(
         field_path,
@@ -315,12 +389,28 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
 
     descriptors = F.normalize(torch.as_tensor(teacher["descriptors"]).float(), dim=-1)
     contexts = F.normalize(torch.as_tensor(teacher["context_descriptors"]).float(), dim=-1)
-    language = F.normalize(0.75 * descriptors + 0.25 * contexts, dim=-1)
+    semantic_language = F.normalize(0.75 * descriptors + 0.25 * contexts, dim=-1)
+    if appearance is not None:
+        if (
+            appearance.get("schema")
+            != "radio_gs.multiscale_sam_mask_aligned_native_dinov2_teacher.v1"
+            or appearance.get("metadata", {}).get("source_only") is not True
+            or appearance.get("metadata", {}).get("benchmark_masks_opened") is not False
+            or torch.as_tensor(appearance.get("proposal_view_indices")).long().tolist()
+            != proposal_views.tolist()
+        ):
+            raise ValueError("native appearance teacher proposal authority differs")
+        appearance_descriptor = torch.as_tensor(appearance.get("descriptors")).float()
+    else:
+        appearance_descriptor = None
+    language = compose_membership_query_features(
+        semantic_language, appearance_descriptor
+    )
     baseline_feature = F.normalize(
         torch.as_tensor(query_cache.get("features", query_cache.get("summary_features"))).float(),
         dim=-1,
     )
-    if language.shape != (proposal_count, 1536):
+    if semantic_language.shape != (proposal_count, 1536):
         raise ValueError("language teacher proposal domain differs")
     if baseline_feature.shape != (field.num_gaussians, 1536):
         raise ValueError("primitive query feature domain differs")
@@ -360,8 +450,17 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
         support_probabilities=training_support_probabilities,
     )
     device = torch.device(args.device)
+    baseline_bytes = baseline_feature.numel() * baseline_feature.element_size()
+    baseline_cache_limit = int(args.baseline_device_cache_max_mib) * 1024 * 1024
+    baseline_feature_eval = (
+        baseline_feature.to(device)
+        if baseline_bytes <= baseline_cache_limit
+        else baseline_feature
+    )
     torch.manual_seed(int(args.seed))
-    model = FrozenLatentMembershipDecoder(hidden_dim=int(args.hidden_dim)).to(device)
+    model = FrozenLatentMembershipDecoder(
+        query_dim=int(language.shape[1]), hidden_dim=int(args.hidden_dim)
+    ).to(device)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=float(args.learning_rate), weight_decay=float(args.weight_decay)
     )
@@ -398,6 +497,12 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
         raise RuntimeError("membership decoder did not complete one optimization step")
     model.load_state_dict(best_state)
     model.eval()
+    encoded_latent = _encode_gaussian_table(
+        model,
+        latent,
+        device=device,
+        chunk_size=int(args.eval_chunk_size),
+    )
 
     calibration_indices = torch.where(training)[0]
     if calibration_indices.numel() > int(args.calibration_proposals):
@@ -416,7 +521,7 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
             (
                 _scores_for_proposal(
                     model,
-                    latent,
+                    encoded_latent,
                     language[proposal],
                     visible,
                     device=device,
@@ -426,7 +531,17 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
             )
         )
         baseline_calibration.append(
-            ((baseline_feature[visible] @ language[proposal]).float(), truth)
+            (
+                _similarity_scores_for_proposal(
+                    baseline_feature_eval,
+                    semantic_language[proposal],
+                    visible,
+                    device=device,
+                    chunk_size=int(args.eval_chunk_size),
+                    features_are_normalized=True,
+                ),
+                truth,
+            )
         )
     decoder_threshold, decoder_train_iou = _calibrate_threshold(
         decoder_calibration, int(args.threshold_candidates)
@@ -444,13 +559,20 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
         )
         decoder_score = _scores_for_proposal(
             model,
-            latent,
+            encoded_latent,
             language[proposal],
             visible,
             device=device,
             chunk_size=int(args.eval_chunk_size),
         )
-        baseline_score = baseline_feature[visible] @ language[proposal]
+        baseline_score = _similarity_scores_for_proposal(
+            baseline_feature_eval,
+            semantic_language[proposal],
+            visible,
+            device=device,
+            chunk_size=int(args.eval_chunk_size),
+            features_are_normalized=True,
+        )
         decoder_ious.append(_iou_from_scores(decoder_score, truth, decoder_threshold))
         baseline_ious.append(_iou_from_scores(baseline_score, truth, baseline_threshold))
     decoder_iou = float(torch.tensor(decoder_ious).mean())
@@ -467,6 +589,8 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "language_teacher": teacher_record,
         "query_cache": query_record,
     }
+    if appearance_record is not None:
+        inputs["appearance_teacher"] = appearance_record
     write_torch_noclobber(
         output,
         {
@@ -482,6 +606,12 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
                 "source_label_semantics": "inside_sam_positive_outside_visible_negative_invisible_unknown",
                 "track_augmented_training": bool(args.track_augmented_training),
                 "soft_membership_targets": bool(args.soft_membership_targets),
+                "query_feature_authority": (
+                    "native_siglip2_semantics_plus_native_dinov2_physical_appearance"
+                    if appearance is not None
+                    else "native_siglip2_semantics"
+                ),
+                "query_feature_dim": int(language.shape[1]),
                 "evaluation_membership_threshold": float(
                     args.evaluation_membership_threshold
                 ),
@@ -504,6 +634,11 @@ def train_and_evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "training_pairs": int(pair_row.numel()),
         "track_augmented_training": bool(args.track_augmented_training),
         "soft_membership_targets": bool(args.soft_membership_targets),
+        "query_feature_authority": (
+            "native_siglip2_semantics_plus_native_dinov2_physical_appearance"
+            if appearance is not None
+            else "native_siglip2_semantics"
+        ),
         "evaluation_membership_threshold": float(args.evaluation_membership_threshold),
         "training_track_stats": track_stats,
         "best_train_loss": best_loss,
@@ -538,6 +673,8 @@ def main() -> None:
     parser.add_argument("--expected-membership-sha256", required=True)
     parser.add_argument("--language-teacher", required=True)
     parser.add_argument("--expected-language-teacher-sha256", required=True)
+    parser.add_argument("--appearance-teacher", default="")
+    parser.add_argument("--expected-appearance-teacher-sha256", default="")
     parser.add_argument("--query-cache", required=True)
     parser.add_argument("--expected-query-cache-sha256", required=True)
     parser.add_argument("--output", required=True)
@@ -552,6 +689,7 @@ def main() -> None:
     parser.add_argument("--calibration-proposals", type=int, default=32)
     parser.add_argument("--threshold-candidates", type=int, default=64)
     parser.add_argument("--eval-chunk-size", type=int, default=32768)
+    parser.add_argument("--baseline-device-cache-max-mib", type=int, default=8192)
     parser.add_argument("--holdout-stride", type=int, default=4)
     parser.add_argument("--holdout-residue", type=int, default=3)
     parser.add_argument("--minimum-heldout-iou", type=float, default=0.20)
