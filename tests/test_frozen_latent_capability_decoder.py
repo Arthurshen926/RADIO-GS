@@ -5,6 +5,7 @@ from radio_gs.models.frozen_latent_capability_decoder import (
 )
 from radio_gs.scripts.train_frozen_latent_direct_capability_decoder import (
     cosine_metrics,
+    response_metrics,
 )
 
 
@@ -25,3 +26,11 @@ def test_cosine_metrics_report_identical_features() -> None:
     assert abs(metrics["mean_cosine"] - 1.0) < 1e-6
     assert abs(metrics["p05_cosine"] - 1.0) < 1e-6
 
+
+def test_response_metrics_report_identical_response_and_margin() -> None:
+    features = torch.randn(16, 7)
+    text = torch.randn(5, 7)
+    metrics = response_metrics(features, features, text, logit_scale=100.0)
+    assert metrics["response_mae"] == 0.0
+    assert metrics["top2_margin_mae"] == 0.0
+    assert metrics["teacher_top1_agreement"] == 1.0

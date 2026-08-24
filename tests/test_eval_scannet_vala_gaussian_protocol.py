@@ -156,6 +156,40 @@ def test_direct_language_score_cache_is_explicitly_label_open_and_geometry_bound
         )
 
 
+def test_source_distilled_score_cache_is_label_closed_and_gate_bound(tmp_path):
+    path = tmp_path / "source_distilled_scores.pt"
+    xyz = torch.randn(3, 3)
+    torch.save(
+        {
+            "schema": "radio_gs.scannet_source_distilled_score_cache.v1",
+            "xyz": xyz,
+            "valid": torch.ones(3, dtype=torch.bool),
+            "scores_split_19": torch.zeros(3, 19),
+            "scores_split_15": torch.zeros(3, 15),
+            "scores_split_10": torch.zeros(3, 10),
+            "metadata": {
+                "artifact_type": "radio_gs_scannet_source_distilled_score_cache",
+                "query_independent": False,
+                "source_only": True,
+                "evaluation_diagnostic_only": False,
+                "benchmark_masks_opened": False,
+                "benchmark_labels_opened": False,
+                "text_queries_opened": True,
+                "postprocessing": "none",
+                "source_gate_passed": True,
+            },
+        },
+        path,
+    )
+    scores, record = load_direct_language_score_cache(
+        path, expected_sha256=sha256_file(path), expected_xyz=xyz,
+        split_names=["19", "15", "10"],
+    )
+    assert scores["10"].shape == (3, 10)
+    assert record["evaluation_diagnostic_only"] is False
+    assert record["direct_observed_rows"] == 3
+
+
 def test_sam_region_residual_changes_only_low_margin_rows():
     scores = torch.tensor(
         [[0.51, 0.49], [0.90, 0.10], [0.10, 0.90]], dtype=torch.float32

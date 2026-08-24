@@ -12,9 +12,9 @@ The active contracts are LERF2D, LERF3D, ScanNet OVS and NVOS.
 |---|---:|---:|---|
 | LERF2D full4 | sample-micro mIoU `0.39584`, LocAcc `0.87981` | `+0.08167` mIoU, unchanged LocAcc | identity--extent posterior retained; 4/4 scenes positive |
 | LERF3D full4 | mIoU `0.43730`, Acc@.25 `0.67788`, Acc@.50 `0.48077` | `+0.04047` mIoU over the prior typed posterior | latent proposal/null readout retained for 3D only |
-| ScanNet OVS paper8 compact student | 19/15/10 mIoU `0.36027/0.35957/0.46626` | `+0.00414/+0.00658/+0.00672` over restored L512 baseline | compact aggregate gain; scene0400 regresses |
+| ScanNet OVS paper8 fully compact score student | 19/15/10 mIoU `0.36401/0.36189/0.46716` | `+0.00787/+0.00889/+0.00763` over restored L512 baseline | 24/24 scene-split mIoU noninferior; eligibility predicted from existing state |
 | ScanNet OVS paper8 exact native region | 19/15/10 mIoU `0.36630/0.36301/0.46866` | `+0.01017/+0.01001/+0.00912` | 24/24 scene-split mIoU positive; native sidecar not fully compressed |
-| NVOS RGB-assisted full8 | macro IoU `0.92555`, pixel accuracy `0.98553` | `+0.10793` over Method-v1 target-only | no LUDVIG; 5 video branches, 3 safe fallbacks, no scene regression |
+| NVOS RGB-assisted full8 | macro IoU `0.92555`, pixel accuracy `0.98553` | `+0.10793` over Method-v1 target-only | deterministic cold-start full8 confirmed bitwise; frozen |
 
 All rows are development evidence.  None is an SOTA or outcome-blind final-test
 claim.
@@ -36,9 +36,11 @@ adaptors alone are sufficient for every task variable.
 
 The main unresolved method problem is therefore not generic RADIO feature
 reconstruction.  It is compactly representing and transporting complete
-object membership while preserving text identity margins.  For ScanNet this
-appears as a native-teacher-to-L512 query-margin compression gap; for LERF it
-appears earlier, as a missing independent 3D physical-instance teacher.
+object membership at the variable consumed by each query.  ScanNet's earlier
+descriptor gap is closed by categorical-score distillation plus a
+score-conditioned reliability gate; no native eligibility bits remain in the
+deployable candidate.  LERF fails earlier, because an independent complete 3D
+physical-instance teacher is still missing.
 
 ## External proposal closure
 

@@ -199,6 +199,98 @@ development result is `0.92555` macro IoU and `0.98553` pixel accuracy, versus
 of LUDVIG and opens no target mask during prediction, but remains explicitly
 target-RGB-assisted and is not an outcome-blind paper/SOTA result.
 
+The complete full8 compiler was subsequently rerun from a cold output root
+with the content-bound dataset manifest, official signed scribbles, registered
+RGB and the same official SAM3 checkpoint.  All eight raw prediction tensors
+are bitwise identical to the first run.  Re-materializing and scoring the
+reliability gate reproduces macro IoU `0.9255494658` and pixel accuracy
+`0.9855318513` exactly.  NVOS is therefore frozen; further candidate-count or
+scene-branch tuning is prohibited.
+
+## Query-variable-aligned ScanNet distillation
+
+Two descriptor-space margin sentinels were rejected before paper8 expansion.
+Using either the exact 19-class bank or a 30-class generic indoor bank improved
+source response and top-two-margin reconstruction, but did not improve
+scene0400 or scene0097 benchmark mIoU.  The reason is structural: the exact
+native readout consumes class scores after per-view aggregation, centering,
+class-agreement gating and structural replay, while the old student distilled
+a generic 1536-D descriptor before those operators.
+
+A new frozen-L512 score decoder distills the actual 19/15/10 categorical
+response blocks.  It is scene-global, zero-initialized around the restored
+score bank and adds no learned per-Gaussian state.  Its source holdout reduces
+eligible-row score MAE by roughly five to seven times.  The paper8 result is:
+
+| metric | restored baseline | descriptor student | score student | exact native |
+|---|---:|---:|---:|---:|
+| mIoU-19 | 0.35613 | 0.36027 | **0.36575** | 0.36630 |
+| mIoU-15 | 0.35300 | 0.35957 | **0.36273** | 0.36301 |
+| mIoU-10 | 0.45954 | 0.46626 | **0.46817** | 0.46866 |
+| mAcc-19 | 0.66975 | 0.67336 | **0.67439** | 0.67435 |
+| mAcc-15 | 0.66261 | 0.66813 | **0.66860** | 0.66873 |
+| mAcc-10 | 0.76356 | **0.76833** | 0.76760 | 0.76809 |
+
+All 24 scene/split mIoU values improve over the restored baseline.  Against
+the descriptor student, 7/8 scenes improve and scene0347 regresses.  The
+capacity diagnostic retains the native compiler's three eligibility bits, so
+the result validates score-variable distillation but is not yet the final
+fully compressed method.  Next work is compact eligibility prediction and a
+scene0347/no-regression confirmation, not another descriptor loss sweep.
+
+A follow-up gate-compression sentinel predicts the three eligibility bits from
+frozen L512 plus the five already persistent Universal Field reliability
+scalars.  It passes scene0400 and scene0097 with only `0.0000--0.0010` mIoU
+loss relative to teacher-gate replay, and a replay-safe threshold also passes
+scene0000.  Scene0347 does not close: preserving split19 replay forces the gate
+to abstain everywhere, so eligible score MAE equals the baseline and the
+source gate correctly fails.  Existing reliability is therefore informative
+but not a sufficient statistic for native region eligibility on every scene.
+No paper8 mixture of predicted and teacher gates is reported.
+
+The final gate adds the categorical variable that the first sentinel omitted:
+the already computed 19/15/10 baseline score blocks.  These are transient
+readout inputs, not stored Gaussian state.  Its source-only rule permits
+abstention only when replay is exact, all split teacher errors are noninferior
+to baseline and aggregate error is strictly lower.  The 44-channel query cache
+is stored in FP32; FP16 changed near-tied baseline classes even during
+abstention.
+
+| metric | restored baseline | descriptor student | compact score+gate | teacher-gate capacity |
+|---|---:|---:|---:|---:|
+| mIoU-19 | 0.35613 | 0.36027 | **0.36401** | 0.36575 |
+| mIoU-15 | 0.35300 | 0.35957 | **0.36189** | 0.36273 |
+| mIoU-10 | 0.45954 | 0.46626 | **0.46716** | 0.46817 |
+| mAcc-19 | 0.66975 | 0.67336 | **0.67287** | 0.67439 |
+| mAcc-15 | 0.66261 | 0.66813 | **0.66803** | 0.66860 |
+| mAcc-10 | 0.76356 | 0.76833 | **0.76741** | 0.76760 |
+
+The compact row improves all six macro metrics over the restored baseline and
+all three mIoU metrics over the descriptor student.  All 24 scene/split mIoU
+values are noninferior to baseline.  It retains no teacher eligibility tensor,
+uses no benchmark label or mask for fitting and is the deployable ScanNet
+development candidate.
+
+## LERF object-slot factorization sentinel
+
+Joint multi-view soft slots were tested on Figurines with source-view residues
+0/1 for fitting, residue 2 for one global readout and residue 3 held out.  The
+results are negative:
+
+| slot teacher | heldout macro IoU |
+|---|---:|
+| K16 soft exact-MPR | 0.06344 |
+| K32 soft exact-MPR | 0.08043 |
+| K64 soft exact-MPR | 0.08812 |
+| K32 hard membership | 0.07604 |
+| existing frozen-L512 membership | **0.13913** |
+
+Even an evaluation-only best-slot oracle reaches only `0.11883` for K32
+(`0.12478` when also allowed to choose a per-proposal threshold).  Failure is
+therefore primarily incomplete/impure 3D extent, not text-to-slot identity.
+Increasing slot count or hardening masks is stopped.  A stronger independent
+instance authority is required before another LERF posterior expansion.
+
 SPIn has been removed from the short-term experimental critical path because
 the available benchmark cohort is incomplete (9/10).  No SPIn process is
 running.  Existing fields, intermediate artifacts and completed gates are
@@ -234,3 +326,9 @@ NVOS.
   `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/figurines32/source_membership_gate/native_proposal_retrieval_gate.json`
 - NVOS prompt-proposal video reliability full8:
   `paper/artifacts/nvos_sam3_prompt_proposal_video_reliability_full8_result_20260824.json`
+- NVOS deterministic cold-start confirmation:
+  `paper/artifacts/nvos_sam3_prompt_proposal_video_reliability_coldstart_20260824.json`
+- ScanNet score-variable compact distillation:
+  `paper/artifacts/scannet_native_categorical_score_l512_paper8_result_20260824.json`
+- ScanNet fully compact score and eligibility distillation:
+  `paper/artifacts/scannet_native_categorical_score_l512_compact_gate_paper8_result_20260824.json`

@@ -920,7 +920,7 @@ def load_direct_language_score_cache(
     expected_xyz: torch.Tensor,
     split_names: list[str],
 ) -> tuple[dict[str, torch.Tensor], dict[str, object]]:
-    """Load a label-open direct-language attribution control, never a field."""
+    """Load a SHA-bound direct score cache, which may be source-distilled."""
 
     source = Path(path).expanduser().resolve()
     if len(expected_sha256) != 64 or sha256_file(source) != expected_sha256:
@@ -929,15 +929,26 @@ def load_direct_language_score_cache(
     if not isinstance(payload, dict):
         raise TypeError("direct-language score cache must be a mapping")
     metadata = payload.get("metadata")
+    diagnostic_contract = (
+        payload.get("schema") == "radio_gs.scannet_direct_language_score_cache.v1"
+        and isinstance(metadata, dict)
+        and metadata.get("artifact_type") == "radio_gs_scannet_direct_language_score_cache"
+        and metadata.get("evaluation_diagnostic_only") is True
+        and metadata.get("benchmark_labels_opened") is True
+    )
+    source_distilled_contract = (
+        payload.get("schema") == "radio_gs.scannet_source_distilled_score_cache.v1"
+        and isinstance(metadata, dict)
+        and metadata.get("artifact_type") == "radio_gs_scannet_source_distilled_score_cache"
+        and metadata.get("source_only") is True
+        and metadata.get("evaluation_diagnostic_only") is False
+        and metadata.get("benchmark_labels_opened") is False
+        and metadata.get("source_gate_passed") is True
+    )
     if (
-        payload.get("schema") != "radio_gs.scannet_direct_language_score_cache.v1"
-        or not isinstance(metadata, dict)
-        or metadata.get("artifact_type")
-        != "radio_gs_scannet_direct_language_score_cache"
+        not (diagnostic_contract or source_distilled_contract)
         or metadata.get("query_independent") is not False
-        or metadata.get("evaluation_diagnostic_only") is not True
         or metadata.get("benchmark_masks_opened") is not False
-        or metadata.get("benchmark_labels_opened") is not True
         or metadata.get("text_queries_opened") is not True
         or metadata.get("postprocessing") != "none"
     ):
@@ -968,14 +979,17 @@ def load_direct_language_score_cache(
         if not bool(torch.isfinite(value).all()):
             raise ValueError(f"direct-language split{split} scores are non-finite")
         scores[split] = value
+    direct_observed = payload.get("direct_observed")
+    if direct_observed is None:
+        direct_observed = valid
+    if not isinstance(direct_observed, torch.Tensor) or direct_observed.shape != valid.shape:
+        raise ValueError("direct-language observed-row mask differs")
     return scores, {
         "path": str(source),
         "sha256": expected_sha256,
         "construction": metadata.get("construction", ""),
-        "evaluation_diagnostic_only": True,
-        "direct_observed_rows": int(
-            torch.as_tensor(payload.get("direct_observed")).bool().sum()
-        ),
+        "evaluation_diagnostic_only": bool(metadata.get("evaluation_diagnostic_only")),
+        "direct_observed_rows": int(direct_observed.bool().sum()),
     }
 
 

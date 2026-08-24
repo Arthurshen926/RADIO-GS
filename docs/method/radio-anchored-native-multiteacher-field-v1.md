@@ -134,10 +134,17 @@ it does not reject native object membership or language-region supervision.
 
 ## Current promotion boundary
 
-- ScanNet's direct capability-before-MPR global L512 decoder is already part
-  of the categorical compiler.  Native SAM extent plus native SigLIP region
-  identity has now passed a fixed four-scene-to-four-scene transfer gate as a
-  centered, class-symmetric residual on top of that decoder.
+- ScanNet now uses variable-aligned categorical distillation.  Native SAM
+  extent and native SigLIP region identity are composed at the actually
+  consumed category-score level: equal-view aggregation, class-symmetric
+  centering, source agreement and structural replay precede distillation.  A
+  zero-initialized scene-global decoder maps frozen L512 plus the deployed
+  categorical score to a residual; it adds no per-Gaussian learned state.  The
+  teacher-gate capacity row is `0.36575/0.36273/0.46817` mIoU for 19/15/10.
+  The deployable candidate predicts eligibility from L512, the five existing
+  reliability scalars and the already computed baseline categorical response;
+  it reaches `0.36401/0.36189/0.46716` without retaining native eligibility
+  bits or any other per-Gaussian side information.
 - LERF retains the promoted identity--extent posterior.  Native DINO proposal
   association and native DINO+SigLIP membership are source-gated candidates;
   they are not allowed into the benchmark method unless held-out membership
@@ -166,3 +173,45 @@ it does not reject native object membership or language-region supervision.
 5. Every output is bound to its field, source authority, teacher and query
    cache hashes.  A rejected pilot remains a diagnostic and cannot silently
    redefine Universal Field v1.
+
+## Categorical score distillation
+
+ScanNet classification does not consume a 1536-D descriptor directly.  It
+consumes mutually exclusive class responses after source-view region evidence
+has been centered and reliability-gated.  Consequently descriptor cosine and
+even fixed-vocabulary top-two-margin losses are insufficient: both passed
+source reconstruction gates but failed to improve two independent benchmark
+sentinels.
+
+For split `s`, the promoted candidate teacher is instead
+
+\[
+ r_i^s=\operatorname{norm}(q_i^s-\bar q_i^s),\qquad
+ y_i^s=\operatorname{norm}((1-\alpha)p_i^s+
+ \alpha a_i^s r_i^s),
+\]
+
+on source-eligible non-structural rows, with exact primitive replay elsewhere.
+Here `q` is the native SAM-extent/SigLIP-identity class response, `a` is
+cross-view class agreement, `p` is the deployed primitive class response and
+`alpha=0.25`.  The compact decoder optimizes centered score coordinates and
+teacher top-two margins on a fixed Gaussian-row holdout.  It therefore
+distills the query variable rather than a high-dimensional surrogate.
+
+On paper8 the teacher-gate capacity diagnostic raises mIoU from the descriptor
+student `0.36027/0.35957/0.46626` to `0.36575/0.36273/0.46817`.  The final
+compact gate consumes L512, the five existing reliability scalars and the
+already computed baseline category-score blocks.  Source-only calibration may
+abstain on a split only when replay is exact, every split is noninferior in
+teacher-score error and their aggregate is strictly better.  FP32 is mandatory
+for the 44-channel query cache so abstention reproduces the baseline decision
+exactly.
+
+The resulting fully compact paper8 row is
+`0.36401/0.36189/0.46716` mIoU and
+`0.67287/0.66803/0.76741` mAcc.  Relative to the restored baseline it gains
+`0.00787/0.00889/0.00763` mIoU and
+`0.00312/0.00542/0.00385` mAcc.  All 24 scene/split mIoU values are
+noninferior to baseline, and no benchmark-conditioned fallback is used.  The
+remaining gap to the teacher-gate capacity row is the explicit cost of
+compressing eligibility, not an unaccounted sidecar.

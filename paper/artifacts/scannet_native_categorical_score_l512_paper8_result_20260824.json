@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_native_categorical_score_l512_paper8_result",
+  "status": "paper8_development_macro_pass_gate_compression_pending",
+  "method": {
+    "persistent_gaussian_state": "unchanged Universal Field v1 L512",
+    "teacher_variable": "source-only native SAM3/SigLIP2 centered categorical scores after view agreement and structural replay",
+    "student": "scene-global zero-initialized split-score residual decoder",
+    "per_gaussian_learned_parameters_added": false,
+    "teacher_eligibility_bits_replayed": 3,
+    "final_promotion_requires_gate_compression": true,
+    "benchmark_labels_or_masks_used_for_fit": false
+  },
+  "paper8_macro": {
+    "miou": {"19": 0.3657515313087956, "15": 0.36272945627391806, "10": 0.4681747169980151},
+    "macc": {"19": 0.6743872281979814, "15": 0.6686016371088243, "10": 0.7675958393318678},
+    "delta_vs_descriptor_student_miou": {"19": 0.005477226311322525, "15": 0.003155241879768511, "10": 0.0019197051126374487},
+    "delta_vs_descriptor_student_macc": {"19": 0.0010303534952682547, "15": 0.00047100558581414376, "10": -0.0007318295248668338},
+    "delta_vs_restored_baseline_miou": {"19": 0.00961656888921895, "15": 0.00973158687127086, "10": 0.00863833487847337},
+    "positive_scenes_vs_descriptor_student_miou": {"19": 7, "15": 7, "10": 7},
+    "positive_scene_splits_vs_restored_baseline_miou": 24
+  },
+  "gap_to_exact_native_miou": {"19": 0.000549814823144, "15": 0.000279186723997, "10": 0.000482674847068},
+  "regressing_scene_vs_descriptor_student": "scene0347_00",
+  "result_sha256": {
+    "scene0000_00": "040b2baa09044e406b203e2443cf92b83e1ec91b1c8356dbab139dda5908b450",
+    "scene0062_00": "cfc85ca1482078e9f02179fba9b65afc7491f180e8ac017ffe8c904c39eeffc4",
+    "scene0070_00": "ee5b5b8bc4dccd950fd43136f998016a3e11557ed428b0d5644c3ca9926ad3cb",
+    "scene0097_00": "6456e08be5c4607f10cda939b5b9910a41863e0bdf57bc85304dd25d032f72e6",
+    "scene0140_00": "a1f08bd557d2b54916b119ccb0e6776adbb072c7f130b892d23b7183019c14c3",
+    "scene0347_00": "096509ae0869668b4a403511fa83b58e57d94c5d96cac00a3702810143ebfb94",
+    "scene0400_00": "23fee633c0a088bb15eabc7fbadcb303a8ce5a84d5665c28503af536deb0cf22",
+    "scene0590_00": "fd8b8bd3988a04599cf775b8c93ac03601d3c0b0ebd01ed5450e1bfd23a998ca"
+  },
+  "claim_boundary": {"development_only": true, "sota_claim": false, "fully_compressed_claim": false}
+}

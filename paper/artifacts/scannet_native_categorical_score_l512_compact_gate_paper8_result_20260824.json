@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_native_categorical_score_l512_compact_gate_paper8_result",
+  "status": "paper8_development_fully_compact_pass",
+  "method": {
+    "persistent_gaussian_state": "unchanged Universal Field v1 L512 plus existing five reliability scalars",
+    "score_student": "scene-global zero-initialized split-score residual decoder",
+    "eligibility_student": "scene-global L512/reliability/baseline-score conditioned gate",
+    "source_gate_rule": "per-split noninferior replay-safe and aggregate strict teacher-score gain",
+    "native_eligibility_bits_retained": 0,
+    "per_gaussian_learned_parameters_added": false,
+    "score_cache_dtype": "float32",
+    "benchmark_labels_or_masks_used_for_fit": false,
+    "benchmark_conditioned_fallback": false
+  },
+  "paper8_macro": {
+    "miou": {"19": 0.3640050732383869, "15": 0.36188714064042804, "10": 0.4671647388007581},
+    "macc": {"19": 0.6728735582642204, "15": 0.6680277678175425, "10": 0.7674111754582984},
+    "delta_vs_restored_baseline_miou": {"19": 0.007870110818810228, "15": 0.008889271237780771, "10": 0.007628356681216364},
+    "delta_vs_restored_baseline_macc": {"19": 0.0031213709768745934, "15": 0.005419894526738411, "10": 0.0038515013004990495},
+    "delta_vs_descriptor_student_miou": {"19": 0.0037307682409137843, "15": 0.0023129262462784905, "10": 0.0009097269153804377},
+    "delta_vs_teacher_gate_capacity_miou": {"19": -0.0017464580704087407, "15": -0.0008423156334900206, "10": -0.001009978197257011},
+    "noninferior_scene_splits_vs_restored_baseline_miou": 24
+  },
+  "result_sha256": {
+    "scene0000_00": "b7b56834221d28f4fb3abf8f4a14cb0990f42a04f6a7f08dd201b984f057445e",
+    "scene0062_00": "064b15d4fc3d83df236c866506ed253c25758bcd70d8057fda208b348d429633",
+    "scene0070_00": "4d36f58dbec1c04fcf2fa0e58fc88e15f6552dc77fa9cf7d9cd3c9f019100b83",
+    "scene0097_00": "21371575a652688588f675a0ecbfdc04ec4ac1f2461d2f2704b5ba789a475c76",
+    "scene0140_00": "d44fcca990f82ceb5ecc4fc77544575a4f4da430a415409052232308ff5af20c",
+    "scene0347_00": "8681abdd9dfc3db2992e64303b6046f7e56d69fd8c5f3d986c02ddcefd7a64f7",
+    "scene0400_00": "b1581b60b00c3a6db0e64f22c7b4f88a4e676cc41ef5b6f20b2313a9b866740e",
+    "scene0590_00": "81bb380bc02d905dd12849258f47f2c5202bf85ca985ca78817a827f3492c651"
+  },
+  "claim_boundary": {
+    "development_only": true,
+    "sota_claim": false,
+    "outcome_blind_final_test": false
+  }
+}
