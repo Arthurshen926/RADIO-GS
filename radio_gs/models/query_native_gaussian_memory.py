@@ -56,6 +56,20 @@ class ModalityQueryAdapter(nn.Module):
         return self.network(value.float())
 
 
+class FixedCosineQueryProjection(nn.Module):
+    """Deterministic JL projection that cannot distort modality alignment."""
+
+    def __init__(self, input_dim: int, query_dim: int = 128, seed: int = 20260824) -> None:
+        super().__init__(); self.input_dim=int(input_dim); self.query_dim=int(query_dim); self.seed=int(seed)
+        generator=torch.Generator().manual_seed(self.seed)
+        projection=torch.empty(self.input_dim,self.query_dim).bernoulli_(.5,generator=generator).mul_(2).sub_(1)
+        projection.div_(float(self.query_dim)**.5); self.register_buffer("projection",projection)
+
+    def forward(self,value:torch.Tensor)->torch.Tensor:
+        if value.ndim!=2 or value.shape[1]!=self.input_dim: raise ValueError("fixed query projection input differs")
+        return F.normalize(value.float()@self.projection,dim=-1)
+
+
 class LowRankSceneCanonicalizer(nn.Module):
     """Constant-size scene FiLM for aligning scene-gauged latent coordinates.
 

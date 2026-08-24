@@ -248,6 +248,36 @@ No paper8 evaluation is authorized.  The remaining ScanNet component is a
 selective-risk estimator trained with explicit beneficial/harmful
 counterfactual labels; another global threshold sweep is not justified.
 
+## Joint extent and counterfactual risk closure
+
+The first joint LERF compiler incorrectly discarded a confirmed same-object
+episode whenever that target view lacked an explicit different-instance edge.
+That violated the three-state contract: absence of a negative means unknown,
+not absence of a positive.  Compiler v2 retains positive-only episodes and
+increases Ramen/Teatime/Waldo from `54/32/10` to `82/58/22` episodes.  With a
+shared decoder, rank-4 scene canonicalizer, object/scene-balanced sampling and
+checkpoint selection by worst-scene IoU gain, all six seeds pass every-scene
+noninferiority. Mean heldout gains are `+0.2134/+0.1335/+0.2288`.
+
+This large source improvement does not directly solve benchmark text readout.
+The learned crop-query adapter obtains only `0.03677` LERF2D direct macro mIoU
+and `0.04104` LERF3D macro mIoU, while localization remains `0.87159`. A fixed
+deterministic cosine-preserving projection improves these to `0.06453` and
+`0.05995`, respectively, and also passes 6/6 source seeds. Both rows remain
+rejected. The remaining LERF failure is now specifically cross-modal extent
+calibration: image-crop identity localizes the text target, but its learned
+extent probability and source threshold do not transfer to text queries.
+
+ScanNet now freezes the score decoder before producing an immutable
+baseline/raw-candidate/source-teacher triplet. Counterfactual labels are
+beneficial, harmful or neutral; neutral rows are not forced negative. A
+three-way risk estimator is trained under scene LOSO with harmful weighted
+mass as the primary gate and nonempty adoption required. Only `2/8` heldout
+scenes pass at a maximum harmful fraction of `0.25`; paper8 remains closed.
+The selector is therefore implemented correctly, but the present candidate
+score decoder does not contain a sufficiently broad transferable improvement
+region for a selector to recover.
+
 ## Current decision
 
 The architecture remains a promising v2 candidate for categorical text

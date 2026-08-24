@@ -11,7 +11,7 @@ from torch.nn import functional as F
 
 from radio_gs.field import load_factorized_canonical_field_checkpoint
 from radio_gs.interfaces.query_packet import QueryPacket
-from radio_gs.models.query_native_gaussian_memory import GaussianGeometry, LowRankSceneCanonicalizer, ModalityQueryAdapter, QueryNativeGaussianPosteriorDecoder
+from radio_gs.models.query_native_gaussian_memory import FixedCosineQueryProjection, GaussianGeometry, LowRankSceneCanonicalizer, ModalityQueryAdapter, QueryNativeGaussianPosteriorDecoder
 from radio_gs.scripts.train_evaluate_frozen_latent_membership_decoder import _load_mapping
 from radio_gs.utils.immutable_artifacts import file_record, write_frozen_json, write_torch_noclobber
 
@@ -32,7 +32,7 @@ def run(args):
     baseline=F.normalize(torch.as_tensor(cache.get("features",cache.get("summary_features"))).float(),dim=-1)
     xyz=torch.as_tensor(cache["xyz"]).float(); reliability=torch.as_tensor(universal["reliability"]).float()
     with torch.inference_mode(): latent=field.query_memory(representation="coefficients").cpu().float()
-    device=torch.device(args.device); adapter=ModalityQueryAdapter(queries.shape[1],args.query_dim).to(device); decoder=QueryNativeGaussianPosteriorDecoder(latent_dim=latent.shape[1],query_dim=args.query_dim,hidden_dim=args.hidden_dim,topk_anchors=args.topk_anchors).to(device); canonicalizer=LowRankSceneCanonicalizer(len(model["scene_canonicalizer_state_dict"]["scene_code.weight"]),latent.shape[1],args.scene_canonicalizer_rank).to(device)
+    device=torch.device(args.device); fixed=bool(model.get("metadata",{}).get("fixed_query_projection",False)); adapter=(FixedCosineQueryProjection(queries.shape[1],args.query_dim,int(model.get("metadata",{}).get("projection_seed",20260824))) if fixed else ModalityQueryAdapter(queries.shape[1],args.query_dim)).to(device); decoder=QueryNativeGaussianPosteriorDecoder(latent_dim=latent.shape[1],query_dim=args.query_dim,hidden_dim=args.hidden_dim,topk_anchors=args.topk_anchors).to(device); canonicalizer=LowRankSceneCanonicalizer(len(model["scene_canonicalizer_state_dict"]["scene_code.weight"]),latent.shape[1],args.scene_canonicalizer_rank).to(device)
     adapter.load_state_dict(model["adapter_state_dict"]); decoder.load_state_dict(model["decoder_state_dict"]); canonicalizer.load_state_dict(model["scene_canonicalizer_state_dict"]); adapter.eval(); decoder.eval(); canonicalizer.eval()
     latent_device=latent.to(device); reliability_device=reliability.to(device); xyz_device=xyz.to(device); baseline_device=baseline.to(device); scores=[]; identities=[]
     with torch.inference_mode():

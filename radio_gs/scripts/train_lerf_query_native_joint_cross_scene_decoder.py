@@ -15,7 +15,7 @@ from torch.nn import functional as F
 from radio_gs.field import load_factorized_canonical_field_checkpoint
 from radio_gs.interfaces.query_packet import QueryPacket
 from radio_gs.models.query_native_gaussian_memory import (
-    GaussianGeometry, LowRankSceneCanonicalizer, ModalityQueryAdapter,
+    FixedCosineQueryProjection, GaussianGeometry, LowRankSceneCanonicalizer, ModalityQueryAdapter,
     QueryNativeGaussianPosteriorDecoder,
 )
 from radio_gs.scripts.train_evaluate_frozen_latent_membership_decoder import (
@@ -154,7 +154,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("joint LERF representation dimensions differ")
     device = torch.device(args.device); torch.manual_seed(args.seed)
     generator = torch.Generator().manual_seed(args.seed + 1)
-    adapter = ModalityQueryAdapter(query_input_dim, args.query_dim).to(device)
+    adapter = (FixedCosineQueryProjection(query_input_dim,args.query_dim,args.projection_seed) if args.fixed_query_projection else ModalityQueryAdapter(query_input_dim, args.query_dim)).to(device)
     decoder = QueryNativeGaussianPosteriorDecoder(
         latent_dim=latent_dim, query_dim=args.query_dim,
         hidden_dim=args.hidden_dim, topk_anchors=args.topk_anchors,
@@ -260,7 +260,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     macro_post=sum(x["posterior_iou"] for x in results.values())/len(results); macro_base=sum(x["primitive_iou"] for x in results.values())/len(results)
     passed=all(scene_pass) and macro_post>=macro_base+args.minimum_macro_gain
     output=Path(args.output).expanduser().resolve()
-    write_torch_noclobber(output,{"schema":"radio_gs.lerf_joint_query_native_extent.v1","schema_version":1,"adapter_state_dict":best_state["adapter"],"decoder_state_dict":best_state["decoder"],"scene_canonicalizer_state_dict":best_state["canonicalizer"],"threshold":threshold,"metadata":{"source_only":True,"field_frozen":True,"per_gaussian_parameters_added":False,"memory_representation":"coefficients","shared_cross_scene_decoder":True,"scene_canonicalizer_rank":args.scene_canonicalizer_rank,"scene_balanced":True,"object_track_balanced":True,"unknown_excluded_from_loss":True,"scene_specs":specs}})
+    write_torch_noclobber(output,{"schema":"radio_gs.lerf_joint_query_native_extent.v1","schema_version":1,"adapter_state_dict":best_state["adapter"],"decoder_state_dict":best_state["decoder"],"scene_canonicalizer_state_dict":best_state["canonicalizer"],"threshold":threshold,"metadata":{"source_only":True,"field_frozen":True,"per_gaussian_parameters_added":False,"memory_representation":"coefficients","shared_cross_scene_decoder":True,"scene_canonicalizer_rank":args.scene_canonicalizer_rank,"fixed_query_projection":bool(args.fixed_query_projection),"projection_seed":args.projection_seed,"scene_balanced":True,"object_track_balanced":True,"unknown_excluded_from_loss":True,"scene_specs":specs}})
     report={"status":"source_gate_pass" if passed else "source_gate_fail","best_validation_scene_macro_bce":best_loss,"checkpoint_selection":best_selection_report,"validation":{"posterior_threshold":threshold,"posterior_scene_macro_iou":validation_iou,"primitive_threshold":primitive_threshold,"primitive_scene_macro_iou":primitive_validation_iou},"source_heldout":results,"source_heldout_scene_macro":{"primitive_iou":macro_base,"posterior_iou":macro_post,"delta":macro_post-macro_base},"gate":{"all_scenes_noninferior":all(scene_pass),"minimum_macro_gain":args.minimum_macro_gain,"passed":passed},"output":file_record(output)}
     write_frozen_json(output.with_suffix(output.suffix+".json"),report); return report
 
@@ -269,7 +269,7 @@ def main() -> None:
     p=argparse.ArgumentParser(description=__doc__); p.add_argument("--scene-specs",required=True); p.add_argument("--output",required=True); p.add_argument("--device",default="cuda:0")
     p.add_argument("--steps",type=int,default=3600); p.add_argument("--learning-rate",type=float,default=1e-3); p.add_argument("--weight-decay",type=float,default=1e-4); p.add_argument("--query-dim",type=int,default=128); p.add_argument("--hidden-dim",type=int,default=128); p.add_argument("--topk-anchors",type=int,default=6); p.add_argument("--scene-canonicalizer-rank",type=int,default=8)
     p.add_argument("--positive-cap",type=int,default=1024); p.add_argument("--negative-cap",type=int,default=2048); p.add_argument("--holdout-stride",type=int,default=4); p.add_argument("--heldout-residue",type=int,default=3); p.add_argument("--validation-residue",type=int,default=2); p.add_argument("--validation-interval",type=int,default=60); p.add_argument("--threshold-candidates",type=int,default=64)
-    p.add_argument("--evaluation-membership-threshold",type=float,default=.5); p.add_argument("--dice-weight",type=float,default=.5); p.add_argument("--brier-weight",type=float,default=.25); p.add_argument("--rank-weight",type=float,default=.25); p.add_argument("--identity-margin",type=float,default=.05); p.add_argument("--scene-noninferiority-tolerance",type=float,default=.0); p.add_argument("--minimum-macro-gain",type=float,default=.01); p.add_argument("--seed",type=int,default=20260824)
+    p.add_argument("--fixed-query-projection",action="store_true"); p.add_argument("--projection-seed",type=int,default=20260824); p.add_argument("--evaluation-membership-threshold",type=float,default=.5); p.add_argument("--dice-weight",type=float,default=.5); p.add_argument("--brier-weight",type=float,default=.25); p.add_argument("--rank-weight",type=float,default=.25); p.add_argument("--identity-margin",type=float,default=.05); p.add_argument("--scene-noninferiority-tolerance",type=float,default=.0); p.add_argument("--minimum-macro-gain",type=float,default=.01); p.add_argument("--seed",type=int,default=20260824)
     print(json.dumps(run(p.parse_args()),indent=2,sort_keys=True))
 
 

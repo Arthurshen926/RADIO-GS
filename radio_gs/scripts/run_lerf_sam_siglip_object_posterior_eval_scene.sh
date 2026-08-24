@@ -5,7 +5,9 @@ SCENE=${1:?usage: run_lerf_sam_siglip_object_posterior_eval_scene.sh SCENE}
 ROOT=/root/RADIO-GS
 RUN_ROOT=${RUN_ROOT:-/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_sam_siglip_object_posterior_source32_v1}
 SCORE_ROOT=${SCORE_ROOT:-$RUN_ROOT}
+SCORE_DIR=${SCORE_DIR:-$SCORE_ROOT/scores}
 PYTHON_RUNNER=${PYTHON_RUNNER:-$ROOT/radio_gs/scripts/run_repo_python.sh}
+SCORE_THRESHOLD=${SCORE_THRESHOLD:-0.6}
 
 case "$SCENE" in
   figurines)
@@ -30,7 +32,7 @@ case "$SCENE" in
     ;;
 esac
 
-SCORES=$SCORE_ROOT/scores/$SCENE.pt
+SCORES=$SCORE_DIR/$SCENE.pt
 LERF3D_ROOT=$RUN_ROOT/lerf3d/$SCENE
 LERF3D_RESULT=$LERF3D_ROOT/$SCENE/lerf_direct_3d_selection_results.json
 LERF2D_ROOT=$RUN_ROOT/lerf2d/${SCENE}_eval
@@ -52,7 +54,7 @@ if [[ ! -f "$LERF3D_RESULT" ]]; then
     --canonical_embedding_cache checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt \
     --prompt_templates '{query}' \
     --selection_mode score_threshold \
-    --score_threshold 0.6 \
+    --score_threshold "$SCORE_THRESHOLD" \
     --score_source direct \
     --scoring relevancy \
     --softmax_temperature 10 \
@@ -81,7 +83,7 @@ if [[ ! -f "$LERF2D_RESULT" ]]; then
     --output_dir "$LERF2D_ROOT" \
     --text_embedding_cache checkpoints/siglip2_lerf_all_exact_official.pt \
     --prompt_templates '{query}' \
-    --iou_threshold 0.6 \
+    --iou_threshold "$SCORE_THRESHOLD" \
     --threshold_mode fixed \
     --scoring relevancy \
     --relevancy_temp 0.1 \

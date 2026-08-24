@@ -55,11 +55,36 @@ different proposals provide negatives, and all other support is unknown.
 Two of three independent source scenes pass with large/positive gains; the
 sparse Waldo scene requires shared cross-scene training before benchmark use.
 
+The joint implementation additionally treats a same-object episode without
+an explicit negative as positive-only; unknown rows never enter the binary
+loss. A shared extent decoder and rank-4 low-rank scene canonicalizer are
+trained with scene/object-track balancing. Checkpoint selection maximizes the
+minimum validation-scene IoU gain before scene-macro gain, matching the final
+decision metric. This closes the source gate in six of six seeds.
+
+Image-to-text use remains a separate contract. A trainable crop adapter may
+distort the official SigLIP shared geometry even when image-query extent is
+excellent. The current modality-safe control uses a fixed seeded Rademacher
+JL projection followed by cosine normalization. It improves both LERF2D and
+LERF3D text transfer over the learned adapter, but is not promoted because the
+absolute benchmark rows remain below the retained method. A final candidate
+requires source-only text-query extent calibration, not a benchmark-selected
+threshold.
+
 The categorical branch now owns label-free opacity-volume weights and a
 class-balanced top-class/soft-IoU objective.  Its residual remains bounded by
 baseline margin and predicted margin gain.  Because the current eligibility
 model still harms some heldout queries, these additions are implemented but
 unpromoted.
+
+The eligibility component is now formally separated from scoring. The frozen
+decoder emits baseline and raw candidate scores; a source teacher defines
+beneficial/harmful/neutral counterfactual outcomes. Neutral is an explicit
+third outcome rather than a negative. The selective-risk estimator may only
+adopt when beneficial probability dominates harmful and neutral probability,
+and promotion is governed by harmful opacity-volume mass, nonempty adoption
+and positive net benefit under source-scene LOSO. The first candidate passes
+only two of eight scenes and is rejected without paper8 evaluation.
 
 The dense reference implementation first computes an identity unary with a
 learned temperature `tau` constrained to `[0.02,0.2]`, then an extent residual:

@@ -1,0 +1,51 @@
+{
+  "schema": "radio_gs.query_native_joint_extent_and_risk_result.v1",
+  "schema_version": 1,
+  "date": "2026-08-24",
+  "status": "lerf_source_gate_stable_text_transfer_incomplete_scannet_risk_rejected",
+  "lerf_episode_compiler_v2": {
+    "semantics": "same-object positives retained even without explicit negatives; absent negatives remain unknown",
+    "episodes": {"ramen": 82, "teatime": 58, "waldo_kitchen": 22},
+    "object_tracks": {"ramen": 9, "teatime": 7, "waldo_kitchen": 3}
+  },
+  "lerf_joint_learned_adapter_source_gate": {
+    "seeds_passed": 6,
+    "seeds_total": 6,
+    "mean_delta": {"ramen": 0.2133740584, "teatime": 0.1335197886, "waldo_kitchen": 0.2287703852},
+    "scene_macro_delta_range": [0.1776, 0.2120],
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/query_native_joint_lerf_v2_positive_unknown"
+  },
+  "lerf_text_transfer": {
+    "learned_image_adapter": {
+      "lerf2d_direct_macro_miou": 0.0367671000,
+      "lerf2d_sam_boundary_macro_miou": 0.0174657790,
+      "lerf3d_macro_miou": 0.0410353194,
+      "localization_accuracy_macro": 0.8715890296,
+      "decision": "reject"
+    },
+    "fixed_cosine_projection": {
+      "source_seeds_passed": 6,
+      "source_seeds_total": 6,
+      "lerf2d_direct_macro_miou": 0.0645288517,
+      "lerf3d_macro_miou": 0.0599518893,
+      "localization_accuracy_macro": 0.8715890296,
+      "decision": "mechanism_improvement_but_reject"
+    },
+    "conclusion": "identity localization transfers, but image-supervised extent probability does not yet calibrate to text queries"
+  },
+  "scannet_counterfactual_risk": {
+    "label_semantics": ["beneficial", "harmful", "neutral_or_teacher_ambiguous"],
+    "neutral_forced_negative": false,
+    "loso_passed": 2,
+    "loso_total": 8,
+    "maximum_harmful_fraction": 0.25,
+    "paper8_opened": false,
+    "decision": "reject_current_frozen_candidate"
+  },
+  "method_boundary": {
+    "universal_field_modified": false,
+    "persistent_second_semantic_field": false,
+    "benchmark_masks_used_for_training": false,
+    "next_high_value_gap": "source-only cross-modal extent calibration with decision-matched text-query authority"
+  }
+}

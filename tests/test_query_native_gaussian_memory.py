@@ -3,6 +3,7 @@ import torch
 from radio_gs.interfaces.query_packet import QueryPacket
 from radio_gs.models.query_native_gaussian_memory import (
     CounterfactualSelectiveRiskEstimator,
+    FixedCosineQueryProjection,
     GaussianGeometry,
     LowRankSceneCanonicalizer,
     ModalityQueryAdapter,
@@ -243,3 +244,11 @@ def test_counterfactual_risk_estimator_has_three_explicit_outcomes() -> None:
         assert "latent input differs" in str(error)
     else:
         raise AssertionError("bad risk-estimator latent domain was accepted")
+
+
+def test_fixed_query_projection_is_deterministic_and_normalized() -> None:
+    value = torch.randn(5, 17)
+    left = FixedCosineQueryProjection(17, 7, seed=3)(value)
+    right = FixedCosineQueryProjection(17, 7, seed=3)(value)
+    torch.testing.assert_close(left, right)
+    torch.testing.assert_close(left.norm(dim=1), torch.ones(5))
