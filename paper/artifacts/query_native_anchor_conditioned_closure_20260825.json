@@ -1,0 +1,50 @@
+{
+  "status": "complete_rejected_benchmark_candidate",
+  "date": "2026-08-25",
+  "method": {
+    "identity_to_anchor_to_extent": true,
+    "token_free_extent": true,
+    "peak_local_anchor": true,
+    "authority_gated_identity_replay": true,
+    "instance_attribute_source_text": true,
+    "universal_field_retrained": false
+  },
+  "source_gate": {
+    "extent_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_anchor_conditioned_extent_v3_metricselect/r0p04_a4_s20260830.pt",
+    "image_macro_delta": 0.120450,
+    "oracle_image_anchor_text_macro_delta": 0.125046,
+    "text_adapter_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_text_to_anchor_v3_decoupled/r64_agree2.pt",
+    "text_macro_delta": 0.027315177023410797,
+    "text_scene_deltas": [0.036105476319789886, 0.008727043867111206, 0.0371130108833313],
+    "anchor_purity": 0.742424240618041,
+    "peak_accuracy": 0.7575757575757576,
+    "raw_anchor_fallback_fraction": 0.48484848484848486
+  },
+  "lerf_full4": {
+    "posterior_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_anchor_conditioned_text_posterior_v3",
+    "evaluation_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_anchor_conditioned_eval_v1",
+    "lerf2d_sample_micro_miou": 0.06177963144846478,
+    "lerf2d_scene_macro_miou": 0.05987621259237687,
+    "lerf2d_sample_micro_locacc": 0.8798076923076923,
+    "lerf3d_sample_micro_miou": 0.03778755145434003,
+    "lerf3d_scene_macro_miou": 0.04539561131969094,
+    "lerf3d_sample_micro_acc025": 0.02403846153846154,
+    "lerf3d_sample_micro_acc050": 0.009615384615384616,
+    "promoted": false
+  },
+  "scannet": {
+    "source_gate": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/scannet_constrained_top2_v1/source_gate.json",
+    "status": "source_gate_fail",
+    "changed_rows": 40993,
+    "recovery_mass": 1.142106176004745,
+    "harm_mass": 0.1483338892358006,
+    "net_recovery_mass": 0.9937722867689445,
+    "retained_compact_head": true
+  },
+  "contract": {
+    "source_only_selection": true,
+    "benchmark_labels_used_for_training_or_selection": false,
+    "benchmark_masks_used_for_training_or_selection": false,
+    "same_lerf_posterior_used_for_2d_and_3d": true
+  }
+}

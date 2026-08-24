@@ -36,6 +36,50 @@ class GaussianGeometry:
             raise ValueError("Gaussian geometry opacity differs")
 
 
+@dataclass(frozen=True)
+class AnchorPacket:
+    """Modality-free object anchors compiled from an external identity map."""
+
+    rows: torch.Tensor
+    scores: torch.Tensor
+    peak_row: int
+    local_radius: float
+
+    def validate(self, total_rows: int) -> None:
+        if self.rows.ndim != 1 or not self.rows.numel():
+            raise ValueError("anchor packet rows differ")
+        if self.scores.shape != self.rows.shape:
+            raise ValueError("anchor packet scores differ")
+        if int(self.rows.min()) < 0 or int(self.rows.max()) >= total_rows:
+            raise IndexError("anchor packet row is out of range")
+        if not 0 <= int(self.peak_row) < total_rows or float(self.local_radius) <= 0:
+            raise ValueError("anchor packet peak/radius differs")
+        if not bool(torch.isfinite(self.scores).all()):
+            raise ValueError("anchor packet score is non-finite")
+
+
+def compile_peak_local_anchor_packet(
+    identity: torch.Tensor, xyz: torch.Tensor, topk: int = 6,
+    radius_fraction: float = 0.02,
+) -> AnchorPacket:
+    """Compile top-k identity anchors only inside the global peak's 3D locality."""
+    if identity.ndim != 1 or xyz.shape != (identity.numel(), 3):
+        raise ValueError("peak-local anchor domain differs")
+    if topk <= 0 or radius_fraction <= 0 or not bool(torch.isfinite(identity).all()):
+        raise ValueError("peak-local anchor configuration differs")
+    peak = int(identity.argmax())
+    diagonal = torch.linalg.vector_norm(xyz.max(0).values - xyz.min(0).values).clamp_min(1e-8)
+    distance = torch.linalg.vector_norm(xyz - xyz[peak], dim=1)
+    required = min(int(topk), identity.numel())
+    kth_radius = float(distance.topk(required, largest=False).values[-1])
+    radius = max(float(diagonal) * float(radius_fraction), kth_radius)
+    eligible = distance <= radius + 1e-8
+    eligible[peak] = True
+    candidates = torch.where(eligible)[0]
+    rows = candidates[identity[candidates].topk(min(int(topk), candidates.numel())).indices]
+    return AnchorPacket(rows=rows, scores=identity[rows], peak_row=peak, local_radius=radius)
+
+
 class ModalityQueryAdapter(nn.Module):
     """Small adapter from one frozen encoder space into shared query tokens."""
 
@@ -68,6 +112,29 @@ class FixedCosineQueryProjection(nn.Module):
     def forward(self,value:torch.Tensor)->torch.Tensor:
         if value.ndim!=2 or value.shape[1]!=self.input_dim: raise ValueError("fixed query projection input differs")
         return F.normalize(value.float()@self.projection,dim=-1)
+
+
+class TextAnchorIdentityAdapter(nn.Module):
+    """Low-rank text retrieval adapter trained in Gaussian identity space.
+
+    The adapter belongs to the modality-specific retrieval stage.  It emits a
+    query vector used only to form an identity map; neither this vector nor the
+    original text token enters the shared extent decoder.
+    """
+
+    def __init__(self, embedding_dim: int = 1536, rank: int = 32) -> None:
+        super().__init__()
+        self.embedding_dim=int(embedding_dim);self.rank=int(rank)
+        if min(self.embedding_dim,self.rank)<=0: raise ValueError("text anchor adapter dimensions differ")
+        self.down=nn.Linear(self.embedding_dim,self.rank,bias=False)
+        self.up=nn.Linear(self.rank,self.embedding_dim,bias=False)
+        nn.init.normal_(self.down.weight,std=0.02)
+        nn.init.zeros_(self.up.weight)
+
+    def forward(self,value:torch.Tensor)->torch.Tensor:
+        if value.ndim!=2 or value.shape[1]!=self.embedding_dim: raise ValueError("text anchor adapter input differs")
+        normalized=F.normalize(value.float(),dim=-1)
+        return F.normalize(normalized+self.up(F.gelu(self.down(normalized))),dim=-1)
 
 
 class LowRankSceneCanonicalizer(nn.Module):
@@ -454,11 +521,67 @@ class QueryNativeGaussianPosteriorDecoder(nn.Module):
         return logits, identity
 
 
+class AnchorConditionedExtentDecoder(nn.Module):
+    """Recover object extent from memory and a modality-free AnchorPacket.
+
+    Raw text/image/prompt tokens are intentionally absent from this interface.
+    Modality-specific retrieval owns the identity map and anchor compilation;
+    this decoder owns only physical support completion.
+    """
+
+    def __init__(self, latent_dim: int = 512, reliability_dim: int = 5,
+                 key_dim: int = 128, hidden_dim: int = 128) -> None:
+        super().__init__()
+        self.latent_dim=int(latent_dim); self.reliability_dim=int(reliability_dim); self.key_dim=int(key_dim)
+        self.latent_norm=nn.LayerNorm(self.latent_dim); self.reliability_norm=nn.LayerNorm(self.reliability_dim)
+        self.gaussian_key=nn.Linear(self.latent_dim,self.key_dim)
+        self.extent=nn.Sequential(
+            nn.Linear(self.key_dim*2+self.reliability_dim+1+9,int(hidden_dim)),
+            nn.GELU(),nn.Linear(int(hidden_dim),1),
+        )
+        nn.init.zeros_(self.extent[-1].weight); nn.init.zeros_(self.extent[-1].bias)
+
+    def forward(self, latent: torch.Tensor, reliability: torch.Tensor,
+                identity: torch.Tensor, anchors: AnchorPacket,
+                geometry: GaussianGeometry, authority: torch.Tensor | None = None) -> torch.Tensor:
+        if latent.ndim!=2 or latent.shape[1]!=self.latent_dim: raise ValueError("anchor extent latent differs")
+        if reliability.shape!=(latent.shape[0],self.reliability_dim) or identity.shape!=(latent.shape[0],): raise ValueError("anchor extent row domain differs")
+        anchors.validate(latent.shape[0]); geometry.validate(latent.shape[0])
+        if authority is not None and authority.shape!=(latent.shape[0],): raise ValueError("anchor extent authority differs")
+        key=F.normalize(self.gaussian_key(self.latent_norm(latent.float())),dim=-1)
+        anchor_rows=anchors.rows.to(key.device); anchor_keys=key[anchor_rows]
+        anchor_scores=anchors.scores.to(key.device).float(); anchor_weight=torch.softmax(anchor_scores/0.05,dim=0)
+        relation_weight=torch.softmax(key@anchor_keys.T/0.07+anchor_weight.clamp_min(1e-8).log()[None,:],dim=1)
+        anchor=relation_weight@anchor_keys
+        xyz=geometry.xyz.to(device=key.device,dtype=key.dtype); anchor_xyz=xyz[anchor_rows]
+        delta=xyz[:,None,:]-anchor_xyz[None,:,:]; distance=torch.linalg.vector_norm(delta,dim=-1)
+        scale=(geometry.scales.to(device=key.device,dtype=key.dtype).clamp_min(1e-6) if geometry.scales is not None else torch.ones_like(xyz))
+        anchor_scale=scale[anchor_rows]
+        mahalanobis=torch.sqrt((delta.square()/anchor_scale[None].square()).sum(-1).clamp_min(1e-8))
+        scale_ratio=(scale.log().mean(-1,keepdim=True)-anchor_scale.log().mean(-1)[None,:]).abs()
+        feature_relation=key@anchor_keys.T; confidence=torch.sigmoid(anchor_scores)[None,:].expand_as(distance)
+        relation=torch.cat((delta,distance[...,None],mahalanobis[...,None],scale_ratio[...,None],feature_relation[...,None],confidence[...,None]),dim=-1)
+        geometry_relation=(relation*relation_weight[...,None]).sum(1)
+        opacity=(geometry.opacity.to(device=key.device,dtype=key.dtype).reshape(-1,1) if geometry.opacity is not None else torch.ones((key.shape[0],1),device=key.device,dtype=key.dtype))
+        geometry_relation=torch.cat((geometry_relation,opacity),dim=1)
+        extent_input=torch.cat((key,anchor,self.reliability_norm(reliability.float()),identity.float()[:,None],geometry_relation),dim=1)
+        residual=self.extent(extent_input).squeeze(-1)
+        if authority is not None: residual=residual*authority.to(device=residual.device,dtype=residual.dtype).clamp(0,1)
+        logits=identity.float()+residual
+        # Extent completion cannot erase any supplied identity anchor.
+        logits=logits.clone(); logits[anchor_rows]=torch.maximum(logits[anchor_rows],identity.float()[anchor_rows])
+        return logits
+
+
 __all__ = [
+    "AnchorConditionedExtentDecoder",
+    "AnchorPacket",
     "GaussianGeometry",
     "LowRankSceneCanonicalizer",
     "ModalityQueryAdapter",
+    "TextAnchorIdentityAdapter",
     "QueryNativeGaussianPosteriorDecoder",
     "QuerySetCategoricalDecoder",
     "QuerySetEligibilityGate",
+    "compile_peak_local_anchor_packet",
 ]

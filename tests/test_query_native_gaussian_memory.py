@@ -2,6 +2,8 @@ import torch
 
 from radio_gs.interfaces.query_packet import QueryPacket
 from radio_gs.models.query_native_gaussian_memory import (
+    AnchorConditionedExtentDecoder,
+    AnchorPacket,
     CounterfactualSelectiveRiskEstimator,
     FixedCosineQueryProjection,
     GaussianGeometry,
@@ -11,6 +13,8 @@ from radio_gs.models.query_native_gaussian_memory import (
     QueryPairEligibilityGate,
     QuerySetCategoricalDecoder,
     QuerySetEligibilityGate,
+    TextAnchorIdentityAdapter,
+    compile_peak_local_anchor_packet,
 )
 from radio_gs.scripts.train_evaluate_query_native_membership_decoder import (
     _cross_view_episodes,
@@ -18,6 +22,7 @@ from radio_gs.scripts.train_evaluate_query_native_membership_decoder import (
     _proposal_pairs,
 )
 from radio_gs.scripts.train_scannet_query_native_shared_decoder import _loss as _categorical_loss
+from radio_gs.scripts.evaluate_scannet_constrained_top2_source_gate import constrained_top2
 from radio_gs.scripts.train_lerf_query_native_joint_cross_scene_decoder import (
     _blend_score,
     _calibrate_selective_blend,
@@ -52,6 +57,45 @@ def test_selective_text_blend_contains_exact_primitive_fallback() -> None:
         posterior[0][0][0], primitive[0][0][0], calibration, 0.5, 0.5,
     )
     assert torch.equal(signed >= 0, primitive[0][0][0] >= 0.5)
+
+
+def test_peak_local_anchor_packet_expands_to_fixed_k_without_distant_instance() -> None:
+    identity = torch.tensor([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.99])
+    xyz = torch.tensor([[0.0, 0.0, float(index) * 0.01] for index in range(6)] + [[9.0, 0.0, 0.0]])
+    packet = compile_peak_local_anchor_packet(identity, xyz, topk=4, radius_fraction=1e-5)
+    packet.validate(identity.numel())
+    assert packet.rows.numel() == 4
+    assert 6 not in packet.rows.tolist()
+
+
+def test_anchor_conditioned_extent_has_exact_zero_authority_replay() -> None:
+    torch.manual_seed(9)
+    decoder = AnchorConditionedExtentDecoder(latent_dim=4, reliability_dim=2, key_dim=3, hidden_dim=5)
+    latent, reliability, identity = torch.randn(8, 4), torch.randn(8, 2), torch.randn(8)
+    xyz = torch.randn(8, 3)
+    packet = AnchorPacket(torch.tensor([0, 1]), identity[:2], 0, 1.0)
+    logits = decoder(
+        latent, reliability, identity, packet, GaussianGeometry(xyz), torch.zeros(8),
+    )
+    assert torch.equal(logits, identity)
+
+
+def test_text_anchor_adapter_is_low_rank_normalized_and_identity_initialized() -> None:
+    value=torch.randn(4,13)
+    adapter=TextAnchorIdentityAdapter(embedding_dim=13,rank=3)
+    output=adapter(value)
+    torch.testing.assert_close(output,torch.nn.functional.normalize(value.float(),dim=-1))
+    torch.testing.assert_close(output.norm(dim=1),torch.ones(4))
+    assert adapter.down.weight.numel()+adapter.up.weight.numel()==2*13*3
+
+
+def test_scannet_constrained_top2_changes_only_two_authorized_coordinates() -> None:
+    baseline=torch.tensor([[.8,.7,.1,.0],[.1,.2,.9,.3]])
+    candidate=torch.tensor([[.2,.9,.8,.0],[.0,.1,.8,.2]])
+    output=constrained_top2(baseline,candidate,1.0)
+    assert torch.equal(output[0,2:],baseline[0,2:])
+    assert torch.equal(output[1],baseline[1])
+    torch.testing.assert_close(output[0,1]-output[0,0],candidate[0,1]-candidate[0,0])
 
 
 def test_query_set_decoder_is_permutation_equivariant_and_cardinality_free() -> None:
