@@ -1,0 +1,82 @@
+{
+  "schema": "radio_gs.query_native_text_physical_track_closure.v1",
+  "schema_version": 1,
+  "date": "2026-08-25",
+  "status": "mechanism_positive_joint_2d_3d_gate_fail",
+  "scene": "figurines",
+  "information_contract": {
+    "field_frozen": true,
+    "geometry_frozen": true,
+    "benchmark_masks_used_for_training_or_selection": false,
+    "threshold": 0.5,
+    "full4_opened": false
+  },
+  "direct_language": {
+    "mean": {
+      "cache_sha256": "3920eff80b4cd8a38e7c8091c8f89c8d44be1307cdd3cbc35965664210386d09",
+      "lerf2d_miou": 0.02427365664399821,
+      "locacc": 0.9107142857142857
+    },
+    "rowwise_top2": {
+      "cache_sha256": "f80f6ad0a95b023ecad6f500d0e57a8fce261e4ffe524a16935d96e5477c539d",
+      "lerf2d_miou": 0.015875915837353403,
+      "decision": "reject"
+    }
+  },
+  "source_vlm_caption_authority": {
+    "model": "microsoft/Florence-2-base-ft",
+    "pinned_revision": "f6c1a258",
+    "track_count": 19,
+    "strict_pass_count": 3,
+    "strict_conditions": [
+      "cross_view_caption_consistency",
+      "crop_caption_alignment",
+      "sibling_discrimination"
+    ],
+    "decision": "insufficient_authority_do_not_train",
+    "sha256": {
+      "ramen": "c141bc55729d77010d22ebdfea370e3c0d1f8f8c3462bb960be754f5d29ed58e",
+      "teatime": "47cc2b7268258291fbeb4786fa3f439af765511e2d973224313bcda1ffcf5b58",
+      "waldo_kitchen": "33542fb2a8978245dc141235de54c519e71d261620c2378ebb9d458d8b51f5bc"
+    }
+  },
+  "view_exclusive_physical_tracks": {
+    "compiler": "descending_confidence_maximum_forest_with_disjoint_view_sets",
+    "track_count": 25,
+    "tracked_proposals": 263,
+    "invariant": "at_most_one_proposal_per_registered_view_per_track",
+    "ordinary_graph_failure": "largest_component_245_of_277_proposals",
+    "direct_identity": {
+      "posterior_sha256": "f1f8fc5077e914c6e0d6d56afbed5c538c8443345d059609bad6d97c575e187a",
+      "lerf2d_miou": 0.2171261725254177,
+      "lerf2d_category_macro_miou": 0.22043835330191922,
+      "lerf2d_locacc": 0.9107142857142857,
+      "lerf3d_miou": 0.26878786087036133,
+      "lerf3d_acc025": 0.4107142857142857,
+      "lerf3d_acc050": 0.2857142857142857,
+      "lerf3d_result_sha256": "60250d572573be9d8513cf044ba6e65c9ffba68672b268feb8e6feb7970f47a0"
+    },
+    "d512_identity": {
+      "posterior_sha256": "bdcd8ef1a01d0f91ac98a9bf5f5b5909430c9eb01cbacd3e67175bd92c6ab76a",
+      "lerf2d_miou": 0.19620603282348434,
+      "lerf2d_category_macro_miou": 0.19404821824881188,
+      "lerf2d_locacc": 0.9107142857142857,
+      "lerf3d_miou": 0.2541719675064087,
+      "lerf3d_acc025": 0.39285714285714285,
+      "lerf3d_acc050": 0.2857142857142857,
+      "lerf3d_result_sha256": "0f45040e65ec4deae70336ab3f29a6ab6e3b23426a8271bec016483a300d5e17"
+    }
+  },
+  "paired_gate": {
+    "matched_primitive_lerf2d_miou": 0.41423949953158423,
+    "matched_primitive_lerf3d_miou": 0.5720701217651367,
+    "best_previous_soft_track_lerf2d_miou": 0.42656691805732905,
+    "best_previous_soft_track_lerf3d_miou": 0.515439510345459,
+    "decision": "reject_hard_tracks_and_do_not_expand_full4"
+  },
+  "retained_other_benchmarks": {
+    "scannet_miou_19_15_10": [0.36401, 0.36189, 0.46716],
+    "nvos_macro_iou": 0.92555
+  },
+  "conclusion": "Physical-track exclusivity causally improves 2D extent for a sparse direct-language identity map, but neither hard nor soft track membership preserves direct 3D purity. The next admissible candidate requires signed visibility-aware Gaussian track membership with different-instance veto and unknown support, not more score calibration or graph closure."
+}

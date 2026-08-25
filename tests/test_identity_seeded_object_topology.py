@@ -1,6 +1,7 @@
 import torch
 
 from radio_gs.querying.identity_seeded_object_topology import (
+    compile_view_exclusive_physical_tracks,
     identity_seeded_object_topology_posterior,
     proposal_query_indices_from_names,
 )
@@ -115,3 +116,45 @@ def test_query_name_mapping_is_case_and_space_stable() -> None:
     assert proposal_query_indices_from_names(
         [" Green Apple ", "unknown"], ["green apple", "bag"]
     ).tolist() == [0, -1]
+
+
+def test_query_free_hierarchy_is_reused_for_each_query_identity() -> None:
+    scores = torch.tensor([[1.0, 0.0], [0.1, 1.0], [0.1, 0.1]])
+    rows = torch.tensor([0, 2, 0, 2, 1, 2, 1, 2])
+    props = torch.tensor([0, 0, 1, 1, 2, 2, 3, 3])
+    posterior, stats = identity_seeded_object_topology_posterior(
+        scores, rows, props, torch.ones(8),
+        torch.tensor([0, 1, 0, 1]), torch.full((4,), -1),
+        unknown_policy="negative_outside_topology",
+    )
+    assert posterior[2, 0] > 0.5
+    assert posterior[2, 1] > 0.5
+    assert posterior[0, 0] == 1.0 and posterior[1, 1] == 1.0
+    assert stats["query_independent_mask_hierarchy"] is True
+    assert stats["capability_track"] == "query_free_source_sam_exact_mpr_object_topology"
+
+
+def test_physical_track_forest_prevents_same_view_chain_percolation() -> None:
+    tracks = compile_view_exclusive_physical_tracks(
+        torch.tensor([0, 1, 0]), torch.tensor([1, 2, 2]),
+        torch.tensor([0.9, 0.8, 0.7]),
+        # Nodes 0 and 2 conflict because they are alternative proposals in view 0.
+        torch.tensor([0, 1, 0]),
+    )
+    assert tracks[0] == tracks[1]
+    assert tracks[2] == -1
+
+
+def test_identity_selects_one_cross_view_physical_track() -> None:
+    scores = torch.tensor([[1.0], [0.1], [0.2], [0.1], [0.1]])
+    rows = torch.tensor([0, 1, 0, 1, 2, 4, 2, 4])
+    props = torch.tensor([0, 0, 1, 1, 2, 2, 3, 3])
+    posterior, stats = identity_seeded_object_topology_posterior(
+        scores, rows, props, torch.ones(8),
+        torch.tensor([0, 1, 0, 1]), torch.full((4,), -1),
+        proposal_track_indices=torch.tensor([0, 0, 1, 1]),
+        unknown_policy="negative_outside_topology",
+    )
+    assert posterior[1, 0] > 0.5
+    assert posterior[4, 0] == 0
+    assert stats["selected_physical_track_per_query"] == [0]

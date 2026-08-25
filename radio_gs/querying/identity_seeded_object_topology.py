@@ -21,6 +21,71 @@ from typing import Literal, Sequence
 import torch
 
 
+def compile_view_exclusive_physical_tracks(
+    edge_left: torch.Tensor,
+    edge_right: torch.Tensor,
+    edge_probability: torch.Tensor,
+    proposal_view_indices: torch.Tensor,
+    *,
+    minimum_probability: float = 0.5,
+    minimum_views: int = 2,
+) -> torch.Tensor:
+    """Compile a maximum-confidence forest with at most one node per view.
+
+    Plain connected components percolate through scale-conflicting SAM nodes.
+    A physical object cannot own two different proposal nodes in one registered
+    view, so an edge is accepted only when its two components have disjoint
+    view sets.  Sorting by calibrated same-object probability makes this a
+    deterministic, view-partition-constrained maximum spanning forest.
+    """
+    if (
+        edge_left.ndim != 1 or edge_right.shape != edge_left.shape
+        or edge_probability.shape != edge_left.shape
+        or proposal_view_indices.ndim != 1
+    ):
+        raise ValueError("physical-track edge/view domains differ")
+    if not 0.0 <= float(minimum_probability) <= 1.0 or int(minimum_views) < 2:
+        raise ValueError("physical-track probability/view contract differs")
+    count = int(proposal_view_indices.numel())
+    if edge_left.numel() and (
+        int(torch.minimum(edge_left, edge_right).min()) < 0
+        or int(torch.maximum(edge_left, edge_right).max()) >= count
+    ):
+        raise ValueError("physical-track edge index exceeds proposal domain")
+    parent = list(range(count))
+    component_views = [{int(proposal_view_indices[index])} for index in range(count)]
+
+    def find(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    order = torch.argsort(edge_probability.float(), descending=True, stable=True)
+    for edge in order.tolist():
+        if float(edge_probability[edge]) < float(minimum_probability):
+            break
+        left = find(int(edge_left[edge])); right = find(int(edge_right[edge]))
+        if left == right or component_views[left] & component_views[right]:
+            continue
+        if len(component_views[left]) < len(component_views[right]):
+            left, right = right, left
+        parent[right] = left
+        component_views[left].update(component_views[right])
+    components: dict[int, list[int]] = {}
+    for proposal in range(count):
+        components.setdefault(find(proposal), []).append(proposal)
+    tracks = torch.full((count,), -1, dtype=torch.long)
+    accepted = [
+        rows for rows in components.values()
+        if len({int(proposal_view_indices[row]) for row in rows}) >= int(minimum_views)
+    ]
+    accepted.sort(key=lambda rows: (min(rows), tuple(rows)))
+    for track, rows in enumerate(accepted):
+        tracks[torch.tensor(rows, dtype=torch.long)] = track
+    return tracks
+
+
 def _scatter_amax(
     values: torch.Tensor,
     indices: torch.Tensor,
@@ -40,6 +105,7 @@ def identity_seeded_object_topology_posterior(
     proposal_view_indices: torch.Tensor,
     proposal_query_indices: torch.Tensor,
     *,
+    proposal_track_indices: torch.Tensor | None = None,
     proposal_scores: torch.Tensor | None = None,
     seed_support_ratio: float = 0.80,
     identity_core_ratio: float = 0.80,
@@ -89,6 +155,8 @@ def identity_seeded_object_topology_posterior(
         raise ValueError("proposal view/query indices must have matching shapes")
     if proposal_scores is not None and proposal_scores.shape != proposal_view_indices.shape:
         raise ValueError("proposal scores must align with proposal rows")
+    if proposal_track_indices is not None and proposal_track_indices.shape != proposal_view_indices.shape:
+        raise ValueError("proposal tracks must align with proposal rows")
     if not 0.0 < float(seed_support_ratio) <= 1.0:
         raise ValueError("seed_support_ratio must be in (0,1]")
     if not 0.0 < float(identity_core_ratio) <= 1.0:
@@ -112,7 +180,7 @@ def identity_seeded_object_topology_posterior(
     stats: dict[str, object] = {
         "enabled": False,
         "mode": "identity_seeded_multiview_object_topology_v1",
-        "capability_track": "query_conditioned_source_sam_diagnostic_not_p0",
+        "capability_track": "resolved_after_proposal_query_contract_validation",
         "identity_authority": "immutable_per_query_text_argmax_and_high_response_core",
         "extent_authority": "query_matched_source_sam_exact_mpr_membership",
         "query_independent_mask_hierarchy": False,
@@ -144,6 +212,17 @@ def identity_seeded_object_topology_posterior(
     membership = weights.to(device=device, dtype=torch.float32)
     views = proposal_view_indices.to(device=device, dtype=torch.long)
     prop_queries = proposal_query_indices.to(device=device, dtype=torch.long)
+    prop_tracks = (
+        proposal_track_indices.to(device=device, dtype=torch.long)
+        if proposal_track_indices is not None else None
+    )
+    query_independent_hierarchy = bool((prop_queries < 0).all())
+    stats["query_independent_mask_hierarchy"] = query_independent_hierarchy
+    stats["capability_track"] = (
+        "query_free_source_sam_exact_mpr_object_topology"
+        if query_independent_hierarchy
+        else "query_conditioned_source_sam_diagnostic_not_p0"
+    )
     prop_quality = (
         proposal_scores.to(device=device, dtype=torch.float32).clamp(0.0, 1.0)
         if proposal_scores is not None
@@ -177,6 +256,7 @@ def identity_seeded_object_topology_posterior(
     selected_by_query: list[torch.Tensor | None] = []
     selected_view_counts: list[int] = []
     exact_seed_view_counts: list[int] = []
+    selected_track_indices: list[int] = []
 
     # Stage 1: immutable identity seed selects a single hierarchy node in each
     # source view.  Weighted peak support, not proposal-wide mean relevance, is
@@ -196,13 +276,31 @@ def identity_seeded_object_topology_posterior(
             exact_seed.index_add_(0, props[exact_pairs], membership[exact_pairs])
 
         candidates = torch.nonzero(
-            (prop_queries == query_index) & (support_sum > 0),
+            ((prop_queries == query_index) | (prop_queries < 0)) & (support_sum > 0),
             as_tuple=False,
         ).flatten()
+        selected_track = -1
+        if prop_tracks is not None and candidates.numel():
+            candidates = candidates[prop_tracks[candidates] >= 0]
+            if candidates.numel():
+                exact = exact_seed[candidates] > 0
+                anchor_candidates = candidates[exact] if bool(exact.any()) else candidates
+                anchor_quality = (
+                    proposal_tail[anchor_candidates].clamp_min(0)
+                    * support_fraction[anchor_candidates].clamp_min(float(min_weight_sum)).sqrt()
+                )
+                if bool(exact.any()):
+                    anchor_quality = anchor_quality * exact_seed[anchor_candidates].clamp_min(
+                        float(min_weight_sum)
+                    )
+                anchor = anchor_candidates[torch.argmax(anchor_quality)]
+                selected_track = int(prop_tracks[anchor])
+                candidates = candidates[prop_tracks[candidates] == selected_track]
         if candidates.numel() == 0:
             selected_by_query.append(None)
             selected_view_counts.append(0)
             exact_seed_view_counts.append(0)
+            selected_track_indices.append(-1)
             continue
         chosen: list[torch.Tensor] = []
         exact_views = 0
@@ -229,6 +327,7 @@ def identity_seeded_object_topology_posterior(
         selected_by_query.append(selected)
         selected_view_counts.append(0 if selected is None else int(selected.numel()))
         exact_seed_view_counts.append(int(exact_views))
+        selected_track_indices.append(selected_track)
 
     # Stage 2: source views are conditionally independent observations of mask
     # membership.  Noisy-or preserves a confident single visible surface while
@@ -328,6 +427,7 @@ def identity_seeded_object_topology_posterior(
             "selected_proposals_per_query": selected_proposal_counts,
             "selected_views_per_query": selected_view_counts,
             "exact_seed_views_per_query": exact_seed_view_counts,
+            "selected_physical_track_per_query": selected_track_indices,
             "mean_extent_rows_per_accepted_query": (
                 float((topology > 0).sum().item()) / changed_queries
                 if changed_queries

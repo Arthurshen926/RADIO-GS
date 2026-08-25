@@ -132,3 +132,47 @@ identity peaks but is not a full-object membership teacher. It is rejected as
 an extent posterior and is not expanded to the other three benchmark scenes.
 Any robust multiview statistic must first pass source-only full-track
 membership; target results cannot select mean/max/quantile aggregation.
+
+## Text authority and physical-track closure
+
+The remaining P1/P2 alternatives were tested without changing the frozen
+field or benchmark threshold.
+
+- A row-wise top-2 robust view aggregate reduced the Figurines direct-language
+  sentinel from `0.02427` to `0.01588` mIoU. Mean-view dilution is therefore
+  not the primary failure.
+- Four raw/rank/distance/reliability canonical calibrators failed the
+  three-scene source Brier gate. Class-balanced proper scoring did not rescue
+  them: a single monotone map cannot turn generic text relevance into physical
+  instance membership when the source language authority itself is wrong.
+- Pinned Florence-2 captions were generated from three legal source crops for
+  every available physical track. Under the frozen official SigLIP2
+  cross-view, crop-caption and sibling-discrimination audit, only `3/19`
+  tracks passed all three conditions. The captions are retained as an audited
+  negative result, not training authority.
+
+The query-free SAM hierarchy was then compiled into a maximum-confidence
+physical-track forest with a strict invariant: a component may contain at
+most one proposal from each registered view. This eliminates the ordinary
+connected-component failure, where one transitive component absorbed
+`245/277` proposals. Choosing exactly one physical track from identity before
+extent raised the direct-language Figurines LERF2D result from `0.02427` to
+`0.21713`, with LocAcc unchanged at `0.91071`. This is strong causal evidence
+for identity/range factorization. Query-free per-view proposals without the
+physical-track constraint remained flat at `0.02422`.
+
+The paired LERF3D gate rejects promotion. Direct-language plus hard tracks
+obtained only `0.2688` mIoU and D512 identity plus hard tracks obtained
+`0.2542`, versus the matched primitive development baseline `0.57207`.
+Moreover, the earlier source-gated soft physical association remains the
+strongest single-scene 2D candidate (`0.42657`) but also regresses LERF3D to
+`0.51544`. Hard tracks improve range coherence but do not yet provide pure
+Gaussian membership. No full4 expansion is authorized.
+
+The surviving high-value problem is now narrower: learn or construct a
+signed, visibility-aware Gaussian membership for each physical track, with
+explicit different-instance veto and unknown outside observed support. More
+text calibration, robust averaging or graph closure is not justified by the
+current evidence. ScanNet and NVOS remain frozen at
+`0.36401/0.36189/0.46716` and `0.92555`; this LERF mechanism study does not
+change their retained rows.

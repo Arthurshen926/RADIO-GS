@@ -30,6 +30,29 @@ def _sample_rows(pool: torch.Tensor, cap: int, generator: torch.Generator) -> to
     return pool[torch.randperm(pool.numel(), generator=generator)[:cap]]
 
 
+def _class_balanced_loss(
+    prediction: torch.Tensor, target: torch.Tensor, *, logits: bool,
+) -> torch.Tensor:
+    """Proper binary loss under the calibrator's explicit equal-class prior.
+
+    Episode construction caps positives and negatives independently, so their
+    sampled ratio is not a population prior.  Averaging the two conditional
+    risks estimates an equal-prior likelihood ratio and keeps zero logit as the
+    fixed membership decision boundary.
+    """
+    positive = target >= 0.5
+    negative = ~positive
+    if not bool(positive.any()) or not bool(negative.any()):
+        raise ValueError("balanced canonical identity loss requires both classes")
+    if logits:
+        positive_loss = F.binary_cross_entropy_with_logits(prediction[positive], target[positive])
+        negative_loss = F.binary_cross_entropy_with_logits(prediction[negative], target[negative])
+    else:
+        positive_loss = F.mse_loss(prediction[positive], target[positive])
+        negative_loss = F.mse_loss(prediction[negative], target[negative])
+    return 0.5 * (positive_loss + negative_loss)
+
+
 def _extract_scene(spec: dict[str, Any], args: argparse.Namespace, generator: torch.Generator) -> dict[str, Any]:
     data = _load_scene(
         spec["seed_model"], spec["seed_model_sha256"], spec["episodes"],
@@ -87,6 +110,7 @@ def _metrics(
     model: CanonicalIdentityEvidenceCalibrator,
     scenes: list[dict[str, Any]], split: str, device: torch.device,
     baseline_center: float, baseline_scale: float,
+    *, use_distance: bool = True, use_reliability: bool = True,
 ) -> dict[str, Any]:
     scene_result: dict[str, Any] = {}
     with torch.inference_mode():
@@ -95,9 +119,12 @@ def _metrics(
             for episode in scene["episodes"][split]:
                 known = episode["known"].to(device)
                 target = episode["target"].to(device)[known]
+                distance = episode["distance"].to(device)
+                reliability = episode["reliability"].to(device)
                 logits = model(
-                    episode["raw"].to(device), episode["distance"].to(device),
-                    episode["reliability"].to(device),
+                    episode["raw"].to(device),
+                    distance if use_distance else torch.zeros_like(distance),
+                    reliability if use_reliability else torch.zeros_like(reliability),
                 )[known]
                 candidate = torch.sigmoid(logits)
                 baseline = torch.sigmoid((episode["raw"].to(device)[known] - baseline_center) / baseline_scale)
@@ -106,8 +133,8 @@ def _metrics(
                     truth = target >= 0.5
                     return float((prediction & truth).sum() / (prediction | truth).sum().clamp_min(1))
                 candidate_iou.append(iou(candidate)); baseline_iou.append(iou(baseline))
-                candidate_brier.append(float(F.mse_loss(candidate, target)))
-                baseline_brier.append(float(F.mse_loss(baseline, target)))
+                candidate_brier.append(float(_class_balanced_loss(candidate, target, logits=False)))
+                baseline_brier.append(float(_class_balanced_loss(baseline, target, logits=False)))
             if not candidate_iou:
                 raise ValueError(f"{scene['scene']} {split} calibrator episodes are empty")
             scene_result[scene["scene"]] = {
@@ -124,13 +151,19 @@ def _metrics(
 
 
 def _fit_baseline(scenes: list[dict[str, Any]]) -> tuple[float, float]:
-    raw = torch.cat([episode["raw"][episode["known"]] for scene in scenes for episode in scene["episodes"]["dev"]])
-    target = torch.cat([episode["target"][episode["known"]] for scene in scenes for episode in scene["episodes"]["dev"]])
+    episodes = [episode for scene in scenes for episode in scene["episodes"]["dev"]]
+    raw = torch.cat([episode["raw"][episode["known"]] for episode in episodes])
     centers = torch.quantile(raw, torch.linspace(0.1, 0.9, 17))
     best: tuple[float, float, float] | None = None
     for center in centers.tolist():
         for scale in (0.01, 0.02, 0.05, 0.1, 0.2):
-            brier = float(F.mse_loss(torch.sigmoid((raw - center) / scale), target))
+            episode_brier = []
+            for episode in episodes:
+                known = episode["known"]
+                target = episode["target"][known]
+                probability = torch.sigmoid((episode["raw"][known] - center) / scale)
+                episode_brier.append(float(_class_balanced_loss(probability, target, logits=False)))
+            brier = sum(episode_brier) / len(episode_brier)
             key = (brier, center, scale)
             if best is None or key < best:
                 best = key
@@ -182,19 +215,25 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         episode = buckets[scene_index][(step // len(buckets)) % len(buckets[scene_index])]
         known = episode["known"].to(device)
         target = episode["target"].to(device)[known]
+        distance = episode["distance"].to(device)
+        reliability = episode["reliability"].to(device)
         logits = model(
-            episode["raw"].to(device), episode["distance"].to(device),
-            episode["reliability"].to(device),
+            episode["raw"].to(device),
+            distance if args.use_distance else torch.zeros_like(distance),
+            reliability if args.use_reliability else torch.zeros_like(reliability),
         )[known]
-        bce = F.binary_cross_entropy_with_logits(logits, target)
-        brier = F.mse_loss(torch.sigmoid(logits), target)
+        bce = _class_balanced_loss(logits, target, logits=True)
+        brier = _class_balanced_loss(torch.sigmoid(logits), target, logits=False)
         positive, negative = logits[target >= 0.5], logits[target < 0.5]
         ranking = F.softplus(negative.max() - positive.max() + args.ranking_margin)
         loss = bce + args.brier_weight * brier + args.ranking_weight * ranking
         optimizer.zero_grad(set_to_none=True); loss.backward(); optimizer.step()
         if (step + 1) % args.log_interval == 0:
             model.eval()
-            dev_metrics = _metrics(model, scenes, "dev", device, baseline_center, baseline_scale)
+            dev_metrics = _metrics(
+                model, scenes, "dev", device, baseline_center, baseline_scale,
+                use_distance=args.use_distance, use_reliability=args.use_reliability,
+            )
             minimum_iou = min(value["delta_iou"] for value in dev_metrics.values())
             maximum_brier = max(value["delta_brier"] for value in dev_metrics.values())
             macro_iou_dev = sum(value["delta_iou"] for value in dev_metrics.values()) / len(dev_metrics)
@@ -220,7 +259,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     model.load_state_dict(best_state)
     model.eval()
     dev = best_dev
-    audit = _metrics(model, scenes, "audit", device, baseline_center, baseline_scale)
+    audit = _metrics(
+        model, scenes, "audit", device, baseline_center, baseline_scale,
+        use_distance=args.use_distance, use_reliability=args.use_reliability,
+    )
     all_noninferior = all(value["delta_iou"] >= 0 and value["delta_brier"] <= 0 for value in audit.values())
     macro_iou = sum(value["delta_iou"] for value in audit.values()) / len(audit)
     macro_brier = sum(value["delta_brier"] for value in audit.values()) / len(audit)
@@ -236,6 +278,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "track_complete": True, "unknown_excluded_from_loss": True,
             "source_only": True, "benchmark_vocabulary_opened": False,
             "benchmark_images_opened": False, "benchmark_masks_opened": False,
+            "use_distance": args.use_distance,
+            "use_reliability": args.use_reliability,
+            "identity_prior": "equal_class_prior",
+            "proper_score": "class_balanced_brier",
             "scene_records": [{"scene": scene["scene"], "anchor_cache": scene["anchor_cache"]} for scene in scenes],
         },
     })
@@ -268,6 +314,8 @@ def main() -> None:
     parser.add_argument("--positive-cap", type=int, default=1024)
     parser.add_argument("--negative-cap", type=int, default=2048)
     parser.add_argument("--random-rows", type=int, default=4096)
+    parser.add_argument("--use-distance", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--use-reliability", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--evaluation-membership-threshold", type=float, default=0.5)
     parser.add_argument("--minimum-macro-iou-gain", type=float, default=0.01)
     parser.add_argument("--log-interval", type=int, default=100)

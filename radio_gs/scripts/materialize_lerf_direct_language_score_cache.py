@@ -59,6 +59,19 @@ def _load_score_fallback(path: str, digest: str, label: str) -> tuple[Mapping[st
     return payload, {"path": str(source), "sha256": observed}
 
 
+def update_rowwise_topk(
+    current: torch.Tensor, value: torch.Tensor, observed: torch.Tensor,
+) -> None:
+    """Update per-row, per-query top-k view responses in place."""
+    if current.ndim != 3 or value.shape != current.shape[:2] or observed.shape != current.shape[:1]:
+        raise ValueError("robust direct-language top-k domain differs")
+    rows = torch.where(observed)[0]
+    if not rows.numel():
+        return
+    candidates = torch.cat((current[rows], value[rows, :, None]), dim=2)
+    current[rows] = candidates.topk(current.shape[2], dim=2).values
+
+
 def materialize(args: argparse.Namespace) -> dict[str, object]:
     fallback_positive, fallback_positive_record = _load_score_fallback(
         args.fallback_positive_cache, args.expected_fallback_positive_cache_sha256,
@@ -106,6 +119,8 @@ def materialize(args: argparse.Namespace) -> dict[str, object]:
     frame_indices = list(map(int, manifest["frame_indices"]))
     if height <= 0 or width <= 0 or len(assignments) != len(frame_indices):
         raise ValueError("LERF exact marginal view domain differs")
+    if args.view_robust_topk < 0 or args.view_robust_topk > len(frame_indices):
+        raise ValueError("view-robust top-k must lie in the registered source-view domain")
 
     positive, positive_queries, positive_record = _load_text_bank(
         args.positive_text_cache, args.expected_positive_text_cache_sha256,
@@ -136,6 +151,16 @@ def materialize(args: argparse.Namespace) -> dict[str, object]:
     registered_count = torch.zeros(xyz.shape[0], dtype=torch.float32)
     sum_staging = torch.empty_like(registered_sum)
     count_staging = torch.empty_like(registered_count)
+    robust_topk = None
+    view_sum = None
+    view_count = None
+    if args.view_robust_topk > 0:
+        robust_topk = torch.full(
+            (xyz.shape[0], channels, args.view_robust_topk), -torch.inf,
+            dtype=torch.float32,
+        )
+        view_sum = torch.zeros_like(registered_sum)
+        view_count = torch.zeros_like(registered_count)
     feature_dir = Path(args.feature_dir).expanduser().resolve(strict=True)
     feature_manifest_record = file_record(feature_dir / "frame_manifest.json")
     device = torch.device(args.device)
@@ -150,17 +175,31 @@ def materialize(args: argparse.Namespace) -> dict[str, object]:
             tokens = raw.permute(1, 2, 0).reshape(1, height * width, 1280)
             descriptor = F.normalize(head(tokens).squeeze(0).float(), dim=-1, eps=1e-8)
             score = (descriptor @ text.T).T.reshape(channels, height, width)
+            target_sum = registered_sum if robust_topk is None else view_sum
+            target_count = registered_count if robust_topk is None else view_count
+            if robust_topk is not None:
+                view_sum.zero_(); view_count.zero_()
             accumulate_contribution_mean_channel_chunked(
                 score, assignment["gaussian_ids"], assignment["pixel_ids"],
-                assignment["marginal_weights"], registered_sum, registered_count,
+                assignment["marginal_weights"], target_sum, target_count,
                 channel_chunk_size=channels, cpu_sum_staging=sum_staging,
                 cpu_count_staging=count_staging,
             )
+            if robust_topk is not None:
+                registered_sum.add_(view_sum)
+                registered_count.add_(view_count)
+                view_value, view_observed = finalize_registered_mean_chunked(
+                    view_sum, view_count, row_chunk_size=args.row_chunk_size,
+                )
+                update_rowwise_topk(robust_topk, view_value.float(), view_observed)
             del raw, tokens, descriptor, score
     direct, observed = finalize_registered_mean_chunked(
         registered_sum, registered_count, row_chunk_size=args.row_chunk_size,
     )
     direct = direct.float()
+    if robust_topk is not None:
+        finite = torch.isfinite(robust_topk)
+        direct = robust_topk.masked_fill(~finite, 0).sum(2) / finite.sum(2).clamp_min(1)
     positive_count = positive.shape[0]
     positive_score = positive_fallback_scores[:, args.fallback_scale_index].clone()
     negative_score = negative_fallback_scores[:, args.fallback_scale_index].clone()
@@ -190,6 +229,10 @@ def materialize(args: argparse.Namespace) -> dict[str, object]:
             "query_independent": False,
             "evaluation_diagnostic_only": True,
             "postprocessing": "none",
+            "view_aggregation": (
+                f"per_query_top_{args.view_robust_topk}_view_mean"
+                if args.view_robust_topk > 0 else "all_view_exact_marginal_mean"
+            ),
             "benchmark_images_opened": False,
             "benchmark_masks_opened": False,
             "evaluation_rgb_opened": False,
@@ -245,6 +288,7 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--row-chunk-size", type=int, default=8192)
+    parser.add_argument("--view-robust-topk", type=int, default=0)
     print(json.dumps(materialize(parser.parse_args()), indent=2, sort_keys=True))
 
 
