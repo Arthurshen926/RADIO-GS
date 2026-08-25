@@ -201,3 +201,21 @@ mIoU `0.58403`, Acc@0.25/0.50 `0.85714/0.66071`. Therefore neither the frozen
 field nor current evaluators lost their normal accuracy. Anchor-conditioned
 Query-Native remains an experimental branch until it independently passes
 the corrected source contract; it cannot replace the formal LERF posterior.
+
+## Normal-baseline boundary improvement
+
+Starting from the restored `identity_extent_posterior_v3`, one fixed
+query-transient RGB GrabCut boundary pass improves all four LERF2D scenes:
+`+0.02806/+0.01374/+0.01491/+0.01832`. Full4 sample-micro mIoU rises from
+`0.39584` to `0.41425`, scene-macro from `0.39756` to `0.41632`, while LocAcc
+remains exactly `0.87981`. No persistent scene state, identity score, extent
+posterior, threshold or query order changes. This row is promoted as the
+protocol-legal target-RGB boundary configuration; the strict RGB-free row is
+retained separately.
+
+Applying the same unguarded boundary to the retained LERF3D posterior gives a
+small full4 mIoU gain (`0.43730` to `0.44086`) but regresses Ramen and Waldo
+and reduces Acc@0.50 to `0.45673`. It is rejected for LERF3D. Official SAM3
+remains the higher-value boundary follow-up, but the pinned model requires its
+contractual `1008` resolution and about 9 GiB peak memory; an attempted unsafe
+low-resolution shortcut was correctly blocked.

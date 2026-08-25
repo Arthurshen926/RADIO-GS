@@ -1,0 +1,47 @@
+{
+  "schema": "radio_gs.lerf_formal_rgb_grabcut_full4_promotion.v1",
+  "schema_version": 1,
+  "date": "2026-08-25",
+  "status": "lerf2d_full4_promoted_lerf3d_rejected",
+  "method": {
+    "identity_and_extent": "retained_identity_extent_posterior_v3",
+    "boundary": "query_transient_target_rgb_grabcut",
+    "persistent_scene_state_changed": false,
+    "target_rgb_visible_to_boundary": true,
+    "target_masks_visible_to_prediction": false,
+    "global_policy": {"iterations": 1, "dilate_pixels": 5, "erode_pixels": 2, "posterior_threshold": 0.6}
+  },
+  "lerf2d": {
+    "retained_full4_sample_micro_miou": 0.3958417415,
+    "candidate_full4_sample_micro_miou": 0.41425316336124934,
+    "delta_sample_micro_miou": 0.018411421861249333,
+    "retained_scene_macro_miou": 0.3975628044,
+    "candidate_scene_macro_miou": 0.4163204172582308,
+    "localization_accuracy": 0.8798076923076923,
+    "all_scenes_positive": true,
+    "scenes": {
+      "figurines": {"miou": 0.4543040109232255, "delta": 0.02805984272322548, "sha256": "2c826d67d595ea51d0605d39873f853061883e8ed37a9d94f45dd677c393e12f"},
+      "ramen": {"miou": 0.38592372271016184, "delta": 0.013741551010161834, "sha256": "989d8871d3bfdaebba086a2abc46092b01dfc92aa93011ef49d3a7ba25c7d51f"},
+      "teatime": {"miou": 0.41005033719534983, "delta": 0.014906355595349807, "sha256": "5c1101ff3137e6c07b52e3abcc423043b2c8203f5650702ea0bb6475423d4db1"},
+      "waldo_kitchen": {"miou": 0.41500359820418614, "delta": 0.01832270200418612, "sha256": "2c54cf431cdcf75ac5c98358d782d9d29882368364f95ce392b6c4aeef4e1bf5"}
+    },
+    "decision": "promote_as_protocol_legal_target_rgb_boundary_row"
+  },
+  "lerf3d_control": {
+    "retained_full4_miou": 0.437303824780079,
+    "candidate_full4_miou": 0.4408577118928616,
+    "candidate_acc025": 0.6826923076923077,
+    "candidate_acc050": 0.4567307692307692,
+    "all_scenes_noninferior": false,
+    "acc050_delta": -0.024038461538461564,
+    "decision": "reject_keep_retained_latent_proposal_null_readout"
+  },
+  "official_sam3_followup": {
+    "status": "blocked_by_current_free_vram_not_method_failure",
+    "required_resolution": 1008,
+    "unsafe_low_resolution_rejected_by_code": true,
+    "available_free_vram_gib": "approximately_6_to_7",
+    "historical_official_sam3_peak_memory_mib": 8978
+  },
+  "conclusion": "A fixed query-transient RGB boundary improves every LERF2D scene without moving localization or changing persistent state. The same unguarded boundary is not jointly safe for LERF3D, so only the LERF2D row is promoted."
+}
