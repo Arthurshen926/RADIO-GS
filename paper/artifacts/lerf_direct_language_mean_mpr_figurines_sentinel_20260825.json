@@ -1,0 +1,47 @@
+{
+  "schema": "radio_gs.lerf_direct_language_mean_mpr_sentinel.v1",
+  "schema_version": 1,
+  "status": "complete_source_order_positive_metric_rejected",
+  "scene": "figurines",
+  "method": "per-source-view official SigLIP2 summary head and text margin, exact front-to-back marginal weighted mean, frozen O0 totality fallback, fixed sigmoid-10 relevancy and threshold 0.5",
+  "construction": {
+    "views": 120,
+    "rows": 168791,
+    "direct_observed_rows": 96879,
+    "valid_rows": 97082,
+    "target_rgb_opened": false,
+    "target_masks_opened_before_evaluation": false,
+    "target_metrics_opened_before_cache_freeze": false
+  },
+  "lerf2d": {
+    "sample_micro_miou": 0.02427365664399821,
+    "category_macro_miou": 0.025392147848078184,
+    "localization_accuracy": 0.9107142857142857,
+    "samples": 56
+  },
+  "comparison": {
+    "d512_figurines_sample_micro_miou": 0.37021,
+    "delta_miou": -0.3459363433560018,
+    "interpretation": "direct language response preserves the identity peak but the exact-MPR weighted mean is not a calibrated full-object posterior"
+  },
+  "artifacts": {
+    "direct_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_direct_language_teacher_v1/figurines_valid_v2.pt",
+      "sha256": "3920eff80b4cd8a38e7c8091c8f89c8d44be1307cdd3cbc35965664210386d09"
+    },
+    "typed_posterior": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_direct_language_teacher_v1/figurines_posterior_valid_v2.pt",
+      "sha256": "fe539da905bf43eb408775d842252c1ebb4740e949baea25f5075daf344de733"
+    },
+    "metric": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_direct_language_teacher_v1/lerf2d/figurines_eval_valid_v2/lerf_ovs_results.json",
+      "sha256": "f05046cfe1c6d2eeadbb262dbaf5c239dc4a0a64e354bf5c029ca1fb72327c3c"
+    }
+  },
+  "decision": {
+    "expand_mean_mpr_to_full4": false,
+    "promote_as_extent_posterior": false,
+    "retain_as_identity_teacher": true,
+    "next_gate": "source-only robust multiview aggregation and canonical identity calibration must improve full-track membership before another benchmark scene is opened"
+  }
+}

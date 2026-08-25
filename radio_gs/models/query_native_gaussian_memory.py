@@ -80,6 +80,30 @@ def compile_peak_local_anchor_packet(
     return AnchorPacket(rows=rows, scores=identity[rows], peak_row=peak, local_radius=radius)
 
 
+def compile_bounded_spatial_authority(
+    xyz: torch.Tensor, peak_row: int, local_radius: float,
+    radius_multiplier: float, maximum_fraction: float = 0.2,
+) -> torch.Tensor:
+    """Compile a peak-local authority that cannot silently become scene-global."""
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or xyz.shape[0] == 0:
+        raise ValueError("bounded authority xyz differs")
+    peak = int(peak_row)
+    if peak < 0 or peak >= xyz.shape[0]:
+        raise IndexError("bounded authority peak is out of range")
+    if local_radius <= 0 or radius_multiplier <= 0 or not 0 < maximum_fraction <= 1:
+        raise ValueError("bounded authority parameters differ")
+    distance = torch.linalg.vector_norm(xyz.float() - xyz[peak].float(), dim=1)
+    radial = distance <= float(local_radius) * float(radius_multiplier)
+    maximum_rows = max(1, int(math.ceil(float(maximum_fraction) * xyz.shape[0])))
+    if int(radial.sum()) > maximum_rows:
+        nearest = distance.topk(maximum_rows, largest=False).indices
+        bounded = torch.zeros_like(radial)
+        bounded[nearest] = True
+        radial &= bounded
+    radial[peak] = True
+    return radial.float()
+
+
 class ModalityQueryAdapter(nn.Module):
     """Small adapter from one frozen encoder space into shared query tokens."""
 
@@ -135,6 +159,85 @@ class TextAnchorIdentityAdapter(nn.Module):
         if value.ndim!=2 or value.shape[1]!=self.embedding_dim: raise ValueError("text anchor adapter input differs")
         normalized=F.normalize(value.float(),dim=-1)
         return F.normalize(normalized+self.up(F.gelu(self.down(normalized))),dim=-1)
+
+
+class CanonicalIdentityEvidenceCalibrator(nn.Module):
+    """Map a modality-specific score gauge to canonical membership log-odds.
+
+    The raw score and empirical-rank terms are constrained to be monotone.
+    Both are normalized inside each query, making the output invariant to a
+    positive affine change of cosine/logit gauge.  Spatial distance can only
+    reduce evidence, while query-independent reliability supplies a bounded
+    correction.  Separate instances are fitted for text, image and prompt
+    modalities; the emitted scalar has one shared log-odds meaning.
+    """
+
+    def __init__(self, reliability_dim: int = 5) -> None:
+        super().__init__()
+        self.reliability_dim = int(reliability_dim)
+        if self.reliability_dim <= 0:
+            raise ValueError("identity calibrator reliability dimension must be positive")
+        self.raw_slope_unconstrained = nn.Parameter(torch.zeros(()))
+        self.rank_slope_unconstrained = nn.Parameter(torch.zeros(()))
+        self.distance_slope_unconstrained = nn.Parameter(torch.zeros(()))
+        self.margin_shift = nn.Parameter(torch.zeros(()))
+        self.bias = nn.Parameter(torch.zeros(()))
+        self.reliability_norm = nn.LayerNorm(self.reliability_dim)
+        self.reliability_correction = nn.Linear(self.reliability_dim, 1, bias=False)
+        nn.init.zeros_(self.reliability_correction.weight)
+
+    @staticmethod
+    def canonical_features(raw_score: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if raw_score.ndim != 1 or raw_score.numel() < 2:
+            raise ValueError("identity calibrator requires at least two score rows")
+        value = raw_score.float()
+        if not bool(torch.isfinite(value).all()):
+            raise ValueError("identity calibrator scores must be finite")
+        center = value.median()
+        absolute = (value - center).abs()
+        scale = absolute.median().mul(1.4826).clamp_min(1e-6)
+        standardized = (value - center) / scale
+        order = torch.argsort(value, stable=True)
+        sorted_value = value[order]
+        _unique, counts = torch.unique_consecutive(sorted_value, return_counts=True)
+        stops = counts.cumsum(0)
+        starts = stops - counts
+        average = (starts.to(value.dtype) + stops.to(value.dtype) - 1.0) * 0.5
+        sorted_rank = torch.repeat_interleave(average, counts)
+        rank = torch.empty_like(value)
+        rank[order] = sorted_rank
+        probability = (rank + 0.5) / float(value.numel())
+        rank_logit = torch.logit(probability.clamp(1e-5, 1.0 - 1e-5))
+        top = value.topk(2).values
+        normalized_margin = (top[0] - top[1]) / scale
+        return standardized, rank_logit, normalized_margin
+
+    def forward(
+        self, raw_score: torch.Tensor, normalized_anchor_distance: torch.Tensor,
+        reliability: torch.Tensor,
+    ) -> torch.Tensor:
+        if normalized_anchor_distance.shape != raw_score.shape:
+            raise ValueError("identity calibrator anchor distance domain differs")
+        if reliability.shape != (raw_score.numel(), self.reliability_dim):
+            raise ValueError("identity calibrator reliability row domain differs")
+        distance = normalized_anchor_distance.float()
+        if not bool(torch.isfinite(distance).all()) or bool((distance < 0).any()):
+            raise ValueError("identity calibrator anchor distances must be finite and nonnegative")
+        standardized, rank_logit, normalized_margin = self.canonical_features(raw_score)
+        raw_slope = F.softplus(self.raw_slope_unconstrained)
+        rank_slope = F.softplus(self.rank_slope_unconstrained)
+        distance_slope = F.softplus(self.distance_slope_unconstrained)
+        reliability_delta = torch.tanh(
+            self.reliability_correction(self.reliability_norm(reliability.float())).squeeze(-1)
+        )
+        return (
+            self.bias
+            + raw_slope * standardized
+            + rank_slope * rank_logit
+            - distance_slope * torch.log1p(distance)
+            + self.margin_shift * normalized_margin
+            + reliability_delta
+        )
 
 
 class LowRankSceneCanonicalizer(nn.Module):
@@ -590,6 +693,7 @@ class AnchorConditionedExtentDecoder(nn.Module):
 __all__ = [
     "AnchorConditionedExtentDecoder",
     "AnchorPacket",
+    "CanonicalIdentityEvidenceCalibrator",
     "GaussianGeometry",
     "LowRankSceneCanonicalizer",
     "ModalityQueryAdapter",
@@ -598,4 +702,5 @@ __all__ = [
     "QuerySetCategoricalDecoder",
     "QuerySetEligibilityGate",
     "compile_peak_local_anchor_packet",
+    "compile_bounded_spatial_authority",
 ]

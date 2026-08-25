@@ -4,6 +4,7 @@ from radio_gs.interfaces.query_packet import QueryPacket
 from radio_gs.models.query_native_gaussian_memory import (
     AnchorConditionedExtentDecoder,
     AnchorPacket,
+    CanonicalIdentityEvidenceCalibrator,
     CounterfactualSelectiveRiskEstimator,
     FixedCosineQueryProjection,
     GaussianGeometry,
@@ -15,6 +16,7 @@ from radio_gs.models.query_native_gaussian_memory import (
     QuerySetEligibilityGate,
     TextAnchorIdentityAdapter,
     compile_peak_local_anchor_packet,
+    compile_bounded_spatial_authority,
 )
 from radio_gs.scripts.train_evaluate_query_native_membership_decoder import (
     _cross_view_episodes,
@@ -23,6 +25,7 @@ from radio_gs.scripts.train_evaluate_query_native_membership_decoder import (
 )
 from radio_gs.scripts.train_scannet_query_native_shared_decoder import _loss as _categorical_loss
 from radio_gs.scripts.evaluate_scannet_constrained_top2_source_gate import constrained_top2
+from radio_gs.scripts.audit_lerf_anchor_posterior_contract import audit_payload
 from radio_gs.scripts.train_lerf_query_native_joint_cross_scene_decoder import (
     _blend_score,
     _calibrate_selective_blend,
@@ -80,6 +83,33 @@ def test_anchor_conditioned_extent_has_exact_zero_authority_replay() -> None:
     assert torch.equal(logits, identity)
 
 
+def test_anchor_posterior_audit_detects_global_authority_and_gauge_mismatch() -> None:
+    payload = {
+        "scene": "figurines",
+        "query_scores": torch.tensor([[0.9], [0.8], [0.1]]),
+        "identity_query_scores": torch.tensor([[0.55], [0.54], [0.53]]),
+        "xyz": torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0]]),
+        "peak_rows": torch.tensor([0]),
+        "local_radii": torch.tensor([1.0]),
+        "metadata": {"score_threshold": 0.7, "scene_canonicalizer_index": -1},
+    }
+    audit = audit_payload(payload, authority_radius_multiplier=4.0, maximum_authority_fraction=0.8)
+    assert not audit["passed"]
+    assert "extent_authority_is_effectively_scene_global" in audit["warnings"]
+    assert "identity_never_crosses_posterior_decision_threshold" in audit["warnings"]
+    assert "posterior_threshold_exceeds_all_identity_scores" in audit["warnings"]
+    assert "scene_canonicalizer_is_skipped_for_unseen_scene" in audit["warnings"]
+
+
+def test_bounded_spatial_authority_caps_scene_fraction_and_keeps_peak() -> None:
+    xyz = torch.stack((torch.arange(20).float(), torch.zeros(20), torch.zeros(20)), dim=1)
+    authority = compile_bounded_spatial_authority(
+        xyz, peak_row=10, local_radius=100.0, radius_multiplier=4.0, maximum_fraction=0.2,
+    )
+    assert int(authority.sum()) == 4
+    assert authority[10] == 1
+
+
 def test_text_anchor_adapter_is_low_rank_normalized_and_identity_initialized() -> None:
     value=torch.randn(4,13)
     adapter=TextAnchorIdentityAdapter(embedding_dim=13,rank=3)
@@ -87,6 +117,25 @@ def test_text_anchor_adapter_is_low_rank_normalized_and_identity_initialized() -
     torch.testing.assert_close(output,torch.nn.functional.normalize(value.float(),dim=-1))
     torch.testing.assert_close(output.norm(dim=1),torch.ones(4))
     assert adapter.down.weight.numel()+adapter.up.weight.numel()==2*13*3
+
+
+def test_canonical_identity_evidence_is_positive_affine_gauge_invariant() -> None:
+    torch.manual_seed(31)
+    calibrator = CanonicalIdentityEvidenceCalibrator(reliability_dim=2)
+    raw = torch.tensor([-0.2, 0.1, 0.4, 0.8, 1.3])
+    distance = torch.linspace(0.0, 2.0, raw.numel())
+    reliability = torch.randn(raw.numel(), 2)
+    first = calibrator(raw, distance, reliability)
+    second = calibrator(4.2 * raw + 7.0, distance, reliability)
+    torch.testing.assert_close(first, second, atol=2e-5, rtol=2e-5)
+
+
+def test_canonical_identity_evidence_decreases_with_anchor_distance() -> None:
+    calibrator = CanonicalIdentityEvidenceCalibrator(reliability_dim=2)
+    raw = torch.tensor([0.0, 0.0, 0.0, 0.0])
+    reliability = torch.zeros(4, 2)
+    output = calibrator(raw, torch.tensor([0.0, 1.0, 2.0, 3.0]), reliability)
+    assert bool(torch.all(output[:-1] > output[1:]))
 
 
 def test_scannet_constrained_top2_changes_only_two_authorized_coordinates() -> None:

@@ -85,3 +85,50 @@ referring expressions plus multi-view object tracks with full-scene support),
 then rerun the same frozen interface. The current candidate must remain a
 mechanism ablation, not a paper result.
 
+## Post-rejection contract audit and next candidate
+
+The failed full4 posterior has now been audited before any further training.
+All four scenes fail the same two deployment contracts:
+
+- the `4x` peak-local radius covers between about `92%` and `99.9%` of scene
+  rows, so the nominal authority is effectively scene-global;
+- no raw text-identity probability crosses the inherited `0.644475` posterior
+  threshold. The selected support is therefore produced almost entirely by
+  the extent residual, not by calibrated identity evidence.
+
+Figurines additionally used `scene_canonicalizer_index=-1`, while the other
+three scenes used learned scene codes. This confirms an unseen-scene forward
+path mismatch rather than a valid scene-heldout canonicalizer experiment. The
+immutable diagnostic is
+`paper/artifacts/lerf_anchor_posterior_contract_audit_sampled_v2_20260825.json`.
+
+Three implementation guards now block recurrence:
+
+1. posterior construction restores the identity gauge, extent-conditioning
+   mode and fixed decision threshold from checkpoint metadata;
+2. unseen-scene identity canonicalization fails closed unless explicitly
+   requested as a diagnostic;
+3. peak-local spatial authority has a fixed maximum scene-row fraction.
+
+The third guard is not promoted until it passes source-only full-track gates.
+A modality-specific `CanonicalIdentityEvidenceCalibrator` is also introduced:
+it converts positive-affine-gauge-invariant score and empirical-rank evidence,
+anchor distance and reliability into a canonical membership logit. Its raw
+and rank contributions are monotone and spatial distance can only reduce
+evidence.
+
+The direct-language ceiling is a distinct experiment from the rejected
+query-independent SigLIP descriptor-before-MPR arm. Its materializer applies
+the frozen official SigLIP2 head and text response per legal source view, then
+lifts only query sufficient statistics through exact MPR. Figurines is the
+low-memory sentinel; full4 evaluation remains unopened until all caches pass
+their construction contracts.
+
+The corrected Figurines sentinel covers 96,879 rows directly and 97,082 valid
+rows after union with the frozen fallback authority. With fixed canonical
+negative relevancy and threshold `0.5`, LERF2D mIoU is only `0.02427`, while
+LocAcc remains `0.91071`. The mean exact-MPR response therefore retains sparse
+identity peaks but is not a full-object membership teacher. It is rejected as
+an extent posterior and is not expanded to the other three benchmark scenes.
+Any robust multiview statistic must first pass source-only full-track
+membership; target results cannot select mean/max/quantile aggregation.

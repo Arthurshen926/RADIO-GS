@@ -551,7 +551,10 @@ def validate_primitive_posterior_identity_cache(
         raise ValueError(f"Primitive identity scores must be {expected_shape}")
     if metadata.get("separate_identity_localization") is not True:
         raise ValueError("primitive identity scores lack separated-output contract")
-    if metadata.get("localization_authority") != "field_siglip2_relevancy_identity":
+    if metadata.get("localization_authority") not in {
+        "field_siglip2_relevancy_identity",
+        "direct_source_view_language_response_exact_mpr",
+    }:
         raise ValueError("primitive localization authority differs")
     values = identity.float().cpu()
     valid = torch.as_tensor(payload.get("valid")).bool().cpu()
