@@ -219,3 +219,10 @@ and reduces Acc@0.50 to `0.45673`. It is rejected for LERF3D. Official SAM3
 remains the higher-value boundary follow-up, but the pinned model requires its
 contractual `1008` resolution and about 9 GiB peak memory; an attempted unsafe
 low-resolution shortcut was correctly blocked.
+
+A fixed dominant-component guard raises the LERF3D control further to
+`0.44438` mIoU and Acc@0.25 `0.69231`, but Ramen remains below the retained
+row (`0.28447` versus `0.30291`) and Acc@0.50 remains lower (`0.46635` versus
+`0.48077`). This closes the low-cost GrabCut-only LERF3D branch without
+promotion; the remaining boundary candidate with meaningful headroom is the
+official SAM3 path.
