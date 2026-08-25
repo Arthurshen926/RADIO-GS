@@ -1,0 +1,66 @@
+{
+  "schema": "radio_gs.lerf_query_native_contract_recovery.v1",
+  "schema_version": 1,
+  "date": "2026-08-25",
+  "status": "formal_readout_restored_query_native_candidate_fail_closed",
+  "stopped_process_audit": {
+    "active_radio_gs_processes_before_audit": 0,
+    "foreign_container_gpu_processes_terminated": false
+  },
+  "root_causes": [
+    {
+      "bug": "failed_source_validation_checkpoint_was_promoted",
+      "evidence": "historical r0p04_a4 checkpoint_selection.all_scenes_noninferior=false",
+      "fix": "posterior builder requires source validation and source audit noninferiority"
+    },
+    {
+      "bug": "identity_gauge_and_decision_threshold_were_mixed",
+      "evidence": "historical posterior inherited text threshold 0.644475 while calibrated deployment requires probability threshold 0.5",
+      "fix": "calibrated identity and fixed threshold must agree; formal builder rejects either field when absent"
+    },
+    {
+      "bug": "primitive_query_validity_was_replaced_by_all_true",
+      "evidence": "posterior builder serialized valid=ones instead of the source query-cache valid mask",
+      "fix": "preserve the immutable query-cache validity mask, zero invalid scores, and exclude invalid rows from extent authority"
+    },
+    {
+      "bug": "unseen_scene_canonicalizer_was_used_as_a_diagnostic_formal_path",
+      "evidence": "Figurines used scene_canonicalizer_index=-1 while source scenes used learned scene codes",
+      "fix": "unseen scene remains fail-closed unless explicitly authorized as a diagnostic"
+    }
+  ],
+  "corrected_source_contract_replay": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260825/lerf_contract_recovery_v1/extent_center0p6805_s20260826.pt",
+    "sha256": "208394584a5518d80412531cee65185d1b7bcaf54b41b4514fc5318b5030b147",
+    "validation_macro_delta": -0.01566554109255473,
+    "minimum_scene_delta": -0.029714427888393402,
+    "audit_macro_delta": 0.019054380090286333,
+    "decision": "reject_because_validation_noninferiority_failed"
+  },
+  "formal_route": {
+    "lerf2d": "retained_identity_extent_posterior_v3",
+    "lerf3d": "retained_latent_proposal_null_marginal_v1",
+    "query_native_anchor_conditioned": "experimental_candidate_only"
+  },
+  "current_code_figurines_replay": {
+    "lerf2d": {
+      "miou": 0.4262441682,
+      "locacc": 0.9107142857,
+      "result_sha256": "746a862ddf467b13d5b5570b78fcf8ef828f812edfecad5656779911670a1237"
+    },
+    "lerf3d": {
+      "miou": 0.5840283632278442,
+      "acc025": 0.8571428571428571,
+      "acc050": 0.6607142857142857,
+      "result_sha256": "d4d2cc067396116398bd625e9e97b610b2777ebd481da535cff47c0724ca4d26"
+    }
+  },
+  "retained_full4": {
+    "lerf2d_sample_micro_miou": 0.3958417415,
+    "lerf2d_locacc": 0.8798076923,
+    "lerf3d_sample_micro_miou": 0.437303824780079,
+    "lerf3d_acc025": 0.6778846153846154,
+    "lerf3d_acc050": 0.4807692307692308
+  },
+  "conclusion": "The LERF collapse was caused by promotion and deployment-contract bugs, not loss of the retained field or evaluator. Current code reproduces normal Figurines accuracy, while the corrected Query-Native candidate correctly fails its source gate and cannot replace the formal readout."
+}

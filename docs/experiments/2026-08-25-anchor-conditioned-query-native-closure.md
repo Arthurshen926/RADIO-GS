@@ -176,3 +176,28 @@ text calibration, robust averaging or graph closure is not justified by the
 current evidence. ScanNet and NVOS remain frozen at
 `0.36401/0.36189/0.46716` and `0.92555`; this LERF mechanism study does not
 change their retained rows.
+
+## Formal-readout contract recovery
+
+A later code audit established that the `0.06178/0.03779` full4 collapse was
+not a valid architectural comparison. The deployed extent checkpoint had
+failed source validation noninferiority, lacked the final decision-gauge
+contract, inherited an incompatible text threshold, and the builder replaced
+the primitive query-cache validity mask by all-true rows. Figurines also used
+the explicit unseen-scene diagnostic path instead of a source-gated
+canonicalizer.
+
+The builder now requires both source validation and source audit
+noninferiority, requires calibrated identity logits together with fixed
+posterior threshold `0.5`, preserves the immutable validity mask, zeros
+invalid-row scores and excludes invalid rows from extent authority. Replaying
+the corrected 60-step source contract gives validation macro delta
+`-0.01567`, so the candidate is correctly rejected before benchmark
+materialization despite a positive audit split.
+
+The formal route is restored to the retained readouts. A current-code
+Figurines replay obtains LERF2D mIoU `0.42624`, LocAcc `0.91071`, and LERF3D
+mIoU `0.58403`, Acc@0.25/0.50 `0.85714/0.66071`. Therefore neither the frozen
+field nor current evaluators lost their normal accuracy. Anchor-conditioned
+Query-Native remains an experimental branch until it independently passes
+the corrected source contract; it cannot replace the formal LERF posterior.
