@@ -35,9 +35,23 @@ from radio_gs.utils.immutable_artifacts import (  # noqa: E402
 
 SCHEMA_VERSION = 1
 COARSE_ARTIFACT_TYPE = "radio_gs_lerf2d_occam_coarse_prediction_receipt"
+FORMAL_COARSE_ARTIFACT_TYPE = (
+    "radio_gs_lerf2d_formal_posterior_coarse_prediction_receipt"
+)
+FORMAL_COARSE_POLICY = {
+    "posterior_threshold": 0.6,
+    "threshold_mode": "fixed",
+    "eval_at_image_resolution": True,
+    "primitive_valid_normalization": True,
+    "primitive_valid_coverage_power": 0.0,
+    "feature_contribution_gamma": 1.0,
+}
 RGB_AUTHORITY_TYPE = "radio_gs_lerf2d_target_rgb_root_authority"
 FINAL_ARTIFACT_TYPE = "radio_gs_lerf2d_official_sam3_box_prediction_receipt"
 METHOD_NAME = "RADIO-GS current-field exact scalar + target-RGB official SAM3 box pad16"
+FORMAL_METHOD_NAME = (
+    "RADIO-GS retained identity_extent_posterior_v3 + target-RGB official SAM3 box pad16"
+)
 
 
 class Sam3Lerf2DProtocolError(ValueError):
@@ -108,9 +122,8 @@ def _load_coarse_receipt(path: Path, *, expected_sha256: str) -> tuple[dict[str,
         raise Sam3Lerf2DProtocolError("coarse receipt SHA256 differs")
     payload = json.loads(receipt_path.read_text(encoding="utf-8"))
     source = _require_mapping(payload.get("source_access"), label="source_access")
-    if (
+    common_invalid = (
         payload.get("schema_version") != SCHEMA_VERSION
-        or payload.get("artifact_type") != COARSE_ARTIFACT_TYPE
         or payload.get("status")
         != "coarse_predictions_sealed_before_target_rgb_or_gt_access"
         or source.get("target_rgb_opened") is not False
@@ -125,18 +138,58 @@ def _load_coarse_receipt(path: Path, *, expected_sha256: str) -> tuple[dict[str,
                 "candidate_selected_with_gt",
             )
         )
-        or payload.get("policy")
+    )
+    artifact_type = payload.get("artifact_type")
+    legacy = artifact_type == COARSE_ARTIFACT_TYPE
+    formal = artifact_type == FORMAL_COARSE_ARTIFACT_TYPE
+    policy_invalid = (
+        legacy
+        and payload.get("policy")
         != {"activation_kernel": 30, "mask_threshold": 0.5, "smooth_kernel": 7}
-    ):
+    ) or (formal and payload.get("policy") != FORMAL_COARSE_POLICY)
+    if common_invalid or not (legacy or formal) or policy_invalid:
         raise Sam3Lerf2DProtocolError("coarse receipt violates the frozen contract")
     _validate_live_file_record(payload.get("implementation"), label="coarse producer")
-    score_manifest = _require_mapping(payload.get("score_manifest"), label="score_manifest")
-    score_path = Path(str(score_manifest.get("path", ""))).resolve(strict=True)
-    if sha256_file(score_path) != _require_sha(
-        score_manifest.get("sha256"), label="score manifest SHA256"
+    if legacy:
+        authority = _require_mapping(payload.get("score_manifest"), label="score_manifest")
+        authority_label = "score manifest"
+    else:
+        authority = _require_mapping(
+            payload.get("query_authority_manifest"), label="query_authority_manifest"
+        )
+        authority_label = "query authority manifest"
+        _validate_live_file_record(payload.get("posterior_source"), label="posterior source")
+        _validate_live_file_record(payload.get("config"), label="formal config")
+        _validate_live_file_record(payload.get("checkpoint"), label="formal checkpoint")
+    authority_path = Path(str(authority.get("path", ""))).resolve(strict=True)
+    if sha256_file(authority_path) != _require_sha(
+        authority.get("sha256"), label=f"{authority_label} SHA256"
     ):
-        raise Sam3Lerf2DProtocolError("score manifest changed after coarse sealing")
+        raise Sam3Lerf2DProtocolError(f"{authority_label} changed after coarse sealing")
     return payload, digest
+
+
+def _final_policy(coarse: Mapping[str, Any]) -> dict[str, Any]:
+    common = {
+        "sam3_box_padding_pixels": 16,
+        "sam3_resolution": 1008,
+        "sam3_confidence_threshold": 0.0,
+        "sam3_min_initial_iou": 0.05,
+        "candidate_selector": "coarse_mask_iou_then_official_score_tie_break",
+    }
+    if coarse.get("artifact_type") == FORMAL_COARSE_ARTIFACT_TYPE:
+        return {
+            "coarse_artifact_type": FORMAL_COARSE_ARTIFACT_TYPE,
+            "coarse_policy": dict(FORMAL_COARSE_POLICY),
+            "binary_mask_materialization": "interpolated_logit_gt_zero_exact",
+            **common,
+        }
+    return {
+        "coarse_activation_kernel": 30,
+        "coarse_mask_threshold": 0.5,
+        "coarse_smooth_kernel": 7,
+        **common,
+    }
 
 
 def _load_rgb_authority(path: Path, *, expected_sha256: str) -> tuple[dict[str, Any], str]:
@@ -259,6 +312,62 @@ def choose_candidate(
     return (masks[best_idx] > 0).astype(bool), report
 
 
+@torch.inference_mode()
+def add_geometric_prompt_binary_memory_efficient(
+    processor: Any, box: list[float], state: dict[str, Any]
+) -> dict[str, Any]:
+    """Run official SAM3 without a redundant full-resolution probability copy.
+
+    The official processor returns ``sigmoid(interpolate(mask_logits))`` and
+    this readout thresholds it at 0.5.  ``sigmoid(x) > 0.5`` is exactly
+    ``x > 0``, so direct logit thresholding preserves every binary mask bit.
+    """
+
+    from sam3.model import box_ops
+    from sam3.model.data_misc import interpolate
+
+    if "backbone_out" not in state:
+        raise ValueError("official SAM3 image state has no backbone output")
+    if "language_features" not in state["backbone_out"]:
+        state["backbone_out"].update(
+            processor.model.backbone.forward_text(["visual"], device=processor.device)
+        )
+    if "geometric_prompt" not in state:
+        state["geometric_prompt"] = processor.model._get_dummy_prompt()
+    prompt_boxes = torch.tensor(
+        box, device=processor.device, dtype=torch.float32
+    ).view(1, 1, 4)
+    prompt_labels = torch.ones((1, 1), device=processor.device, dtype=torch.bool)
+    state["geometric_prompt"].append_boxes(prompt_boxes, prompt_labels)
+    outputs = processor.model.forward_grounding(
+        backbone_out=state["backbone_out"],
+        find_input=processor.find_stage,
+        geometric_prompt=state["geometric_prompt"],
+        find_target=None,
+    )
+    probabilities = outputs["pred_logits"].sigmoid()
+    presence = outputs["presence_logit_dec"].sigmoid().unsqueeze(1)
+    probabilities = (probabilities * presence).squeeze(-1)
+    keep = probabilities > processor.confidence_threshold
+    probabilities = probabilities[keep]
+    boxes_xyxy = box_ops.box_cxcywh_to_xyxy(outputs["pred_boxes"][keep])
+    height, width = int(state["original_height"]), int(state["original_width"])
+    scale = torch.tensor(
+        [width, height, width, height], device=processor.device
+    )
+    boxes_xyxy = boxes_xyxy * scale[None, :]
+    resized_logits = interpolate(
+        outputs["pred_masks"][keep].unsqueeze(1),
+        (height, width),
+        mode="bilinear",
+        align_corners=False,
+    )
+    state["masks"] = resized_logits > 0.0
+    state["boxes"] = boxes_xyxy
+    state["scores"] = probabilities
+    return state
+
+
 def _official_commit() -> str:
     try:
         return subprocess.run(
@@ -354,6 +463,12 @@ def refine(
                     raise Sam3Lerf2DProtocolError(f"{scene}/{frame}: RGB resolution differs")
                 with torch.no_grad(), sam3_autocast_context(str(processor.device), amp_dtype):
                     state = processor.set_image(image)
+            # The official image encoder transiently reserves CUDA allocator
+            # blocks that are no longer live once the immutable image state is
+            # materialized.  Return only those unused blocks before the box
+            # decoder; this does not move tensors or alter model precision.
+            if str(processor.device).startswith("cuda"):
+                torch.cuda.empty_cache()
             final_qhw = np.zeros(expected_shape, dtype=np.uint8)
             final_query_rows = []
             for index in range(expected_shape[0]):
@@ -380,7 +495,14 @@ def refine(
                     with torch.no_grad(), sam3_autocast_context(
                         str(processor.device), amp_dtype
                     ):
-                        sam_output = processor.add_geometric_prompt(box, True, dict(state))
+                        if coarse.get("artifact_type") == FORMAL_COARSE_ARTIFACT_TYPE:
+                            sam_output = add_geometric_prompt_binary_memory_efficient(
+                                processor, box, dict(state)
+                            )
+                        else:
+                            sam_output = processor.add_geometric_prompt(
+                                box, True, dict(state)
+                            )
                     masks = sam_output.get("masks")
                     if masks is None and sam_output.get("masks_logits") is not None:
                         masks = sam_output["masks_logits"].float() > 0.0
@@ -446,21 +568,18 @@ def refine(
         "schema_version": SCHEMA_VERSION,
         "artifact_type": FINAL_ARTIFACT_TYPE,
         "status": "sealed_before_benchmark_mask_or_metric_access",
-        "method": METHOD_NAME,
-        "policy": {
-            "coarse_activation_kernel": 30,
-            "coarse_mask_threshold": 0.5,
-            "coarse_smooth_kernel": 7,
-            "sam3_box_padding_pixels": 16,
-            "sam3_resolution": 1008,
-            "sam3_confidence_threshold": 0.0,
-            "sam3_min_initial_iou": 0.05,
-            "candidate_selector": "coarse_mask_iou_then_official_score_tie_break",
-        },
+        "method": (
+            FORMAL_METHOD_NAME
+            if coarse.get("artifact_type") == FORMAL_COARSE_ARTIFACT_TYPE
+            else METHOD_NAME
+        ),
+        "policy": _final_policy(coarse),
         "coarse_prediction_receipt": {
             "path": str(coarse_receipt.resolve(strict=True)),
             "sha256": coarse_sha,
             "score_manifest": coarse.get("score_manifest"),
+            "query_authority_manifest": coarse.get("query_authority_manifest"),
+            "posterior_source": coarse.get("posterior_source"),
         },
         "rgb_root_authority": {
             "path": str(rgb_authority.resolve(strict=True)),

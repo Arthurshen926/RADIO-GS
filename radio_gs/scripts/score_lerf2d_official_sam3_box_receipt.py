@@ -10,19 +10,27 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 import torch
+import yaml
 
+from radio_gs.scripts.eval_lerf_grounding import build_gt_masks, load_lerf_ovs_labels
 from radio_gs.scripts.eval_ours_lerf2d_scalar_maps import (
     CANONICAL_TASK_ID,
     EXPECTED_REGISTRY_ROW,
     FrozenLerf2DContract,
     _load_annotation,
     canonical_query_id,
+    contract_from_validated_freeze,
     load_frozen_contract,
+    _read_stable_regular_file,
     write_result_no_clobber,
 )
 from radio_gs.scripts.eval_prerendered_lerf_features import _localization_hit
 from radio_gs.scripts.materialize_lerf2d_coarse_prediction_receipt import (
     COARSE_ARTIFACT_TYPE,
+)
+from radio_gs.scripts.materialize_lerf2d_formal_posterior_coarse_receipt import (
+    COARSE_ARTIFACT_TYPE as FORMAL_COARSE_ARTIFACT_TYPE,
+    FIXED_POLICY as FORMAL_COARSE_POLICY,
 )
 from radio_gs.scripts.refine_lerf2d_coarse_receipt_official_sam3 import (
     FINAL_ARTIFACT_TYPE,
@@ -32,6 +40,7 @@ from radio_gs.scripts.refine_lerf2d_coarse_receipt_official_sam3 import (
     _require_mapping,
     _require_sha,
     _validate_live_file_record,
+    _final_policy,
 )
 from radio_gs.utils.immutable_artifacts import file_record, sha256_file
 
@@ -48,6 +57,21 @@ FIXED_POLICY = {
     "sam3_min_initial_iou": 0.05,
     "candidate_selector": "coarse_mask_iou_then_official_score_tie_break",
 }
+
+
+def _load_lerf_scoped_contract(path: Path) -> FrozenLerf2DContract:
+    """Validate only the immutable LERF task inside the multi-task freeze."""
+
+    canonical = path.expanduser().resolve(strict=True)
+    encoded = _read_stable_regular_file(canonical, label="protocol freeze")
+    payload = yaml.safe_load(encoded)
+    if not isinstance(payload, Mapping):
+        raise Sam3Lerf2DProtocolError("protocol freeze must contain an object")
+    return contract_from_validated_freeze(
+        payload,
+        freeze_path=canonical,
+        freeze_sha256=sha256_file(canonical),
+    )
 
 
 def _parse_scenes(raw: str, contract: FrozenLerf2DContract) -> tuple[str, ...]:
@@ -78,7 +102,7 @@ def _validate_before_gt(
         payload.get("schema_version") != SCHEMA_VERSION
         or payload.get("artifact_type") != FINAL_ARTIFACT_TYPE
         or payload.get("status") != "sealed_before_benchmark_mask_or_metric_access"
-        or payload.get("policy") != FIXED_POLICY
+        or payload.get("policy") not in (FIXED_POLICY, _final_policy({"artifact_type": FORMAL_COARSE_ARTIFACT_TYPE}))
         or source.get("target_rgb_opened") is not True
         or any(
             source.get(key) is not False
@@ -106,7 +130,10 @@ def _validate_before_gt(
     coarse_payload = json.loads(coarse_path.read_text(encoding="utf-8"))
     coarse_source = _require_mapping(coarse_payload.get("source_access"), label="coarse access")
     if (
-        coarse_payload.get("artifact_type") != COARSE_ARTIFACT_TYPE
+        coarse_payload.get("artifact_type") not in (
+            COARSE_ARTIFACT_TYPE,
+            FORMAL_COARSE_ARTIFACT_TYPE,
+        )
         or coarse_payload.get("status")
         != "coarse_predictions_sealed_before_target_rgb_or_gt_access"
         or coarse_source.get("target_rgb_opened") is not False
@@ -124,18 +151,34 @@ def _validate_before_gt(
     ):
         raise Sam3Lerf2DProtocolError("coarse receipt violates the pre-RGB/GT contract")
     _validate_live_file_record(coarse_payload.get("implementation"), label="coarse producer")
+    formal_coarse = coarse_payload.get("artifact_type") == FORMAL_COARSE_ARTIFACT_TYPE
+    if formal_coarse:
+        if coarse_payload.get("policy") != FORMAL_COARSE_POLICY:
+            raise Sam3Lerf2DProtocolError("formal posterior coarse policy differs")
+        _validate_live_file_record(coarse_payload.get("posterior_source"), label="posterior source")
+        _validate_live_file_record(coarse_payload.get("config"), label="formal config")
+        _validate_live_file_record(coarse_payload.get("checkpoint"), label="formal checkpoint")
     score_manifest = _require_mapping(
-        coarse_payload.get("score_manifest"), label="score_manifest"
+        coarse_payload.get(
+            "query_authority_manifest" if formal_coarse else "score_manifest"
+        ),
+        label="query authority manifest" if formal_coarse else "score_manifest",
     )
     score_path = Path(str(score_manifest.get("path", ""))).resolve(strict=True)
     if sha256_file(score_path) != _require_sha(
         score_manifest.get("sha256"), label="score manifest SHA256"
     ):
-        raise Sam3Lerf2DProtocolError("scalar score manifest changed")
+        raise Sam3Lerf2DProtocolError("query authority manifest changed")
     freeze = _require_mapping(score_manifest.get("protocol_freeze"), label="protocol_freeze")
     if freeze.get("freeze_id") != contract.freeze_id or freeze.get("sha256") != contract.freeze_sha256:
         raise Sam3Lerf2DProtocolError("prediction protocol freeze differs")
     raw_scenes = _require_mapping(payload.get("scenes"), label="prediction scenes")
+    formal_current = (
+        _require_mapping(payload.get("policy"), label="prediction policy").get(
+            "coarse_artifact_type"
+        )
+        == FORMAL_COARSE_ARTIFACT_TYPE
+    )
     coarse_scenes = _require_mapping(coarse_payload.get("scenes"), label="coarse scenes")
     if tuple(raw_scenes) != scenes or tuple(coarse_scenes) != scenes:
         raise Sam3Lerf2DProtocolError("prediction scene cohort/order differs")
@@ -249,9 +292,20 @@ def score(
         scenes=scenes,
     )
     raw_scenes = _require_mapping(payload.get("scenes"), label="prediction scenes")
+    formal_current = (
+        _require_mapping(payload.get("policy"), label="prediction policy").get(
+            "coarse_artifact_type"
+        )
+        == FORMAL_COARSE_ARTIFACT_TYPE
+    )
     scene_rows: dict[str, Any] = {}
     all_final, all_initial, all_hits = [], [], []
     for scene in scenes:
+        grounding_frames = None
+        if formal_current:
+            grounding_frames, _categories, _height, _width = load_lerf_ovs_labels(
+                str(label_root), scene
+            )
         frames = _require_mapping(
             _require_mapping(raw_scenes[scene], label=scene).get("frames"),
             label=f"{scene}.frames",
@@ -279,9 +333,26 @@ def score(
             final_qhw, initial_qhw = arrays[scene][frame]
             query_rows = entry.get("queries")
             assert isinstance(query_rows, list)
+            formal_masks = None
+            if grounding_frames is not None:
+                frame_id = int(frame.rsplit("_", 1)[-1])
+                formal_objects = grounding_frames.get(frame_id)
+                if formal_objects is None:
+                    raise Sam3Lerf2DProtocolError(
+                        f"{scene}/{frame}: current-evaluator annotation is missing"
+                    )
+                formal_masks = build_gt_masks(
+                    formal_objects,
+                    query_texts,
+                    int(resolution[0]),
+                    int(resolution[1]),
+                )
             object_rows = []
             for index, obj in enumerate(objects):
-                gt = np.asarray(obj.mask, dtype=bool)
+                gt = np.asarray(
+                    formal_masks[obj.query] if formal_masks is not None else obj.mask,
+                    dtype=bool,
+                )
                 final, initial = final_qhw[index], initial_qhw[index]
                 final_union = int(np.logical_or(final, gt).sum())
                 initial_union = int(np.logical_or(initial, gt).sum())
@@ -293,8 +364,11 @@ def score(
                     if initial_union
                     else 0.0
                 )
-                coords = torch.as_tensor(query_rows[index]["localization_coords_yx"]).long()
-                hit = bool(_localization_hit(coords, obj.bboxes))
+                raw_coords = query_rows[index].get("localization_coords_yx")
+                hit = None
+                if raw_coords is not None:
+                    coords = torch.as_tensor(raw_coords).long()
+                    hit = bool(_localization_hit(coords, obj.bboxes))
                 boundary = _require_mapping(query_rows[index].get("boundary"), label="boundary")
                 object_rows.append(
                     {
@@ -303,7 +377,11 @@ def score(
                         "iou": final_iou,
                         "delta_iou": final_iou - initial_iou,
                         "loc_hit": hit,
-                        "chosen_level": int(query_rows[index]["chosen_level"]),
+                        "chosen_level": (
+                            int(query_rows[index]["chosen_level"])
+                            if "chosen_level" in query_rows[index]
+                            else None
+                        ),
                         "sam3_attempted": bool(boundary.get("attempted", False)),
                         "sam3_accepted": bool(boundary.get("accepted", False)),
                         "sam3_report": dict(boundary),
@@ -311,22 +389,28 @@ def score(
                 )
                 scene_final.append(final_iou)
                 scene_initial.append(initial_iou)
-                scene_hits.append(hit)
+                if hit is not None:
+                    scene_hits.append(hit)
                 all_final.append(final_iou)
                 all_initial.append(initial_iou)
-                all_hits.append(hit)
+                if hit is not None:
+                    all_hits.append(hit)
             frame_rows[frame] = {
                 "initial_miou": float(np.mean([row["initial_iou"] for row in object_rows])),
                 "miou": float(np.mean([row["iou"] for row in object_rows])),
                 "delta_miou": float(np.mean([row["delta_iou"] for row in object_rows])),
-                "loc_acc": float(np.mean([row["loc_hit"] for row in object_rows])),
+                "loc_acc": (
+                    float(np.mean([row["loc_hit"] for row in object_rows if row["loc_hit"] is not None]))
+                    if any(row["loc_hit"] is not None for row in object_rows)
+                    else None
+                ),
                 "objects": object_rows,
             }
         scene_rows[scene] = {
             "initial_miou": float(np.mean(scene_initial)),
             "miou": float(np.mean(scene_final)),
             "delta_miou": float(np.mean(scene_final) - np.mean(scene_initial)),
-            "loc_acc": float(np.mean(scene_hits)),
+            "loc_acc": float(np.mean(scene_hits)) if scene_hits else None,
             "objects": len(scene_final),
             "frames": frame_rows,
         }
@@ -337,7 +421,11 @@ def score(
             np.mean([row["miou"] for row in scene_rows.values()])
             - np.mean([row["initial_miou"] for row in scene_rows.values()])
         ),
-        "loc_acc": float(np.mean([row["loc_acc"] for row in scene_rows.values()])),
+        "loc_acc": (
+            float(np.mean([row["loc_acc"] for row in scene_rows.values() if row["loc_acc"] is not None]))
+            if any(row["loc_acc"] is not None for row in scene_rows.values())
+            else None
+        ),
         "scenes": len(scene_rows),
         "aggregation": "scene_equal_macro",
     }
@@ -345,7 +433,7 @@ def score(
         "initial_miou": float(np.mean(all_initial)),
         "miou": float(np.mean(all_final)),
         "delta_miou": float(np.mean(all_final) - np.mean(all_initial)),
-        "loc_acc": float(np.mean(all_hits)),
+        "loc_acc": float(np.mean(all_hits)) if all_hits else None,
         "objects": len(all_final),
         "aggregation": "query_weighted_micro",
     }
@@ -398,10 +486,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=repo_root / "paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
     )
     parser.add_argument("--repo-root", type=Path, default=repo_root)
+    parser.add_argument(
+        "--lerf-contract-only",
+        action="store_true",
+        help=(
+            "Validate the frozen LERF task identity and all prediction/annotation "
+            "bindings without traversing unrelated benchmark authority files."
+        ),
+    )
     parser.add_argument("--output-json", type=Path, required=True)
     args = parser.parse_args(argv)
-    contract = load_frozen_contract(
-        args.protocol_freeze, repo_root=args.repo_root, verify_hashes=True
+    contract = (
+        _load_lerf_scoped_contract(args.protocol_freeze)
+        if args.lerf_contract_only
+        else load_frozen_contract(
+            args.protocol_freeze,
+            repo_root=args.repo_root,
+            verify_hashes=True,
+        )
     )
     scenes = _parse_scenes(args.scenes, contract)
     result = score(

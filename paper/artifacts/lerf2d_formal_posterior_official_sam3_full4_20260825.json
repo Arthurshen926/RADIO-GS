@@ -1,0 +1,78 @@
+{
+  "schema": "radio_gs.lerf2d_formal_posterior_official_sam3_full4.v1",
+  "schema_version": 1,
+  "date": "2026-08-25",
+  "status": "complete_lerf_scoped_protocol_legal_target_rgb_assisted_full4",
+  "method": {
+    "identity_and_extent": "retained_identity_extent_posterior_v3",
+    "coarse_threshold": 0.6,
+    "coarse_rasterizer": "current_eval_lerf_grounding_build_gt_masks",
+    "boundary": "query_transient_captured_target_rgb_official_sam3_box",
+    "box_padding_pixels": 16,
+    "sam3_resolution": 1008,
+    "candidate_selector": "coarse_mask_iou_then_official_score_tie_break",
+    "minimum_coarse_iou": 0.05,
+    "binary_mask_materialization": "interpolated_logit_gt_zero_exact_equivalent_to_sigmoid_gt_0p5",
+    "persistent_scene_state_changed": false,
+    "target_rgb_visible_to_boundary": true,
+    "target_masks_visible_to_prediction": false,
+    "candidate_selected_with_gt": false
+  },
+  "lerf2d": {
+    "samples": 208,
+    "initial_sample_micro_miou": 0.39584174154838825,
+    "official_sam3_sample_micro_miou": 0.576690691074806,
+    "delta_sample_micro_miou": 0.18084894952641775,
+    "initial_scene_macro_miou": 0.3975628044289917,
+    "official_sam3_scene_macro_miou": 0.5856783280717114,
+    "delta_scene_macro_miou": 0.18811552364271966,
+    "localization_accuracy": 0.8798076923076923,
+    "localization_note": "unchanged by construction; the frozen identity heatmap owns localization and SAM3 only replaces the segmentation boundary mask",
+    "all_scenes_positive": true,
+    "sam3_candidate_accepted": 206,
+    "sam3_candidate_total": 208,
+    "scenes": {
+      "figurines": {
+        "samples": 56,
+        "initial_miou": 0.42624416819099725,
+        "miou": 0.622083615706123,
+        "delta_miou": 0.19583944751512578,
+        "accepted": 56,
+        "evaluation_sha256": "8509b38d747e897c3612251225c1caf6a72351a1e9c120808426f645f6cb1219"
+      },
+      "ramen": {
+        "samples": 71,
+        "initial_miou": 0.37218217172299817,
+        "miou": 0.5509436549886744,
+        "delta_miou": 0.1787614832656762,
+        "accepted": 69,
+        "evaluation_sha256": "9349ab60486165c8226632aaceb8ddfc5fce4980afbde590f48b82e6dbcd58b3"
+      },
+      "teatime": {
+        "samples": 59,
+        "initial_miou": 0.39514398160520736,
+        "miou": 0.5476996985079954,
+        "delta_miou": 0.15255571690278802,
+        "accepted": 59,
+        "evaluation_sha256": "6135aa2c08c458ae39a38c8120e0a17140fbb347ba43ef861865d483f518bad6"
+      },
+      "waldo_kitchen": {
+        "samples": 22,
+        "initial_miou": 0.396680896196764,
+        "miou": 0.6219863430840525,
+        "delta_miou": 0.22530544688728854,
+        "accepted": 22,
+        "evaluation_sha256": "f67fb89b3a5e3ee268b367e6d653d6661f4909ebb1ea18cad00c29ba370101a8"
+      }
+    }
+  },
+  "protocol": {
+    "coarse_prediction_sealed_before_target_rgb_or_gt": true,
+    "sam3_prediction_sealed_before_gt": true,
+    "all_lerf_query_camera_annotation_and_prediction_hashes_validated": true,
+    "global_multibenchmark_freeze_graph_validated": false,
+    "global_freeze_blocker": "unrelated retired SPIn authority path output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json is absent",
+    "reporting_boundary": "promote as LERF target-RGB-assisted method row; retain 0.3958417415 as the strict RGB-free row"
+  },
+  "conclusion": "The current formal posterior already identifies the correct object but undercovers its image extent. Frozen official SAM3 supplies a strong instance boundary prior and improves every scene by 15.26 to 22.53 mIoU points without changing field state or localization."
+}

@@ -7,6 +7,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pytest
+import torch
 
 from radio_gs.scripts.eval_ours_lerf2d_scalar_maps import (
     CANONICAL_TASK_ID,
@@ -32,6 +33,8 @@ from radio_gs.scripts.materialize_lerf2d_coarse_prediction_receipt import (
 from radio_gs.scripts.refine_lerf2d_coarse_receipt_official_sam3 import (
     FINAL_ARTIFACT_TYPE as LERF2D_SAM3_PREDICTION_TYPE,
     Sam3Lerf2DProtocolError,
+    FORMAL_COARSE_ARTIFACT_TYPE,
+    _final_policy,
     choose_candidate as choose_sam3_box_candidate,
     mask_to_box as lerf2d_mask_to_sam3_box,
 )
@@ -62,6 +65,15 @@ def test_occam_coarse_prediction_preserves_frozen_three_scale_readout() -> None:
     assert posterior.dtype == np.float32
     assert posterior.shape == coarse.shape == (40, 40)
     assert coords
+
+
+def test_formal_sam3_policy_binds_exact_memory_efficient_binary_semantics() -> None:
+    policy = _final_policy({"artifact_type": FORMAL_COARSE_ARTIFACT_TYPE})
+    assert policy["coarse_policy"]["posterior_threshold"] == 0.6
+    assert policy["sam3_resolution"] == 1008
+    assert policy["binary_mask_materialization"] == "interpolated_logit_gt_zero_exact"
+    logits = torch.tensor([-100.0, -0.01, 0.0, 0.01, 100.0])
+    assert torch.equal(torch.sigmoid(logits) > 0.5, logits > 0.0)
 
 
 def test_rgb_candidate_gate_uses_only_posterior_peak_area_and_mass() -> None:

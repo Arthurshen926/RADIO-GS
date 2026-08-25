@@ -226,3 +226,39 @@ row (`0.28447` versus `0.30291`) and Acc@0.50 remains lower (`0.46635` versus
 `0.48077`). This closes the low-cost GrabCut-only LERF3D branch without
 promotion; the remaining boundary candidate with meaningful headroom is the
 official SAM3 path.
+
+## Current-formal-posterior official SAM3 closure
+
+The official SAM3 follow-up is now complete for LERF2D full4. A sealed
+producer renders the retained `identity_extent_posterior_v3` at its unchanged
+fixed threshold `0.6` before either target RGB or GT is opened. The coarse
+masks reproduce the retained current evaluator exactly: full4 sample-micro
+mIoU is `0.3958417415`. Captured target RGB and the hash-pinned official SAM3
+image model then receive only a fixed pad-16 box derived from that coarse mask.
+Candidate selection is fixed coarse-mask IoU with official score as a tie
+break; 206/208 candidates pass the fixed `0.05` overlap gate.
+
+The result is positive in every scene: Figurines `0.62208` (`+0.19584`), Ramen
+`0.55094` (`+0.17876`), Teatime `0.54770` (`+0.15256`), and Waldo Kitchen
+`0.62199` (`+0.22531`). Full4 sample-micro mIoU is `0.57669`, a gain of
+`+0.18085`; scene-macro is `0.58568`, a gain of `+0.18812`. Localization stays
+`0.87981` by construction because the frozen identity heatmap remains the
+localization authority and SAM3 only replaces the segmentation boundary mask.
+
+Two implementation issues were closed while obtaining the row. First, the
+SAM3-only process must run through `run_official_sam3_python.sh`, which binds
+official source commit `46957e47805e...` and its compatible runtime. Second,
+the official processor materializes both full-resolution interpolated logits
+and an equally sized sigmoid tensor. The binary-only readout now uses the exact
+identity `sigmoid(x)>0.5 iff x>0`, avoiding that redundant probability copy and
+allowing contractual 1008-resolution inference in the available memory. The
+model, candidates, score, mask bits, and selection rule are unchanged.
+
+This is promoted as the target-RGB-assisted LERF2D method row, separately from
+the strict RGB-free `0.39584` row. All LERF query, camera, annotation,
+prediction, checkpoint and source hashes pass. The repository-wide freeze
+graph cannot currently be traversed because it retains an unrelated missing
+SPIn authority file, so scoring uses the exact LERF task subsection of the same
+freeze rather than pretending the global graph is complete. The complete
+result identity is
+`paper/artifacts/lerf2d_formal_posterior_official_sam3_full4_20260825.json`.
