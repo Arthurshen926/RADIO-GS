@@ -251,3 +251,207 @@ candidate, continuing its budget, starting another shared-D512 joint update,
 or tuning around its gate failure would violate the stopping rule. A clean
 multi-teacher source-mapping restart is therefore recorded only as a possible
 future-plan hypothesis, not as an authorized continuation of v3.
+
+## Structured shared-private revision
+
+A revised analysis separates the diagnostic role of raw RADIO reconstruction
+from the capabilities consumed by queries. Strict zero raw-RADIO regression is
+removed as a hard promotion condition. It remains a soft regularizer and
+diagnostic; the hard condition is now a preregistered source-capability Pareto
+gate over instance, semantic identity, image correspondence, category, geometry,
+and rendering metrics. This revision does not retroactively promote the old
+rank-16 candidate and does not authorize unrestricted joint-D512 updates.
+
+The new candidate is one physical `N x 512` table with the fixed first layout:
+
+| block | dimensions | write authority |
+|---|---:|---|
+| shared core | 320 | general source visual structure only |
+| semantic identity | 128 | source semantic/category authority only |
+| instance membership | 48 | SAM co-membership and ternary relation losses |
+| boundary | 16 | SAM edge and visibility-conflict authority |
+
+Instance and boundary readers may later consume stop-gradient context through
+zero-initialized global one-way bridges. The first causal screen disables those
+bridges. The optimizer owns contiguous table columns: Adam moments, weight
+decay, and updates for one private task cannot touch another block. Direct
+gradient and optimizer tests enforce this property.
+
+Initialization is fresh and source-only. A fixed seeded JL map projects source
+RADIO pixels into the shared block and exact-MPR lifts train-residue evidence to
+Gaussians. A separate fixed seeded JL map projects source mask-aligned SigLIP2
+descriptors into the semantic block and lifts only train-residue proposals.
+Instance rows receive a seeded random initialization and boundary rows start at
+zero. No historical field checkpoint, pre-fusion code, post-fusion coefficient,
+residual candidate, target RGB, audit mask, or benchmark metric is opened.
+
+Two-step full-per-step smoke tests validate both available complete-authority
+scenes. `figurines` and `ramen` both serialize exactly one structured D512 plus
+global heads; shared and semantic maximum absolute changes are exactly `0.0`,
+while instance and boundary blocks change. The `ramen` smoke exposed and fixed
+an implementation-only allocation where row indexing preceded column slicing;
+column-first indexing avoids materializing a hits-by-512 tensor and preserves
+identical values. Frozen 600-step source-dev screens are running on two GPUs.
+They are structure evidence only: source audit and all benchmark data remain
+sealed, and promotion additionally requires the missing registered text and
+ScanNet category capability cohorts.
+
+The frozen 600-step results are:
+
+| scene | IoU gain | Brier change | boundary F change | unknown FP change | shared max change | semantic max change |
+|---|---:|---:|---:|---:|---:|---:|
+| figurines | +0.08422 | -0.32848 | +0.11387 | -0.36032 | 0.0 | 0.0 |
+| ramen | +0.16793 | -0.33380 | +0.33145 | -0.39083 | 0.0 | 0.0 |
+
+Scene-macro IoU gain is `+0.12608`; neither scene regresses and every proper
+instance metric improves. This is substantially different from the
+undifferentiated joint-D512 screen (`+0.00178` macro with a Figurines
+regression): the private instance block can learn co-membership without
+rewriting the source visual or semantic coordinates.
+
+The source-dev capability diagnostics are invariant between two-step smoke and
+600-step artifacts, as required by exact protected-block ownership:
+
+| scene | projected RADIO render cosine | projected SigLIP proposal cosine | proposal retrieval top-1 |
+|---|---:|---:|---:|
+| figurines | 0.44080 | 0.70823 | 0.14894 |
+| ramen | 0.70101 | 0.89169 | 0.14286 |
+
+These values establish preservation, not absolute superiority over the
+historical field. In particular, category and registered text-query source
+metrics remain absent, so source audit and benchmarks stay sealed. The strong
+two-scene instance trend authorizes a matched 2000-step development extension.
+The original rank-16 writeback is also being rerun from scratch at its fixed
+configuration as the non-structured shared-D512 comparator under the revised
+capability contract; it is not used to initialize the structured candidate.
+
+An apples-to-apples historical comparator then showed why exact protected-block
+preservation is necessary but not sufficient. Both the historical RADIO render
+and the fresh shared block were evaluated against the same seeded projected
+RADIO teacher. Before any shared visual optimization, fresh structured D320
+lagged the historical field by `-0.21997` on Figurines and `-0.08175` on Ramen.
+The scheduled 2000-step private-only extensions were stopped without artifacts
+because their parameter ownership made this capability deficit impossible to
+repair.
+
+The next registered screen added the required phase order with separate
+partition optimizers:
+
+```text
+sampled source-train visual step (shared only)
+-> instance/relation step (instance only)
+-> boundary step (boundary only)
+```
+
+At 600 steps the two seeds both retain strong instance gains:
+
+| seed | Figurines IoU gain | Ramen IoU gain | macro gain |
+|---:|---:|---:|---:|
+| 20260826 | +0.07186 | +0.17544 | +0.12365 |
+| 20260827 | +0.08898 | +0.17638 | +0.13268 |
+
+However, the visual phase does not pass the capability Pareto gate. The
+historical-projected correspondence deltas are `-0.25491/-0.25647` for the two
+Figurines seeds and `-0.09240/-0.09129` for the two Ramen seeds. The
+source-train sampled visual loss falls,
+but source-dev correspondence worsens, indicating mapping overfit rather than
+instance-gradient interference. No 2000-step extension is authorized.
+
+The next capacity diagnostic is therefore the preregistered hard-block S1
+layout `448 visual + 48 instance + 16 boundary = 512`, with no semantic-private
+block. It tests whether the shared D320 bottleneck itself causes the image
+capability deficit. S1 is an explanatory arm, not the final shared-private
+candidate, and uses the same source split, steps, losses, and thresholds.
+
+S1 was run from a fresh source-only initialization with the visual block frozen.
+This isolates representational capacity from the source-train visual overfit
+already observed in the D320 alternating arm. Partition-owned writes remained
+exact: the shared-block maximum absolute delta was `0.0` in both scenes. Its
+600-step source-dev results are:
+
+| scene | IoU gain | Brier change | boundary F change | unknown FP change | projected image delta from historical |
+|---|---:|---:|---:|---:|---:|
+| figurines | +0.08281 | -0.32846 | +0.11392 | -0.36030 | -0.21414 |
+| ramen | +0.16793 | -0.33380 | +0.33145 | -0.39083 | -0.08242 |
+
+The scene-macro IoU gain is `+0.12537`, confirming again that the private
+instance/boundary coordinates work. The image-correspondence capability does
+not: D448 reaches `0.45282` versus historical `0.66695` on Figurines and
+`0.69861` versus `0.78103` on Ramen. Increasing the fresh visual block from
+D320 to D448 therefore does not materially close the deficits (`-0.21997` and
+`-0.08175` at D320). S1 fails the capability Pareto gate. S2 and S3 allocate
+fewer visual dimensions, so they cannot answer this failed capacity hypothesis
+and are not opened as image-repair searches. There is no 2000-step extension,
+source-audit access, or benchmark access.
+
+The fixed rank-16 historical writeback comparator was independently rerun from
+scratch at its original configuration. It gives IoU gains `+0.01132` on
+Figurines and `+0.09019` on Ramen (macro `+0.05075`) while its raw RADIO
+diagnostic changes are `-0.000548` and `-0.000614`. Raw RADIO is no longer a
+hard gate, but this rerun still lacks the registered source text/category suite
+and does not dominate the structured arm's instance gains. It is retained only
+as a comparator and is not promoted or used to initialize the new structure.
+
+The structured revision is therefore a useful architectural result but not a
+promotion candidate: block ownership solves instance-gradient interference,
+whereas a fresh fixed-JL source visual initialization fails real held-out image
+correspondence and sampled visual updates overfit it further. The next method
+revision must improve the source visual mapping authority itself while
+preserving private writes; it must not recycle a historical field into training
+or resume any rejected arm under a new label.
+
+## Product-space architecture comparison
+
+Two previously proposed refinements were then implemented and compared with
+the fixed hard-block product space under the same `320/128/48/16` layout,
+source split, seed, 600 steps, four episodes, and 32 relation edges. All arms
+persist exactly one `N x 512` table and no Gaussian-indexed sidecar.
+
+- The learned orthogonal product arm uses 192 global disjoint Givens rotations.
+  It is exactly orthogonal for every parameter value. Source visual authority
+  may update only these constant-size angles; the Gaussian shared block stays
+  frozen. An identity-initialized run exposed the expected stationary point, so
+  the decisive rerun used fixed seeded angles in `[-0.05, 0.05]`.
+- The shared-core low-rank-private arm adds zero-output rank-8 shared-to-instance
+  and rank-4 context-to-boundary one-way branches. Context reads are detached;
+  only the private blocks and global branch factors receive private-task writes.
+  The branches add 6,016 global parameters and no per-Gaussian state.
+
+The matched source-dev results are:
+
+| architecture | Figurines IoU gain | Ramen IoU gain | macro IoU gain | macro Brier change | macro boundary F change | macro unknown FP change |
+|---|---:|---:|---:|---:|---:|---:|
+| fixed hard block | +0.08422 | +0.16793 | +0.12608 | -0.33114 | +0.22266 | -0.37558 |
+| learned orthogonal product | +0.07186 | +0.17544 | +0.12365 | -0.33057 | **+0.24759** | -0.38092 |
+| shared core + low-rank private | +0.07774 | **+0.20594** | **+0.14184** | **-0.33581** | +0.21468 | **-0.39148** |
+
+The perturbed orthogonal angles converge back to identity: final mean absolute
+angle is `1.07e-6` on Figurines and `1.21e-15` on Ramen. Its image and semantic
+capability values are consequently identical to the hard-block initialization.
+This is evidence that, for the current cosine/prototype objectives, the learned
+orthogonal basis is an isometric reparameterization rather than additional
+identifiable capacity. It is not selected.
+
+The low-rank branches are active rather than dormant. Final instance-up norms
+are `0.543/0.569` and boundary-up norms are `0.909/0.970` for
+Figurines/Ramen. They produce the best macro instance IoU, Brier, and unknown-FP
+change, though the gain is concentrated in Ramen and the orthogonal arm retains
+the best macro boundary F. Among the three instance structures, low-rank
+private branches are the preferred next development arm; the fixed hard block
+remains the simpler robustness baseline.
+
+No arm passes the full capability Pareto gate. All three preserve the same
+projected SigLIP source-dev values but retain image-correspondence deficits of
+`-0.21997` on Figurines and `-0.08175` on Ramen relative to the hash-bound
+historical comparator. Therefore “best instance structure” does not mean
+promotion: Teatime, Waldo, ScanNet, source audit, and benchmarks remain sealed.
+The next authorized work is a new source visual mapping authority paired with
+the low-rank-private instance structure, not further tuning of these private
+branches or relaxation of the image gate.
+
+Three implementation-only peak allocations were removed while retaining exact
+losses and budgets: low-rank projections accumulate directly from column
+blocks, repeated compositor Gaussian rows are compacted before private reads,
+and episode/relation gradients are accumulated in exact weighted chunks before
+one clipping/update. A numerical test verifies that compact relation loss and
+its full-table gradient match the original formulation.

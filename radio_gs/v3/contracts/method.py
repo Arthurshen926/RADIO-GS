@@ -19,9 +19,13 @@ class StructuredMemoryContract:
     name: str = "structured_universal_gaussian_memory_v3"
     latent_dim: int = 512
     reliability_dim: int = 5
-    visual_dim: int = 256
-    instance_dim: int = 32
+    shared_dim: int = 320
+    semantic_dim: int = 128
+    instance_dim: int = 48
     boundary_dim: int = 16
+    capability_preservation_gate: str = "source_capability_pareto"
+    raw_radio_fidelity_role: str = "diagnostic_soft_regularizer"
+    partition_owned_writes: bool = True
     gaussian_indexed_high_dimensional_sidecars: int = 0
     target_rgb_allowed_in_strict_lerf: bool = False
     shared_2d_3d_posterior: bool = True

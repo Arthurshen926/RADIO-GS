@@ -13,6 +13,34 @@ class GateDecision:
     failures: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class CapabilityMetric:
+    value: float
+    higher_is_better: bool
+    tolerance: float
+
+
+def capability_pareto_gate(
+    baseline: dict[str, CapabilityMetric],
+    candidate: dict[str, float],
+) -> GateDecision:
+    """Require every real source capability to remain within its tolerance."""
+
+    if set(baseline) != set(candidate) or not baseline:
+        raise ValueError("capability gate cohorts differ")
+    failures = []
+    for name in sorted(baseline):
+        before = baseline[name]
+        after = float(candidate[name])
+        change = after - before.value
+        regression = -change if before.higher_is_better else change
+        if regression > before.tolerance:
+            failures.append(
+                f"{name}: capability regression {regression:.8g} exceeds tolerance {before.tolerance:.8g}"
+            )
+    return GateDecision(not failures, tuple(failures))
+
+
 def source_heldout_gate(
     baseline: dict[str, SourceHeldoutMetrics],
     candidate: dict[str, SourceHeldoutMetrics],
@@ -38,4 +66,9 @@ def source_heldout_gate(
     return GateDecision(not failures, tuple(failures))
 
 
-__all__ = ["GateDecision", "source_heldout_gate"]
+__all__ = [
+    "CapabilityMetric",
+    "GateDecision",
+    "capability_pareto_gate",
+    "source_heldout_gate",
+]

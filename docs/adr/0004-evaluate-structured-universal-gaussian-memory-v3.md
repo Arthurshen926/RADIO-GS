@@ -16,6 +16,12 @@ Evaluate **Structured Universal Gaussian Memory v3 (SUGM-v3)** under these
 invariants:
 
 - each Gaussian persists exactly one D512 latent and five reliability scalars;
+- the D512 is an explicit product space with a shared core and semantic,
+  instance, and boundary-private blocks; the first registered layout is
+  `320/128/48/16`;
+- task losses may read other blocks through stop-gradient context, but writes
+  are owned by their block; cross-block bridges are global, one-way, and zero
+  initialized;
 - RADIO, DINO, SigLIP, and SAM are frozen mapping-time teachers and add no
   Gaussian-indexed feature sidecar;
 - exact-MPR transports positive, negative, and unknown evidence but is not an
@@ -39,10 +45,15 @@ deployment eligible.
 
 The D16 oracle must first improve scene-macro source-heldout mask IoU by at
 least 0.05, reduce Brier score, improve boundary F, avoid per-scene regression,
-and not increase unknown false-positive mass. Only then may a low-rank D512
-residual be trained. Full benchmarks remain blocked until the D512 arm passes
-the same source gate and fixed LERF/ScanNet/NVOS sentinels. LERF 2D and 3D must
-both improve using one posterior without localization regression.
+and not increase unknown false-positive mass. Raw RADIO reconstruction cosine
+is retained as a diagnostic and soft regularizer, not a strict zero-regression
+gate. Promotion instead requires a preregistered source-capability Pareto gate:
+instance metrics must pass the same source gate while text/image identity,
+category response, correspondence, geometry, and rendering remain within
+their measured run-variance tolerances. Full benchmarks remain blocked until
+the structured arm passes that source gate and fixed LERF/ScanNet/NVOS
+sentinels. LERF 2D and 3D must both improve using one posterior without
+localization regression.
 
 ## Consequences
 

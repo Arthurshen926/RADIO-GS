@@ -39,6 +39,10 @@ _Avoid_: Universal Field v2, promoted field, multi-feature field
 The proposed single-field representation in which one persistent D512 latent
 and five reliability scalars per Gaussian jointly retain visual semantics,
 scale-conditioned instance membership, boundary structure, and reliability.
+The D512 is an explicit shared-private product space: a shared core plus
+semantic, instance, and boundary-private blocks with partition-owned writes;
+raw RADIO reconstruction is diagnostic while promotion uses source-capability
+Pareto preservation.
 It is trained through source-heldout 3D-membership rendering and remains a
 candidate until ADR 0004 promotion gates pass.
 _Avoid_: v2 readout extension, instance sidecar, benchmark memory
