@@ -35,6 +35,19 @@ decode into a named foundation-model feature space.  It remains a candidate
 until ADR 0003 promotion gates pass.
 _Avoid_: Universal Field v2, promoted field, multi-feature field
 
+**Structured Universal Gaussian Memory v3 Candidate**:
+The proposed single-field representation in which one persistent D512 latent
+and five reliability scalars per Gaussian jointly retain visual semantics,
+scale-conditioned instance membership, boundary structure, and reliability.
+It is trained through source-heldout 3D-membership rendering and remains a
+candidate until ADR 0004 promotion gates pass.
+_Avoid_: v2 readout extension, instance sidecar, benchmark memory
+
+**Shared 3D Instance Membership**:
+The one per-Gaussian object posterior selected by text, image, or prompt
+identity anchors and consumed unchanged by both 3D evaluation and 2D rendering.
+_Avoid_: 2D proposal, projection repair, separate 2D/3D posterior
+
 ## Querying
 
 **Authorized Query Input**:
