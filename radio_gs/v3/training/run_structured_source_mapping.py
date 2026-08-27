@@ -29,6 +29,7 @@ from radio_gs.v3.training.rendered_mask import render_membership
 from radio_gs.v3.training.run_instance_upper_bound import evaluate, load_episodes
 from radio_gs.v3.training.structured_initialization import initialize_structured_memory
 from radio_gs.v3.training.structured_initialization import fixed_jl_projection
+from radio_gs.v3.training.learned_source_codec import apply_codec
 
 
 def relation_training_edges(
@@ -249,6 +250,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         layout=layout,
         seed=args.seed,
         hit_chunk=args.initialization_hit_chunk,
+        codec_path=args.codec,
     )
     initial_protected = initial[:, : layout.shared + layout.semantic].clone()
     device = torch.device(args.device)
@@ -311,6 +313,10 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     )
     rng = random.Random(args.seed)
     visual_training = []
+    codec_state = (
+        torch.load(Path(args.codec).resolve(strict=True), map_location="cpu")["state_dict"]
+        if args.codec else None
+    )
     seen_views = set()
     for item in training:
         if item.view_index in seen_views:
@@ -325,9 +331,18 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             / "backbone" / f"rgb_{int(record['frame_id'])}.pt",
             map_location="cpu",
         ).float()
-        projection = fixed_jl_projection(teacher.shape[0], layout.shared, args.seed)
+        if codec_state is not None:
+            projection = torch.as_tensor(codec_state["radio_basis"]).float()
+            teacher = apply_codec(
+                teacher.permute(1, 2, 0).reshape(-1, teacher.shape[0]),
+                torch.as_tensor(codec_state["radio_mean"]).float(),
+                projection,
+            )
+        else:
+            projection = fixed_jl_projection(teacher.shape[0], layout.shared, args.seed)
+            teacher = teacher.permute(1, 2, 0).reshape(-1, teacher.shape[0]) @ projection
         teacher = F.normalize(
-            teacher.permute(1, 2, 0).reshape(-1, teacher.shape[0]) @ projection,
+            teacher,
             dim=-1,
             eps=1e-8,
         )
@@ -456,6 +471,12 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         "schema": "radio_gs.sugm_v3.structured_source_mapping.v1",
         "state_dict": {
             **best_state,
+            **({
+                "codec.radio_mean": codec_state["radio_mean"],
+                "codec.radio_basis": codec_state["radio_basis"],
+                "codec.siglip_mean": codec_state["siglip_mean"],
+                "codec.siglip_basis": codec_state["siglip_basis"],
+            } if codec_state is not None else {}),
             "memory": deployed,
             "boundary_head.weight": best_boundary_head["weight"],
             "boundary_head.bias": best_boundary_head["bias"],
@@ -540,6 +561,7 @@ def parser() -> argparse.ArgumentParser:
     value.add_argument("--relation", required=True)
     value.add_argument("--radio-teacher-root", required=True)
     value.add_argument("--siglip-teacher", required=True)
+    value.add_argument("--codec")
     value.add_argument("--device", default="cuda:0")
     value.add_argument(
         "--architecture",

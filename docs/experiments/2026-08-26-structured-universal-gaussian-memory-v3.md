@@ -455,3 +455,66 @@ blocks, repeated compositor Gaussian rows are compacted before private reads,
 and episode/relation gradients are accumulated in exact weighted chunks before
 one clipping/update. A numerical test verifies that compact relation loss and
 its full-table gradient match the original formulation.
+
+## Historical-comparator fairness audit and learned codec screen
+
+The historical projected-RADIO delta was subsequently audited against the
+historical field's hash-bound `feature_frame_manifest` and
+`selected_dataset_indices`. The comparator had opened every current source-dev
+frame: all `8/8` Figurines residue-3 frames and all `8/8` Ramen residue-3 frames
+overlap its construction views. The current train and audit cohorts also overlap
+completely. The evaluator now fails closed on missing lineage, manifest hash
+mismatch, or invalid selected indices, and labels both comparators
+`diagnostic_nonheldout_comparator`. Consequently the earlier
+`-0.21997/-0.08175` deltas are not held-out rejection gates.
+
+The next visual-semantic screen kept the registered `320/128/48/16` layout and
+did not open historical weights. A single cross-scene source-train PCA codec was
+fit jointly on Figurines and Ramen native RADIO and SigLIP2 samples. RADIO D320
+retains `0.94145` of sampled variance and SigLIP2 D128 retains `0.91008`.
+Initialization applies the linear codec before exact-MPR and normalizes only the
+aggregated Gaussian row. Before any private training, its source-dev results are:
+
+| arm / scene | RADIO cosine | same-pixel top-1 | top-5 | margin | SigLIP cosine | proposal top-1 |
+|---|---:|---:|---:|---:|---:|---:|
+| fixed-JL / Figurines | 0.44080 | 0.09595 | 0.25049 | -0.17843 | 0.70823 | 0.14894 |
+| PCA codec / Figurines | 0.42749 | 0.09302 | 0.24976 | -0.19265 | **0.93555** | **0.19149** |
+| fixed-JL / Ramen | 0.70101 | 0.16748 | 0.46851 | -0.07833 | 0.89169 | 0.14286 |
+| PCA codec / Ramen | 0.65775 | **0.17871** | **0.48218** | -0.09604 | **0.99970** | **0.16327** |
+
+Thus the learned semantic codec passes a two-scene improvement screen, while
+plain PCA visual mapping is mixed and cannot authorize private training. A
+fixed-JL-visual/learned-SigLIP control using the corrected normalization order
+is nearly identical to old fixed-JL on image metrics (`0.44128/0.70109` cosine,
+`0.09521/0.16650` top-1), proving that normalization order alone is not the
+visual bottleneck.
+
+A bounded global D320 positive diagonal render metric was then learned from
+source-train exact-hit render cosine and in-view correspondence cross entropy.
+It updates no Gaussian and is shared across both scenes. On the PCA visual basis
+it improves same-pixel top-1 to `0.11475/0.21143` and top-5 to
+`0.29565/0.54736`, but Ramen margin is `-0.08704` versus the fixed-JL
+`-0.07833`. This remains a Pareto failure. The final authorized codec control is
+the same bounded render metric on the stronger fixed-JL visual basis; private
+low-rank training remains closed pending that result. That final control reaches
+only `0.09082/0.17432` top-1, `0.24707/0.47266` top-5, and
+`-0.19963/-0.09009` margin on Figurines/Ramen. It regresses Figurines and is
+rejected. This closes diagonal render-metric learning on both PCA and fixed-JL
+visual bases; neither is attached to the low-rank-private branch. The successful
+piece retained for the next method revision is the cross-scene learned SigLIP
+semantic codec. The visual branch requires a more expressive correspondence-
+trained encoder/decoder than PCA plus a diagonal metric.
+
+Frozen evidence:
+
+- comparator fairness reports:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/architecture_comparison_capability_v2_fairness_audit/`;
+- PCA codec and render-metric codecs:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/cross_scene_source_codec_v1/`;
+- source-dev capability reports:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/cross_scene_codec_capability_v1/`,
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/render_metric_codec_capability_v1/`,
+  and
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/hybrid_codec_capability_v1/`;
+- rejected fixed-JL render-metric control:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/hybrid_render_metric_capability_v1/`.

@@ -9,6 +9,8 @@ import torch
 from torch.nn import functional as F
 
 from radio_gs.v3.memory.structured_memory import SharedPrivateLayout
+from radio_gs.v3.training.instance_upper_bound import sha256_file
+from radio_gs.v3.training.learned_source_codec import apply_codec
 
 
 def fixed_jl_projection(input_dim: int, output_dim: int, seed: int) -> torch.Tensor:
@@ -26,6 +28,7 @@ def initialize_structured_memory(
     layout: SharedPrivateLayout = SharedPrivateLayout(),
     seed: int = 20260826,
     hit_chunk: int = 32768,
+    codec_path: str | Path | None = None,
 ) -> tuple[torch.Tensor, dict[str, object]]:
     """Build all D512 blocks without reading a historical Gaussian field."""
 
@@ -44,7 +47,27 @@ def initialize_structured_memory(
         teacher_root / "backbone" / f"rgb_{int(records[0]['frame_id'])}.pt",
         map_location="cpu",
     ).float()
-    radio_projection = fixed_jl_projection(first.shape[0], layout.shared, seed)
+    codec = None
+    if codec_path is not None:
+        resolved_codec = Path(codec_path).resolve(strict=True)
+        codec = torch.load(resolved_codec, map_location="cpu")
+        codec_metadata = codec.get("metadata", {})
+        if (
+            codec.get("schema") != "radio_gs.sugm_v3.cross_scene_source_codec.v1"
+            or codec_metadata.get("source_only") is not True
+            or codec_metadata.get("historical_field_opened") is not False
+            or codec_metadata.get("source_train_residues") != [1, 2]
+        ):
+            raise ValueError("learned codec violates fresh source-only lineage")
+        codec_state = codec["state_dict"]
+        radio_mean = torch.as_tensor(codec_state["radio_mean"]).float()
+        radio_projection = torch.as_tensor(codec_state["radio_basis"]).float()
+        if radio_projection.shape != (first.shape[0], layout.shared):
+            raise ValueError("learned RADIO codec axes differ")
+    else:
+        resolved_codec = None
+        radio_mean = torch.zeros(first.shape[0])
+        radio_projection = fixed_jl_projection(first.shape[0], layout.shared, seed)
     shared_sum = torch.zeros(rows, layout.shared)
     shared_mass = torch.zeros(rows)
     for record in records:
@@ -53,7 +76,9 @@ def initialize_structured_memory(
             map_location="cpu",
         ).float()
         pixels = teacher.permute(1, 2, 0).reshape(-1, teacher.shape[0])
-        projected = F.normalize(pixels @ radio_projection, dim=-1, eps=1e-8)
+        projected = apply_codec(pixels, radio_mean, radio_projection)
+        if codec is None:
+            projected = F.normalize(projected, dim=-1, eps=1e-8)
         shard = torch.load(Path(record["responsibility_view"]), map_location="cpu")
         gaussian_ids = torch.as_tensor(shard["gaussian_ids"]).long()
         pixel_ids = torch.as_tensor(shard["pixel_ids"]).long()
@@ -75,8 +100,21 @@ def initialize_structured_memory(
         descriptors = torch.as_tensor(siglip["descriptors"]).float()
         if descriptors.shape[0] != int(membership["num_proposals"]):
             raise ValueError("SigLIP and membership proposal axes differ")
-        semantic_projection = fixed_jl_projection(descriptors.shape[1], layout.semantic, seed + 1)
-        proposal_semantic = F.normalize(descriptors @ semantic_projection, dim=-1, eps=1e-8)
+        if codec is not None:
+            semantic_mean = torch.as_tensor(codec_state["siglip_mean"]).float()
+            semantic_projection = torch.as_tensor(codec_state["siglip_basis"]).float()
+            if semantic_projection.shape != (descriptors.shape[1], layout.semantic):
+                raise ValueError("learned SigLIP codec axes differ")
+            proposal_semantic = apply_codec(
+                descriptors, semantic_mean, semantic_projection
+            )
+        else:
+            semantic_projection = fixed_jl_projection(
+                descriptors.shape[1], layout.semantic, seed + 1
+            )
+            proposal_semantic = F.normalize(
+                descriptors @ semantic_projection, dim=-1, eps=1e-8
+            )
         proposal_views = torch.as_tensor(membership["proposal_view_indices"]).long()
         train_proposals = (proposal_views % 4 == 1) | (proposal_views % 4 == 2)
         membership_proposals = torch.as_tensor(membership["proposal_indices"]).long()
@@ -109,14 +147,24 @@ def initialize_structured_memory(
     return memory, {
         "source_train_residues": [1, 2],
         "historical_field_opened": False,
-        "radio_projection": {"type": "fixed_jl", "seed": int(seed), "dim": layout.shared},
+        "radio_projection": (
+            {"type": "learned_cross_scene_pca", "dim": layout.shared}
+            if codec is not None else
+            {"type": "fixed_jl", "seed": int(seed), "dim": layout.shared}
+        ),
         "siglip_projection": (
-            {"type": "fixed_jl", "seed": int(seed + 1), "dim": layout.semantic}
+            ({"type": "learned_cross_scene_pca", "dim": layout.semantic}
+             if codec is not None else
+             {"type": "fixed_jl", "seed": int(seed + 1), "dim": layout.semantic})
             if layout.semantic else None
         ),
         "shared_observed_rows": int(observed_shared.sum()),
         "semantic_observed_rows": int(observed_semantic.sum()),
         "num_rows": rows,
+        "codec": (
+            {"path": str(resolved_codec), "sha256": sha256_file(resolved_codec)}
+            if resolved_codec is not None else None
+        ),
     }
 
 
