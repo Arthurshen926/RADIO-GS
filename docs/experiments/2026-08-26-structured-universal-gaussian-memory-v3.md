@@ -518,3 +518,102 @@ Frozen evidence:
   `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/hybrid_codec_capability_v1/`;
 - rejected fixed-JL render-metric control:
   `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/hybrid_render_metric_capability_v1/`.
+
+## SUGM-v3.1 native-teacher ceiling and nonlinear visual writer
+
+The v3.1 continuation freezes the `320/128/48/16` layout, the rank-8/rank-4
+private branches, and the learned SigLIP semantic codec. It stops all orthogonal,
+width, rank, projection-order, and diagonal-metric searches. Ramen's missing
+official DINOv2 ViT-B/14 source maps were extracted for the exact same sealed 32
+source views; Figurines already had complete `32/32` coverage.
+
+Before training another D320 writer, uncompressed native-teacher exact-MPR
+ceilings were measured from train residues 1/2 to dev residue 3:
+
+| teacher / scene | dimension | render cosine | same-pixel top-1 | top-5 | margin |
+|---|---:|---:|---:|---:|---:|
+| RADIO / Figurines | 1280 | 0.45358 | 0.09814 | 0.25366 | -0.16267 |
+| DINOv2 / Figurines | 768 | 0.44038 | 0.07300 | 0.18408 | -0.21236 |
+| RADIO / Ramen | 1280 | 0.69638 | 0.18042 | 0.48584 | -0.07500 |
+| DINOv2 / Ramen | 768 | 0.65269 | 0.11035 | 0.32031 | -0.12469 |
+
+Compared with fixed-JL D320 RADIO (`0.09595/0.16748` top-1), removing
+compression recovers only `+0.00220/+0.01294`. Thus compression is not the
+dominant loss; ordinary multiview aggregation and task alignment remain limiting.
+One preregistered single-step cosine-Huber IRLS aggregation was tested with
+residual delta `0.10` and weight floor `0.05`. It fails the two-scene Pareto
+screen: RADIO top-1 becomes `0.09863/0.17847`, with worse top-5 or margin, and
+DINOv2 also remains mixed. No robust-weight threshold search is authorized.
+
+The one registered nonlinear writer is therefore:
+
+```text
+RADIO LayerNorm -> rank-160 projection --\
+                                         gated D320 fusion -> residual MLP -> unit D320
+DINO LayerNorm  -> rank-96 projection  --/
+```
+
+It is trained jointly across Figurines and Ramen using source-train cross-view
+same-Gaussian positive pairs. Distinct Gaussian identities in each batch are
+hard negatives. The loss combines symmetric correspondence cross entropy,
+positive-pair cosine, RADIO/DINO decoder reconstruction, and preservation of
+the two teachers' local similarity graph. It opens no dev view, historical
+field, target RGB, audit residue, or benchmark metric. A two-step four-GPU smoke
+reduced total loss from `5.15176` to `4.52823`. The single formal nonlinear-codec
+run used 300 steps and batch size 128; its loss fell from `4.92620` to `1.86040`
+(`correspondence 4.13970 -> 1.59975`, dual reconstruction `1.98350 -> 0.62051`).
+No architecture, rank, width, loss-weight, or threshold arm was searched.
+
+Frozen ceiling evidence:
+
+- `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/uncompressed_exact_mpr_ceiling_v1/`;
+- `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/uncompressed_robust_mpr_ceiling_v1/`;
+- `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/native_dinov2_source32/ramen/`.
+
+The codec was then frozen and written by ordinary exact-MPR into a fresh D512,
+while the learned SigLIP D128 codec initialized the semantic block. On the
+unseen residue-3 source views this MPR-only nonlinear candidate obtains:
+
+| scene | encoded render cosine | same-pixel top-1 | top-5 | margin | SigLIP cosine | proposal top-1 |
+|---|---:|---:|---:|---:|---:|---:|
+| Figurines | **0.83212** | 0.09473 | 0.26294 | **-0.07914** | 0.93555 | 0.19149 |
+| Ramen | **0.88149** | **0.21143** | **0.55786** | **-0.03680** | 0.99970 | 0.16327 |
+
+Relative to fixed-JL, Ramen improves every correspondence statistic. Figurines
+improves cosine, top-5, and margin, but top-1 changes from `0.09595` to
+`0.09473`. This is not a strict two-scene Pareto pass, so private training was
+not opened.
+
+To complete the one missing registered component rather than create another
+codec arm, the same frozen encoder was followed by one source-train
+renderer-aware D320 refinement. Only visual columns were optimized through the
+immutable exact compositor with render cosine, within-view correspondence, and
+an initialization anchor. Semantic, instance, and boundary maximum absolute
+change is exactly `0.0`. Its residue-3 results are:
+
+| scene | encoded render cosine | same-pixel top-1 | top-5 | margin |
+|---|---:|---:|---:|---:|
+| Figurines | 0.57859 | **0.11523** | **0.30371** | -0.11447 |
+| Ramen | 0.70395 | **0.24561** | **0.60010** | -0.04896 |
+
+The refinement raises top-1/top-5 in both scenes and exceeds fixed-JL on all
+three retrieval statistics, but it regresses cosine and margin relative to its
+MPR-only parent. It is therefore retained as diagnostic evidence that
+renderer-aware correspondence can recover ranking, but rejected as the new
+visual-core checkpoint under the parent-Pareto rule. No loss-weight retuning is
+performed. Phase 4 remains closed because neither visual candidate is a strict
+two-scene Pareto successor and the preregistered source text/category gates are
+still absent. Teatime, Waldo, source audit, and all benchmarks remain sealed.
+
+Frozen nonlinear evidence:
+
+- codec:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/native_visual_codec_v1/`;
+- MPR-only D512 and capability:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/native_visual_initialization_v1/`
+  and
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/native_visual_capability_v1/`;
+- renderer-aware D512 and capability:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/native_visual_render_refinement_v1/`
+  and
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/native_visual_render_capability_v1/`.

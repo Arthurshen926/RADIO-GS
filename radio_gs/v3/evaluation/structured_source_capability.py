@@ -19,6 +19,7 @@ from radio_gs.v3.training.instance_upper_bound import proposal_supports, sha256_
 from radio_gs.v3.training.run_instance_upper_bound import materialize_canonical_memory
 from radio_gs.v3.training.structured_initialization import fixed_jl_projection
 from radio_gs.v3.training.learned_source_codec import apply_codec
+from radio_gs.v3.training.native_visual_codec import GatedResidualVisualCodec, _load_dino
 
 
 def _same_pixel_retrieval(
@@ -73,10 +74,14 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     semantic = memory[:, semantic_start : semantic_start + int(layout["semantic"])]
     architecture = metadata.get("architecture", "hard_block_shared_private")
     state_dict = candidate["state_dict"]
-    learned_codec = metadata["initialization"]["radio_projection"]["type"] == "learned_cross_scene_pca"
+    projection_type = metadata["initialization"]["radio_projection"]["type"]
+    native_codec = projection_type == "native_gated_residual_radio_dino"
+    learned_codec = projection_type == "learned_cross_scene_pca"
+    semantic_learned = metadata["initialization"]["siglip_projection"]["type"] != "fixed_jl"
     if learned_codec:
         radio_mean = torch.as_tensor(state_dict["codec.radio_mean"]).float()
         radio_basis = torch.as_tensor(state_dict["codec.radio_basis"]).float()
+    if semantic_learned:
         siglip_mean = torch.as_tensor(state_dict["codec.siglip_mean"]).float()
         siglip_basis = torch.as_tensor(state_dict["codec.siglip_basis"]).float()
 
@@ -103,6 +108,17 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         rotated[..., right_indices] = angles.sin() * left + angles.cos() * right
         return rotated
     device = torch.device(args.device)
+    visual_model = None
+    dino_root = None
+    if native_codec:
+        if args.baseline_field:
+            raise ValueError("native RADIO+DINO codec has no historical RADIO-only comparator")
+        dino_root = Path(metadata["dino_teacher_root"]).resolve(strict=True)
+        visual_model = GatedResidualVisualCodec().to(device).eval()
+        visual_model.load_state_dict({
+            name.removeprefix("visual_codec."): torch.as_tensor(value)
+            for name, value in state_dict.items() if name.startswith("visual_codec.")
+        }, strict=True)
     baseline_memory = baseline_decoder = baseline_path = comparator_view_audit = None
     if args.baseline_field:
         baseline_path = Path(args.baseline_field).resolve(strict=True)
@@ -137,21 +153,36 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             teacher_root / "backbone" / f"rgb_{int(record['frame_id'])}.pt",
             map_location="cpu",
         ).float()
-        projection = (
-            radio_basis if learned_codec else fixed_jl_projection(
-                teacher.shape[0], int(layout["shared"]),
-                int(metadata["initialization"]["radio_projection"]["seed"]),
+        teacher_flat = teacher.permute(1, 2, 0).reshape(-1, teacher.shape[0])
+        if native_codec:
+            assert visual_model is not None and dino_root is not None
+            dino = _load_dino(
+                dino_root / f"frame_{int(record['frame_id']):05d}.pt"
+            ).float().permute(1, 2, 0).reshape(-1, 768)
+            target_parts = []
+            for start in range(0, teacher_flat.shape[0], args.teacher_pixel_chunk):
+                stop = min(start + args.teacher_pixel_chunk, teacher_flat.shape[0])
+                target_parts.append(visual_model.encode(
+                    teacher_flat[start:stop].to(device), dino[start:stop].to(device)
+                ))
+            target = torch.cat(target_parts)
+            projection = None
+        else:
+            projection = (
+                radio_basis if learned_codec else fixed_jl_projection(
+                    teacher.shape[0], int(layout["shared"]),
+                    int(metadata["initialization"]["radio_projection"]["seed"]),
+                )
             )
-        )
-        target = F.normalize(
-            apply_codec(
-                teacher.permute(1, 2, 0).reshape(-1, teacher.shape[0]),
-                radio_mean if learned_codec else torch.zeros(teacher.shape[0]),
-                projection,
-            ),
-            dim=-1,
-            eps=1e-8,
-        ).to(device)
+            target = F.normalize(
+                apply_codec(
+                    teacher_flat,
+                    radio_mean if learned_codec else torch.zeros(teacher.shape[0]),
+                    projection,
+                ),
+                dim=-1,
+                eps=1e-8,
+            ).to(device)
         target = target_image_view(target)
         shard = torch.load(Path(record["responsibility_view"]), map_location="cpu")
         ids = torch.as_tensor(shard["gaussian_ids"]).long()
@@ -224,7 +255,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     if int(layout["semantic"]):
         siglip = torch.load(siglip_path, map_location="cpu")
         descriptors = torch.as_tensor(siglip["descriptors"]).float()
-        if learned_codec:
+        if semantic_learned:
             target_semantic = F.normalize(
                 apply_codec(descriptors, siglip_mean, siglip_basis), dim=-1, eps=1e-8
             )
@@ -312,6 +343,7 @@ def main() -> None:
     parser.add_argument("--hit-chunk", type=int, default=32768)
     parser.add_argument("--alpha-threshold", type=float, default=0.02)
     parser.add_argument("--retrieval-samples-per-view", type=int, default=512)
+    parser.add_argument("--teacher-pixel-chunk", type=int, default=1024)
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     if bool(args.baseline_field) != bool(args.expected_baseline_field_sha256):
