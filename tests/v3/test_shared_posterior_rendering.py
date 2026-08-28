@@ -1,6 +1,15 @@
 import torch
+from torch import nn
 
-from radio_gs.v3.query.membership import membership_from_prototype, pool_prototype
+from radio_gs.v3.memory.structured_memory import LowRankPrivateBranchMemory
+from radio_gs.v3.query.identity_adapter import AffineTextAlignment, DirectTextProjection
+from radio_gs.v3.query.interface import StructuredGaussianQueryInterface
+from radio_gs.v3.query.packet import QueryPacket
+from radio_gs.v3.query.membership import (
+    membership_from_prototype,
+    pool_prototype,
+    relative_membership_from_prototypes,
+)
 from radio_gs.v3.training.rendered_mask import render_membership, rendered_mask_loss
 
 
@@ -26,3 +35,134 @@ def test_unknown_pixels_are_excluded_from_mask_loss():
     loss = rendered_mask_loss(prediction, torch.tensor([1.0, 0.0, 0.0]), known=torch.tensor([1, 0, 1], dtype=torch.bool))
     loss.total.backward()
     assert prediction.grad[1] == 0
+
+
+def test_positive_membership_margin_reduces_unrelated_coverage():
+    instance = torch.tensor([[1.0, 0.0], [0.2, 0.98], [-1.0, 0.0]])
+    prototype = torch.tensor([1.0, 0.0])
+    raw = membership_from_prototype(instance, prototype, temperature=0.15)
+    calibrated = membership_from_prototype(
+        instance, prototype, temperature=0.15, margin=0.2
+    )
+    assert bool((calibrated < raw).all())
+    assert float(raw[1]) > 0.5
+    assert float(calibrated[1]) < 0.5
+
+
+def test_relative_membership_uses_hardest_competing_prototype():
+    instance = torch.tensor([[1.0, 0.0], [0.0, 1.0], [0.7, 0.7]])
+    posterior = relative_membership_from_prototypes(
+        instance,
+        torch.tensor([1.0, 0.0]),
+        torch.tensor([[0.0, 1.0], [-1.0, 0.0]]),
+        temperature=0.15,
+    )
+    assert float(posterior[0]) > 0.99
+    assert float(posterior[1]) < 0.01
+    torch.testing.assert_close(posterior[2], torch.tensor(0.5))
+
+
+def test_affine_text_alignment_is_finite_and_normalized():
+    alignment = AffineTextAlignment(torch.eye(128), torch.ones(128) * 0.1)
+    output = alignment(torch.randn(3, 128))
+    torch.testing.assert_close(output.norm(dim=1), torch.ones(3))
+
+
+def test_direct_text_projection_uses_raw_token_coordinates():
+    basis = torch.zeros(1536, 128)
+    basis[:128] = torch.eye(128)
+    projection = DirectTextProjection(basis)
+    token = torch.zeros(1536)
+    token[7] = 2.0
+    output = projection.project_raw(token, torch.zeros(1536))
+    assert output.shape == (1, 128)
+    torch.testing.assert_close(output[0, 7], torch.tensor(1.0))
+
+
+def test_canonical_interface_renders_the_exact_gaussian_posterior():
+    torch.manual_seed(3)
+    model = LowRankPrivateBranchMemory(torch.randn(5, 512))
+    interface = StructuredGaussianQueryInterface(
+        model, torch.zeros(5, 5), nn.Linear(16, 1)
+    )
+    posterior = interface.gaussian_posterior(
+        torch.tensor([0, 1]), torch.tensor([0.7, 0.3]), scale=0.4
+    )
+    rendered = interface.render_posterior(
+        posterior,
+        torch.tensor([0, 1, 2, 3]),
+        torch.tensor([0, 0, 1, 1]),
+        torch.tensor([0.6, 0.4, 0.2, 0.8]),
+        num_pixels=2,
+    )
+    torch.testing.assert_close(
+        rendered,
+        torch.stack((0.6 * posterior[0] + 0.4 * posterior[1], 0.2 * posterior[2] + 0.8 * posterior[3])),
+    )
+
+
+def test_text_and_image_tokens_compile_to_the_same_identity_anchors():
+    torch.manual_seed(5)
+    model = LowRankPrivateBranchMemory(torch.randn(13, 512))
+    interface = StructuredGaussianQueryInterface(
+        model,
+        torch.zeros(13, 5),
+        nn.Linear(16, 1),
+        siglip_mean=torch.randn(1536),
+        siglip_basis=torch.randn(1536, 128),
+    )
+    token = torch.randn(1536)
+    text = QueryPacket("text", token=token)
+    image = QueryPacket("image", token=token.clone())
+
+    text_rows, text_weights, text_identity = interface.compile_identity_anchors(text, topk=4)
+    image_rows, image_weights, image_identity = interface.compile_identity_anchors(image, topk=4)
+    text_posterior, _ = interface.posterior_from_packet(text, scale=0.3, topk=4)
+    image_posterior, _ = interface.posterior_from_packet(image, scale=0.3, topk=4)
+
+    assert torch.equal(text_rows, image_rows)
+    torch.testing.assert_close(text_weights, image_weights)
+    torch.testing.assert_close(text_identity, image_identity)
+    torch.testing.assert_close(text_posterior, image_posterior)
+
+
+def test_text_identity_uses_hardest_canonical_negative_when_sealed():
+    memory = torch.zeros(3, 512)
+    memory[0, 320] = 1.0
+    memory[1, 321] = 1.0
+    memory[2, 320:322] = 1.0
+    basis = torch.zeros(1536, 128)
+    basis[:128] = torch.eye(128)
+    positive = torch.zeros(1536)
+    positive[0] = 1.0
+    negatives = torch.zeros(1, 1536)
+    negatives[0, 1] = 1.0
+    interface = StructuredGaussianQueryInterface(
+        LowRankPrivateBranchMemory(memory),
+        torch.zeros(3, 5),
+        nn.Linear(16, 1),
+        siglip_mean=torch.zeros(1536),
+        siglip_basis=basis,
+        text_negative_tokens=negatives,
+        text_logit_scale=10.0,
+    )
+    _rows, _weights, identity = interface.compile_identity_anchors(
+        QueryPacket("text", token=positive), topk=2
+    )
+    assert float(identity[0]) > 0.99
+    assert float(identity[1]) < 0.01
+    assert abs(float(identity[2]) - 0.5) < 1e-5
+
+
+def test_prompt_packet_uses_only_finite_gaussian_seed_rows():
+    model = LowRankPrivateBranchMemory(torch.randn(6, 512))
+    interface = StructuredGaussianQueryInterface(
+        model, torch.zeros(6, 5), nn.Linear(16, 1)
+    )
+    seed = torch.tensor([float("nan"), 0.2, 0.9, 0.4, float("nan"), 0.8])
+    rows, weights, _ = interface.compile_identity_anchors(
+        QueryPacket("prompt", seed_probability=seed), topk=2
+    )
+
+    assert torch.equal(rows, torch.tensor([2, 5]))
+    assert float(weights.sum()) == 1.0

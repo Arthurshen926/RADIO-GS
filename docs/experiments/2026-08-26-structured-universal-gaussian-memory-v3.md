@@ -617,3 +617,554 @@ Frozen nonlinear evidence:
   `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/native_visual_render_refinement_v1/`
   and
   `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260827/sugm_v3/native_visual_render_capability_v1/`.
+
+## SUGM-v3.2 correspondence-authority and observation-set screen
+
+The next revision keeps the `320/128/48/16` layout, learned SigLIP D128, and
+rank-8/rank-4 private design frozen. Before training, a five-level source-only
+error ladder adds Recall@1/5, MRR, positive similarity, hardest-negative
+similarity, and margin. It also buckets the current pair authority by SAM
+boundary and Gaussian footprint.
+
+The ladder rejects the old training authority as a one-hot truth. Across all
+residue-1 x residue-2 view combinations, only `1.56%/2.88%` of Figurines/Ramen
+same-Gaussian best-pixel pairs are simultaneously bidirectional-mutual under
+both native RADIO and DINO. Native fused-teacher Recall@1 on those labels is
+only `10.43%/14.01%`, with margins `-0.18542/-0.18133`. The dominant loss is
+therefore correspondence authority, not D320 capacity. No new width or codec
+arm is authorized from this result.
+
+A fresh authority is built only on the eight adjacent source-train view pairs,
+using all valid `46 x 62` feature-grid pixels. Its tiers are fixed as:
+
+- high: DINO bidirectional mutual plus the same exact-compositor top Gaussian;
+- medium: DINO bidirectional mutual plus overlapping top-4 compositor support,
+  while allowing different top Gaussians;
+- weak: adjacent-view same-Gaussian best pixels, never used as one-hot truth;
+- hard negative: the most DINO-similar candidate with disjoint top-4 support.
+
+This yields `90/219` high/medium pairs on Figurines and `441/984` on Ramen,
+versus `79,282/586,302` weak pairs. Positive-to-support-disjoint-negative DINO
+margins are generally positive on overlapping adjacent pairs, validating the
+new authority mechanism. Later Figurines pairs `25-26/29-30` yield no
+support-consistent positive, which is retained as a coverage failure rather
+than filled with weak labels.
+
+Exactly one top-4 observation-set writer was then tested. It initializes the
+existing RADIO+DINO pixel codec, applies a zero-initialized DeepSets update to
+the four highest-responsibility pixels per Gaussian-view, and learns a global
+view confidence. Only high/medium pairs enter the soft-distribution,
+support-disjoint margin, neighborhood, and dual-reconstruction objectives. At
+300 steps total loss falls from `1.45245` to `0.22866`, but the explicit
+positive-negative score gap contracts from `0.06257` to `0.02925`; the hard
+margin loss worsens from `0.03960` to `0.05166`.
+
+The held-out residue-3 gate confirms rejection:
+
+| scene | set render cosine | top-1 | top-5 | MRR | positive | hardest negative | margin |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Figurines | 0.61054 | 0.06592 | 0.19727 | 0.13702 | 0.61090 | 0.72020 | -0.10930 |
+| Ramen | 0.70203 | 0.12671 | 0.39380 | 0.25767 | 0.70292 | 0.75697 | -0.05405 |
+
+Both scenes regress the MPR-only nonlinear parent (`0.09473/0.21143` top-1,
+`0.26294/0.55786` top-5). The set writer is rejected. No top-K, loss-weight,
+learning-rate, or threshold search, renderer refinement, private training,
+source audit, or benchmark is run. The retained result is the new adjacent-view
+multisource correspondence authority; the next method must avoid end-to-end
+pixel-codec drift under this sparse authority, for example by freezing the
+pixel codec and validating an authority-coverage mechanism before another
+aggregator run.
+
+Frozen v3.2 evidence:
+
+- ladder:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/visual_mapping_error_ladder_v1/`;
+- adjacent-view authority:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/multisource_correspondence_authority_v2/`;
+- rejected set codec:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/native_visual_set_codec_v1/`;
+- rejected D512 and held-out capability:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/native_visual_set_initialization_v1/`
+  and
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/native_visual_set_capability_v1/`.
+
+## SUGM-v3.3: source overlap graph and coverage repair
+
+The adjacent-pair authority was replaced by a source-only overlap graph over
+the residue-1/2 training views.  Edges are selected from symmetric exact-MPR
+top-8 support overlap (four fixed neighbors per view).  Direct shared-support
+anchors are locked; otherwise responsibility-weighted XYZ supplies an anchor
+and a radius-2 window is scored equally by geometry, native DINO, and native
+RADIO.  Every correspondence retains a continuous support/geometry/teacher/
+cycle confidence and both edge directions are materialized.
+
+A fixed view-authority gate rejects a view when its unique top-Gaussian count
+is below 2% of the 46x62 feature raster.  This exposed a genuine responsibility
+collapse in three Figurines training views: source-view indices 25, 29, and 30
+have only 4, 8, and 2 unique top Gaussians.  The shards are sorted and their
+frame indices agree with the source records, so this is not a loader error.
+Those views are excluded rather than relabeled with geometry-only guesses.
+Their removal changes top-8 row coverage only from 10.477% to 10.448%, and
+any-hit row coverage only from 44.864% to 44.802%.
+
+Frozen graph-union coverage (direct support and cycle distance no larger than
+the fixed radius) is:
+
+| scene | accepted views | graph edges | direct union mean/min | direct+cycle union mean/min | strict union mean/min | top-8 row coverage | any-hit row coverage |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Figurines | 13/16 | 32 | 99.51% / 95.41% | 76.51% / 50.11% | 75.02% / 47.48% | 10.45% | 44.80% |
+| Ramen | 16/16 | 45 | 97.54% / 79.73% | 90.22% / 65.22% | 89.82% / 64.41% | 14.73% | 80.24% |
+
+This repairs the correspondence-authority sparsity sufficiently to attempt a
+frozen-codec structural propagator, especially on Ramen.  It does not repair
+Gaussian-row coverage: the next stage must propagate from observed rows to
+unobserved/weak rows using source-only XYZ, region membership, boundary
+scalars, and confidence, while keeping the pixel codec frozen.  No private
+training, source audit, target RGB, text query, or benchmark was opened.
+
+Frozen artifacts:
+
+- graph authority:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/source_overlap_graph_v3/`;
+- union and row coverage:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/source_overlap_coverage_v1/`.
+
+The next source-only step materializes, but does not yet train on, a nested row
+propagation authority.  Observed rows map to themselves.  Unobserved rows first
+use the strongest observed row in the same membership proposal and the same
+128-cubed normalized-XYZ voxel; remaining rows use strongest-observed anchors
+in 128-, 64-, then 32-cubed voxels.  Confidence combines a median-saturated
+source evidence score with distance relative to the voxel diagonal.  Requiring
+the region and fine voxel jointly is important: region alone produced
+geometrically remote anchors and was rejected.
+
+| scene | observed | + region/128 voxel | + 128 voxel | + 64 voxel | + 32 voxel | unassigned rows |
+|---|---:|---:|---:|---:|---:|---:|
+| Figurines | 44.80% | 47.10% | 94.83% | 96.59% | 97.92% | 3,508 |
+| Ramen | 80.24% | 81.87% | 99.23% | 99.71% | 99.93% | 270 |
+
+Fine-voxel confidence medians are `0.805` and `0.851`; their 99th-percentile
+XYZ distances are `3.408` and `0.367` respectively.  The much larger absolute
+Figurines scale is accounted for in confidence by the scene/voxel diagonal,
+but this authority remains a candidate until a source-heldout feature
+reconstruction gate confirms propagation fidelity.  The frozen candidate is:
+
+`/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/row_propagation_authority_v2/`.
+
+## SUGM-v3.4: propagation fidelity gate and fail-closed coverage
+
+Row-path coverage is not treated as visual fidelity.  Before opening source
+dev, the fine propagation gate was fixed to fused native RADIO+DINO median
+cosine at least `0.70` and at least `0.80` of the directly observed-row
+median.  Residue 3 is used for this gate; the same 2% top-Gaussian diversity
+gate rejects collapsed dev views.  Audit residue 0 remains sealed.
+
+A single-best-pixel readout fails (`0.198/0.532` fine median for Figurines/
+Ramen).  A frozen top-4 multiview observation prototype rendered with the full
+exact-MPR weights improves the direct medians to `0.542/0.684`, but fine
+propagation reaches only `0.276/0.638`.  Ramen preserves 93% of its direct
+median but misses the fixed absolute gate; Figurines is an unambiguous failure.
+
+Two preregistered structural repairs were then tested without changing the
+gate.  Selecting one neighbor by geometry times observation reliability gives
+`0.240/0.639`.  A top-4 normalized local mixture gives `0.267/0.636`.  Neither
+passes, so no propagated row is authorized as a D512 visual write and no
+codec, loss, threshold, or benchmark tuning follows.
+
+The retained repair is fail-closed coverage modeling.  Every Gaussian receives
+a coverage-confidence/unknown scalar policy.  Only rows with actual accepted
+training-view compositor evidence have visual-write authority; region/voxel
+paths remain explicit candidates with zero visual authority.  This authorizes
+`75,621/168,791` Figurines rows and `307,087/382,687` Ramen rows, while all
+remaining rows, including rows with no propagation candidate, abstain.
+
+Frozen evidence:
+
+- rejected single-row gate:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/row_propagation_source_dev_v1/`;
+- rejected exact-MPR top-4 render gates:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/row_propagation_render_source_dev_v1/`,
+  `v2/`, and `v3/`;
+- final propagation candidates and fail-closed policy:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/row_propagation_authority_v4/`
+  and
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/row_coverage_policy_v2/`.
+
+The next eligible method change must learn an explicit unknown-aware structural
+predictor from accepted rows and source correspondences while keeping the
+pixel codec frozen.  Direct geometry copy or averaging is closed as the visual
+coverage solution on this evidence.
+
+## SUGM-v3.5: compact-space masked reconstruction and semantic-only repair
+
+The frozen nonlinear parent supplies D320 RADIO+DINO shared codes and D128
+SigLIP semantic codes.  A deterministic 20% mask is applied only inside rows
+with true visual-write authority; reconstruction uses top-4 authorized
+neighbors in the same 128-cubed voxel.  Before evaluation, the upper-bound gate
+was fixed to at least 80% masked-row coverage and D320 median cosine at least
+0.80.
+
+Both scenes pass strongly:
+
+| scene | masked coverage | D320 mean | D320 p10 | D320 median | D128 median |
+|---|---:|---:|---:|---:|---:|
+| Figurines | 99.78% | 0.97996 | 0.94926 | 0.99195 | 0.99987 |
+| Ramen | 99.31% | 0.98717 | 0.96802 | 0.99604 | 0.99999 |
+
+This shows that structure is predictable after the frozen codec even though
+raw native-teacher copying is not.  Filling unknown shared+semantic D448 is
+nevertheless rejected on source dev: Figurines visual top-1/top-5 regress from
+`0.09473/0.26294` to `0.09106/0.25708`.  The block decomposition is then used
+as intended: only unknown semantic D128 is interpolated.  This leaves every
+shared D320 and private D64 value bitwise unchanged.
+
+The semantic-only candidate is Pareto-positive on source dev.  Figurines
+proposal cosine improves from `0.93555` to `0.99934` with top-1 unchanged at
+`0.19149`; Ramen stays at `0.99970/0.16327`.  All visual cosine, retrieval, and
+margin metrics exactly equal the parent.
+
+One source audit on residue 0 confirms the result.  Figurines semantic top-1
+improves from `0.09859` to `0.11268` and cosine is non-regressing
+(`0.9854143` to `0.9854165`); Ramen remains unchanged within numerical noise.
+All audit visual metrics exactly match the parent.  Target RGB and benchmark
+metrics remain sealed.
+
+The retained state is sealed as exactly one D512 plus five scalar reliability
+values per Gaussian: visual-write authority, coverage confidence, unknown
+probability, structural-candidate confidence, and semantic-membership
+strength.  No Gaussian-indexed high-dimensional sidecar is persistent.
+
+Frozen artifacts:
+
+- masked upper bound:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/masked_structural_reconstruction_v1/`;
+- rejected D448 candidate and dev capability:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/unknown_structural_initialization_v1/`
+  and `unknown_structural_capability_v1/`;
+- retained semantic-only candidate, dev, and audit:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/unknown_semantic_initialization_v1/`,
+  `unknown_semantic_capability_v1/`, and `unknown_semantic_audit_v1/`;
+- deployment-form scene state:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/unknown_aware_scene_state_v1/`.
+
+## SUGM-v3.6: protected private continuation and architecture selection
+
+Instance D48 and boundary D16 are trained from the retained semantic-only
+candidate; shared D320, semantic D128, the native visual codec, and the
+fail-closed coverage policy are not reinitialized.  A protected-continuation
+loader rejects a mismatched membership hash, layout, historical-field access,
+target-RGB access, or benchmark access.  It carries the sealed codec state and
+requires visual loss weight zero.  Shared and semantic drift is checked again
+after training and must be exactly zero.
+
+The original partition optimizer still caused autograd to allocate a dense
+D512 gradient, which exceeded the 2.7--3.2 GiB spare GPU budget on Ramen.  The
+private phase now uses training-only D48/D16 owned-column buffers and merges
+them into the sole D512 at deployment.  The buffers are absent from the
+checkpoint state; tests confirm that the D512 gradient is absent and that only
+the two private blocks change.  This is an optimization implementation change,
+not an additional persistent Gaussian field.
+
+Four fixed 600-step source-only runs compare hard blocks with shared-core plus
+zero-output low-rank private branches.  Residues 1/2 train and residue 3 is the
+only development split.
+
+| scene | arm | mask-IoU delta | Brier delta | boundary-F delta | unknown-FP-mass delta | D320/D128 max delta |
+|---|---|---:|---:|---:|---:|---:|
+| Figurines | hard block | +0.03681 | -0.28451 | +0.11280 | -0.32710 | 0 / 0 |
+| Figurines | low-rank private | +0.06193 | -0.29820 | +0.15333 | -0.34606 | 0 / 0 |
+| Ramen | hard block | +0.20093 | -0.33276 | +0.38412 | -0.38533 | 0 / 0 |
+| Ramen | low-rank private | +0.16956 | -0.32716 | +0.38436 | -0.41284 | 0 / 0 |
+
+Hard block has a slightly larger macro IoU delta (`+0.11887` versus
+`+0.11574`) because of Ramen, but it fails the preregistered no-scene-failure
+gate on Figurines (`+0.03681 < +0.05`).  Low-rank private passes the IoU gate
+on both scenes and has better macro Brier (`-0.31268`), boundary-F
+(`+0.26885`), and unknown mass (`-0.37945`).  It is therefore the uniquely
+eligible retained private architecture.  Orthogonal product is not reopened:
+the earlier controlled arm was identity-equivalent and supplied no benefit.
+
+The final low-rank checkpoints are then rerun through the native source-dev
+capability evaluator.  Figurines visual cosine/top-1/top-5 remain
+`0.832125/0.09473/0.26294` and semantic cosine is `0.999342`; Ramen remains
+`0.881486/0.21143/0.55786` and `0.999699`.  Ranking metrics equal the parent;
+only nondeterministic GPU reductions in two diagnostic means differ by about
+`2e-8`.  No source audit is reopened because shared and semantic contents are
+exactly protected and the development capability suite is unchanged.  Target
+RGB and all benchmark metrics remain sealed.
+
+Frozen evidence:
+
+- hard-block and low-rank training reports/checkpoints:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/private_continuation_v1/`
+  and
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/private_continuation_v2/`;
+- hash-bound architecture decision:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/private_architecture_selection_v1.json`;
+- retained low-rank capability suite:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/private_low_rank_capability_v2/`.
+- deployment-form retained low-rank D512+R5 scene states:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/low_rank_unknown_aware_scene_state_v1/`.
+
+## SUGM-v3.7: boundary metric correction and hybrid private candidate
+
+The v3.6 boundary numbers are invalid as evidence for D16: the old evaluator
+computed boundary-F from the image gradient of the rendered instance posterior
+and never read the trained D16 block or boundary head.  Re-evaluating the
+actual head preserves IoU, Brier, and unknown mass but exposes collapse in the
+fully low-rank candidate (`0.00315/0.00469` boundary-F on Figurines/Ramen).
+Accordingly, v3.6 retains only its instance-architecture conclusion; its
+boundary conclusion is superseded here.
+
+The first balanced-boundary repair also exposed two training defects.  Some
+proposal episodes contain no positive boundary pixel inside known authority
+and must be excluded rather than treated as all-negative.  In addition, zero
+D16, zero low-rank up, and a zero head create a symmetry dead point that learns
+only a constant bias.  The retained repair therefore uses only proposals with
+both positive and negative boundary authority, class-balanced BCE plus soft
+Dice, a fixed source-independent unit-axis head initialization, fresh boundary
+down/zero up, and explicit non-degeneracy gates.
+
+D320, D128, and the retained low-rank instance D48 remain exactly frozen.  The
+corrected 600-step comparison is:
+
+| scene | boundary arm | valid train proposals | corrected boundary-F | D16 std | branch-up norm |
+|---|---|---:|---:|---:|---:|
+| Figurines | hard D16 | 133 | 0.32658 | 0.00924 | 0 |
+| Figurines | low-rank boundary | 133 | 0.32972 | 0.00906 | 0.37204 |
+| Ramen | hard D16 | 111 | 0.32488 | 0.02213 | 0 |
+| Ramen | low-rank boundary | 111 | 0.30625 | 0.02071 | 0.71823 |
+
+Both arms are non-degenerate, but hard D16 has the better scene-macro
+boundary-F (`0.32573` versus `0.31798`) and is simpler.  The retained private
+structure is therefore **low-rank instance D48 plus hard boundary D16**.
+Its original instance gains remain `+0.06193/+0.16956` mask IoU, while shared,
+semantic, and instance blocks have zero drift during boundary refinement.
+
+A canonical deployment query interface now loads only the sealed D512+R5 plus
+constant-size global weights, creates one Gaussian posterior, and permits 2D
+only as an exact rendering of that same posterior.  Both deployment sentinels
+pass.  Deployment latent and every global tensor are exactly equal to the
+selected checkpoint; IoU and boundary-F reproduce exactly, while Brier and
+unknown-mass reductions use a fixed `1e-5` GPU numerical tolerance.
+
+Frozen evidence:
+
+- corrected diagnosis:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/private_boundary_source_dev_v1/`;
+- rejected constant repair and retained non-degenerate repair:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/private_boundary_refinement_v2/`
+  and `private_boundary_refinement_v3/`;
+- hash-bound boundary selection:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/boundary_refinement_selection_v1.json`;
+- retained hybrid deployment states:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/hybrid_private_unknown_aware_scene_state_v1/`;
+- passing unified-interface deployment sentinels:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/deployment_source_sentinel_v3/`.
+
+Target RGB, source audit residue 0, and all benchmark metrics remain sealed.
+
+## SUGM-v3.8: native multimodal query boundary and image-identity diagnosis
+
+A v3-native `QueryPacket` and canonical query interface are implemented
+without importing the forbidden historical querying or query-native model
+trees.  Text and image packets contain exactly one finite frozen-encoder
+SigLIP D1536 token; prompt packets contain only Gaussian-domain seed
+probability with NaN retained as unknown.  The sealed scene SigLIP codec maps
+text/image tokens into D128 identity scores.  Every modality then compiles
+anchor rows and calls the same instance function, producing one Gaussian
+posterior that 2D can only render unchanged.  Unit tests show that identical
+text/image tokens commute exactly through identity scores, anchors, weights,
+and the final posterior.
+
+The first source-dev image-query diagnostic uses held-out proposal crop tokens
+only for identity selection.  Source relations are not used to create the
+posterior; they measure whether selected anchors fall in independent
+training-view support.
+
+| scene | relation-anchor IoU ceiling | image top-8 IoU | Brier | unknown mass | peak support hit | top-8 support precision |
+|---|---:|---:|---:|---:|---:|---:|
+| Figurines | 0.35436 | 0.23400 | 0.24767 | 0.45954 | 50.00% | 41.54% |
+| Ramen | 0.51226 | 0.42044 | 0.21498 | 0.48046 | 70.27% | 66.89% |
+
+This localizes the current query gap to semantic identity-anchor selection,
+not the instance memory or posterior interface.  A single immutable identity
+peak was tested as one causal control rather than a K search.  It is rejected:
+IoU falls to `0.21413/0.37763`, and both Brier and unknown mass regress.  Thus
+multiple anchors add real information, but the raw semantic cosine metric
+mixes wrong-object anchors.  Further K/threshold or geometry-locality tuning is
+closed.  The next eligible change is a constant-size source-only cross-view
+semantic identity metric/adaptor with D512 and the posterior frozen.
+
+Frozen evidence:
+
+- top-8 image-query diagnostic:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/image_query_source_dev_v1/`;
+- rejected identity-peak-only control:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/image_query_source_dev_peak_only_v1/`.
+
+No text-quality claim, prompt-quality claim, source audit, sentinel expansion,
+or benchmark execution is authorized by this diagnostic.
+
+## SUGM-v3.9: identity-adapter controls and first benchmark opening
+
+A shared rank-16 residual identity adapter improves image-query source dev on
+both calibration scenes, but fails the independent source audit macro check.
+It is rejected and the raw sealed identity mapping remains the parent.  A
+shared orthogonal text alignment is also non-causal: source-paired cosine is
+already `0.99931` before and `0.99954` after alignment.  Finally, LERF-style
+positive-versus-canonical-negative relevancy changes every top-8 text anchor
+but leaves the compressed D128 scores within about `1e-4` of `0.5`; the first
+benchmark control remains essentially unchanged.  None of these adapters is
+retained.
+
+The first benchmark opening on Figurines/Ramen exposes the actual deployment
+failure.  With raw text cosine and the shared instance posterior, 45--49% of
+Gaussian/query pairs exceed the fixed `0.6` selection threshold.  LERF-2D is
+`0.01234/0.02913` mIoU and strict-threshold LERF-3D is
+`0.01383/0.03050`.  A source-derived fixed 1.1436% extent cap makes both worse,
+so it too is rejected.  The benchmark is used only to diagnose excessive
+coverage; it does not select the following repair.
+
+Frozen controls:
+
+- rejected shared adapter dev/audit:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/image_query_source_dev_adapter_v2/`
+  and `image_query_source_audit_adapter_v1/`;
+- orthogonal text control:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/orthogonal_text_alignment_v1/shared.pt`;
+- raw and fixed-fraction benchmark controls:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/lerf_full_eval_v1/`
+  and `lerf_full_eval_extent_v1/`.
+
+## SUGM-v3.10: centered identity--extent posterior
+
+The D128 field is highly anisotropic: known Gaussian/text cosine values are
+concentrated near `0.999`, while unknown rows are zero.  A deterministic
+scene-field centroid removal expands the identity distribution to roughly
+`[-0.40, 0.35]` without adding Gaussian state.  Identity then contributes a
+robustly normalized logit to the existing D48 extent posterior.  This remains
+one posterior; identity is neither a second output field nor a post-render
+mask.  Candidate global weights `1`, `2`, and `4` are compared only on source
+dev, with no hard gate and a minimum-intervention tie break.
+
+| weight | source-dev macro IoU | selected-weight audit macro IoU |
+|---:|---:|---:|
+| 1 | 0.41081 | -- |
+| 2 | 0.43914 | -- |
+| 4 | **0.46153** | **0.45949** |
+
+At the retained weight `4`, independent audit IoU is `0.36951` on Figurines
+and `0.54947` on Ramen, versus raw `0.23834/0.42577`.  The source-selected
+repair raises preliminary LERF-2D to `0.02471/0.04157`.  Strict-threshold
+LERF-3D is `0.01402/0.03135`; the standard fixed top-2% readout, reported as a
+less brittle evaluation view rather than a tuned method component, is
+`0.02840/0.03232`.  Full four-scene evaluation is completed in the next
+section after the two large scene states are materialized.
+
+Frozen source selection:
+
+- source sweeps and independent audits:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/source_identity_extent_sweep_v1/`
+  and `source_identity_extent_validation_v1/`;
+- hash-bound shared weight decision:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/identity_extent_selection_v1/shared.json`.
+
+## SUGM-v3.11: complete four-scene LERF-2D/3D evaluation
+
+The two large scenes use the same protected low-rank-instance plus hard-D16
+structure for 300 source-only steps.  This reduced budget is sufficient for a
+complete evaluation and avoids treating 600 steps as a brittle gate.  Teatime
+source-dev IoU improves from `0.35551` to `0.46121`; Waldo Kitchen improves
+from `0.33407` to `0.40352`.  Brier improves by `0.31204/0.30004` and unknown
+mass by `0.37333/0.35428`.  D320 and D128 remain exactly unchanged.  The fp16
+protected memory is assembled into fp32 on CPU at deployment, and posterior
+evaluation is row-chunked; both are memory-only implementation changes.
+
+All four scenes use the source-selected centered identity--extent weight `4`,
+one D512+R5 state, and exactly the same Gaussian posterior for 2D and 3D.
+LERF-3D is reported both with the strict absolute `0.6` probability threshold
+and with one fixed, scene-independent top-2% readout.
+
+| scene | samples | LERF-2D mIoU | 2D localization | 3D strict mIoU | strict Acc@.25/.50 | 3D top-2% mIoU | top-2% Acc@.25 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Figurines | 56 | 0.02471 | 0.07143 | 0.01402 | 0 / 0 | 0.02840 | 0.01786 |
+| Ramen | 71 | 0.04157 | 0.09859 | 0.03135 | 0 / 0 | 0.03232 | 0 |
+| Teatime | 59 | 0.01695 | 0.01695 | 0.03365 | 0 / 0 | 0.02769 | 0 |
+| Waldo Kitchen | 22 | 0.08915 | 0.18182 | 0.09356 | 0.09091 / 0.09091 | 0.05903 | 0.04545 |
+| scene macro | 208 total | **0.04309** | **0.09220** | **0.04315** | **0.02273 / 0.02273** | **0.03686** | **0.01583** |
+
+The complete result is still modest, especially for Figurines and Teatime,
+but it is now a valid end-to-end result rather than a two-scene proxy.  The
+coverage repair is strongly supported by source dev/audit and improves the
+first two-scene 2D benchmark.  The fact that strict 3D outperforms top-2% on
+Teatime and Waldo also confirms that no single aggressive gate should be made
+the method definition.
+
+Frozen evidence:
+
+- large-scene private candidates and sealed states:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/full_lerf_private_low_rank_v3/`
+  and `full_lerf_scene_state_v1/`;
+- authority-bound query caches:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/lerf_renderer_bridge_final_v1/`;
+- complete evaluator outputs and hash-bound aggregate:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/lerf_full_final_v1/`
+  and `lerf_full_final_v1/summary.json`.
+
+## SUGM-v3.12: posterior and text-anchor failure isolation
+
+The poor full-LERF result was reopened as a staged source-only diagnosis rather
+than another benchmark-selected gate sweep. Contribution-weighted held-out
+hits confirm that `sigmoid(cos/T)` maps unrelated `cos≈0` evidence near
+probability `0.5`. A positive-versus-explicit-negative upper bound reduces
+background mass and Brier in all four scenes, but reduces source render IoU in
+all four scenes, so it is not connected to deployment.
+
+On identical held-out proposals, image-selected top-8 anchors already lose
+substantial IoU relative to relation-authorized supports. A separate source
+text diagnostic localizes a larger cross-modal failure: raw text top-8 support
+precision is zero on the available Ramen and Waldo dev pairs and one third on
+Teatime. The previously rejected orthogonal alignment was rechecked using
+held-out anchor precision instead of anisotropy-dominated raw cosine and does
+improve Ramen and Teatime. Thus the old `0.999` cosine criterion was
+non-informative.
+
+A strongly identity-regularized affine text-only alignment was fitted from 27
+source-train pairs. Ridge `1` raises dev anchor precision and the independent
+audit macro, but exact source render gives only a small dev gain
+(`≈0.467→0.485`, pair weighted) and a large audit regression
+(`≈0.380→0.267`). It is rejected. This closes posterior-only and post-codec
+text-adapter repairs: the next change must repair D128 cross-modal
+write/compression while D320/D48/D16 stay protected.
+
+Frozen evidence:
+
+- posterior and image-anchor diagnostics:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/membership_logit_diagnostic_v2/`
+  and `membership_logit_diagnostic_v3/`;
+- raw, orthogonal, and affine text-anchor diagnostics:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/text_identity_anchor_diagnostic_raw_v1/`,
+  `text_identity_anchor_diagnostic_orthogonal_v1/`, and
+  `text_identity_anchor_diagnostic_affine_grid_v1/`;
+- rejected affine source render dev/audit:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/text_identity_render_diagnostic_v1/`.
+
+Two codec-level controls were then tested without changing D320, D48, or D16.
+A fixed-seed JL rewrite of D128 preserves no useful source text-anchor support
+and regresses most scene/split renders, so generic distance preservation is not
+enough. A second control keeps image D128 unchanged and learns a direct
+D1536-text-to-D128 correction around the image-PCA basis. Its correction rank
+is at most the 27 source-train pairs. The least-regularized candidate improves
+Figurines and Waldo dev, but regresses Ramen from `0.735` to `0.308` and
+Teatime from `0.229` to `0.122`; pair-weighted dev falls from about `0.467` to
+`0.308`. Both controls are rejected. The remaining blocker is insufficiently
+diverse source language-pair authority for learning a universal cross-modal
+codec, not a posterior gate or an implementation fallback.
+
+- fixed-JL protected-block control:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/fixed_jl_semantic_scene_state_v1/`
+  and `fixed_jl_text_identity_render_v1/`;
+- direct raw-text projection control:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/direct_text_projection_candidates_v1/`
+  and `direct_text_projection_source_dev_grid_v1/`.

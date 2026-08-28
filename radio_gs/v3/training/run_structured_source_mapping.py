@@ -32,6 +32,52 @@ from radio_gs.v3.training.structured_initialization import fixed_jl_projection
 from radio_gs.v3.training.learned_source_codec import apply_codec
 
 
+def load_protected_initialization(
+    path: Path,
+    *,
+    membership_path: Path,
+    layout: SharedPrivateLayout,
+) -> tuple[
+    torch.Tensor,
+    dict[str, object],
+    dict[str, torch.Tensor],
+    dict[str, torch.Tensor],
+]:
+    """Load a sealed source-only D512 candidate for private-block continuation."""
+
+    checkpoint = torch.load(path, map_location="cpu")
+    metadata = checkpoint.get("metadata", {})
+    state = checkpoint.get("state_dict", {})
+    if checkpoint.get("schema") != "radio_gs.sugm_v3.structured_source_mapping.v1":
+        raise ValueError("initialization checkpoint is not a SUGM-v3 mapping candidate")
+    if not metadata.get("source_only") or metadata.get("historical_field_opened"):
+        raise ValueError("initialization checkpoint violates the fresh source-only contract")
+    if metadata.get("target_rgb_opened") or metadata.get("benchmark_metrics_opened"):
+        raise ValueError("initialization checkpoint opened forbidden evaluation authority")
+    if metadata.get("layout") != dict(layout.__dict__):
+        raise ValueError("initialization checkpoint layout differs from the requested D512 layout")
+    membership = metadata.get("membership", {})
+    if membership.get("sha256") != sha256_file(membership_path):
+        raise ValueError("initialization checkpoint and membership authority differ")
+    memory = torch.as_tensor(state.get("memory"))
+    if memory.ndim != 2 or memory.shape[1] != 512:
+        raise ValueError("initialization checkpoint does not contain one D512 per Gaussian")
+    carried = {
+        key: torch.as_tensor(value)
+        for key, value in state.items()
+        if key.startswith("visual_codec.") or key.startswith("codec.")
+    }
+    initialization = {
+        "method": "protected_source_only_checkpoint_continuation",
+        "path": str(path),
+        "sha256": sha256_file(path),
+        "parent_phase_order": metadata.get("phase_order"),
+        "parent_initialization": metadata.get("initialization"),
+        "shared_and_semantic_frozen": True,
+    }
+    return memory.float().clone(), initialization, dict(state), carried
+
+
 def relation_training_edges(
     training, relation: dict
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, list[int], list[int]]:
@@ -89,8 +135,27 @@ def boundary_objective(
         num_pixels=episode.target.numel(),
     )
     known = episode.known.to(device).flatten()
-    target = episode.boundary.to(device).float().flatten()
-    return F.binary_cross_entropy(rendered[known].clamp(1e-6, 1 - 1e-6), target[known])
+    target = episode.boundary.to(device).bool().flatten()
+    score = rendered.clamp(1e-6, 1 - 1e-6)
+    positive = known & target
+    negative = known & ~target
+    if not bool(positive.any()) or not bool(negative.any()):
+        raise ValueError("boundary episode requires positive and negative authority")
+    balanced_bce = -0.5 * (
+        score[positive].log().mean() + (1.0 - score[negative]).log().mean()
+    )
+    truth = target[known].float()
+    known_score = score[known]
+    dice = 1.0 - (
+        2.0 * (known_score * truth).sum() + 1.0
+    ) / (known_score.sum() + truth.sum() + 1.0)
+    return balanced_bce + dice
+
+
+def has_boundary_authority(episode) -> bool:
+    known = torch.as_tensor(episode.known).bool().flatten()
+    target = torch.as_tensor(episode.boundary).bool().flatten()
+    return bool((known & target).any()) and bool((known & ~target).any())
 
 
 def compact_episode_objective(
@@ -232,6 +297,9 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     episodes, supports = load_episodes(membership, relation)
     valid = [value for value in episodes if supports[value.proposal_index][0].numel()]
     training = [value for value in valid if value.view_index % 4 in (1, 2)]
+    boundary_training = [value for value in training if has_boundary_authority(value)]
+    if not boundary_training:
+        raise ValueError("source training split has no valid boundary authority")
     evaluation = [value for value in valid if value.view_index % 4 == 3]
     train_proposals = {value.proposal_index for value in training}
     left, right, labels, same_edges, different_edges = relation_training_edges(
@@ -243,16 +311,25 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         instance=args.instance_dim,
         boundary=args.boundary_dim,
     )
-    initial, initialization = initialize_structured_memory(
-        membership,
-        radio_teacher_root=args.radio_teacher_root,
-        siglip_teacher_path=siglip_path,
-        layout=layout,
-        seed=args.seed,
-        hit_chunk=args.initialization_hit_chunk,
-        codec_path=args.codec,
-    )
-    initial_protected = initial[:, : layout.shared + layout.semantic].clone()
+    carried_state: dict[str, torch.Tensor] = {}
+    if args.initialization_checkpoint:
+        initialization_path = Path(args.initialization_checkpoint).resolve(strict=True)
+        initial, initialization, parent_state, carried_state = load_protected_initialization(
+            initialization_path,
+            membership_path=membership_path,
+            layout=layout,
+        )
+    else:
+        parent_state = {}
+        initial, initialization = initialize_structured_memory(
+            membership,
+            radio_teacher_root=args.radio_teacher_root,
+            siglip_teacher_path=siglip_path,
+            layout=layout,
+            seed=args.seed,
+            hit_chunk=args.initialization_hit_chunk,
+            codec_path=args.codec,
+        )
     device = torch.device(args.device)
     torch.manual_seed(int(args.seed))
     model_types = {
@@ -261,6 +338,13 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         "low_rank_private": LowRankPrivateBranchMemory,
     }
     model = model_types[args.architecture](initial, layout=layout)
+    if args.initialization_checkpoint:
+        current = model.state_dict()
+        compatible = {
+            key: value for key, value in parent_state.items()
+            if key in current and torch.as_tensor(value).shape == current[key].shape
+        }
+        model.load_state_dict(compatible, strict=False)
     if args.architecture == "orthogonal_product" and args.orthogonal_angle_init > 0:
         generator = torch.Generator(device="cpu").manual_seed(int(args.seed + 3))
         with torch.no_grad():
@@ -270,13 +354,20 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                 generator=generator,
             )
     model = model.to(device)
+    if args.initialization_checkpoint:
+        model.enable_owned_training_blocks("instance", "boundary")
+    if args.protected_memory_fp16:
+        if not args.initialization_checkpoint:
+            raise ValueError("FP16 protected memory requires checkpoint continuation")
+        model.memory.data = model.memory.data.half()
     # First causal proof has no cross-block bridge. The zero-initialized bridge
     # remains serialized as a global constant-size component for later ablation.
     model.visual_to_instance.requires_grad_(False)
     model.context_to_boundary.requires_grad_(False)
     boundary_head = nn.Linear(layout.boundary, 1).to(device)
     baseline, baseline_count = evaluate(
-        model, evaluation, supports, relation, train_proposals, args.temperature
+        model, evaluation, supports, relation, train_proposals, args.temperature,
+        boundary_head=boundary_head,
     )
     if args.visual_weight > 0 and args.freeze_shared_visual:
         visual_parameters = model.visual_auxiliary_parameters()
@@ -297,20 +388,47 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         )
     else:
         visual_optimizer = None
-    instance_optimizer = PartitionOwnedAdamW(
-        model.memory,
-        layout.slices["instance"],
-        model.instance_auxiliary_parameters(),
-        lr=args.learning_rate,
-        weight_decay=args.weight_decay,
-    )
-    boundary_optimizer = PartitionOwnedAdamW(
-        model.memory,
-        layout.slices["boundary"],
-        (*boundary_head.parameters(), *model.boundary_auxiliary_parameters()),
-        lr=args.learning_rate,
-        weight_decay=args.weight_decay,
-    )
+    if args.initialization_checkpoint:
+        instance_trainable = (
+            model.owned_training_parameter("instance"),
+            *model.instance_auxiliary_parameters(),
+        )
+        boundary_trainable = (
+            model.owned_training_parameter("boundary"),
+            *boundary_head.parameters(),
+            *model.boundary_auxiliary_parameters(),
+        )
+        instance_optimizer = torch.optim.AdamW(
+            instance_trainable,
+            lr=args.learning_rate,
+            weight_decay=args.weight_decay,
+        )
+        boundary_optimizer = torch.optim.AdamW(
+            boundary_trainable,
+            lr=args.learning_rate,
+            weight_decay=args.weight_decay,
+        )
+    else:
+        instance_trainable = (model.memory, *model.instance_auxiliary_parameters())
+        boundary_trainable = (
+            model.memory,
+            *boundary_head.parameters(),
+            *model.boundary_auxiliary_parameters(),
+        )
+        instance_optimizer = PartitionOwnedAdamW(
+            model.memory,
+            layout.slices["instance"],
+            model.instance_auxiliary_parameters(),
+            lr=args.learning_rate,
+            weight_decay=args.weight_decay,
+        )
+        boundary_optimizer = PartitionOwnedAdamW(
+            model.memory,
+            layout.slices["boundary"],
+            (*boundary_head.parameters(), *model.boundary_auxiliary_parameters()),
+            lr=args.learning_rate,
+            weight_decay=args.weight_decay,
+        )
     rng = random.Random(args.seed)
     visual_training = []
     codec_state = (
@@ -406,30 +524,24 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             sum(render_values) / len(render_values)
             + args.relation_weight * relation_value
         )
-        torch.nn.utils.clip_grad_norm_(
-            [model.memory, *model.instance_auxiliary_parameters()], 5.0
-        )
+        torch.nn.utils.clip_grad_norm_(instance_trainable, 5.0)
         instance_optimizer.step()
 
         boundary_optimizer.zero_grad(set_to_none=True)
+        boundary_selected = rng.sample(
+            boundary_training, k=min(args.episodes_per_step, len(boundary_training))
+        )
         boundary_values = []
-        for item in selected:
+        for item in boundary_selected:
             episode_boundary_loss = boundary_objective(
                 model, boundary_head, item
             )
             boundary_values.append(float(episode_boundary_loss.detach()))
-            (episode_boundary_loss / len(selected)).backward()
+            (episode_boundary_loss / len(boundary_selected)).backward()
         boundary_loss = model.memory.new_tensor(
             sum(boundary_values) / len(boundary_values)
         )
-        torch.nn.utils.clip_grad_norm_(
-            [
-                model.memory,
-                *boundary_head.parameters(),
-                *model.boundary_auxiliary_parameters(),
-            ],
-            5.0,
-        )
+        torch.nn.utils.clip_grad_norm_(boundary_trainable, 5.0)
         boundary_optimizer.step()
         boundary_sum += float(boundary_loss.detach())
         value = (
@@ -460,17 +572,29 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     model.load_state_dict(best_state)
     boundary_head.load_state_dict(best_boundary_head)
     candidate, candidate_count = evaluate(
-        model, evaluation, supports, relation, train_proposals, args.temperature
+        model, evaluation, supports, relation, train_proposals, args.temperature,
+        boundary_head=boundary_head,
     )
     deployed = model.deployment_memory().cpu()
+    if args.protected_memory_fp16:
+        deployed[:, : layout.shared + layout.semantic] = initial[
+            :, : layout.shared + layout.semantic
+        ]
+    deployable_state = {
+        key: value for key, value in best_state.items()
+        if not key.startswith("_owned_training_blocks.")
+    }
     deltas = protected_block_deltas(initial, deployed, layout)
     if deltas["semantic"] != 0.0:
         raise RuntimeError("private losses rewrote a protected capability block")
+    if args.initialization_checkpoint and deltas["shared"] != 0.0:
+        raise RuntimeError("private continuation rewrote the protected shared block")
     output = Path(args.output).resolve()
     payload = {
         "schema": "radio_gs.sugm_v3.structured_source_mapping.v1",
         "state_dict": {
-            **best_state,
+            **deployable_state,
+            **carried_state,
             **({
                 "codec.radio_mean": codec_state["radio_mean"],
                 "codec.radio_basis": codec_state["radio_basis"],
@@ -486,6 +610,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "architecture": model.architecture,
             "layout": dict(layout.__dict__),
             "partition_owned_writes": True,
+            "training_only_partition_buffers": bool(args.initialization_checkpoint),
             "phase_order": (
                 "global_basis_visual_then_instance_then_boundary"
                 if args.freeze_shared_visual and visual_optimizer is not None
@@ -545,6 +670,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             ),
             "shared_frozen": visual_optimizer is None or args.freeze_shared_visual,
             "semantic_exact": deltas["semantic"] == 0.0,
+            "protected_checkpoint_continuation": bool(args.initialization_checkpoint),
             "raw_radio_is_hard_gate": False,
             "status": "structural_preservation_only_pending_source_capability_suite",
         },
@@ -562,6 +688,7 @@ def parser() -> argparse.ArgumentParser:
     value.add_argument("--radio-teacher-root", required=True)
     value.add_argument("--siglip-teacher", required=True)
     value.add_argument("--codec")
+    value.add_argument("--initialization-checkpoint")
     value.add_argument("--device", default="cuda:0")
     value.add_argument(
         "--architecture",
@@ -587,6 +714,7 @@ def parser() -> argparse.ArgumentParser:
     value.add_argument("--instance-dim", type=int, default=48)
     value.add_argument("--boundary-dim", type=int, default=16)
     value.add_argument("--initialization-hit-chunk", type=int, default=32768)
+    value.add_argument("--protected-memory-fp16", action="store_true")
     value.add_argument("--snapshot-interval", type=int, default=50)
     value.add_argument("--seed", type=int, default=20260826)
     value.add_argument("--output", required=True)
@@ -607,6 +735,10 @@ def main() -> None:
         raise ValueError("structured source-mapping budgets must be positive")
     if args.freeze_shared_visual and args.architecture != "orthogonal_product":
         raise ValueError("only the orthogonal arm owns a global visual basis")
+    if args.initialization_checkpoint and args.visual_weight != 0:
+        raise ValueError("protected checkpoint continuation requires --visual-weight 0")
+    if args.initialization_checkpoint and args.codec:
+        raise ValueError("protected checkpoint continuation carries its sealed codecs")
     if args.orthogonal_angle_init > 0 and args.architecture != "orthogonal_product":
         raise ValueError("only the orthogonal arm owns basis angles")
     print(run(args))

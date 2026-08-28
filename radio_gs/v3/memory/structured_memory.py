@@ -117,13 +117,45 @@ class StructuredSharedPrivateMemory(nn.Module):
         nn.init.zeros_(self.context_to_boundary.weight)
         self.scale_adapter = nn.Linear(2, 2 * layout.instance)
 
+    def enable_owned_training_blocks(self, *names: str) -> None:
+        """Optimize owned columns without allocating a dense D512 gradient.
+
+        The buffers are training-only parameters. ``deployment_memory`` merges
+        them back into the sole persistent D512 table.
+        """
+
+        if hasattr(self, "_owned_training_blocks"):
+            raise RuntimeError("owned training blocks are already enabled")
+        if not names or any(name not in self.layout.slices for name in names):
+            raise ValueError("unknown owned training block")
+        if len(set(names)) != len(names):
+            raise ValueError("owned training blocks must be unique")
+        self.memory.requires_grad_(False)
+        self._owned_training_blocks = nn.ParameterDict({
+            name: nn.Parameter(
+                self.memory[:, self.layout.slices[name]].detach().clone()
+            )
+            for name in names
+        })
+
+    def owned_training_parameter(self, name: str) -> nn.Parameter:
+        blocks = getattr(self, "_owned_training_blocks", None)
+        if blocks is None or name not in blocks:
+            raise ValueError("owned training block is not enabled")
+        return blocks[name]
+
     def block(self, name: str, rows: torch.Tensor | None = None) -> torch.Tensor:
         if name not in self.layout.slices:
             raise ValueError("unknown shared-private block")
         # Slice owned columns first. Advanced row indexing the D512 table and
         # slicing afterwards would materialize an unnecessary hits-by-512
         # tensor (over 1 GiB for dense exact-MPR views).
-        value = self.memory[:, self.layout.slices[name]]
+        training_blocks = getattr(self, "_owned_training_blocks", None)
+        value = (
+            training_blocks[name]
+            if training_blocks is not None and name in training_blocks
+            else self.memory[:, self.layout.slices[name]]
+        )
         if rows is not None:
             value = value[
                 torch.as_tensor(rows, device=self.memory.device, dtype=torch.long)
@@ -188,7 +220,19 @@ class StructuredSharedPrivateMemory(nn.Module):
 
     @torch.no_grad()
     def deployment_memory(self) -> torch.Tensor:
-        return self.memory.detach().clone()
+        training_blocks = getattr(self, "_owned_training_blocks", None)
+        output = (
+            # Protected-memory training is specifically used when a shared GPU
+            # cannot hold another full fp32 D512 copy. Assemble the deployment
+            # tensor on CPU instead of transiently defeating that protection.
+            self.memory.detach().cpu().float().clone()
+            if training_blocks is not None
+            else self.memory.detach().clone()
+        )
+        if training_blocks is not None:
+            for name, value in training_blocks.items():
+                output[:, self.layout.slices[name]] = value.detach().cpu()
+        return output
 
 
 class OrthogonalProductMemory(StructuredSharedPrivateMemory):
@@ -286,6 +330,9 @@ class LowRankPrivateBranchMemory(StructuredSharedPrivateMemory):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         shared = self.block("shared", rows).detach()
         semantic = self.block("semantic", rows).detach()
+        target_dtype = self.instance_down.weight.dtype
+        shared = shared.to(target_dtype)
+        semantic = semantic.to(target_dtype)
         squared_norm = shared.square().sum(-1, keepdim=True)
         if semantic.shape[-1]:
             squared_norm = squared_norm + semantic.square().sum(-1, keepdim=True)

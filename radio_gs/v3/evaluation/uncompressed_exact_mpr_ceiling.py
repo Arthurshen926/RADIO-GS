@@ -10,7 +10,7 @@ import torch
 from torch.nn import functional as F
 
 from radio_gs.utils.immutable_artifacts import write_frozen_json
-from radio_gs.v3.evaluation.structured_source_capability import _same_pixel_retrieval
+from radio_gs.v3.evaluation.structured_source_capability import _retrieval_diagnostics
 from radio_gs.v3.training.instance_upper_bound import sha256_file
 
 
@@ -125,19 +125,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             alpha.index_add_(0, target_pixels, weight)
         valid = alpha >= args.alpha_threshold
         cosine_values.append(F.cosine_similarity(rendered[valid], target[valid], dim=-1))
-        retrieval_values.append(_same_pixel_retrieval(
+        retrieval_values.append(_retrieval_diagnostics(
             rendered[valid], target[valid], args.retrieval_samples_per_view
         ))
-        native_values.append(_same_pixel_retrieval(
+        native_values.append(_retrieval_diagnostics(
             target[valid], target[valid], args.retrieval_samples_per_view
         ))
         valid_pixels += int(valid.sum())
 
     def mean_retrieval(values):
         return {
-            "top1": sum(value[0] for value in values) / len(values),
-            "top5": sum(value[1] for value in values) / len(values),
-            "positive_margin": sum(value[2] for value in values) / len(values),
+            name: sum(value[name] for value in values) / len(values)
+            for name in values[0]
         }
 
     report = {

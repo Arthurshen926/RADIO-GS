@@ -14,6 +14,7 @@ from torch.nn import functional as F
 from radio_gs.field import load_factorized_canonical_field_checkpoint
 from radio_gs.utils.immutable_artifacts import write_frozen_json, write_torch_noclobber
 from radio_gs.v3.evaluation.source_heldout import evaluate_source_heldout
+from radio_gs.v3.query.membership import membership_from_prototype, pool_prototype
 from radio_gs.v3.training.instance_upper_bound import (
     ExtraCodeArm,
     FrozenProjectionArm,
@@ -37,6 +38,7 @@ from radio_gs.v3.training.low_rank_writeback import (
 )
 from radio_gs.v3.training.joint_d512 import JointD512Arm
 from radio_gs.v3.training.memory_safe_adamw import MemorySafeAdamW
+from radio_gs.v3.training.rendered_mask import render_membership
 
 
 @torch.no_grad()
@@ -208,6 +210,7 @@ def evaluate(
     relation: dict,
     train_proposals: set[int],
     temperature: float,
+    boundary_head: torch.nn.Module | None = None,
 ) -> tuple[dict[str, float], int]:
     metrics = []
     shared_projection = (
@@ -223,19 +226,57 @@ def evaluate(
         )
         if support is None:
             continue
-        embedding = (
-            model.scale_embedding(shared_projection, episode.scale)
-            if shared_projection is not None
-            else model(episode.scale)
-        )
-        prediction, _ = render_episode(
-            embedding, support, episode, temperature=temperature
-        )
-        height, width = episode.target.shape
-        image = prediction.reshape(height, width)
-        dilation = F.max_pool2d(image[None, None], 3, 1, 1)
-        erosion = -F.max_pool2d(-image[None, None], 3, 1, 1)
-        edge = torch.sigmoid((dilation - erosion)[0, 0] * 16.0 - 4.0)
+        if shared_projection is None and hasattr(model, "block"):
+            support_rows, support_weights = support
+            combined = torch.cat((support_rows, episode.gaussian_ids))
+            unique, inverse = torch.unique(combined, sorted=True, return_inverse=True)
+            embedding = model(episode.scale, unique.to(model.memory.device))
+            support_count = support_rows.numel()
+            prototype = pool_prototype(
+                embedding[inverse[:support_count].to(embedding.device)],
+                support_weights.to(embedding.device),
+            )
+            hit_posterior = membership_from_prototype(
+                embedding[inverse[support_count:].to(embedding.device)],
+                prototype,
+                temperature=temperature,
+            )
+            prediction = render_membership(
+                hit_posterior,
+                torch.arange(hit_posterior.numel(), device=embedding.device),
+                episode.pixel_ids.to(embedding.device),
+                episode.contribution_weights.to(embedding.device),
+                num_pixels=episode.target.numel(),
+            )
+        else:
+            embedding = (
+                model.scale_embedding(shared_projection, episode.scale)
+                if shared_projection is not None
+                else model(episode.scale)
+            )
+            prediction, _ = render_episode(
+                embedding, support, episode, temperature=temperature
+            )
+        if boundary_head is None:
+            height, width = episode.target.shape
+            image = prediction.reshape(height, width)
+            dilation = F.max_pool2d(image[None, None], 3, 1, 1)
+            erosion = -F.max_pool2d(-image[None, None], 3, 1, 1)
+            edge = torch.sigmoid((dilation - erosion)[0, 0] * 16.0 - 4.0)
+        else:
+            unique_rows, inverse = torch.unique(
+                episode.gaussian_ids, sorted=True, return_inverse=True
+            )
+            row_boundary = boundary_head(
+                model.boundary_view(unique_rows.to(model.memory.device))
+            ).squeeze(-1).sigmoid()
+            edge = render_membership(
+                row_boundary[inverse.to(row_boundary.device)],
+                torch.arange(inverse.numel(), device=row_boundary.device),
+                episode.pixel_ids.to(row_boundary.device),
+                episode.contribution_weights.to(row_boundary.device),
+                num_pixels=episode.target.numel(),
+            ).reshape(episode.target.shape)
         metrics.append(evaluate_source_heldout(
             prediction.cpu(), episode.target.flatten(), episode.known.flatten(),
             episode.unknown.flatten(), edge.flatten().cpu(), episode.boundary.flatten(),

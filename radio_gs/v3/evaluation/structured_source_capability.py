@@ -20,12 +20,52 @@ from radio_gs.v3.training.run_instance_upper_bound import materialize_canonical_
 from radio_gs.v3.training.structured_initialization import fixed_jl_projection
 from radio_gs.v3.training.learned_source_codec import apply_codec
 from radio_gs.v3.training.native_visual_codec import GatedResidualVisualCodec, _load_dino
+from radio_gs.v3.training.native_visual_set_codec import ObservationSetVisualCodec
+
+
+def _resolve_initialization_metadata(
+    candidate_path: Path, metadata: dict[str, object]
+) -> tuple[dict[str, object], dict[str, object]]:
+    """Resolve a hash-bound protected-continuation chain to its codec definition."""
+
+    current_metadata = metadata
+    seen = {candidate_path}
+    while True:
+        initialization = current_metadata.get("initialization", {})
+        if "radio_projection" in initialization and "siglip_projection" in initialization:
+            return initialization, current_metadata
+        parent_value = initialization.get("path")
+        expected_hash = initialization.get("sha256")
+        if not parent_value or not expected_hash:
+            raise ValueError("structured candidate has no resolvable codec initialization")
+        parent_path = Path(parent_value).resolve(strict=True)
+        if parent_path in seen or sha256_file(parent_path) != expected_hash:
+            raise ValueError("protected initialization lineage is cyclic or hash-mismatched")
+        parent = torch.load(parent_path, map_location="cpu")
+        current_metadata = parent.get("metadata", {})
+        if (
+            not current_metadata.get("source_only")
+            or current_metadata.get("historical_field_opened")
+            or current_metadata.get("target_rgb_opened")
+            or current_metadata.get("benchmark_metrics_opened")
+        ):
+            raise ValueError("protected initialization lineage violates source-only authority")
+        seen.add(parent_path)
 
 
 def _same_pixel_retrieval(
     query: torch.Tensor, target: torch.Tensor, sample_budget: int
 ) -> tuple[float, float, float]:
     """Retrieve the matching held-out source pixel among same-view candidates."""
+
+    value = _retrieval_diagnostics(query, target, sample_budget)
+    return value["top1"], value["top5"], value["positive_margin"]
+
+
+def _retrieval_diagnostics(
+    query: torch.Tensor, target: torch.Tensor, sample_budget: int
+) -> dict[str, float]:
+    """Report ranking and score decomposition for aligned query/target rows."""
 
     count = min(int(sample_budget), query.shape[0])
     if count <= 0:
@@ -42,11 +82,14 @@ def _same_pixel_retrieval(
         other = similarity.clone()
         other.fill_diagonal_(-torch.inf)
         margin = diagonal - other.max(-1).values
-    return (
-        float((rank == 1).float().mean()),
-        float((rank <= min(5, count)).float().mean()),
-        float(margin.mean()),
-    )
+    return {
+        "top1": float((rank == 1).float().mean()),
+        "top5": float((rank <= min(5, count)).float().mean()),
+        "mrr": float(rank.float().reciprocal().mean()),
+        "positive_similarity": float(diagonal.mean()),
+        "hardest_negative_similarity": float((diagonal - margin).mean()),
+        "positive_margin": float(margin.mean()),
+    }
 
 
 @torch.no_grad()
@@ -74,10 +117,14 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     semantic = memory[:, semantic_start : semantic_start + int(layout["semantic"])]
     architecture = metadata.get("architecture", "hard_block_shared_private")
     state_dict = candidate["state_dict"]
-    projection_type = metadata["initialization"]["radio_projection"]["type"]
+    codec_initialization, codec_metadata = _resolve_initialization_metadata(
+        candidate_path, metadata
+    )
+    projection_type = codec_initialization["radio_projection"]["type"]
     native_codec = projection_type == "native_gated_residual_radio_dino"
+    native_set_codec = projection_type == "native_observation_set_radio_dino"
     learned_codec = projection_type == "learned_cross_scene_pca"
-    semantic_learned = metadata["initialization"]["siglip_projection"]["type"] != "fixed_jl"
+    semantic_learned = codec_initialization["siglip_projection"]["type"] != "fixed_jl"
     if learned_codec:
         radio_mean = torch.as_tensor(state_dict["codec.radio_mean"]).float()
         radio_basis = torch.as_tensor(state_dict["codec.radio_basis"]).float()
@@ -110,15 +157,23 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     device = torch.device(args.device)
     visual_model = None
     dino_root = None
-    if native_codec:
+    if native_codec or native_set_codec:
         if args.baseline_field:
             raise ValueError("native RADIO+DINO codec has no historical RADIO-only comparator")
-        dino_root = Path(metadata["dino_teacher_root"]).resolve(strict=True)
-        visual_model = GatedResidualVisualCodec().to(device).eval()
-        visual_model.load_state_dict({
-            name.removeprefix("visual_codec."): torch.as_tensor(value)
-            for name, value in state_dict.items() if name.startswith("visual_codec.")
-        }, strict=True)
+        dino_root = Path(codec_metadata["dino_teacher_root"]).resolve(strict=True)
+        if native_set_codec:
+            set_model = ObservationSetVisualCodec().to(device).eval()
+            set_model.load_state_dict({
+                name.removeprefix("set_visual_codec."): torch.as_tensor(value)
+                for name, value in state_dict.items() if name.startswith("set_visual_codec.")
+            }, strict=True)
+            visual_model = set_model.pixel_codec
+        else:
+            visual_model = GatedResidualVisualCodec().to(device).eval()
+            visual_model.load_state_dict({
+                name.removeprefix("visual_codec."): torch.as_tensor(value)
+                for name, value in state_dict.items() if name.startswith("visual_codec.")
+            }, strict=True)
     baseline_memory = baseline_decoder = baseline_path = comparator_view_audit = None
     if args.baseline_field:
         baseline_path = Path(args.baseline_field).resolve(strict=True)
@@ -140,7 +195,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
 
     records = [
         value for value in membership["metadata"]["source_records"]
-        if int(value["source_view_index"]) % 4 == 3
+        if int(value["source_view_index"]) % 4 == args.evaluation_residue
     ]
     radio_values = []
     baseline_radio_values = []
@@ -154,7 +209,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             map_location="cpu",
         ).float()
         teacher_flat = teacher.permute(1, 2, 0).reshape(-1, teacher.shape[0])
-        if native_codec:
+        if native_codec or native_set_codec:
             assert visual_model is not None and dino_root is not None
             dino = _load_dino(
                 dino_root / f"frame_{int(record['frame_id']):05d}.pt"
@@ -171,7 +226,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             projection = (
                 radio_basis if learned_codec else fixed_jl_projection(
                     teacher.shape[0], int(layout["shared"]),
-                    int(metadata["initialization"]["radio_projection"]["seed"]),
+                    int(codec_initialization["radio_projection"]["seed"]),
                 )
             )
             target = F.normalize(
@@ -203,12 +258,12 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             F.cosine_similarity(rendered_view[valid], target[valid], dim=-1)
         )
         retrieval_values.append(
-            _same_pixel_retrieval(
+            _retrieval_diagnostics(
                 rendered_view[valid], target[valid], args.retrieval_samples_per_view
             )
         )
         teacher_ceiling_values.append(
-            _same_pixel_retrieval(
+            _retrieval_diagnostics(
                 target[valid], target[valid], args.retrieval_samples_per_view
             )
         )
@@ -234,7 +289,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                 F.cosine_similarity(projected_baseline[valid], target[valid], dim=-1)
             )
             baseline_retrieval_values.append(
-                _same_pixel_retrieval(
+                _retrieval_diagnostics(
                     projected_baseline[valid], target[valid], args.retrieval_samples_per_view
                 )
             )
@@ -246,9 +301,8 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     )
     def mean_retrieval(values):
         return {
-            "top1": sum(value[0] for value in values) / len(values),
-            "top5": sum(value[1] for value in values) / len(values),
-            "positive_margin": sum(value[2] for value in values) / len(values),
+            name: sum(value[name] for value in values) / len(values)
+            for name in values[0]
         } if values else None
 
     pooled = []
@@ -262,16 +316,19 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         else:
             semantic_projection = fixed_jl_projection(
                 descriptors.shape[1], int(layout["semantic"]),
-                int(metadata["initialization"]["siglip_projection"]["seed"]),
+                int(codec_initialization["siglip_projection"]["seed"]),
             )
             target_semantic = F.normalize(descriptors @ semantic_projection, dim=-1, eps=1e-8)
         supports = proposal_supports(
             membership["row_indices"], membership["proposal_indices"],
             membership["weights"], int(membership["num_proposals"]),
         )
-        dev = torch.where(torch.as_tensor(membership["proposal_view_indices"]).long() % 4 == 3)[0]
+        evaluation_proposals = torch.where(
+            torch.as_tensor(membership["proposal_view_indices"]).long() % 4
+            == args.evaluation_residue
+        )[0]
         targets = []
-        for proposal in dev.tolist():
+        for proposal in evaluation_proposals.tolist():
             rows, weights = supports[proposal]
             if rows.numel():
                 pooled.append(pool_prototype(semantic[rows], weights))
@@ -286,7 +343,10 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     report = {
         "schema": "radio_gs.sugm_v3.structured_source_capability.v1",
         "architecture": architecture,
-        "split": "source_dev_view_residue_3",
+        "split": (
+            "source_dev_view_residue_3"
+            if args.evaluation_residue == 3 else "source_audit_view_residue_0"
+        ),
         "image_correspondence": {
             "projected_radio_render_cosine": radio_cosine,
             "historical_projected_radio_render_cosine": baseline_radio_cosine,
@@ -317,6 +377,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         "text_query_metric": "pending_registered_source_query_suite",
         "target_rgb_opened": False,
         "benchmark_metrics_opened": False,
+        "source_audit_opened": args.evaluation_residue == 0,
         "inputs": {
             "membership": {"path": str(membership_path), "sha256": sha256_file(membership_path)},
             "candidate": {"path": str(candidate_path), "sha256": sha256_file(candidate_path)},
@@ -344,6 +405,7 @@ def main() -> None:
     parser.add_argument("--alpha-threshold", type=float, default=0.02)
     parser.add_argument("--retrieval-samples-per-view", type=int, default=512)
     parser.add_argument("--teacher-pixel-chunk", type=int, default=1024)
+    parser.add_argument("--evaluation-residue", type=int, choices=(0, 3), default=3)
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     if bool(args.baseline_field) != bool(args.expected_baseline_field_sha256):
