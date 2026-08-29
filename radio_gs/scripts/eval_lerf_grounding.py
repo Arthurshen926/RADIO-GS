@@ -499,6 +499,9 @@ def validate_primitive_posterior_cache(
         or typed_posterior.startswith(
             "object_aware_universal_field_v2_text_object_posterior_"
         )
+        or typed_posterior.startswith(
+            "sugm_v3_null_calibrated_positive_anchor_posterior_"
+        )
     ):
         raise ValueError("primitive_posterior method identity differs")
     if metadata.get("persistent_second_semantic_field") is not False:
@@ -554,6 +557,7 @@ def validate_primitive_posterior_identity_cache(
     if metadata.get("localization_authority") not in {
         "field_siglip2_relevancy_identity",
         "direct_source_view_language_response_exact_mpr",
+        "clean_source_only_d128_positive_identity",
     }:
         raise ValueError("primitive localization authority differs")
     values = identity.float().cpu()

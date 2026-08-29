@@ -154,6 +154,37 @@ def test_text_identity_uses_hardest_canonical_negative_when_sealed():
     assert abs(float(identity[2]) - 0.5) < 1e-5
 
 
+def test_positive_text_anchors_keep_null_as_separate_evidence():
+    memory = torch.zeros(3, 512)
+    memory[0, 320] = 1.0
+    memory[1, 321] = 1.0
+    memory[2, 320:322] = 1.0
+    basis = torch.zeros(1536, 128)
+    basis[:128] = torch.eye(128)
+    positive = torch.zeros(1536)
+    positive[0] = 1.0
+    negatives = torch.zeros(1, 1536)
+    negatives[0, 1] = 1.0
+    interface = StructuredGaussianQueryInterface(
+        LowRankPrivateBranchMemory(memory),
+        torch.zeros(3, 5),
+        nn.Linear(16, 1),
+        siglip_mean=torch.zeros(1536),
+        siglip_basis=basis,
+        text_negative_tokens=negatives,
+    )
+    packet = QueryPacket("text", token=positive)
+    rows, _weights, score = interface.compile_identity_anchors(
+        packet, topk=2, text_anchor_policy="positive"
+    )
+    raw, null, unknown = interface.semantic_text_evidence(packet)
+
+    assert torch.equal(rows, torch.tensor([0, 2]))
+    torch.testing.assert_close(score, raw)
+    torch.testing.assert_close(null, torch.tensor([0.0, 1.0, 2 ** -0.5]))
+    assert not bool(unknown.any())
+
+
 def test_prompt_packet_uses_only_finite_gaussian_seed_rows():
     model = LowRankPrivateBranchMemory(torch.randn(6, 512))
     interface = StructuredGaussianQueryInterface(

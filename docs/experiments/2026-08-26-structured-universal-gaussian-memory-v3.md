@@ -1168,3 +1168,167 @@ codec, not a posterior gate or an implementation fallback.
 - direct raw-text projection control:
   `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260828/sugm_v3/direct_text_projection_candidates_v1/`
   and `direct_text_projection_source_dev_grid_v1/`.
+
+## SUGM-v3.13: historical-language-lineage correction and clean semantic rewrite
+
+The apparent 27-pair language authority used in v3.12 was reopened at the
+artifact-provenance level.  Its `proposal_probability` was generated from a
+historical latent-score cache and field-tail readout.  Static namespace audits
+had only proved that v3 code did not import an old module; they did not prove
+that an input artifact was independent.  Therefore every conclusion selected
+from those 27 pairs is superseded.  The poor full-LERF numbers remain valid
+measurements of the old method, but they are not evidence for retaining its
+text alignment or semantic codec.
+
+A fresh source-only ternary authority is built directly from query-independent
+SAM proposal memberships, mask-aligned SigLIP crop summaries, official frozen
+text embeddings, and canonical null phrases.  Cross-view proposal components
+use mutual-best strong geometry/descriptor/context matches.  Descending-strength
+union rejects repeated-view and explicit-different conflicts.  Text seeds use
+only residues 1/2; dev/audit text responses never select labels.  The retained
+medium-evidence rule requires mean foreground/context response above canonical
+null, proposal top-3 membership, and evidence in two training views.  It gives
+33/67 queries with positive authority, 426 explicit positive pairs and 3,400
+explicit negative pairs; all other pairs remain unknown rather than becoming
+false negatives.
+
+The corrected error ladder localizes the old failure.  Native SigLIP D1536 has
+positive held-out margins of roughly `0.03--0.056`.  The old image-PCA D128
+compresses these to about `1e-6`, and old Gaussian writing makes them negative.
+One shared query-discriminative D1536-to-D128 projection was therefore fitted
+from scratch with canonical-null response, listwise retrieval, sibling margin,
+and native cross-modal distillation.  Three seeds ran concurrently; seed
+`20260829` was selected only on source dev.  Its source-dev macro Recall@1 is
+`0.9167` over the three evaluable scenes (20 queries), with margin `0.4299`.
+Independent audit gives macro Recall@1 `0.8373` over four scenes (27 queries),
+with margin `0.3752`.  Waldo residue 0 has no query with both explicit positive
+and negative authority and is reported as not evaluable, not as zero.
+
+A query-free two-pass Gaussian writer then combines proposal quality with
+directional consensus in the learned D128 space.  Weak conflicting writes are
+downweighted continuously and zero-evidence rows stay unknown.  Held-out
+written-memory Recall@1 is `0.75/0.875/0.75` on Figurines/Ramen/Teatime dev and
+`0.857/0.875/0.889/1.0` on the four audit scenes.  Every written-memory margin
+is positive (`0.0476--0.7678`).  Thus the scientific chain from native semantic
+response through D128 compression into Gaussian D128 is closed for covered
+rows.  Coverage is not closed: direct reliable writes cover only
+`25.5%/54.7%/54.8%/21.0%` of the four Gaussian sets.  No geometry copy or
+benchmark-selected threshold is authorized to fill the remainder.
+
+Finally, a constant-size null-aware posterior module and synthetic scientific
+suite expose the earlier D16 integration bug.  Boundary is unsigned, so it
+does not hard-delete edge rows; it transfers authority from expanded instance
+support back to local identity evidence.  Synthetic identical-sibling,
+multipart, cross-boundary, null/unknown, and shared-2D/3D-posterior checks pass.
+The module is not connected to benchmark deployment until it is trained from
+real source authority and the remaining semantic coverage problem is solved.
+
+Frozen evidence:
+
+- clean language authority:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/native_language_authority_v3/`;
+- corrected old-codec error ladder:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/semantic_mapping_error_ladder_v2/`;
+- three semantic-codec seeds and held-out evaluations:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/query_discriminative_semantic_codec_v1/`
+  and `semantic_codec_evaluation_v1/`;
+- clean conflict-aware Gaussian D128 and held-out evaluations:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/conflict_aware_semantic_memory_v1/`
+  and `semantic_writer_evaluation_v1/`.
+
+The frozen source-only RADIO+DINO D320 writer was then provenance-audited as a
+coverage input.  Its direct train-view coverage is
+`44.9%/80.2%/75.8%/61.3%`, and its metadata seals historical-field, target-RGB,
+and benchmark access as false.  A shared linear masked writer is fitted from
+directly observed D320/D128 row pairs with a deterministic 80/20 row split.
+Held-out median D128 cosine is `0.756/0.919/0.897/0.876`; Figurines has a weak
+10th percentile of `0.391`, while the other scenes are `0.523--0.598`.
+
+The existing v3 split convention is train residues 1/2, dev residue 3, and
+audit residue 0.  An earlier summary in this work session accidentally named
+residues 0 and 3 in the opposite order.  Replaying selection on the correct
+dev residue leaves semantic-codec seed `20260829` unchanged.  However, because
+both held-out residues had already been evaluated in the same batch, the
+residue-0 results below are validation evidence, not a pristine independent
+audit.  A future claim of independent audit requires a newly sealed source
+cohort.
+
+On correct source dev, masked coverage is retained for Ramen, Teatime, and
+Waldo: Recall@1/MRR do not regress and explicit margin increases.  Figurines
+Recall@1 drops from `0.857` to `0.714`, so its predicted writes are rejected.
+The retained per-scene semantic coverage is therefore
+`25.5%/80.2%/75.8%/61.3%`.  Descriptive residue-0 validation keeps retrieval
+unchanged on Ramen and Teatime; Waldo has no evaluable query on that split.
+
+- masked writer and expanded-memory candidates:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/masked_semantic_writer_v1/`
+  and `masked_semantic_memory_v1/`;
+- dev evaluations and provenance-honest selection replay:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/semantic_writer_evaluation_v2/`
+  and `masked_semantic_writer_selection_v2.json`.
+
+## SUGM-v3.14: disentangled null calibration and retained-private-route rejection
+
+The complete query interface exposed two later-stage errors which were hidden
+by the proposal-space semantic-writer evaluation.  First, canonical negatives
+were converted to a positive-versus-null probability *before* identity-anchor
+selection.  This changed the ranking even when the raw D128 text response was
+correct.  On correct source dev, Teatime raw D128 identity has Recall@1
+`0.889` and margin `+0.2025`; the prematurely null-adjusted identity falls to
+Recall@1 `0.444` and margin `-0.0070`.  The interface now exposes raw positive,
+canonical null, and unknown evidence separately.  Positive text response alone
+selects anchors, while null remains an explicit final-posterior input.
+
+Second, an initial calibrator was trained on proposal-mean features followed by
+a sigmoid, while deployment applies a sigmoid per Gaussian and only then
+renders or pools.  That proxy predicted Teatime Recall@1 `0.778`, but the exact
+deployment order produced `0.444`.  This proxy result is rejected.  The
+corrected training evidence preserves the actual order: Gaussian logit,
+sigmoid, membership-weighted proposal mean.  Deterministic membership-mass
+quantiles cap each explicit proposal/query support at 512 hits without turning
+unknown pairs into negatives.  Three seeds were fitted from residues 1/2 only;
+their train outcomes are effectively identical.
+
+The exact source-dev comparison is decisive:
+
+| route | Figurines R@1 | Ramen R@1 | Teatime R@1 | Waldo R@1 | scene-macro R@1 | scene-macro MRR | scene-macro margin |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| raw clean D128 identity | 0.857 | 0.875 | 0.889 | 1.000 | 0.905 | 0.942 | +0.397 |
+| trained D128 + retained D48/D16 | 0.571 | 1.000 | 0.556 | 1.000 | 0.782 | 0.862 | +0.328 |
+| trained semantic-local control, D48/D16 disabled | 0.571 | 1.000 | 0.667 | 1.000 | 0.810 | 0.874 | +0.306 |
+
+The full posterior has Recall@5 `1.0` and a positive mean margin in every
+scene, so the failure is not a strict gate or a total language collapse.
+Nevertheless it is worse than raw identity by `0.123` macro Recall@1, and
+removing D48/D16 improves Recall@1 and MRR.  Teatime shows the clearest causal
+ordering: `0.889` raw identity, `0.667` without the retained private route, and
+`0.556` with it.  Earlier direct D48 measurements were also negative on
+Figurines and Teatime.  Therefore the retained old D48 instance geometry is
+not merely under-calibrated; it is incompatible with the newly rewritten D128
+semantic identity space.  D16 is unsigned and cannot repair a wrong instance
+prototype by itself.
+
+This satisfies the predeclared negative terminal condition.  The candidate is
+not promoted to a new full LERF2D/3D benchmark run, because the source
+scientific chain does not close and benchmark metrics must not be used to tune
+around that failure.  The previously completed LERF full result (`0.0431` 2D
+scene-macro mIoU and `0.0431` strict-3D scene-macro mIoU) remains evidence for
+the superseded historical-language route, not for this corrected candidate.
+The next method version must retrain or replace instance structure against the
+clean semantic identity authority; retaining the old D48/D16 branch is
+rejected.
+
+Frozen evidence:
+
+- raw/null/D48 error separation:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/clean_query_evidence_dev_v2/`;
+- exact-order Gaussian evidence:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/clean_posterior_evidence_v2/`;
+- three-seed full and semantic-local calibrators:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/null_calibrated_posterior_exact_v2/`;
+- exact source-dev deployment comparison:
+  `/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/clean_query_exact_calibrated_dev_v2/`.
+
+Verification after the correction: all `104` v3 tests pass in the repository
+runtime, the v3 static historical-import/scene-token audit returns `[]`, and
+`git diff --check` passes.

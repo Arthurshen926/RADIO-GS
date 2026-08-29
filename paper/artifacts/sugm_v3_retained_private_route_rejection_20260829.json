@@ -1,0 +1,90 @@
+{
+  "schema": "radio_gs.sugm_v3.retained_private_route_rejection.v1",
+  "date": "2026-08-29",
+  "status": "source_scientific_chain_failed_do_not_promote_to_lerf_benchmark",
+  "split": {
+    "train_view_residues": [1, 2],
+    "dev_view_residue": 3,
+    "residue_0_status": "already_opened_descriptive_validation_not_independent_audit"
+  },
+  "protocol": {
+    "anchor_policy": "raw_positive_D128_text_similarity",
+    "null_policy": "independent_final_posterior_evidence",
+    "calibrator_train_order": "gaussian_logit_then_sigmoid_then_membership_weighted_proposal_mean",
+    "unknown_pairs_used_as_negative": false,
+    "target_rgb_opened": false,
+    "benchmark_metrics_opened_for_selection": false,
+    "strict_gate_used": false
+  },
+  "source_dev": {
+    "raw_clean_d128_identity": {
+      "scene_recall_at_1": {
+        "figurines": 0.8571428571428571,
+        "ramen": 0.875,
+        "teatime": 0.8888888888888888,
+        "waldo_kitchen": 1.0
+      },
+      "scene_macro_recall_at_1": 0.9052579365079365,
+      "scene_macro_mrr": 0.9420469576719577,
+      "scene_macro_margin": 0.3967870279409243
+    },
+    "trained_retained_d48_d16": {
+      "scene_recall_at_1": {
+        "figurines": 0.5714285714285714,
+        "ramen": 1.0,
+        "teatime": 0.5555555555555556,
+        "waldo_kitchen": 1.0
+      },
+      "scene_macro_recall_at_1": 0.7817460317460317,
+      "scene_macro_recall_at_5": 1.0,
+      "scene_macro_mrr": 0.8619708994708994,
+      "scene_macro_margin": 0.32787127579961506
+    },
+    "trained_semantic_local_control_without_d48_d16": {
+      "scene_recall_at_1": {
+        "figurines": 0.5714285714285714,
+        "ramen": 1.0,
+        "teatime": 0.6666666666666666,
+        "waldo_kitchen": 1.0
+      },
+      "scene_macro_recall_at_1": 0.8095238095238095,
+      "scene_macro_recall_at_5": 1.0,
+      "scene_macro_mrr": 0.8740740740740741,
+      "scene_macro_margin": 0.3057846763570394
+    }
+  },
+  "causal_findings": [
+    "canonical null was previously mixed before anchor selection and reduced Teatime Recall@1 from 0.889 raw identity to 0.444",
+    "proposal-mean-feature then sigmoid training was not deployment-equivalent and its optimistic result was rejected",
+    "after correcting the operation order, disabling retained D48/D16 improves macro Recall@1 and MRR over the full route",
+    "the full route remains materially worse than raw clean D128 identity, so calibration does not close the instance-structure chain"
+  ],
+  "decision": {
+    "retained_d48_d16_route": "rejected",
+    "new_full_lerf2d_lerf3d_run": "not_authorized_after_source_dev_failure",
+    "negative_terminal_condition_satisfied": true,
+    "next_required_change": "retrain_or_replace_instance_structure_against_clean_semantic_identity_authority"
+  },
+  "selected_train_stable_seed_for_comparison": {
+    "seed": 20260830,
+    "full": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/null_calibrated_posterior_exact_v2/full/seed_20260830.pt",
+      "sha256": "2cb0baf479b1221adcc2832f98110f9af30f48c4e005929414e79072e469b834"
+    },
+    "semantic_control": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/null_calibrated_posterior_exact_v2/semantic_control/seed_20260830.pt",
+      "sha256": "75d368ea4389f0460a0a8f04b1f945c2514710ff64c6de3986f0e4c9486e3cbc"
+    }
+  },
+  "evidence_roots": {
+    "raw_null_private_error_separation": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/clean_query_evidence_dev_v2",
+    "exact_order_training_evidence": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/clean_posterior_evidence_v2",
+    "exact_order_calibrators": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/null_calibrated_posterior_exact_v2",
+    "exact_source_dev_comparison": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260829/sugm_v3/clean_query_exact_calibrated_dev_v2"
+  },
+  "verification": {
+    "v3_tests_passed": 104,
+    "v3_static_audit_failures": [],
+    "git_diff_check": "pass"
+  }
+}

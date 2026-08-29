@@ -10,6 +10,7 @@ from torch import nn
 from radio_gs.v3.contracts.method import validate_scene_state
 from radio_gs.v3.memory.structured_memory import LowRankPrivateBranchMemory, SharedPrivateLayout
 from radio_gs.v3.query.membership import membership_from_prototype, pool_prototype
+from radio_gs.v3.query.calibrated_posterior import NullCalibratedPosterior
 from radio_gs.v3.query.identity_adapter import (
     AffineTextAlignment,
     DirectTextProjection,
@@ -101,29 +102,64 @@ class StructuredGaussianQueryInterface(nn.Module):
         )
 
     @torch.no_grad()
+    def semantic_text_evidence(
+        self, packet: QueryPacket
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Keep positive, canonical-null, and unknown evidence disentangled.
+
+        Canonical negatives are useful final-posterior evidence, but they must
+        not silently replace the positive text score used to choose identity
+        anchors.  Returning the three axes separately makes that distinction
+        explicit and lets a source-trained calibrator decide how much null
+        evidence should count.
+        """
+
+        if packet.modality not in ("text", "image"):
+            raise ValueError("semantic evidence requires a text or image packet")
+        if self.siglip_mean is None or self.siglip_basis is None:
+            raise ValueError("scene state has no sealed semantic identity codec")
+        query = self._project_semantic_tokens(
+            packet.token, text=packet.modality == "text"
+        )[0]
+        original_semantic = self.model.semantic_view()
+        unknown = original_semantic.norm(dim=1) <= 1e-6
+        semantic, query = self._center_identity(original_semantic, query)
+        positive = semantic @ query
+        null = torch.zeros_like(positive)
+        if packet.modality == "text" and self.text_negative_tokens is not None:
+            negatives = self._project_semantic_tokens(
+                self.text_negative_tokens, text=True
+            )
+            if self.center_semantic_identity:
+                known = ~unknown
+                centroid = original_semantic[known].mean(dim=0)
+                negatives = torch.nn.functional.normalize(
+                    negatives - centroid, dim=-1, eps=1e-8
+                )
+            null = (semantic @ negatives.T).max(dim=1).values
+        return positive, null, unknown.float()
+
+    @torch.no_grad()
     def compile_identity_anchors(
-        self, packet: QueryPacket, *, topk: int = 8
+        self,
+        packet: QueryPacket,
+        *,
+        topk: int = 8,
+        text_anchor_policy: str = "null_adjusted",
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         if topk <= 0 or topk > self.model.memory.shape[0]:
             raise ValueError("identity anchor budget differs")
         if packet.modality in ("text", "image"):
-            if self.siglip_mean is None or self.siglip_basis is None:
-                raise ValueError("scene state has no sealed semantic identity codec")
-            query = self._project_semantic_tokens(packet.token, text=packet.modality == "text")[0]
-            semantic = self.model.semantic_view()
-            semantic, query = self._center_identity(semantic, query)
-            score = semantic @ query
-            if packet.modality == "text" and self.text_negative_tokens is not None:
-                negatives = self._project_semantic_tokens(self.text_negative_tokens, text=True)
-                if self.center_semantic_identity:
-                    known = self.model.semantic_view().norm(dim=1) > 1e-6
-                    centroid = self.model.semantic_view()[known].mean(dim=0)
-                    negatives = torch.nn.functional.normalize(
-                        negatives - centroid, dim=-1, eps=1e-8
-                    )
-                hardest_negative = (semantic @ negatives.T).max(dim=1).values
-                pair = torch.stack((score, hardest_negative), dim=1) * self.text_logit_scale
-                score = torch.softmax(pair, dim=1)[:, 0]
+            if text_anchor_policy not in ("positive", "null_adjusted"):
+                raise ValueError("text anchor policy differs")
+            positive, null, _unknown = self.semantic_text_evidence(packet)
+            score = positive
+            if (
+                text_anchor_policy == "null_adjusted"
+                and packet.modality == "text"
+                and self.text_negative_tokens is not None
+            ):
+                score = torch.sigmoid((positive - null) * self.text_logit_scale)
         else:
             score = torch.as_tensor(
                 packet.seed_probability, device=self.model.memory.device
@@ -148,8 +184,11 @@ class StructuredGaussianQueryInterface(nn.Module):
         membership_margin: float = 0.0,
         identity_extent_weight: float = 0.0,
         posterior_chunk_size: int = 0,
+        text_anchor_policy: str = "null_adjusted",
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        rows, weights, identity = self.compile_identity_anchors(packet, topk=topk)
+        rows, weights, identity = self.compile_identity_anchors(
+            packet, topk=topk, text_anchor_policy=text_anchor_policy
+        )
         posterior = self.gaussian_posterior(
             rows, weights, scale=scale, temperature=temperature,
             membership_margin=membership_margin,
@@ -169,6 +208,41 @@ class StructuredGaussianQueryInterface(nn.Module):
                 base_logit + float(identity_extent_weight) * identity_logit
             )
         return posterior, identity
+
+    @torch.no_grad()
+    def calibrated_posterior_from_packet(
+        self,
+        packet: QueryPacket,
+        calibrator: NullCalibratedPosterior,
+        *,
+        scale: float,
+        topk: int = 8,
+        temperature: float = 0.15,
+        posterior_chunk_size: int = 0,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Fuse disentangled text evidence into one reusable Gaussian posterior."""
+
+        identity, null, unknown = self.semantic_text_evidence(packet)
+        instance, returned_identity = self.posterior_from_packet(
+            packet,
+            scale=scale,
+            topk=topk,
+            temperature=temperature,
+            posterior_chunk_size=posterior_chunk_size,
+            text_anchor_policy="positive",
+        )
+        if not torch.equal(identity, returned_identity):
+            raise RuntimeError("positive identity evidence changed during expansion")
+        posterior = calibrator(
+            identity=identity,
+            instance=instance,
+            null=null,
+            negative=torch.sigmoid((null - identity) * self.text_logit_scale),
+            unknown=unknown,
+            boundary=self.boundary_probability(),
+            reliability=self.reliability,
+        )
+        return posterior, identity, instance
 
     @torch.no_grad()
     def gaussian_posterior(

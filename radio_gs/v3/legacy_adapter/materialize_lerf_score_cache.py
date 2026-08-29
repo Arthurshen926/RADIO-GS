@@ -7,6 +7,7 @@ from pathlib import Path
 
 import torch
 
+from radio_gs.v3.query.calibrated_posterior import load_null_calibrated_posterior
 from radio_gs.v3.query.interface import load_query_interface
 from radio_gs.v3.query.packet import QueryPacket
 from radio_gs.v3.training.instance_upper_bound import sha256_file
@@ -25,6 +26,7 @@ def main() -> None:
     parser.add_argument("--text-alignment")
     parser.add_argument("--text-negatives")
     parser.add_argument("--text-logit-scale", type=float, default=10.0)
+    parser.add_argument("--posterior-calibrator")
     parser.add_argument("--membership-margin", type=float, default=0.0)
     parser.add_argument("--membership-margin-authority")
     parser.add_argument("--center-semantic-identity", action="store_true")
@@ -48,6 +50,10 @@ def main() -> None:
         text_negative_path=args.text_negatives, text_logit_scale=args.text_logit_scale,
         center_semantic_identity=args.center_semantic_identity,
     )
+    calibrator = (
+        load_null_calibrated_posterior(args.posterior_calibrator, device=args.device)
+        if args.posterior_calibrator else None
+    )
     xyz = torch.as_tensor(geometry["xyz"]).float()
     if xyz.shape != (interface.model.memory.shape[0], 3):
         raise ValueError("renderer geometry row domain differs from v3 state")
@@ -55,13 +61,26 @@ def main() -> None:
     embeddings = torch.as_tensor(text["embeddings"]).float()
     for query in queries:
         token = embeddings[lookup[query.casefold()]]
-        value, score = interface.posterior_from_packet(
-            QueryPacket("text", token=token), scale=args.scale,
-            topk=args.topk, temperature=args.temperature,
-            membership_margin=args.membership_margin,
-            identity_extent_weight=args.identity_extent_weight,
-            posterior_chunk_size=args.posterior_chunk_size,
-        )
+        packet = QueryPacket("text", token=token)
+        if calibrator is not None:
+            if args.membership_margin or args.identity_extent_weight:
+                raise ValueError("trained calibrator forbids historical extent tuning")
+            value, score, _instance = interface.calibrated_posterior_from_packet(
+                packet,
+                calibrator,
+                scale=args.scale,
+                topk=args.topk,
+                temperature=args.temperature,
+                posterior_chunk_size=args.posterior_chunk_size,
+            )
+        else:
+            value, score = interface.posterior_from_packet(
+                packet, scale=args.scale,
+                topk=args.topk, temperature=args.temperature,
+                membership_margin=args.membership_margin,
+                identity_extent_weight=args.identity_extent_weight,
+                posterior_chunk_size=args.posterior_chunk_size,
+            )
         if args.extent_fraction:
             if not 0.0 < args.extent_fraction <= 1.0:
                 raise ValueError("extent fraction differs")
@@ -71,7 +90,12 @@ def main() -> None:
             bounded[keep] = value[keep]
             value = bounded
         posterior.append(value.cpu())
-        identity.append(score.cpu())
+        identity.append(
+            (
+                torch.sigmoid(score * args.text_logit_scale)
+                if calibrator is not None else score
+            ).cpu()
+        )
     output = Path(args.output).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -86,12 +110,21 @@ def main() -> None:
             "query_names": queries,
             "query_family": "text_object_extent",
             "construction": "shared_3d_support_solver_probabilities",
-            "typed_posterior": "sugm_v3_shared_gaussian_posterior",
+            "typed_posterior": (
+                "sugm_v3_null_calibrated_positive_anchor_posterior_v1"
+                if calibrator is not None
+                else "sugm_v3_shared_gaussian_posterior"
+            ),
             "persistent_second_semantic_field": False,
             "benchmark_images_opened": False,
             "benchmark_masks_opened": False,
             "evaluation_rgb_opened": False,
             "separate_identity_localization": True,
+            "localization_authority": (
+                "clean_source_only_d128_positive_identity"
+                if calibrator is not None
+                else None
+            ),
             "score_input": "exactly_one_d512_plus_five_scalars",
             "fixed_downstream_threshold": 0.6,
             "same_gaussian_posterior_for_2d_and_3d": True,
@@ -99,13 +132,29 @@ def main() -> None:
             "benchmark_labels_opened": False,
             "method_selection_from_benchmark": False,
             "scene_state": {"path": str(state_path), "sha256": sha256_file(state_path)},
-            "geometry_only_cache": {"path": str(geometry_path), "sha256": sha256_file(geometry_path)},
+            "geometry_query_axis_cache": {
+                "path": str(geometry_path),
+                "sha256": sha256_file(geometry_path),
+                "fields_used": ["xyz", "metadata.query_names"],
+                "historical_score_tensor_used": False,
+            },
             "text_embeddings": {"path": str(text_path), "sha256": sha256_file(text_path)},
             "topk": args.topk, "scale": args.scale, "temperature": args.temperature,
             "membership_margin": args.membership_margin,
             "center_semantic_identity": args.center_semantic_identity,
             "identity_extent_weight": args.identity_extent_weight,
             "posterior_chunk_size": args.posterior_chunk_size,
+            "posterior_calibrator": (
+                {
+                    "path": str(Path(args.posterior_calibrator).resolve(strict=True)),
+                    "sha256": sha256_file(
+                        Path(args.posterior_calibrator).resolve(strict=True)
+                    ),
+                    "anchor_policy": "raw_positive_text_similarity",
+                    "null_policy": "independent_final_posterior_evidence",
+                }
+                if args.posterior_calibrator else None
+            ),
             "identity_extent_authority": (
                 {"path": str(Path(args.identity_extent_authority).resolve(strict=True)),
                  "sha256": sha256_file(Path(args.identity_extent_authority).resolve(strict=True))}
