@@ -1,0 +1,580 @@
+{
+  "accepted_edge_count": 74,
+  "accepted_edge_rate": 0.30833333333333335,
+  "diagnostic_policy": {
+    "minimum_proposal_margin": 0.2,
+    "minimum_proposal_purity": 0.7
+  },
+  "duplicate_target_root_edge_count": 1,
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": true,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "mesh_oracle_video_identity_edge_audit",
+    "coordinate_convention": "source_video_masks_to_instance_diagnostic",
+    "inputs": [
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs_all_adjacent/shard_0.json",
+        "role": "source_pair_manifest_0",
+        "sha256": "a232b231f7ebc6f93e80d9df07d0626b839ca94d2b25c3d0be4f711988b360e7"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs_all_adjacent/shard_1.json",
+        "role": "source_pair_manifest_1",
+        "sha256": "262ef498cd2da82437a968314878978b54b078beef8ec6967eb08e216aa22ec1"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs_all_adjacent/shard_2.json",
+        "role": "source_pair_manifest_2",
+        "sha256": "c61d95df25f1b15955e8579e8515c424e1abea2f94cb859f99691beeca5ff92e"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs_all_adjacent/shard_3.json",
+        "role": "source_pair_manifest_3",
+        "sha256": "781c2625f1551d7bbfd73a1c3a7bf442050021ecc2a0ef3ec789a99c436bc1e0"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+        "role": "camera_transforms",
+        "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+        "role": "mesh_geometry",
+        "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00_vh_clean_2.0.010000.segs.json",
+        "role": "diagnostic_instance_segmentation",
+        "sha256": "f53f0ec1c1999d789f6a9275e0c673a55bf7aa8e7e19bc5ea35cdb4935f8cf55"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00.aggregation.json",
+        "role": "diagnostic_instance_aggregation",
+        "sha256": "0c622a6160b7b36c97a303192c6ff83c181d22b5233601399988b4a3d332c243"
+      }
+    ],
+    "metadata": {
+      "labels_used_only_after_pair_edges_were_sealed": true,
+      "method_pair_manifests_query_independent": true
+    },
+    "model_checkpoint_sha256": null,
+    "model_family": null,
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": false,
+    "target_rgb_opened": false
+  },
+  "implementation_sha256": "eabe7e5867b8ec7882e7cdbc93fbfe3598f72a523a35101b1e7ab78b212f6f49",
+  "mean_accepted_tracker_to_target_root_iou": 0.8381211391171893,
+  "per_pair": [
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 120,
+      "target_frame_id": 140
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 2520,
+      "target_frame_id": 2540
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 4100,
+      "target_frame_id": 4120
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 380,
+      "target_frame_id": 420
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 1200,
+      "target_frame_id": 1240
+    },
+    {
+      "accepted_edge_count": 4,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 3,
+      "seeded_root_count": 4,
+      "source_frame_id": 3960,
+      "target_frame_id": 4000
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 4960,
+      "target_frame_id": 5000
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 3,
+      "source_frame_id": 2060,
+      "target_frame_id": 2120
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 4320,
+      "target_frame_id": 4380
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 4120,
+      "target_frame_id": 4200
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 1100,
+      "target_frame_id": 1200
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 5080,
+      "target_frame_id": 5180
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 2960,
+      "target_frame_id": 3080
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 680,
+      "target_frame_id": 820
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 4740,
+      "target_frame_id": 4880
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 3560,
+      "target_frame_id": 3800
+    },
+    {
+      "accepted_edge_count": 3,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 260,
+      "target_frame_id": 280
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 2540,
+      "target_frame_id": 2560
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 4380,
+      "target_frame_id": 4400
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 420,
+      "target_frame_id": 460
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 3,
+      "source_frame_id": 2560,
+      "target_frame_id": 2600
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 4400,
+      "target_frame_id": 4440
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 820,
+      "target_frame_id": 880
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 2720,
+      "target_frame_id": 2780
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 4680,
+      "target_frame_id": 4740
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 4580,
+      "target_frame_id": 4660
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 3080,
+      "target_frame_id": 3180
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 140,
+      "target_frame_id": 260
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 0,
+      "source_frame_id": 3180,
+      "target_frame_id": 3300
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 2,
+      "source_frame_id": 2120,
+      "target_frame_id": 2260
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 3,
+      "source_frame_id": 5180,
+      "target_frame_id": 5340
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 2260,
+      "target_frame_id": 2520
+    },
+    {
+      "accepted_edge_count": 3,
+      "correct_instance_edge_count": 3,
+      "safe_diagnostic_edge_count": 3,
+      "seeded_root_count": 4,
+      "source_frame_id": 1080,
+      "target_frame_id": 1100
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 2780,
+      "target_frame_id": 2800
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 1,
+      "source_frame_id": 4660,
+      "target_frame_id": 4680
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 940,
+      "target_frame_id": 980
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 2920,
+      "target_frame_id": 2960
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 4880,
+      "target_frame_id": 4920
+    },
+    {
+      "accepted_edge_count": 3,
+      "correct_instance_edge_count": 3,
+      "safe_diagnostic_edge_count": 3,
+      "seeded_root_count": 4,
+      "source_frame_id": 880,
+      "target_frame_id": 940
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 2800,
+      "target_frame_id": 2860
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 5020,
+      "target_frame_id": 5080
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 20,
+      "target_frame_id": 120
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 3320,
+      "target_frame_id": 3420
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 1940,
+      "target_frame_id": 2060
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 3840,
+      "target_frame_id": 3960
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 3420,
+      "target_frame_id": 3560
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 460,
+      "target_frame_id": 680
+    },
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 1480,
+      "target_frame_id": 1840
+    },
+    {
+      "accepted_edge_count": 3,
+      "correct_instance_edge_count": 3,
+      "safe_diagnostic_edge_count": 3,
+      "seeded_root_count": 4,
+      "source_frame_id": 1840,
+      "target_frame_id": 1860
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 3300,
+      "target_frame_id": 3320
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 5000,
+      "target_frame_id": 5020
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 980,
+      "target_frame_id": 1020
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 3800,
+      "target_frame_id": 3840
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 4920,
+      "target_frame_id": 4960
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 1020,
+      "target_frame_id": 1080
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 2860,
+      "target_frame_id": 2920
+    },
+    {
+      "accepted_edge_count": 2,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 1860,
+      "target_frame_id": 1940
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 280,
+      "target_frame_id": 380
+    },
+    {
+      "accepted_edge_count": 3,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 4000,
+      "target_frame_id": 4100
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 2600,
+      "target_frame_id": 2720
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 4200,
+      "target_frame_id": 4320
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 1,
+      "safe_diagnostic_edge_count": 1,
+      "seeded_root_count": 4,
+      "source_frame_id": 4440,
+      "target_frame_id": 4580
+    },
+    {
+      "accepted_edge_count": 1,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 1240,
+      "target_frame_id": 1480
+    }
+  ],
+  "safe_diagnostic_edge_count": 55,
+  "safe_instance_identity_accuracy": 0.9454545454545454,
+  "schema": "radio_gs.surface_object_memory_v4.sam3_video_pair_association_audit.v1",
+  "seeded_root_count": 240
+}

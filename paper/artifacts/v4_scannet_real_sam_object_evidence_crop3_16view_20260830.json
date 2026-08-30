@@ -1,0 +1,443 @@
+{
+  "association_policy": {
+    "ambiguous_masks_remain_unmatched": true,
+    "minimum_margin": 0.2,
+    "minimum_purity": 0.7,
+    "part_masks_are_auxiliary_not_object_membership_targets": true,
+    "whole_object_visible_recall": 0.5
+  },
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": true,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "frozen_sparse_surface_real_sam_object_evidence_audit",
+    "coordinate_convention": "source_sam_to_sparse_surface_feature_raster",
+    "inputs": [
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_source64_geometry_greedy_rgb_authority_20260830.json",
+        "role": "source_rgb_authority",
+        "sha256": "00ee187f510e2544281a2ae09f7ec6e2b8c8de7cd717020b6af87ff09f15a137"
+      },
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_geometry_source_view_selection_20260830.json",
+        "role": "label_free_view_selection",
+        "sha256": "58c92fd8d39daa77eba5cfcf541561f7a8fe91ae60e9fb3bcf5e72aa3e33814a"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+        "role": "camera_transforms",
+        "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+        "role": "mesh_geometry",
+        "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00_vh_clean_2.0.010000.segs.json",
+        "role": "diagnostic_instance_segmentation",
+        "sha256": "f53f0ec1c1999d789f6a9275e0c673a55bf7aa8e7e19bc5ea35cdb4935f8cf55"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00.aggregation.json",
+        "role": "diagnostic_instance_aggregation",
+        "sha256": "0c622a6160b7b36c97a303192c6ff83c181d22b5233601399988b4a3d332c243"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source16_geometry_greedy_sam3_crop3/shard_0.json",
+        "role": "sam_manifest_0",
+        "sha256": "794278f5cfb9737f8911cc2d6ceb9e2e4be905ad79fae643144d739d1f944b62"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source16_geometry_greedy_sam3_crop3/shard_1.json",
+        "role": "sam_manifest_1",
+        "sha256": "c91eb345a1483283a10b17e469762135acadd27a38510901331f252c2b1c37ea"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source16_geometry_greedy_sam3_crop3/shard_2.json",
+        "role": "sam_manifest_2",
+        "sha256": "d1bcbb3e47fa15e9c5695d1aa9da43c41f03df87f4e98784090309b40c90939b"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source16_geometry_greedy_sam3_crop3/shard_3.json",
+        "role": "sam_manifest_3",
+        "sha256": "4614c3b70d335778c5cfd2b614d5343add94928b2ec14bee180de6703cfa4ac8"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source16_geometry_greedy_sam3_crop3/shard_4.json",
+        "role": "sam_manifest_4",
+        "sha256": "42aafa520253dc71a99780ca7cbef98dcee26ac74e432d7378fc895e980303ba"
+      }
+    ],
+    "metadata": {
+      "completion_trained": false,
+      "diagnostic_labels_used_only_to_measure_association": true,
+      "matching_type": "partial_null_capable_diagnostic_not_hungarian"
+    },
+    "model_checkpoint_sha256": null,
+    "model_family": null,
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": false,
+    "target_rgb_opened": false
+  },
+  "implementation_sha256": "ea06a4a506e6e802d527788cf1e8a6266cbe5c521d312bd0d148905c9f903747",
+  "ladder": [
+    {
+      "ambiguous_or_merged_proposal_count": 28,
+      "annotated_safely_associated_surface_union": 0.2608540654182434,
+      "observed_token_count": 35,
+      "part_proposal_count": 85,
+      "proposal_count": 174,
+      "safely_associated_surface_union": 0.25192990899086,
+      "sam_covered_surface_union": 0.2880013585090637,
+      "selected_view_count": 16,
+      "surface_visibility_union": 0.6671135425567627,
+      "unknown_reasons": {
+        "A_never_visible_without_observed_token": {
+          "annotated_object_count": 4068,
+          "count": 6095,
+          "fraction_of_unassociated": 0.125543265566747,
+          "largest_raw_label_groups": [
+            {
+              "element_count": 509,
+              "raw_label": "bicycle"
+            },
+            {
+              "element_count": 326,
+              "raw_label": "window"
+            },
+            {
+              "element_count": 304,
+              "raw_label": "stool"
+            },
+            {
+              "element_count": 277,
+              "raw_label": "object"
+            },
+            {
+              "element_count": 273,
+              "raw_label": "coffee table"
+            },
+            {
+              "element_count": 248,
+              "raw_label": "table"
+            },
+            {
+              "element_count": 243,
+              "raw_label": "door"
+            },
+            {
+              "element_count": 208,
+              "raw_label": "toaster oven"
+            },
+            {
+              "element_count": 187,
+              "raw_label": "nightstand"
+            },
+            {
+              "element_count": 185,
+              "raw_label": "dish rack"
+            }
+          ]
+        },
+        "B_visible_without_any_sam_mask": {
+          "annotated_object_count": 23830,
+          "count": 24604,
+          "fraction_of_unassociated": 0.5067869575068488,
+          "largest_raw_label_groups": [
+            {
+              "element_count": 4746,
+              "raw_label": "wall"
+            },
+            {
+              "element_count": 2767,
+              "raw_label": "cabinet"
+            },
+            {
+              "element_count": 2497,
+              "raw_label": "curtain"
+            },
+            {
+              "element_count": 2039,
+              "raw_label": "shelf"
+            },
+            {
+              "element_count": 1441,
+              "raw_label": "couch"
+            },
+            {
+              "element_count": 1428,
+              "raw_label": "shower"
+            },
+            {
+              "element_count": 1165,
+              "raw_label": "floor"
+            },
+            {
+              "element_count": 1083,
+              "raw_label": "table"
+            },
+            {
+              "element_count": 804,
+              "raw_label": "refrigerator"
+            },
+            {
+              "element_count": 661,
+              "raw_label": "kitchen cabinets"
+            }
+          ]
+        },
+        "C_sam_covered_without_safe_token_association": {
+          "annotated_object_count": 2236,
+          "count": 2341,
+          "fraction_of_unassociated": 0.048219324805866236,
+          "largest_raw_label_groups": [
+            {
+              "element_count": 637,
+              "raw_label": "wall"
+            },
+            {
+              "element_count": 418,
+              "raw_label": "cabinet"
+            },
+            {
+              "element_count": 253,
+              "raw_label": "tv"
+            },
+            {
+              "element_count": 132,
+              "raw_label": "shelf"
+            },
+            {
+              "element_count": 125,
+              "raw_label": "ceiling"
+            },
+            {
+              "element_count": 117,
+              "raw_label": "stool"
+            },
+            {
+              "element_count": 116,
+              "raw_label": "curtain"
+            },
+            {
+              "element_count": 116,
+              "raw_label": "doorframe"
+            },
+            {
+              "element_count": 96,
+              "raw_label": "table"
+            },
+            {
+              "element_count": 74,
+              "raw_label": "object"
+            }
+          ]
+        },
+        "D_safely_associated_but_not_committed": {
+          "annotated_object_count": 0,
+          "count": 0,
+          "fraction_of_unassociated": 0.0,
+          "largest_raw_label_groups": []
+        },
+        "E_unseen_surface_of_an_observed_object": {
+          "annotated_object_count": 15509,
+          "count": 15509,
+          "fraction_of_unassociated": 0.319450452120538,
+          "largest_raw_label_groups": [
+            {
+              "element_count": 3502,
+              "raw_label": "wall"
+            },
+            {
+              "element_count": 3464,
+              "raw_label": "floor"
+            },
+            {
+              "element_count": 1946,
+              "raw_label": "cabinet"
+            },
+            {
+              "element_count": 1064,
+              "raw_label": "couch"
+            },
+            {
+              "element_count": 882,
+              "raw_label": "shelf"
+            },
+            {
+              "element_count": 758,
+              "raw_label": "ceiling"
+            },
+            {
+              "element_count": 737,
+              "raw_label": "table"
+            },
+            {
+              "element_count": 716,
+              "raw_label": "bed"
+            },
+            {
+              "element_count": 684,
+              "raw_label": "desk"
+            },
+            {
+              "element_count": 683,
+              "raw_label": "curtain"
+            }
+          ]
+        }
+      },
+      "whole_object_proposal_count": 61
+    }
+  ],
+  "per_view_proposals": [
+    {
+      "ambiguous_or_merged_proposal_count": 5,
+      "frame_id": 1940,
+      "mean_best_token_margin": 0.7420644760131836,
+      "mean_best_token_purity": 0.8376668691635132,
+      "part_proposal_count": 6,
+      "proposal_count": 18,
+      "whole_object_proposal_count": 7
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 3,
+      "frame_id": 820,
+      "mean_best_token_margin": 0.7744094729423523,
+      "mean_best_token_purity": 0.8747315406799316,
+      "part_proposal_count": 8,
+      "proposal_count": 17,
+      "whole_object_proposal_count": 6
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 0,
+      "frame_id": 2120,
+      "mean_best_token_margin": 0.9189044833183289,
+      "mean_best_token_purity": 0.9562015533447266,
+      "part_proposal_count": 1,
+      "proposal_count": 7,
+      "whole_object_proposal_count": 6
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 1,
+      "frame_id": 2960,
+      "mean_best_token_margin": 0.7215078473091125,
+      "mean_best_token_purity": 0.8323934674263,
+      "part_proposal_count": 3,
+      "proposal_count": 6,
+      "whole_object_proposal_count": 2
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 1,
+      "frame_id": 2260,
+      "mean_best_token_margin": 0.9023040533065796,
+      "mean_best_token_purity": 0.9503381848335266,
+      "part_proposal_count": 7,
+      "proposal_count": 10,
+      "whole_object_proposal_count": 2
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 3,
+      "frame_id": 4320,
+      "mean_best_token_margin": 0.7954909205436707,
+      "mean_best_token_purity": 0.8856564164161682,
+      "part_proposal_count": 7,
+      "proposal_count": 15,
+      "whole_object_proposal_count": 5
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 4,
+      "frame_id": 1240,
+      "mean_best_token_margin": 0.6348985433578491,
+      "mean_best_token_purity": 0.7960125803947449,
+      "part_proposal_count": 10,
+      "proposal_count": 14,
+      "whole_object_proposal_count": 0
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 1,
+      "frame_id": 880,
+      "mean_best_token_margin": 0.8724148869514465,
+      "mean_best_token_purity": 0.9316019415855408,
+      "part_proposal_count": 7,
+      "proposal_count": 13,
+      "whole_object_proposal_count": 5
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 3,
+      "frame_id": 4100,
+      "mean_best_token_margin": 0.7827345728874207,
+      "mean_best_token_purity": 0.8776359558105469,
+      "part_proposal_count": 12,
+      "proposal_count": 18,
+      "whole_object_proposal_count": 3
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 1,
+      "frame_id": 2560,
+      "mean_best_token_margin": 0.6859130859375,
+      "mean_best_token_purity": 0.8155821561813354,
+      "part_proposal_count": 2,
+      "proposal_count": 4,
+      "whole_object_proposal_count": 1
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 0,
+      "frame_id": 5020,
+      "mean_best_token_margin": 0.9096361398696899,
+      "mean_best_token_purity": 0.9428296685218811,
+      "part_proposal_count": 3,
+      "proposal_count": 11,
+      "whole_object_proposal_count": 8
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 3,
+      "frame_id": 2720,
+      "mean_best_token_margin": 0.6895732879638672,
+      "mean_best_token_purity": 0.7724230885505676,
+      "part_proposal_count": 3,
+      "proposal_count": 10,
+      "whole_object_proposal_count": 4
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 1,
+      "frame_id": 4380,
+      "mean_best_token_margin": 0.73631751537323,
+      "mean_best_token_purity": 0.8612207770347595,
+      "part_proposal_count": 5,
+      "proposal_count": 9,
+      "whole_object_proposal_count": 3
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 0,
+      "frame_id": 4000,
+      "mean_best_token_margin": 0.889478862285614,
+      "mean_best_token_purity": 0.9307585954666138,
+      "part_proposal_count": 3,
+      "proposal_count": 10,
+      "whole_object_proposal_count": 7
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 1,
+      "frame_id": 140,
+      "mean_best_token_margin": 0.7800666689872742,
+      "mean_best_token_purity": 0.8746757507324219,
+      "part_proposal_count": 3,
+      "proposal_count": 5,
+      "whole_object_proposal_count": 1
+    },
+    {
+      "ambiguous_or_merged_proposal_count": 1,
+      "frame_id": 2800,
+      "mean_best_token_margin": 0.8112083077430725,
+      "mean_best_token_purity": 0.8913025259971619,
+      "part_proposal_count": 5,
+      "proposal_count": 7,
+      "whole_object_proposal_count": 1
+    }
+  ],
+  "schema": "radio_gs.surface_object_memory_v4.real_sam_object_evidence_audit.v1",
+  "stage": "pretraining_diagnostic"
+}

@@ -1,0 +1,108 @@
+{
+  "accepted_edge_count": 9,
+  "accepted_edge_rate": 0.5625,
+  "diagnostic_policy": {
+    "minimum_proposal_margin": 0.2,
+    "minimum_proposal_purity": 0.7
+  },
+  "duplicate_target_root_edge_count": 0,
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": true,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "mesh_oracle_video_identity_edge_audit",
+    "coordinate_convention": "source_video_masks_to_instance_diagnostic",
+    "inputs": [
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs/shard_0.json",
+        "role": "source_pair_manifest_0",
+        "sha256": "38981a2e0748e9df6ed73b88becd0e786236c9a68ab516ab2b5efec266fb378d"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs/shard_1.json",
+        "role": "source_pair_manifest_1",
+        "sha256": "f849a5e99121cce0dc402ed18b954d3633eb571cc0ce3850fa5711722dc1b8e4"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs/shard_2.json",
+        "role": "source_pair_manifest_2",
+        "sha256": "75ae484b42a161d77ea1a211847683c2926ba55a9f5b14dba4f809895e932066"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs/shard_3.json",
+        "role": "source_pair_manifest_3",
+        "sha256": "1f1d1651621a3391512ea2d9cece4948db53ce4489fabfc7289043ed8a95bd21"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+        "role": "camera_transforms",
+        "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+        "role": "mesh_geometry",
+        "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00_vh_clean_2.0.010000.segs.json",
+        "role": "diagnostic_instance_segmentation",
+        "sha256": "f53f0ec1c1999d789f6a9275e0c673a55bf7aa8e7e19bc5ea35cdb4935f8cf55"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00.aggregation.json",
+        "role": "diagnostic_instance_aggregation",
+        "sha256": "0c622a6160b7b36c97a303192c6ff83c181d22b5233601399988b4a3d332c243"
+      }
+    ],
+    "metadata": {
+      "labels_used_only_after_pair_edges_were_sealed": true,
+      "method_pair_manifests_query_independent": true
+    },
+    "model_checkpoint_sha256": null,
+    "model_family": null,
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": false,
+    "target_rgb_opened": false
+  },
+  "implementation_sha256": "eabe7e5867b8ec7882e7cdbc93fbfe3598f72a523a35101b1e7ab78b212f6f49",
+  "mean_accepted_tracker_to_target_root_iou": 0.8649617433547974,
+  "per_pair": [
+    {
+      "accepted_edge_count": 0,
+      "correct_instance_edge_count": 0,
+      "safe_diagnostic_edge_count": 0,
+      "seeded_root_count": 4,
+      "source_frame_id": 120,
+      "target_frame_id": 140
+    },
+    {
+      "accepted_edge_count": 3,
+      "correct_instance_edge_count": 2,
+      "safe_diagnostic_edge_count": 2,
+      "seeded_root_count": 4,
+      "source_frame_id": 260,
+      "target_frame_id": 280
+    },
+    {
+      "accepted_edge_count": 3,
+      "correct_instance_edge_count": 3,
+      "safe_diagnostic_edge_count": 3,
+      "seeded_root_count": 4,
+      "source_frame_id": 1080,
+      "target_frame_id": 1100
+    },
+    {
+      "accepted_edge_count": 3,
+      "correct_instance_edge_count": 3,
+      "safe_diagnostic_edge_count": 3,
+      "seeded_root_count": 4,
+      "source_frame_id": 1840,
+      "target_frame_id": 1860
+    }
+  ],
+  "safe_diagnostic_edge_count": 8,
+  "safe_instance_identity_accuracy": 1.0,
+  "schema": "radio_gs.surface_object_memory_v4.sam3_video_pair_association_audit.v1",
+  "seeded_root_count": 16
+}

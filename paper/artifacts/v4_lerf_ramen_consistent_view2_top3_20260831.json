@@ -1,0 +1,805 @@
+{
+  "assigned_proposal_count": 485,
+  "category_metrics": {
+    "bowl": {
+      "best_token_null_probability": 0.1792089343070984,
+      "best_token_positive_probability": 0.8207910656929016,
+      "mean_iou_2d": 0.15909221475548593,
+      "mean_iou_3d": 0.1701972793247662,
+      "observation_count": 5
+    },
+    "chopsticks": {
+      "best_token_null_probability": 0.12483048439025879,
+      "best_token_positive_probability": 0.8751695156097412,
+      "mean_iou_2d": 0.024244264818648973,
+      "mean_iou_3d": 0.02507387638313438,
+      "observation_count": 7
+    },
+    "corn": {
+      "best_token_null_probability": 0.3617438077926636,
+      "best_token_positive_probability": 0.6382561922073364,
+      "mean_iou_2d": 0.010226513804133754,
+      "mean_iou_3d": 0.009710908062434772,
+      "observation_count": 5
+    },
+    "egg": {
+      "best_token_null_probability": 0.12602299451828003,
+      "best_token_positive_probability": 0.87397700548172,
+      "mean_iou_2d": 0.03874714835764547,
+      "mean_iou_3d": 0.03867455918744568,
+      "observation_count": 7
+    },
+    "glass of water": {
+      "best_token_null_probability": 0.10650777816772461,
+      "best_token_positive_probability": 0.8934922218322754,
+      "mean_iou_2d": 0.0,
+      "mean_iou_3d": 0.001336898395721925,
+      "observation_count": 2
+    },
+    "hand": {
+      "best_token_null_probability": 0.41206085681915283,
+      "best_token_positive_probability": 0.5879391431808472,
+      "mean_iou_2d": 0.0,
+      "mean_iou_3d": 0.0,
+      "observation_count": 1
+    },
+    "kamaboko": {
+      "best_token_null_probability": 0.2631399631500244,
+      "best_token_positive_probability": 0.7368600368499756,
+      "mean_iou_2d": 0.019570017285089652,
+      "mean_iou_3d": 0.021017932577360936,
+      "observation_count": 7
+    },
+    "napkin": {
+      "best_token_null_probability": 0.1302582025527954,
+      "best_token_positive_probability": 0.8697417974472046,
+      "mean_iou_2d": 0.01906026260806153,
+      "mean_iou_3d": 0.020403200110051832,
+      "observation_count": 5
+    },
+    "nori": {
+      "best_token_null_probability": 0.15634822845458984,
+      "best_token_positive_probability": 0.8436517715454102,
+      "mean_iou_2d": 0.09135237464242789,
+      "mean_iou_3d": 0.09055907091805325,
+      "observation_count": 6
+    },
+    "onion segments": {
+      "best_token_null_probability": 0.540618360042572,
+      "best_token_positive_probability": 0.459381639957428,
+      "mean_iou_2d": 0.027034624811943353,
+      "mean_iou_3d": 0.026184798386806825,
+      "observation_count": 7
+    },
+    "plate": {
+      "best_token_null_probability": 0.22299396991729736,
+      "best_token_positive_probability": 0.7770060300827026,
+      "mean_iou_2d": 0.07034409613072419,
+      "mean_iou_3d": 0.0696998808858604,
+      "observation_count": 4
+    },
+    "sake cup": {
+      "best_token_null_probability": 0.11851286888122559,
+      "best_token_positive_probability": 0.8814871311187744,
+      "mean_iou_2d": 0.05737148090169374,
+      "mean_iou_3d": 0.06177305982784193,
+      "observation_count": 6
+    },
+    "spoon": {
+      "best_token_null_probability": 0.2578229308128357,
+      "best_token_positive_probability": 0.7421770691871643,
+      "mean_iou_2d": 0.03327942439418846,
+      "mean_iou_3d": 0.03260562587853399,
+      "observation_count": 2
+    },
+    "wavy noodles": {
+      "best_token_null_probability": 0.1576128602027893,
+      "best_token_positive_probability": 0.8423871397972107,
+      "mean_iou_2d": 0.02520919462241725,
+      "mean_iou_3d": 0.026447515743482763,
+      "observation_count": 7
+    }
+  },
+  "completion_added_fraction": 0.053494829684495926,
+  "development_only": true,
+  "evaluation_contract_scope": "development 2D polygon proxy for continuous and element-thresholded surface posterior renderings",
+  "flow_completed": true,
+  "information_policy": {
+    "benchmark_labels_opened_during_construction": false,
+    "semantic_manifest_excluded_frames_respected": true,
+    "target_rgb_opened_during_construction": false,
+    "text_queries_opened_during_construction": false
+  },
+  "metrics": {
+    "identity_only_micro_iou": 0.11461226720094714,
+    "identity_peak_localization_accuracy": 0.07042253521126761,
+    "macro_category_miou_2d": 0.041109401223747156,
+    "macro_category_miou_3d": 0.042406043262963926,
+    "micro_iou_2d": 0.05029017599462676,
+    "micro_iou_3d": 0.050502588501399055
+  },
+  "observed_element_fraction": 0.09152127802371979,
+  "per_observation": [
+    {
+      "category": "bowl",
+      "frame_id": 6,
+      "identity_only_iou": 0.2814207650273224,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.19204284621270085,
+      "iou_3d": 0.17422748191978962,
+      "selected_element_fraction": 0.01917990855872631
+    },
+    {
+      "category": "chopsticks",
+      "frame_id": 6,
+      "identity_only_iou": 0.04993252361673414,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.03187250996015936,
+      "iou_3d": 0.030432136335970784,
+      "selected_element_fraction": 0.01855761744081974
+    },
+    {
+      "category": "egg",
+      "frame_id": 6,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.001364256480218281,
+      "iou_3d": 0.005208333333333333,
+      "selected_element_fraction": 0.019557729363441467
+    },
+    {
+      "category": "kamaboko",
+      "frame_id": 6,
+      "identity_only_iou": 0.03125,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.012239020878329733,
+      "iou_3d": 0.010429447852760737,
+      "selected_element_fraction": 0.017357483506202698
+    },
+    {
+      "category": "napkin",
+      "frame_id": 6,
+      "identity_only_iou": 0.0043859649122807015,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.012027491408934709,
+      "iou_3d": 0.019796682718031033,
+      "selected_element_fraction": 0.02566951885819435
+    },
+    {
+      "category": "nori",
+      "frame_id": 6,
+      "identity_only_iou": 0.02390438247011952,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.006702412868632708,
+      "iou_3d": 0.011568123393316195,
+      "selected_element_fraction": 0.03224802762269974
+    },
+    {
+      "category": "onion segments",
+      "frame_id": 6,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.017200938232994525,
+      "iou_3d": 0.014129736673089274,
+      "selected_element_fraction": 0.01573508232831955
+    },
+    {
+      "category": "plate",
+      "frame_id": 6,
+      "identity_only_iou": 0.25559105431309903,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.07852314092563703,
+      "iou_3d": 0.08416334661354581,
+      "selected_element_fraction": 0.021535726264119148
+    },
+    {
+      "category": "sake cup",
+      "frame_id": 6,
+      "identity_only_iou": 0.04363636363636364,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.07026348808030113,
+      "iou_3d": 0.06572769953051644,
+      "selected_element_fraction": 0.0209801085293293
+    },
+    {
+      "category": "wavy noodles",
+      "frame_id": 6,
+      "identity_only_iou": 0.021052631578947368,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.00101010101010101,
+      "selected_element_fraction": 0.03362595662474632
+    },
+    {
+      "category": "bowl",
+      "frame_id": 24,
+      "identity_only_iou": 0.24979983987189752,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.2298050139275766,
+      "iou_3d": 0.2514506769825919,
+      "selected_element_fraction": 0.01917990855872631
+    },
+    {
+      "category": "chopsticks",
+      "frame_id": 24,
+      "identity_only_iou": 0.034782608695652174,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.05141388174807198,
+      "iou_3d": 0.050454086781029264,
+      "selected_element_fraction": 0.01855761744081974
+    },
+    {
+      "category": "corn",
+      "frame_id": 24,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.008125,
+      "iou_3d": 0.0077473182359952325,
+      "selected_element_fraction": 0.008445383049547672
+    },
+    {
+      "category": "egg",
+      "frame_id": 24,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.05,
+      "iou_3d": 0.04929322218194998,
+      "selected_element_fraction": 0.019557729363441467
+    },
+    {
+      "category": "kamaboko",
+      "frame_id": 24,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.03473302229134267,
+      "iou_3d": 0.03316831683168317,
+      "selected_element_fraction": 0.017357483506202698
+    },
+    {
+      "category": "nori",
+      "frame_id": 24,
+      "identity_only_iou": 0.1804812834224599,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.1645418326693227,
+      "iou_3d": 0.16279069767441862,
+      "selected_element_fraction": 0.03224802762269974
+    },
+    {
+      "category": "onion segments",
+      "frame_id": 24,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.052600818234950324,
+      "iou_3d": 0.04894736842105263,
+      "selected_element_fraction": 0.01573508232831955
+    },
+    {
+      "category": "wavy noodles",
+      "frame_id": 24,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0691085003455425,
+      "iou_3d": 0.06982543640897755,
+      "selected_element_fraction": 0.03362595662474632
+    },
+    {
+      "category": "chopsticks",
+      "frame_id": 60,
+      "identity_only_iou": 0.029079159935379646,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.046348314606741575,
+      "iou_3d": 0.044471896232242125,
+      "selected_element_fraction": 0.01855761744081974
+    },
+    {
+      "category": "corn",
+      "frame_id": 60,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.016229712858926344,
+      "iou_3d": 0.014557670772676373,
+      "selected_element_fraction": 0.008445383049547672
+    },
+    {
+      "category": "egg",
+      "frame_id": 60,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.054005400540054004,
+      "iou_3d": 0.05309734513274336,
+      "selected_element_fraction": 0.019557729363441467
+    },
+    {
+      "category": "kamaboko",
+      "frame_id": 60,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.02796420581655481,
+      "iou_3d": 0.02675227394328518,
+      "selected_element_fraction": 0.017357483506202698
+    },
+    {
+      "category": "napkin",
+      "frame_id": 60,
+      "identity_only_iou": 0.1048951048951049,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.03865425912670007,
+      "iou_3d": 0.03855765797929311,
+      "selected_element_fraction": 0.02566951885819435
+    },
+    {
+      "category": "onion segments",
+      "frame_id": 60,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.03385579937304075,
+      "iou_3d": 0.030033370411568408,
+      "selected_element_fraction": 0.01573508232831955
+    },
+    {
+      "category": "sake cup",
+      "frame_id": 60,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.04706927175843695,
+      "iou_3d": 0.04427736006683375,
+      "selected_element_fraction": 0.0209801085293293
+    },
+    {
+      "category": "wavy noodles",
+      "frame_id": 60,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.06173725771715721,
+      "iou_3d": 0.05390334572490706,
+      "selected_element_fraction": 0.03362595662474632
+    },
+    {
+      "category": "bowl",
+      "frame_id": 65,
+      "identity_only_iou": 0.10542398777692895,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.14258793969849246,
+      "iou_3d": 0.1786339754816112,
+      "selected_element_fraction": 0.01917990855872631
+    },
+    {
+      "category": "chopsticks",
+      "frame_id": 65,
+      "identity_only_iou": 0.0175,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.028122956180510136,
+      "iou_3d": 0.026171637248934874,
+      "selected_element_fraction": 0.01855761744081974
+    },
+    {
+      "category": "corn",
+      "frame_id": 65,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.011848341232227487,
+      "iou_3d": 0.010912698412698412,
+      "selected_element_fraction": 0.008445383049547672
+    },
+    {
+      "category": "egg",
+      "frame_id": 65,
+      "identity_only_iou": 0.07894736842105263,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.043853820598006646,
+      "iou_3d": 0.04182509505703422,
+      "selected_element_fraction": 0.019557729363441467
+    },
+    {
+      "category": "kamaboko",
+      "frame_id": 65,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.014507253626813406,
+      "iou_3d": 0.01345707656612529,
+      "selected_element_fraction": 0.017357483506202698
+    },
+    {
+      "category": "napkin",
+      "frame_id": 65,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.01572052401746725,
+      "iou_3d": 0.015202702702702704,
+      "selected_element_fraction": 0.02566951885819435
+    },
+    {
+      "category": "nori",
+      "frame_id": 65,
+      "identity_only_iou": 0.18087318087318088,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.04440026507620941,
+      "iou_3d": 0.04577691811734365,
+      "selected_element_fraction": 0.03224802762269974
+    },
+    {
+      "category": "onion segments",
+      "frame_id": 65,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.017905588714053174,
+      "iou_3d": 0.022533800701051578,
+      "selected_element_fraction": 0.01573508232831955
+    },
+    {
+      "category": "plate",
+      "frame_id": 65,
+      "identity_only_iou": 0.07814761215629522,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.07358024691358024,
+      "iou_3d": 0.07855822550831792,
+      "selected_element_fraction": 0.021535726264119148
+    },
+    {
+      "category": "sake cup",
+      "frame_id": 65,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.06374501992031872,
+      "iou_3d": 0.05864197530864197,
+      "selected_element_fraction": 0.0209801085293293
+    },
+    {
+      "category": "wavy noodles",
+      "frame_id": 65,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.006158583525789068,
+      "iou_3d": 0.012345679012345678,
+      "selected_element_fraction": 0.03362595662474632
+    },
+    {
+      "category": "bowl",
+      "frame_id": 81,
+      "identity_only_iou": 0.17900172117039587,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.1381118881118881,
+      "iou_3d": 0.13776337115072934,
+      "selected_element_fraction": 0.01917990855872631
+    },
+    {
+      "category": "chopsticks",
+      "frame_id": 81,
+      "identity_only_iou": 0.0525783619817998,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.01195219123505976,
+      "iou_3d": 0.020654044750430294,
+      "selected_element_fraction": 0.01855761744081974
+    },
+    {
+      "category": "egg",
+      "frame_id": 81,
+      "identity_only_iou": 0.05970149253731343,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.022774327122153208,
+      "iou_3d": 0.02219233355749832,
+      "selected_element_fraction": 0.019557729363441467
+    },
+    {
+      "category": "glass of water",
+      "frame_id": 81,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.012312479317188263
+    },
+    {
+      "category": "kamaboko",
+      "frame_id": 81,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.017357483506202698
+    },
+    {
+      "category": "napkin",
+      "frame_id": 81,
+      "identity_only_iou": 0.006802721088435374,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.019620253164556962,
+      "iou_3d": 0.019230769230769232,
+      "selected_element_fraction": 0.02566951885819435
+    },
+    {
+      "category": "nori",
+      "frame_id": 81,
+      "identity_only_iou": 0.13368983957219252,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.08149171270718232,
+      "iou_3d": 0.07824933687002653,
+      "selected_element_fraction": 0.03224802762269974
+    },
+    {
+      "category": "onion segments",
+      "frame_id": 81,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.01573508232831955
+    },
+    {
+      "category": "plate",
+      "frame_id": 81,
+      "identity_only_iou": 0.07159904534606205,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.046341463414634146,
+      "iou_3d": 0.0420353982300885,
+      "selected_element_fraction": 0.021535726264119148
+    },
+    {
+      "category": "sake cup",
+      "frame_id": 81,
+      "identity_only_iou": 0.045576407506702415,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.10565110565110565,
+      "iou_3d": 0.09978768577494693,
+      "selected_element_fraction": 0.0209801085293293
+    },
+    {
+      "category": "spoon",
+      "frame_id": 81,
+      "identity_only_iou": 0.10967741935483871,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.02464268112370626,
+      "iou_3d": 0.023843586075345733,
+      "selected_element_fraction": 0.022535838186740875
+    },
+    {
+      "category": "wavy noodles",
+      "frame_id": 81,
+      "identity_only_iou": 0.015151515151515152,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.03362595662474632
+    },
+    {
+      "category": "chopsticks",
+      "frame_id": 119,
+      "identity_only_iou": 0.13445378151260504,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.01855761744081974
+    },
+    {
+      "category": "corn",
+      "frame_id": 119,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.005772005772005772,
+      "iou_3d": 0.0050729232720355105,
+      "selected_element_fraction": 0.008445383049547672
+    },
+    {
+      "category": "egg",
+      "frame_id": 119,
+      "identity_only_iou": 0.16,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.06137322593018796,
+      "iou_3d": 0.061426936283861124,
+      "selected_element_fraction": 0.019557729363441467
+    },
+    {
+      "category": "kamaboko",
+      "frame_id": 119,
+      "identity_only_iou": 0.043010752688172046,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.03992273019961365,
+      "iou_3d": 0.035509736540664374,
+      "selected_element_fraction": 0.017357483506202698
+    },
+    {
+      "category": "nori",
+      "frame_id": 119,
+      "identity_only_iou": 0.2664624808575804,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.1588785046728972,
+      "iou_3d": 0.1547212741751991,
+      "selected_element_fraction": 0.03224802762269974
+    },
+    {
+      "category": "onion segments",
+      "frame_id": 119,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.04172767203513909,
+      "iou_3d": 0.035691922354414526,
+      "selected_element_fraction": 0.01573508232831955
+    },
+    {
+      "category": "sake cup",
+      "frame_id": 119,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.020618556701030927,
+      "selected_element_fraction": 0.0209801085293293
+    },
+    {
+      "category": "wavy noodles",
+      "frame_id": 119,
+      "identity_only_iou": 0.1797752808988764,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.03946002076843198,
+      "iou_3d": 0.04804804804804805,
+      "selected_element_fraction": 0.03362595662474632
+    },
+    {
+      "category": "bowl",
+      "frame_id": 128,
+      "identity_only_iou": 0.16172106824925817,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.09291338582677165,
+      "iou_3d": 0.10891089108910891,
+      "selected_element_fraction": 0.01917990855872631
+    },
+    {
+      "category": "chopsticks",
+      "frame_id": 128,
+      "identity_only_iou": 0.04573170731707317,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0033333333333333335,
+      "selected_element_fraction": 0.01855761744081974
+    },
+    {
+      "category": "corn",
+      "frame_id": 128,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.009157509157509158,
+      "iou_3d": 0.010263929618768328,
+      "selected_element_fraction": 0.008445383049547672
+    },
+    {
+      "category": "egg",
+      "frame_id": 128,
+      "identity_only_iou": 0.08444444444444445,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.037859007832898174,
+      "iou_3d": 0.037678648765699436,
+      "selected_element_fraction": 0.019557729363441467
+    },
+    {
+      "category": "glass of water",
+      "frame_id": 128,
+      "identity_only_iou": 0.003355704697986577,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.00267379679144385,
+      "selected_element_fraction": 0.012312479317188263
+    },
+    {
+      "category": "hand",
+      "frame_id": 128,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.014268252067267895
+    },
+    {
+      "category": "kamaboko",
+      "frame_id": 128,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.007623888182973317,
+      "iou_3d": 0.027808676307007785,
+      "selected_element_fraction": 0.017357483506202698
+    },
+    {
+      "category": "napkin",
+      "frame_id": 128,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.009278785322648671,
+      "iou_3d": 0.009228187919463088,
+      "selected_element_fraction": 0.02566951885819435
+    },
+    {
+      "category": "nori",
+      "frame_id": 128,
+      "identity_only_iou": 0.37423312883435583,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.092099519860323,
+      "iou_3d": 0.0902480752780154,
+      "selected_element_fraction": 0.03224802762269974
+    },
+    {
+      "category": "onion segments",
+      "frame_id": 128,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.025951557093425604,
+      "iou_3d": 0.03195739014647137,
+      "selected_element_fraction": 0.01573508232831955
+    },
+    {
+      "category": "plate",
+      "frame_id": 128,
+      "identity_only_iou": 0.2615769712140175,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.08293153326904533,
+      "iou_3d": 0.07404255319148936,
+      "selected_element_fraction": 0.021535726264119148
+    },
+    {
+      "category": "sake cup",
+      "frame_id": 128,
+      "identity_only_iou": 0.020080321285140562,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0575,
+      "iou_3d": 0.08158508158508158,
+      "selected_element_fraction": 0.0209801085293293
+    },
+    {
+      "category": "spoon",
+      "frame_id": 128,
+      "identity_only_iou": 0.10964912280701754,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.041916167664670656,
+      "iou_3d": 0.041367665681722246,
+      "selected_element_fraction": 0.022535838186740875
+    },
+    {
+      "category": "wavy noodles",
+      "frame_id": 128,
+      "identity_only_iou": 0.12773722627737227,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.03362595662474632
+    }
+  ],
+  "post_completion_element_fraction": 0.14501610398292542,
+  "proposal_count": 485,
+  "query_configuration": {
+    "development_negative_text_cache": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "development_negative_text_cache_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+    "development_text_query_cache": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+    "development_text_query_cache_sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d",
+    "element_threshold": 0.2,
+    "identity_membership_threshold": 0.05,
+    "identity_peak_count": 8,
+    "identity_pixel_threshold": 0.5,
+    "maximum_query_tokens": 3,
+    "pixel_threshold": 0.2,
+    "proposal_descriptor_mode": "mean_text_aligned_pixels",
+    "semantic_feature_space": "radio_backbone_summary_head",
+    "surface_semantic_evidence": "consistent_view",
+    "surface_view_prototype_count": 2,
+    "temperature": 0.03,
+    "token_semantic_pooling": "surface_local_peak"
+  },
+  "raster_shape": [
+    46,
+    62
+  ],
+  "relaxed_gate_policy": {
+    "gates_block_execution": false,
+    "promotion_claimed": false,
+    "warnings": [
+      "object organization and completion are development baselines",
+      "fixed thresholds are provisional and were not benchmark-tuned",
+      "full-cohort confirmation remains pending",
+      "pointwise summary-head projection is a development approximation"
+    ]
+  },
+  "scene_label": "ramen",
+  "scene_state": "/mnt/pool/sqy/results/RADIO-GS/output/v4_lerf_development_20260831/ramen_consistent_view2_state.pt",
+  "scene_state_sha256": "5218fc7d4af21832876d6664bcc2aeb4415b7866eb118f7ae09dc82202d9cc90",
+  "schema": "radio_gs.surface_object_memory_v4.lerf_development_evaluation.v1",
+  "semantic_observed_element_fraction": 0.11412378400564194,
+  "semantic_source_view_count": 32,
+  "source_view_count": 32,
+  "token_count": 77
+}

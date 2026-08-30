@@ -8,6 +8,13 @@ import torch
 
 
 @dataclass(frozen=True)
+class ElementQueryPosterior:
+    foreground: torch.Tensor
+    assignment_unknown: torch.Tensor
+    query_null_probability: float
+
+
+@dataclass(frozen=True)
 class SparseObjectAssignments:
     token_ids: torch.Tensor
     weights: torch.Tensor
@@ -81,11 +88,29 @@ class SparseObjectAssignments:
         result.index_put_((rows[occupied], self.token_ids[occupied]), self.weights[occupied], accumulate=True)
         return result
 
-    def element_posterior(self, token_posterior: torch.Tensor) -> torch.Tensor:
+    def element_posterior(
+        self,
+        token_posterior: torch.Tensor,
+        *,
+        null_probability: float,
+    ) -> ElementQueryPosterior:
         posterior = torch.as_tensor(token_posterior, dtype=torch.float32).cpu()
-        if posterior.shape != (self.num_tokens,) or bool((posterior < 0).any()):
-            raise ValueError("token posterior must be a non-negative [K] vector")
+        null = float(null_probability)
+        if (
+            posterior.shape != (self.num_tokens,)
+            or not torch.isfinite(posterior).all()
+            or bool((posterior < 0).any())
+            or bool((posterior > 1).any())
+            or not 0 <= null <= 1
+        ):
+            raise ValueError("token and null probabilities must lie in [0, 1]")
+        if abs(float(posterior.sum()) + null - 1.0) > 1e-5:
+            raise ValueError("token probabilities and explicit null must sum to one")
         safe_ids = self.token_ids.clamp_min(0)
         selected = posterior[safe_ids] * self.weights
         selected[self.token_ids < 0] = 0
-        return selected.sum(-1)
+        return ElementQueryPosterior(
+            foreground=selected.sum(-1),
+            assignment_unknown=(1.0 - null) * self.unknown_weight,
+            query_null_probability=null,
+        )

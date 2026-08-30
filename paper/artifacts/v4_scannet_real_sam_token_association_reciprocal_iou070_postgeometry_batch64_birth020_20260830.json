@@ -1,0 +1,778 @@
+{
+  "diagnostic_policy": {
+    "labels_in_method_path": false,
+    "minimum_proposal_margin": 0.2,
+    "minimum_proposal_purity": 0.7
+  },
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": true,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "frozen_sparse_surface_source_only_token_bootstrap",
+    "coordinate_convention": "source_sam_to_surface_tokens_then_isolated_oracle_audit",
+    "inputs": [
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_source64_geometry_greedy_rgb_authority_20260830.json",
+        "role": "source_rgb_authority",
+        "sha256": "00ee187f510e2544281a2ae09f7ec6e2b8c8de7cd717020b6af87ff09f15a137"
+      },
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_association_aware_source_order_20260830.json",
+        "role": "label_free_view_selection",
+        "sha256": "39f6fbf4796cd6df01250ea2d6d2fa3fb3c9b23b168a45576f77ff29c10a5e4e"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+        "role": "camera_transforms",
+        "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+        "role": "mesh_geometry",
+        "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source64_geometry_greedy_sam3/shard_0.json",
+        "role": "sam_manifest_0",
+        "sha256": "1bf758ecf63809adbecd6faf6d06e1ae3ae35d07ab038b9c0435713fd85fd66c"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source64_geometry_greedy_sam3/shard_1.json",
+        "role": "sam_manifest_1",
+        "sha256": "7af9a6d2356d2e7ab597463ee15c7c067c4a4ce198154db1f6ea0549d6bd5dd1"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source64_geometry_greedy_sam3/shard_2.json",
+        "role": "sam_manifest_2",
+        "sha256": "50d9d94d8022c17670f6fcbcadc93f027aba9854e214eb087aa99acdd8f67557"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source64_geometry_greedy_sam3/shard_3.json",
+        "role": "sam_manifest_3",
+        "sha256": "240b11200ce13c7d874872c317cecafbed7ffd150f4e3d7a9e8ea83087e9975e"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_source64_geometry_greedy_sam3/shard_4.json",
+        "role": "sam_manifest_4",
+        "sha256": "ab5cdd02d87fc9ce78c5868e45ccddd28b2140af9cbfceb26ffa2b234b7a9a38"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_scannet_sam3_video_pairs_all_adjacent_reciprocal_iou070.json",
+        "role": "source_identity_edges_0",
+        "sha256": "64005d1d3115484796fb27ee3c805a6befadc57d9e068163356dae580340fd45"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00_vh_clean_2.0.010000.segs.json",
+        "role": "diagnostic_instance_segmentation",
+        "sha256": "f53f0ec1c1999d789f6a9275e0c673a55bf7aa8e7e19bc5ea35cdb4935f8cf55"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00.aggregation.json",
+        "role": "diagnostic_instance_aggregation",
+        "sha256": "0c622a6160b7b36c97a303192c6ff83c181d22b5233601399988b4a3d332c243"
+      }
+    ],
+    "metadata": {
+      "completion_trained": false,
+      "deployment_compression_applied": false,
+      "diagnostic_labels_opened_after_method_snapshots": true,
+      "method_stage_oracle_inputs": false,
+      "query_independent": true
+    },
+    "model_checkpoint_sha256": null,
+    "model_family": null,
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": false,
+    "target_rgb_opened": false
+  },
+  "implementation_sha256": "d6cdfce1a9ff709d5a86594ffc13db9dec4e3e93335ba55bbb643fdc00742884",
+  "ladder": [
+    {
+      "assigned_proposal_surface_union": 0.5268648266792297,
+      "created_token_count": 195,
+      "final_token_count": 195,
+      "object_best_token_recall_macro": 0.2352978140115738,
+      "observed_object_best_token_recall_macro": 0.2352978140115738,
+      "observed_object_count": 67,
+      "observed_object_split_impurity_macro": 0.4897901117801666,
+      "proposal_assignment_rate": 0.9959623149394348,
+      "proposal_count": 743,
+      "root_assignment_rate": 0.9953161592505855,
+      "safe_diagnostic_assignment_rate": 1.0,
+      "safe_diagnostic_association_accuracy": 0.9447513812154696,
+      "safe_diagnostic_proposal_count": 543,
+      "selected_view_count": 64,
+      "strongly_merged_token_count_at_purity_below_0_7": 55,
+      "token_annotated_fraction_mass_weighted": 0.9681328535079956,
+      "token_membership_surface_union": 0.5268648266792297,
+      "token_purity_macro": 0.7941208481788635,
+      "token_purity_mass_weighted": 0.7326527833938599,
+      "valid_annotated_token_count": 195
+    }
+  ],
+  "method_policy": {
+    "appearance_descriptor": "none",
+    "appearance_weight": 0.0,
+    "association_mode": "frozen_batch",
+    "batch_birth_overlap": 0.2,
+    "batch_size": 64,
+    "explicit_null": true,
+    "geometry_weight": 0.25,
+    "identity_integration": "post_geometry_conflict_free_token_merge",
+    "identity_minimum_tracker_to_target_root_iou": 0.7,
+    "minimum_overlap": 0.1,
+    "null_logit": 0.25,
+    "one_to_one_assignment": false,
+    "part_proposals_may_reuse_tokens": true,
+    "prototypes_frozen_until_batch_commit": true,
+    "sealed_video_identity_edge_manifest_count": 1,
+    "source_trained_descriptor_metric": false,
+    "temperature": 0.1,
+    "token_birth": "unmatched_hierarchy_roots_only"
+  },
+  "per_view_method_records": [
+    {
+      "assigned_proposal_count": 17,
+      "commit_ending_view_index": 64,
+      "created_token_count": 8,
+      "frame_id": 1940,
+      "null_proposal_count": 0,
+      "proposal_count": 17,
+      "root_proposal_count": 11,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 6,
+      "commit_ending_view_index": 64,
+      "created_token_count": 1,
+      "frame_id": 2540,
+      "null_proposal_count": 0,
+      "proposal_count": 6,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 4,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 2800,
+      "null_proposal_count": 0,
+      "proposal_count": 4,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 9,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 2920,
+      "null_proposal_count": 0,
+      "proposal_count": 9,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 19,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 1860,
+      "null_proposal_count": 0,
+      "proposal_count": 19,
+      "root_proposal_count": 8,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 11,
+      "commit_ending_view_index": 64,
+      "created_token_count": 0,
+      "frame_id": 2060,
+      "null_proposal_count": 0,
+      "proposal_count": 11,
+      "root_proposal_count": 3,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 12,
+      "commit_ending_view_index": 64,
+      "created_token_count": 0,
+      "frame_id": 3300,
+      "null_proposal_count": 0,
+      "proposal_count": 12,
+      "root_proposal_count": 5,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 9,
+      "commit_ending_view_index": 64,
+      "created_token_count": 6,
+      "frame_id": 4380,
+      "null_proposal_count": 0,
+      "proposal_count": 9,
+      "root_proposal_count": 8,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 11,
+      "commit_ending_view_index": 64,
+      "created_token_count": 1,
+      "frame_id": 5020,
+      "null_proposal_count": 0,
+      "proposal_count": 11,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 9,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 2260,
+      "null_proposal_count": 0,
+      "proposal_count": 9,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 9,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 460,
+      "null_proposal_count": 0,
+      "proposal_count": 9,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 12,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 880,
+      "null_proposal_count": 0,
+      "proposal_count": 12,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 17,
+      "commit_ending_view_index": 64,
+      "created_token_count": 1,
+      "frame_id": 820,
+      "null_proposal_count": 0,
+      "proposal_count": 17,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 20,
+      "commit_ending_view_index": 64,
+      "created_token_count": 6,
+      "frame_id": 4200,
+      "null_proposal_count": 0,
+      "proposal_count": 20,
+      "root_proposal_count": 12,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 13,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 1240,
+      "null_proposal_count": 0,
+      "proposal_count": 13,
+      "root_proposal_count": 9,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 7,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 4120,
+      "null_proposal_count": 0,
+      "proposal_count": 7,
+      "root_proposal_count": 5,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 10,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 4000,
+      "null_proposal_count": 0,
+      "proposal_count": 10,
+      "root_proposal_count": 5,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 8,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 120,
+      "null_proposal_count": 0,
+      "proposal_count": 8,
+      "root_proposal_count": 8,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 8,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 1480,
+      "null_proposal_count": 0,
+      "proposal_count": 8,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 7,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 3080,
+      "null_proposal_count": 0,
+      "proposal_count": 7,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 12,
+      "commit_ending_view_index": 64,
+      "created_token_count": 5,
+      "frame_id": 980,
+      "null_proposal_count": 0,
+      "proposal_count": 12,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 6,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 2120,
+      "null_proposal_count": 0,
+      "proposal_count": 6,
+      "root_proposal_count": 2,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 10,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 2720,
+      "null_proposal_count": 0,
+      "proposal_count": 10,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 16,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 4960,
+      "null_proposal_count": 0,
+      "proposal_count": 16,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 3,
+      "commit_ending_view_index": 64,
+      "created_token_count": 1,
+      "frame_id": 2560,
+      "null_proposal_count": 0,
+      "proposal_count": 3,
+      "root_proposal_count": 3,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 14,
+      "commit_ending_view_index": 64,
+      "created_token_count": 6,
+      "frame_id": 1100,
+      "null_proposal_count": 0,
+      "proposal_count": 14,
+      "root_proposal_count": 12,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 14,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 4320,
+      "null_proposal_count": 0,
+      "proposal_count": 14,
+      "root_proposal_count": 9,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 14,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 4680,
+      "null_proposal_count": 2,
+      "proposal_count": 16,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 18,
+      "commit_ending_view_index": 64,
+      "created_token_count": 5,
+      "frame_id": 3800,
+      "null_proposal_count": 0,
+      "proposal_count": 18,
+      "root_proposal_count": 11,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 5,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 2960,
+      "null_proposal_count": 0,
+      "proposal_count": 5,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 12,
+      "commit_ending_view_index": 64,
+      "created_token_count": 5,
+      "frame_id": 280,
+      "null_proposal_count": 0,
+      "proposal_count": 12,
+      "root_proposal_count": 10,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 10,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 2780,
+      "null_proposal_count": 0,
+      "proposal_count": 10,
+      "root_proposal_count": 5,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 12,
+      "commit_ending_view_index": 64,
+      "created_token_count": 1,
+      "frame_id": 5080,
+      "null_proposal_count": 0,
+      "proposal_count": 12,
+      "root_proposal_count": 5,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 13,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 3420,
+      "null_proposal_count": 0,
+      "proposal_count": 13,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 8,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 3960,
+      "null_proposal_count": 0,
+      "proposal_count": 8,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 0,
+      "commit_ending_view_index": 64,
+      "created_token_count": 0,
+      "frame_id": 3180,
+      "null_proposal_count": 0,
+      "proposal_count": 0,
+      "root_proposal_count": 0,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 5,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 140,
+      "null_proposal_count": 0,
+      "proposal_count": 5,
+      "root_proposal_count": 5,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 19,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 3560,
+      "null_proposal_count": 0,
+      "proposal_count": 19,
+      "root_proposal_count": 10,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 19,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 4740,
+      "null_proposal_count": 0,
+      "proposal_count": 19,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 10,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 4580,
+      "null_proposal_count": 0,
+      "proposal_count": 10,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 12,
+      "commit_ending_view_index": 64,
+      "created_token_count": 0,
+      "frame_id": 4920,
+      "null_proposal_count": 0,
+      "proposal_count": 12,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 16,
+      "commit_ending_view_index": 64,
+      "created_token_count": 6,
+      "frame_id": 940,
+      "null_proposal_count": 0,
+      "proposal_count": 16,
+      "root_proposal_count": 10,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 13,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 380,
+      "null_proposal_count": 0,
+      "proposal_count": 13,
+      "root_proposal_count": 12,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 8,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 2520,
+      "null_proposal_count": 0,
+      "proposal_count": 8,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 13,
+      "commit_ending_view_index": 64,
+      "created_token_count": 6,
+      "frame_id": 2860,
+      "null_proposal_count": 0,
+      "proposal_count": 13,
+      "root_proposal_count": 9,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 3,
+      "commit_ending_view_index": 64,
+      "created_token_count": 0,
+      "frame_id": 5180,
+      "null_proposal_count": 0,
+      "proposal_count": 3,
+      "root_proposal_count": 3,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 9,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 3840,
+      "null_proposal_count": 0,
+      "proposal_count": 9,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 11,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 680,
+      "null_proposal_count": 0,
+      "proposal_count": 11,
+      "root_proposal_count": 9,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 23,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 5000,
+      "null_proposal_count": 0,
+      "proposal_count": 23,
+      "root_proposal_count": 10,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 2,
+      "commit_ending_view_index": 64,
+      "created_token_count": 0,
+      "frame_id": 4660,
+      "null_proposal_count": 0,
+      "proposal_count": 2,
+      "root_proposal_count": 1,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 2,
+      "commit_ending_view_index": 64,
+      "created_token_count": 0,
+      "frame_id": 5340,
+      "null_proposal_count": 0,
+      "proposal_count": 2,
+      "root_proposal_count": 2,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 13,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 1840,
+      "null_proposal_count": 0,
+      "proposal_count": 13,
+      "root_proposal_count": 6,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 18,
+      "commit_ending_view_index": 64,
+      "created_token_count": 7,
+      "frame_id": 4100,
+      "null_proposal_count": 0,
+      "proposal_count": 18,
+      "root_proposal_count": 12,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 18,
+      "commit_ending_view_index": 64,
+      "created_token_count": 5,
+      "frame_id": 3320,
+      "null_proposal_count": 0,
+      "proposal_count": 18,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 15,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 260,
+      "null_proposal_count": 0,
+      "proposal_count": 15,
+      "root_proposal_count": 9,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 10,
+      "commit_ending_view_index": 64,
+      "created_token_count": 0,
+      "frame_id": 1020,
+      "null_proposal_count": 0,
+      "proposal_count": 10,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 11,
+      "commit_ending_view_index": 64,
+      "created_token_count": 5,
+      "frame_id": 4400,
+      "null_proposal_count": 0,
+      "proposal_count": 11,
+      "root_proposal_count": 8,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 10,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 20,
+      "null_proposal_count": 0,
+      "proposal_count": 10,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 16,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 2600,
+      "null_proposal_count": 1,
+      "proposal_count": 17,
+      "root_proposal_count": 9,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 7,
+      "commit_ending_view_index": 64,
+      "created_token_count": 4,
+      "frame_id": 1200,
+      "null_proposal_count": 0,
+      "proposal_count": 7,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 15,
+      "commit_ending_view_index": 64,
+      "created_token_count": 3,
+      "frame_id": 4880,
+      "null_proposal_count": 0,
+      "proposal_count": 15,
+      "root_proposal_count": 7,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 24,
+      "commit_ending_view_index": 64,
+      "created_token_count": 9,
+      "frame_id": 420,
+      "null_proposal_count": 0,
+      "proposal_count": 24,
+      "root_proposal_count": 15,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 11,
+      "commit_ending_view_index": 64,
+      "created_token_count": 2,
+      "frame_id": 4440,
+      "null_proposal_count": 0,
+      "proposal_count": 11,
+      "root_proposal_count": 4,
+      "running_token_count_after_commit": 195
+    },
+    {
+      "assigned_proposal_count": 22,
+      "commit_ending_view_index": 64,
+      "created_token_count": 1,
+      "frame_id": 1080,
+      "null_proposal_count": 0,
+      "proposal_count": 22,
+      "root_proposal_count": 11,
+      "running_token_count_after_commit": 195
+    }
+  ],
+  "schema": "radio_gs.surface_object_memory_v4.real_sam_token_association.v1",
+  "stage": "source_only_bootstrap_precompletion_diagnostic"
+}

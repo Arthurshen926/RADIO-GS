@@ -47,5 +47,18 @@ class ObjectCodebook:
         centres = dense.T @ points / mass.clamp_min(1e-12)[:, None]
         delta = points[:, None, :] - centres[None, :, :]
         scales = torch.sqrt((dense[..., None] * delta.square()).sum(0) / mass.clamp_min(1e-12)[:, None])
-        confidence = mass / (mass + assignments.unknown_weight.sum().clamp_min(1e-12))
+        scene_extent = (points.max(0).values - points.min(0).values).norm().clamp_min(1e-6)
+        scale_floor = scene_extent * 1e-3
+        confidence = torch.zeros(assignments.num_tokens)
+        total_known = dense.sum(-1)
+        for token_index in range(assignments.num_tokens):
+            if mass[token_index] <= 0:
+                continue
+            half_extent = 2.5 * scales[token_index].clamp_min(scale_floor)
+            local = ((points - centres[token_index]).abs() <= half_extent).all(-1)
+            local_unknown = assignments.unknown_weight[local].sum()
+            local_conflict = (total_known[local] - dense[local, token_index]).clamp_min(0).sum()
+            confidence[token_index] = mass[token_index] / (
+                mass[token_index] + local_unknown + local_conflict
+            ).clamp_min(1e-12)
         return cls(centres, scales, confidence, assignments)

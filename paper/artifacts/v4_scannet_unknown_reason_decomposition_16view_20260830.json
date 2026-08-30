@@ -1,0 +1,138 @@
+{
+  "counts": {
+    "annotated_object_elements": 61751,
+    "hard_unknown_annotated_object_elements": 35763,
+    "hard_unknown_elements": 38272,
+    "surface_elements": 64899,
+    "unannotated_exterior_elements": 3148
+  },
+  "coverage_stages": {
+    "annotated_object_hard_unknown_fraction": 0.579148530960083,
+    "annotated_surface_visibility_union": 0.4235396981239319,
+    "committed_annotated_object_surface_union": 0.4208514988422394,
+    "committed_membership_surface_union": 0.4102836847305298,
+    "hard_unknown_element_fraction": 0.5897163152694702,
+    "mean_unknown_probability": 0.5975601077079773,
+    "object_mask_covered_surface_union": 0.4102836847305298,
+    "successfully_associated_surface_union": 0.4102836847305298,
+    "surface_visibility_union": 0.4173870086669922
+  },
+  "diagnostic_boundaries": {
+    "completion_trained": false,
+    "reason_C_measurable_in_this_oracle_id_arm": false,
+    "reason_D_includes_no_threshold_relaxation": true,
+    "unannotated_exterior_is_reported_separately_from_missing_object_surface": true
+  },
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": true,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "frozen_sparse_surface_unknown_decomposition",
+    "coordinate_convention": "mesh_oracle_to_sparse_surface_feature_raster",
+    "inputs": [
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/v4_geometry_object_oracle_milestone_20260830.json",
+        "role": "milestone_receipt",
+        "sha256": "d26af7c429c2043fac186c12910026818a5040b5e8a3ad0e6ce0d654556c5005"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_memberships.pt",
+        "role": "source_authority",
+        "sha256": "cbe3330a6d92e20c8a47b336e712e526a9d739c875045326a61064f7824126bf"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+        "role": "camera_transforms",
+        "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+        "role": "mesh_geometry",
+        "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00_vh_clean_2.0.010000.segs.json",
+        "role": "instance_segmentation",
+        "sha256": "f53f0ec1c1999d789f6a9275e0c673a55bf7aa8e7e19bc5ea35cdb4935f8cf55"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00.aggregation.json",
+        "role": "instance_aggregation",
+        "sha256": "0c622a6160b7b36c97a303192c6ff83c181d22b5233601399988b4a3d332c243"
+      }
+    ],
+    "metadata": {
+      "association_mode": "exact_oracle_id_so_reason_C_is_structurally_zero",
+      "diagnostic_only": true,
+      "heldout_view_indices": [
+        3,
+        7,
+        11,
+        15
+      ],
+      "mapping_view_indices": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        13,
+        14
+      ]
+    },
+    "model_checkpoint_sha256": null,
+    "model_family": null,
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": false,
+    "target_rgb_opened": false
+  },
+  "heldout_view_count": 4,
+  "implementation_sha256": "a9f8f35bc439304076bff242a5a5a5dfb1c662781935cd3ea5aad9ba847a01d9",
+  "largest_annotated_object_unknown_reason": "E_unseen_surface_of_an_observed_object",
+  "mapping_view_count": 12,
+  "schema": "radio_gs.surface_object_memory_v4.unknown_reason_decomposition.v1",
+  "stage": "pretraining_diagnostic",
+  "unknown_reasons": {
+    "A_never_visible_without_observed_token": {
+      "annotated_object_element_count": 5624,
+      "hard_unknown_element_count": 7838,
+      "hard_unknown_element_fraction": 0.20479724080267558,
+      "unknown_probability_mass": 7838.0,
+      "unknown_probability_mass_fraction": 0.20210899531121732
+    },
+    "B_visible_without_object_mask_evidence": {
+      "annotated_object_element_count": 166,
+      "hard_unknown_element_count": 461,
+      "hard_unknown_element_fraction": 0.012045359531772576,
+      "unknown_probability_mass": 461.0,
+      "unknown_probability_mass_fraction": 0.011887247619095584
+    },
+    "C_mask_evidence_without_token_association": {
+      "annotated_object_element_count": 0,
+      "hard_unknown_element_count": 0,
+      "hard_unknown_element_fraction": 0.0,
+      "unknown_probability_mass": 0.0,
+      "unknown_probability_mass_fraction": 0.0
+    },
+    "D_associated_but_not_committed": {
+      "annotated_object_element_count": 0,
+      "hard_unknown_element_count": 0,
+      "hard_unknown_element_fraction": 0.0,
+      "unknown_probability_mass": 0.0,
+      "unknown_probability_mass_fraction": 0.0
+    },
+    "E_unseen_surface_of_an_observed_object": {
+      "annotated_object_element_count": 29973,
+      "hard_unknown_element_count": 29973,
+      "hard_unknown_element_fraction": 0.7831573996655519,
+      "unknown_probability_mass": 29973.0,
+      "unknown_probability_mass_fraction": 0.7728773815339521
+    }
+  }
+}

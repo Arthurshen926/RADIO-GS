@@ -1,0 +1,178 @@
+{
+  "carrier_contract": {
+    "maximum_contributors_per_pixel": 8,
+    "maximum_splat_radius_at_reference_raster": 1,
+    "resolution_invariance_audit_pending": true,
+    "surface_band_voxels": 1.5,
+    "voxel_size_metres": 0.04
+  },
+  "decisions": {
+    "carrier_parameters_frozen": true,
+    "compression_authorized": false,
+    "geometry_milestone_complete": true,
+    "historical_v3_method_imported": false,
+    "learned_soft_codebook_authorized": false,
+    "oracle_object_codebook_passed": true,
+    "query_encoder_authorized": false
+  },
+  "evidence": [
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_geometry_gate_complete_r1_20260830.json",
+      "schema": "radio_gs.surface_object_memory_v4.geometry_gate.v1",
+      "sha256": "a5b3f66a664dddda26896eaf9320d1307a019d082585d245bf4652809dbf2aec"
+    },
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_object_codebook_oracle_gate_a_20260830.json",
+      "schema": "radio_gs.surface_object_memory_v4.object_codebook_oracle_gate.v1",
+      "sha256": "0fd6a9eae6b73fc14387321e973571e3468688df3db03ad20d1a8f2d7f2ee42f"
+    },
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_lerf_figurines_source_mask_geometry_gate_r1_20260830.json",
+      "schema": "radio_gs.surface_object_memory_v4.lerf_source_mask_geometry_gate.v1",
+      "sha256": "b85d414ea54dd49c378b0f4359ae8fec994f878662abc96aba006ca00e9fa4d1"
+    },
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_lerf_ramen_source_mask_geometry_gate_r1_20260830.json",
+      "schema": "radio_gs.surface_object_memory_v4.lerf_source_mask_geometry_gate.v1",
+      "sha256": "86974e34d52121e7e6686361e8ca1583b4a9378579ba2e16c9810d11b3e1c6af"
+    },
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_geometry_ladder_oracle_r1_20260830.json",
+      "schema": "radio_gs.surface_object_memory_v4.geometry_registration_ladder.v1",
+      "sha256": "a7e80df177769d8c64374a170dcdd1b1cbe1c61e6d83599f0d272a6245e8cc44"
+    }
+  ],
+  "git_head": "a42cd82a24ea00b2599def75b63bcfb57506266a",
+  "milestone": "geometry_and_oracle_codebook",
+  "schema": "radio_gs.surface_object_memory_v4.milestone_receipt.v1",
+  "source_snapshot": [
+    {
+      "path": "__init__.py",
+      "sha256": "141a690e31f21ad083ffddde2a45d445b1302afe24fcb658a76686bbf5524da5"
+    },
+    {
+      "path": "carrier/__init__.py",
+      "sha256": "22bcf35a0a2296832021f002c1e99d144c31a2a6034f17e6c53611e83d6f54a8"
+    },
+    {
+      "path": "carrier/base.py",
+      "sha256": "aad4646dc9d132b685f94528f7aba5bc6deec4bdeda17f3caebf3e4db52b5b19"
+    },
+    {
+      "path": "carrier/gaussian.py",
+      "sha256": "e7fc9e4afcf1f684f1f88dff3549c202eeb06753d0fe50e0bfdbd2682b7cc313"
+    },
+    {
+      "path": "carrier/mesh.py",
+      "sha256": "e5495f381697fd1a4af262085961d0f964f38c8621cd3c96bd392caa5040ff92"
+    },
+    {
+      "path": "carrier/sparse_voxel.py",
+      "sha256": "ee0a8fe56b3921a8b67634890574dbf01f6a4ba337de45c5c804e96e9d476235"
+    },
+    {
+      "path": "contracts/__init__.py",
+      "sha256": "dea30d86e739607f98aa443442510727e59dbd3d3c7fd783d69b7dfbd1a8676b"
+    },
+    {
+      "path": "contracts/build_geometry_receipt.py",
+      "sha256": "bed71e471e219d0ec528f839910c1e1e6c6cb66382719a9ae7db71a5bddc1b94"
+    },
+    {
+      "path": "contracts/build_milestone_receipt.py",
+      "sha256": "3f2076cd6925f055e3749995be0b882af99797465d95ff6007d7dec1a4e63fbe"
+    },
+    {
+      "path": "contracts/geometry_receipt.py",
+      "sha256": "d5e5073c5c6be1f4a55acc964e8c908160adcd4e45f5a3c7747dc8a659ba5b72"
+    },
+    {
+      "path": "contracts/method_receipt.py",
+      "sha256": "1f2af17c01adcee9fd6711367f3340e6b4d0dd15bb2060499ae84fede06d22a1"
+    },
+    {
+      "path": "contracts/source_split.py",
+      "sha256": "f70d2a35e48ad123de87377c2db278f478d5293564964b965fdebcf2f5b1a002"
+    },
+    {
+      "path": "contracts/static_audit.py",
+      "sha256": "4ae03ec737dec95612177579ce2706c2013c819ed64ebf22d46f0180ca075510"
+    },
+    {
+      "path": "evaluation/__init__.py",
+      "sha256": "f0c43405475fc9c89f5dda1a3217bdd7d08141410a8f841ae670c1bdd0f67a98"
+    },
+    {
+      "path": "evaluation/geometry_gate.py",
+      "sha256": "019865faa97701194d11fb182ac18d475b10c6a52a18e880cacb2f5f8188ef58"
+    },
+    {
+      "path": "evaluation/geometry_ladder.py",
+      "sha256": "c0bd3fece03ed7a54fe7289526696d5d82d2faefa4e6d88a3b0582c28e1d2cbe"
+    },
+    {
+      "path": "evaluation/lerf_source_mask_gate.py",
+      "sha256": "a3cbe9ea7ea425bd928d820f42288278974d18eedc8ac6c6da575a82fdea89db"
+    },
+    {
+      "path": "evaluation/object_oracle_gate.py",
+      "sha256": "1a009b3ab6bba12739fbec731627fbceaf54c036816ede650191b15e941e3bd7"
+    },
+    {
+      "path": "evaluation/source_mask_ladder.py",
+      "sha256": "3de18e6e7743c649360f092f3b45d3c8acc70dd642a07babdafd92be7083a563"
+    },
+    {
+      "path": "geometry/__init__.py",
+      "sha256": "1126402b0ae3f880c3629a4330a95a748223009529827c2fcf07721c2f398681"
+    },
+    {
+      "path": "geometry/batch_moge3.py",
+      "sha256": "56e348e8d0c49f92961605c2ae267fac2253853a8ae60173091bca6544297c1d"
+    },
+    {
+      "path": "geometry/depth_calibration.py",
+      "sha256": "43dcf8b2ba0cb503b8bbdb4bd8882685f5ee284e58b843ec91935b3dc3a5cf05"
+    },
+    {
+      "path": "geometry/fuse_lerf_moge3.py",
+      "sha256": "09d8a9a81b96f344942eb60406266531f2ea927fa6efc6239310efde8a30c630"
+    },
+    {
+      "path": "geometry/merge_moge3_shards.py",
+      "sha256": "13a45054084e186e29abeb1b273bc3876bc27ded99c2dc39ba94adf7886f90d4"
+    },
+    {
+      "path": "geometry/moge3_inference.py",
+      "sha256": "c27b64de2b8785878b141ce0fd396dfcb6b2236de4b08ed372fba42735112c05"
+    },
+    {
+      "path": "geometry/tsdf_fusion.py",
+      "sha256": "4811d32709b8a24f58b1ad681f9adf48991c9232da8208d2fdb388457d1bba3c"
+    },
+    {
+      "path": "object_memory/__init__.py",
+      "sha256": "8bf0ba019763d850587649603ab128b87c7f3bdb8fc526fa47f524445f050c2d"
+    },
+    {
+      "path": "object_memory/sparse_assignment.py",
+      "sha256": "8293c33786576d4a1ec0552b7a667267b7eba827745093439c330390e4647756"
+    },
+    {
+      "path": "object_memory/tokens.py",
+      "sha256": "83fae5f40fd382c4434e6c54752f5218d9bc7b25087f0c339a86cca2fae09d19"
+    },
+    {
+      "path": "registration/__init__.py",
+      "sha256": "803d46802fd9d2ecf195876175ecb810a6252c0edb7dddfd89de441efa00d7ba"
+    },
+    {
+      "path": "registration/evidence_fusion.py",
+      "sha256": "6b39cce6dd78a01f65322d3b78b34a41f9df9edeb16a1531bb6669eef4413667"
+    },
+    {
+      "path": "registration/surface_projection.py",
+      "sha256": "13bbeadd665fee1b0d48bbec1d4a731c24946d725c2502532c911b22eed6bc96"
+    }
+  ]
+}
