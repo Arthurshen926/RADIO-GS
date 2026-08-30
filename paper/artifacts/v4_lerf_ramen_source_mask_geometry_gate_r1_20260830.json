@@ -1,0 +1,1029 @@
+{
+  "comparison_to_gaussian": {
+    "coverage_delta": -0.0023357259858515222,
+    "effective_contributors_reduction": 64.78309215977788,
+    "mutually_exclusive_purity_delta": 4.119137936053896e-05,
+    "roundtrip_delta": 0.09507146413178791,
+    "same_view_leakage_reduction": 0.06878720496963597
+  },
+  "coverage_is_reported_not_compensatory": true,
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "lerf_gaussian_vs_calibrated_moge3_sparse_surface",
+    "coordinate_convention": "colmap_world_opencv_camera_feature_raster",
+    "inputs": [
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source32_exact_mpr_rgb_authority_20260817.json",
+        "role": "source_rgb_authority",
+        "sha256": "7fbbaf44361b90ae3f48edb52d50bef987a61d8dc6509b51bed5205a90134fd6"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+        "role": "exact_mpr_authority",
+        "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_surface_4cm.pt",
+        "role": "surface_carrier",
+        "sha256": "ffbcf681260a627e2495fc9ff8b4f4ee16bf9dcd917279f69bf5273fc7f43889"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/cameras.bin",
+        "role": "colmap_cameras",
+        "sha256": "72b479230bcca2ca5952de882ef09f84f048d23e4297ab4585e24c3427c3347c"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/images.bin",
+        "role": "colmap_images",
+        "sha256": "a2710cb4285f7930ee382a6f739fc352b9a579c98f1dd912c05c42ac2a6d21af"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_sam3_source32/shard_0.json",
+        "role": "sam3_manifest_0",
+        "sha256": "5e8259014efc297c742a92d30a75b9264b1e11bca8183d41e8ef465773dbe12b"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_sam3_source32/shard_1.json",
+        "role": "sam3_manifest_1",
+        "sha256": "8efe913cf8f256a82be2924a1a656771e3229aa8b1e3572067cffe4a6d5499b5"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_sam3_source32/shard_2.json",
+        "role": "sam3_manifest_2",
+        "sha256": "6c51e6a18541fda37d01a8e845a18327d5079735e76639fb5c61092b6ef60aca"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_sam3_source32/shard_3.json",
+        "role": "sam3_manifest_3",
+        "sha256": "61cf519e1d068aea6b7020d79ad514d3ca13f07a29ffe2a87bb2137d5759fba3"
+      }
+    ],
+    "metadata": {
+      "maximum_contributors_per_pixel": 8,
+      "maximum_splat_radius": 1,
+      "scene_label": "lerf_ramen",
+      "source_only": true,
+      "source_view_count": 32,
+      "surface_band_voxels": 1.5
+    },
+    "model_checkpoint_sha256": "9b41b7b9f65ad80aab7ad686f5e9cc0d1fd33f1964022618dfbcd52fc1fb7925",
+    "model_family": "MoGe-3",
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": true,
+    "target_rgb_opened": false
+  },
+  "implementation_sha256": "a3cbe9ea7ea425bd928d820f42288278974d18eedc8ac6c6da575a82fdea89db",
+  "passes_scene_gate": true,
+  "primary_directions": {
+    "leakage": true,
+    "purity": true,
+    "roundtrip": true
+  },
+  "projection_configuration": {
+    "maximum_contributors_per_pixel": 8,
+    "maximum_splat_radius": 1,
+    "surface_band_voxels": 1.5
+  },
+  "raster_shape": [
+    46,
+    62
+  ],
+  "results": {
+    "gaussian_exact_renderer": {
+      "cross_view_metric": "omitted: untracked best-proposal matching is non-gating and quadratic in proposal count",
+      "mutually_exclusive_element_purity": 0.9993249629596488,
+      "mutually_exclusive_proposal_pair_count": 3026,
+      "per_view_diagnostics": [
+        {
+          "camera_key": "1",
+          "mutually_exclusive_element_purity": 0.9993439342664636,
+          "proposal_count": 18,
+          "registration_entropy": {
+            "effective_contributors": 70.84234619140625,
+            "mean_contributors": 180.84571838378906,
+            "mean_entropy_nats": 4.155101299285889,
+            "normalized_entropy": 0.8124662637710571
+          },
+          "same_view_boundary_leakage": 0.1921684741973877,
+          "same_view_mask_roundtrip_soft_iou": 0.6984840035438538,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "7",
+          "mutually_exclusive_element_purity": 0.9996024805146295,
+          "proposal_count": 14,
+          "registration_entropy": {
+            "effective_contributors": 71.10945892333984,
+            "mean_contributors": 185.89340209960938,
+            "mean_entropy_nats": 4.157587051391602,
+            "normalized_entropy": 0.8081980347633362
+          },
+          "same_view_boundary_leakage": 0.16510900855064392,
+          "same_view_mask_roundtrip_soft_iou": 0.733027994632721,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "11",
+          "mutually_exclusive_element_purity": 0.9994881952681193,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 65.48617553710938,
+            "mean_contributors": 175.68162536621094,
+            "mean_entropy_nats": 4.081500053405762,
+            "normalized_entropy": 0.8054588437080383
+          },
+          "same_view_boundary_leakage": 0.17818348109722137,
+          "same_view_mask_roundtrip_soft_iou": 0.7073706388473511,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "15",
+          "mutually_exclusive_element_purity": 0.9989600127393549,
+          "proposal_count": 12,
+          "registration_entropy": {
+            "effective_contributors": 65.36580657958984,
+            "mean_contributors": 168.1714630126953,
+            "mean_entropy_nats": 4.102020740509033,
+            "normalized_entropy": 0.8139607906341553
+          },
+          "same_view_boundary_leakage": 0.20096296072006226,
+          "same_view_mask_roundtrip_soft_iou": 0.6661083698272705,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "18",
+          "mutually_exclusive_element_purity": 0.9990962159633636,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 64.83763122558594,
+            "mean_contributors": 168.49929809570312,
+            "mean_entropy_nats": 4.076373100280762,
+            "normalized_entropy": 0.8053688406944275
+          },
+          "same_view_boundary_leakage": 0.19800236821174622,
+          "same_view_mask_roundtrip_soft_iou": 0.6893060207366943,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "22",
+          "mutually_exclusive_element_purity": 0.9991799120573287,
+          "proposal_count": 24,
+          "registration_entropy": {
+            "effective_contributors": 59.53540802001953,
+            "mean_contributors": 155.07188415527344,
+            "mean_entropy_nats": 4.015035629272461,
+            "normalized_entropy": 0.8095911741256714
+          },
+          "same_view_boundary_leakage": 0.23684720695018768,
+          "same_view_mask_roundtrip_soft_iou": 0.6171517372131348,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "27",
+          "mutually_exclusive_element_purity": 0.9984755915144216,
+          "proposal_count": 17,
+          "registration_entropy": {
+            "effective_contributors": 68.4299545288086,
+            "mean_contributors": 186.11044311523438,
+            "mean_entropy_nats": 4.107656955718994,
+            "normalized_entropy": 0.8002861142158508
+          },
+          "same_view_boundary_leakage": 0.25105851888656616,
+          "same_view_mask_roundtrip_soft_iou": 0.6178014874458313,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "31",
+          "mutually_exclusive_element_purity": 0.9994582953276457,
+          "proposal_count": 19,
+          "registration_entropy": {
+            "effective_contributors": 70.26785278320312,
+            "mean_contributors": 190.93197631835938,
+            "mean_entropy_nats": 4.089874267578125,
+            "normalized_entropy": 0.7990656495094299
+          },
+          "same_view_boundary_leakage": 0.2611455023288727,
+          "same_view_mask_roundtrip_soft_iou": 0.6107223033905029,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "35",
+          "mutually_exclusive_element_purity": 0.9999541827610561,
+          "proposal_count": 10,
+          "registration_entropy": {
+            "effective_contributors": 66.263916015625,
+            "mean_contributors": 177.52069091796875,
+            "mean_entropy_nats": 4.086318492889404,
+            "normalized_entropy": 0.800297737121582
+          },
+          "same_view_boundary_leakage": 0.19342175126075745,
+          "same_view_mask_roundtrip_soft_iou": 0.6934331059455872,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "39",
+          "mutually_exclusive_element_purity": 0.9983641985389922,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 63.6693000793457,
+            "mean_contributors": 173.92601013183594,
+            "mean_entropy_nats": 4.095308303833008,
+            "normalized_entropy": 0.8022186160087585
+          },
+          "same_view_boundary_leakage": 0.14582379162311554,
+          "same_view_mask_roundtrip_soft_iou": 0.7543461918830872,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "42",
+          "mutually_exclusive_element_purity": 0.9994623830505446,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 65.8088607788086,
+            "mean_contributors": 169.05995178222656,
+            "mean_entropy_nats": 4.090777397155762,
+            "normalized_entropy": 0.8097712397575378
+          },
+          "same_view_boundary_leakage": 0.2546786069869995,
+          "same_view_mask_roundtrip_soft_iou": 0.6310907602310181,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "47",
+          "mutually_exclusive_element_purity": 0.9990929275751114,
+          "proposal_count": 7,
+          "registration_entropy": {
+            "effective_contributors": 60.66509246826172,
+            "mean_contributors": 172.48036193847656,
+            "mean_entropy_nats": 3.977692127227783,
+            "normalized_entropy": 0.7881219983100891
+          },
+          "same_view_boundary_leakage": 0.23322108387947083,
+          "same_view_mask_roundtrip_soft_iou": 0.6439487338066101,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "51",
+          "mutually_exclusive_element_purity": 0.9997016892389015,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 59.94940948486328,
+            "mean_contributors": 162.91233825683594,
+            "mean_entropy_nats": 3.987990617752075,
+            "normalized_entropy": 0.8018055558204651
+          },
+          "same_view_boundary_leakage": 0.34802567958831787,
+          "same_view_mask_roundtrip_soft_iou": 0.5134015083312988,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "55",
+          "mutually_exclusive_element_purity": 0.999234121530614,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 68.90021514892578,
+            "mean_contributors": 180.15988159179688,
+            "mean_entropy_nats": 4.147256374359131,
+            "normalized_entropy": 0.8102704882621765
+          },
+          "same_view_boundary_leakage": 0.2081461101770401,
+          "same_view_mask_roundtrip_soft_iou": 0.6597211360931396,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "59",
+          "mutually_exclusive_element_purity": 0.9995108880895249,
+          "proposal_count": 15,
+          "registration_entropy": {
+            "effective_contributors": 62.36713409423828,
+            "mean_contributors": 169.11500549316406,
+            "mean_entropy_nats": 4.0130839347839355,
+            "normalized_entropy": 0.8004327416419983
+          },
+          "same_view_boundary_leakage": 0.3293685019016266,
+          "same_view_mask_roundtrip_soft_iou": 0.541181206703186,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "64",
+          "mutually_exclusive_element_purity": 0.9974125332948638,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 67.77275848388672,
+            "mean_contributors": 177.04171752929688,
+            "mean_entropy_nats": 4.138430595397949,
+            "normalized_entropy": 0.8097732067108154
+          },
+          "same_view_boundary_leakage": 0.1440514773130417,
+          "same_view_mask_roundtrip_soft_iou": 0.7509543299674988,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "68",
+          "mutually_exclusive_element_purity": 0.9995762775245222,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 62.95750427246094,
+            "mean_contributors": 163.98281860351562,
+            "mean_entropy_nats": 4.043158054351807,
+            "normalized_entropy": 0.8094234466552734
+          },
+          "same_view_boundary_leakage": 0.1831025779247284,
+          "same_view_mask_roundtrip_soft_iou": 0.6915004253387451,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "72",
+          "mutually_exclusive_element_purity": 0.999460906535387,
+          "proposal_count": 15,
+          "registration_entropy": {
+            "effective_contributors": 72.55875396728516,
+            "mean_contributors": 182.45266723632812,
+            "mean_entropy_nats": 4.195433139801025,
+            "normalized_entropy": 0.8195502758026123
+          },
+          "same_view_boundary_leakage": 0.18078677356243134,
+          "same_view_mask_roundtrip_soft_iou": 0.7081801295280457,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "76",
+          "mutually_exclusive_element_purity": 0.9994546497944605,
+          "proposal_count": 26,
+          "registration_entropy": {
+            "effective_contributors": 68.48757934570312,
+            "mean_contributors": 189.82643127441406,
+            "mean_entropy_nats": 4.04167366027832,
+            "normalized_entropy": 0.7866833209991455
+          },
+          "same_view_boundary_leakage": 0.3105602264404297,
+          "same_view_mask_roundtrip_soft_iou": 0.5442746877670288,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "80",
+          "mutually_exclusive_element_purity": 0.9996690509612101,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 72.78880310058594,
+            "mean_contributors": 191.8422088623047,
+            "mean_entropy_nats": 4.1413750648498535,
+            "normalized_entropy": 0.8090478181838989
+          },
+          "same_view_boundary_leakage": 0.3385765552520752,
+          "same_view_mask_roundtrip_soft_iou": 0.5022889375686646,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "85",
+          "mutually_exclusive_element_purity": 0.9990412698516363,
+          "proposal_count": 15,
+          "registration_entropy": {
+            "effective_contributors": 66.67925262451172,
+            "mean_contributors": 179.41514587402344,
+            "mean_entropy_nats": 4.087162017822266,
+            "normalized_entropy": 0.806587815284729
+          },
+          "same_view_boundary_leakage": 0.21993450820446014,
+          "same_view_mask_roundtrip_soft_iou": 0.6508173942565918,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "90",
+          "mutually_exclusive_element_purity": 0.9999108648300171,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 68.58369445800781,
+            "mean_contributors": 179.307861328125,
+            "mean_entropy_nats": 4.143844127655029,
+            "normalized_entropy": 0.8103474378585815
+          },
+          "same_view_boundary_leakage": 0.38991403579711914,
+          "same_view_mask_roundtrip_soft_iou": 0.45951926708221436,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "93",
+          "mutually_exclusive_element_purity": 0.9995128745885239,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 72.79270935058594,
+            "mean_contributors": 191.11781311035156,
+            "mean_entropy_nats": 4.202461242675781,
+            "normalized_entropy": 0.8116349577903748
+          },
+          "same_view_boundary_leakage": 0.25840431451797485,
+          "same_view_mask_roundtrip_soft_iou": 0.5975468158721924,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "97",
+          "mutually_exclusive_element_purity": 0.99942616305568,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 64.62950134277344,
+            "mean_contributors": 171.5960693359375,
+            "mean_entropy_nats": 3.9829587936401367,
+            "normalized_entropy": 0.8040427565574646
+          },
+          "same_view_boundary_leakage": 0.27550020813941956,
+          "same_view_mask_roundtrip_soft_iou": 0.5731800198554993,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "101",
+          "mutually_exclusive_element_purity": 0.9994061893605172,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 54.882991790771484,
+            "mean_contributors": 155.19529724121094,
+            "mean_entropy_nats": 3.8522884845733643,
+            "normalized_entropy": 0.788239598274231
+          },
+          "same_view_boundary_leakage": 0.25863897800445557,
+          "same_view_mask_roundtrip_soft_iou": 0.605068027973175,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "105",
+          "mutually_exclusive_element_purity": 0.9992413476986044,
+          "proposal_count": 13,
+          "registration_entropy": {
+            "effective_contributors": 65.10430908203125,
+            "mean_contributors": 175.7268524169922,
+            "mean_entropy_nats": 3.947057008743286,
+            "normalized_entropy": 0.8004558682441711
+          },
+          "same_view_boundary_leakage": 0.31917497515678406,
+          "same_view_mask_roundtrip_soft_iou": 0.5159437656402588,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "109",
+          "mutually_exclusive_element_purity": 0.9995077022231451,
+          "proposal_count": 15,
+          "registration_entropy": {
+            "effective_contributors": 66.39359283447266,
+            "mean_contributors": 176.49508666992188,
+            "mean_entropy_nats": 3.882458448410034,
+            "normalized_entropy": 0.7981979250907898
+          },
+          "same_view_boundary_leakage": 0.3306521475315094,
+          "same_view_mask_roundtrip_soft_iou": 0.5298779606819153,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "113",
+          "mutually_exclusive_element_purity": 0.9996467930638891,
+          "proposal_count": 17,
+          "registration_entropy": {
+            "effective_contributors": 76.82671356201172,
+            "mean_contributors": 199.50807189941406,
+            "mean_entropy_nats": 4.26438570022583,
+            "normalized_entropy": 0.8162480592727661
+          },
+          "same_view_boundary_leakage": 0.24971064925193787,
+          "same_view_mask_roundtrip_soft_iou": 0.6277617812156677,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "116",
+          "mutually_exclusive_element_purity": 0.9995849658702982,
+          "proposal_count": 18,
+          "registration_entropy": {
+            "effective_contributors": 71.84955596923828,
+            "mean_contributors": 188.21107482910156,
+            "mean_entropy_nats": 4.1993088722229,
+            "normalized_entropy": 0.8118957281112671
+          },
+          "same_view_boundary_leakage": 0.33501502871513367,
+          "same_view_mask_roundtrip_soft_iou": 0.522612452507019,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "121",
+          "mutually_exclusive_element_purity": 0.998335203608951,
+          "proposal_count": 17,
+          "registration_entropy": {
+            "effective_contributors": 49.67591094970703,
+            "mean_contributors": 132.98211669921875,
+            "mean_entropy_nats": 3.844331741333008,
+            "normalized_entropy": 0.7929514646530151
+          },
+          "same_view_boundary_leakage": 0.22647908329963684,
+          "same_view_mask_roundtrip_soft_iou": 0.609917938709259,
+          "source_mask_surface_coverage": 0.9411764740943909
+        },
+        {
+          "camera_key": "125",
+          "mutually_exclusive_element_purity": 0.9993687346577644,
+          "proposal_count": 19,
+          "registration_entropy": {
+            "effective_contributors": 58.84404754638672,
+            "mean_contributors": 152.78787231445312,
+            "mean_entropy_nats": 4.012306213378906,
+            "normalized_entropy": 0.8062974214553833
+          },
+          "same_view_boundary_leakage": 0.19263820350170135,
+          "same_view_mask_roundtrip_soft_iou": 0.6828880310058594,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "131",
+          "mutually_exclusive_element_purity": 0.9995059509362493,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 73.59659576416016,
+            "mean_contributors": 192.45372009277344,
+            "mean_entropy_nats": 4.144658088684082,
+            "normalized_entropy": 0.8112568855285645
+          },
+          "same_view_boundary_leakage": 0.35716694593429565,
+          "same_view_mask_roundtrip_soft_iou": 0.49295657873153687,
+          "source_mask_surface_coverage": 1.0
+        }
+      ],
+      "proposal_count": 485,
+      "registration_entropy": {
+        "effective_contributors": 66.18508863449097,
+        "mean_contributors": 175.51008987426758,
+        "mean_entropy_nats": 4.072089612483978,
+        "normalized_entropy": 0.8049983773380518
+      },
+      "same_view_boundary_leakage": 0.25202978267190385,
+      "same_view_mask_roundtrip_soft_iou": 0.6159173072459772,
+      "source_mask_surface_coverage": 0.9979381443298969
+    },
+    "moge3_calibrated_sparse_surface": {
+      "cross_view_metric": "omitted: untracked best-proposal matching is non-gating and quadratic in proposal count",
+      "mutually_exclusive_element_purity": 0.9993661543390093,
+      "mutually_exclusive_proposal_pair_count": 3026,
+      "per_view_diagnostics": [
+        {
+          "camera_key": "1",
+          "mutually_exclusive_element_purity": 0.999533802702807,
+          "proposal_count": 18,
+          "registration_entropy": {
+            "effective_contributors": 1.3807429075241089,
+            "mean_contributors": 1.4786114692687988,
+            "mean_entropy_nats": 0.2668546438217163,
+            "normalized_entropy": 0.35808539390563965
+          },
+          "same_view_boundary_leakage": 0.10713405162096024,
+          "same_view_mask_roundtrip_soft_iou": 0.8158405423164368,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "7",
+          "mutually_exclusive_element_purity": 0.9995677535598343,
+          "proposal_count": 14,
+          "registration_entropy": {
+            "effective_contributors": 1.4544963836669922,
+            "mean_contributors": 1.555399775505066,
+            "mean_entropy_nats": 0.30889827013015747,
+            "normalized_entropy": 0.40521541237831116
+          },
+          "same_view_boundary_leakage": 0.1311734914779663,
+          "same_view_mask_roundtrip_soft_iou": 0.7881017923355103,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "11",
+          "mutually_exclusive_element_purity": 0.9985712679421029,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 1.2986725568771362,
+            "mean_contributors": 1.3709677457809448,
+            "mean_entropy_nats": 0.21404258906841278,
+            "normalized_entropy": 0.2984546720981598
+          },
+          "same_view_boundary_leakage": 0.12361767143011093,
+          "same_view_mask_roundtrip_soft_iou": 0.793274462223053,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "15",
+          "mutually_exclusive_element_purity": 0.9993423234332691,
+          "proposal_count": 12,
+          "registration_entropy": {
+            "effective_contributors": 1.3056684732437134,
+            "mean_contributors": 1.3842917680740356,
+            "mean_entropy_nats": 0.22011828422546387,
+            "normalized_entropy": 0.30806154012680054
+          },
+          "same_view_boundary_leakage": 0.11069892346858978,
+          "same_view_mask_roundtrip_soft_iou": 0.8071866035461426,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "18",
+          "mutually_exclusive_element_purity": 0.9989449453353881,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 1.3731441497802734,
+            "mean_contributors": 1.4708976745605469,
+            "mean_entropy_nats": 0.26645511388778687,
+            "normalized_entropy": 0.3673885464668274
+          },
+          "same_view_boundary_leakage": 0.18450824916362762,
+          "same_view_mask_roundtrip_soft_iou": 0.710935115814209,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "22",
+          "mutually_exclusive_element_purity": 0.9997676306582511,
+          "proposal_count": 24,
+          "registration_entropy": {
+            "effective_contributors": 1.2357252836227417,
+            "mean_contributors": 1.3029452562332153,
+            "mean_entropy_nats": 0.17069454491138458,
+            "normalized_entropy": 0.23885342478752136
+          },
+          "same_view_boundary_leakage": 0.17011448740959167,
+          "same_view_mask_roundtrip_soft_iou": 0.7304624319076538,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "27",
+          "mutually_exclusive_element_purity": 0.9990949791410695,
+          "proposal_count": 17,
+          "registration_entropy": {
+            "effective_contributors": 1.3393378257751465,
+            "mean_contributors": 1.4274193048477173,
+            "mean_entropy_nats": 0.24087229371070862,
+            "normalized_entropy": 0.3295653760433197
+          },
+          "same_view_boundary_leakage": 0.17676378786563873,
+          "same_view_mask_roundtrip_soft_iou": 0.7132787704467773,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "31",
+          "mutually_exclusive_element_purity": 0.9994582026093094,
+          "proposal_count": 19,
+          "registration_entropy": {
+            "effective_contributors": 1.553613305091858,
+            "mean_contributors": 1.6791518926620483,
+            "mean_entropy_nats": 0.3614484369754791,
+            "normalized_entropy": 0.44323742389678955
+          },
+          "same_view_boundary_leakage": 0.2012711465358734,
+          "same_view_mask_roundtrip_soft_iou": 0.6817493438720703,
+          "source_mask_surface_coverage": 0.9785041809082031
+        },
+        {
+          "camera_key": "35",
+          "mutually_exclusive_element_purity": 1.0,
+          "proposal_count": 10,
+          "registration_entropy": {
+            "effective_contributors": 1.2558871507644653,
+            "mean_contributors": 1.320449709892273,
+            "mean_entropy_nats": 0.18219737708568573,
+            "normalized_entropy": 0.2515477240085602
+          },
+          "same_view_boundary_leakage": 0.1696397066116333,
+          "same_view_mask_roundtrip_soft_iou": 0.7403827905654907,
+          "source_mask_surface_coverage": 0.9937450289726257
+        },
+        {
+          "camera_key": "39",
+          "mutually_exclusive_element_purity": 0.9986678461233774,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 1.2798535823822021,
+            "mean_contributors": 1.3579944372177124,
+            "mean_entropy_nats": 0.19912263751029968,
+            "normalized_entropy": 0.2711372673511505
+          },
+          "same_view_boundary_leakage": 0.10064717382192612,
+          "same_view_mask_roundtrip_soft_iou": 0.8226352334022522,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "42",
+          "mutually_exclusive_element_purity": 0.9995859913966235,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 1.3000431060791016,
+            "mean_contributors": 1.3728516101837158,
+            "mean_entropy_nats": 0.2133335918188095,
+            "normalized_entropy": 0.29394030570983887
+          },
+          "same_view_boundary_leakage": 0.16936646401882172,
+          "same_view_mask_roundtrip_soft_iou": 0.749539315700531,
+          "source_mask_surface_coverage": 0.9999047517776489
+        },
+        {
+          "camera_key": "47",
+          "mutually_exclusive_element_purity": 0.9992024451494217,
+          "proposal_count": 7,
+          "registration_entropy": {
+            "effective_contributors": 1.4204471111297607,
+            "mean_contributors": 1.517882227897644,
+            "mean_entropy_nats": 0.2944641411304474,
+            "normalized_entropy": 0.39817580580711365
+          },
+          "same_view_boundary_leakage": 0.13998627662658691,
+          "same_view_mask_roundtrip_soft_iou": 0.7686392068862915,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "51",
+          "mutually_exclusive_element_purity": 0.9999488674932056,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 1.3616018295288086,
+            "mean_contributors": 1.458976149559021,
+            "mean_entropy_nats": 0.26210275292396545,
+            "normalized_entropy": 0.369136780500412
+          },
+          "same_view_boundary_leakage": 0.23283664882183075,
+          "same_view_mask_roundtrip_soft_iou": 0.6508325338363647,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "55",
+          "mutually_exclusive_element_purity": 0.9986452181288537,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 1.3497649431228638,
+            "mean_contributors": 1.4296737909317017,
+            "mean_entropy_nats": 0.237391397356987,
+            "normalized_entropy": 0.3065541982650757
+          },
+          "same_view_boundary_leakage": 0.15576355159282684,
+          "same_view_mask_roundtrip_soft_iou": 0.7340630292892456,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "59",
+          "mutually_exclusive_element_purity": 0.9995335042476654,
+          "proposal_count": 15,
+          "registration_entropy": {
+            "effective_contributors": 1.4298814535140991,
+            "mean_contributors": 1.539621353149414,
+            "mean_entropy_nats": 0.3000065088272095,
+            "normalized_entropy": 0.39972642064094543
+          },
+          "same_view_boundary_leakage": 0.2283923327922821,
+          "same_view_mask_roundtrip_soft_iou": 0.660754919052124,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "64",
+          "mutually_exclusive_element_purity": 0.9966102983893418,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 1.4226208925247192,
+            "mean_contributors": 1.5224404335021973,
+            "mean_entropy_nats": 0.2974965572357178,
+            "normalized_entropy": 0.40455788373947144
+          },
+          "same_view_boundary_leakage": 0.11941825598478317,
+          "same_view_mask_roundtrip_soft_iou": 0.7911884188652039,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "68",
+          "mutually_exclusive_element_purity": 0.9996670906983532,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 1.3090654611587524,
+            "mean_contributors": 1.393758773803711,
+            "mean_entropy_nats": 0.22397099435329437,
+            "normalized_entropy": 0.3152208626270294
+          },
+          "same_view_boundary_leakage": 0.1417277753353119,
+          "same_view_mask_roundtrip_soft_iou": 0.7741870880126953,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "72",
+          "mutually_exclusive_element_purity": 0.9995895974338055,
+          "proposal_count": 15,
+          "registration_entropy": {
+            "effective_contributors": 1.3548367023468018,
+            "mean_contributors": 1.4467040300369263,
+            "mean_entropy_nats": 0.2514840066432953,
+            "normalized_entropy": 0.34286266565322876
+          },
+          "same_view_boundary_leakage": 0.15376685559749603,
+          "same_view_mask_roundtrip_soft_iou": 0.7605272531509399,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "76",
+          "mutually_exclusive_element_purity": 0.9994691209649561,
+          "proposal_count": 26,
+          "registration_entropy": {
+            "effective_contributors": 1.8736432790756226,
+            "mean_contributors": 2.044992685317993,
+            "mean_entropy_nats": 0.5252049565315247,
+            "normalized_entropy": 0.5782421827316284
+          },
+          "same_view_boundary_leakage": 0.2305683046579361,
+          "same_view_mask_roundtrip_soft_iou": 0.6298655867576599,
+          "source_mask_surface_coverage": 0.9775729775428772
+        },
+        {
+          "camera_key": "80",
+          "mutually_exclusive_element_purity": 0.9996405473926611,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 1.6274796724319458,
+            "mean_contributors": 1.7732537984848022,
+            "mean_entropy_nats": 0.41430988907814026,
+            "normalized_entropy": 0.5168300867080688
+          },
+          "same_view_boundary_leakage": 0.2853966951370239,
+          "same_view_mask_roundtrip_soft_iou": 0.5886141061782837,
+          "source_mask_surface_coverage": 0.9967105388641357
+        },
+        {
+          "camera_key": "85",
+          "mutually_exclusive_element_purity": 0.999021252499351,
+          "proposal_count": 15,
+          "registration_entropy": {
+            "effective_contributors": 1.353941798210144,
+            "mean_contributors": 1.4379383325576782,
+            "mean_entropy_nats": 0.25386786460876465,
+            "normalized_entropy": 0.355160117149353
+          },
+          "same_view_boundary_leakage": 0.1279831975698471,
+          "same_view_mask_roundtrip_soft_iou": 0.7817233204841614,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "90",
+          "mutually_exclusive_element_purity": 0.999918850660324,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 1.479728102684021,
+            "mean_contributors": 1.5781906843185425,
+            "mean_entropy_nats": 0.3263753652572632,
+            "normalized_entropy": 0.4264943301677704
+          },
+          "same_view_boundary_leakage": 0.2866925895214081,
+          "same_view_mask_roundtrip_soft_iou": 0.5800838470458984,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "93",
+          "mutually_exclusive_element_purity": 0.9998975371577076,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 1.4408758878707886,
+            "mean_contributors": 1.5357643365859985,
+            "mean_entropy_nats": 0.30005890130996704,
+            "normalized_entropy": 0.39399799704551697
+          },
+          "same_view_boundary_leakage": 0.1752939522266388,
+          "same_view_mask_roundtrip_soft_iou": 0.7255866527557373,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "97",
+          "mutually_exclusive_element_purity": 0.9985863417387009,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 1.3043780326843262,
+            "mean_contributors": 1.3849929571151733,
+            "mean_entropy_nats": 0.21865516901016235,
+            "normalized_entropy": 0.3038986027240753
+          },
+          "same_view_boundary_leakage": 0.19236768782138824,
+          "same_view_mask_roundtrip_soft_iou": 0.6940197944641113,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "101",
+          "mutually_exclusive_element_purity": 0.9983840331118158,
+          "proposal_count": 11,
+          "registration_entropy": {
+            "effective_contributors": 1.325846791267395,
+            "mean_contributors": 1.407238245010376,
+            "mean_entropy_nats": 0.232414111495018,
+            "normalized_entropy": 0.32107898592948914
+          },
+          "same_view_boundary_leakage": 0.13871192932128906,
+          "same_view_mask_roundtrip_soft_iou": 0.771769106388092,
+          "source_mask_surface_coverage": 0.9977636337280273
+        },
+        {
+          "camera_key": "105",
+          "mutually_exclusive_element_purity": 0.9972288012504578,
+          "proposal_count": 13,
+          "registration_entropy": {
+            "effective_contributors": 1.2901524305343628,
+            "mean_contributors": 1.3688639402389526,
+            "mean_entropy_nats": 0.20914509892463684,
+            "normalized_entropy": 0.2924991846084595
+          },
+          "same_view_boundary_leakage": 0.23420125246047974,
+          "same_view_mask_roundtrip_soft_iou": 0.6323580145835876,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "109",
+          "mutually_exclusive_element_purity": 0.9994262374273621,
+          "proposal_count": 15,
+          "registration_entropy": {
+            "effective_contributors": 1.8614503145217896,
+            "mean_contributors": 2.0179450511932373,
+            "mean_entropy_nats": 0.5227171182632446,
+            "normalized_entropy": 0.5872211456298828
+          },
+          "same_view_boundary_leakage": 0.25814199447631836,
+          "same_view_mask_roundtrip_soft_iou": 0.6161923408508301,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "113",
+          "mutually_exclusive_element_purity": 0.9997663925855588,
+          "proposal_count": 17,
+          "registration_entropy": {
+            "effective_contributors": 1.5056321620941162,
+            "mean_contributors": 1.6090463399887085,
+            "mean_entropy_nats": 0.3418826758861542,
+            "normalized_entropy": 0.44305697083473206
+          },
+          "same_view_boundary_leakage": 0.19787849485874176,
+          "same_view_mask_roundtrip_soft_iou": 0.7002434134483337,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "116",
+          "mutually_exclusive_element_purity": 0.9995492659766099,
+          "proposal_count": 18,
+          "registration_entropy": {
+            "effective_contributors": 1.3605384826660156,
+            "mean_contributors": 1.4453015327453613,
+            "mean_entropy_nats": 0.2545006275177002,
+            "normalized_entropy": 0.3490460515022278
+          },
+          "same_view_boundary_leakage": 0.3047361373901367,
+          "same_view_mask_roundtrip_soft_iou": 0.5712222456932068,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "121",
+          "mutually_exclusive_element_purity": 0.9991476745218844,
+          "proposal_count": 17,
+          "registration_entropy": {
+            "effective_contributors": 1.2285056114196777,
+            "mean_contributors": 1.2917251586914062,
+            "mean_entropy_nats": 0.16680730879306793,
+            "normalized_entropy": 0.23717054724693298
+          },
+          "same_view_boundary_leakage": 0.15447945892810822,
+          "same_view_mask_roundtrip_soft_iou": 0.703273355960846,
+          "source_mask_surface_coverage": 0.9411764740943909
+        },
+        {
+          "camera_key": "125",
+          "mutually_exclusive_element_purity": 0.9998158126285202,
+          "proposal_count": 19,
+          "registration_entropy": {
+            "effective_contributors": 1.2493547201156616,
+            "mean_contributors": 1.3134642839431763,
+            "mean_entropy_nats": 0.18098406493663788,
+            "normalized_entropy": 0.25617408752441406
+          },
+          "same_view_boundary_leakage": 0.11997554451227188,
+          "same_view_mask_roundtrip_soft_iou": 0.7870713472366333,
+          "source_mask_surface_coverage": 1.0
+        },
+        {
+          "camera_key": "131",
+          "mutually_exclusive_element_purity": 0.9995278705443654,
+          "proposal_count": 16,
+          "registration_entropy": {
+            "effective_contributors": 1.536956787109375,
+            "mean_contributors": 1.650070071220398,
+            "mean_entropy_nats": 0.3588049113750458,
+            "normalized_entropy": 0.45517775416374207
+          },
+          "same_view_boundary_leakage": 0.23615047335624695,
+          "same_view_mask_roundtrip_soft_iou": 0.6328949332237244,
+          "source_mask_surface_coverage": 1.0
+        }
+      ],
+      "proposal_count": 485,
+      "registration_entropy": {
+        "effective_contributors": 1.401996474713087,
+        "mean_contributors": 1.496525775641203,
+        "mean_entropy_nats": 0.27552131889387965,
+        "normalized_entropy": 0.36305530462414026
+      },
+      "same_view_boundary_leakage": 0.18324257770226787,
+      "same_view_mask_roundtrip_soft_iou": 0.7109887713777651,
+      "source_mask_surface_coverage": 0.9956024183440454
+    }
+  },
+  "scene_label": "lerf_ramen",
+  "schema": "radio_gs.surface_object_memory_v4.lerf_source_mask_geometry_gate.v1",
+  "source_view_count": 32
+}

@@ -1,0 +1,45 @@
+{
+  "benchmark_images_opened": false,
+  "benchmark_labels_opened": false,
+  "benchmark_masks_opened": false,
+  "calibration": {},
+  "carrier": "gaussian_exact_renderer",
+  "coordinate_convention": "colmap_world_to_camera_with_registered_pinhole",
+  "inputs": [
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/cameras.bin",
+      "role": "colmap_cameras",
+      "sha256": "f15177de04831c7052822d0694ede2de78151052de5199df9afaacf141ae7154"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/images.bin",
+      "role": "colmap_images",
+      "sha256": "ecbf431d68982126fcae865cf2d951f4cdf14c70348f760939543b5cb8c7ee9e"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/points3D.bin",
+      "role": "colmap_sparse_points",
+      "sha256": "338ab2a8d30e1ba14a33c78c8f30484adc2b3c6ecd75d77c75eaa1808bebd229"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "role": "gaussian_checkpoint",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_direct_capability/figurines/exact_marginal_responsibility_current.json",
+      "role": "exact_renderer_authority",
+      "sha256": "8876cd8a6da5d737792a34895f05d52940f4cfc646fdb1e31939fcc0fd0b43a9"
+    }
+  ],
+  "metadata": {
+    "benchmark": "LERF",
+    "stage": "retained_gaussian_geometry_baseline",
+    "target_rgb_forbidden": true
+  },
+  "model_checkpoint_sha256": null,
+  "model_family": null,
+  "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+  "source_rgb_opened": true,
+  "target_rgb_opened": false
+}

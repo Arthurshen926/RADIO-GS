@@ -52,6 +52,33 @@ The one per-Gaussian object posterior selected by text, image, or prompt
 identity anchors and consumed unchanged by both 3D evaluation and 2D rendering.
 _Avoid_: 2D proposal, projection repair, separate 2D/3D posterior
 
+**Surface-Aligned Object-Centric Universal Memory v4 Candidate**:
+The geometry-first candidate in which query-independent source observations are
+registered to a visible surface carrier before object organization or feature
+compression.  Local visual-semantic evidence and sparse soft object
+memberships are persistent scene state; text, image, and prompt queries select
+object tokens and produce one element posterior for both 2D and 3D output.
+_Avoid_: SUGM-v3 extension, Gaussian-only memory, benchmark readout
+
+**Surface Carrier**:
+A replaceable geometric domain exposing projection, evidence lifting,
+posterior rendering, and surface-local adjacency without exposing backend
+element identity to downstream object or query code.  Registered backends are
+Gaussian transport, sparse surface voxels/surfels, and mesh oracle.
+_Avoid_: Gaussian ID interface, exact physical registration
+
+**Geometry Receipt**:
+A hash-bound record of geometry, cameras, source evidence, model identity,
+coordinate conventions, legal information access, and derived outputs used by
+a carrier experiment.
+_Avoid_: experiment note, unsealed data path
+
+**Soft Object Codebook**:
+A mapping-time object organization consisting of scene-level object tokens and
+top-1/top-2 sparse element memberships.  It is eligible only after the
+geometry-registration gate passes.
+_Avoid_: D48 expansion, connected component, query-time tracking
+
 ## Querying
 
 **Authorized Query Input**:

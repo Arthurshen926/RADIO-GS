@@ -126,7 +126,7 @@ def main() -> None:
                 else None
             ),
             "score_input": "exactly_one_d512_plus_five_scalars",
-            "fixed_downstream_threshold": 0.6,
+            "fixed_downstream_threshold": 0.5,
             "same_gaussian_posterior_for_2d_and_3d": True,
             "target_rgb_opened": False,
             "benchmark_labels_opened": False,

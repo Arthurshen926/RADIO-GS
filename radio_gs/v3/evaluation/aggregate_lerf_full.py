@@ -53,7 +53,7 @@ def main() -> None:
         "sample_micro": {key: sum(row[key] * row["samples"] for row in rows) / total for key in keys},
         "sample_count": total,
         "same_gaussian_posterior_for_2d_and_3d": True,
-        "strict_3d_rule": "absolute_probability_above_0.6",
+        "strict_3d_rule": "absolute_probability_above_0.5",
         "relaxed_3d_rule": "fixed_top_2_percent",
         "benchmark_used_for_method_selection": False,
         "inputs": inputs,

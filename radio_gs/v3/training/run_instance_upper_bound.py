@@ -11,7 +11,6 @@ import random
 import torch
 from torch.nn import functional as F
 
-from radio_gs.field import load_factorized_canonical_field_checkpoint
 from radio_gs.utils.immutable_artifacts import write_frozen_json, write_torch_noclobber
 from radio_gs.v3.evaluation.source_heldout import evaluate_source_heldout
 from radio_gs.v3.query.membership import membership_from_prototype, pool_prototype
@@ -150,15 +149,41 @@ def load_episodes(
             raise ValueError("source mask and exact contribution raster axes differ")
         globals_for_view = torch.arange(proposal_offset, proposal_offset + count)
         areas = torch.as_tensor(mask_payload["proposal_area_fraction"]).float()
+        # Compute same-view disjoint authority once per proposal.  The prior
+        # implementation recomputed every pair in both known-mask assembly
+        # and episode metadata, making four-scene source loading needlessly
+        # quadratic twice over.
+        different_by_local = [
+            same_view_different_peers(masks, local, globals_for_view)
+            for local in range(count)
+        ]
+        global_to_local = {
+            int(value): local for local, value in enumerate(globals_for_view.tolist())
+        }
+        explicit_by_local: list[list[int]] = [[] for _ in range(count)]
+        for a, b in zip(different_left.tolist(), different_right.tolist()):
+            if a in global_to_local and b in global_to_local:
+                explicit_by_local[global_to_local[a]].append(global_to_local[b])
+                explicit_by_local[global_to_local[b]].append(global_to_local[a])
+        mask_values = masks.float().unsqueeze(1)
+        boundaries = (
+            F.max_pool2d(mask_values, 3, stride=1, padding=1)
+            != -F.max_pool2d(-mask_values, 3, stride=1, padding=1)
+        )[:, 0]
         for local in range(count):
             global_index = proposal_offset + local
-            target, known = build_known_pixel_authority(
-                masks, local, global_index, globals_for_view,
-                different_left, different_right,
-            )
-            different_proposals = same_view_different_peers(
-                masks, local, globals_for_view
-            )
+            target = masks[local]
+            peers = sorted({
+                *(
+                    global_to_local[value]
+                    for value in different_by_local[local]
+                ),
+                *explicit_by_local[local],
+            })
+            known = target.clone()
+            if peers:
+                known |= masks[torch.tensor(peers)].any(0)
+            different_proposals = different_by_local[local]
             episodes.append(MaskEpisode(
                 proposal_index=global_index,
                 view_index=int(record["source_view_index"]),
@@ -167,7 +192,7 @@ def load_episodes(
                 contribution_weights=torch.as_tensor(shard["base_weights"]).float(),
                 target=target,
                 known=known,
-                boundary=mask_boundary(target),
+                boundary=boundaries[local],
                 unknown=~known,
                 scale=float(areas[local]),
                 different_proposals=different_proposals,
@@ -346,6 +371,11 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         model = ExtraCodeArm(int(membership["num_rows"]), seed=args.seed)
         field_record = None
     else:
+        # Keep source-mask episode/evaluation helpers importable in a minimal
+        # environment.  The gsplat-backed field stack is needed only by the
+        # field arms executed in this branch.
+        from radio_gs.field import load_factorized_canonical_field_checkpoint
+
         field_path = Path(args.field).resolve(strict=True)
         field, field_payload, _signature = load_factorized_canonical_field_checkpoint(
             field_path, map_location="cpu", expected_sha256=args.expected_field_sha256

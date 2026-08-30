@@ -1,0 +1,82 @@
+{
+  "cohort_key": "geometry-ladder-v4-development",
+  "evaluated_scene_count": 1,
+  "expected_scene_count": 3,
+  "inputs": {
+    "oracle_report": {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_geometry_ladder_oracle_a_20260830.json",
+      "sha256": "98680aad862bceaef30cfbfd4a7de99b339405cf2d2a84d7766b7c8c6cdd674b"
+    },
+    "source_report": {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_source_mask_geometry_ladder_a_20260830.json",
+      "sha256": "111179443c46912461ebeb736be2ea9608640f36a8c71937d4cdde2db0545353"
+    }
+  },
+  "metric_policy": {
+    "coverage_cannot_compensate_for_purity_regression": true,
+    "magnitude_is_reported_even_when_directional_gate_is_used": true,
+    "source_best_target_proposal_transfer_is_non_gating_without_tracks": true
+  },
+  "milestone_1_complete": false,
+  "minimum_directional_delta": 0.0,
+  "minimum_improved_primary_metrics": 3,
+  "object_codebook_authorized": false,
+  "object_codebook_block_reason": "geometry ladder cohort incomplete; all preregistered scenes must move in the same direction",
+  "scan_oracle_stop_rule_triggered": false,
+  "scene_gate": {
+    "mesh_oracle": {
+      "coverage_delta": {
+        "oracle": 0.0,
+        "source": -0.0018096646157707008
+      },
+      "oracle_primary_directions": {
+        "boundary_leakage_reduction": 0.30920164921553805,
+        "mutually_exclusive_purity": 0.10549808293581009,
+        "same_view_roundtrip": 0.31969199515879154,
+        "tracked_cross_view_transfer": 0.16438554879277945
+      },
+      "oracle_primary_improved_count": 4,
+      "passes_scene_gate": true,
+      "purity_non_regression": true,
+      "registration_ambiguity": {
+        "oracle_effective_contributors_reduction": 21.87739498913288,
+        "source_effective_contributors_reduction": 21.87739498913288
+      },
+      "source_primary_directions": {
+        "boundary_leakage_reduction": 0.2063567101637401,
+        "mutually_exclusive_purity": 0.004295179656907622,
+        "same_view_roundtrip": 0.27182875793972394
+      },
+      "source_primary_improved_count": 3,
+      "untracked_source_cross_view_best_match_delta_not_gating": -0.0033870805290013174
+    },
+    "sparse_surface": {
+      "coverage_delta": {
+        "oracle": -0.05172395333647728,
+        "source": -0.07066693029752591
+      },
+      "oracle_primary_directions": {
+        "boundary_leakage_reduction": 0.12751913163810968,
+        "mutually_exclusive_purity": 0.0690372996032238,
+        "same_view_roundtrip": 0.1586254332214594,
+        "tracked_cross_view_transfer": 0.017325134947896004
+      },
+      "oracle_primary_improved_count": 4,
+      "passes_scene_gate": true,
+      "purity_non_regression": true,
+      "registration_ambiguity": {
+        "oracle_effective_contributors_reduction": 21.978788539767265,
+        "source_effective_contributors_reduction": 21.978788539767265
+      },
+      "source_primary_directions": {
+        "boundary_leakage_reduction": 0.14290875336155293,
+        "mutually_exclusive_purity": 0.003724305847891074,
+        "same_view_roundtrip": 0.1385904020152804
+      },
+      "source_primary_improved_count": 3,
+      "untracked_source_cross_view_best_match_delta_not_gating": -0.005513137325732647
+    }
+  },
+  "schema": "radio_gs.surface_object_memory_v4.geometry_gate.v1",
+  "sparse_surface_scene_gate_passed": true
+}

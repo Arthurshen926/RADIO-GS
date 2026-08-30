@@ -184,6 +184,16 @@ def test_positive_text_anchors_keep_null_as_separate_evidence():
     torch.testing.assert_close(null, torch.tensor([0.0, 1.0, 2 ** -0.5]))
     assert not bool(unknown.any())
 
+    replay_score, replay_rows, replay_weights = interface.replay_identity_from_packet(
+        packet, topk=2
+    )
+    assert torch.equal(replay_score, raw)
+    assert torch.equal(replay_rows, rows)
+    _rows, positive_weights, _score = interface.compile_identity_anchors(
+        packet, topk=2, text_anchor_policy="positive"
+    )
+    assert torch.equal(replay_weights, positive_weights)
+
 
 def test_prompt_packet_uses_only_finite_gaussian_seed_rows():
     model = LowRankPrivateBranchMemory(torch.randn(6, 512))
@@ -197,3 +207,33 @@ def test_prompt_packet_uses_only_finite_gaussian_seed_rows():
 
     assert torch.equal(rows, torch.tensor([2, 5]))
     assert float(weights.sum()) == 1.0
+
+
+def test_disabled_signed_boundary_is_exact_noop():
+    model = LowRankPrivateBranchMemory(torch.zeros(3, 512))
+    head = nn.Linear(16, 1)
+    nn.init.zeros_(head.weight)
+    nn.init.zeros_(head.bias)
+    interface = StructuredGaussianQueryInterface(model, torch.zeros(3, 5), head)
+    base = torch.tensor([0.2, 0.5, 0.8])
+    refined, magnitude = interface.refine_instance_with_boundary(base)
+
+    assert torch.equal(refined, base)
+    assert not bool(magnitude.any())
+
+
+def test_signed_boundary_uses_instance_membership_for_inside_outside_direction():
+    memory = torch.zeros(2, 512)
+    memory[:, 496] = 1.0
+    model = LowRankPrivateBranchMemory(memory)
+    head = nn.Linear(16, 1)
+    nn.init.zeros_(head.weight)
+    nn.init.zeros_(head.bias)
+    head.weight.data[0, 0] = 1.0
+    interface = StructuredGaussianQueryInterface(model, torch.zeros(2, 5), head)
+    base = torch.tensor([0.2, 0.8])
+    refined, magnitude = interface.refine_instance_with_boundary(base)
+
+    assert bool((magnitude > 0).all())
+    assert refined[0] < base[0]
+    assert refined[1] > base[1]

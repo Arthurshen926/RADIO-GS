@@ -1,0 +1,577 @@
+{
+  "class_count_including_unlabeled": 41,
+  "comparison_to_gaussian": {
+    "mesh_derived_sparse_surface": {
+      "boundary_leakage_reduction": 0.12751913163810968,
+      "coverage_delta": -0.05172395333647728,
+      "effective_contributors_reduction": 21.978788539767265,
+      "entropy_nats_reduction": 2.412914711982012,
+      "purity_delta": 0.0690372996032238,
+      "roundtrip_delta": 0.1586254332214594,
+      "transfer_delta": 0.017325134947896004
+    },
+    "mesh_oracle": {
+      "boundary_leakage_reduction": 0.30920164921553805,
+      "coverage_delta": 0.0,
+      "effective_contributors_reduction": 21.87739498913288,
+      "entropy_nats_reduction": 2.24197593703866,
+      "purity_delta": 0.10549808293581009,
+      "roundtrip_delta": 0.31969199515879154,
+      "transfer_delta": 0.16438554879277945
+    }
+  },
+  "downstream_gates": {
+    "compression_started": false,
+    "object_codebook_started": false,
+    "query_encoder_started": false
+  },
+  "geometry_receipts": {
+    "gaussian_exact_renderer": {
+      "benchmark_images_opened": false,
+      "benchmark_labels_opened": true,
+      "benchmark_masks_opened": false,
+      "calibration": {},
+      "carrier": "gaussian_exact_renderer",
+      "coordinate_convention": "nerf_opengl_to_opencv_camera_to_world_pixel_centres",
+      "inputs": [
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+          "role": "camera_transforms",
+          "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_memberships.pt",
+          "role": "source_authority",
+          "sha256": "cbe3330a6d92e20c8a47b336e712e526a9d739c875045326a61064f7824126bf"
+        },
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+          "role": "mesh_geometry",
+          "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+        },
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/scene0000_00_vh_clean_2.labels.ply",
+          "role": "diagnostic_vertex_labels",
+          "sha256": "491607d59b85140081b70d6b4d53a319e74616cbd5b00c66c6b65b7b04de7ba9"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00000.pt",
+          "role": "source_projection_0",
+          "sha256": "8b27a1951146bd03bffe56836905bd0bd4e891e7e0caeaabd7217f086a8dad55"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00008.pt",
+          "role": "source_projection_1",
+          "sha256": "fa471892a25238783856ff67a0f7137e185d1104fa55a3d70fe56c0a8de1c28b"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00016.pt",
+          "role": "source_projection_2",
+          "sha256": "45ea85609459070cb8651c07f2619abdef8cbd6e234bcea58e092079f2338061"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00024.pt",
+          "role": "source_projection_3",
+          "sha256": "006dbb5bb14f4cf41e22a4a5792a8950f5efca4458c5051253ef38b70e49ce42"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00032.pt",
+          "role": "source_projection_4",
+          "sha256": "4677cac0c46f08bc511af42ae7d3d9d483be42a4037e243581cf930c7cdd91a5"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00040.pt",
+          "role": "source_projection_5",
+          "sha256": "3d8340079410938d0bc2db5ea94626f6567dce23445b7de77837884e01508cf9"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00048.pt",
+          "role": "source_projection_6",
+          "sha256": "1670894fa3530eca5d2d7229d7fadb8a92b12553ebd714dfb4f07c994ddb4573"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00056.pt",
+          "role": "source_projection_7",
+          "sha256": "62fcfa56e0612f0b5bdfe87b1b71f1f3af38e5c6792be2cde743865d0b6cf192"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00063.pt",
+          "role": "source_projection_8",
+          "sha256": "494d00b7c1a53b0204ffa1689916a500169918947bbd9372a2ecf0dd7ec18f76"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00071.pt",
+          "role": "source_projection_9",
+          "sha256": "c010200bb12eef46b81844f6fcd2850fa64f148594df8546460d11d5c7f80d5e"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00079.pt",
+          "role": "source_projection_10",
+          "sha256": "4e96e0ceea3bd0edbd2c83cea68dfd77d2ecf3305227aad96ab802a883239b37"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00087.pt",
+          "role": "source_projection_11",
+          "sha256": "fa8dcdada7745414c1c833b04cd633c12bebd7a97b169ba2b42a5002b6184215"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00095.pt",
+          "role": "source_projection_12",
+          "sha256": "1c798647b2ad46a809527acbdebb37555de413bc47dd3a1c04533fdcc8a1c7ee"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00103.pt",
+          "role": "source_projection_13",
+          "sha256": "c621b6b8a459eb768d01a31b07e48892eb0831174565881ec8238edc3936287a"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00111.pt",
+          "role": "source_projection_14",
+          "sha256": "d27c32c53caffdf124999e80741eeea160d5afa596e769d0f193783886636b23"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00119.pt",
+          "role": "source_projection_15",
+          "sha256": "33340fe4e9609c8743cf6fbb44267f68609049efc4b334adc083cc403b755395"
+        }
+      ],
+      "metadata": {
+        "oracle_geometry_diagnostic": true
+      },
+      "model_checkpoint_sha256": null,
+      "model_family": null,
+      "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+      "source_rgb_opened": false,
+      "target_rgb_opened": false
+    },
+    "mesh_derived_sparse_surface": {
+      "benchmark_images_opened": false,
+      "benchmark_labels_opened": true,
+      "benchmark_masks_opened": false,
+      "calibration": {},
+      "carrier": "mesh_derived_sparse_surface",
+      "coordinate_convention": "nerf_opengl_to_opencv_camera_to_world_pixel_centres",
+      "inputs": [
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+          "role": "camera_transforms",
+          "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_memberships.pt",
+          "role": "source_authority",
+          "sha256": "cbe3330a6d92e20c8a47b336e712e526a9d739c875045326a61064f7824126bf"
+        },
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+          "role": "mesh_geometry",
+          "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+        },
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/scene0000_00_vh_clean_2.labels.ply",
+          "role": "diagnostic_vertex_labels",
+          "sha256": "491607d59b85140081b70d6b4d53a319e74616cbd5b00c66c6b65b7b04de7ba9"
+        }
+      ],
+      "metadata": {
+        "maximum_contributors_per_pixel": 8,
+        "maximum_splat_radius": 3,
+        "oracle_geometry_diagnostic": true,
+        "surface_band_voxels": 1.5,
+        "voxel_size": 0.04
+      },
+      "model_checkpoint_sha256": null,
+      "model_family": null,
+      "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+      "source_rgb_opened": false,
+      "target_rgb_opened": false
+    },
+    "mesh_oracle": {
+      "benchmark_images_opened": false,
+      "benchmark_labels_opened": true,
+      "benchmark_masks_opened": false,
+      "calibration": {},
+      "carrier": "mesh_oracle",
+      "coordinate_convention": "nerf_opengl_to_opencv_camera_to_world_pixel_centres",
+      "inputs": [
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+          "role": "camera_transforms",
+          "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+        },
+        {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_memberships.pt",
+          "role": "source_authority",
+          "sha256": "cbe3330a6d92e20c8a47b336e712e526a9d739c875045326a61064f7824126bf"
+        },
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+          "role": "mesh_geometry",
+          "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+        },
+        {
+          "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/scene0000_00_vh_clean_2.labels.ply",
+          "role": "diagnostic_vertex_labels",
+          "sha256": "491607d59b85140081b70d6b4d53a319e74616cbd5b00c66c6b65b7b04de7ba9"
+        }
+      ],
+      "metadata": {
+        "oracle_geometry_diagnostic": true
+      },
+      "model_checkpoint_sha256": null,
+      "model_family": null,
+      "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+      "source_rgb_opened": false,
+      "target_rgb_opened": false
+    }
+  },
+  "implementation_sha256": "c0bd3fece03ed7a54fe7289526696d5d82d2faefa4e6d88a3b0582c28e1d2cbe",
+  "oracle_label_use": "explicit_geometry_diagnostic_only_not_method_state",
+  "raster_shape": [
+    60,
+    81
+  ],
+  "results": {
+    "gaussian_exact_renderer": {
+      "boundary_leakage": 0.3507487466558814,
+      "cross_view_mask_transfer_soft_miou": 0.43728851806372404,
+      "depth_consistency": null,
+      "element_purity": 0.8786416873335838,
+      "normal_consistency": null,
+      "oracle_surface_coverage": 1.0,
+      "per_view": {
+        "boundary_leakage": [
+          0.18223462998867035,
+          0.34837496280670166,
+          0.34683772921562195,
+          0.36514702439308167,
+          0.25199946761131287,
+          0.41731417179107666,
+          0.25078216195106506,
+          0.38889357447624207,
+          0.5508802533149719,
+          0.35807156562805176,
+          0.3323664963245392,
+          0.503526508808136,
+          0.34539005160331726,
+          0.37497478723526,
+          0.3556368947029114,
+          0.2395496666431427
+        ],
+        "cross_view_mask_transfer_soft_miou": [
+          0.6467201113700867,
+          0.519723653793335,
+          0.28119900822639465,
+          0.4312722980976105,
+          0.3863266110420227,
+          0.4029346704483032,
+          0.6143316030502319,
+          0.3988773226737976,
+          0.2897445261478424,
+          0.3910711407661438,
+          0.4607391357421875,
+          0.23311670124530792,
+          0.4622044563293457,
+          0.48092156648635864,
+          0.37831830978393555,
+          0.6191151738166809
+        ],
+        "element_purity": [
+          0.8772280216217041,
+          0.8783939480781555,
+          0.8778308629989624,
+          0.8779705762863159,
+          0.8773495554924011,
+          0.8794700503349304,
+          0.8777480125427246,
+          0.8785538673400879,
+          0.8833388090133667,
+          0.8783833980560303,
+          0.8780974745750427,
+          0.8806198835372925,
+          0.8785151839256287,
+          0.878256618976593,
+          0.8791993260383606,
+          0.8773114085197449
+        ],
+        "oracle_surface_coverage": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "same_view_mask_roundtrip_soft_miou": [
+          0.7544524073600769,
+          0.5587033629417419,
+          0.6198604702949524,
+          0.5474793910980225,
+          0.7528730630874634,
+          0.6172585487365723,
+          0.6502799987792969,
+          0.6899257898330688,
+          0.5050942897796631,
+          0.6311407089233398,
+          0.6280731558799744,
+          0.6216913461685181,
+          0.49789610505104065,
+          0.6594887971878052,
+          0.5962816476821899,
+          0.6475411057472229
+        ]
+      },
+      "registration_entropy": {
+        "effective_contributors": 24.220823049545288,
+        "mean_contributors": 82.48701095581055,
+        "mean_entropy_nats": 3.075554847717285,
+        "normalized_entropy": 0.7115701586008072
+      },
+      "same_view_mask_roundtrip_soft_miou": 0.6236275117844343
+    },
+    "mesh_derived_sparse_surface": {
+      "boundary_leakage": 0.22322961501777172,
+      "cross_view_mask_transfer_soft_miou": 0.45461365301162004,
+      "depth_consistency": {
+        "mean_absolute_depth_residual": 0.07136231800541282,
+        "median_absolute_depth_residual": 0.021285858005285263,
+        "overlap_pixel_count": 4582.9375
+      },
+      "element_purity": 0.9476789869368076,
+      "normal_consistency": {
+        "mean_unsigned_cosine": 0.8985411562025547,
+        "median_angular_error_degrees": 5.116944715380669,
+        "overlap_pixel_count": 4582.9375
+      },
+      "oracle_surface_coverage": 0.9482760466635227,
+      "per_view": {
+        "boundary_leakage": [
+          0.0942402258515358,
+          0.2038809210062027,
+          0.2892581820487976,
+          0.3129926323890686,
+          0.09551727026700974,
+          0.1885877251625061,
+          0.1572052389383316,
+          0.21717509627342224,
+          0.4322298765182495,
+          0.1850217580795288,
+          0.2557247579097748,
+          0.3510655164718628,
+          0.14788325130939484,
+          0.2782287299633026,
+          0.21780699491500854,
+          0.14485566318035126
+        ],
+        "cross_view_mask_transfer_soft_miou": [
+          0.6342525482177734,
+          0.6332244277000427,
+          0.27702581882476807,
+          0.42326661944389343,
+          0.2035304605960846,
+          0.5215702056884766,
+          0.7085529565811157,
+          0.39189431071281433,
+          0.27125465869903564,
+          0.45839226245880127,
+          0.46885472536087036,
+          0.17821954190731049,
+          0.6263465881347656,
+          0.34870338439941406,
+          0.3880678415298462,
+          0.7406620979309082
+        ],
+        "element_purity": [
+          0.9471710920333862,
+          0.9478046894073486,
+          0.946476399898529,
+          0.9480236768722534,
+          0.9468417763710022,
+          0.9477296471595764,
+          0.947431743144989,
+          0.9467938542366028,
+          0.9496958255767822,
+          0.9468485116958618,
+          0.9480493068695068,
+          0.9489572644233704,
+          0.9479784965515137,
+          0.9475318193435669,
+          0.948125422000885,
+          0.9474042654037476
+        ],
+        "oracle_surface_coverage": [
+          0.9382303953170776,
+          0.9513163566589355,
+          0.9174727201461792,
+          0.9909071922302246,
+          0.9336355924606323,
+          0.9539351463317871,
+          0.9916840195655823,
+          0.984054684638977,
+          0.9834915399551392,
+          0.9288806319236755,
+          0.9822826385498047,
+          0.9531185626983643,
+          0.9394627809524536,
+          0.7631687521934509,
+          0.973455011844635,
+          0.9873207211494446
+        ],
+        "same_view_mask_roundtrip_soft_miou": [
+          0.8515796661376953,
+          0.7405054569244385,
+          0.7554128766059875,
+          0.7566930651664734,
+          0.8582149744033813,
+          0.8039535880088806,
+          0.8101713061332703,
+          0.8407360911369324,
+          0.7062757015228271,
+          0.7839187979698181,
+          0.7667694091796875,
+          0.7591240406036377,
+          0.8006755709648132,
+          0.6646553874015808,
+          0.8090347647666931,
+          0.8083264231681824
+        ]
+      },
+      "registration_entropy": {
+        "effective_contributors": 2.2420345097780228,
+        "mean_contributors": 2.400080420076847,
+        "mean_entropy_nats": 0.6626401357352734,
+        "normalized_entropy": 0.6378021333366632
+      },
+      "same_view_mask_roundtrip_soft_miou": 0.7822529450058937
+    },
+    "mesh_oracle": {
+      "boundary_leakage": 0.04154709744034335,
+      "cross_view_mask_transfer_soft_miou": 0.6016740668565035,
+      "depth_consistency": {
+        "mean_absolute_depth_residual": 0.0,
+        "median_absolute_depth_residual": 0.0,
+        "overlap_pixel_count": 4833.375
+      },
+      "element_purity": 0.9841397702693939,
+      "normal_consistency": {
+        "mean_unsigned_cosine": 1.0,
+        "median_angular_error_degrees": 0.0,
+        "overlap_pixel_count": 4833.375
+      },
+      "oracle_surface_coverage": 1.0,
+      "per_view": {
+        "boundary_leakage": [
+          0.02946300245821476,
+          0.07142563164234161,
+          0.12546028196811676,
+          0.023686321452260017,
+          0.008159670047461987,
+          0.02061614766716957,
+          0.048570163547992706,
+          0.058173127472400665,
+          0.04256284236907959,
+          0.036223843693733215,
+          0.03622825816273689,
+          0.03328251093626022,
+          0.018176740035414696,
+          0.05326785892248154,
+          0.01666576974093914,
+          0.04279138892889023
+        ],
+        "cross_view_mask_transfer_soft_miou": [
+          0.7231633067131042,
+          0.8158983588218689,
+          0.3474399149417877,
+          0.5604326725006104,
+          0.2501436471939087,
+          0.7161343693733215,
+          0.845893383026123,
+          0.41721728444099426,
+          0.5629311800003052,
+          0.5745988488197327,
+          0.6958260536193848,
+          0.26682230830192566,
+          0.8330090045928955,
+          0.5875800848007202,
+          0.5382063984870911,
+          0.891488254070282
+        ],
+        "element_purity": [
+          0.9842913746833801,
+          0.9843394756317139,
+          0.9839663505554199,
+          0.984424889087677,
+          0.9847924113273621,
+          0.9841335415840149,
+          0.9840608239173889,
+          0.9840291142463684,
+          0.9834966659545898,
+          0.9841376543045044,
+          0.9841516017913818,
+          0.9839490056037903,
+          0.984210729598999,
+          0.9844155311584473,
+          0.9837811589241028,
+          0.9840559959411621
+        ],
+        "oracle_surface_coverage": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "same_view_mask_roundtrip_soft_miou": [
+          0.9587648510932922,
+          0.885955810546875,
+          0.8695996403694153,
+          0.9601857662200928,
+          0.9593664407730103,
+          0.9711562395095825,
+          0.9294899106025696,
+          0.9688008427619934,
+          0.9768064618110657,
+          0.9682672619819641,
+          0.9491438865661621,
+          0.9509780406951904,
+          0.9719930291175842,
+          0.9202049374580383,
+          0.9132035374641418,
+          0.939195454120636
+        ]
+      },
+      "registration_entropy": {
+        "effective_contributors": 2.343428060412407,
+        "mean_contributors": 3.0,
+        "mean_entropy_nats": 0.8335789106786251,
+        "normalized_entropy": 0.7587562240660191
+      },
+      "same_view_mask_roundtrip_soft_miou": 0.9433195069432259
+    }
+  },
+  "scene_label": "scannet-paper8-oracle-a-surface-band",
+  "schema": "radio_gs.surface_object_memory_v4.geometry_registration_ladder.v1",
+  "source_view_count": 16,
+  "stage": "geometry_registration_only"
+}

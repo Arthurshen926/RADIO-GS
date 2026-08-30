@@ -160,7 +160,7 @@ def main() -> None:
             "positive": [
                 "raw_positive_identity",
                 "raw_positive_anchor_d48_instance",
-                "d16_identity_minus_instance_contrast",
+                "signed_D16_magnitude_identity_minus_instance_contrast",
                 "r5_visual_write_authority",
                 "r5_coverage_confidence",
                 "r5_structural_confidence",

@@ -1,0 +1,29 @@
+{
+  "checked_at": "2026-08-30",
+  "exact_moge3_checkpoint_available": true,
+  "fallback_substitution_allowed": false,
+  "official_code_revision": "74fbce054ebed49800de42d0ad0e83495065719a",
+  "official_repository_status": "MoGe-3 model code is present on the default branch",
+  "pretrained_models": [
+    {
+      "model_id": "Ruicheng/moge-3-vitl",
+      "revision": "a96e58bad16a94c9a3c193a5d4cd75b4b6906c94",
+      "parameter_count": "370M",
+      "provides": ["metric geometry", "normals"]
+    },
+    {
+      "model_id": "Ruicheng/moge-3-vitg",
+      "revision": "9d2e5caca41d40e86843c18802f861c8f2091ddb",
+      "parameter_count": "1.25B",
+      "provides": ["metric geometry", "normals"]
+    }
+  ],
+  "sources": [
+    "https://github.com/microsoft/moge",
+    "https://huggingface.co/Ruicheng/moge-3-vitl",
+    "https://huggingface.co/Ruicheng/moge-3-vitg"
+  ],
+  "status": "released_available",
+  "substitution_note": "MoGe-2 must not be reported or receipted as MoGe-3",
+  "correction_note": "The earlier availability decision relied on stale README and open-issue text. Repository contents and published Hugging Face checkpoints are authoritative for this receipt."
+}

@@ -1,0 +1,139 @@
+{
+  "cohort_key": "geometry-ladder-v4-development",
+  "compression_authorized": false,
+  "evaluated_scene_count": 3,
+  "expected_scene_count": 3,
+  "inputs": {
+    "lerf_reports": [
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/v4_lerf_figurines_source_mask_geometry_gate_r1_20260830.json",
+        "sha256": "b85d414ea54dd49c378b0f4359ae8fec994f878662abc96aba006ca00e9fa4d1"
+      },
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/v4_lerf_ramen_source_mask_geometry_gate_r1_20260830.json",
+        "sha256": "86974e34d52121e7e6686361e8ca1583b4a9378579ba2e16c9810d11b3e1c6af"
+      }
+    ],
+    "oracle_report": {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_geometry_ladder_oracle_r1_20260830.json",
+      "sha256": "a7e80df177769d8c64374a170dcdd1b1cbe1c61e6d83599f0d272a6245e8cc44"
+    },
+    "source_report": {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_scannet_source_mask_geometry_ladder_r1_20260830.json",
+      "sha256": "85a2e64d791af6bb101902c88dfa6c0405bd9ca0281972891daeda3d3c1f2a0a"
+    }
+  },
+  "lerf_scene_gates": {
+    "lerf_figurines": {
+      "comparison_to_gaussian": {
+        "coverage_delta": -0.02166278507168007,
+        "effective_contributors_reduction": 24.731299322098494,
+        "mutually_exclusive_purity_delta": 0.00947667645458905,
+        "roundtrip_delta": 0.24930242581620926,
+        "same_view_leakage_reduction": 0.26139044821011437
+      },
+      "coverage_is_reported_not_compensatory": true,
+      "passes_scene_gate": true,
+      "primary_directions": {
+        "leakage": true,
+        "purity": true,
+        "roundtrip": true
+      },
+      "projection_configuration": {
+        "maximum_contributors_per_pixel": 8,
+        "maximum_splat_radius": 1,
+        "surface_band_voxels": 1.5
+      }
+    },
+    "lerf_ramen": {
+      "comparison_to_gaussian": {
+        "coverage_delta": -0.0023357259858515222,
+        "effective_contributors_reduction": 64.78309215977788,
+        "mutually_exclusive_purity_delta": 4.119137936053896e-05,
+        "roundtrip_delta": 0.09507146413178791,
+        "same_view_leakage_reduction": 0.06878720496963597
+      },
+      "coverage_is_reported_not_compensatory": true,
+      "passes_scene_gate": true,
+      "primary_directions": {
+        "leakage": true,
+        "purity": true,
+        "roundtrip": true
+      },
+      "projection_configuration": {
+        "maximum_contributors_per_pixel": 8,
+        "maximum_splat_radius": 1,
+        "surface_band_voxels": 1.5
+      }
+    }
+  },
+  "metric_policy": {
+    "coverage_cannot_compensate_for_purity_regression": true,
+    "magnitude_is_reported_even_when_directional_gate_is_used": true,
+    "source_best_target_proposal_transfer_is_non_gating_without_tracks": true
+  },
+  "milestone_1_complete": true,
+  "minimum_directional_delta": 0.0,
+  "minimum_improved_primary_metrics": 3,
+  "object_codebook_authorized": true,
+  "object_codebook_authorized_scope": "oracle_only",
+  "object_codebook_block_reason": null,
+  "query_encoder_authorized": false,
+  "scan_oracle_stop_rule_triggered": false,
+  "scene_gate": {
+    "mesh_oracle": {
+      "coverage_delta": {
+        "oracle": 0.0,
+        "source": -0.0018096646157707008
+      },
+      "oracle_primary_directions": {
+        "boundary_leakage_reduction": 0.30920164921553805,
+        "mutually_exclusive_purity": 0.10549811273813248,
+        "same_view_roundtrip": 0.31969199515879154,
+        "tracked_cross_view_transfer": 0.16438554879277945
+      },
+      "oracle_primary_improved_count": 4,
+      "passes_scene_gate": true,
+      "purity_non_regression": true,
+      "registration_ambiguity": {
+        "oracle_effective_contributors_reduction": 21.87739498913288,
+        "source_effective_contributors_reduction": 21.87739498913288
+      },
+      "source_primary_directions": {
+        "boundary_leakage_reduction": 0.2063567101637401,
+        "mutually_exclusive_purity": 0.004295179656907622,
+        "same_view_roundtrip": 0.27182875793972394
+      },
+      "source_primary_improved_count": 3,
+      "untracked_source_cross_view_best_match_delta_not_gating": -0.0033870805290013174
+    },
+    "sparse_surface": {
+      "coverage_delta": {
+        "oracle": -0.08023879118263721,
+        "source": -0.09804131435911834
+      },
+      "oracle_primary_directions": {
+        "boundary_leakage_reduction": 0.12421870324760675,
+        "mutually_exclusive_purity": 0.06922794878482819,
+        "same_view_roundtrip": 0.15019405260682106,
+        "tracked_cross_view_transfer": 0.004030247218906879
+      },
+      "oracle_primary_improved_count": 4,
+      "passes_scene_gate": true,
+      "purity_non_regression": true,
+      "registration_ambiguity": {
+        "oracle_effective_contributors_reduction": 22.033356174826622,
+        "source_effective_contributors_reduction": 22.033356174826622
+      },
+      "source_primary_directions": {
+        "boundary_leakage_reduction": 0.15231906601068812,
+        "mutually_exclusive_purity": 0.004038949028339234,
+        "same_view_roundtrip": 0.13154460837292237
+      },
+      "source_primary_improved_count": 3,
+      "untracked_source_cross_view_best_match_delta_not_gating": -0.005690573997011568
+    }
+  },
+  "schema": "radio_gs.surface_object_memory_v4.geometry_gate.v1",
+  "sparse_surface_scene_gate_passed": true
+}

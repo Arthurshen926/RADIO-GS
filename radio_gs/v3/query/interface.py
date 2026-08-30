@@ -37,6 +37,7 @@ class StructuredGaussianQueryInterface(nn.Module):
         text_negative_tokens: torch.Tensor | None = None,
         text_logit_scale: float = 10.0,
         center_semantic_identity: bool = False,
+        maximum_boundary_logit_residual: float = 1.0,
     ) -> None:
         super().__init__()
         value = torch.as_tensor(reliability).float()
@@ -50,6 +51,11 @@ class StructuredGaussianQueryInterface(nn.Module):
             raise ValueError("text logit scale differs")
         self.text_logit_scale = float(text_logit_scale)
         self.center_semantic_identity = bool(center_semantic_identity)
+        if maximum_boundary_logit_residual <= 0:
+            raise ValueError("maximum boundary logit residual differs")
+        self.maximum_boundary_logit_residual = float(
+            maximum_boundary_logit_residual
+        )
         self.register_buffer("reliability", value, persistent=False)
         if (siglip_mean is None) != (siglip_basis is None):
             raise ValueError("semantic identity codec is incomplete")
@@ -174,6 +180,23 @@ class StructuredGaussianQueryInterface(nn.Module):
         return rows, weights, score
 
     @torch.no_grad()
+    def replay_identity_from_packet(
+        self, packet: QueryPacket, *, topk: int = 8
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Gate-0 path: replay clean identity with every child residual disabled.
+
+        This deliberately performs no null conversion, instance expansion,
+        boundary update, reliability tempering, or calibration.  The returned
+        score is the exact clean semantic identity tensor; the other outputs
+        are its positive-score anchors and weights.
+        """
+
+        rows, weights, score = self.compile_identity_anchors(
+            packet, topk=topk, text_anchor_policy="positive"
+        )
+        return score, rows, weights
+
+    @torch.no_grad()
     def posterior_from_packet(
         self,
         packet: QueryPacket,
@@ -223,7 +246,7 @@ class StructuredGaussianQueryInterface(nn.Module):
         """Fuse disentangled text evidence into one reusable Gaussian posterior."""
 
         identity, null, unknown = self.semantic_text_evidence(packet)
-        instance, returned_identity = self.posterior_from_packet(
+        base_instance, returned_identity = self.posterior_from_packet(
             packet,
             scale=scale,
             topk=topk,
@@ -233,13 +256,17 @@ class StructuredGaussianQueryInterface(nn.Module):
         )
         if not torch.equal(identity, returned_identity):
             raise RuntimeError("positive identity evidence changed during expansion")
+        instance, boundary = self.refine_instance_with_boundary(
+            base_instance,
+            maximum_logit_residual=self.maximum_boundary_logit_residual,
+        )
         posterior = calibrator(
             identity=identity,
             instance=instance,
             null=null,
             negative=torch.sigmoid((null - identity) * self.text_logit_scale),
             unknown=unknown,
-            boundary=self.boundary_probability(),
+            boundary=boundary,
             reliability=self.reliability,
         )
         return posterior, identity, instance
@@ -285,6 +312,55 @@ class StructuredGaussianQueryInterface(nn.Module):
     @torch.no_grad()
     def boundary_probability(self) -> torch.Tensor:
         return self.boundary_head(self.model.boundary_view()).squeeze(-1).sigmoid()
+
+    @torch.no_grad()
+    def signed_boundary_residual(
+        self,
+        instance_posterior: torch.Tensor,
+        *,
+        maximum_logit_residual: float = 1.0,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return a query-signed, zero-at-disabled D16 boundary refinement.
+
+        D16 owns only boundary magnitude.  The already-authorized D48
+        membership logit supplies the inside/outside sign, so the boundary
+        block cannot independently change query identity.
+        """
+
+        probability = torch.as_tensor(
+            instance_posterior, device=self.model.memory.device
+        ).float().reshape(-1)
+        if (
+            probability.shape != (self.model.memory.shape[0],)
+            or not 0 < maximum_logit_residual
+            or not bool(torch.isfinite(probability).all())
+        ):
+            raise ValueError("signed boundary posterior or residual budget differs")
+        raw = self.boundary_head(self.model.boundary_view()).squeeze(-1)
+        magnitude = raw.tanh().square()
+        base_logit = torch.logit(probability.clamp(1e-5, 1 - 1e-5))
+        sign = base_logit.tanh()
+        residual = float(maximum_logit_residual) * magnitude * sign
+        return residual, magnitude
+
+    @torch.no_grad()
+    def refine_instance_with_boundary(
+        self,
+        instance_posterior: torch.Tensor,
+        *,
+        maximum_logit_residual: float = 1.0,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        probability = torch.as_tensor(
+            instance_posterior, device=self.model.memory.device
+        ).float().reshape(-1)
+        residual, magnitude = self.signed_boundary_residual(
+            probability, maximum_logit_residual=maximum_logit_residual
+        )
+        refined = torch.sigmoid(
+            torch.logit(probability.clamp(1e-5, 1 - 1e-5)) + residual
+        )
+        refined = torch.where(magnitude == 0, probability, refined)
+        return refined, magnitude
 
     @staticmethod
     def render_posterior(
@@ -419,6 +495,11 @@ def load_query_interface(
         text_negative_tokens=text_negative_tokens,
         text_logit_scale=text_logit_scale,
         center_semantic_identity=center_semantic_identity,
+        maximum_boundary_logit_residual=float(
+            metadata.get("signed_boundary_gate3", {}).get(
+                "maximum_logit_residual", 1.0
+            )
+        ),
     )
     return interface.to(device).eval()
 

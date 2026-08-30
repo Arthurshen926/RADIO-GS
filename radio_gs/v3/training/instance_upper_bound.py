@@ -248,8 +248,27 @@ def validate_source_only_inputs(
     forbidden = ("benchmark_images_opened", "benchmark_masks_opened", "evaluation_rgb_opened")
     if any(metadata.get(name) is not False for name in forbidden):
         raise ValueError("membership input is not source-only")
-    if relation_metadata.get("source_only") is not True or any(
-        relation_metadata.get(name) is not False for name in ("benchmark_masks_opened", "evaluation_rgb_opened")
+    native_language_v3 = (
+        relation.get("schema") == "radio_gs.sugm_v3.native_language_authority.v3"
+    )
+    relation_forbidden = (
+        ("benchmark_images_opened", "benchmark_masks_opened", "benchmark_metrics_opened")
+        if native_language_v3
+        else ("benchmark_masks_opened", "evaluation_rgb_opened")
+    )
+    if (
+        relation_metadata.get("source_only") is not True
+        or any(relation_metadata.get(name) is not False for name in relation_forbidden)
+        or (
+            native_language_v3
+            and (
+                relation_metadata.get("historical_field_opened") is not False
+                or relation_metadata.get(
+                    "dev_and_audit_text_scores_used_for_label_selection"
+                )
+                is not False
+            )
+        )
     ):
         raise ValueError("relation input is not source-only")
     if torch.as_tensor(relation["edge_relation"]).to(torch.int8).min() != -1:

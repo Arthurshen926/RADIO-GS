@@ -4,6 +4,9 @@ from radio_gs.v3.query.calibrated_posterior import NullCalibratedPosterior
 from radio_gs.v3.query.interface import StructuredGaussianQueryInterface
 from radio_gs.v3.training.materialize_clean_posterior_evidence import _pool_membership
 from radio_gs.v3.training.fit_null_calibrated_posterior import _pool_hit_probability
+from radio_gs.v3.training.materialize_clean_parent_scene_state import (
+    _reset_child_global_state,
+)
 
 
 def _reliability(unknown=(0.0, 0.0, 0.0, 0.0)):
@@ -119,3 +122,10 @@ def test_hit_probability_is_pooled_after_sigmoid_like_deployment():
     )
 
     torch.testing.assert_close(result, torch.tensor([0.7, 0.4]))
+
+
+def test_clean_parent_resets_every_child_global_path_to_exact_zero():
+    state = _reset_child_global_state(torch.randn(5, 512), 17)
+
+    assert state
+    assert all(not bool(value.any()) for value in state.values())

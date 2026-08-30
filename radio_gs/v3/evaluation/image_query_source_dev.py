@@ -9,6 +9,7 @@ import torch
 
 from radio_gs.utils.immutable_artifacts import write_frozen_json
 from radio_gs.v3.evaluation.source_heldout import evaluate_source_heldout
+from radio_gs.v3.query.calibrated_posterior import load_null_calibrated_posterior
 from radio_gs.v3.query.interface import load_query_interface
 from radio_gs.v3.query.packet import QueryPacket
 from radio_gs.v3.training.instance_upper_bound import sha256_file, validate_source_only_inputs
@@ -27,11 +28,14 @@ def main() -> None:
     parser.add_argument("--siglip-teacher", required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--topk", type=int, default=8)
+    parser.add_argument("--scale", type=float, default=0.5)
     parser.add_argument("--temperature", type=float, default=0.15)
     parser.add_argument("--membership-margin", type=float, default=0.0)
     parser.add_argument("--center-semantic-identity", action="store_true")
     parser.add_argument("--identity-extent-weight", type=float, default=0.0)
     parser.add_argument("--identity-adapter")
+    parser.add_argument("--text-negatives")
+    parser.add_argument("--posterior-calibrator")
     parser.add_argument("--evaluation-residue", type=int, default=3)
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
@@ -48,8 +52,15 @@ def main() -> None:
         raise ValueError("image-query descriptor proposal axis differs")
     interface = load_query_interface(
         state_path, device=args.device, identity_adapter_path=args.identity_adapter,
+        text_negative_path=args.text_negatives,
         center_semantic_identity=args.center_semantic_identity,
     )
+    calibrator = (
+        load_null_calibrated_posterior(args.posterior_calibrator, device=args.device)
+        if args.posterior_calibrator else None
+    )
+    if calibrator is not None and (args.membership_margin or args.identity_extent_weight):
+        raise ValueError("trained calibrator forbids historical extent tuning")
     episodes, supports = load_episodes(membership, relation)
     valid = [item for item in episodes if supports[item.proposal_index][0].numel()]
     training = [item for item in valid if item.view_index % 4 in (1, 2)]
@@ -59,8 +70,8 @@ def main() -> None:
         item for item in valid if item.view_index % 4 == args.evaluation_residue
     ]
     train_proposals = {item.proposal_index for item in training}
-    boundary = interface.boundary_probability()
     metrics = []
+    uncalibrated_metrics = []
     peak_hits = []
     anchor_precisions = []
     evaluated = 0
@@ -72,11 +83,36 @@ def main() -> None:
             continue
         packet = QueryPacket("image", token=descriptors[episode.proposal_index])
         rows, _weights, identity = interface.compile_identity_anchors(packet, topk=args.topk)
-        posterior, _ = interface.posterior_from_packet(
-            packet, scale=episode.scale, topk=args.topk, temperature=args.temperature,
+        base, returned_identity = interface.posterior_from_packet(
+            packet, scale=args.scale, topk=args.topk, temperature=args.temperature,
             membership_margin=args.membership_margin,
             identity_extent_weight=args.identity_extent_weight,
+            posterior_chunk_size=65536,
+            text_anchor_policy="positive",
         )
+        uncalibrated, boundary = interface.refine_instance_with_boundary(
+            base,
+            maximum_logit_residual=interface.maximum_boundary_logit_residual,
+        )
+        if calibrator is not None:
+            posterior, calibrated_identity, calibrated_instance = (
+                interface.calibrated_posterior_from_packet(
+                    packet,
+                    calibrator,
+                    scale=args.scale,
+                    topk=args.topk,
+                    temperature=args.temperature,
+                    posterior_chunk_size=65536,
+                )
+            )
+            if not (
+                torch.equal(identity, returned_identity)
+                and torch.equal(identity, calibrated_identity)
+                and torch.equal(uncalibrated, calibrated_instance)
+            ):
+                raise RuntimeError("image-query calibrator changed its frozen parents")
+        else:
+            posterior = uncalibrated
         prediction = interface.render_posterior(
             posterior,
             episode.gaussian_ids.to(posterior.device),
@@ -91,6 +127,17 @@ def main() -> None:
             episode.contribution_weights.to(boundary.device),
             num_pixels=episode.target.numel(),
         )
+        baseline_prediction = interface.render_posterior(
+            uncalibrated,
+            episode.gaussian_ids.to(uncalibrated.device),
+            episode.pixel_ids.to(uncalibrated.device),
+            episode.contribution_weights.to(uncalibrated.device),
+            num_pixels=episode.target.numel(),
+        )
+        uncalibrated_metrics.append(evaluate_source_heldout(
+            baseline_prediction.cpu(), episode.target.flatten(), episode.known.flatten(),
+            episode.unknown.flatten(), edge.cpu(), episode.boundary.flatten(),
+        ))
         metrics.append(evaluate_source_heldout(
             prediction.cpu(), episode.target.flatten(), episode.known.flatten(),
             episode.unknown.flatten(), edge.cpu(), episode.boundary.flatten(),
@@ -105,16 +152,23 @@ def main() -> None:
         name: sum(getattr(item, name) for item in metrics) / len(metrics)
         for name in ("mask_iou", "brier", "boundary_f", "unknown_fp_mass")
     }
+    baseline_summary = {
+        name: sum(getattr(item, name) for item in uncalibrated_metrics) / len(uncalibrated_metrics)
+        for name in ("mask_iou", "brier", "boundary_f", "unknown_fp_mass")
+    }
     payload = {
-        "schema": "radio_gs.sugm_v3.image_query_source_dev.v1",
+        "schema": "radio_gs.sugm_v3.image_query_source_dev.v2",
         "scene": membership["scene"],
         "evaluation_proposals": evaluated,
         "topk": args.topk,
         "evaluation_residue": args.evaluation_residue,
+        "scale": args.scale,
         "membership_margin": args.membership_margin,
         "center_semantic_identity": args.center_semantic_identity,
         "identity_extent_weight": args.identity_extent_weight,
         "metrics": summary,
+        "uncalibrated_metrics": baseline_summary,
+        "identity_bitwise_preserved": True,
         "identity_peak_training_support_hit_rate": sum(peak_hits) / len(peak_hits),
         "identity_anchor_training_support_precision": sum(anchor_precisions) / len(anchor_precisions),
         "same_gaussian_posterior_for_2d_and_3d": True,
@@ -138,6 +192,16 @@ def main() -> None:
             else "source_audit_identity_adapter_evaluation"
         ),
     }
+    if args.text_negatives:
+        negative_path = Path(args.text_negatives).resolve(strict=True)
+        payload["inputs"]["text_negatives"] = {
+            "path": str(negative_path), "sha256": sha256_file(negative_path)
+        }
+    if args.posterior_calibrator:
+        calibrator_path = Path(args.posterior_calibrator).resolve(strict=True)
+        payload["inputs"]["posterior_calibrator"] = {
+            "path": str(calibrator_path), "sha256": sha256_file(calibrator_path)
+        }
     write_frozen_json(Path(args.output).resolve(), payload)
     print(payload)
 

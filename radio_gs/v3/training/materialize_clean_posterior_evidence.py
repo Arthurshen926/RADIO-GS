@@ -63,6 +63,10 @@ def main() -> None:
     membership = torch.load(paths["membership"], map_location="cpu")
     authority = torch.load(paths["authority"], map_location="cpu")
     text_payload = torch.load(paths["text_embeddings"], map_location="cpu")
+    scene_state = torch.load(paths["scene_state"], map_location="cpu")
+    signed_gate = scene_state.get("metadata", {}).get("signed_boundary_gate3", {})
+    if signed_gate.get("status") != "passed":
+        raise ValueError("posterior evidence requires a passed signed D16 parent")
     if authority.get("schema") != "radio_gs.sugm_v3.native_language_authority.v3":
         raise ValueError("posterior evidence requires native language authority v3")
     if membership["scene"] != authority["scene"]:
@@ -83,7 +87,6 @@ def main() -> None:
     }
     if any(str(name).casefold() not in lookup for name in authority["query_names"]):
         raise ValueError("posterior evidence text cache misses authority query")
-    boundary = interface.boundary_probability()
     reliability = interface.reliability
     calibrator = NullCalibratedPosterior().to(args.device).eval()
     if args.max_train_hits_per_pair <= 0:
@@ -108,7 +111,7 @@ def main() -> None:
         ].float()
         packet = QueryPacket("text", token)
         identity, null, unknown = interface.semantic_text_evidence(packet)
-        instance, returned_identity = interface.posterior_from_packet(
+        base_instance, returned_identity = interface.posterior_from_packet(
             packet,
             scale=args.scale,
             topk=args.topk,
@@ -118,6 +121,10 @@ def main() -> None:
         )
         if not torch.equal(identity, returned_identity):
             raise RuntimeError("positive identity evidence changed during expansion")
+        instance, boundary = interface.refine_instance_with_boundary(
+            base_instance,
+            maximum_logit_residual=interface.maximum_boundary_logit_residual,
+        )
         positive, negative = calibrator.evidence_features(
             identity=identity,
             instance=instance,
@@ -195,7 +202,7 @@ def main() -> None:
             "positive": [
                 "raw_positive_identity",
                 "raw_positive_anchor_d48_instance",
-                "d16_identity_minus_instance_contrast",
+                "signed_D16_magnitude_identity_minus_instance_contrast",
                 "r5_visual_write_authority",
                 "r5_coverage_confidence",
                 "r5_structural_confidence",

@@ -1,0 +1,165 @@
+{
+  "gate_thresholds": {
+    "minimum_iou": 0.5,
+    "minimum_purity": 0.9,
+    "minimum_token_count": 5,
+    "minimum_token_mass": 1.0
+  },
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": true,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "sparse_surface_oracle_object_codebook",
+    "coordinate_convention": "scannet_mesh_nerf_opengl_to_opencv_feature_raster",
+    "inputs": [
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/v4_geometry_gate_complete_r1_20260830.json",
+        "role": "geometry_gate",
+        "sha256": "a5b3f66a664dddda26896eaf9320d1307a019d082585d245bf4652809dbf2aec"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_memberships.pt",
+        "role": "source_authority",
+        "sha256": "cbe3330a6d92e20c8a47b336e712e526a9d739c875045326a61064f7824126bf"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+        "role": "camera_transforms",
+        "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+        "role": "mesh_geometry",
+        "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00_vh_clean_2.0.010000.segs.json",
+        "role": "instance_segmentation",
+        "sha256": "f53f0ec1c1999d789f6a9275e0c673a55bf7aa8e7e19bc5ea35cdb4935f8cf55"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/instance_annotations/scene0000_00.aggregation.json",
+        "role": "instance_aggregation",
+        "sha256": "0c622a6160b7b36c97a303192c6ff83c181d22b5233601399988b4a3d332c243"
+      }
+    ],
+    "metadata": {
+      "heldout_stride": 4,
+      "heldout_view_indices": [
+        3,
+        7,
+        11,
+        15
+      ],
+      "mapping_view_indices": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        13,
+        14
+      ],
+      "maximum_splat_radius": 1,
+      "oracle_object_id_diagnostic_only": true,
+      "top_k": 2,
+      "voxel_size": 0.04
+    },
+    "model_checkpoint_sha256": null,
+    "model_family": null,
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": false,
+    "target_rgb_opened": false
+  },
+  "heldout_view_count": 4,
+  "implementation_sha256": "1a009b3ab6bba12739fbec731627fbceaf54c036816ede650191b15e941e3bd7",
+  "instance_ids_persisted_as_deployment_semantics": false,
+  "learned_soft_codebook_authorized": false,
+  "learned_soft_codebook_block_reason": "source-lifted memberships do not yet meet the held-out 2-D/3-D oracle thresholds",
+  "mapping_view_count": 12,
+  "method_receipt": {
+    "carrier": "sparse_surface_voxel",
+    "codebook_enabled": true,
+    "compression_enabled": false,
+    "geometry_receipt_sha256": "a5b3f66a664dddda26896eaf9320d1307a019d082585d245bf4652809dbf2aec",
+    "historical_field_opened": false,
+    "query_enabled": false,
+    "retained_baselines": {
+      "lerf2d_strict_miou": 0.3958417415,
+      "lerf2d_target_rgb_assisted_upper_bound": 0.576690691074806,
+      "lerf3d_miou": 0.437303824780079,
+      "nvos_target_rgb_assisted_iou": 0.92555,
+      "scannet_miou_10": 0.4671647388007581,
+      "scannet_miou_15": 0.36188714064042804,
+      "scannet_miou_19": 0.3640050732383869
+    },
+    "schema": "radio_gs.surface_object_memory_v4.method_receipt.v1",
+    "stage": "object_codebook_oracle",
+    "target_rgb_opened": false
+  },
+  "oracle_metrics": {
+    "element_assignment_purity": 1.0,
+    "eligible_token_count": 67,
+    "heldout_2d_soft_miou": 0.6729564993793882,
+    "heldout_3d_soft_miou": 1.0,
+    "known_element_fraction": 0.9514938592910767,
+    "mean_unknown_weight": 0.04850614070892334,
+    "total_oracle_token_count": 67
+  },
+  "passes_oracle_object_gate": true,
+  "per_heldout_view": [
+    {
+      "camera_key": "1120",
+      "eligible_visible_token_count": 11,
+      "soft_iou": 0.4191946664994413
+    },
+    {
+      "camera_key": "2620",
+      "eligible_visible_token_count": 8,
+      "soft_iou": 0.3824805309996009
+    },
+    {
+      "camera_key": "4060",
+      "eligible_visible_token_count": 6,
+      "soft_iou": 0.21310945227742195
+    },
+    {
+      "camera_key": "5560",
+      "eligible_visible_token_count": 11,
+      "soft_iou": 0.714807849038731
+    }
+  ],
+  "primary_directions": {
+    "heldout_2d": true,
+    "heldout_3d": true,
+    "nondegenerate_tokens": true,
+    "purity": true
+  },
+  "same_element_posterior_used_for_2d_and_3d": true,
+  "schema": "radio_gs.surface_object_memory_v4.object_codebook_oracle_gate.v1",
+  "source_lifted_diagnostic_metrics": {
+    "element_assignment_purity": 0.9487804174423218,
+    "eligible_token_count": 55,
+    "heldout_2d_soft_miou": 0.4670146842383676,
+    "heldout_2d_token_observation_count": 36,
+    "heldout_3d_soft_miou": 0.4601615930774382,
+    "heldout_3d_token_observation_count": 28,
+    "heldout_visible_top1_accuracy": 0.8685458898544312,
+    "known_element_fraction": 0.4102836847305298,
+    "mean_unknown_weight": 0.5975601077079773,
+    "total_oracle_token_count": 67
+  },
+  "stage": "object_codebook_oracle",
+  "storage": {
+    "assignment_slots_per_element": 2,
+    "dense_membership_values_avoided": 4218435,
+    "element_count": 64899,
+    "token_count": 67
+  }
+}

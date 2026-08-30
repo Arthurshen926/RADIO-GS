@@ -1,0 +1,292 @@
+{
+  "comparison_to_gaussian": {
+    "mesh_derived_sparse_surface": {
+      "coverage_delta": -0.07066693029752591,
+      "cross_view_leakage_reduction": 0.15132707272338253,
+      "effective_contributors_reduction": 21.978788539767265,
+      "mutually_exclusive_purity_delta": 0.003724305847891074,
+      "roundtrip_delta": 0.1385904020152804,
+      "same_view_leakage_reduction": 0.14290875336155293,
+      "transfer_delta": -0.005513137325732647
+    },
+    "mesh_surface": {
+      "coverage_delta": -0.0018096646157707008,
+      "cross_view_leakage_reduction": 0.1537405243684818,
+      "effective_contributors_reduction": 21.87739498913288,
+      "mutually_exclusive_purity_delta": 0.004295179656907622,
+      "roundtrip_delta": 0.27182875793972394,
+      "same_view_leakage_reduction": 0.2063567101637401,
+      "transfer_delta": -0.0033870805290013174
+    }
+  },
+  "downstream_gates": {
+    "compression_started": false,
+    "object_codebook_started": false,
+    "query_encoder_started": false
+  },
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "multi_carrier_source_mask_ladder",
+    "coordinate_convention": "nerf_opengl_to_opencv_camera_to_world_feature_raster",
+    "inputs": [
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+        "role": "camera_transforms",
+        "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_memberships.pt",
+        "role": "source_authority",
+        "sha256": "cbe3330a6d92e20c8a47b336e712e526a9d739c875045326a61064f7824126bf"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+        "role": "mesh_geometry",
+        "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_00000.pt",
+        "role": "source_mask_0",
+        "sha256": "ffbcc846fd270c8dbd4f85075572e926013eb39108b381412f787277cffc2c31"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_00360.pt",
+        "role": "source_mask_1",
+        "sha256": "f1534713b48b7c5b80fa07d0191176353246e405831c387bda2ebf1fabcf63f9"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_00740.pt",
+        "role": "source_mask_2",
+        "sha256": "5de4abe5cce36101ec35bc9fcde03ccb43e14a254a3ffe94d4b686e8f179cb9a"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_01120.pt",
+        "role": "source_mask_3",
+        "sha256": "71dba0a7c3bd41ad8b3e80d60405cd9c7da89fab12528c3e6664b90a66585730"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_01500.pt",
+        "role": "source_mask_4",
+        "sha256": "f6816e1926bfccf69a7d55fff9126a107a8fd2841597412ec16ccb3250b0151b"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_01860.pt",
+        "role": "source_mask_5",
+        "sha256": "b59ea42a432a7b79ec0517dd183fd5abc89ba54287c76789b0ce2ee0cb7778f1"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_02260.pt",
+        "role": "source_mask_6",
+        "sha256": "e8db61630ddba45779cc31b368c2873b947d9076de74649e0e4eb7012a9f728f"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_02620.pt",
+        "role": "source_mask_7",
+        "sha256": "23a4bf2c94ab5947b23a0b062689cb89b70fc392949f48d7d1a0a09e4f82ce68"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_02940.pt",
+        "role": "source_mask_8",
+        "sha256": "f5cf8abe862e425554001914b4fdde1136784dd3c1c2e74cc76fd386d5037dd4"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_03300.pt",
+        "role": "source_mask_9",
+        "sha256": "a0b57755f3bf3350628ecabbb44fac02670eb08a636f7a9c709cb5c147701743"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_03700.pt",
+        "role": "source_mask_10",
+        "sha256": "2e58ff50adf61e11a28a9a5b0c8160c5bf7aa8f25edaac3d3bbc2cf8b44c4d85"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_04060.pt",
+        "role": "source_mask_11",
+        "sha256": "aa26488c4a8fa90014384783ddf1fbcc916606c181adbbc82c0972c92b3c85be"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_04440.pt",
+        "role": "source_mask_12",
+        "sha256": "9ebacc98a7938384acc84237fab59505b3b93ccb7cad4da3f881e7d836553727"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_04820.pt",
+        "role": "source_mask_13",
+        "sha256": "bd5d08436a3a7863490751f046f76274e01bbdedeb50d9eabd2356d7af0f0472"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_05200.pt",
+        "role": "source_mask_14",
+        "sha256": "e79fff8f3d0c17795a387df0189bc6ac44325684c8fd9511335cb0e07d17bb94"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260824/native_multiteacher_v1/scene0000_00/native_sam_siglip/native_sam3_multiscale_uniform16/frame_05560.pt",
+        "role": "source_mask_15",
+        "sha256": "b1f85995a1a26862e1895a4ccba853b42a1317f99944d57da96e8b58dcb6bad3"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00000.pt",
+        "role": "source_projection_0",
+        "sha256": "8b27a1951146bd03bffe56836905bd0bd4e891e7e0caeaabd7217f086a8dad55"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00008.pt",
+        "role": "source_projection_1",
+        "sha256": "fa471892a25238783856ff67a0f7137e185d1104fa55a3d70fe56c0a8de1c28b"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00016.pt",
+        "role": "source_projection_2",
+        "sha256": "45ea85609459070cb8651c07f2619abdef8cbd6e234bcea58e092079f2338061"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00024.pt",
+        "role": "source_projection_3",
+        "sha256": "006dbb5bb14f4cf41e22a4a5792a8950f5efca4458c5051253ef38b70e49ce42"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00032.pt",
+        "role": "source_projection_4",
+        "sha256": "4677cac0c46f08bc511af42ae7d3d9d483be42a4037e243581cf930c7cdd91a5"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00040.pt",
+        "role": "source_projection_5",
+        "sha256": "3d8340079410938d0bc2db5ea94626f6567dce23445b7de77837884e01508cf9"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00048.pt",
+        "role": "source_projection_6",
+        "sha256": "1670894fa3530eca5d2d7229d7fadb8a92b12553ebd714dfb4f07c994ddb4573"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00056.pt",
+        "role": "source_projection_7",
+        "sha256": "62fcfa56e0612f0b5bdfe87b1b71f1f3af38e5c6792be2cde743865d0b6cf192"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00063.pt",
+        "role": "source_projection_8",
+        "sha256": "494d00b7c1a53b0204ffa1689916a500169918947bbd9372a2ecf0dd7ec18f76"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00071.pt",
+        "role": "source_projection_9",
+        "sha256": "c010200bb12eef46b81844f6fcd2850fa64f148594df8546460d11d5c7f80d5e"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00079.pt",
+        "role": "source_projection_10",
+        "sha256": "4e96e0ceea3bd0edbd2c83cea68dfd77d2ecf3305227aad96ab802a883239b37"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00087.pt",
+        "role": "source_projection_11",
+        "sha256": "fa8dcdada7745414c1c833b04cd633c12bebd7a97b169ba2b42a5002b6184215"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00095.pt",
+        "role": "source_projection_12",
+        "sha256": "1c798647b2ad46a809527acbdebb37555de413bc47dd3a1c04533fdcc8a1c7ee"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00103.pt",
+        "role": "source_projection_13",
+        "sha256": "c621b6b8a459eb768d01a31b07e48892eb0831174565881ec8238edc3936287a"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00111.pt",
+        "role": "source_projection_14",
+        "sha256": "d27c32c53caffdf124999e80741eeea160d5afa596e769d0f193783886636b23"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json.views/view_00119.pt",
+        "role": "source_projection_15",
+        "sha256": "33340fe4e9609c8743cf6fbb44267f68609049efc4b334adc083cc403b755395"
+      }
+    ],
+    "metadata": {
+      "maximum_contributors_per_pixel": 8,
+      "maximum_splat_radius": 3,
+      "source_only": true,
+      "surface_band_voxels": 1.5,
+      "voxel_size": 0.04
+    },
+    "model_checkpoint_sha256": null,
+    "model_family": null,
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": false,
+    "target_rgb_opened": false
+  },
+  "implementation_sha256": "3de18e6e7743c649360f092f3b45d3c8acc70dd642a07babdafd92be7083a563",
+  "raster_shape": [
+    60,
+    81
+  ],
+  "results": {
+    "gaussian_exact_renderer": {
+      "cross_view_best_target_proposal_leakage": 0.2631941497530334,
+      "cross_view_best_target_proposal_soft_iou": 0.01684541906691922,
+      "cross_view_metric_boundary": "best available target proposal; proposals are not tracked, so this is a source-only transport diagnostic rather than object-correspondence ground truth",
+      "cross_view_pair_count": 1230,
+      "hierarchy_inclusive_element_purity_diagnostic": 0.8558848937352498,
+      "mutually_exclusive_element_purity": 0.9952277412601546,
+      "mutually_exclusive_proposal_pair_count": 153,
+      "proposal_count": 82,
+      "registration_entropy": {
+        "effective_contributors": 24.220823049545288,
+        "mean_contributors": 82.48701095581055,
+        "mean_entropy_nats": 3.075554847717285,
+        "normalized_entropy": 0.7115701586008072
+      },
+      "same_view_boundary_leakage": 0.2952302422647069,
+      "same_view_mask_roundtrip_soft_iou": 0.5736129876089896,
+      "source_mask_surface_coverage": 1.0
+    },
+    "mesh_derived_sparse_surface": {
+      "cross_view_best_target_proposal_leakage": 0.11186707702965089,
+      "cross_view_best_target_proposal_soft_iou": 0.011332281741186574,
+      "cross_view_metric_boundary": "best available target proposal; proposals are not tracked, so this is a source-only transport diagnostic rather than object-correspondence ground truth",
+      "cross_view_pair_count": 1230,
+      "hierarchy_inclusive_element_purity_diagnostic": 0.8235357681910197,
+      "mutually_exclusive_element_purity": 0.9989520471080456,
+      "mutually_exclusive_proposal_pair_count": 153,
+      "proposal_count": 82,
+      "registration_entropy": {
+        "effective_contributors": 2.2420345097780228,
+        "mean_contributors": 2.400080420076847,
+        "mean_entropy_nats": 0.6626401357352734,
+        "normalized_entropy": 0.6378021333366632
+      },
+      "same_view_boundary_leakage": 0.15232148890315397,
+      "same_view_mask_roundtrip_soft_iou": 0.71220338962427,
+      "source_mask_surface_coverage": 0.9293330697024741
+    },
+    "mesh_surface": {
+      "cross_view_best_target_proposal_leakage": 0.1094536253845516,
+      "cross_view_best_target_proposal_soft_iou": 0.013458338537917903,
+      "cross_view_metric_boundary": "best available target proposal; proposals are not tracked, so this is a source-only transport diagnostic rather than object-correspondence ground truth",
+      "cross_view_pair_count": 1230,
+      "hierarchy_inclusive_element_purity_diagnostic": 0.8230421582857768,
+      "mutually_exclusive_element_purity": 0.9995229209170622,
+      "mutually_exclusive_proposal_pair_count": 153,
+      "proposal_count": 82,
+      "registration_entropy": {
+        "effective_contributors": 2.343428060412407,
+        "mean_contributors": 3.0,
+        "mean_entropy_nats": 0.8335789106786251,
+        "normalized_entropy": 0.7587562240660191
+      },
+      "same_view_boundary_leakage": 0.0888735321009668,
+      "same_view_mask_roundtrip_soft_iou": 0.8454417455487135,
+      "source_mask_surface_coverage": 0.9981903353842293
+    }
+  },
+  "scene_label": "scannet-source-only-a-surface-band",
+  "schema": "radio_gs.surface_object_memory_v4.source_mask_geometry_ladder.v1",
+  "source_view_count": 16,
+  "stage": "geometry_registration_only"
+}

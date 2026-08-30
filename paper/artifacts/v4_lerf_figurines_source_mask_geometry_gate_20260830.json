@@ -1,0 +1,106 @@
+{
+  "comparison_to_gaussian": {
+    "coverage_delta": -0.019370650058686212,
+    "effective_contributors_reduction": 24.140579760074615,
+    "mutually_exclusive_purity_delta": 0.008521797289697708,
+    "roundtrip_delta": 0.0907599542161594,
+    "same_view_leakage_reduction": 0.1059666995541394
+  },
+  "coverage_is_reported_not_compensatory": true,
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "lerf_gaussian_vs_calibrated_moge3_sparse_surface",
+    "coordinate_convention": "colmap_world_opencv_camera_feature_raster",
+    "inputs": [
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_figurines_source32_exact_mpr_rgb_authority_20260817.json",
+        "role": "source_rgb_authority",
+        "sha256": "2d014e55ac72efbefdceae455cee8065e1379b675cda6a1fb9f6d3b58695eecf"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_direct_capability/figurines/exact_marginal_responsibility_current.json",
+        "role": "exact_mpr_authority",
+        "sha256": "8876cd8a6da5d737792a34895f05d52940f4cfc646fdb1e31939fcc0fd0b43a9"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines_surface_4cm.pt",
+        "role": "surface_carrier",
+        "sha256": "4ca8c6eb74d1b9cf083877c32ef6ad02a7a56052e46c3fa5523426f5990701af"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/cameras.bin",
+        "role": "colmap_cameras",
+        "sha256": "f15177de04831c7052822d0694ede2de78151052de5199df9afaacf141ae7154"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/images.bin",
+        "role": "colmap_images",
+        "sha256": "ecbf431d68982126fcae865cf2d951f4cdf14c70348f760939543b5cb8c7ee9e"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260820/lerf_multiscale_sam3_source32_grid16/figurines/manifest.json",
+        "role": "sam3_manifest_0",
+        "sha256": "c8109e20ebbab6e93fa6876877da2a6a94f85640048b1d7a3f94f2c0a1a8643b"
+      }
+    ],
+    "metadata": {
+      "scene_label": "lerf_figurines",
+      "source_only": true,
+      "source_view_count": 32
+    },
+    "model_checkpoint_sha256": "9b41b7b9f65ad80aab7ad686f5e9cc0d1fd33f1964022618dfbcd52fc1fb7925",
+    "model_family": "MoGe-3",
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": true,
+    "target_rgb_opened": false
+  },
+  "implementation_sha256": "4c95d79cc671b0305b6135faca862c9cdc9ad1dc06fd91fb890bace7fedb1cfb",
+  "passes_scene_gate": true,
+  "primary_directions": {
+    "leakage": true,
+    "purity": true,
+    "roundtrip": true
+  },
+  "raster_shape": [
+    46,
+    62
+  ],
+  "results": {
+    "gaussian_exact_renderer": {
+      "cross_view_metric": "omitted: untracked best-proposal matching is non-gating and quadratic in proposal count",
+      "mutually_exclusive_element_purity": 0.9900466252721674,
+      "mutually_exclusive_proposal_pair_count": 5057,
+      "proposal_count": 579,
+      "registration_entropy": {
+        "effective_contributors": 26.842514976859093,
+        "mean_contributors": 94.52363473176956,
+        "mean_entropy_nats": 3.0818926952779293,
+        "normalized_entropy": 0.6882867449894547
+      },
+      "same_view_boundary_leakage": 0.5114993394412011,
+      "same_view_mask_roundtrip_soft_iou": 0.3605245510916952,
+      "source_mask_surface_coverage": 0.9965457685664939
+    },
+    "moge3_calibrated_sparse_surface": {
+      "cross_view_metric": "omitted: untracked best-proposal matching is non-gating and quadratic in proposal count",
+      "mutually_exclusive_element_purity": 0.9985684225618651,
+      "mutually_exclusive_proposal_pair_count": 5057,
+      "proposal_count": 579,
+      "registration_entropy": {
+        "effective_contributors": 2.7019352167844772,
+        "mean_contributors": 2.9596355855464935,
+        "mean_entropy_nats": 0.855397766456008,
+        "normalized_entropy": 0.7498972862958908
+      },
+      "same_view_boundary_leakage": 0.4055326398870617,
+      "same_view_mask_roundtrip_soft_iou": 0.4512845053078546,
+      "source_mask_surface_coverage": 0.9771751185078077
+    }
+  },
+  "scene_label": "lerf_figurines",
+  "schema": "radio_gs.surface_object_memory_v4.lerf_source_mask_geometry_gate.v1",
+  "source_view_count": 32
+}

@@ -1,0 +1,121 @@
+{
+  "comparison_to_gaussian": {
+    "coverage_delta": -0.002071632306600346,
+    "effective_contributors_reduction": 63.965445294976234,
+    "mutually_exclusive_purity_delta": -0.0014576100389136482,
+    "roundtrip_delta": -0.10959221268283947,
+    "same_view_leakage_reduction": -0.1104448813215359
+  },
+  "coverage_is_reported_not_compensatory": true,
+  "geometry_receipt": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "calibration": {},
+    "carrier": "lerf_gaussian_vs_calibrated_moge3_sparse_surface",
+    "coordinate_convention": "colmap_world_opencv_camera_feature_raster",
+    "inputs": [
+      {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source32_exact_mpr_rgb_authority_20260817.json",
+        "role": "source_rgb_authority",
+        "sha256": "7fbbaf44361b90ae3f48edb52d50bef987a61d8dc6509b51bed5205a90134fd6"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+        "role": "exact_mpr_authority",
+        "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_surface_4cm.pt",
+        "role": "surface_carrier",
+        "sha256": "ffbcf681260a627e2495fc9ff8b4f4ee16bf9dcd917279f69bf5273fc7f43889"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/cameras.bin",
+        "role": "colmap_cameras",
+        "sha256": "72b479230bcca2ca5952de882ef09f84f048d23e4297ab4585e24c3427c3347c"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/images.bin",
+        "role": "colmap_images",
+        "sha256": "a2710cb4285f7930ee382a6f739fc352b9a579c98f1dd912c05c42ac2a6d21af"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_sam3_source32/shard_0.json",
+        "role": "sam3_manifest_0",
+        "sha256": "5e8259014efc297c742a92d30a75b9264b1e11bca8183d41e8ef465773dbe12b"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_sam3_source32/shard_1.json",
+        "role": "sam3_manifest_1",
+        "sha256": "8efe913cf8f256a82be2924a1a656771e3229aa8b1e3572067cffe4a6d5499b5"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_sam3_source32/shard_2.json",
+        "role": "sam3_manifest_2",
+        "sha256": "6c51e6a18541fda37d01a8e845a18327d5079735e76639fb5c61092b6ef60aca"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/ramen_sam3_source32/shard_3.json",
+        "role": "sam3_manifest_3",
+        "sha256": "61cf519e1d068aea6b7020d79ad514d3ca13f07a29ffe2a87bb2137d5759fba3"
+      }
+    ],
+    "metadata": {
+      "scene_label": "lerf_ramen",
+      "source_only": true,
+      "source_view_count": 32
+    },
+    "model_checkpoint_sha256": "9b41b7b9f65ad80aab7ad686f5e9cc0d1fd33f1964022618dfbcd52fc1fb7925",
+    "model_family": "MoGe-3",
+    "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+    "source_rgb_opened": true,
+    "target_rgb_opened": false
+  },
+  "implementation_sha256": "4c95d79cc671b0305b6135faca862c9cdc9ad1dc06fd91fb890bace7fedb1cfb",
+  "passes_scene_gate": false,
+  "primary_directions": {
+    "leakage": false,
+    "purity": false,
+    "roundtrip": false
+  },
+  "raster_shape": [
+    46,
+    62
+  ],
+  "results": {
+    "gaussian_exact_renderer": {
+      "cross_view_metric": "omitted: untracked best-proposal matching is non-gating and quadratic in proposal count",
+      "mutually_exclusive_element_purity": 0.9993249629399513,
+      "mutually_exclusive_proposal_pair_count": 3026,
+      "proposal_count": 485,
+      "registration_entropy": {
+        "effective_contributors": 66.18508863449097,
+        "mean_contributors": 175.51008987426758,
+        "mean_entropy_nats": 4.072089612483978,
+        "normalized_entropy": 0.8049983773380518
+      },
+      "same_view_boundary_leakage": 0.2520297810358485,
+      "same_view_mask_roundtrip_soft_iou": 0.6159173128531151,
+      "source_mask_surface_coverage": 0.9979381443298969
+    },
+    "moge3_calibrated_sparse_surface": {
+      "cross_view_metric": "omitted: untracked best-proposal matching is non-gating and quadratic in proposal count",
+      "mutually_exclusive_element_purity": 0.9978673529010377,
+      "mutually_exclusive_proposal_pair_count": 3026,
+      "proposal_count": 485,
+      "registration_entropy": {
+        "effective_contributors": 2.2196433395147324,
+        "mean_contributors": 2.441713683307171,
+        "mean_entropy_nats": 0.7113975686952472,
+        "normalized_entropy": 0.7311564767733216
+      },
+      "same_view_boundary_leakage": 0.3624746623573844,
+      "same_view_mask_roundtrip_soft_iou": 0.5063251001702757,
+      "source_mask_surface_coverage": 0.9958665120232966
+    }
+  },
+  "scene_label": "lerf_ramen",
+  "schema": "radio_gs.surface_object_memory_v4.lerf_source_mask_geometry_gate.v1",
+  "source_view_count": 32
+}

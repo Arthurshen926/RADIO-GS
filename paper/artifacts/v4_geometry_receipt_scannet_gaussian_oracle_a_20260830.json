@@ -1,0 +1,42 @@
+{
+  "benchmark_images_opened": false,
+  "benchmark_labels_opened": false,
+  "benchmark_masks_opened": false,
+  "calibration": {},
+  "carrier": "gaussian_exact_renderer",
+  "coordinate_convention": "nerf_opengl_to_opencv_camera_to_world_feature_raster",
+  "inputs": [
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/transforms.json",
+      "role": "camera_transforms",
+      "sha256": "061640cff8d0bcdaac244de225b506b5fba3d1ff8792200b0f28119adbf4728a"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/points3d.ply",
+      "role": "initialization_mesh",
+      "sha256": "222dbe3e7518f5e3260f0feef08c260b9c3e89cb7cecdf20c553368001f998c8"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/scannet_og_scene0000_00_v14/checkpoints/best.pth",
+      "role": "gaussian_checkpoint",
+      "sha256": "d5ce0a13264ee2bb5a638a2eab6c51cd8a81e87ec1b03d8a70b956c1d08c40fa"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/scene0000_00/exact_marginal_responsibility_heldout4.json",
+      "role": "exact_renderer_authority",
+      "sha256": "6ca0110b0a97a67bccd94688870a9a7e51917eff3b5c05164378806b69b2922e"
+    }
+  ],
+  "metadata": {
+    "benchmark": "ScanNet",
+    "rgbd_used_for_initialization": true,
+    "stage": "retained_gaussian_geometry_baseline",
+    "subsequent_photometric_optimization": true,
+    "target_rgb_forbidden": true
+  },
+  "model_checkpoint_sha256": null,
+  "model_family": null,
+  "schema": "radio_gs.surface_object_memory_v4.geometry_receipt.v1",
+  "source_rgb_opened": true,
+  "target_rgb_opened": false
+}
