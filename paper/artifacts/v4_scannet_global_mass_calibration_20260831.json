@@ -1,0 +1,65 @@
+{
+  "schema": "radio_gs.surface_object_memory_v4.global_mass_calibration_result.v1",
+  "date": "2026-08-31",
+  "status": "oracle_mechanism_confirmed_learned_scalar_mass_not_promoted",
+  "claim_scope": "oracle-identity ScanNet completion development evidence only",
+  "fixed_validation_scene_ids": [
+    "scene0030_00",
+    "scene0050_02",
+    "scene0307_02",
+    "scene0697_01"
+  ],
+  "oracle_physical_mass_projection": {
+    "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/diagnostics/formal16_val4_oracle_physical_mass_projection_20260831.json",
+    "report_sha256": "8cd91da798d04e8b1c3154fd103e17e865b1001a6a42b10c1229f5e5ef5b61e6",
+    "target_is_projection_input": true,
+    "delta_soft_3d_miou": 0.09274407,
+    "delta_unknown_only_soft_3d_miou": 0.10114922,
+    "delta_visible_but_unmasked_soft_3d_miou": 0.01714522,
+    "delta_never_visible_soft_3d_miou": 0.09466245,
+    "delta_heldout_2d_soft_miou": 0.03377460,
+    "interpretation": "Frozen unary ranking has substantial usable headroom when each token's global physical support mass is known."
+  },
+  "formal12_train_learned_mass": {
+    "summary_report_sha256": "c3e26d05bcd06c6e99a7aafdeec715b7d1f1b0d480ba01ad9fccbb1760eaa864",
+    "summary_f71_report_sha256": "4f64170f764332e22ce3f04a908d249d2926af03be85477acf69c351f32fd263",
+    "summary_delta_soft_3d_miou": 0.00814654,
+    "summary_delta_unknown_only_soft_3d_miou": -0.00097902,
+    "summary_delta_heldout_2d_soft_miou": 0.00032360,
+    "summary_delta_unknown_retained_object_coverage": -0.01579597,
+    "f71_improves_summary": false
+  },
+  "expanded22_train_learned_mass": {
+    "training_scene_count": 22,
+    "training_token_count": 373,
+    "additional_strict_scene_count": 10,
+    "strict_stage_manifest_sha256": "0c1e34f658bedaf5f660152e41937588d0595f3db1e634e5a5e2e1683d574e46",
+    "summary_report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/learned_mass_calibration_expanded22x4_v1_crossfit/summary_e40.json",
+    "summary_report_sha256": "337b15f21d7af43645a3d6a518631cc17fe84b3191ee8708c5524d3b7c198e88",
+    "coverage_geometry_report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/learned_mass_calibration_expanded22x4_v1_crossfit/coverage_geometry_e40.json",
+    "coverage_geometry_report_sha256": "9b474f07f23596cbbe82037a756fb14fae4e1aaee76270b8aa637461887d72c8",
+    "blend_selection": "leave_one_training_scene_out_only",
+    "validation_used_for_blend_selection": false,
+    "summary_selected_blend_fraction": 0.5,
+    "summary_delta_soft_3d_miou": 0.00376730,
+    "summary_delta_unknown_only_soft_3d_miou": 0.00242324,
+    "summary_delta_visible_but_unmasked_soft_3d_miou": -0.00331738,
+    "summary_delta_never_visible_soft_3d_miou": 0.00254357,
+    "summary_delta_heldout_2d_soft_miou": 0.00161897,
+    "summary_delta_unknown_assignment_precision": 0.01439977,
+    "summary_delta_unknown_retained_object_coverage": -0.01684520,
+    "validation_token_mean_absolute_relative_mass_error_range": [0.269, 0.603],
+    "coverage_geometry_improves_summary": false
+  },
+  "decision": {
+    "promote_scalar_mass_calibrator": false,
+    "reject_oracle_mass_mechanism": false,
+    "reject_local_gate_or_threshold_tuning_as_next_step": true,
+    "next_method": "predict a structured token-specific spatial support distribution or multiple support slots, jointly constrained by source coverage, rather than only one global scalar mass"
+  },
+  "forbidden_interpretations": [
+    "The oracle projection is not deployable because target physical mass is its input.",
+    "The learned result is not association evidence and is not LERF2D or LERF3D evidence.",
+    "The small positive learned deltas do not close the completion stage."
+  ]
+}

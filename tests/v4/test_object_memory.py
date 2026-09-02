@@ -6,6 +6,7 @@ from radio_gs.v4.object_memory import (
     ObjectCodebook,
     SparseObjectAssignments,
 )
+from radio_gs.v4.query import QueryPacket
 
 
 def test_top2_assignment_preserves_unknown_and_dropped_mass():
@@ -26,7 +27,9 @@ def test_one_token_selection_produces_one_element_posterior():
         unknown_weight=torch.tensor([0.1, 0.3]),
     )
     posterior = assignments.element_posterior(
-        torch.tensor([0.9, 0.0]), null_probability=0.1
+        QueryPacket("single_instance"),
+        torch.tensor([0.9, 0.0]),
+        null_probability=0.1,
     )
     assert posterior.foreground.tolist() == pytest.approx([0.72, 0.0])
     assert posterior.assignment_unknown.tolist() == pytest.approx([0.09, 0.27])
@@ -39,10 +42,18 @@ def test_one_token_selection_produces_one_element_posterior():
 
 def test_query_posterior_requires_explicit_null_simplex():
     assignments = SparseObjectAssignments.from_dense(torch.tensor([[0.8, 0.1]]))
-    with pytest.raises(ValueError, match="sum to one"):
-        assignments.element_posterior(torch.tensor([0.8, 0.1]), null_probability=0.2)
+    with pytest.raises(ValueError, match="simplex"):
+        assignments.element_posterior(
+            QueryPacket("single_instance"),
+            torch.tensor([0.8, 0.1]),
+            null_probability=0.2,
+        )
     with pytest.raises(ValueError, match=r"\[0, 1\]"):
-        assignments.element_posterior(torch.tensor([1.1, 0.0]), null_probability=-0.1)
+        assignments.element_posterior(
+            QueryPacket("single_instance"),
+            torch.tensor([1.1, 0.0]),
+            null_probability=-0.1,
+        )
 
 
 def test_training_assignments_remain_dense_until_explicit_compression():

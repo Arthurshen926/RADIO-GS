@@ -1,0 +1,189 @@
+{
+  "schema": "radio_gs.surface_object_memory_v4.spatial_slots_result.v1",
+  "date": "2026-08-31",
+  "status": "positive_structural_diagnostic_not_yet_completion_promotion",
+  "claim_scope": "oracle-identity ScanNet completion development evidence only",
+  "training_scene_count": 22,
+  "validation_scene_count": 4,
+  "training_token_count": 373,
+  "validation_used_for_model_selection": false,
+  "architecture": {
+    "slot_count": 7,
+    "slot_layout": "source-observed PCA centre and symmetric principal-axis pairs",
+    "continuous": true,
+    "hard_threshold": false,
+    "hard_extent_envelope": false,
+    "target_membership_input": false,
+    "heldout_rgb_input": false,
+    "query_input": false,
+    "v3_dependency": false
+  },
+  "causal_arms": {
+    "bias_only": {
+      "report_sha256": "d1ffe7b000393acfaaa35835df788705ee191ebf2dc1cf9f728c946c36e03e10",
+      "delta_soft_3d_miou": -0.01975720,
+      "delta_unknown_only_soft_3d_miou": -0.00942788,
+      "delta_heldout_2d_soft_miou": 0.00659978,
+      "delta_unknown_retained_object_coverage": -0.06578792
+    },
+    "spatial_slots_with_token_bias": {
+      "report_sha256": "2c6a17d9f9f40b54282fa041a14a022a7edb1330f33fe6436a2657d44f58fe9d",
+      "delta_soft_3d_miou": -0.01100071,
+      "delta_unknown_only_soft_3d_miou": -0.00137267,
+      "delta_heldout_2d_soft_miou": 0.00719907,
+      "delta_unknown_retained_object_coverage": -0.03470347
+    },
+    "spatial_only": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/spatial_slots_expanded22x4_v1/spatial_only_e80.json",
+      "report_sha256": "239aae34c265e1db402c072cdae4b1ba962836c3aeba1d1013182e9c94b3c562",
+      "checkpoint_sha256": "357c9454086d49aa99988303333360c244dddf682b871c7953512211a8434bb4",
+      "delta_soft_3d_miou": 0.00524953,
+      "delta_unknown_only_soft_3d_miou": 0.00588033,
+      "delta_visible_but_unmasked_soft_3d_miou": -0.00137733,
+      "delta_never_visible_soft_3d_miou": 0.00585815,
+      "delta_heldout_2d_soft_miou": 0.00092806,
+      "delta_unknown_assignment_precision": 0.01444412,
+      "delta_unknown_retained_object_coverage": -0.02401258,
+      "full_3d_improved_validation_scene_count": 4
+    },
+    "spatial_only_plus_training_crossfit_mass": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/spatial_slots_expanded22x4_v1/spatial_only_plus_learned_mass_projection.json",
+      "report_sha256": "22dacf4397ec4aebfc6e17d015a123c2b83843c5d881e91a09cdd08a6b1b00af",
+      "mass_blend_fraction": 0.5,
+      "mass_blend_selected_on_training_crossfit_only": true,
+      "delta_soft_3d_miou": 0.00528416,
+      "delta_unknown_only_soft_3d_miou": 0.00478138,
+      "delta_visible_but_unmasked_soft_3d_miou": -0.00211712,
+      "delta_never_visible_soft_3d_miou": 0.00451998,
+      "delta_heldout_2d_soft_miou": 0.00220334,
+      "delta_unknown_assignment_precision": 0.01448433,
+      "delta_unknown_retained_object_coverage": -0.01977804,
+      "full_3d_improved_validation_scene_count": 4
+    },
+    "spatial_only_plus_oracle_mass": {
+      "deployable": false,
+      "target_physical_mass_is_projection_input": true,
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/spatial_slots_expanded22x4_v1/spatial_only_plus_oracle_mass_projection.json",
+      "report_sha256": "6d8d6e018efe82db57f3c1c67117d575468c0e882d369f4d4e4cad223b82a3be",
+      "delta_soft_3d_miou": 0.09739855,
+      "delta_unknown_only_soft_3d_miou": 0.10828741,
+      "delta_visible_but_unmasked_soft_3d_miou": 0.01913599,
+      "delta_never_visible_soft_3d_miou": 0.10165307,
+      "delta_heldout_2d_soft_miou": 0.03588335,
+      "delta_unknown_assignment_precision": 0.05580771,
+      "delta_unknown_retained_object_coverage": 0.11889524,
+      "full_3d_improved_validation_scene_count": 4,
+      "additional_delta_over_frozen_unary_oracle_mass": {
+        "soft_3d_miou": 0.00465448,
+        "unknown_only_soft_3d_miou": 0.00713819,
+        "visible_but_unmasked_soft_3d_miou": 0.00199077,
+        "never_visible_soft_3d_miou": 0.00699062,
+        "heldout_2d_soft_miou": 0.00210875,
+        "unknown_retained_object_coverage": 0.00282666
+      }
+    }
+  },
+  "implementation_sha256": {
+    "spatial_slots_core": "9f4182df21d6d84566cbd11ab41796e50d14c5cc814bdcb4a219f4b57481ad87",
+    "spatial_slots_trainer": "0839f32b45442598e52079525ef27c531cadceef66e4cdca48ecabef5a36b455",
+    "mass_projection_combiner": "9bc38bf7ca51cc96b223f7d7b6d37add37cde172e233ed86f21e276a5b94c165"
+  },
+  "rejected_mass_estimators": {
+    "training_crossfit_knn_summary": {
+      "selected_k": 8,
+      "report_sha256": "3db57a88759851cde58984649996c4b1007dc78fca2b73b7da6c2c5b5de65052",
+      "validation_mass_mare_range": [0.361, 0.639],
+      "delta_soft_3d_miou": -0.09209027,
+      "delta_heldout_2d_soft_miou": -0.05491182
+    },
+    "training_crossfit_knn_summary_f71": {
+      "selected_k": 8,
+      "report_sha256": "fd5dee2ecfeb4d107787467d5ad20a8637c6a6bff9c3474f61d475974118d89d",
+      "validation_mass_mare_range": [0.510, 0.629],
+      "delta_soft_3d_miou": -0.10596354,
+      "delta_heldout_2d_soft_miou": -0.06158040
+    },
+    "decision": "cross-object nearest-neighbour completion-ratio transfer is frozen"
+  },
+  "candidate_mass_estimators": {
+    "scene_balanced_ridge_summary_f71": {
+      "feature_mode_selected_by_training_crossfit": true,
+      "training_crossfit_log_mass_loss": 0.14339508,
+      "selected_ridge": 10.0,
+      "selected_correction_blend": 0.5,
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/spatial_slots_expanded22x4_v1/ridge_mass_summary_f71_v2_mass_matched_control.json",
+      "report_sha256": "a34c197a7761ebff5f339960fecf6053b5d31f50505761a905cf998cade846b0",
+      "delta_soft_3d_miou": 0.01194030,
+      "delta_unknown_only_soft_3d_miou": 0.00722272,
+      "delta_visible_but_unmasked_soft_3d_miou": -0.00474954,
+      "delta_never_visible_soft_3d_miou": 0.01165702,
+      "delta_heldout_2d_soft_miou": -0.00051102,
+      "delta_unknown_assignment_precision": 0.01894235,
+      "delta_unknown_retained_object_coverage": -0.01017371,
+      "slots_minus_mass_matched_frozen": {
+        "soft_3d_miou": 0.00180845,
+        "unknown_only_soft_3d_miou": 0.00271336,
+        "visible_but_unmasked_soft_3d_miou": 0.00123904,
+        "never_visible_soft_3d_miou": 0.00252199,
+        "heldout_2d_soft_miou": 0.00072513
+      },
+      "decision": "retain_as_3d_positive_candidate_but_do_not_promote_because_heldout_2d_is_negative"
+    },
+    "scene_balanced_ridge_source_view_coverage": {
+      "feature_mode_selected_by_training_crossfit": false,
+      "training_crossfit_log_mass_loss": 0.14512954,
+      "selected_ridge": 10.0,
+      "selected_correction_blend": 0.5,
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/spatial_slots_expanded22x4_v1/ridge_mass_source_view_coverage.json",
+      "report_sha256": "b68122809fa59ca81dde14ee866df033f13c5dc0270031de6f41de188203496f",
+      "delta_soft_3d_miou": 0.00627199,
+      "delta_unknown_only_soft_3d_miou": 0.00828462,
+      "delta_never_visible_soft_3d_miou": 0.00718752,
+      "delta_heldout_2d_soft_miou": 0.00189655,
+      "delta_unknown_retained_object_coverage": -0.02600364,
+      "decision": "reject_as_standalone_feature_group_because_training_crossfit_is_worse_than_summary_f71"
+    },
+    "scene_balanced_ridge_source_view_coverage_f71": {
+      "feature_mode_selected_by_training_crossfit": true,
+      "training_crossfit_log_mass_loss": 0.14002934,
+      "selected_ridge": 10.0,
+      "selected_correction_blend": 0.5,
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/spatial_slots_expanded22x4_v1/ridge_mass_source_view_coverage_f71.json",
+      "report_sha256": "a8cc7a3dcf31d8e5cdeeb7808369737926b8fb964c9c3f42afe52de08eba1472",
+      "delta_soft_3d_miou": 0.01264521,
+      "delta_unknown_only_soft_3d_miou": 0.01060165,
+      "delta_visible_but_unmasked_soft_3d_miou": -0.00296538,
+      "delta_never_visible_soft_3d_miou": 0.01242741,
+      "delta_heldout_2d_soft_miou": 0.00097551,
+      "delta_unknown_assignment_precision": 0.01300128,
+      "delta_unknown_retained_object_coverage": -0.01579796,
+      "full_3d_improved_validation_scene_count": 3,
+      "heldout_2d_improved_validation_scene_count": 3,
+      "validation_mass_mare": [0.41347131, 0.33818051, 0.54979628, 0.24726214],
+      "slots_minus_mass_matched_frozen": {
+        "soft_3d_miou": 0.00179426,
+        "unknown_only_soft_3d_miou": 0.00260107,
+        "visible_but_unmasked_soft_3d_miou": 0.00118721,
+        "never_visible_soft_3d_miou": 0.00226457,
+        "heldout_2d_soft_miou": 0.00064458
+      },
+      "decision": "retain_as_relaxed_oracle_identity_completion_candidate_and_advance_to_association_closure"
+    },
+    "implementation_sha256": {
+      "ridge_driver": "9473c550393651909dde13d101de81505a3f65acef94d97f8c38698302548bc9",
+      "source_view_feature_builder": "5c2ea802d5418f7cd5ba89524e4274fd13dc389f87d1d6f9ad2d077c23deec0f"
+    }
+  },
+  "decision": {
+    "retain_spatial_slots": true,
+    "retain_token_bias_inside_spatial_branch": false,
+    "promote_completion_stage": "relaxed_development_only",
+    "remaining_bottleneck": "source-only total support mass accuracy and real-token association closure",
+    "next_method": "retain source-view-coverage-plus-F71 ridge with bias-free slots as the relaxed completion candidate; close real source-token association and run cold-loadable LERF2D plus explicitly labeled rendered-proxy LERF3D while the official persistent-element target contract remains unavailable"
+  },
+  "forbidden_interpretations": [
+    "This remains oracle-identity completion and is not association evidence.",
+    "This is not a LERF2D or LERF3D benchmark result.",
+    "The positive deltas do not yet satisfy complete-stage promotion because coverage still falls."
+  ]
+}

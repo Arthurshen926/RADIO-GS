@@ -1,0 +1,41 @@
+{
+  "aggregation": "per_query_then_unweighted_scene_macro",
+  "blocker": "The available LERF release and frozen local evaluator define 2-D polygon targets for rendered selected primitives; no official persistent-carrier-element target association authority was found. A rendered polygon proxy is not accepted as formal 3-D ground truth.",
+  "expected_total_query_count": 208,
+  "metrics": {
+    "iou": "binary_element_iou",
+    "strict_accuracy_thresholds": [
+      0.25,
+      0.5
+    ]
+  },
+  "protocol_id": "lerf3d_persistent_element_target_contract_pending_20260831",
+  "query_unit_semantics": "unresolved_official_3d_target_association",
+  "schema": "radio_gs.evaluation.lerf3d_element_cohort_manifest.v1",
+  "scenes": [
+    {
+      "expected_query_count": 56,
+      "scene_id": "figurines"
+    },
+    {
+      "expected_query_count": 71,
+      "scene_id": "ramen"
+    },
+    {
+      "expected_query_count": 59,
+      "scene_id": "teatime"
+    },
+    {
+      "expected_query_count": 22,
+      "scene_id": "waldo_kitchen"
+    }
+  ],
+  "source_protocol_freeze": {
+    "path": "paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+    "sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916",
+    "task": "concept_lerf3d_vala"
+  },
+  "status": "blocked_missing_official_element_target_contract",
+  "target_authority_schema": "radio_gs.evaluation.lerf3d_element_target_authority.v1",
+  "target_domain": "persistent_carrier_elements"
+}

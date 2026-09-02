@@ -1,0 +1,760 @@
+{
+  "assigned_proposal_count": 669,
+  "category_metrics": {
+    "apple": {
+      "best_token_null_probability": 0.0335078239440918,
+      "best_token_positive_probability": 0.9664921760559082,
+      "mean_iou_2d": 0.07471660752151849,
+      "mean_iou_3d": 0.07377449677981593,
+      "observation_count": 5
+    },
+    "bag of cookies": {
+      "best_token_null_probability": 0.2721938490867615,
+      "best_token_positive_probability": 0.7278061509132385,
+      "mean_iou_2d": 0.07116972084397145,
+      "mean_iou_3d": 0.0684109450124767,
+      "observation_count": 5
+    },
+    "bear nose": {
+      "best_token_null_probability": 0.09959143400192261,
+      "best_token_positive_probability": 0.9004085659980774,
+      "mean_iou_2d": 0.07314923619271446,
+      "mean_iou_3d": 0.07363444639718804,
+      "observation_count": 3
+    },
+    "coffee": {
+      "best_token_null_probability": 0.31684792041778564,
+      "best_token_positive_probability": 0.6831520795822144,
+      "mean_iou_2d": 0.015843221163539072,
+      "mean_iou_3d": 0.018304798888762297,
+      "observation_count": 4
+    },
+    "coffee mug": {
+      "best_token_null_probability": 0.375866174697876,
+      "best_token_positive_probability": 0.624133825302124,
+      "mean_iou_2d": 0.012759938552425548,
+      "mean_iou_3d": 0.015223699201312866,
+      "observation_count": 5
+    },
+    "dall-e brand": {
+      "best_token_null_probability": 0.30831027030944824,
+      "best_token_positive_probability": 0.6916897296905518,
+      "mean_iou_2d": 0.0,
+      "mean_iou_3d": 0.0,
+      "observation_count": 2
+    },
+    "hooves": {
+      "best_token_null_probability": 0.3605983853340149,
+      "best_token_positive_probability": 0.6394016146659851,
+      "mean_iou_2d": 0.06556748466257668,
+      "mean_iou_3d": 0.06360479797979798,
+      "observation_count": 2
+    },
+    "paper napkin": {
+      "best_token_null_probability": 0.24301385879516602,
+      "best_token_positive_probability": 0.756986141204834,
+      "mean_iou_2d": 0.07571347171347172,
+      "mean_iou_3d": 0.07839559045725271,
+      "observation_count": 5
+    },
+    "plate": {
+      "best_token_null_probability": 0.29220861196517944,
+      "best_token_positive_probability": 0.7077913880348206,
+      "mean_iou_2d": 0.09057867869132702,
+      "mean_iou_3d": 0.09018368153362631,
+      "observation_count": 6
+    },
+    "sheep": {
+      "best_token_null_probability": 0.17477405071258545,
+      "best_token_positive_probability": 0.8252259492874146,
+      "mean_iou_2d": 0.3427242326977294,
+      "mean_iou_3d": 0.3635830297406005,
+      "observation_count": 4
+    },
+    "stuffed bear": {
+      "best_token_null_probability": 0.0326535701751709,
+      "best_token_positive_probability": 0.9673464298248291,
+      "mean_iou_2d": 0.32883067155300105,
+      "mean_iou_3d": 0.3295584348858767,
+      "observation_count": 5
+    },
+    "tea in a glass": {
+      "best_token_null_probability": 0.17536598443984985,
+      "best_token_positive_probability": 0.8246340155601501,
+      "mean_iou_2d": 0.10951773201773202,
+      "mean_iou_3d": 0.11731715440943745,
+      "observation_count": 6
+    },
+    "three cookies": {
+      "best_token_null_probability": 0.17475605010986328,
+      "best_token_positive_probability": 0.8252439498901367,
+      "mean_iou_2d": 0.036923129465742735,
+      "mean_iou_3d": 0.036185685208109636,
+      "observation_count": 6
+    },
+    "yellow pouf": {
+      "best_token_null_probability": 0.11492776870727539,
+      "best_token_positive_probability": 0.8850722312927246,
+      "mean_iou_2d": 0.30739299610894943,
+      "mean_iou_3d": 0.2936802973977695,
+      "observation_count": 1
+    }
+  },
+  "completion_added_fraction": 0.8528773188591003,
+  "completion_audit": {
+    "adapter": {
+      "active_completion_token_count": 138,
+      "categorical_observed_element_count": 18423,
+      "categorical_observed_element_fraction": 0.14712271094322205,
+      "complete_target_labels_read": false,
+      "heldout_rgb_read": false,
+      "inactive_unseeded_token_count": 5,
+      "inactive_unseeded_token_ids": [
+        28,
+        65,
+        111,
+        113,
+        139
+      ],
+      "input_token_count": 143,
+      "maximum_observed_token_mass": 2070,
+      "minimum_observed_token_mass": 1,
+      "overlap_discarded_element_count": 8919,
+      "query_read": false,
+      "source_view_count": 32
+    },
+    "inference": {
+      "completed_nonzero_element_fraction": 1.0,
+      "frozen_mass_mean": 758.0324096679688,
+      "heldout_rgb_read": false,
+      "mass_feature_mode": "source_view_coverage_f71",
+      "mass_projection": {
+        "bias_absolute_mean": 1.9653472900390625,
+        "damping": 0.5,
+        "final_mass_mean": 700.328125,
+        "initial_mass_mean": 720.4747924804688,
+        "iteration_count": 256,
+        "maximum_relative_mass_error": 0.03112257830798626,
+        "target_mass_mean": 700.0012817382812
+      },
+      "mass_selected_blend": 0.5,
+      "mass_selected_ridge": 10.0,
+      "mean_null_probability": 0.25944191217422485,
+      "method": "frozen_unary_bias_free_spatial_slots_source_view_f71_ridge_mass",
+      "observed_mass_mean": 133.5,
+      "predicted_mass_maximum": 7194.93701171875,
+      "predicted_mass_mean": 700.0011596679688,
+      "predicted_mass_minimum": 1.0,
+      "query_read": false,
+      "slot": {
+        "fusion_strength": 0.05257371440529823,
+        "slot_scale_multiplier_maximum": 7.387866020202637,
+        "slot_scale_multiplier_minimum": 0.20547333359718323,
+        "token_bias_absolute_mean": 0.0
+      },
+      "target_membership_read": false,
+      "token_count": 138,
+      "unknown_element_count": 106799
+    }
+  },
+  "completion_method": "scannet_spatial_mass",
+  "development_only": true,
+  "evaluation_contract_scope": "development 2D polygon proxy for continuous and element-thresholded surface posterior renderings",
+  "flow_completed": true,
+  "information_policy": {
+    "benchmark_labels_opened_during_construction": false,
+    "semantic_manifest_excluded_frames_respected": true,
+    "target_rgb_opened_during_construction": false,
+    "text_queries_opened_during_construction": false
+  },
+  "metrics": {
+    "identity_only_micro_iou": 0.3445378151260504,
+    "identity_peak_evaluated_count": 59,
+    "identity_peak_localization_accuracy": 0.6610169491525424,
+    "macro_category_miou_2d": 0.11463479437033565,
+    "macro_category_miou_3d": 0.11584693270657333,
+    "micro_iou_2d": 0.13320318989865426,
+    "micro_iou_3d": 0.13222195948608811
+  },
+  "observed_element_fraction": 0.14712271094322205,
+  "per_observation": [
+    {
+      "category": "apple",
+      "frame_id": 2,
+      "identity_only_iou": 0.1875,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.05555555555555555,
+      "iou_3d": 0.06382978723404255,
+      "selected_element_fraction": 0.004903291817754507
+    },
+    {
+      "category": "bag of cookies",
+      "frame_id": 2,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.06461538461538462,
+      "iou_3d": 0.05965909090909091,
+      "selected_element_fraction": 0.028956573456525803
+    },
+    {
+      "category": "bear nose",
+      "frame_id": 2,
+      "identity_only_iou": 0.1069182389937107,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.08108108108108109,
+      "iou_3d": 0.08333333333333333,
+      "selected_element_fraction": 0.010213860310614109
+    },
+    {
+      "category": "coffee",
+      "frame_id": 2,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.015151515151515152,
+      "iou_3d": 0.013605442176870748,
+      "selected_element_fraction": 0.011371803469955921
+    },
+    {
+      "category": "coffee mug",
+      "frame_id": 2,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.016,
+      "iou_3d": 0.013605442176870748,
+      "selected_element_fraction": 0.01135583221912384
+    },
+    {
+      "category": "paper napkin",
+      "frame_id": 2,
+      "identity_only_iou": 0.34285714285714286,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.11666666666666667,
+      "iou_3d": 0.12096774193548387,
+      "selected_element_fraction": 0.02302311174571514
+    },
+    {
+      "category": "plate",
+      "frame_id": 2,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.042483660130718956,
+      "iou_3d": 0.04722222222222222,
+      "selected_element_fraction": 0.027167750522494316
+    },
+    {
+      "category": "sheep",
+      "frame_id": 2,
+      "identity_only_iou": 0.17777777777777778,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.24795640326975477,
+      "iou_3d": 0.2803234501347709,
+      "selected_element_fraction": 0.02509942278265953
+    },
+    {
+      "category": "stuffed bear",
+      "frame_id": 2,
+      "identity_only_iou": 0.6786492374727668,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.4880382775119617,
+      "iou_3d": 0.4886499402628435,
+      "selected_element_fraction": 0.010884668678045273
+    },
+    {
+      "category": "tea in a glass",
+      "frame_id": 2,
+      "identity_only_iou": 0.05263157894736842,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.1388888888888889,
+      "iou_3d": 0.15730337078651685,
+      "selected_element_fraction": 0.004551915917545557
+    },
+    {
+      "category": "three cookies",
+      "frame_id": 2,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.024390243902439025,
+      "iou_3d": 0.02586206896551724,
+      "selected_element_fraction": 0.029499609023332596
+    },
+    {
+      "category": "bag of cookies",
+      "frame_id": 25,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.05859375,
+      "iou_3d": 0.055762081784386616,
+      "selected_element_fraction": 0.028956573456525803
+    },
+    {
+      "category": "bear nose",
+      "frame_id": 25,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.04054054054054054,
+      "iou_3d": 0.042666666666666665,
+      "selected_element_fraction": 0.010213860310614109
+    },
+    {
+      "category": "coffee",
+      "frame_id": 25,
+      "identity_only_iou": 0.023809523809523808,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.011371803469955921
+    },
+    {
+      "category": "coffee mug",
+      "frame_id": 25,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.01135583221912384
+    },
+    {
+      "category": "hooves",
+      "frame_id": 25,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.006134969325153374,
+      "iou_3d": 0.005681818181818182,
+      "selected_element_fraction": 0.022727636620402336
+    },
+    {
+      "category": "paper napkin",
+      "frame_id": 25,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.02302311174571514
+    },
+    {
+      "category": "plate",
+      "frame_id": 25,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.02443609022556391,
+      "iou_3d": 0.02413793103448276,
+      "selected_element_fraction": 0.027167750522494316
+    },
+    {
+      "category": "sheep",
+      "frame_id": 25,
+      "identity_only_iou": 0.5287081339712919,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.5672514619883041,
+      "iou_3d": 0.573076923076923,
+      "selected_element_fraction": 0.02509942278265953
+    },
+    {
+      "category": "stuffed bear",
+      "frame_id": 25,
+      "identity_only_iou": 0.3311432325886991,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.18485915492957747,
+      "iou_3d": 0.18629173989455183,
+      "selected_element_fraction": 0.010884668678045273
+    },
+    {
+      "category": "tea in a glass",
+      "frame_id": 25,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.004551915917545557
+    },
+    {
+      "category": "three cookies",
+      "frame_id": 25,
+      "identity_only_iou": 0.13043478260869565,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.009416195856873822,
+      "iou_3d": 0.00909090909090909,
+      "selected_element_fraction": 0.029499609023332596
+    },
+    {
+      "category": "apple",
+      "frame_id": 43,
+      "identity_only_iou": 0.43333333333333335,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.06880733944954129,
+      "iou_3d": 0.06696428571428571,
+      "selected_element_fraction": 0.004903291817754507
+    },
+    {
+      "category": "bag of cookies",
+      "frame_id": 43,
+      "identity_only_iou": 0.13186813186813187,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.09760956175298804,
+      "iou_3d": 0.09702209414024976,
+      "selected_element_fraction": 0.028956573456525803
+    },
+    {
+      "category": "coffee",
+      "frame_id": 43,
+      "identity_only_iou": 0.46774193548387094,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.019538188277087035,
+      "iou_3d": 0.028938906752411574,
+      "selected_element_fraction": 0.011371803469955921
+    },
+    {
+      "category": "coffee mug",
+      "frame_id": 43,
+      "identity_only_iou": 0.2127659574468085,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.0186219739292365,
+      "iou_3d": 0.025848142164781908,
+      "selected_element_fraction": 0.01135583221912384
+    },
+    {
+      "category": "hooves",
+      "frame_id": 43,
+      "identity_only_iou": 0.029850746268656716,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.125,
+      "iou_3d": 0.12152777777777778,
+      "selected_element_fraction": 0.022727636620402336
+    },
+    {
+      "category": "paper napkin",
+      "frame_id": 43,
+      "identity_only_iou": 0.2,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.07179487179487179,
+      "iou_3d": 0.06666666666666667,
+      "selected_element_fraction": 0.02302311174571514
+    },
+    {
+      "category": "plate",
+      "frame_id": 43,
+      "identity_only_iou": 0.027624309392265192,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.16255144032921812,
+      "iou_3d": 0.15804878048780488,
+      "selected_element_fraction": 0.027167750522494316
+    },
+    {
+      "category": "stuffed bear",
+      "frame_id": 43,
+      "identity_only_iou": 0.23644251626898047,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.16796875,
+      "iou_3d": 0.16796875,
+      "selected_element_fraction": 0.010884668678045273
+    },
+    {
+      "category": "tea in a glass",
+      "frame_id": 43,
+      "identity_only_iou": 0.24175824175824176,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.13333333333333333,
+      "iou_3d": 0.1411764705882353,
+      "selected_element_fraction": 0.004551915917545557
+    },
+    {
+      "category": "three cookies",
+      "frame_id": 43,
+      "identity_only_iou": 0.5301204819277109,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.06116207951070336,
+      "iou_3d": 0.06033630069238378,
+      "selected_element_fraction": 0.029499609023332596
+    },
+    {
+      "category": "apple",
+      "frame_id": 107,
+      "identity_only_iou": 0.5,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.10416666666666667,
+      "iou_3d": 0.09615384615384616,
+      "selected_element_fraction": 0.004903291817754507
+    },
+    {
+      "category": "bag of cookies",
+      "frame_id": 107,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.02922077922077922,
+      "iou_3d": 0.02694610778443114,
+      "selected_element_fraction": 0.028956573456525803
+    },
+    {
+      "category": "bear nose",
+      "frame_id": 107,
+      "identity_only_iou": 0.1881720430107527,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.09782608695652174,
+      "iou_3d": 0.09490333919156414,
+      "selected_element_fraction": 0.010213860310614109
+    },
+    {
+      "category": "coffee mug",
+      "frame_id": 107,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.0,
+      "iou_3d": 0.005952380952380952,
+      "selected_element_fraction": 0.01135583221912384
+    },
+    {
+      "category": "dall-e brand",
+      "frame_id": 107,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.019828783348202705
+    },
+    {
+      "category": "paper napkin",
+      "frame_id": 107,
+      "identity_only_iou": 0.2727272727272727,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.12,
+      "iou_3d": 0.12781954887218044,
+      "selected_element_fraction": 0.02302311174571514
+    },
+    {
+      "category": "plate",
+      "frame_id": 107,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.08178438661710037,
+      "iou_3d": 0.0701219512195122,
+      "selected_element_fraction": 0.027167750522494316
+    },
+    {
+      "category": "sheep",
+      "frame_id": 107,
+      "identity_only_iou": 0.13612565445026178,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.24193548387096775,
+      "iou_3d": 0.25390625,
+      "selected_element_fraction": 0.02509942278265953
+    },
+    {
+      "category": "stuffed bear",
+      "frame_id": 107,
+      "identity_only_iou": 0.5650969529085873,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.5516093229744728,
+      "iou_3d": 0.5532150776053215,
+      "selected_element_fraction": 0.010884668678045273
+    },
+    {
+      "category": "tea in a glass",
+      "frame_id": 107,
+      "identity_only_iou": 0.045454545454545456,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.09,
+      "iou_3d": 0.11009174311926606,
+      "selected_element_fraction": 0.004551915917545557
+    },
+    {
+      "category": "three cookies",
+      "frame_id": 107,
+      "identity_only_iou": 0.16666666666666666,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.030612244897959183,
+      "iou_3d": 0.02875399361022364,
+      "selected_element_fraction": 0.029499609023332596
+    },
+    {
+      "category": "apple",
+      "frame_id": 129,
+      "identity_only_iou": 0.34782608695652173,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.08823529411764706,
+      "iou_3d": 0.0851063829787234,
+      "selected_element_fraction": 0.004903291817754507
+    },
+    {
+      "category": "dall-e brand",
+      "frame_id": 129,
+      "identity_only_iou": 0.0,
+      "identity_peak_in_gt": false,
+      "iou_2d": 0.0,
+      "iou_3d": 0.0,
+      "selected_element_fraction": 0.019828783348202705
+    },
+    {
+      "category": "plate",
+      "frame_id": 129,
+      "identity_only_iou": 0.014492753623188406,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.125,
+      "iou_3d": 0.12030075187969924,
+      "selected_element_fraction": 0.027167750522494316
+    },
+    {
+      "category": "sheep",
+      "frame_id": 129,
+      "identity_only_iou": 0.23118279569892472,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.3137535816618911,
+      "iou_3d": 0.34702549575070823,
+      "selected_element_fraction": 0.02509942278265953
+    },
+    {
+      "category": "tea in a glass",
+      "frame_id": 129,
+      "identity_only_iou": 0.4266666666666667,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.125,
+      "iou_3d": 0.11594202898550725,
+      "selected_element_fraction": 0.004551915917545557
+    },
+    {
+      "category": "three cookies",
+      "frame_id": 129,
+      "identity_only_iou": 0.2903225806451613,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.05361930294906166,
+      "iou_3d": 0.05181347150259067,
+      "selected_element_fraction": 0.029499609023332596
+    },
+    {
+      "category": "yellow pouf",
+      "frame_id": 129,
+      "identity_only_iou": 0.5675675675675675,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.30739299610894943,
+      "iou_3d": 0.2936802973977695,
+      "selected_element_fraction": 0.08417849987745285
+    },
+    {
+      "category": "apple",
+      "frame_id": 140,
+      "identity_only_iou": 0.20454545454545456,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.056818181818181816,
+      "iou_3d": 0.056818181818181816,
+      "selected_element_fraction": 0.004903291817754507
+    },
+    {
+      "category": "bag of cookies",
+      "frame_id": 140,
+      "identity_only_iou": 0.046875,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.10580912863070539,
+      "iou_3d": 0.10266535044422508,
+      "selected_element_fraction": 0.028956573456525803
+    },
+    {
+      "category": "coffee",
+      "frame_id": 140,
+      "identity_only_iou": 0.2815533980582524,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.028683181225554105,
+      "iou_3d": 0.03067484662576687,
+      "selected_element_fraction": 0.011371803469955921
+    },
+    {
+      "category": "coffee mug",
+      "frame_id": 140,
+      "identity_only_iou": 0.17721518987341772,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.029177718832891247,
+      "iou_3d": 0.030712530712530713,
+      "selected_element_fraction": 0.01135583221912384
+    },
+    {
+      "category": "paper napkin",
+      "frame_id": 140,
+      "identity_only_iou": 0.5914634146341463,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.0701058201058201,
+      "iou_3d": 0.07652399481193256,
+      "selected_element_fraction": 0.02302311174571514
+    },
+    {
+      "category": "plate",
+      "frame_id": 140,
+      "identity_only_iou": 0.03680981595092025,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.10721649484536082,
+      "iou_3d": 0.12127045235803657,
+      "selected_element_fraction": 0.027167750522494316
+    },
+    {
+      "category": "stuffed bear",
+      "frame_id": 140,
+      "identity_only_iou": 0.750814332247557,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.2516778523489933,
+      "iou_3d": 0.25166666666666665,
+      "selected_element_fraction": 0.010884668678045273
+    },
+    {
+      "category": "tea in a glass",
+      "frame_id": 140,
+      "identity_only_iou": 0.33544303797468356,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.16988416988416988,
+      "iou_3d": 0.17938931297709923,
+      "selected_element_fraction": 0.004551915917545557
+    },
+    {
+      "category": "three cookies",
+      "frame_id": 140,
+      "identity_only_iou": 0.2361111111111111,
+      "identity_peak_in_gt": true,
+      "iou_2d": 0.04233870967741935,
+      "iou_3d": 0.0412573673870334,
+      "selected_element_fraction": 0.029499609023332596
+    }
+  ],
+  "post_completion_element_fraction": 1.0,
+  "proposal_count": 671,
+  "query_configuration": {
+    "development_negative_text_cache": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "development_negative_text_cache_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+    "development_text_query_cache": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+    "development_text_query_cache_sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d",
+    "element_threshold": 0.2,
+    "identity_membership_threshold": 0.05,
+    "identity_peak_count": 8,
+    "identity_pixel_threshold": 0.5,
+    "maximum_query_tokens": 3,
+    "pixel_threshold": 0.2,
+    "proposal_descriptor_mode": "mean_text_aligned_pixels",
+    "semantic_agreement_floor": 0.3,
+    "semantic_agreement_power": 2.0,
+    "semantic_feature_space": "radio_backbone_summary_head",
+    "surface_semantic_evidence": "average",
+    "surface_view_prototype_count": 2,
+    "temperature": 0.03,
+    "token_semantic_pooling": "surface_local_peak"
+  },
+  "raster_shape": [
+    46,
+    62
+  ],
+  "relaxed_gate_policy": {
+    "gates_block_execution": false,
+    "promotion_claimed": false,
+    "warnings": [
+      "object organization and completion are development baselines",
+      "fixed thresholds are provisional and were not benchmark-tuned",
+      "full-cohort confirmation remains pending",
+      "pointwise summary-head projection is a development approximation"
+    ]
+  },
+  "scene_label": "teatime",
+  "scene_state": "/mnt/pool/sqy/results/RADIO-GS/output/v4_lerf_development_20260831/teatime_scannet_spatial_mass_state.pt",
+  "scene_state_sha256": "6836b10fdb92fe3a4e9a505ba6dae68a6d7a6d80596eb6eba343ab20083e7d87",
+  "schema": "radio_gs.surface_object_memory_v4.lerf_development_evaluation.v1",
+  "semantic_observed_element_fraction": 0.23123732209205627,
+  "semantic_reliability_mean": null,
+  "semantic_reliability_observed_element_fraction": null,
+  "semantic_reliability_positive_observation_fraction": null,
+  "semantic_source_view_count": 32,
+  "source_view_count": 32,
+  "token_count": 143
+}

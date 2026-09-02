@@ -31,3 +31,29 @@ def test_receipts_and_source_split_fail_closed(tmp_path):
         MethodReceipt("geometry_registration", "surface", sealed.sha256, codebook_enabled=True)
     with pytest.raises(ValueError, match="overlap"):
         SourceSplit(frozenset({"same"}), frozenset(), frozenset({"same"}))
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        ("from radio_gs.v2.method import legacy\n", "historical-method"),
+        ("from radio_gs import v3\n", "historical-method"),
+        ("from .. import v3\n", "historical-method"),
+        ("import importlib\nimportlib.import_module(name)\n", "dynamic code/import"),
+        ("from importlib import import_module as load\nload(name)\n", "dynamic code/import"),
+        ("module = __import__(name)\n", "dynamic code/import"),
+        ("import builtins as b\nb.__import__(name)\n", "dynamic code/import"),
+        ("import builtins\nload = builtins.__import__\nload(name)\n", "dynamic code/import"),
+        (
+            "from radio_gs.v4.evaluation.lerf_development_pipeline import run\n",
+            "quarantined development",
+        ),
+        ("SCENE = 'teatime'\n", "benchmark scene"),
+    ],
+)
+def test_static_audit_rejects_indirect_history_and_scene_specialization(
+    tmp_path, source, expected
+):
+    (tmp_path / "candidate.py").write_text(source)
+    failures = audit(tmp_path)
+    assert any(expected in failure for failure in failures)

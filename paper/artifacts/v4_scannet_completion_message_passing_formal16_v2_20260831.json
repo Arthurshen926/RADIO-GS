@@ -1,0 +1,175 @@
+{
+  "schema": "radio_gs.surface_object_memory_v4.scannet_completion_message_passing_formal16.v1",
+  "date": "2026-08-31",
+  "method_identity": "Surface-Aligned Object-Centric Universal Memory v4 Candidate",
+  "status": "formal_shared_edge_global_extent_rejected",
+  "claim_scope": "scene-disjoint oracle-identity membership completion only",
+  "cohort": {
+    "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/pfir16_formal_stage_v2_target_rgb_isolated/cohort_manifest.json",
+    "manifest_sha256": "5e80bfb5d644f01d808c0bdb3e0ab231603ef641144d198b9646d3545d5ff56e",
+    "training_scene_count": 12,
+    "validation_scene_count": 4,
+    "target_rgb_opened_or_hashed": false
+  },
+  "frozen_pointwise_authority": {
+    "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/formal16_completion_12x4_v2_contract_v10/radio_f71_h128_s4000.json",
+    "report_sha256": "1f8aa44ac3c934b38b8caaa9c6adfea756eff04bc2836795ab59eaafa4e4d922",
+    "checkpoint_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/formal16_completion_12x4_v2_contract_v10/radio_f71_h128_s4000.pt",
+    "checkpoint_sha256": "248f43039c21355a05b7042933138f311c9c55932173c970cf2a54898762297d"
+  },
+  "implementation": {
+    "source_tree_sha256": "51759f8cee849ff695bac187f076a75e8c52370a3138856a259332f24c61fdb5",
+    "trainer_sha256": "8ff46c3c5e954feedc7149662c971aec1d77cab062edcd6b172f176add461300",
+    "message_passing_module_sha256": "ef347b6f8590340780f146a07bcf7a0bd298a90db1d43cb1a21f2612ee1f9155",
+    "observed_clamp": "exact_after_every_step",
+    "pointwise_unary_trainable": false,
+    "edge_features": "query_and_target_free_geometry_normal_source_rgb_radio",
+    "hard_radius_threshold_or_connected_component": false,
+    "message_passing_steps_compared": [
+      2,
+      3
+    ],
+    "optimizer_steps_per_arm": 480
+  },
+  "diagnostic_upper_bounds": {
+    "oracle_adjacency_report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/diagnostics/formal16_val4_oracle_edge_upper_bound_20260831.json",
+    "oracle_adjacency_report_sha256": "7bc23e16aa485c36c03f5dd414ad4368075ced6f29a25516971ef0048d9a505d",
+    "oracle_reachable_flood_fill": {
+      "full_3d_scene_macro": 0.96098,
+      "visible_but_unmasked_3d_scene_macro": 0.88733,
+      "never_visible_3d_scene_macro": 0.94437,
+      "heldout_2d_scene_macro": 0.64053,
+      "heldout_2d_false_positive_only_scene_token_count": 0
+    },
+    "unary_times_oracle_extent": {
+      "full_3d_scene_macro": 0.76040,
+      "visible_but_unmasked_3d_scene_macro": 0.35133,
+      "never_visible_3d_scene_macro": 0.68404,
+      "heldout_2d_scene_macro": 0.50354,
+      "heldout_2d_false_positive_only_scene_token_count": 0
+    }
+  },
+  "source_only_edge_probe": {
+    "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/diagnostics/formal16_edge_classifier_seed_extent_probe_20260831.json",
+    "report_sha256": "6da11a586d9115ffcfa37516a30a72a4847e15f13a028dd6f8f623c17f375931",
+    "checkpoint_sha256": "d760355f5d0d432594cbc5dbbdb00d170ab9f2dde6a53993ba4a381e96c8860f",
+    "validation_auroc": 0.745335,
+    "validation_average_precision": 0.777126,
+    "validation_balanced_accuracy_at_0p5": 0.645621,
+    "validation_true_positive_rate_at_0p5": 0.808958,
+    "validation_true_negative_rate_at_0p5": 0.482285,
+    "threshold_free_soft_bottleneck": {
+      "full_3d_scene_macro": 0.570816,
+      "visible_but_unmasked_3d_scene_macro": 0.085792,
+      "never_visible_3d_scene_macro": 0.374793,
+      "heldout_2d_scene_macro": 0.311474,
+      "heldout_2d_false_positive_only_scene_token_count": 33
+    },
+    "interpretation": "A shared query-free edge has real but insufficient boundary signal and tends to over-connect objects."
+  },
+  "formal_artifacts": {
+    "two_step": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/formal16_message_passing_v2/step2_e40.json",
+      "report_sha256": "3f17a9a1c7c5037888ac19082dad7359198d4eef34ba12c71114e23d8ae0223f",
+      "checkpoint_sha256": "35e28165f8f71e068d87161baa84407fc40cc608fcca5a21901c8470881e7e07"
+    },
+    "three_step": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/formal16_message_passing_v2/step3_e40.json",
+      "report_sha256": "c5f6dc43250255e7d6f174e49125502168f18c7111a8ef79f9de5ee4d542e333",
+      "checkpoint_sha256": "7223b06547e94a04ffa62b000904db1ad0d1dc7ea19fbf3b909a95ab10d9e88e"
+    }
+  },
+  "scene_macro": {
+    "observed_only": {
+      "full_3d_soft_miou": 0.4280492961406708,
+      "heldout_2d_soft_miou": 0.3206993639469147
+    },
+    "frozen_aligned_pointwise": {
+      "full_3d_soft_miou": 0.5628428906202316,
+      "unknown_3d_soft_miou": 0.34947939962148666,
+      "visible_but_unmasked_3d_soft_miou": 0.08751634694635868,
+      "never_visible_3d_soft_miou": 0.36890406906604767,
+      "heldout_2d_soft_miou": 0.3074658829718828,
+      "unknown_assignment_precision": 0.6945053262535653,
+      "unknown_retained_object_coverage": 0.6991049436662256
+    },
+    "two_step": {
+      "full_3d_soft_miou": 0.5560691878199577,
+      "unknown_3d_soft_miou": 0.33507871627807617,
+      "visible_but_unmasked_3d_soft_miou": 0.08511719107627869,
+      "never_visible_3d_soft_miou": 0.35408127307891846,
+      "heldout_2d_soft_miou": 0.30250104516744614,
+      "unknown_assignment_precision": 0.70494627079812,
+      "unknown_retained_object_coverage": 0.691029052603793,
+      "target_absent_prediction_mass_relative_reduction": 0.12224084084099963
+    },
+    "three_step": {
+      "full_3d_soft_miou": 0.5556466355919838,
+      "unknown_3d_soft_miou": 0.33413969725370407,
+      "visible_but_unmasked_3d_soft_miou": 0.08484507165849209,
+      "never_visible_3d_soft_miou": 0.35316990315914154,
+      "heldout_2d_soft_miou": 0.30192825198173523,
+      "unknown_assignment_precision": 0.7060971602018107,
+      "unknown_retained_object_coverage": 0.689781875794921,
+      "target_absent_prediction_mass_relative_reduction": 0.13061260590095178
+    }
+  },
+  "paired_differences_from_frozen_pointwise": {
+    "two_step": {
+      "full_3d_soft_miou": -0.006773702800273895,
+      "visible_but_unmasked_3d_soft_miou": -0.002399155870079994,
+      "never_visible_3d_soft_miou": -0.014822795987129211,
+      "heldout_2d_soft_miou": -0.004964837804436684,
+      "unknown_assignment_precision": 0.010440944544554706,
+      "unknown_retained_object_coverage": -0.008075891062432613
+    },
+    "three_step": {
+      "full_3d_soft_miou": -0.007196255028247833,
+      "visible_but_unmasked_3d_soft_miou": -0.0026712752878665924,
+      "never_visible_3d_soft_miou": -0.015734165906906128,
+      "heldout_2d_soft_miou": -0.005537630990147591,
+      "unknown_assignment_precision": 0.011591833948245405,
+      "unknown_retained_object_coverage": -0.009323067871304637
+    }
+  },
+  "mechanistic_ablations": {
+    "component_ablation_report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/diagnostics/formal16_message_passing_step2_component_ablation_20260831.json",
+    "component_ablation_report_sha256": "8704dde44ab4d613b8f879181e4cbbce90ce9b4b143bdd3f9f4e7f93d3fb46c9",
+    "message_only_retrained_report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/diagnostics/formal16_message_only_step2_e40_20260831.json",
+    "message_only_retrained_report_sha256": "6ec53b162b116f1c03f50ef8f02b42724fd3db2eef6350e6baf2077be9ea7b9a",
+    "message_only_retrained_checkpoint_sha256": "46a7d0b6b51fe87c3d033fc575b9e56db3b5ca87ecad8e7ae452d2ea27429261",
+    "message_only_retrained": {
+      "full_3d_delta": -0.00027726590633392334,
+      "visible_but_unmasked_3d_delta": 0.001778310164809227,
+      "never_visible_3d_delta": -0.0015460774302482605,
+      "heldout_2d_delta": -0.0003718305379152298,
+      "target_absent_prediction_mass_relative_reduction": 0.07125179291289711
+    },
+    "interpretation": "Learned local messaging is nearly neutral and slightly helps the visible-mask gap; the shared global extent shrinkage causes most of the formal regression."
+  },
+  "decision": {
+    "promote_shared_edge_global_extent": false,
+    "restart_v4_or_replace_carrier": false,
+    "next_bounded_structure": "token_conditioned_soft_extent_with_learned_token_mass_prior",
+    "forbidden_next_variables": [
+      "v3 feature partitions",
+      "hard radius",
+      "benchmark threshold sweep",
+      "root cap",
+      "text prompt tuning",
+      "LERF proxy tuning"
+    ]
+  },
+  "conclusions": [
+    "The strict surface carrier has enough adjacency headroom; it is not the current bottleneck.",
+    "A shared query-free edge contains useful local boundary signal but cannot express that one surface edge may be valid for one object token and invalid for another.",
+    "The two-step and three-step learned arms consistently reduce continuous target-absent mass but trade away object coverage, full 3D mIoU, and held-out 2D mIoU.",
+    "The next minimal method change is token-conditioned edge transport plus a scene-disjoint learned soft full-mass prior, while keeping the frozen aligned pointwise unary and exact observed clamps."
+  ],
+  "forbidden_interpretations": [
+    "This is not a real-mask association result or a LERF2D/LERF3D result.",
+    "The oracle adjacency numbers use target membership and are diagnostic ceilings only.",
+    "The reduction in continuous absent-token mass does not rescue the regressions in object-equal held-out 2D or full 3D.",
+    "The rejected shared extent residual does not invalidate v4, the sparse carrier, observed/completed separation, or aligned RADIO source features."
+  ]
+}

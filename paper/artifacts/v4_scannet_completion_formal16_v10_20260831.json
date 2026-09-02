@@ -1,0 +1,194 @@
+{
+  "schema": "radio_gs.surface_object_memory_v4.scannet_completion_formal16.v1",
+  "status": "formal_completion_scored_pointwise_decoder_not_promoted",
+  "date": "2026-08-31",
+  "method_identity": "Surface-Aligned Object-Centric Universal Memory v4 Candidate",
+  "claim_scope": "scene-disjoint oracle-identity membership completion only",
+  "cohort": {
+    "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/pfir16_formal_stage_v2_target_rgb_isolated/cohort_manifest.json",
+    "manifest_sha256": "5e80bfb5d644f01d808c0bdb3e0ab231603ef641144d198b9646d3545d5ff56e",
+    "cache_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/pfir16_completion_cache_v2_target_rgb_isolated",
+    "cache_record_list_sha256": "3464b8e92aa2a0a23ab1537ee24f719dfc04cc778452f3b2cb751e731df4b2eb",
+    "training_scene_count": 12,
+    "validation_scene_count": 4,
+    "physical_family_disjoint": true,
+    "validation_element_count": 258033,
+    "validation_retained_token_count": 78,
+    "strict_stage_heldout_rgb_file_count": 0,
+    "target_rgb_opened_or_hashed": false
+  },
+  "training_contract": {
+    "report_schema": "radio_gs.surface_object_memory_v4.scannet_completion_oracle.v10",
+    "implementation_sha256": "2ec846c86406a71dd20c86a21e12b13ee5e9d709bb09e6e0b6cc79202fe69858",
+    "completion_implementation_sha256": "ea2d67616efd186c91bb9de6d9828787b2c8da355f8b9b9033d807e2275dcec5",
+    "seed": 20260831,
+    "step_count": 4000,
+    "samples_per_token": 256,
+    "batch_size": 256,
+    "element_batch_size": 4096,
+    "optimizer": "AdamW",
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0001,
+    "dropout": 0.1,
+    "temperature": 0.5,
+    "completion_confidence_cap": 0.95,
+    "sampler": "token_uniform",
+    "scoring": "mlp",
+    "validation_used_for_model_selection": false,
+    "primary_assignment": "threshold_free_token_plus_null_argmax",
+    "soft_iou_sufficient_statistics_dtype": "float64"
+  },
+  "artifacts": {
+    "radio_aligned": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/formal16_completion_12x4_v2_contract_v10/radio_f71_h128_s4000.json",
+      "report_sha256": "1f8aa44ac3c934b38b8caaa9c6adfea756eff04bc2836795ab59eaafa4e4d922",
+      "checkpoint_sha256": "248f43039c21355a05b7042933138f311c9c55932173c970cf2a54898762297d",
+      "feature_dimension": 71,
+      "hidden_dimension": 128,
+      "parameter_count": 55042
+    },
+    "rgb_capacity_matched": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/formal16_completion_12x4_v2_contract_v10/rgb_f7_h213_s4000.json",
+      "report_sha256": "bd090e236cc53546bc64e49dbb87e79d3e6263f450fa039087a16888249d5544",
+      "checkpoint_sha256": "b674f38888f1ddfb07b20abf6a9d05e5569a5b3063b4ff0d3f1aa6190c6751bc",
+      "feature_dimension": 7,
+      "hidden_dimension": 213,
+      "parameter_count": 55169,
+      "parameter_count_gap": 127,
+      "relative_parameter_count_gap": 0.0023073289488027325,
+      "exact_parameter_match": false
+    },
+    "radio_shuffled_alignment_control": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/formal16_completion_12x4_v2_contract_v10/radio_f71_h128_shuffled_s4000.json",
+      "report_sha256": "997328a2a72794bec9293a800c05d459dd22fe6df594916e6333cf0703c663f9",
+      "checkpoint_sha256": "ff82fb907585702289802783d20c6ca4ea424945ac22baaf1a776d10892204a5",
+      "aligned_reference_report_sha256": "1f8aa44ac3c934b38b8caaa9c6adfea756eff04bc2836795ab59eaafa4e4d922",
+      "only_changed_factor": "radio_alignment_control",
+      "shuffled_visible_row_count": 270184,
+      "moved_visible_row_count": 270184,
+      "fixed_point_count": 0,
+      "per_stratum_row_multisets_preserved": true
+    }
+  },
+  "scene_macro": {
+    "observed_only": {
+      "soft_3d_miou": 0.4280492961406708,
+      "heldout_2d_soft_miou": 0.3206993639469147
+    },
+    "radio_aligned": {
+      "soft_3d_miou": 0.5628429055213928,
+      "unknown_only_soft_3d_miou": 0.34947939962148666,
+      "heldout_2d_soft_miou": 0.3074658829718828,
+      "visible_but_unmasked_soft_3d_miou": 0.08751634694635868,
+      "visible_but_unmasked_assignment_precision": 0.6175762000267115,
+      "visible_but_unmasked_retained_object_coverage": 0.4558845338648378,
+      "visible_but_unmasked_correct_assignment_recall": 0.4019599868440214,
+      "never_visible_soft_3d_miou": 0.36890406906604767
+    },
+    "rgb_capacity_matched": {
+      "soft_3d_miou": 0.5517875775694847,
+      "unknown_only_soft_3d_miou": 0.35582689195871353,
+      "heldout_2d_soft_miou": 0.30077841505408287,
+      "visible_but_unmasked_soft_3d_miou": 0.08578408416360617,
+      "visible_but_unmasked_assignment_precision": 0.4990375243261139,
+      "visible_but_unmasked_retained_object_coverage": 0.3887606582270312,
+      "visible_but_unmasked_correct_assignment_recall": 0.3452848193544873,
+      "never_visible_soft_3d_miou": 0.37944646179676056
+    },
+    "radio_shuffled": {
+      "soft_3d_miou": 0.5673636943101883,
+      "unknown_only_soft_3d_miou": 0.36447974294424057,
+      "heldout_2d_soft_miou": 0.302151320502162,
+      "visible_but_unmasked_soft_3d_miou": 0.0719097163528204,
+      "visible_but_unmasked_assignment_precision": 0.4956716295886189,
+      "visible_but_unmasked_retained_object_coverage": 0.39337062091935554,
+      "visible_but_unmasked_correct_assignment_recall": 0.34831826502352026,
+      "never_visible_soft_3d_miou": 0.38771768659353256
+    }
+  },
+  "pooled_soft_iou": {
+    "observed_only": {
+      "full_3d_scene_token_macro": 0.43597710104094317,
+      "full_3d_union_micro": 0.2861526033292165,
+      "heldout_2d_scene_token_macro": 0.311733818256792,
+      "heldout_2d_union_micro": 0.25842015711795774,
+      "heldout_2d_false_positive_only_scene_token_count": 0
+    },
+    "radio_aligned": {
+      "full_3d_scene_token_macro": 0.5581791285909261,
+      "full_3d_union_micro": 0.5756966804321388,
+      "unknown_3d_scene_token_macro": 0.337054283023724,
+      "unknown_3d_union_micro": 0.44060069147321673,
+      "visible_but_unmasked_3d_scene_token_macro": 0.08514941637598165,
+      "visible_but_unmasked_3d_union_micro": 0.3226811008942342,
+      "never_visible_3d_scene_token_macro": 0.35807714239636607,
+      "never_visible_3d_union_micro": 0.4581140538506939,
+      "heldout_2d_scene_token_macro": 0.24143545729147953,
+      "heldout_2d_union_micro": 0.5066399734438503,
+      "heldout_2d_target_present_scene_token_count": 44,
+      "heldout_2d_false_positive_only_scene_token_count": 34
+    },
+    "rgb_capacity_matched": {
+      "full_3d_scene_token_macro": 0.5319143827274144,
+      "full_3d_union_micro": 0.5292528158031036,
+      "visible_but_unmasked_3d_scene_token_macro": 0.07299397201415156,
+      "visible_but_unmasked_3d_union_micro": 0.2259074306405818,
+      "heldout_2d_scene_token_macro": 0.22941435837153248,
+      "heldout_2d_union_micro": 0.47959359388836226,
+      "heldout_2d_false_positive_only_scene_token_count": 34
+    },
+    "radio_shuffled": {
+      "full_3d_scene_token_macro": 0.550578339817474,
+      "full_3d_union_micro": 0.5309493194894254,
+      "visible_but_unmasked_3d_scene_token_macro": 0.06995455890193233,
+      "visible_but_unmasked_3d_union_micro": 0.2370777607672003,
+      "heldout_2d_scene_token_macro": 0.22783579177108843,
+      "heldout_2d_union_micro": 0.46577084707118727,
+      "heldout_2d_false_positive_only_scene_token_count": 34
+    },
+    "surface_oracle_render_reference": {
+      "heldout_2d_scene_token_macro": 0.6426542880536465,
+      "heldout_2d_union_micro": 0.8255924127747618,
+      "heldout_2d_false_positive_only_scene_token_count": 0
+    }
+  },
+  "paired_differences": {
+    "radio_aligned_minus_rgb_capacity_matched_scene_macro": {
+      "soft_3d_miou": 0.011055327951908112,
+      "heldout_2d_soft_miou": 0.00668746791779995,
+      "visible_but_unmasked_soft_3d_miou": 0.0017322627827525139,
+      "visible_but_unmasked_assignment_precision": 0.11853867570059759,
+      "visible_but_unmasked_retained_object_coverage": 0.0671238756378066,
+      "visible_but_unmasked_correct_assignment_recall": 0.05667516748953408
+    },
+    "radio_aligned_minus_radio_shuffled": {
+      "scene_macro_soft_3d_miou": -0.004520788788795471,
+      "scene_macro_heldout_2d_soft_miou": 0.00531456246972084,
+      "scene_macro_visible_but_unmasked_soft_3d_miou": 0.015606630593538284,
+      "scene_macro_visible_but_unmasked_assignment_precision": 0.12190457043809256,
+      "scene_macro_visible_but_unmasked_retained_object_coverage": 0.06251391294548225,
+      "scene_macro_visible_but_unmasked_correct_assignment_recall": 0.05364172182050112,
+      "pooled_full_3d_scene_token_macro": 0.007600788773452161,
+      "pooled_full_3d_union_micro": 0.04474736094271348,
+      "pooled_heldout_2d_scene_token_macro": 0.013599665520391102,
+      "pooled_heldout_2d_union_micro": 0.04086912637266299
+    }
+  },
+  "formal_gate": {
+    "passes_scene_disjoint_completion_oracle": false,
+    "radio_aligned_soft_3d_improvement_over_observed_only": 0.13479360938072205,
+    "radio_aligned_heldout_2d_improvement_over_observed_only": -0.013233480975031853
+  },
+  "conclusions": [
+    "Scene-disjoint learned membership completion is effective in 3D, so the sparse carrier, observed/completed split, and completion supervision are not invalidated.",
+    "Exact same-implementation shuffling shows that RADIO element alignment improves visible-but-unmasked precision, coverage, recall, pooled 3D mass, and pooled held-out 2D; the source descriptor is useful.",
+    "The current independent element-token MLP is not promotable because object-equal held-out 2D declines despite a large mass-weighted micro gain. It over-completes 34 held-out scene-token pairs whose target object is absent.",
+    "The next method change is learned surface adjacency plus token-extent selection seeded by immutable observed positives. Radius, thresholds, root caps, text prompts, and v3 partitions are not the next optimization variables."
+  ],
+  "forbidden_interpretations": [
+    "This is not a real-mask global association result; object identity is oracle-isolated.",
+    "This is not LERF2D or LERF3D evidence.",
+    "The union-micro held-out 2D gain must not be presented without the object-equal macro regression and 34 false-positive-only pairs.",
+    "The failed strict gate does not invalidate the v4 carrier or RADIO features; it rejects the current pointwise completion decoder."
+  ]
+}

@@ -21,7 +21,16 @@ from torch.nn import functional as F
 from radio_gs.data.lerf_dataset import _read_cameras_binary
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.v4.carrier import Camera, SurfaceVoxelCarrier
+from radio_gs.v4.completion.lerf_adapter import (
+    apply_scannet_spatial_mass_candidate,
+    build_real_token_runtime,
+)
+from radio_gs.v4.completion.scannet import (
+    _load_source_rgb,
+    _radio_projection_matrix,
+)
 from radio_gs.v4.contracts.geometry_receipt import sha256_file
+from radio_gs.v4.contracts.surface_scene_bundle import load_geometry_binding
 from radio_gs.v4.evaluation.lerf_source_mask_gate import _load_sam_records, _masks
 from radio_gs.v4.evaluation.real_sam_token_association import _lift_masks
 from radio_gs.v4.geometry.fuse_lerf_moge3 import _read_images
@@ -58,7 +67,13 @@ def _validate_semantic_manifest(
     source_frames: list[int],
 ) -> list[int]:
     backbone = manifest.get("features", {}).get("backbone", {})
-    if backbone.get("dim") != 1280 or backbone.get("grid") != [46, 62]:
+    grid = backbone.get("grid")
+    if (
+        backbone.get("dim") != 1280
+        or not isinstance(grid, list)
+        or len(grid) != 2
+        or any(not isinstance(value, int) or value <= 0 for value in grid)
+    ):
         raise ValueError("semantic frame manifest lacks the expected RADIO backbone")
     binding = authority.get("construction", {}).get("frame_manifest", {})
     if binding.get("sha256") != sha256_file(manifest_path):
@@ -706,6 +721,11 @@ def _binary_iou(prediction: torch.Tensor, target: torch.Tensor) -> tuple[float, 
 
 @torch.no_grad()
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    if not getattr(args, "allow_deprecated_development_proxy", False):
+        raise RuntimeError(
+            "the legacy LERF polygon proxy is quarantined; build a cold-loadable "
+            "v4 surface scene bundle and use the formal evaluator"
+        )
     torch.set_num_threads(args.cpu_threads)
     if args.surface_view_prototype_count <= 0:
         raise ValueError("surface view prototype count must be positive")
@@ -716,6 +736,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     authority_path = Path(args.source_rgb_authority).resolve(strict=True)
     authority = json.loads(authority_path.read_text())
     source_frames = _validate_source_authority(authority, args.scene_label)
+    source_image_paths = {
+        _frame_index(str(item["image_id"])): Path(item["path"]).resolve(strict=True)
+        for item in authority["images"]
+    }
+    if set(source_image_paths) != set(source_frames):
+        raise ValueError("source RGB authority paths do not match its frame inventory")
     sam_paths = [Path(value).resolve(strict=True) for value in args.sam_manifest]
     sam_records = _load_sam_records(sam_paths)
     if set(source_frames) != set(sam_records):
@@ -725,13 +751,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     views = _read_images(sparse / "images.bin", raw_cameras)
 
     surface_path = Path(args.surface_carrier).resolve(strict=True)
-    surface_payload = torch.load(surface_path, map_location="cpu", weights_only=False)
-    carrier = SurfaceVoxelCarrier(
-        surface_payload["centres"], float(surface_payload["voxel_size_colmap"]),
-        normals=surface_payload.get("normals"), confidence=surface_payload.get("confidence"),
-        maximum_splat_radius=args.maximum_splat_radius,
-        surface_band_voxels=args.surface_band_voxels,
-        maximum_contributors_per_pixel=args.maximum_contributors_per_pixel,
+    geometry_binding, surface_payload = load_geometry_binding(
+        args.geometry_authority, surface_path
+    )
+    carrier = geometry_binding.configuration.build_carrier(
+        surface_payload["centres"],
+        normals=surface_payload.get("normals"),
+        confidence=surface_payload.get(
+            "confidence", torch.ones(len(surface_payload["centres"]), dtype=torch.float32)
+        ),
     )
     feature_dir = Path(args.siglip_feature_dir).resolve(strict=True)
     bound_manifest_value = authority.get("construction", {}).get("frame_manifest", {}).get("path")
@@ -756,6 +784,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         feature_dir / f"rgb_{source_frames[0]}.pt", expected_channels=1280
     )
     input_feature_dimension, height, width = first_feature.shape
+    declared_grid = semantic_manifest["features"]["backbone"]["grid"]
+    if [height, width] != declared_grid:
+        raise ValueError("semantic feature tensor grid differs from its bound manifest")
     summary_head = None
     if args.semantic_feature_space == "radio_backbone_summary_head":
         if input_feature_dimension != 1280 or not (args.summary_head_weights or args.radio_checkpoint):
@@ -785,6 +816,26 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         carrier.num_elements, feature_dimension, dtype=torch.float32, device=device
     )
     surface_feature_mass = torch.zeros(carrier.num_elements, dtype=torch.float32, device=device)
+    learned_completion = args.completion_mode == "scannet_spatial_mass"
+    required_completion_paths = (
+        args.completion_base_report,
+        args.completion_base_checkpoint,
+        args.completion_slot_checkpoint,
+        args.completion_mass_report,
+    )
+    if learned_completion and not all(required_completion_paths):
+        raise ValueError("learned completion requires all frozen report/checkpoint paths")
+    completion_feature_sum = torch.zeros(
+        carrier.num_elements,
+        67 if learned_completion else 0,
+        dtype=torch.float32,
+        device=device,
+    )
+    completion_feature_mass = torch.zeros(
+        carrier.num_elements, dtype=torch.float32, device=device
+    )
+    completion_cameras: list[Camera] = []
+    radio_projection = _radio_projection_matrix().to(device) if learned_completion else None
     retained_view_count = (
         args.surface_view_prototype_count
         if args.surface_semantic_evidence in ("view_prototype", "consistent_view") else 0
@@ -821,6 +872,25 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             expected_width=width,
         )
         raw_dense_device = dense.to(device).float()
+        projection = carrier.project(camera)
+        if learned_completion:
+            normalized_backbone = F.normalize(
+                raw_dense_device.permute(1, 2, 0), dim=-1, eps=1e-12
+            )
+            projected_radio = F.normalize(
+                normalized_backbone @ radio_projection, dim=-1, eps=1e-12
+            ).permute(2, 0, 1)
+            source_rgb = _load_source_rgb(
+                source_image_paths[frame_id], height, width
+            ).to(device).permute(2, 0, 1)
+            accumulate_surface_features(
+                completion_feature_sum,
+                completion_feature_mass,
+                torch.cat((source_rgb, projected_radio), dim=0),
+                projection,
+                channel_chunk_size=args.semantic_channel_chunk_size,
+            )
+            completion_cameras.append(camera)
         if summary_head is not None:
             mask_backbone = _masked_descriptors(raw_dense_device, masks.to(device))
             pooled_backbone_descriptor = F.normalize(
@@ -842,13 +912,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             surface_feature_sum,
             surface_feature_mass,
             dense_device,
-            carrier.project(camera),
+            projection,
             channel_chunk_size=args.semantic_channel_chunk_size,
         )
         if retained_view_count:
             update_surface_view_prototypes(
                 surface_view_descriptors, surface_view_mass, dense_device,
-                carrier.project(camera), channel_chunk_size=args.semantic_channel_chunk_size,
+                projection, channel_chunk_size=args.semantic_channel_chunk_size,
             )
         proposal_count += int(masks.shape[0])
     for semantic_index, frame_id in enumerate(semantic_extra_frames, start=1):
@@ -938,15 +1008,74 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     prototype_descriptors = torch.cat(descriptors, dim=0).detach().cpu()
     prototype_token_ids = torch.cat([item.token_ids for item in results], dim=0).detach().cpu()
     observed_membership = model.membership.detach()
-    completed_membership, completion_mask = conservative_token_geometry_completion(
-        model.element_centres, observed_membership,
-        observed_threshold=args.observed_threshold,
-        radius_multiplier=args.completion_radius_multiplier,
-        completion_weight=args.completion_weight,
-        minimum_scale=args.minimum_completion_scale,
-    )
     token_descriptors = model.descriptor_sum / model.descriptor_mass[:, None].clamp_min(1e-8)
     token_descriptors = F.normalize(token_descriptors, dim=-1).cpu()
+    completion_audit: dict[str, Any]
+    categorical_observed_membership = None
+    if learned_completion:
+        if carrier.normals is None:
+            raise RuntimeError("learned completion requires carrier normals")
+        completion_available = completion_feature_mass > 0
+        completion_average = completion_feature_sum / completion_feature_mass[:, None].clamp_min(1e-8)
+        completion_rgb = (
+            completion_average[:, :3] * 2.0 - 1.0
+        ) * completion_available[:, None]
+        completion_radio = F.normalize(
+            completion_average[:, 3:], dim=-1, eps=1e-12
+        ) * completion_available[:, None]
+        completion_local_features = torch.cat(
+            (
+                completion_rgb,
+                completion_available.float()[:, None],
+                completion_radio,
+                carrier.normals.to(device).float(),
+            ),
+            dim=-1,
+        ).cpu()
+        completion_runtime, adapter_audit = build_real_token_runtime(
+            carrier=carrier,
+            local_features=completion_local_features,
+            source_visible=completion_available.cpu(),
+            observed_membership=observed_membership.cpu(),
+            observation_cameras=completion_cameras,
+            view_token_ids=[item.token_ids.cpu() for item in results],
+            observed_threshold=args.observed_threshold,
+        )
+        categorical_active = completion_runtime["partial"].positive.float()
+        completed_active, learned_audit = apply_scannet_spatial_mass_candidate(
+            completion_runtime,
+            base_report_path=args.completion_base_report,
+            base_checkpoint_path=args.completion_base_checkpoint,
+            slot_checkpoint_path=args.completion_slot_checkpoint,
+            mass_report_path=args.completion_mass_report,
+            device=device,
+            unary_element_batch_size=args.completion_unary_element_batch_size,
+            inference_element_batch_size=args.completion_inference_element_batch_size,
+            projection_iteration_count=args.completion_projection_iteration_count,
+            projection_damping=args.completion_projection_damping,
+        )
+        active_token_ids = completion_runtime["active_token_ids"].long()
+        categorical_observed_membership = torch.zeros_like(observed_membership).cpu()
+        categorical_observed_membership[:, active_token_ids] = categorical_active
+        # Completion is defined only for tokens with a real categorical seed.
+        # Unseeded semantic tokens retain their source association evidence but
+        # receive no synthesized support.
+        completed_membership = observed_membership.float().cpu().clone()
+        completed_membership[:, active_token_ids] = completed_active
+        observed_categorical = categorical_observed_membership.max(-1).values > 0
+        completion_mask = (
+            completed_membership.max(-1).values > 0
+        ) & ~observed_categorical
+        completion_audit = {"adapter": adapter_audit, "inference": learned_audit}
+    else:
+        completed_membership, completion_mask = conservative_token_geometry_completion(
+            model.element_centres, observed_membership,
+            observed_threshold=args.observed_threshold,
+            radius_multiplier=args.completion_radius_multiplier,
+            completion_weight=args.completion_weight,
+            minimum_scale=args.minimum_completion_scale,
+        )
+        completion_audit = {"method": "legacy_conservative_token_geometry"}
     surface_average_descriptors_cpu = surface_average_descriptors.half().cpu()
     surface_descriptors = surface_descriptors_device.half().cpu()
     surface_view_descriptors_cpu = surface_view_descriptors.cpu()
@@ -957,9 +1086,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "scene_label": args.scene_label,
         "centres": carrier.centres,
         "normals": carrier.normals,
+        "confidence": carrier.confidence,
+        "voxel_size": carrier.voxel_size,
         "observed_membership": observed_membership.cpu(),
         "completed_membership": completed_membership.cpu(),
         "completion_mask": completion_mask.cpu(),
+        "categorical_observed_membership": (
+            categorical_observed_membership.cpu()
+            if categorical_observed_membership is not None else None
+        ),
+        "completion_audit": completion_audit,
         "token_descriptors": token_descriptors,
         "prototype_descriptors": prototype_descriptors,
         "prototype_token_ids": prototype_token_ids,
@@ -972,6 +1108,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "source_frames": source_frames,
         "semantic_source_frames": sorted(source_frames + semantic_extra_frames),
         "source_input_digests": {
+            "geometry_authority": geometry_binding.authority_sha256,
             "source_rgb_authority": sha256_file(authority_path),
             "surface_carrier": sha256_file(surface_path),
             "semantic_projector_checkpoint": (
@@ -981,19 +1118,48 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "semantic_frame_manifest": (
                 sha256_file(semantic_manifest_path)
             ),
+            **(
+                {
+                    "completion_base_report": sha256_file(
+                        Path(args.completion_base_report).resolve(strict=True)
+                    ),
+                    "completion_base_checkpoint": sha256_file(
+                        Path(args.completion_base_checkpoint).resolve(strict=True)
+                    ),
+                    "completion_slot_checkpoint": sha256_file(
+                        Path(args.completion_slot_checkpoint).resolve(strict=True)
+                    ),
+                    "completion_mass_report": sha256_file(
+                        Path(args.completion_mass_report).resolve(strict=True)
+                    ),
+                }
+                if learned_completion else {}
+            ),
             **{f"sam_manifest_{index}": sha256_file(path) for index, path in enumerate(sam_paths)},
         },
         "method_configuration": {
-            key: getattr(args, key) for key in (
-                "minimum_overlap", "association_null_logit", "association_temperature",
-                "geometry_weight", "appearance_weight", "batch_birth_overlap",
-                "completion_radius_multiplier", "completion_weight", "observed_threshold",
-                "semantic_channel_chunk_size",
-                "semantic_feature_space",
-                "proposal_descriptor_mode",
-                "surface_view_prototype_count",
-                "semantic_agreement_floor", "semantic_agreement_power",
-            )
+            "carrier": {
+                "voxel_size": geometry_binding.configuration.voxel_size,
+                "maximum_splat_radius": geometry_binding.configuration.maximum_splat_radius,
+                "surface_band_voxels": geometry_binding.configuration.surface_band_voxels,
+                "maximum_contributors_per_pixel": (
+                    geometry_binding.configuration.maximum_contributors_per_pixel
+                ),
+                "camera_convention": geometry_binding.configuration.camera_convention,
+            },
+            **{
+                key: getattr(args, key) for key in (
+                    "minimum_overlap", "association_null_logit", "association_temperature",
+                    "geometry_weight", "appearance_weight", "batch_birth_overlap",
+                    "completion_radius_multiplier", "completion_weight", "observed_threshold",
+                    "completion_mode",
+                    "semantic_channel_chunk_size",
+                    "semantic_feature_space",
+                    "proposal_descriptor_mode",
+                    "surface_view_prototype_count",
+                    "semantic_agreement_floor", "semantic_agreement_power",
+                )
+            },
         },
         "information_policy": {
             "target_rgb_opened_during_construction": False,
@@ -1209,6 +1375,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "per_observation": per_observation,
         "scene_state": str(state_path),
         "scene_state_sha256": sha256_file(state_path),
+        "completion_method": args.completion_mode,
+        "completion_audit": completion_audit,
         "relaxed_gate_policy": {
             "gates_block_execution": False,
             "promotion_claimed": False,
@@ -1234,6 +1402,7 @@ def main() -> None:
     parser.add_argument("--source-rgb-authority", required=True)
     parser.add_argument("--sam-manifest", action="append", required=True)
     parser.add_argument("--surface-carrier", required=True)
+    parser.add_argument("--geometry-authority", required=True)
     parser.add_argument("--siglip-feature-dir", required=True)
     parser.add_argument("--semantic-frame-manifest")
     parser.add_argument("--label-root", required=True)
@@ -1241,9 +1410,11 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--cpu-threads", type=int, default=4)
-    parser.add_argument("--maximum-splat-radius", type=int, default=3)
-    parser.add_argument("--surface-band-voxels", type=float, default=1.5)
-    parser.add_argument("--maximum-contributors-per-pixel", type=int, default=8)
+    parser.add_argument(
+        "--allow-deprecated-development-proxy",
+        action="store_true",
+        help="explicitly opt into the quarantined non-promotion polygon proxy",
+    )
     parser.add_argument("--minimum-overlap", type=float, default=0.10)
     parser.add_argument("--association-null-logit", type=float, default=0.25)
     parser.add_argument("--association-temperature", type=float, default=0.10)
@@ -1254,6 +1425,19 @@ def main() -> None:
     parser.add_argument("--completion-radius-multiplier", type=float, default=1.5)
     parser.add_argument("--completion-weight", type=float, default=0.25)
     parser.add_argument("--minimum-completion-scale", type=float, default=0.04)
+    parser.add_argument(
+        "--completion-mode",
+        choices=("legacy_conservative_geometry", "scannet_spatial_mass"),
+        default="legacy_conservative_geometry",
+    )
+    parser.add_argument("--completion-base-report")
+    parser.add_argument("--completion-base-checkpoint")
+    parser.add_argument("--completion-slot-checkpoint")
+    parser.add_argument("--completion-mass-report")
+    parser.add_argument("--completion-unary-element-batch-size", type=int, default=512)
+    parser.add_argument("--completion-inference-element-batch-size", type=int, default=1024)
+    parser.add_argument("--completion-projection-iteration-count", type=int, default=256)
+    parser.add_argument("--completion-projection-damping", type=float, default=0.5)
     parser.add_argument(
         "--semantic-feature-space",
         choices=("radio_backbone_summary_head",),

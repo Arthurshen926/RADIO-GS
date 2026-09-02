@@ -1,0 +1,170 @@
+{
+  "schema": "radio_gs.surface_object_memory_v4.scannet_completion_cohort16_contract.v2",
+  "status": "strict_cache_ready_formal_pointwise_completion_scored_not_promoted",
+  "date": "2026-08-31",
+  "claim_scope": "development evidence for the oracle-identity learned completion stage only",
+  "method_identity": "Surface-Aligned Object-Centric Universal Memory v4 Candidate",
+  "cohort": {
+    "selection_policy": "eligible_frozen_radio_grid_sha256_rank_physical_family_disjoint_balanced_per_field_shard_v1",
+    "selection_salt": "radio_gs_v4_completion_cohort16_v1",
+    "validation_selection_salt": "radio_gs_v4_completion_val4_v1",
+    "cohort_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/pfir16_formal_stage_v2_target_rgb_isolated/cohort_manifest.json",
+      "sha256": "5e80bfb5d644f01d808c0bdb3e0ab231603ef641144d198b9646d3545d5ff56e"
+    },
+    "training_scene_ids": [
+      "scene0382_01",
+      "scene0535_00",
+      "scene0430_00",
+      "scene0474_05",
+      "scene0621_00",
+      "scene0578_01",
+      "scene0011_01",
+      "scene0550_00",
+      "scene0046_00",
+      "scene0559_01",
+      "scene0435_03",
+      "scene0591_02"
+    ],
+    "validation_scene_ids": [
+      "scene0030_00",
+      "scene0050_02",
+      "scene0697_01",
+      "scene0307_02"
+    ],
+    "physical_family_overlap": [],
+    "field_shard_counts": {
+      "shard0": {"total": 8, "training": 6, "validation": 2},
+      "shard1": {"total": 8, "training": 6, "validation": 2}
+    },
+    "audited_annotation_scene_count": 57,
+    "fully_valid_scene_count": 57,
+    "excluded_incompatible_native_30x40_radio_grid_scenes": [
+      "scene0088_03",
+      "scene0474_03",
+      "scene0689_00",
+      "scene0704_00",
+      "scene0704_01"
+    ]
+  },
+  "source_contract": {
+    "total_views_per_scene": 8,
+    "source_positions_zero_based": [0, 2, 5, 7],
+    "heldout_positions_zero_based": [1, 3, 4, 6],
+    "source_rgb_size_wh": [1296, 968],
+    "radio_input_size_hw": [960, 1296],
+    "radio_grid_hw": [60, 81],
+    "radio_version": "c-radio_v4-h",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "radio_projection": "fixed_data_independent_rademacher_jl64",
+    "radio_projection_sha256": "9c38ec18c82219e404fdecc4ee65ebefa7f7e803ac92b4e0ce5ae81c78fef663",
+    "source_feature_manifest_count": 16,
+    "source_rgb_frame_count": 64,
+    "heldout_rgb_path_resolved": false,
+    "heldout_rgb_materialized_in_scene_root": false,
+    "heldout_rgb_decoded_or_opened": false,
+    "heldout_rgb_content_hashed": false,
+    "heldout_radio_opened": false,
+    "heldout_target_authority": "original_mesh_vertex_instance_raycast"
+  },
+  "carrier_and_observation_configuration": {
+    "voxel_size": 0.04,
+    "maximum_splat_radius": 1,
+    "surface_band_voxels": 1.5,
+    "maximum_contributors_per_pixel": 8,
+    "minimum_voxel_instance_purity": 0.8,
+    "minimum_observed_elements": 8,
+    "minimum_total_elements": 24,
+    "source_object_view_mask_keep_probability": 0.5
+  },
+  "cache_inventory": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/pfir16_completion_cache_v2_target_rgb_isolated",
+    "scene_count": 16,
+    "cache_record_list_sha256": "3464b8e92aa2a0a23ab1537ee24f719dfc04cc778452f3b2cb751e731df4b2eb",
+    "element_count": 734094,
+    "annotated_element_count": 425753,
+    "retained_token_count": 286,
+    "scene_macro": {
+      "observed_annotated_fraction": 0.3216800270602107,
+      "source_visible_annotated_fraction": 0.4439489133656025,
+      "visible_but_unmasked_annotated_fraction": 0.12226888642180711,
+      "never_visible_annotated_fraction": 0.5560510903596878,
+      "surface_perfect_membership_heldout_2d_soft_miou": 0.6511710402442981
+    },
+    "training": {
+      "scene_count": 12,
+      "element_count": 476061,
+      "retained_token_count": 208,
+      "scene_macro_observed_annotated_fraction": 0.3226878096659978,
+      "scene_macro_source_visible_annotated_fraction": 0.45401719212532043,
+      "scene_macro_visible_but_unmasked_annotated_fraction": 0.1313293813727796,
+      "scene_macro_never_visible_annotated_fraction": 0.5459828128417333,
+      "scene_macro_surface_perfect_membership_heldout_2d_soft_miou": 0.6416789130948677
+    },
+    "validation": {
+      "scene_count": 4,
+      "element_count": 258033,
+      "retained_token_count": 78,
+      "scene_macro_observed_annotated_fraction": 0.31865667924284935,
+      "scene_macro_source_visible_annotated_fraction": 0.41374407708644867,
+      "scene_macro_visible_but_unmasked_annotated_fraction": 0.09508740156888962,
+      "scene_macro_never_visible_annotated_fraction": 0.5862559229135513,
+      "scene_macro_surface_perfect_membership_heldout_2d_soft_miou": 0.6796474216925894
+    }
+  },
+  "implementation_corrections": [
+    "RADIO manifest camera matching is an exact duplicate-free set match and is reordered by camera key rather than extractor file order.",
+    "Numeric extractor saved stems may remove leading zeroes only when their integer identity remains equal to the camera key.",
+    "Held-out RGB paths are not resolved or recorded and held-out RGB files are not materialized in the strict scene root; transforms retain camera identifiers only.",
+    "All 16 strict caches passed the production loader and are tensor-for-tensor numerically identical to the superseded v1 diagnostic caches."
+  ],
+  "strict_target_rgb_isolation_audit": {
+    "stage_schema": "radio_gs.surface_object_memory_v4.scannet_pfir_completion_stage.v3",
+    "cohort_schema": "radio_gs.surface_object_memory_v4.scannet_pfir_completion_cohort.v3",
+    "source_frame_count": 64,
+    "heldout_camera_count": 64,
+    "heldout_rgb_file_count_in_strict_stage": 0,
+    "heldout_rgb_absolute_path_occurrences_from_v1_in_v2_json": 0,
+    "source_rgb_v1_v2_radio_manifest_sha_binding_count": 64,
+    "source_rgb_binding_aggregate_sha256": "7b5b115ebc73834aaa2c114e8ca4c9c93ce9947abc85bbdc7f0e0985e0c1a18d",
+    "radio_feature_tensor_hash_count": 128,
+    "radio_feature_tensor_total_bytes": 797013376,
+    "stage_receipt_aggregate_sha256": "f59188af78694613b1a57246b372198dc46a14ff977f0dcf808ad7281965ab78",
+    "strict_cache_load_validated_scene_count": 16,
+    "strict_cache_numerically_identical_to_v1_scene_count": 16
+  },
+  "formal_training_protocol": {
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260831/v4_completion_oracle/formal16_completion_12x4_v2_contract_v10",
+    "report_schema": "radio_gs.surface_object_memory_v4.scannet_completion_oracle.v10",
+    "step_count": 4000,
+    "seed": 20260831,
+    "sampler": "token_uniform",
+    "scoring": "mlp",
+    "radio_arm": {"feature_dimension": 71, "hidden_dimension": 128, "parameter_count": 55042},
+    "rgb_control_arm": {
+      "feature_dimension": 7,
+      "hidden_dimension": 213,
+      "parameter_count": 55169,
+      "parameter_count_gap_from_radio": 127,
+      "relative_parameter_count_gap": 0.002307328950256531
+    },
+    "capacity_match_is_exact": false,
+    "validation_is_not_used_for_model_selection": true
+  },
+  "formal_result": {
+    "artifact_path": "paper/artifacts/v4_scannet_completion_formal16_v10_20260831.json",
+    "artifact_sha256": "32eabc4f8ead9d54ba7ffe2d02d37b56ff37312447e45b8e9432dffe321ac2be",
+    "radio_aligned_scene_macro_soft_3d_miou": 0.5628429055213928,
+    "radio_aligned_scene_macro_heldout_2d_soft_miou": 0.3074658829718828,
+    "observed_only_scene_macro_soft_3d_miou": 0.4280492961406708,
+    "observed_only_scene_macro_heldout_2d_soft_miou": 0.3206993639469147,
+    "heldout_2d_false_positive_only_scene_token_count": 34,
+    "pointwise_decoder_promoted": false,
+    "next_method": "learned_surface_adjacency_and_token_extent_selection"
+  },
+  "forbidden_interpretations": [
+    "This artifact is not a learned-completion result.",
+    "It is not an association result and uses oracle object identity.",
+    "It is not LERF2D or LERF3D evidence."
+  ]
+}

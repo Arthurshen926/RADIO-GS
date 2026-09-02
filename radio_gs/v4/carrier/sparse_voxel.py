@@ -2,12 +2,26 @@
 
 from __future__ import annotations
 
+import hashlib
 import itertools
+import operator
 
 import numpy as np
 import torch
 
 from .base import Camera, ProjectionTable, SparseAdjacency, SurfaceCarrier
+
+
+def _exact_integer(value: object, *, name: str, minimum: int) -> int:
+    if isinstance(value, (bool, np.bool_)):
+        raise ValueError(f"{name} must be an integer >= {minimum}")
+    try:
+        result = operator.index(value)
+    except TypeError as error:
+        raise ValueError(f"{name} must be an integer >= {minimum}") from error
+    if result < minimum:
+        raise ValueError(f"{name} must be an integer >= {minimum}")
+    return int(result)
 
 
 class SurfaceVoxelCarrier(SurfaceCarrier):
@@ -18,28 +32,40 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         *,
         normals: torch.Tensor | None = None,
         confidence: torch.Tensor | None = None,
-        maximum_splat_radius: int = 3,
-        surface_band_voxels: float = 1.5,
-        maximum_contributors_per_pixel: int = 8,
+        maximum_splat_radius: int,
+        surface_band_voxels: float,
+        maximum_contributors_per_pixel: int,
     ) -> None:
         centres = torch.as_tensor(centres, dtype=torch.float32).cpu()
         if centres.ndim != 2 or centres.shape[1] != 3 or centres.shape[0] == 0:
             raise ValueError("centres must have shape [E, 3]")
+        if not torch.isfinite(centres).all():
+            raise ValueError("centres must be finite")
+        radius = _exact_integer(
+            maximum_splat_radius, name="maximum_splat_radius", minimum=0
+        )
+        contributor_cap = _exact_integer(
+            maximum_contributors_per_pixel,
+            name="maximum_contributors_per_pixel",
+            minimum=1,
+        )
         if (
-            voxel_size <= 0
-            or maximum_splat_radius < 0
+            not np.isfinite(voxel_size)
+            or not np.isfinite(surface_band_voxels)
+            or voxel_size <= 0
             or surface_band_voxels < 0
-            or maximum_contributors_per_pixel <= 0
         ):
-            raise ValueError("voxel size must be positive and splat radius non-negative")
+            raise ValueError("voxel_size and surface_band_voxels must be finite and non-negative")
         self.centres = centres
         self.voxel_size = float(voxel_size)
-        self.maximum_splat_radius = int(maximum_splat_radius)
+        self.maximum_splat_radius = radius
         self.surface_band_voxels = float(surface_band_voxels)
-        self.maximum_contributors_per_pixel = int(maximum_contributors_per_pixel)
+        self.maximum_contributors_per_pixel = contributor_cap
         self.normals = None if normals is None else torch.as_tensor(normals, dtype=torch.float32).cpu()
         if self.normals is not None and self.normals.shape != centres.shape:
             raise ValueError("normals must match centres")
+        if self.normals is not None and not torch.isfinite(self.normals).all():
+            raise ValueError("normals must be finite")
         self.confidence = (
             torch.ones(centres.shape[0])
             if confidence is None
@@ -47,6 +73,8 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         )
         if self.confidence.shape != (centres.shape[0],):
             raise ValueError("confidence must have shape [E]")
+        if not torch.isfinite(self.confidence).all() or bool((self.confidence < 0).any()):
+            raise ValueError("confidence must be finite and non-negative")
         self._adjacency: SparseAdjacency | None = None
         self._projection_cache: dict[str, ProjectionTable] = {}
 
@@ -58,11 +86,25 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         *,
         normals: torch.Tensor | None = None,
         confidence: torch.Tensor | None = None,
-        maximum_splat_radius: int = 3,
-        surface_band_voxels: float = 1.5,
-        maximum_contributors_per_pixel: int = 8,
+        maximum_splat_radius: int,
+        surface_band_voxels: float,
+        maximum_contributors_per_pixel: int,
     ) -> "SurfaceVoxelCarrier":
         points = torch.as_tensor(points, dtype=torch.float32).cpu()
+        if points.ndim != 2 or points.shape[1] != 3 or points.shape[0] == 0:
+            raise ValueError("points must have shape [N, 3]")
+        if not torch.isfinite(points).all():
+            raise ValueError("points must be finite")
+        if not np.isfinite(voxel_size) or voxel_size <= 0:
+            raise ValueError("voxel_size must be finite and positive")
+        radius = _exact_integer(
+            maximum_splat_radius, name="maximum_splat_radius", minimum=0
+        )
+        contributor_cap = _exact_integer(
+            maximum_contributors_per_pixel,
+            name="maximum_contributors_per_pixel",
+            minimum=1,
+        )
         keys = torch.floor(points / voxel_size).to(torch.int64)
         unique, inverse = torch.unique(keys, dim=0, return_inverse=True)
         count = torch.bincount(inverse, minlength=unique.shape[0]).float()
@@ -71,31 +113,55 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         centres /= count[:, None]
         reduced_normals = None
         if normals is not None:
+            normals = torch.as_tensor(normals, dtype=torch.float32).cpu()
+            if normals.shape != points.shape or not torch.isfinite(normals).all():
+                raise ValueError("normals must be finite and match points")
             reduced_normals = torch.zeros_like(centres)
-            reduced_normals.index_add_(0, inverse, torch.as_tensor(normals, dtype=torch.float32))
+            reduced_normals.index_add_(0, inverse, normals)
             reduced_normals = torch.nn.functional.normalize(reduced_normals, dim=-1, eps=1e-12)
         reduced_confidence = torch.ones(unique.shape[0])
         if confidence is not None:
+            confidence = torch.as_tensor(confidence, dtype=torch.float32).cpu()
+            if (
+                confidence.shape != (points.shape[0],)
+                or not torch.isfinite(confidence).all()
+                or bool((confidence < 0).any())
+            ):
+                raise ValueError("confidence must be finite, non-negative, and match points")
             reduced_confidence = torch.zeros(unique.shape[0])
-            reduced_confidence.index_add_(0, inverse, torch.as_tensor(confidence, dtype=torch.float32))
+            reduced_confidence.index_add_(0, inverse, confidence)
             reduced_confidence /= count
         return cls(
             centres,
             voxel_size,
             normals=reduced_normals,
             confidence=reduced_confidence,
-            maximum_splat_radius=maximum_splat_radius,
+            maximum_splat_radius=radius,
             surface_band_voxels=surface_band_voxels,
-            maximum_contributors_per_pixel=maximum_contributors_per_pixel,
+            maximum_contributors_per_pixel=contributor_cap,
         )
 
     @property
     def num_elements(self) -> int:
         return int(self.centres.shape[0])
 
+    @staticmethod
+    def _projection_cache_key(camera: Camera) -> str:
+        """Bind cached projections to the complete camera, never only its label."""
+
+        digest = hashlib.sha256()
+        digest.update(camera.key.encode("utf-8"))
+        digest.update(camera.intrinsic.detach().cpu().numpy().astype(np.float64, copy=False).tobytes())
+        digest.update(
+            camera.camera_to_world.detach().cpu().numpy().astype(np.float64, copy=False).tobytes()
+        )
+        digest.update(np.asarray([camera.height, camera.width], dtype=np.int64).tobytes())
+        return digest.hexdigest()
+
     def project(self, camera: Camera) -> ProjectionTable:
-        if camera.key in self._projection_cache:
-            return self._projection_cache[camera.key]
+        cache_key = self._projection_cache_key(camera)
+        if cache_key in self._projection_cache:
+            return self._projection_cache[cache_key]
         world_to_camera = torch.linalg.inv(camera.camera_to_world).float()
         homogeneous = torch.cat([self.centres, torch.ones(self.num_elements, 1)], dim=-1)
         camera_points = homogeneous @ world_to_camera.T
@@ -128,7 +194,7 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
                 torch.empty(0), torch.empty(0), self.num_elements, camera.height, camera.width,
                 metadata={"backend": "sparse_surface_voxel_zbuffer"},
             )
-            self._projection_cache[camera.key] = result
+            self._projection_cache[cache_key] = result
             return result
         elements = torch.cat(candidate_elements).numpy()
         pixels = torch.cat(candidate_pixels).numpy()
@@ -163,12 +229,13 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
             metadata={
                 "backend": "sparse_surface_voxel_zbuffer",
                 "voxel_size": self.voxel_size,
+                "maximum_splat_radius": self.maximum_splat_radius,
                 "surface_band_voxels": self.surface_band_voxels,
                 "maximum_contributors_per_pixel": self.maximum_contributors_per_pixel,
                 "visible_pixel_count": int(np.unique(pixels[chosen]).size),
             },
         )
-        self._projection_cache[camera.key] = result
+        self._projection_cache[cache_key] = result
         return result
 
     def neighbors(self) -> SparseAdjacency:

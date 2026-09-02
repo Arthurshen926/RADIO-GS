@@ -1,3 +1,4 @@
+import argparse
 import json
 
 import torch
@@ -20,7 +21,17 @@ from radio_gs.v4.evaluation.lerf_development_pipeline import (
     select_consistent_surface_view,
     conservative_token_geometry_completion,
     token_null_posterior,
+    run,
 )
+
+
+def test_development_polygon_proxy_is_quarantined_by_default() -> None:
+    try:
+        run(argparse.Namespace(allow_deprecated_development_proxy=False))
+    except RuntimeError as error:
+        assert "quarantined" in str(error)
+    else:
+        raise AssertionError("deprecated development proxy ran without explicit opt-in")
 
 
 def test_source_authority_validation_rejects_information_leak() -> None:
@@ -63,6 +74,26 @@ def test_semantic_manifest_validation_rejects_excluded_frame(tmp_path) -> None:
         assert "excluded frame" in str(error)
     else:
         raise AssertionError("excluded semantic frame was accepted")
+
+
+def test_semantic_manifest_validation_accepts_bound_native_grid(tmp_path) -> None:
+    manifest_path = tmp_path / "frame_manifest.json"
+    feature_dir = tmp_path / "backbone"
+    feature_dir.mkdir()
+    manifest = {
+        "features": {"backbone": {"dim": 1280, "grid": [45, 62], "subdir": "backbone"}},
+        "frames": [{"frame_idx": 1}],
+        "excluded_image_names": [],
+    }
+    manifest_path.write_text(json.dumps(manifest))
+    from radio_gs.v4.contracts.geometry_receipt import sha256_file
+    authority = {"construction": {"frame_manifest": {"sha256": sha256_file(manifest_path)}}}
+
+    frames = _validate_semantic_manifest(
+        manifest, manifest_path, authority, feature_dir.resolve(), [1]
+    )
+
+    assert frames == [1]
 
 
 def test_accumulate_surface_features_respects_sparse_projection_weights() -> None:

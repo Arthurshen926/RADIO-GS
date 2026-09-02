@@ -486,17 +486,381 @@ negative text banks are now loaded directly by the v4 evaluator, avoiding an
 unrelated legacy evaluator import and its optional dependencies. Average mode
 also no longer allocates or serializes unused per-view prototype banks.
 
+## Scene-disjoint learned object completion (2026-08-31)
+
+The v4 main line now isolates the missing link explicitly: sparse, mask-supported
+observations are immutable input facts, while only unknown element/token pairs
+may be completed.  The cache distinguishes `source_visible` from
+`membership_observed`, applies deterministic object/view mask dropout, uses
+complete 3D ScanNet instance membership only as the unknown-row target, and
+evaluates four RGB-free held-out cameras against the original annotated mesh.
+The primary assignment decision is threshold-free argmax over all tokens plus
+one learned null; the historical 0.5 threshold is diagnostic only.
+
+On the initial four-scene leave-one-scene-out pilot, the F7 RGB+normal MLP
+reaches scene-macro 0.45003 3D soft mIoU and 0.38797 held-out 2D soft mIoU,
+improving over observed-only by 0.03276 and 0.00621.  Adding source-only frozen
+C-RADIO JL64 features raises these to 0.49188 and 0.43187, gains of 0.07460 and
+0.05011 over the same observed-only baseline.  This overall gain is real but
+does not solve the central visible-mask gap: visible-but-unmasked soft 3D mIoU
+falls from 0.08167 to 0.04740, correct-assignment recall from 0.24149 to
+0.12528, and predicted coverage from 0.51753 to 0.25391.  The aggregate RADIO
+gain is therefore concentrated in the never-visible stratum and calibration,
+not in recovery of already visible surfaces missed by the mask teacher.
+
+A matched-capacity RGB control closes the model-size confound.  F7/H213 has
+55,169 parameters versus 55,042 for F71/H128, but reaches only 0.44737/0.38073
+(3D/held-out 2D), slightly below the smaller F7/H128 control.  Network capacity
+does not explain the RADIO improvement.  Two-fold directional sentinels also
+reject three local repairs as the next method: visibility-stratum sampling,
+an explicit normalized RADIO cosine residual, and availability-conditioned
+dual experts.  The dual expert especially collapses one held-out scene, while
+direct cache diagnostics show that RADIO VBU object/prototype top-1 cosine is
+about 0.488.  Thus the source feature is not globally uninformative; the
+current pointwise scoring/training organization fails to convert it into
+stable completion.
+
+The pilot was too small for a scientific conclusion, so a formal expanded
+cohort is now frozen.  All 57 PFIR annotation scenes were audited; five native
+low-resolution scenes that would produce a 30x40 rather than 60x81 RADIO grid
+are excluded.  SHA-ranked, physical-family-disjoint selection yields 16 scenes
+balanced 8/8 across the two field shards, with 12 training scenes and two
+validation scenes per shard.  All 64 source frames have exact checkpoint-bound
+C-RADIO features.  The 16 validated caches contain 734,094 elements and 286
+retained tokens.  Validation contains 258,033 elements and 78 tokens; its
+scene-macro observed fraction is 0.31866, visible-but-unmasked fraction 0.09509,
+never-visible fraction 0.58626, and independent mesh-rendered 4 cm ceiling
+0.67965.  The superseded v1 stage did not decode or content-hash held-out RGB,
+but still exposed hardlinks.  The strict v2 stage removes that capability:
+each scene contains exactly the four source images, all 64 held-out image files
+are absent, their raw paths are not recorded, and all 16 rebuilt caches remain
+tensor-for-tensor identical to v1.
+
+A four-fold shuffled-RADIO diagnostic preserves the RADIO row multiset within
+the observed and visible-but-unmasked strata while breaking element alignment.
+Relative to the earlier aligned pilot, held-out 2D soft mIoU is lower by 0.04735
+on average and is lower on all four held-out scenes; full 3D is lower by 0.03141
+on average.  However, unknown-only soft 3D is essentially unchanged (-0.00273
+for aligned minus shuffled), and shuffled features increase visible-but-unmasked
+coverage.  This supports a limited conclusion: aligned source descriptors help
+the aggregate cross-view result, but the current pointwise completion route does
+not turn that alignment into stable visible-mask-gap recovery.  Because the old
+aligned and shuffled reports were emitted by different reporting revisions,
+this remains a diagnostic rather than a sealed single-factor causal result; the
+formal v10 runner now requires a hash-bound same-implementation aligned report
+for any shuffled control.
+
+Two preparation adapter defects were fixed before training: feature manifests
+are now matched to cameras as an exact duplicate-free set rather than requiring
+extractor order, and numeric saved stems may drop leading zeroes only when their
+integer camera identity remains equal.  A real scene replay verifies that
+coverage order `000110,000527,000121,000000` resolves to the corresponding
+`rgb_110,rgb_527,rgb_121,rgb_0` tensors without reopening or regenerating any
+feature.
+
+The frozen 12-train/4-validation run now provides the first formal completion
+result.  Aligned F71/H128 reaches scene-macro 0.56284 3D soft mIoU versus
+0.42805 observed-only and 0.55179 for the closest-capacity F7/H213 control.
+The same-implementation, hash-bound shuffled-RADIO arm shows the more precise
+feature conclusion: alignment improves visible-but-unmasked soft IoU by
+0.01561, assignment precision by 0.12190, coverage by 0.06251, recall by
+0.05364, and pooled held-out 2D token macro/micro by 0.01360/0.04087.  RADIO
+alignment is useful, although its effect is heterogeneous across scenes.
+
+The current pointwise decoder nevertheless fails the Object Gate.  Its
+scene-macro held-out 2D score is 0.30747, below 0.32070 observed-only; its
+scene-token macro falls from 0.31173 to 0.24144 even while union-micro rises
+from 0.25842 to 0.50664.  The discrepancy is explained by object-size
+imbalance and spatial over-completion: only 44 of 78 held-out scene-token pairs
+contain the target, while the learned posterior creates 34 false-positive-only
+pairs.  This rejects independent element-token scoring, not the carrier,
+completion supervision, or RADIO.  The next bounded arm is token-conditioned
+surface message passing with learned geometry/RADIO edge compatibility and
+soft extent regularization; it must improve held-out object-equal 2D and reduce
+the 34 false-positive pairs while retaining the demonstrated 3D gain.  Hard
+extent envelopes, threshold tuning, and direct LERF deployment of the
+oracle-identity checkpoint are not justified.
+
+The bound expanded-cohort contract is
+`paper/artifacts/v4_scannet_completion_cohort16_contract_20260831.json`
+(`789553dc61ef0509728b8b006152d3bd0d1273e0434e270dee8359b1239c1fa3`).
+The scored result is bound by
+`paper/artifacts/v4_scannet_completion_formal16_v10_20260831.json`
+(`32eabc4f8ead9d54ba7ffe2d02d37b56ff37312447e45b8e9432dffe321ac2be`).
+Radius, root cap, tracking threshold, v3 feature partitions, text selection,
+and LERF proxy tuning remain outside this stage.
+
+### Shared-edge message passing result
+
+The next bounded arm was implemented without changing the frozen aligned
+pointwise unary.  A source-only 19-D geometry/normal/RGB/RADIO edge scorer
+feeds two or three local propagation steps, observed token and null facts are
+clamped exactly after every step, and a soft observed-seed extent residual
+returns suppressed token mass to null.  The first implementation exposed two
+contract defects before the formal run: CUDA and CPU `floor` disagreed at a
+small number of voxel boundaries, and a zero-logit extent gate removed half of
+unsupported mass per step before learning.  Adjacency validation now uses the
+same CPU-float32 authority as `SurfaceVoxelCarrier`; all 16 caches and about
+2.89 million directed edges pass.  The extent residual now starts at logit
+-3, retaining about 95.3% per step, and the latest module/trainer tests pass
+19/19.
+
+The fixed six-neighbour topology is not the limiting factor.  Target-aware
+diagnostics show that oracle same-token flood-fill reaches 0.96098 full 3D,
+0.88733 visible-but-unmasked 3D, and 0.64053 held-out 2D.  Multiplying the
+frozen unary by the oracle reachable extent still reaches 0.76040/0.50354
+(full 3D/held-out 2D) and removes every false-positive-only held-out token.
+Only 4,452 of 128,739 validation object-surface elements lie in true-token
+components without any observed seed.  The carrier therefore has ample
+completion headroom.
+
+A scene-disjoint source-only edge probe finds real but insufficient boundary
+signal: validation AUROC/AP are 0.74534/0.77713, but TNR at 0.5 is only
+0.48229.  Threshold-free soft bottleneck extent changes full 3D from 0.56284
+to 0.57082 and held-out 2D from 0.30747 to 0.31147, while visible-but-unmasked
+3D falls slightly.  A post-hoc hard 0.75 diagnostic raises held-out 2D to
+0.38175 and clears false-positive-only support, but collapses never-visible
+3D from 0.36890 to 0.11198.  This is a purity--coverage trade-off, not a
+threshold to promote.
+
+The formal learned residual is negative.  The two-step arm reaches
+0.55607/0.30250 full-3D/held-out-2D scene macro; the three-step arm reaches
+0.55565/0.30193.  Both are below the identical frozen unary at
+0.56284/0.30747, and all four validation scenes regress in held-out 2D.
+Continuous prediction mass on target-absent held-out tokens falls by 12.2%
+and 13.1%, and assignment precision rises slightly, but coverage and
+never-visible IoU fall.  Exact false-positive-only support count remains a
+diagnostic rather than a promotion direction because a strictly positive soft
+posterior assigns non-zero support to almost every absent token.
+
+The mechanistic ablation localizes the regression.  Retraining the two-step
+model with the shared extent residual disabled leaves full 3D and held-out 2D
+within -0.00028/-0.00037 of the frozen unary, improves visible-but-unmasked 3D
+by 0.00178, and lowers continuous absent mass by 7.1%.  Learned local messaging
+is therefore nearly neutral and locally useful; one query-independent edge
+field plus one global extent strength is too coarse.  The rejected arm is
+frozen.  The next minimal structure is token-conditioned edge transport with
+a scene-disjoint learned soft full-mass prior and two global dual updates.  It
+keeps the pointwise unary, carrier, and observed clamps, but allows the same
+surface edge to be open for one scene token and closed for another.  It does
+not introduce a hard radius, benchmark threshold, connected component, text
+query, or v3 dependency.
+
+This result is bound by
+`paper/artifacts/v4_scannet_completion_message_passing_formal16_v2_20260831.json`
+(`2a23f312b2ebf2d2b444d19d58ad56df0f0d419fc0b0a64f02a30fc4d4f22946`).
+
+### Global physical-mass projection result
+
+The token-conditioned local/dual arm was also negative: forty epochs of
+structured extent training change full 3D and held-out 2D by less than
+0.0002, even though its edge BCE is learnable.  Two local steps therefore act
+as weak smoothing and cannot repair long-range coverage.  The corrected mass
+contract treats physical object support directly as the pre-confidence-cap
+posterior mass; the 0.95 unknown-membership cap is not a reason to inflate the
+mass target.
+
+A target-only global projection gives the decisive mechanism check.  Fitting
+one continuous bias per token to its exact physical support mass raises full
+3D by 0.09274, unknown-only by 0.10115, never-visible by 0.09466, and held-out
+2D by 0.03377.  All four validation scenes improve.  Thus frozen unary ranking
+contains useful spatial information; the primary unresolved problem is
+estimating and spatially allocating object support, rather than another local
+edge threshold.
+
+A deployable source-only scalar mass calibrator does not close that gap.  On
+the formal 12 training scenes, summary features improve full 3D by 0.00815 but
+reduce unknown coverage by 0.01580; adding the pooled F71 prototype is worse.
+Source-camera coverage geometry also fails to improve the summary model.  A
+training-only leave-one-scene-out blend cannot rescue the result: it selects
+full strength for summary and 0.95 for coverage geometry.
+
+Ten additional physical-family-disjoint PFIR training scenes were then staged
+under the strict target-RGB-isolated v3 contract.  Their 40 source images were
+processed with the same checkpoint-bound C-RADIO model, and their caches add
+165 retained tokens.  With 22 training scenes and 373 tokens, training-only
+cross-fit selects a conservative 0.5 summary blend.  The frozen four-scene
+validation deltas are +0.00377 full 3D, +0.00242 unknown-only, +0.00254
+never-visible, and +0.00162 held-out 2D, but visible-but-unmasked falls by
+0.00332 and unknown coverage still falls by 0.01685.  Per-scene token-mass
+mean absolute relative error remains 0.269--0.603.  More examples reduce the
+worst direction error but do not make one scalar mass identifiable enough.
+
+The bounded conclusion is therefore structural: exact global mass is highly
+valuable, but a token-level scalar regressor followed by uniform global bias
+projection is not the complete method.  The next arm must predict structured
+spatial support (for example multiple token-specific support slots or a global
+set-conditioned support field) while retaining exact observed clamps.  More
+gate, threshold, local propagation-depth, or scalar-MLP tuning is frozen.
+This result is bound by
+`paper/artifacts/v4_scannet_global_mass_calibration_20260831.json`
+(`c5c96bd0aeb92c4749d47de91111271ef42c5ceea037d22ff2b4c517f4a05835`).
+
+### Bias-free spatial support slots
+
+The first structured spatial arm uses seven continuous slots in each token's
+source-observed PCA frame: the observed centre plus a symmetric pair on every
+principal axis.  A shared network predicts radius, anisotropic scale, and
+mixture weight for every slot.  Joint rigid rotation leaves its result
+unchanged, PCA sign ambiguity cancels through the symmetric pairs, and exact
+observed categorical clamps remain immutable.  No target, query, threshold,
+hard envelope, connected component, or v3 module enters its forward API.
+
+The causal controls expose a material implementation/design defect.  A
+token-bias-only arm lowers full 3D by 0.01976 and unknown coverage by 0.06579.
+Allowing both token bias and slots is less negative in full 3D (-0.01100) and
+raises held-out 2D by 0.00720, showing that spatial slots add real information,
+but the learned bias still collapses total support.  Learned slot scales span
+roughly 0.14x--7.39x while token-bias magnitude reaches 1.1--2.2, confirming
+that global mass and spatial allocation became improperly entangled.
+
+Disabling token bias exactly produces the first consistently positive
+structured allocation result.  On the unchanged val4 split, bias-free slots
+raise full 3D by 0.00525, unknown-only by 0.00588, never-visible by 0.00586,
+held-out 2D by 0.00093, and unknown assignment precision by 0.01444.  Full 3D
+improves on all four validation scenes.  Unknown coverage still falls by
+0.02401, so this is a retained component rather than a completed stage.
+
+Orthogonally imposing the source-only mass prediction selected by training
+cross-fit keeps full 3D positive on all four scenes (+0.00528 scene macro),
+raises held-out 2D by 0.00220, and reduces the coverage loss to -0.01978.  It
+slightly reduces unknown-only gain to +0.00478, consistent with the known
+scalar-mass prediction error.  The result validates the factorization:
+spatial slots should control where support goes, while a separate calibrated
+head controls how much support exists.  Token bias inside the spatial branch
+is now forbidden.  The remaining bounded work is explicit mass-conserving
+training of the bias-free allocation field and then association closure.
+
+This result is bound by
+`paper/artifacts/v4_scannet_spatial_slots_20260831.json`
+(`e3bd9abae46badd03ddc9c9eb909902faffe77b08d53c9e3878d88a41ce68cc0`).
+
+A final target-only upper bound separates spatial ranking from mass error.
+Imposing exact physical token mass on the bias-free slot posterior raises full
+3D by 0.09740, unknown-only by 0.10829, never-visible by 0.10165, held-out 2D
+by 0.03588, and unknown coverage by 0.11890.  Full 3D improves on all four
+scenes.  More importantly, this exceeds exact-mass projection of the frozen
+unary by 0.00465 full 3D, 0.00714 unknown-only, 0.00699 never-visible, and
+0.00211 held-out 2D.  The slots therefore improve spatial ordering under the
+same mass authority; they are not merely another calibration bias.  This
+oracle arm is non-deployable, but localizes nearly all remaining headroom to
+the separate source-only total-mass estimator.
+
+A training-only leave-one-scene-out non-parametric control is also negative.
+Both summary and summary-plus-F71 kNN select eight neighbours on the 22
+training scenes, but validation token-mass mean absolute relative error stays
+at 0.36--0.64 and 0.51--0.63.  When imposed on the bias-free slots, full 3D
+falls by 0.09209 and 0.10596 respectively.  Cross-object nearest-neighbour
+transfer of complete/observed area ratio is therefore frozen; neither k nor
+distance weighting will be tuned on val4.
+
+A scene-balanced ridge residual is the first mass estimator to improve the
+deployable 3D candidate materially.  It predicts log mass correction relative
+to the frozen unary and selects both regularization and correction blend by
+leave-one-training-scene-out loss.  Among three preregistered feature groups,
+summary-plus-F71 is also selected by the lowest training cross-fit loss
+(0.14340 versus 0.14589 for coverage geometry and 0.14653 for summary).  With
+bias-free slots it raises full 3D by 0.01194, unknown-only by 0.00722,
+never-visible by 0.01166, and precision by 0.01894; coverage falls only
+0.01017.  It is not promoted because held-out 2D is still -0.00051 and the
+visible-but-unmasked cohort is -0.00475.
+
+A same-mass control attributes the result cleanly.  Ridge mass projection on
+the frozen unary supplies +0.01013 full 3D, while slots under exactly the same
+predicted mass add another +0.00181 full 3D, +0.00271 unknown-only, +0.00252
+never-visible, and +0.00073 held-out 2D.  The remaining 2D regression is thus
+caused by imperfect mass prediction, not by slot spatial ordering.  Aggregate
+token features are now saturated; the next mass model must represent each
+source view's object coverage explicitly rather than add another aggregate
+MLP, ridge feature, kNN metric, or gate.
+
+The explicit source-view arm reconstructs, from the sealed carrier and four
+source cameras, only the visibility of already observed token support.  Its 21
+fixed-dimensional statistics include per-view visible support, carrier
+occupancy, visibility multiplicity, and kept/dropped mask-view coverage.  They
+do not read complete token labels or held-out RGB.  Source-view features alone
+are rejected because their training cross-fit loss (0.14513) is worse than the
+summary-plus-F71 ridge (0.14340), despite positive held-out 2D.
+
+Combining source-view coverage with F71 is selected by training-only cross-fit
+at ridge 10 and correction blend 0.5, with a lower loss of 0.14003.  On frozen
+val4 it raises full 3D by 0.01265, unknown-only by 0.01060, never-visible by
+0.01243, held-out 2D by 0.00098, and assignment precision by 0.01300.  Three of
+four scenes improve in both full 3D and held-out 2D.  Coverage still falls by
+0.01580 and one scene regresses, so this is the relaxed development candidate,
+not a formal completion claim.  Under identical predicted mass, bias-free
+slots add +0.00179 full 3D, +0.00260 unknown-only, and +0.00064 held-out 2D;
+the factorization remains causally supported.  With both aggregate and
+per-view source coverage now tested, work advances to real-token association
+closure rather than another mass-feature or gate sweep.
+
 ## Gate result and next action
 
 The strict promotion path remains gated, while the user-authorized development
-path continues without hard intermediate stops. Its next action is a
-surface-local identity unary followed by token extent selection, first on
-Figurines and then Ramen. Generic graph propagation, connected components,
-target RGB during construction, and historical v3 instance modules remain
-forbidden.
+path continues without hard intermediate stops.  The shared-edge/global-gate
+arm above is complete and rejected.  Its next action is one bounded ScanNet
+ablation: retain the aligned pointwise unary, condition edge transport on each
+observed scene token, predict a soft complete-surface mass from its observed
+descriptor, and apply two differentiable local/dual updates with immutable
+observed clamps.  Held-out rendered loss and continuous absent-token mass must
+remain explicit.  Unbounded generic diffusion, threshold sweeps, connected
+component heuristics, hard extent envelopes, target RGB during construction,
+and historical v3 instance modules remain forbidden.
+
+## Four-scene real-token completion closure
+
+The selected ScanNet candidate is now connected to real source-only LERF
+tokens.  Real soft association is hardened only where an element has a
+categorical winner.  Tokens that never win any element are excluded from the
+completion axis, then mapped back to the full semantic token axis without
+receiving synthesized support.  This repaired a real interface defect exposed
+by 11 unseeded tokens in Figurines and three in Ramen.  A second cross-scene
+defect was fixed when Waldo Kitchen exposed a valid 45x62 RADIO grid while the
+development pipeline had incorrectly hard-coded 46x62.
+
+Teatime and Waldo Kitchen were completed with the same source-only MoGe-3
+checkpoint and shared radius-one surface projection used by Figurines and
+Ramen.  Their geometry gates pass without parameter changes.  The completion
+A/B uses identical carrier, association, semantic evidence, text readout, and
+evaluation settings within each scene; only completion differs.
+
+| Scene | legacy 2D macro | candidate 2D macro | delta | legacy rendered-3D macro | candidate rendered-3D macro | delta |
+|---|---:|---:|---:|---:|---:|---:|
+| Figurines | 0.07084 | 0.08293 | +0.01209 | 0.06999 | 0.08276 | +0.01277 |
+| Ramen | 0.05785 | 0.05255 | -0.00530 | 0.05954 | 0.05442 | -0.00512 |
+| Teatime | 0.10690 | 0.11463 | +0.00773 | 0.10555 | 0.11585 | +0.01030 |
+| Waldo Kitchen | 0.15037 | 0.15558 | +0.00521 | 0.15736 | 0.14507 | -0.01229 |
+| Scene mean | 0.09649 | 0.10142 | +0.00493 | 0.09811 | 0.09952 | +0.00141 |
+
+Scene-mean micro IoU improves by 0.01907 in 2D and 0.01944 in the rendered
+element-thresholded proxy, with all four scenes positive.  Identity-only
+metrics are exactly unchanged between arms, so the A/B difference is caused
+by completion rather than semantic query drift.  Macro improvement is not
+uniform: Ramen regresses in both macro metrics and Waldo regresses in the
+rendered proxy.  Per-category inspection localizes the remaining failure to
+small and rare object support being over-expanded or assigned to a dominant
+token.  The arm is retained as a relaxed development candidate, not promoted
+as a finished method.
+
+The reported 3D value remains a development rendering proxy.  Formal LERF3D
+is unavailable because the cohort still lacks an official persistent
+element-domain target authority; no proxy is relabeled as formal LERF3D.  The
+four-scene result is bound by
+`paper/artifacts/v4_lerf_four_scene_scannet_spatial_mass_development_20260831.json`
+(`14b18e6f7259527a60a3ae2ffa2f9e75f779cdbf760dddba6a16662f5784096f`).
 
 ## Bound artifacts
 
+- `paper/artifacts/v4_scannet_spatial_slots_20260831.json`
+  (`e3bd9abae46badd03ddc9c9eb909902faffe77b08d53c9e3878d88a41ce68cc0`)
+- `paper/artifacts/v4_scannet_global_mass_calibration_20260831.json`
+  (`c5c96bd0aeb92c4749d47de91111271ef42c5ceea037d22ff2b4c517f4a05835`)
+- `paper/artifacts/v4_scannet_completion_cohort16_contract_20260831.json`
+  (`789553dc61ef0509728b8b006152d3bd0d1273e0434e270dee8359b1239c1fa3`)
+- `paper/artifacts/v4_scannet_completion_formal16_v10_20260831.json`
+  (`32eabc4f8ead9d54ba7ffe2d02d37b56ff37312447e45b8e9432dffe321ac2be`)
+- `paper/artifacts/v4_scannet_completion_message_passing_formal16_v2_20260831.json`
+  (`2a23f312b2ebf2d2b444d19d58ad56df0f0d419fc0b0a64f02a30fc4d4f22946`)
 - `paper/artifacts/v4_scannet_geometry_ladder_oracle_a_20260830.json`
   (`98680aad862bceaef30cfbfd4a7de99b339405cf2d2a84d7766b7c8c6cdd674b`)
 - `paper/artifacts/v4_scannet_source_mask_geometry_ladder_a_20260830.json`

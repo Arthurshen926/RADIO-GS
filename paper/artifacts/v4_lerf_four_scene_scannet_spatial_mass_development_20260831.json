@@ -1,0 +1,180 @@
+{
+  "schema": "radio_gs.surface_object_memory_v4.lerf_four_scene_completion_development_summary.v1",
+  "development_only": true,
+  "scene_cohort": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "comparison_contract": {
+    "association_geometry_semantics_and_query_readout_identical_within_scene": true,
+    "only_completion_method_differs": true,
+    "legacy_completion": "conservative_token_geometry",
+    "candidate_completion": "frozen_unary_bias_free_spatial_slots_source_view_f71_ridge_mass",
+    "maximum_query_tokens": 3,
+    "element_threshold": 0.2,
+    "pixel_threshold": 0.2,
+    "surface_semantic_evidence": "average",
+    "formal_lerf3d_claimed": false,
+    "reported_3d_metric_scope": "development element-thresholded surface posterior rendered against 2D polygons"
+  },
+  "information_policy": {
+    "complete_target_labels_read_by_completion": false,
+    "heldout_rgb_read_by_completion": false,
+    "query_read_by_completion": false,
+    "benchmark_labels_opened_only_after_query_independent_scene_state_serialization": true
+  },
+  "scene_results": {
+    "figurines": {
+      "token_count": 130,
+      "active_completion_token_count": 119,
+      "inactive_unseeded_token_count": 11,
+      "legacy": {
+        "macro_category_miou_2d": 0.0708400949730716,
+        "macro_category_miou_3d_proxy": 0.06998729177763806,
+        "micro_iou_2d": 0.051735926460533314,
+        "micro_iou_3d_proxy": 0.049085992928289156
+      },
+      "candidate": {
+        "macro_category_miou_2d": 0.08292956376082208,
+        "macro_category_miou_3d_proxy": 0.08275831902640336,
+        "micro_iou_2d": 0.059989612188365654,
+        "micro_iou_3d_proxy": 0.056525384967220614
+      },
+      "delta": {
+        "macro_category_miou_2d": 0.012089468787750482,
+        "macro_category_miou_3d_proxy": 0.012771027248765304,
+        "micro_iou_2d": 0.00825368572783234,
+        "micro_iou_3d_proxy": 0.007439392038931458
+      },
+      "legacy_report_sha256": "7be697bd6106893180ead487a477a26de1392d9fc130f1e48f97a4822a4e3c50",
+      "candidate_report_sha256": "018c84436315c35c082394355628fb994fd81486d99faf356798d00ecd0d6223",
+      "candidate_state_sha256": "c963e517597fe600ccf0be2cf3b10d8f31d5962fb093b7b78c2fbdb966b2822d"
+    },
+    "ramen": {
+      "token_count": 67,
+      "active_completion_token_count": 64,
+      "inactive_unseeded_token_count": 3,
+      "legacy": {
+        "macro_category_miou_2d": 0.057854139383173665,
+        "macro_category_miou_3d_proxy": 0.059535877997009476,
+        "micro_iou_2d": 0.06366681957824208,
+        "micro_iou_3d_proxy": 0.06345048007020945
+      },
+      "candidate": {
+        "macro_category_miou_2d": 0.052552032538153236,
+        "macro_category_miou_3d_proxy": 0.05441966519791382,
+        "micro_iou_2d": 0.07919062291540929,
+        "micro_iou_3d_proxy": 0.07861729580507712
+      },
+      "delta": {
+        "macro_category_miou_2d": -0.0053021068450204295,
+        "macro_category_miou_3d_proxy": -0.005116212799095653,
+        "micro_iou_2d": 0.015523803337167214,
+        "micro_iou_3d_proxy": 0.015166815734867667
+      },
+      "legacy_report_sha256": "2d4937065dbed15268f917cb7d218a8dded460ae44f40f3366829e00d9ca4d99",
+      "candidate_report_sha256": "be4f7ddcbd8f71fc10edc7edfc3090d56ad6340c389a8900b9cc1ab5e8740e66",
+      "candidate_state_sha256": "865b613163a5fdf85ba18f01c07b5fa3cb633074021ddb87e3ae3238f3f31ed0"
+    },
+    "teatime": {
+      "token_count": 143,
+      "active_completion_token_count": 138,
+      "inactive_unseeded_token_count": 5,
+      "legacy": {
+        "macro_category_miou_2d": 0.10690413555495763,
+        "macro_category_miou_3d_proxy": 0.10555077875346677,
+        "micro_iou_2d": 0.09612126455426985,
+        "micro_iou_3d_proxy": 0.09282442748091603
+      },
+      "candidate": {
+        "macro_category_miou_2d": 0.11463479437033565,
+        "macro_category_miou_3d_proxy": 0.11584693270657333,
+        "micro_iou_2d": 0.13320318989865426,
+        "micro_iou_3d_proxy": 0.13222195948608811
+      },
+      "delta": {
+        "macro_category_miou_2d": 0.0077306588153780165,
+        "macro_category_miou_3d_proxy": 0.010296153953106554,
+        "micro_iou_2d": 0.03708192534438441,
+        "micro_iou_3d_proxy": 0.039397532005172084
+      },
+      "legacy_report_sha256": "33f6719ccafda8df19df6e57b52c628d90bd71ead252f98bb38cdbf0ef5fe1cc",
+      "candidate_report_sha256": "feac134591ef915508ec55db4d1a4b39d2fab727cb278847befd82b93317efe5",
+      "candidate_state_sha256": "6836b10fdb92fe3a4e9a505ba6dae68a6d7a6d80596eb6eba343ab20083e7d87"
+    },
+    "waldo_kitchen": {
+      "token_count": 111,
+      "active_completion_token_count": 107,
+      "inactive_unseeded_token_count": 4,
+      "legacy": {
+        "macro_category_miou_2d": 0.15036773035998907,
+        "macro_category_miou_3d_proxy": 0.15736426542602305,
+        "micro_iou_2d": 0.14815286624203822,
+        "micro_iou_3d_proxy": 0.1449563753252717
+      },
+      "candidate": {
+        "macro_category_miou_2d": 0.15557554338380947,
+        "macro_category_miou_3d_proxy": 0.1450696299208733,
+        "micro_iou_2d": 0.16357813680687994,
+        "micro_iou_3d_proxy": 0.1607192933258553
+      },
+      "delta": {
+        "macro_category_miou_2d": 0.005207813023820396,
+        "macro_category_miou_3d_proxy": -0.012294635505149754,
+        "micro_iou_2d": 0.01542527056484172,
+        "micro_iou_3d_proxy": 0.015762918000583603
+      },
+      "legacy_report_sha256": "e5ef02c4590a9828cae76f488b2fb699a37e0a994d884d3e916ea2d9ba98e193",
+      "candidate_report_sha256": "9db1b66371c8949cd89ad6321a127d954f39cfc776b67ef2c8ba3165aff4a769",
+      "candidate_state_sha256": "8d620d1f09b65bf6b1b54c09cb2a928dcec2357e6a0700d5c7acd6adf69bce0b"
+    }
+  },
+  "four_scene_macro": {
+    "legacy": {
+      "macro_category_miou_2d": 0.096491525067798,
+      "macro_category_miou_3d_proxy": 0.09810955348853434,
+      "micro_iou_2d_scene_mean": 0.08991921920877087,
+      "micro_iou_3d_proxy_scene_mean": 0.08757931895117158
+    },
+    "candidate": {
+      "macro_category_miou_2d": 0.10142298351328011,
+      "macro_category_miou_3d_proxy": 0.09952363671294095,
+      "micro_iou_2d_scene_mean": 0.10899039045232728,
+      "micro_iou_3d_proxy_scene_mean": 0.10702098339606028
+    },
+    "delta": {
+      "macro_category_miou_2d": 0.004931458445482109,
+      "macro_category_miou_3d_proxy": 0.0014140832244066148,
+      "micro_iou_2d_scene_mean": 0.01907117124355641,
+      "micro_iou_3d_proxy_scene_mean": 0.019441664444888707
+    },
+    "positive_scene_count": {
+      "macro_category_miou_2d": 3,
+      "macro_category_miou_3d_proxy": 2,
+      "micro_iou_2d": 4,
+      "micro_iou_3d_proxy": 4
+    }
+  },
+  "interpretation": {
+    "completion_improves_real_token_end_to_end_coverage": true,
+    "uniform_per_scene_macro_improvement": false,
+    "remaining_failure": "small_and_rare_category_support_is_overexpanded_or_misallocated_in_ramen_and_waldo_kitchen",
+    "identity_readout_confounded": false,
+    "identity_metrics_are_exactly_equal_between_completion_arms": true,
+    "promotion_decision": "retain_as_relaxed_development_candidate_not_formal_method"
+  },
+  "formal_lerf3d_status": {
+    "available": false,
+    "reason": "official persistent element-domain target authority is absent",
+    "contract_audit_sha256": "b5c52091f2ad539f5388ab600488d8ec884d7f98daba8d74dd3b80001367ed80"
+  },
+  "implementation": {
+    "lerf_adapter_sha256": "302d86a54386f8c675f5f62caa997c2b221c7b32f0c7dd85add075ddf46209b5",
+    "lerf_pipeline_sha256": "a662c628eeeef20f7d2e910741dea9fba19f3dde323d1c08bb99c3243815bcbd",
+    "frozen_unary_checkpoint_sha256": "248f43039c21355a05b7042933138f311c9c55932173c970cf2a54898762297d",
+    "spatial_slots_checkpoint_sha256": "357c9454086d49aa99988303333360c244dddf682b871c7953512211a8434bb4",
+    "source_view_f71_mass_report_sha256": "a8cc7a3dcf31d8e5cdeeb7808369737926b8fb964c9c3f42afe52de08eba1472"
+  }
+}

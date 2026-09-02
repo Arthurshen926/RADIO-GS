@@ -6,12 +6,15 @@ from dataclasses import dataclass
 
 import torch
 
+from radio_gs.v4.query import QueryPacket, QuerySelectionMode
+
 
 @dataclass(frozen=True)
 class ElementQueryPosterior:
     foreground: torch.Tensor
     assignment_unknown: torch.Tensor
     query_null_probability: float
+    selection_mode: QuerySelectionMode
 
 
 @dataclass(frozen=True)
@@ -88,29 +91,82 @@ class SparseObjectAssignments:
         result.index_put_((rows[occupied], self.token_ids[occupied]), self.weights[occupied], accumulate=True)
         return result
 
+    def _validated_token_probability(self, token_probability: torch.Tensor) -> torch.Tensor:
+        probability = torch.as_tensor(token_probability, dtype=torch.float32).cpu()
+        if probability.shape != (self.num_tokens,):
+            raise ValueError(f"token_probability must have shape [{self.num_tokens}]")
+        if (
+            not bool(torch.isfinite(probability).all())
+            or bool((probability < 0).any())
+            or bool((probability > 1).any())
+        ):
+            raise ValueError("token probabilities must be finite values in [0, 1]")
+        return probability
+
+    def mixture_sum(self, token_probability: torch.Tensor) -> torch.Tensor:
+        """Return the canonical object-mixture probability for every element.
+
+        This is intentionally the only token-to-element composition formula.
+        In particular, overlapping retained token contributions are summed,
+        never reduced with ``max``.
+        """
+
+        probability = self._validated_token_probability(token_probability)
+        safe_ids = self.token_ids.clamp_min(0)
+        selected = probability[safe_ids] * self.weights
+        selected[self.token_ids < 0] = 0
+        return selected.sum(-1)
+
     def element_posterior(
         self,
-        token_posterior: torch.Tensor,
+        query: QueryPacket,
+        token_probability: torch.Tensor,
         *,
-        null_probability: float,
+        null_probability: float | torch.Tensor | None = None,
     ) -> ElementQueryPosterior:
-        posterior = torch.as_tensor(token_posterior, dtype=torch.float32).cpu()
-        null = float(null_probability)
-        if (
-            posterior.shape != (self.num_tokens,)
-            or not torch.isfinite(posterior).all()
-            or bool((posterior < 0).any())
-            or bool((posterior > 1).any())
-            or not 0 <= null <= 1
-        ):
-            raise ValueError("token and null probabilities must lie in [0, 1]")
-        if abs(float(posterior.sum()) + null - 1.0) > 1e-5:
-            raise ValueError("token probabilities and explicit null must sum to one")
-        safe_ids = self.token_ids.clamp_min(0)
-        selected = posterior[safe_ids] * self.weights
-        selected[self.token_ids < 0] = 0
+        """Compose a cardinality-aware query posterior with element membership.
+
+        ``single_instance`` requires one categorical distribution across all
+        tokens plus an explicit null. ``multi_instance`` treats token scores
+        as independently calibrated Bernoulli probabilities; its reported
+        null is the corresponding probability that no token matches. Local
+        semantic queries are deliberately rejected because they must read the
+        local surface field rather than the object codebook.
+        """
+
+        if not isinstance(query, QueryPacket):
+            raise TypeError("query must be a validated v4 QueryPacket")
+        mode = query.selection_mode
+        if mode is QuerySelectionMode.LOCAL_SEMANTIC:
+            raise ValueError("local_semantic queries require the local surface semantic memory")
+
+        probability = self._validated_token_probability(token_probability)
+        if mode is QuerySelectionMode.SINGLE_INSTANCE:
+            if null_probability is None:
+                raise ValueError("single_instance queries require an explicit null_probability")
+            null_tensor = torch.as_tensor(null_probability, dtype=torch.float32).cpu()
+            if null_tensor.ndim != 0 or not bool(torch.isfinite(null_tensor)):
+                raise ValueError("null_probability must be one finite scalar in [0, 1]")
+            null = float(null_tensor)
+            if not 0.0 <= null <= 1.0:
+                raise ValueError("null_probability must be one finite scalar in [0, 1]")
+            if abs(float(probability.sum()) + null - 1.0) > 1e-5:
+                raise ValueError(
+                    "single_instance token probabilities and explicit null must form one simplex"
+                )
+        elif mode is QuerySelectionMode.MULTI_INSTANCE:
+            if null_probability is not None:
+                raise ValueError(
+                    "multi_instance queries use independent token probabilities; "
+                    "null_probability must not be supplied"
+                )
+            null = float(torch.prod(1.0 - probability))
+        else:  # QueryPacket validation should make this unreachable.
+            raise AssertionError(f"unhandled query selection mode: {mode!r}")
+
         return ElementQueryPosterior(
-            foreground=selected.sum(-1),
+            foreground=self.mixture_sum(probability),
             assignment_unknown=(1.0 - null) * self.unknown_weight,
             query_null_probability=null,
+            selection_mode=mode,
         )
