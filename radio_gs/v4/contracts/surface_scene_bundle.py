@@ -303,6 +303,7 @@ class SurfaceCarrierConfiguration:
     surface_band_voxels: float
     maximum_contributors_per_pixel: int
     camera_convention: str
+    reference_raster_shape: tuple[int, int] | None = None
 
     def __post_init__(self) -> None:
         voxel_size = float(self.voxel_size)
@@ -325,6 +326,20 @@ class SurfaceCarrierConfiguration:
         object.__setattr__(self, "maximum_splat_radius", radius)
         object.__setattr__(self, "surface_band_voxels", surface_band)
         object.__setattr__(self, "maximum_contributors_per_pixel", contributor_cap)
+        if self.reference_raster_shape is not None:
+            if len(self.reference_raster_shape) != 2:
+                raise ValueError("reference_raster_shape requires height and width")
+            object.__setattr__(self, "reference_raster_shape", tuple(
+                _exact_integer(value, name="reference raster dimension", minimum=1)
+                for value in self.reference_raster_shape
+            ))
+
+    def to_dict(self) -> dict[str, Any]:
+        result = asdict(self)
+        if self.reference_raster_shape is None:
+            # Keep historical bundle identities byte-compatible.
+            result.pop("reference_raster_shape")
+        return result
 
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> "SurfaceCarrierConfiguration":
@@ -335,9 +350,9 @@ class SurfaceCarrierConfiguration:
             "maximum_contributors_per_pixel",
             "camera_convention",
         }
-        if set(value) != required:
+        if not required.issubset(value) or set(value) - required - {"reference_raster_shape"}:
             raise ValueError("surface carrier configuration fields changed")
-        return cls(**{key: value[key] for key in required})
+        return cls(**value)
 
     def build_carrier(
         self,
@@ -354,6 +369,7 @@ class SurfaceCarrierConfiguration:
             maximum_splat_radius=self.maximum_splat_radius,
             surface_band_voxels=self.surface_band_voxels,
             maximum_contributors_per_pixel=self.maximum_contributors_per_pixel,
+            reference_raster_shape=self.reference_raster_shape,
         )
 
 
@@ -429,6 +445,8 @@ def load_geometry_binding(
         outer_projection.get(key) != metadata.get(key) for key in required_projection
     ):
         raise ValueError("geometry report and embedded receipt disagree on projection configuration")
+    if outer_projection.get("reference_raster_shape") != metadata.get("reference_raster_shape"):
+        raise ValueError("geometry report and receipt disagree on reference raster")
 
     surface_payload = torch.load(surface_file, map_location="cpu", weights_only=False)
     if not isinstance(surface_payload, dict) or not {
@@ -441,6 +459,7 @@ def load_geometry_binding(
         surface_band_voxels=metadata["surface_band_voxels"],
         maximum_contributors_per_pixel=metadata["maximum_contributors_per_pixel"],
         camera_convention=str(receipt.get("coordinate_convention", "")),
+        reference_raster_shape=metadata.get("reference_raster_shape"),
     )
     binding = GeometryBinding(
         authority_path=str(authority_file),
@@ -605,7 +624,7 @@ class SurfaceSceneBundle:
             self.centres,
             self.normals,
             self.confidence,
-            configuration=asdict(self.configuration),
+            configuration=self.configuration.to_dict(),
         )
 
     def build_carrier(self) -> SurfaceVoxelCarrier:
@@ -617,7 +636,7 @@ class SurfaceSceneBundle:
         return {
             "schema": self.schema,
             "scene_label": self.scene_label,
-            "carrier_configuration": asdict(self.configuration),
+            "carrier_configuration": self.configuration.to_dict(),
             "carrier": {
                 "centres": self.centres,
                 "normals": self.normals,

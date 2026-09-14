@@ -356,7 +356,7 @@ class SurfaceMessagePassing(nn.Module):
     form a convex combination while even a single-neighbour edge keeps a useful
     gradient.  Observed positive clamps also seed a continuous token support
     diffusion.  A learned soft extent gate moves unsupported *unknown* token
-    mass back to null without a hard radius, threshold, connected component, or
+    mass back to null without a hard radius, threshold, connectivity post-process, or
     target input.
 
     These 2--3 layers are a local boundary/support residual.  The frozen unary

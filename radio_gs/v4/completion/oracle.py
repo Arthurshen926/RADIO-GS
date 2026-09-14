@@ -417,6 +417,42 @@ def complete_unknown_only(
     return membership, null
 
 
+def complete_independent_unknown_only(
+    partial: PartialObjectMembership,
+    unknown_probability: torch.Tensor,
+    *,
+    completion_confidence_cap: float,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Clamp facts while retaining token-wise Bernoulli completion scores.
+
+    Unlike the categorical completion contract, this representation is
+    invariant to how many unrelated hypotheses coexist in a scene.  Null is a
+    per-row abstention score against the strongest token, not probability mass
+    shared across the full object inventory.
+    """
+
+    probability = torch.as_tensor(unknown_probability, dtype=torch.float32).cpu()
+    if probability.shape != partial.positive.shape:
+        raise ValueError("independent unknown_probability must have shape [E, K]")
+    if not bool(torch.isfinite(probability).all()) or bool(
+        ((probability < 0) | (probability > 1)).any()
+    ):
+        raise ValueError("independent completion probabilities must lie in [0,1]")
+    if not 0 < completion_confidence_cap < 1:
+        raise ValueError("completion confidence cap must be strictly between zero and one")
+    membership = torch.zeros_like(probability)
+    membership[partial.positive] = 1.0
+    membership = torch.where(
+        partial.unknown,
+        probability * float(completion_confidence_cap),
+        membership,
+    )
+    membership = torch.where(partial.negative, torch.zeros_like(membership), membership)
+    null = 1.0 - membership.max(-1).values
+    null[~partial.eligible_elements] = 1.0
+    return membership, null.clamp(0, 1)
+
+
 def _masked_soft_iou(
     membership: torch.Tensor,
     target: torch.Tensor,
@@ -443,7 +479,7 @@ def _categorical_subset_metrics(
     *,
     null_index: int,
     subset: torch.Tensor,
-) -> dict[str, float | int]:
+) -> dict[str, float | int | str]:
     target_object = subset & (labels >= 0)
     target_null = subset & (labels < 0)
     predicted_token = subset & (categorical != null_index)
@@ -510,6 +546,7 @@ def completion_metrics(
     null_probability: torch.Tensor | None = None,
     assignment_threshold: float = 0.5,
     unknown_strata: Mapping[str, torch.Tensor] | None = None,
+    probability_contract: str = "categorical_simplex",
 ) -> dict[str, float | int]:
     membership = torch.as_tensor(membership, dtype=torch.float32).cpu()
     labels = torch.as_tensor(target_token_index, dtype=torch.long).cpu()
@@ -517,6 +554,10 @@ def completion_metrics(
         raise ValueError("completion metric inputs do not align")
     if abs(float(assignment_threshold) - 0.5) > 1e-12:
         raise ValueError("the legacy assignment diagnostic is frozen at 0.5")
+    if probability_contract not in {
+        "categorical_simplex", "independent_bernoulli"
+    }:
+        raise ValueError("completion probability contract is unsupported")
     eligible = partial.eligible_elements
     eligible_membership = membership[eligible]
     if not torch.isfinite(eligible_membership).all() or bool(
@@ -556,7 +597,7 @@ def completion_metrics(
     ):
         raise ValueError("eligible completion null values must be finite probabilities")
     eligible_simplex_mass = evaluated_membership[eligible].sum(-1) + eligible_null
-    if not torch.allclose(
+    if probability_contract == "categorical_simplex" and not torch.allclose(
         eligible_simplex_mass, torch.ones_like(eligible_simplex_mass), atol=1e-4
     ):
         raise ValueError("eligible completion rows must form one K-plus-null simplex")
@@ -612,7 +653,8 @@ def completion_metrics(
         membership[partial.negative].abs().max()
         if bool(partial.negative.any()) else torch.tensor(0.0)
     )
-    result: dict[str, float | int] = {
+    result: dict[str, float | int | str] = {
+        "probability_contract": probability_contract,
         "soft_3d_miou": float(soft_iou.mean()),
         "unknown_only_soft_3d_miou": float(unknown_summary["soft_3d_miou"]),
         "full_object_token_top1_accuracy": float(top1_accuracy),

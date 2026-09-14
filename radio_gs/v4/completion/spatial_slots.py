@@ -4,7 +4,7 @@ The module is a residual over a frozen ``K + null`` posterior.  Seven slots
 are anchored in each token's source-only PCA frame: one centre slot and a
 positive/negative pair on every principal axis.  A shared token network may
 change slot radius, anisotropic scale, and mixture weight.  There is no hard
-support envelope, threshold, connected component, target, or query input.
+support envelope, threshold, discrete connectivity post-process, target, or query input.
 """
 
 from __future__ import annotations

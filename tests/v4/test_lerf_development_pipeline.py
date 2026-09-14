@@ -2,6 +2,7 @@ import argparse
 import json
 
 import torch
+import pytest
 
 from radio_gs.v4.carrier import ProjectionTable
 from radio_gs.v4.evaluation.lerf_development_pipeline import (
@@ -32,6 +33,11 @@ def test_development_polygon_proxy_is_quarantined_by_default() -> None:
         assert "quarantined" in str(error)
     else:
         raise AssertionError("deprecated development proxy ran without explicit opt-in")
+
+
+def test_invalid_spatial_summary_path_cannot_be_reenabled():
+    with pytest.raises(RuntimeError, match="SigLIP2SummaryHead"):
+        run(argparse.Namespace(allow_deprecated_development_proxy=True))
 
 
 def test_source_authority_validation_rejects_information_leak() -> None:

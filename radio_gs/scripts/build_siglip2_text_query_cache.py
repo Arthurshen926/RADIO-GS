@@ -14,6 +14,7 @@ from radio_gs.scripts.eval_lerf_grounding import (
     _SIGLIP2_MODEL_NAME,
     _SIGLIP2_TEXT_CANONICALIZATION,
     encode_text_siglip2,
+    _canonicalize_siglip2_text,
 )
 
 
@@ -50,11 +51,11 @@ def build(args: argparse.Namespace) -> dict:
         "text_canonicalization": _SIGLIP2_TEXT_CANONICALIZATION,
     }
     torch.save(
-        {**common, "queries": queries, "embeddings": embeddings[: len(queries)]},
+        {**common, "queries": queries, "canonical_queries": [_canonicalize_siglip2_text(q) for q in queries], "embeddings": embeddings[: len(queries)]},
         query_output,
     )
     torch.save(
-        {**common, "queries": negatives, "embeddings": embeddings[len(queries) :]},
+        {**common, "queries": negatives, "canonical_queries": [_canonicalize_siglip2_text(q) for q in negatives], "embeddings": embeddings[len(queries) :]},
         negative_output,
     )
     return {

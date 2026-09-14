@@ -7,6 +7,7 @@ from .oracle import (
     build_feature_cosine_similarity,
     build_pair_features,
     build_token_context,
+    complete_independent_unknown_only,
     complete_unknown_only,
     completion_metrics,
 )
@@ -36,6 +37,7 @@ __all__ = [
     "build_feature_cosine_similarity",
     "build_pair_features",
     "build_token_context",
+    "complete_independent_unknown_only",
     "complete_unknown_only",
     "completion_metrics",
     "EDGE_FEATURE_DIMENSION",

@@ -10,7 +10,7 @@ Unlike the earlier scalar-edge residual, every carrier edge receives a
 continuous compatibility for every scene token.  A learned per-token soft
 full-mass prior supplies the global coverage signal, while two differentiable
 dual updates reconcile that signal with the local posterior.  No hard edge
-threshold, radius, envelope, connected component, or token cap is used.
+threshold, radius, envelope, discrete connectivity post-process, or token cap is used.
 """
 
 from __future__ import annotations

@@ -721,6 +721,13 @@ def _binary_iou(prediction: torch.Tensor, target: torch.Tensor) -> tuple[float, 
 
 @torch.no_grad()
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    raise RuntimeError(
+        "This development pipeline is quarantined permanently: it applies "
+        "SigLIP2SummaryHead to spatial/pooled tokens without summary supervision. "
+        "The deprecated opt-in cannot restore this invalid semantic path. "
+        "Use build_lerf_fragment_language_memory for source crop encoding and "
+        "lerf_object_hypothesis_text_evaluator for independent cold evaluation."
+    )
     if not getattr(args, "allow_deprecated_development_proxy", False):
         raise RuntimeError(
             "the legacy LERF polygon proxy is quarantined; build a cold-loadable "

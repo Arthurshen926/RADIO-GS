@@ -217,10 +217,14 @@ class OfficialRadioRuntime:
     def encode_official_crop_summaries(self, crops: torch.Tensor) -> torch.Tensor:
         """Level-2 target: official visual summary from re-encoded crops."""
 
-        output = self.encode_images(crops, feature_fmt="NCHW")
-        if not isinstance(output, Mapping) or "siglip2-g" not in output:
-            raise RuntimeError("official runtime did not return siglip2-g adaptor output")
-        summary = output["siglip2-g"].summary
+        summary, _ = self.encode_adaptor_images(crops, "siglip2-g")
+        if (
+            not torch.is_tensor(summary)
+            or summary.shape != (crops.shape[0], 1536)
+            or not bool(torch.isfinite(summary).all())
+            or bool((summary.float().norm(dim=-1) <= 1e-8).any())
+        ):
+            raise RuntimeError("official SigLIP2 summary must be finite nonzero [B,1536]")
         return F.normalize(summary.float(), dim=-1, eps=1e-8)
 
 
@@ -237,6 +241,7 @@ class OfficialCropSummaryRuntime:
     summary_head: nn.Module
     version: str
     radio_checkpoint_sha256: str
+    summary_slot_index: int = 0
 
     @classmethod
     def load(
@@ -246,25 +251,61 @@ class OfficialCropSummaryRuntime:
         radio_repo: str = "/root/RADIO",
         version: str = "c-radio_v4-h",
         device: str | torch.device = "cuda",
+        parameter_dtype: torch.dtype | None = None,
     ) -> "OfficialCropSummaryRuntime":
-        backbone = torch.hub.load(
+        checkpoint_path = Path(checkpoint_path).resolve(strict=True)
+        backbone, checkpoint = torch.hub.load(
             radio_repo,
             "radio_model",
             source="local",
-            version=version,
+            version=str(checkpoint_path),
             progress=True,
             skip_validation=True,
             adaptor_names=[],
+            return_checkpoint=True,
         )
-        backbone = _freeze(backbone).to(device)
-        summary_head = _freeze(
-            SigLIP2SummaryHead.from_radio_checkpoint(checkpoint_path)
-        ).to(device)
+        teacher_args = checkpoint["args"]
+        teachers = teacher_args.teachers
+        siglip = [(index, teacher) for index, teacher in enumerate(teachers)
+                  if teacher["name"] == "siglip2-g"]
+        if len(siglip) != 1:
+            raise ValueError("checkpoint must define exactly one SigLIP2 teacher")
+        teacher_index, teacher = siglip[0]
+        if getattr(teacher_args, "cls_token_per_teacher", True):
+            name_to_index = {}
+            for index, item in enumerate(teachers):
+                if item.get("use_summary", True):
+                    name_to_index.setdefault(item["name"], index)
+            slots = sorted(name_to_index.values())
+            teacher_slot = teacher.get("token_slot", teacher_index)
+            if teacher_slot not in slots:
+                raise ValueError("SigLIP2 summary token is absent from backbone output")
+            summary_slot_index = slots.index(teacher_slot)
+        else:
+            summary_slot_index = 0
+        del checkpoint
+        backbone = _freeze(backbone)
+        summary_head = _freeze(SigLIP2SummaryHead.from_radio_checkpoint(checkpoint_path))
+        if parameter_dtype is not None:
+            if parameter_dtype not in (torch.float16, torch.float32, torch.bfloat16):
+                raise ValueError("crop-summary runtime requires a floating parameter dtype")
+            backbone = backbone.to(dtype=parameter_dtype)
+            summary_head = summary_head.to(dtype=parameter_dtype)
+            # RADIO's input conditioner keeps its output dtype as a Python
+            # attribute, so ``Module.to(dtype=...)`` cannot update it.  Without
+            # this explicit synchronization it upcasts half inputs back to
+            # float32 before the half-precision patch embedder.
+            conditioner = getattr(backbone, "input_conditioner", None)
+            if conditioner is not None and hasattr(conditioner, "dtype"):
+                conditioner.dtype = parameter_dtype
+        backbone = backbone.to(device)
+        summary_head = summary_head.to(device)
         return cls(
             backbone=backbone,
             summary_head=summary_head,
             version=version,
             radio_checkpoint_sha256=sha256_file(checkpoint_path),
+            summary_slot_index=summary_slot_index,
         )
 
     @torch.no_grad()
@@ -275,12 +316,14 @@ class OfficialCropSummaryRuntime:
         target_size = (int(nearest.height), int(nearest.width))
         if tuple(crops.shape[-2:]) != target_size:
             crops = F.interpolate(crops, target_size, mode="bilinear", align_corners=False)
+        parameter = next(self.backbone.parameters())
+        crops = crops.to(device=parameter.device, dtype=parameter.dtype)
         output = self.backbone(crops)
         summary = output.summary if hasattr(output, "summary") else output[0]
         if summary.ndim != 2 or summary.shape[1] % 1280 != 0:
             raise RuntimeError("unexpected C-RADIO summary layout")
         teacher_slots = summary.reshape(summary.shape[0], -1, 1280)
-        siglip_summary_token = teacher_slots[:, 0]
+        siglip_summary_token = teacher_slots[:, self.summary_slot_index]
         descriptor = self.summary_head(siglip_summary_token[:, None])[:, 0]
         return F.normalize(descriptor.float(), dim=-1, eps=1e-8)
 
@@ -296,6 +339,8 @@ class OfficialCropSummaryRuntime:
         target_size = (int(nearest.height), int(nearest.width))
         if tuple(crops.shape[-2:]) != target_size:
             crops = F.interpolate(crops, target_size, mode="bilinear", align_corners=False)
+        parameter = next(self.backbone.parameters())
+        crops = crops.to(device=parameter.device, dtype=parameter.dtype)
         output = self.backbone(crops, feature_fmt="NCHW")
         summary = output.summary if hasattr(output, "summary") else output[0]
         spatial = output.features if hasattr(output, "features") else output[1]
@@ -303,7 +348,7 @@ class OfficialCropSummaryRuntime:
             raise RuntimeError("unexpected C-RADIO spatial layout")
         if summary.ndim != 2 or summary.shape[1] % 1280 != 0:
             raise RuntimeError("unexpected C-RADIO summary layout")
-        summary_token = summary.reshape(summary.shape[0], -1, 1280)[:, 0]
+        summary_token = summary.reshape(summary.shape[0], -1, 1280)[:, self.summary_slot_index]
         descriptor = self.summary_head(summary_token[:, None])[:, 0]
         return (
             spatial.float(),

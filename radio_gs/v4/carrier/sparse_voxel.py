@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import itertools
+import math
 import operator
 
 import numpy as np
@@ -35,6 +36,7 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         maximum_splat_radius: int,
         surface_band_voxels: float,
         maximum_contributors_per_pixel: int,
+        reference_raster_shape: tuple[int, int] | None = None,
     ) -> None:
         centres = torch.as_tensor(centres, dtype=torch.float32).cpu()
         if centres.ndim != 2 or centres.shape[1] != 3 or centres.shape[0] == 0:
@@ -61,6 +63,14 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         self.maximum_splat_radius = radius
         self.surface_band_voxels = float(surface_band_voxels)
         self.maximum_contributors_per_pixel = contributor_cap
+        if reference_raster_shape is not None:
+            if len(reference_raster_shape) != 2:
+                raise ValueError("reference_raster_shape must contain height and width")
+            reference_raster_shape = tuple(
+                _exact_integer(value, name="reference raster dimension", minimum=1)
+                for value in reference_raster_shape
+            )
+        self.reference_raster_shape = reference_raster_shape
         self.normals = None if normals is None else torch.as_tensor(normals, dtype=torch.float32).cpu()
         if self.normals is not None and self.normals.shape != centres.shape:
             raise ValueError("normals must match centres")
@@ -89,6 +99,7 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         maximum_splat_radius: int,
         surface_band_voxels: float,
         maximum_contributors_per_pixel: int,
+        reference_raster_shape: tuple[int, int] | None = None,
     ) -> "SurfaceVoxelCarrier":
         points = torch.as_tensor(points, dtype=torch.float32).cpu()
         if points.ndim != 2 or points.shape[1] != 3 or points.shape[0] == 0:
@@ -139,6 +150,7 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
             maximum_splat_radius=radius,
             surface_band_voxels=surface_band_voxels,
             maximum_contributors_per_pixel=contributor_cap,
+            reference_raster_shape=reference_raster_shape,
         )
 
     @property
@@ -170,18 +182,26 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         intrinsic = camera.intrinsic.float()
         u = intrinsic[0, 0] * camera_points[:, 0] / z.clamp_min(1e-6) + intrinsic[0, 2]
         v = intrinsic[1, 1] * camera_points[:, 1] / z.clamp_min(1e-6) + intrinsic[1, 2]
+        scale_y, scale_x = (1.0, 1.0) if self.reference_raster_shape is None else (
+            camera.height / self.reference_raster_shape[0], camera.width / self.reference_raster_shape[1]
+        )
+        # Radius is quantized and capped in the mapping raster, then transported
+        # to the output raster. An output-pixel cap changes physical support.
         radius = torch.ceil(
-            0.5 * self.voxel_size * torch.maximum(intrinsic[0, 0], intrinsic[1, 1])
+            0.5 * self.voxel_size * torch.maximum(intrinsic[0, 0] / scale_x, intrinsic[1, 1] / scale_y)
             / z.clamp_min(1e-6)
         ).long()
         radius = radius.clamp(0, self.maximum_splat_radius)
+        cap_x = math.ceil(self.maximum_splat_radius * scale_x)
+        cap_y = math.ceil(self.maximum_splat_radius * scale_y)
+        rounded_u, rounded_v = torch.round(u).long(), torch.round(v).long()
         candidate_elements, candidate_pixels, candidate_depths = [], [], []
         for offset_y, offset_x in itertools.product(
-            range(-self.maximum_splat_radius, self.maximum_splat_radius + 1), repeat=2
+            range(-cap_y, cap_y + 1), range(-cap_x, cap_x + 1)
         ):
-            inside_radius = (offset_x * offset_x + offset_y * offset_y) <= radius.square()
-            x = torch.round(u).long() + offset_x
-            y = torch.round(v).long() + offset_y
+            inside_radius = ((offset_x / scale_x) ** 2 + (offset_y / scale_y) ** 2) <= radius.square()
+            x = rounded_u + offset_x
+            y = rounded_v + offset_y
             selected = valid & inside_radius & (x >= 0) & (x < camera.width) & (y >= 0) & (y < camera.height)
             ids = torch.where(selected)[0]
             if ids.numel():
@@ -233,6 +253,8 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
                 "surface_band_voxels": self.surface_band_voxels,
                 "maximum_contributors_per_pixel": self.maximum_contributors_per_pixel,
                 "visible_pixel_count": int(np.unique(pixels[chosen]).size),
+                "reference_raster_shape": self.reference_raster_shape,
+                "output_splat_radius_cap_xy": [cap_x, cap_y],
             },
         )
         self._projection_cache[cache_key] = result

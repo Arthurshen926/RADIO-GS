@@ -143,8 +143,10 @@ def _scaled_camera(view: ColmapSourceView, height: int, width: int, stride: int)
     intrinsic = full.clone()
     intrinsic[0, 0] /= stride
     intrinsic[1, 1] /= stride
-    intrinsic[0, 2] = (full[0, 2] + 0.5) / stride - 0.5
-    intrinsic[1, 2] = (full[1, 2] + 0.5) / stride - 0.5
+    # Depth is sliced [::stride], not resized. The fusion unprojector uses
+    # pixel centres j + 0.5, so preserve the original ray stride*j + 0.5.
+    intrinsic[0, 2] = (full[0, 2] - 0.5) / stride + 0.5
+    intrinsic[1, 2] = (full[1, 2] - 0.5) / stride + 0.5
     return Camera(str(view.frame_index), intrinsic, view.camera_to_world, sampled_height, sampled_width)
 
 

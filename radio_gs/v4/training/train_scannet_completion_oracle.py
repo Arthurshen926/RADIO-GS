@@ -20,10 +20,12 @@ from radio_gs.v4.completion import (
     build_feature_cosine_similarity,
     build_pair_features,
     build_token_context,
+    complete_independent_unknown_only,
     complete_unknown_only,
     completion_metrics,
 )
 from radio_gs.v4.completion.scannet import camera_from_record, load_scene_cache
+from radio_gs.v4.completion.fragment_noise import apply_fragment_noise_to_runtime
 from radio_gs.v4.contracts.geometry_receipt import sha256_file
 from radio_gs.v4.contracts.source_split import SourceSplit
 
@@ -55,6 +57,7 @@ UNKNOWN_SAMPLING_MODES = (
 )
 SCORING_MODES = (
     "mlp",
+    "independent_bernoulli_mlp",
     "mlp_radio_cosine_residual",
     "availability_dual_mlp",
 )
@@ -64,12 +67,15 @@ RADIO_ALIGNMENT_CONTROLS = (
     "aligned",
     "shuffled_within_observation_stratum",
 )
+OBSERVATION_NOISE_MODES = ("clean", "coherent_fragment_set")
 ALIGNED_RADIO_REFERENCE = {
     "local_feature_mode": "rgb_radio_geometry",
     "unknown_sampling_mode": "token_uniform",
     "scoring_mode": "mlp",
     "radio_alignment_control": "aligned",
     "hidden_dimension": 128,
+    "training_observation_noise_mode": "clean",
+    "validation_observation_noise_mode": "clean",
 }
 
 
@@ -92,6 +98,12 @@ def _changed_factors_against_aligned_radio(args: argparse.Namespace) -> list[str
         "scoring_mode": args.scoring_mode,
         "radio_alignment_control": getattr(args, "radio_alignment_control", "aligned"),
         "hidden_dimension": int(args.hidden_dimension),
+        "training_observation_noise_mode": getattr(
+            args, "training_observation_noise_mode", "clean"
+        ),
+        "validation_observation_noise_mode": getattr(
+            args, "validation_observation_noise_mode", "clean"
+        ),
     }
     return [
         key for key, reference in ALIGNED_RADIO_REFERENCE.items()
@@ -523,7 +535,9 @@ def _training_examples(
                 feature_start=RADIO_FEATURE_START,
                 feature_stop=RADIO_FEATURE_STOP,
             )
-        elif scoring_mode not in ("mlp", "availability_dual_mlp"):
+        elif scoring_mode not in (
+            "mlp", "independent_bernoulli_mlp", "availability_dual_mlp"
+        ):
             raise ValueError(f"unsupported completion scoring mode {scoring_mode!r}")
         labels = runtime["labels"][indices].clone()
         labels[labels < 0] = features.shape[1]
@@ -559,6 +573,7 @@ def _fit(
     learning_rate: float,
     weight_decay: float,
     seed: int,
+    scoring_mode: str = "mlp",
 ) -> dict[str, Any]:
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=learning_rate, weight_decay=weight_decay
@@ -567,6 +582,11 @@ def _fit(
     python_rng = random.Random(seed + 2)
     model.train()
     loss_history = []
+    loss_name = (
+        "balanced_binary_cross_entropy"
+        if scoring_mode == "independent_bernoulli_mlp"
+        else "cross_entropy"
+    )
     for step in range(step_count):
         example = examples[python_rng.randrange(len(examples))]
         count = example["labels"].numel()
@@ -579,18 +599,66 @@ def _fit(
         source_available = example.get("source_available")
         if source_available is not None:
             source_available = source_available[indices].to(device, non_blocking=True)
-        logits = model.categorical_logits(
-            pair,
-            explicit_similarity=similarity,
-            source_available=source_available,
-        )
-        loss = F.cross_entropy(logits, target)
+        if scoring_mode == "independent_bernoulli_mlp":
+            if similarity is not None or source_available is not None:
+                raise ValueError("independent Bernoulli is a plain shared pair scorer")
+            token_logits = model(pair) - model.null_logit
+            loss = independent_bernoulli_completion_loss(token_logits, target)
+        else:
+            logits = model.categorical_logits(
+                pair,
+                explicit_similarity=similarity,
+                source_available=source_available,
+            )
+            loss = F.cross_entropy(logits, target)
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         optimizer.step()
         if step == 0 or (step + 1) % max(step_count // 20, 1) == 0:
-            loss_history.append({"step": step + 1, "cross_entropy": float(loss.detach())})
-    return {"loss_history": loss_history, "final_cross_entropy": loss_history[-1]["cross_entropy"]}
+            loss_history.append({"step": step + 1, loss_name: float(loss.detach())})
+    return {
+        "loss_history": loss_history,
+        f"final_{loss_name}": loss_history[-1][loss_name],
+    }
+
+
+def independent_bernoulli_completion_loss(
+    token_logits: torch.Tensor, categorical_target: torch.Tensor
+) -> torch.Tensor:
+    """Object-equal binary loss independent of the scene token count.
+
+    For object rows, positive and all non-target hypotheses receive equal total
+    weight.  Null rows contribute one mean negative term.  This avoids allowing
+    a scene with many hypotheses to overwhelm each positive with K negatives.
+    """
+
+    logits = torch.as_tensor(token_logits)
+    target = torch.as_tensor(categorical_target, dtype=torch.long, device=logits.device)
+    if logits.ndim != 2 or target.shape != (logits.shape[0],):
+        raise ValueError("binary completion logits and targets must align")
+    token_count = logits.shape[1]
+    if token_count <= 0 or bool(((target < 0) | (target > token_count)).any()):
+        raise ValueError("binary completion categorical targets are invalid")
+    losses = []
+    object_rows = target < token_count
+    if bool(object_rows.any()):
+        object_logits = logits[object_rows]
+        object_target = target[object_rows]
+        row = torch.arange(object_logits.shape[0], device=logits.device)
+        positive = F.softplus(-object_logits[row, object_target])
+        negative_terms = F.softplus(object_logits)
+        negative_terms[row, object_target] = 0
+        if token_count > 1:
+            negative = negative_terms.sum(-1) / (token_count - 1)
+            losses.append(0.5 * (positive + negative))
+        else:
+            losses.append(positive)
+    null_rows = ~object_rows
+    if bool(null_rows.any()):
+        losses.append(F.softplus(logits[null_rows]).mean(-1))
+    if not losses:
+        raise ValueError("binary completion loss received an empty batch")
+    return torch.cat(losses).mean()
 
 
 @torch.no_grad()
@@ -602,6 +670,7 @@ def _predict(
     element_batch_size: int,
     temperature: float,
     completion_confidence_cap: float,
+    scoring_mode: str = "mlp",
 ) -> tuple[torch.Tensor, torch.Tensor]:
     if temperature <= 0:
         raise ValueError("temperature must be positive")
@@ -635,20 +704,31 @@ def _predict(
             if not torch.equal(routed, strata["visible_but_unmasked"][indices]):
                 raise RuntimeError("dual-expert inference route differs from sealed source visibility")
             source_available = routed.to(device, non_blocking=True)
-        categorical = torch.softmax(
-            model.categorical_logits(
-                pair,
-                explicit_similarity=similarity,
-                source_available=source_available,
-            ) / temperature,
-            dim=-1,
-        ).cpu()
-        probability[indices] = categorical[:, :-1]
-        null_probability[indices] = categorical[:, -1]
+        if scoring_mode == "independent_bernoulli_mlp":
+            if similarity is not None or source_available is not None:
+                raise ValueError("independent Bernoulli is a plain shared pair scorer")
+            probability[indices] = torch.sigmoid(
+                (model(pair) - model.null_logit) / temperature
+            ).cpu()
+        else:
+            categorical = torch.softmax(
+                model.categorical_logits(
+                    pair,
+                    explicit_similarity=similarity,
+                    source_available=source_available,
+                ) / temperature,
+                dim=-1,
+            ).cpu()
+            probability[indices] = categorical[:, :-1]
+            null_probability[indices] = categorical[:, -1]
+    if scoring_mode == "independent_bernoulli_mlp":
+        return complete_independent_unknown_only(
+            partial,
+            probability,
+            completion_confidence_cap=completion_confidence_cap,
+        )
     return complete_unknown_only(
-        partial,
-        probability,
-        unknown_null_probability=null_probability,
+        partial, probability, unknown_null_probability=null_probability,
         completion_confidence_cap=completion_confidence_cap,
     )
 
@@ -900,10 +980,12 @@ def _evaluate_scene(
     temperature: float,
     completion_confidence_cap: float,
     assignment_threshold: float,
+    scoring_mode: str = "mlp",
 ) -> dict[str, Any]:
     learned, null = _predict(
         model, runtime, device=device, element_batch_size=element_batch_size,
         temperature=temperature, completion_confidence_cap=completion_confidence_cap,
+        scoring_mode=scoring_mode,
     )
     observed_only = runtime["partial"].positive.float()
     baseline_null = 1.0 - observed_only.sum(-1)
@@ -918,6 +1000,11 @@ def _evaluate_scene(
         null_probability=null,
         assignment_threshold=assignment_threshold,
         unknown_strata=runtime.get("unknown_strata"),
+        probability_contract=(
+            "independent_bernoulli"
+            if scoring_mode == "independent_bernoulli_mlp"
+            else "categorical_simplex"
+        ),
     )
     baseline_statistics = _element_soft_iou_sufficient_statistics(
         runtime, observed_only
@@ -1288,8 +1375,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     completion_implementation_path = (
         implementation_path.parents[1] / "completion" / "oracle.py"
     )
+    fragment_noise_implementation_path = (
+        implementation_path.parents[1] / "completion" / "fragment_noise.py"
+    )
     implementation_sha256 = sha256_file(implementation_path)
     completion_implementation_sha256 = sha256_file(completion_implementation_path)
+    fragment_noise_implementation_sha256 = sha256_file(
+        fragment_noise_implementation_path
+    )
     if (
         args.step_count <= 0
         or args.batch_size <= 0
@@ -1319,6 +1412,49 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("a supported unknown sampling mode is required")
     if args.scoring_mode not in SCORING_MODES:
         raise ValueError("a supported completion scoring mode is required")
+    membership_prediction_mode = (
+        "independent_token_bernoulli"
+        if args.scoring_mode == "independent_bernoulli_mlp"
+        else "categorical_tokens_plus_null"
+    )
+    null_head_contract = (
+        "shared_binary_reference_logit"
+        if args.scoring_mode == "independent_bernoulli_mlp"
+        else "single_raw_learned_null"
+    )
+    token_cardinality_contract = (
+        "independent_bernoulli_no_cross_token_normalization"
+        if args.scoring_mode == "independent_bernoulli_mlp"
+        else TOKEN_CARDINALITY_NORMALIZATION
+    )
+    primary_assignment_decision = (
+        "strongest_independent_bernoulli_vs_row_abstention"
+        if args.scoring_mode == "independent_bernoulli_mlp"
+        else "threshold_free_token_plus_null_argmax"
+    )
+    training_observation_noise_mode = getattr(
+        args, "training_observation_noise_mode", "clean"
+    )
+    validation_observation_noise_mode = getattr(
+        args, "validation_observation_noise_mode", "clean"
+    )
+    observation_noise_seed = int(getattr(args, "observation_noise_seed", args.seed))
+    noise_minimum_keep_fraction = float(
+        getattr(args, "noise_minimum_keep_fraction", 0.35)
+    )
+    noise_maximum_keep_fraction = float(
+        getattr(args, "noise_maximum_keep_fraction", 0.75)
+    )
+    noise_maximum_fragments = int(getattr(args, "noise_maximum_fragments", 3))
+    if (
+        training_observation_noise_mode not in OBSERVATION_NOISE_MODES
+        or validation_observation_noise_mode not in OBSERVATION_NOISE_MODES
+    ):
+        raise ValueError("supported training/validation observation noise modes are required")
+    if not 0 < noise_minimum_keep_fraction <= noise_maximum_keep_fraction <= 1:
+        raise ValueError("fragment-noise keep fractions must lie in (0,1]")
+    if noise_maximum_fragments <= 0:
+        raise ValueError("fragment-noise maximum fragment count must be positive")
     radio_alignment_control = getattr(args, "radio_alignment_control", "aligned")
     radio_alignment_seed = int(getattr(args, "radio_alignment_seed", args.seed))
     if radio_alignment_control not in RADIO_ALIGNMENT_CONTROLS:
@@ -1410,6 +1546,28 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         )
         for identity in sorted(split.development_ids)
     ]
+    if training_observation_noise_mode == "coherent_fragment_set":
+        train_runtime = [
+            apply_fragment_noise_to_runtime(
+                runtime,
+                seed=observation_noise_seed,
+                minimum_keep_fraction=noise_minimum_keep_fraction,
+                maximum_keep_fraction=noise_maximum_keep_fraction,
+                maximum_fragments=noise_maximum_fragments,
+            )
+            for runtime in train_runtime
+        ]
+    if validation_observation_noise_mode == "coherent_fragment_set":
+        validation_runtime = [
+            apply_fragment_noise_to_runtime(
+                runtime,
+                seed=observation_noise_seed,
+                minimum_keep_fraction=noise_minimum_keep_fraction,
+                maximum_keep_fraction=noise_maximum_keep_fraction,
+                maximum_fragments=noise_maximum_fragments,
+            )
+            for runtime in validation_runtime
+        ]
     all_runtimes = train_runtime + validation_runtime
     selected_feature_layout = all_runtimes[0]["selected_local_feature_layout"]
     if any(
@@ -1479,12 +1637,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     training = _fit(
         model, examples, device=device, step_count=args.step_count,
         batch_size=args.batch_size, learning_rate=args.learning_rate,
-        weight_decay=args.weight_decay, seed=args.seed,
+        weight_decay=args.weight_decay, seed=args.seed, scoring_mode=args.scoring_mode,
     )
     if (
         sha256_file(implementation_path) != implementation_sha256
         or sha256_file(completion_implementation_path)
         != completion_implementation_sha256
+        or sha256_file(fragment_noise_implementation_path)
+        != fragment_noise_implementation_sha256
     ):
         raise RuntimeError("completion implementation changed during training")
     scene_cache_receipts = [
@@ -1505,21 +1665,28 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "input_dimension": input_dimension,
             "hidden_dimension": args.hidden_dimension,
             "dropout": args.dropout,
-            "token_cardinality_normalization": TOKEN_CARDINALITY_NORMALIZATION,
+            "token_cardinality_normalization": token_cardinality_contract,
             "local_feature_mode": args.local_feature_mode,
             "source_local_feature_layout": configurations[0]["local_feature_layout"],
             "selected_local_feature_layout": selected_feature_layout,
             "unknown_sampling_mode": args.unknown_sampling_mode,
             "scoring_mode": args.scoring_mode,
+            "membership_prediction_mode": membership_prediction_mode,
             "radio_alignment_control": radio_alignment_control,
             "radio_alignment_seed": radio_alignment_seed,
+            "training_observation_noise_mode": training_observation_noise_mode,
+            "validation_observation_noise_mode": validation_observation_noise_mode,
+            "observation_noise_seed": observation_noise_seed,
+            "noise_minimum_keep_fraction": noise_minimum_keep_fraction,
+            "noise_maximum_keep_fraction": noise_maximum_keep_fraction,
+            "noise_maximum_fragments": noise_maximum_fragments,
             "model_parameter_count": model_parameter_count,
             "availability_route": (
                 "sealed_source_visible"
                 if args.scoring_mode == "availability_dual_mlp"
                 else "none"
             ),
-            "null_head_sharing": "single_raw_learned_null",
+            "null_head_sharing": null_head_contract,
         },
         "training_scene_ids": sorted(split.source_ids),
         "validation_scene_ids": sorted(split.development_ids),
@@ -1528,7 +1695,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "observed_membership_is_oracle_input": True,
         "unobserved_membership_used_as_target_only": True,
         "full_membership_used_as_target_only": False,
-        "token_cardinality_normalization": TOKEN_CARDINALITY_NORMALIZATION,
+        "token_cardinality_normalization": token_cardinality_contract,
         "token_cardinality_normalization_applied_in_training_and_inference": False,
         "rejected_log_token_count_null_ablation_restored": True,
         "ablation_scope": ablation_scope,
@@ -1540,8 +1707,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "mask_support_strata_available": strata_available,
         "unknown_sampling_mode": args.unknown_sampling_mode,
         "scoring_mode": args.scoring_mode,
+        "membership_prediction_mode": membership_prediction_mode,
         "radio_alignment_control": radio_alignment_control,
         "radio_alignment_seed": radio_alignment_seed,
+        "training_observation_noise_mode": training_observation_noise_mode,
+        "validation_observation_noise_mode": validation_observation_noise_mode,
+        "observation_noise_seed": observation_noise_seed,
+        "training_observation_noise_receipts": [
+            runtime.get("fragment_noise_receipt") for runtime in train_runtime
+        ],
+        "validation_observation_noise_receipts": [
+            runtime.get("fragment_noise_receipt") for runtime in validation_runtime
+        ],
         "radio_alignment_control_receipts": [
             runtime["radio_alignment_receipt"] for runtime in all_runtimes
         ],
@@ -1554,10 +1731,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             if args.scoring_mode == "availability_dual_mlp"
             else "none"
         ),
-        "null_head_sharing": "single_raw_learned_null",
+        "null_head_sharing": null_head_contract,
         "threshold_or_temperature_changed_from_v5": False,
         "implementation_sha256": implementation_sha256,
         "completion_implementation_sha256": completion_implementation_sha256,
+        "fragment_noise_implementation_sha256": fragment_noise_implementation_sha256,
     }, checkpoint_path)
     per_scene = [
         _evaluate_scene(
@@ -1565,6 +1743,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             temperature=args.temperature,
             completion_confidence_cap=args.completion_confidence_cap,
             assignment_threshold=args.assignment_threshold,
+            scoring_mode=args.scoring_mode,
         )
         for runtime in validation_runtime
     ]
@@ -1572,6 +1751,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         sha256_file(implementation_path) != implementation_sha256
         or sha256_file(completion_implementation_path)
         != completion_implementation_sha256
+        or sha256_file(fragment_noise_implementation_path)
+        != fragment_noise_implementation_sha256
     ):
         raise RuntimeError("completion implementation changed during evaluation")
     aggregate_keys = [
@@ -1686,7 +1867,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "full_membership_used_as_target_only": False,
         "completion_writes_unknown_only": True,
         "observed_positive_and_negative_are_clamped": True,
-        "token_cardinality_normalization": TOKEN_CARDINALITY_NORMALIZATION,
+        "token_cardinality_normalization": token_cardinality_contract,
         "token_cardinality_normalization_applied_in_training_and_inference": False,
         "rejected_log_token_count_null_ablation_restored": True,
         "ablation_scope": ablation_scope,
@@ -1698,8 +1879,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "mask_support_strata_available": strata_available,
         "unknown_sampling_mode": args.unknown_sampling_mode,
         "scoring_mode": args.scoring_mode,
+        "membership_prediction_mode": membership_prediction_mode,
         "radio_alignment_control": radio_alignment_control,
         "radio_alignment_seed": radio_alignment_seed,
+        "training_observation_noise_mode": training_observation_noise_mode,
+        "validation_observation_noise_mode": validation_observation_noise_mode,
+        "observation_noise_seed": observation_noise_seed,
+        "training_observation_noise_receipts": [
+            runtime.get("fragment_noise_receipt") for runtime in train_runtime
+        ],
+        "validation_observation_noise_receipts": [
+            runtime.get("fragment_noise_receipt") for runtime in validation_runtime
+        ],
         "radio_alignment_control_receipts": [
             runtime["radio_alignment_receipt"] for runtime in all_runtimes
         ],
@@ -1711,8 +1902,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             if args.scoring_mode == "availability_dual_mlp"
             else "none"
         ),
-        "null_head_sharing": "single_raw_learned_null",
-        "primary_assignment_decision": "threshold_free_token_plus_null_argmax",
+        "null_head_sharing": null_head_contract,
+        "primary_assignment_decision": primary_assignment_decision,
         "legacy_assignment_threshold_metrics_are_diagnostic_only": True,
         "heldout_2d_metric": "cross_view_token_soft_iou_with_absent_view_false_positives",
         "threshold_or_temperature_changed_from_v5": False,
@@ -1730,8 +1921,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "samples_per_token": args.samples_per_token,
             "unknown_sampling_mode": args.unknown_sampling_mode,
             "scoring_mode": args.scoring_mode,
+            "membership_prediction_mode": membership_prediction_mode,
             "radio_alignment_control": radio_alignment_control,
             "radio_alignment_seed": radio_alignment_seed,
+            "training_observation_noise_mode": training_observation_noise_mode,
+            "validation_observation_noise_mode": validation_observation_noise_mode,
+            "observation_noise_seed": observation_noise_seed,
+            "noise_minimum_keep_fraction": noise_minimum_keep_fraction,
+            "noise_maximum_keep_fraction": noise_maximum_keep_fraction,
+            "noise_maximum_fragments": noise_maximum_fragments,
             "input_dimension": input_dimension,
             "model_parameter_count": model_parameter_count,
             "learning_rate": args.learning_rate,
@@ -1752,7 +1950,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "selected_local_feature_layout": selected_feature_layout,
             "token_probability_concentration_is_diagnostic_only": True,
             "assignment_threshold_is_legacy_diagnostic_only": True,
-            "token_cardinality_normalization": TOKEN_CARDINALITY_NORMALIZATION,
+            "token_cardinality_normalization": token_cardinality_contract,
             "validation_used_for_model_selection": False,
         },
         "training": {
@@ -1774,6 +1972,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "scene_cache_receipts": scene_cache_receipts,
         "implementation_sha256": implementation_sha256,
         "completion_implementation_sha256": completion_implementation_sha256,
+        "fragment_noise_implementation_sha256": fragment_noise_implementation_sha256,
     }
     output_path = Path(args.output).resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1804,6 +2003,20 @@ def main() -> None:
         default="aligned",
     )
     parser.add_argument("--radio-alignment-seed", type=int, default=20260831)
+    parser.add_argument(
+        "--training-observation-noise-mode",
+        choices=OBSERVATION_NOISE_MODES,
+        default="clean",
+    )
+    parser.add_argument(
+        "--validation-observation-noise-mode",
+        choices=OBSERVATION_NOISE_MODES,
+        default="clean",
+    )
+    parser.add_argument("--observation-noise-seed", type=int, default=20260904)
+    parser.add_argument("--noise-minimum-keep-fraction", type=float, default=0.35)
+    parser.add_argument("--noise-maximum-keep-fraction", type=float, default=0.75)
+    parser.add_argument("--noise-maximum-fragments", type=int, default=3)
     parser.add_argument("--aligned-reference-report")
     parser.add_argument("--cohort-manifest")
     parser.add_argument("--step-count", type=int, default=2000)

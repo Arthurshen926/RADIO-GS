@@ -12,6 +12,7 @@ from radio_gs.v4.completion import (
     build_feature_cosine_similarity,
     build_pair_features,
     build_token_context,
+    complete_independent_unknown_only,
     complete_unknown_only,
     completion_metrics,
 )
@@ -43,6 +44,7 @@ from radio_gs.v4.training.train_scannet_completion_oracle import (
     _changed_factors_against_aligned_radio,
     _shuffle_radio_within_observation_strata,
     _sampling_audit,
+    independent_bernoulli_completion_loss,
 )
 
 
@@ -137,6 +139,32 @@ def test_completion_is_unknown_only_and_reserves_null_mass():
     assert membership[3].tolist() == pytest.approx([0.09, 0.81])
     assert float(null[1]) == pytest.approx(0.1)
     assert float(null[4]) == 1.0
+
+
+def test_independent_completion_is_not_diluted_by_unrelated_tokens():
+    _, partial = _partial()
+    probability = torch.tensor([
+        [0.1, 0.2], [0.8, 0.2], [0.2, 0.1], [0.1, 0.9], [0.0, 0.0]
+    ])
+    membership, null = complete_independent_unknown_only(
+        partial, probability, completion_confidence_cap=0.9
+    )
+    assert membership[1].tolist() == pytest.approx([0.72, 0.18])
+    assert membership[3].tolist() == pytest.approx([0.09, 0.81])
+    assert float(null[1]) == pytest.approx(0.28)
+    assert float(null[3]) == pytest.approx(0.19)
+
+
+def test_independent_binary_loss_balances_positive_and_negative_sets():
+    logits = torch.tensor([[2.0, -2.0, -2.0], [-1.0, -1.0, -1.0]])
+    target = torch.tensor([0, 3])
+    loss = independent_bernoulli_completion_loss(logits, target)
+    expected_object = 0.5 * (
+        torch.nn.functional.softplus(torch.tensor(-2.0))
+        + torch.nn.functional.softplus(torch.tensor(-2.0))
+    )
+    expected_null = torch.nn.functional.softplus(torch.tensor(-1.0))
+    assert loss == pytest.approx(float((expected_object + expected_null) / 2))
 
 
 def test_token_context_and_pair_scorer_do_not_need_integer_identity():
@@ -405,6 +433,36 @@ def test_completion_metrics_separate_unknown_precision_coverage_and_null():
     assert metrics["unknown_retained_set_null_recall"] == pytest.approx(0.5)
     assert metrics["full_k_plus_null_categorical_accuracy"] == pytest.approx(4 / 6)
     assert metrics["unknown_target_aware_token_mass_precision"] == pytest.approx(1.1 / 2.8)
+
+
+def test_completion_metrics_accept_independent_probabilities_without_simplex():
+    labels, partial = _partial()
+    membership = torch.tensor([
+        [1.0, 0.0],
+        [0.7, 0.6],
+        [0.0, 1.0],
+        [0.2, 0.8],
+        [0.0, 0.0],
+    ])
+    null = 1.0 - membership.max(-1).values
+    with pytest.raises(ValueError, match="K-plus-null simplex"):
+        completion_metrics(
+            membership,
+            partial,
+            labels,
+            null_probability=null,
+            probability_contract="categorical_simplex",
+        )
+    metrics = completion_metrics(
+        membership,
+        partial,
+        labels,
+        null_probability=null,
+        probability_contract="independent_bernoulli",
+    )
+    assert metrics["probability_contract"] == "independent_bernoulli"
+    assert metrics["positive_clamp_max_error"] == 0
+    assert metrics["negative_clamp_max_error"] == 0
 
 
 def test_low_purity_element_is_excluded_from_evidence_and_metrics():

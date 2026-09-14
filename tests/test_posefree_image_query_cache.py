@@ -156,3 +156,25 @@ def test_official_runtime_resizes_and_unpacks_released_tuple_output() -> None:
     assert model.seen_shape == (1, 3, 8, 12)
     assert summary.shape == (1, 4)
     assert spatial.shape == (1, 4, 2, 3)
+
+
+@pytest.mark.parametrize("container", ["tuple", "dict", "named"])
+def test_crop_summary_accepts_official_output_containers(container) -> None:
+    runtime = OfficialRadioRuntime(model=_FakeOfficialModel(), version="test", adaptor_names=("siglip2-g",))
+    summary = torch.ones(2, 1536)
+    spatial = torch.ones(2, 1536, 2, 3)
+    value = {"tuple": (summary, spatial), "dict": {"summary": summary, "features": spatial},
+             "named": SimpleNamespace(summary=summary, features=spatial)}[container]
+    runtime.encode_images = lambda *args, **kwargs: {"siglip2-g": value}
+    result = runtime.encode_official_crop_summaries(torch.zeros(2, 3, 8, 12))
+    assert result.shape == (2, 1536)
+    torch.testing.assert_close(result.norm(dim=-1), torch.ones(2))
+
+
+@pytest.mark.parametrize("summary", [None, torch.zeros(2, 1536), torch.ones(2, 6, 1536),
+                                     torch.full((2, 1536), float("nan"))])
+def test_crop_summary_rejects_invalid_summary(summary) -> None:
+    runtime = OfficialRadioRuntime(model=_FakeOfficialModel(), version="test", adaptor_names=("siglip2-g",))
+    runtime.encode_images = lambda *args, **kwargs: {"siglip2-g": (summary, torch.ones(2, 4, 2, 3))}
+    with pytest.raises(RuntimeError, match="finite nonzero"):
+        runtime.encode_official_crop_summaries(torch.zeros(2, 3, 8, 12))

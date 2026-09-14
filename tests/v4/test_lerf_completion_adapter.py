@@ -6,7 +6,7 @@ from radio_gs.v4.carrier import Camera, SurfaceVoxelCarrier
 from radio_gs.v4.completion.lerf_adapter import build_real_token_runtime
 
 
-def test_real_token_runtime_hardens_only_observed_source_rows():
+def test_real_token_runtime_keeps_ambiguous_soft_rows_unknown():
     carrier = SurfaceVoxelCarrier(
         torch.tensor(
             [[0.0, 0.0, 1.0], [0.1, 0.0, 1.0], [0.0, 0.1, 1.0], [0.1, 0.1, 1.0]]
@@ -33,11 +33,14 @@ def test_real_token_runtime_hardens_only_observed_source_rows():
     )
 
     expected_positive = torch.tensor(
-        [[True, False], [False, True], [False, False], [False, True]]
+        [[True, False], [False, False], [False, False], [False, True]]
     )
     assert torch.equal(runtime["partial"].positive, expected_positive)
+    assert bool(runtime["partial"].unknown[1].all())
     assert bool(runtime["partial"].unknown[2].all())
     assert int(runtime["partial"].positive.sum(-1).max()) == 1
+    assert audit["ambiguous_observed_element_count"] == 1
+    assert audit["ambiguous_observed_policy"].startswith("retain_unknown")
     assert audit["overlap_discarded_element_count"] == 1
     assert audit["complete_target_labels_read"] is False
 
@@ -56,7 +59,7 @@ def test_real_token_runtime_compacts_tokens_without_categorical_seed():
     # Token 1 has genuine soft source evidence and a source proposal receipt,
     # but it never wins an element-wise categorical assignment.
     membership = torch.tensor(
-        [[0.9, 0.8, 0.0], [0.7, 0.6, 0.0], [0.0, 0.0, 0.8], [0.0, 0.0, 0.0]]
+        [[0.9, 0.2, 0.0], [0.7, 0.6, 0.0], [0.0, 0.0, 0.8], [0.0, 0.0, 0.0]]
     )
 
     runtime, audit = build_real_token_runtime(

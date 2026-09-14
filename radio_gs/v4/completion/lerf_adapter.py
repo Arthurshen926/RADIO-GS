@@ -1,11 +1,11 @@
 """Target-free deployment adapter for the retained ScanNet completion arm.
 
 The learned models are scene-agnostic, but their training runtime used oracle
-identities to *simulate* source observations.  This adapter replaces that
-simulation with real source-only SAM token assignments.  It deliberately
-hardens only the directly observed rows to one categorical token; all other
-carrier rows remain unknown.  No benchmark labels, target RGB, or text query
-enters the completion path.
+identities to *simulate* source observations.  This legacy adapter replaces
+that simulation with real source-only SAM token assignments.  Its frozen
+categorical contract cannot represent overlapping soft evidence, so ambiguous
+rows remain unknown instead of being silently hardened to an argmax winner.
+No benchmark labels, target RGB, or text query enters the completion path.
 """
 
 from __future__ import annotations
@@ -16,7 +16,12 @@ from typing import Any
 
 import torch
 
-from radio_gs.v4.completion.oracle import PartialObjectMembership, build_token_context
+from radio_gs.utils.immutable_artifacts import sha256_file
+from radio_gs.v4.completion.oracle import (
+    OracleIdentityCompletionMLP,
+    PartialObjectMembership,
+    build_token_context,
+)
 from radio_gs.v4.completion.spatial_slots import TokenSpatialSupportSlots
 from radio_gs.v4.training.diagnose_scannet_knn_mass_spatial_slots import (
     _load_weights_only,
@@ -35,6 +40,11 @@ from radio_gs.v4.training.train_scannet_completion_message_passing import (
     _frozen_unary_probabilities,
     _load_frozen_unary_model,
     _posterior_to_membership,
+)
+from radio_gs.v4.training.train_scannet_completion_oracle import (
+    CHECKPOINT_SCHEMA as COMPLETION_ORACLE_CHECKPOINT_SCHEMA,
+    REPORT_SCHEMA as COMPLETION_ORACLE_REPORT_SCHEMA,
+    _predict as _predict_completion_oracle,
 )
 from radio_gs.v4.training.train_scannet_spatial_slots import (
     _full_posterior,
@@ -80,8 +90,16 @@ def build_real_token_runtime(
     if not torch.isfinite(membership).all() or bool((membership < 0).any()):
         raise ValueError("real observed membership must be finite and non-negative")
 
-    best_mass, best_token = membership.max(-1)
-    membership_observed = best_mass > float(observed_threshold)
+    above_threshold = membership > float(observed_threshold)
+    support_count = above_threshold.sum(-1)
+    ambiguous_observed = support_count > 1
+    membership_observed = support_count == 1
+    if bool((membership_observed & ~visible).any()):
+        raise ValueError("categorical mask evidence appears outside source visibility")
+    # The categorical ScanNet checkpoint has no legal soft/top-2 input.  Use
+    # argmax only where exactly one token is supported; conflicting rows stay
+    # unknown for every token and are left to the future fragment-set model.
+    best_token = membership.argmax(-1)
     if not bool(membership_observed.any()):
         raise RuntimeError("real token adapter received no observed carrier support")
     observed_label_full = torch.full((membership.shape[0],), -1, dtype=torch.long)
@@ -168,9 +186,11 @@ def build_real_token_runtime(
         "inactive_unseeded_token_ids": inactive_token_ids.tolist(),
         "categorical_observed_element_count": int(membership_observed.sum()),
         "categorical_observed_element_fraction": float(membership_observed.float().mean()),
-        "overlap_discarded_element_count": int(
-            ((membership > observed_threshold).sum(-1) > 1).sum()
-        ),
+        "ambiguous_observed_element_count": int(ambiguous_observed.sum()),
+        "ambiguous_observed_element_fraction": float(ambiguous_observed.float().mean()),
+        "ambiguous_observed_policy": "retain_unknown_for_legacy_categorical_completion",
+        # Kept as a deprecated compatibility field for old report readers.
+        "overlap_discarded_element_count": int(ambiguous_observed.sum()),
         "minimum_observed_token_mass": int(token_mass.min()),
         "maximum_observed_token_mass": int(token_mass.max()),
         "source_view_count": len(frame_keys),
@@ -179,6 +199,94 @@ def build_real_token_runtime(
         "query_read": False,
     }
     return runtime, audit
+
+
+@torch.no_grad()
+def apply_noise_matched_completion_candidate(
+    runtime: dict[str, Any],
+    *,
+    report_path: str | Path,
+    checkpoint_path: str | Path,
+    device: torch.device,
+    element_batch_size: int,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, Any]]:
+    """Apply the scene-disjoint coherent-fragment completion checkpoint.
+
+    The checkpoint was trained with oracle identities only to simulate noisy
+    source observations.  At deployment the integer identities are replaced
+    by the source-only object-hypothesis axis in ``runtime``.
+    """
+
+    if element_batch_size <= 0:
+        raise ValueError("completion inference element batch size must be positive")
+    report_file = Path(report_path).resolve(strict=True)
+    checkpoint_file = Path(checkpoint_path).resolve(strict=True)
+    report = json.loads(report_file.read_text())
+    checkpoint_sha256 = sha256_file(checkpoint_file)
+    if report.get("schema") != COMPLETION_ORACLE_REPORT_SCHEMA:
+        raise ValueError("completion report schema differs")
+    if report.get("checkpoint", {}).get("sha256") != checkpoint_sha256:
+        raise ValueError("completion report and checkpoint are not bound")
+    checkpoint = _load_weights_only(checkpoint_file)
+    if checkpoint.get("schema") != COMPLETION_ORACLE_CHECKPOINT_SCHEMA:
+        raise ValueError("completion checkpoint schema differs")
+    if (
+        checkpoint.get("training_observation_noise_mode")
+        != "coherent_fragment_set"
+    ):
+        raise ValueError("LERF deployment requires coherent-fragment matched training")
+    configuration = checkpoint.get("model_configuration", {})
+    scoring_mode = str(configuration.get("scoring_mode"))
+    if (
+        configuration.get("local_feature_mode") != "rgb_radio_geometry"
+        or scoring_mode not in {"mlp", "independent_bernoulli_mlp"}
+        or configuration.get("radio_alignment_control") != "aligned"
+    ):
+        raise ValueError("LERF deployment requires an aligned F71 shared-MLP arm")
+    local_features = torch.as_tensor(runtime.get("local_features"))
+    if local_features.ndim != 2 or local_features.shape[1] != 71:
+        raise ValueError("LERF deployment runtime must provide sealed F71 features")
+    model = OracleIdentityCompletionMLP(
+        int(configuration["input_dimension"]),
+        hidden_dimension=int(configuration["hidden_dimension"]),
+        dropout=float(configuration["dropout"]),
+    ).to(device)
+    model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+    if sum(parameter.numel() for parameter in model.parameters()) != int(
+        configuration["model_parameter_count"]
+    ):
+        raise ValueError("completion checkpoint parameter count differs")
+    training_configuration = report.get("training_configuration", {})
+    membership, null = _predict_completion_oracle(
+        model,
+        runtime,
+        device=device,
+        element_batch_size=element_batch_size,
+        temperature=float(training_configuration["temperature"]),
+        completion_confidence_cap=float(
+            training_configuration["completion_confidence_cap"]
+        ),
+        scoring_mode=scoring_mode,
+    )
+    return membership, null, {
+        "method": "scene_disjoint_coherent_fragment_noise_completion_mlp",
+        "report": str(report_file),
+        "report_sha256": sha256_file(report_file),
+        "checkpoint": str(checkpoint_file),
+        "checkpoint_sha256": checkpoint_sha256,
+        "training_observation_noise_mode": checkpoint[
+            "training_observation_noise_mode"
+        ],
+        "validation_observation_noise_mode": checkpoint[
+            "validation_observation_noise_mode"
+        ],
+        "scoring_mode": scoring_mode,
+        "training_scene_count": len(checkpoint["training_scene_ids"]),
+        "validation_scene_count": len(checkpoint["validation_scene_ids"]),
+        "target_membership_read": False,
+        "heldout_rgb_read": False,
+        "query_read": False,
+    }
 
 
 @torch.no_grad()
