@@ -1,0 +1,73 @@
+{
+  "schema": "protected_source_membership_gradient.v1",
+  "source_only": true,
+  "benchmark_data_used": false,
+  "optimizer_steps": 0,
+  "auxiliary_teacher_losses_included": false,
+  "field_sha256": "145ccf5a8a522175e1564ef0ac40489cc76ffaf0a9e1d3432ae38aa2e25feff6",
+  "episode_sha256": "477b37ecc4ca762338c70519b3e2608e67f1a63df09b07a79be0db78e213e6c8",
+  "grounded_supervision_sha256": "263d19ac2bd3681712e713708811339f85843329c20067e133d74a29d05c4408",
+  "implementation_sha256": "39bab11a0205bac53fed99c2481e64f3e4a506849d10faf6f2af3fe533b7f924",
+  "observations": [
+    {
+      "modality": "text",
+      "source_query_index": 12,
+      "target_view": 0,
+      "known_pixels": 7644,
+      "known_elements": 30776,
+      "loss": 1.2252376079559326,
+      "native_coordinate_gradient_norm": 0.0,
+      "structural_coordinate_gradient_norm": 0.0,
+      "parameter_gradient_norms": {
+        "latent": 0.0,
+        "query_adapters.prompt.weight": 0.0,
+        "readout_log_scale.image": 0.0,
+        "readout_log_scale.prompt": 0.0,
+        "readout_log_scale.text": 5.087441921234131,
+        "readout_bias.image": 0.0,
+        "readout_bias.prompt": 0.0,
+        "readout_bias.text": 0.39500686526298523
+      }
+    },
+    {
+      "modality": "image",
+      "source_query_index": 2,
+      "target_view": 1,
+      "known_pixels": 8967,
+      "known_elements": 31858,
+      "loss": 2.101872444152832,
+      "native_coordinate_gradient_norm": 0.0,
+      "structural_coordinate_gradient_norm": 0.0,
+      "parameter_gradient_norms": {
+        "latent": 0.0,
+        "query_adapters.prompt.weight": 0.0,
+        "readout_log_scale.image": 3.440324068069458,
+        "readout_log_scale.prompt": 0.0,
+        "readout_log_scale.text": 0.0,
+        "readout_bias.image": 0.28234753012657166,
+        "readout_bias.prompt": 0.0,
+        "readout_bias.text": 0.0
+      }
+    },
+    {
+      "modality": "prompt",
+      "source_query_index": 2,
+      "target_view": 1,
+      "known_pixels": 8967,
+      "known_elements": 31858,
+      "loss": 0.4105323553085327,
+      "native_coordinate_gradient_norm": 0.0,
+      "structural_coordinate_gradient_norm": 0.04363388195633888,
+      "parameter_gradient_norms": {
+        "latent": 0.04363388195633888,
+        "query_adapters.prompt.weight": 0.17304487526416779,
+        "readout_log_scale.image": 0.0,
+        "readout_log_scale.prompt": 0.007665302604436874,
+        "readout_log_scale.text": 0.0,
+        "readout_bias.image": 0.0,
+        "readout_bias.prompt": 0.005848425440490246,
+        "readout_bias.text": 0.0
+      }
+    }
+  ]
+}

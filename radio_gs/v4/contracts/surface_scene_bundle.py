@@ -304,8 +304,12 @@ class SurfaceCarrierConfiguration:
     maximum_contributors_per_pixel: int
     camera_convention: str
     reference_raster_shape: tuple[int, int] | None = None
+    projection_contract: str = "pixel_centres_nearest_v2"
 
     def __post_init__(self) -> None:
+        from radio_gs.v4.carrier.sparse_voxel import PROJECTION_CONTRACTS
+        if self.projection_contract not in PROJECTION_CONTRACTS:
+            raise ValueError("unsupported projection contract")
         voxel_size = float(self.voxel_size)
         surface_band = float(self.surface_band_voxels)
         radius = _exact_integer(
@@ -336,6 +340,8 @@ class SurfaceCarrierConfiguration:
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
+        if self.projection_contract == "legacy_round_band_v1":
+            result.pop("projection_contract")
         if self.reference_raster_shape is None:
             # Keep historical bundle identities byte-compatible.
             result.pop("reference_raster_shape")
@@ -350,9 +356,9 @@ class SurfaceCarrierConfiguration:
             "maximum_contributors_per_pixel",
             "camera_convention",
         }
-        if not required.issubset(value) or set(value) - required - {"reference_raster_shape"}:
+        if not required.issubset(value) or set(value) - required - {"reference_raster_shape", "projection_contract"}:
             raise ValueError("surface carrier configuration fields changed")
-        return cls(**value)
+        return cls(**{**value, "projection_contract": value.get("projection_contract", "legacy_round_band_v1")})
 
     def build_carrier(
         self,
@@ -370,6 +376,7 @@ class SurfaceCarrierConfiguration:
             surface_band_voxels=self.surface_band_voxels,
             maximum_contributors_per_pixel=self.maximum_contributors_per_pixel,
             reference_raster_shape=self.reference_raster_shape,
+            projection_contract=self.projection_contract,
         )
 
 
@@ -445,6 +452,8 @@ def load_geometry_binding(
         outer_projection.get(key) != metadata.get(key) for key in required_projection
     ):
         raise ValueError("geometry report and embedded receipt disagree on projection configuration")
+    if outer_projection.get("projection_contract") != metadata.get("projection_contract"):
+        raise ValueError("geometry report and receipt disagree on projection contract")
     if outer_projection.get("reference_raster_shape") != metadata.get("reference_raster_shape"):
         raise ValueError("geometry report and receipt disagree on reference raster")
 
@@ -460,6 +469,7 @@ def load_geometry_binding(
         maximum_contributors_per_pixel=metadata["maximum_contributors_per_pixel"],
         camera_convention=str(receipt.get("coordinate_convention", "")),
         reference_raster_shape=metadata.get("reference_raster_shape"),
+        projection_contract=metadata.get("projection_contract", "legacy_round_band_v1"),
     )
     binding = GeometryBinding(
         authority_path=str(authority_file),

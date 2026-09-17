@@ -1,0 +1,278 @@
+[
+  {
+    "scene": "figurines",
+    "inputs": {
+      "primitive_query_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/figurines/primitive_query_method_v1.pth",
+        "sha256": "acc0b8b4cbf429d92e2f9df05865898066349fb79bcbe0bd3933ae1e504f1e18"
+      },
+      "membership_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/figurines/gaussian_multiscale_memberships.pt",
+        "sha256": "210d0bad171423ad29105670e1ea80279a99ac068d4476859709f2f469a6e2d0"
+      },
+      "proposal_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/figurines/mask_aligned_siglip2_crop_summary_teacher.pt",
+        "sha256": "56e8c0495cd7e7acca1e783db15e8a5b6c897fa1abfec8ed8c6703cd00773c59"
+      },
+      "text_embedding_cache": {
+        "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+        "sha256": "2b8142252b541a585e248226d38efc30cde53cdef82d5b0ac371085102888e7b"
+      },
+      "canonical_embedding_cache": {
+        "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt",
+        "sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0"
+      }
+    },
+    "argv": [
+      "--scene",
+      "figurines",
+      "--query-names",
+      "bag,green apple,green toy chair,jake,miffy,old camera,pikachu,pink ice cream,pirate hat,porcelain hand,pumpkin,red apple,red toy chair,rubber duck with buoy,rubber duck with hat,rubics cube,spatula,tesla door handle,toy cat statue,toy elephant,waldo",
+      "--output",
+      "/mnt/pool/sqy/results/RADIO-GS/output/v4_rebuilt_control_queries_v2_20260914/figurines.pt",
+      "--device",
+      "cuda:0",
+      "--association-mode",
+      "latent_proposal_marginal",
+      "--descriptor-gate",
+      "query_listwise",
+      "--primitive-query-cache",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/figurines/primitive_query_method_v1.pth",
+      "--membership-cache",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/figurines/gaussian_multiscale_memberships.pt",
+      "--proposal-teacher",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/figurines/mask_aligned_siglip2_crop_summary_teacher.pt",
+      "--text-embedding-cache",
+      "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+      "--canonical-embedding-cache",
+      "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt"
+    ],
+    "comparisons": {
+      "query_scores": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "identity_query_scores": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "valid": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "xyz": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      }
+    },
+    "old_score_sha256": "724c3615988f385613e9673eebcd05ceecb2fc488029bcc5111e1d5293bfe5bf",
+    "new_score_sha256": "2622fc84d99a833bb93369fc8afca8315b2fb87e0ef40b06ff5784f729acf516"
+  },
+  {
+    "scene": "ramen",
+    "inputs": {
+      "primitive_query_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/ramen/primitive_query_method_v1.pth",
+        "sha256": "893fda2a90142f71ee8175e666f12353a93e08a8125d8d5bdaf26d3a95dc54b5"
+      },
+      "membership_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/ramen/gaussian_multiscale_memberships.pt",
+        "sha256": "cdbb80e470f534a06d4de0632a49ad8cfce50bedbbe2bed83c3836b4c5276e42"
+      },
+      "proposal_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/ramen/mask_aligned_siglip2_crop_summary_teacher.pt",
+        "sha256": "844264a79e8a1054483bc91e8240bf8dd8845b6c62642fe6d1fc911b69dff7a1"
+      },
+      "text_embedding_cache": {
+        "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+        "sha256": "2b8142252b541a585e248226d38efc30cde53cdef82d5b0ac371085102888e7b"
+      },
+      "canonical_embedding_cache": {
+        "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt",
+        "sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0"
+      }
+    },
+    "argv": [
+      "--scene",
+      "ramen",
+      "--query-names",
+      "bowl,chopsticks,corn,egg,glass of water,hand,kamaboko,napkin,nori,onion segments,plate,sake cup,spoon,wavy noodles",
+      "--output",
+      "/mnt/pool/sqy/results/RADIO-GS/output/v4_rebuilt_control_queries_v2_20260914/ramen.pt",
+      "--device",
+      "cuda:0",
+      "--association-mode",
+      "latent_proposal_marginal",
+      "--descriptor-gate",
+      "query_listwise",
+      "--primitive-query-cache",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/ramen/primitive_query_method_v1.pth",
+      "--membership-cache",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/ramen/gaussian_multiscale_memberships.pt",
+      "--proposal-teacher",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/ramen/mask_aligned_siglip2_crop_summary_teacher.pt",
+      "--text-embedding-cache",
+      "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+      "--canonical-embedding-cache",
+      "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt"
+    ],
+    "comparisons": {
+      "query_scores": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "identity_query_scores": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "valid": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "xyz": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      }
+    },
+    "old_score_sha256": "ec4cabfcc179f3aa986726182d0f4a6ebd971a3d9c497b39325bd9234f7286c3",
+    "new_score_sha256": "c479e2ac023e6d84299e84ffa00bd3470f1cadaec4c8c54c03c6c7a8145077e7"
+  },
+  {
+    "scene": "teatime",
+    "inputs": {
+      "primitive_query_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/teatime/primitive_query_method_v1.pth",
+        "sha256": "3938c13cd5f2c78cc2522aeff26cb0f77ba08cbeb519288b4b564dffd629b96b"
+      },
+      "membership_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/teatime/gaussian_multiscale_memberships.pt",
+        "sha256": "8ff0a637c3b3485f8271aacae83ecac0a6e1537b88e4d2f79ce5b23e854f601c"
+      },
+      "proposal_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/teatime/mask_aligned_siglip2_crop_summary_teacher.pt",
+        "sha256": "2a2236fbf340c233a9ddaacd3a5005df6a30e990ab19b93d142ec66c91501fbc"
+      },
+      "text_embedding_cache": {
+        "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+        "sha256": "2b8142252b541a585e248226d38efc30cde53cdef82d5b0ac371085102888e7b"
+      },
+      "canonical_embedding_cache": {
+        "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt",
+        "sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0"
+      }
+    },
+    "argv": [
+      "--scene",
+      "teatime",
+      "--query-names",
+      "apple,bag of cookies,bear nose,coffee,coffee mug,dall-e brand,hooves,paper napkin,plate,sheep,stuffed bear,tea in a glass,three cookies,yellow pouf",
+      "--output",
+      "/mnt/pool/sqy/results/RADIO-GS/output/v4_rebuilt_control_queries_v2_20260914/teatime.pt",
+      "--device",
+      "cuda:0",
+      "--association-mode",
+      "latent_proposal_marginal",
+      "--descriptor-gate",
+      "query_listwise",
+      "--primitive-query-cache",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/teatime/primitive_query_method_v1.pth",
+      "--membership-cache",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/teatime/gaussian_multiscale_memberships.pt",
+      "--proposal-teacher",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/teatime/mask_aligned_siglip2_crop_summary_teacher.pt",
+      "--text-embedding-cache",
+      "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+      "--canonical-embedding-cache",
+      "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt"
+    ],
+    "comparisons": {
+      "query_scores": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "identity_query_scores": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "valid": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "xyz": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      }
+    },
+    "old_score_sha256": "f513fa6720fafbaef383e60df668bda9bea1eab53fc4974a24c0f7c5bf5e29ec",
+    "new_score_sha256": "ae48f1086188cd91750d7ede65f7da89417c60c581e2c1c1a8d03b00c66fdffc"
+  },
+  {
+    "scene": "waldo_kitchen",
+    "inputs": {
+      "primitive_query_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/waldo_kitchen/primitive_query_method_v1.pth",
+        "sha256": "01ffe08e54466dc0da720bcc2e25029ae2b085e24e78f8ac5ad9ced28085159f"
+      },
+      "membership_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/waldo_kitchen/gaussian_multiscale_memberships.pt",
+        "sha256": "d80dffe29ca327d66e7608aeecdbaca3b04ba8814f444d410d5075df873d6077"
+      },
+      "proposal_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/waldo_kitchen/mask_aligned_siglip2_crop_summary_teacher.pt",
+        "sha256": "b00c6381173326445c5c9d4a6678c95a328d705e9c0d3ee66e4066489527a22a"
+      },
+      "text_embedding_cache": {
+        "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+        "sha256": "2b8142252b541a585e248226d38efc30cde53cdef82d5b0ac371085102888e7b"
+      },
+      "canonical_embedding_cache": {
+        "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt",
+        "sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0"
+      }
+    },
+    "argv": [
+      "--scene",
+      "waldo_kitchen",
+      "--query-names",
+      "Stainless steel pots,cabinet,dark cup,frog cup,ketchup,knife,ottolenghi,plastic ladle,plate,pot,pour-over vessel,red cup,refrigerator,sink,spatula,spoon,toaster,yellow desk",
+      "--output",
+      "/mnt/pool/sqy/results/RADIO-GS/output/v4_rebuilt_control_queries_v2_20260914/waldo_kitchen.pt",
+      "--device",
+      "cuda:0",
+      "--association-mode",
+      "latent_proposal_marginal",
+      "--descriptor-gate",
+      "query_listwise",
+      "--primitive-query-cache",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260815/core_method_v1/waldo_kitchen/primitive_query_method_v1.pth",
+      "--membership-cache",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/waldo_kitchen/gaussian_multiscale_memberships.pt",
+      "--proposal-teacher",
+      "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260817/lerf_multiscale_sam3_source32/waldo_kitchen/mask_aligned_siglip2_crop_summary_teacher.pt",
+      "--text-embedding-cache",
+      "/root/RADIO-GS/checkpoints/siglip2_lerf_all_exact_official.pt",
+      "--canonical-embedding-cache",
+      "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt"
+    ],
+    "comparisons": {
+      "query_scores": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "identity_query_scores": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "valid": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      },
+      "xyz": {
+        "equal": true,
+        "maximum_absolute_error": 0.0
+      }
+    },
+    "old_score_sha256": "4092af41cb68f0e78dbdbd6e66b2799aad848172c04005d63d5334c8a77579a6",
+    "new_score_sha256": "9db8d430120aa14661ab3e45d988819905c78759fd1858dc6afa43e15914cdb3"
+  }
+]

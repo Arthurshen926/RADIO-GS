@@ -1,0 +1,439 @@
+{
+  "schema": "native_extent_selection_ceiling.v1",
+  "diagnostic_only": true,
+  "benchmark_labels_used": true,
+  "deployable": false,
+  "scenes": {
+    "figurines": {
+      "inputs": {
+        "output/pixel_evidence_rebuild_20260917/figurines/native_text_after.json": "e06e8c0be076f49279a33cadf48427f790c5b32ae8b73df0c610067f9c71f834",
+        "output/pixel_evidence_rebuild_20260917/figurines/text_evaluation.json": "dfbfe6af5b27799cf231316287fbf12862665eedabcc82f0b3e7283cde7eee56",
+        "output/pixel_evidence_rebuild_20260917/figurines/counterfactual_extent_benefit_admission_validation/text.json": "610183c4d5a93e7089c8def5ebbbc32d98aea90180fedc28a27a583b6e97d3be",
+        "output/pixel_evidence_rebuild_20260917/figurines/semantic_extent_benefit_admission_validation/text.json": "625ce0b1e14c0346367912ee5abc1de28902c74d4844598651c36a6de5dbaf53"
+      },
+      "observations": 56,
+      "metrics": {
+        "native": {
+          "observation_miou": 0.43829759934315915,
+          "category_macro_miou": 0.4171510055601668,
+          "average_precision_macro": 0.6607672642279155
+        },
+        "extent": {
+          "observation_miou": 0.44351034325352706,
+          "category_macro_miou": 0.4347089275274808,
+          "average_precision_macro": 0.625773920800291
+        },
+        "retained": {
+          "observation_miou": 0.4619885515628849,
+          "category_macro_miou": 0.45085980395430814,
+          "average_precision_macro": 0.6679990673159864
+        },
+        "semantic": {
+          "observation_miou": 0.4593313671518612,
+          "category_macro_miou": 0.4493794789325613,
+          "average_precision_macro": 0.66727559099738
+        }
+      },
+      "query_fixed_binary_selection_ceiling": 0.4867073220528759,
+      "per_observation_binary_selection_ceiling": 0.48920327558878707,
+      "remaining_query_selection_gap": 0.02471877048999105,
+      "categories_both_routes_below_25_percent": [
+        "pirate hat",
+        "red toy chair"
+      ],
+      "per_category": {
+        "bag": {
+          "native": 0.0,
+          "extent": 0.3076923076923077,
+          "retained": 0.3076923076923077,
+          "semantic": 0.3076923076923077,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.3076923076923077,
+          "observations": 1
+        },
+        "green apple": {
+          "native": 0.7043756462448806,
+          "extent": 0.7323854200770903,
+          "retained": 0.7323854200770903,
+          "semantic": 0.7323854200770903,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.7323854200770903,
+          "observations": 4
+        },
+        "green toy chair": {
+          "native": 0.25304394345425185,
+          "extent": 0.141671717853133,
+          "retained": 0.24962390083195335,
+          "semantic": 0.24962390083195335,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.25304394345425185,
+          "observations": 2
+        },
+        "jake": {
+          "native": 0.3006021075179199,
+          "extent": 0.01350812994661311,
+          "retained": 0.2658011755607142,
+          "semantic": 0.2658011755607142,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.3006021075179199,
+          "observations": 3
+        },
+        "miffy": {
+          "native": 0.3201293548673959,
+          "extent": 0.10032668717304632,
+          "retained": 0.10032668717304632,
+          "semantic": 0.10032668717304632,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.3201293548673959,
+          "observations": 2
+        },
+        "old camera": {
+          "native": 0.6542098697949967,
+          "extent": 0.7134168116601974,
+          "retained": 0.7134168116601974,
+          "semantic": 0.7134168116601974,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.7134168116601974,
+          "observations": 3
+        },
+        "pikachu": {
+          "native": 0.7961147109006153,
+          "extent": 0.848477798238881,
+          "retained": 0.848477798238881,
+          "semantic": 0.8168945271555741,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.848477798238881,
+          "observations": 2
+        },
+        "pink ice cream": {
+          "native": 0.3198779317225291,
+          "extent": 0.4182722862019728,
+          "retained": 0.4182722862019728,
+          "semantic": 0.4182722862019728,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.4182722862019728,
+          "observations": 3
+        },
+        "pirate hat": {
+          "native": 0.0,
+          "extent": 0.02973432092445457,
+          "retained": 0.02973432092445457,
+          "semantic": 0.02973432092445457,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.02973432092445457,
+          "observations": 4
+        },
+        "porcelain hand": {
+          "native": 0.5693555309788721,
+          "extent": 0.5858317635145344,
+          "retained": 0.5481081265388846,
+          "semantic": 0.5481081265388846,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.5858317635145344,
+          "observations": 3
+        },
+        "pumpkin": {
+          "native": 0.5338165773715726,
+          "extent": 0.6180317848410758,
+          "retained": 0.6180317848410758,
+          "semantic": 0.6180317848410758,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.6180317848410758,
+          "observations": 1
+        },
+        "red apple": {
+          "native": 0.6264902213231455,
+          "extent": 0.7257491173309646,
+          "retained": 0.7257491173309646,
+          "semantic": 0.7257491173309646,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.7257491173309646,
+          "observations": 3
+        },
+        "red toy chair": {
+          "native": 0.14494108846081916,
+          "extent": 0.21551724137931033,
+          "retained": 0.15290392467294392,
+          "semantic": 0.15290392467294392,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.21551724137931033,
+          "observations": 1
+        },
+        "rubber duck with buoy": {
+          "native": 0.5610627993000966,
+          "extent": 0.4703792720194721,
+          "retained": 0.4703792720194721,
+          "semantic": 0.5390765813203524,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.5610627993000966,
+          "observations": 3
+        },
+        "rubber duck with hat": {
+          "native": 0.286579907568569,
+          "extent": 0.3795622240340727,
+          "retained": 0.3795622240340727,
+          "semantic": 0.2924371023034945,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.3795622240340727,
+          "observations": 4
+        },
+        "rubics cube": {
+          "native": 0.6971503766816382,
+          "extent": 0.6353426939117712,
+          "retained": 0.6353426939117712,
+          "semantic": 0.6783390093769306,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.6971503766816382,
+          "observations": 3
+        },
+        "spatula": {
+          "native": 0.5653865188604045,
+          "extent": 0.574421601549398,
+          "retained": 0.5682157622229663,
+          "semantic": 0.5682157622229663,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.574421601549398,
+          "observations": 3
+        },
+        "tesla door handle": {
+          "native": 0.0,
+          "extent": 0.3188063059789355,
+          "retained": 0.3188063059789355,
+          "semantic": 0.3188063059789355,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.3188063059789355,
+          "observations": 2
+        },
+        "toy cat statue": {
+          "native": 0.2810789318521026,
+          "extent": 0.2942198015424847,
+          "retained": 0.2942198015424847,
+          "semantic": 0.270147744133646,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.2942198015424847,
+          "observations": 3
+        },
+        "toy elephant": {
+          "native": 0.7709347065740056,
+          "extent": 0.7764944533534267,
+          "retained": 0.7860694479303683,
+          "semantic": 0.7860694479303683,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.7764944533534267,
+          "observations": 3
+        },
+        "waldo": {
+          "native": 0.3750208932896866,
+          "extent": 0.22904573885395285,
+          "retained": 0.3049367136559141,
+          "semantic": 0.3049367136559141,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.3750208932896866,
+          "observations": 3
+        }
+      },
+      "semantic_changes": [
+        {
+          "category": "pikachu",
+          "before": 0.848477798238881,
+          "after": 0.8168945271555741,
+          "delta": -0.03158327108330694
+        },
+        {
+          "category": "rubber duck with buoy",
+          "before": 0.4703792720194721,
+          "after": 0.5390765813203524,
+          "delta": 0.0686973093008803
+        },
+        {
+          "category": "rubber duck with hat",
+          "before": 0.3795622240340727,
+          "after": 0.2924371023034945,
+          "delta": -0.08712512173057818
+        },
+        {
+          "category": "rubics cube",
+          "before": 0.6353426939117712,
+          "after": 0.6783390093769306,
+          "delta": 0.04299631546515936
+        },
+        {
+          "category": "toy cat statue",
+          "before": 0.2942198015424847,
+          "after": 0.270147744133646,
+          "delta": -0.02407205740883872
+        }
+      ]
+    },
+    "ramen": {
+      "inputs": {
+        "output/pixel_evidence_rebuild_20260917/ramen/native_text_after.json": "4691839cbb5aee34ad691c1ba421a9d63deef32f2a3f1b13f4dd245a7f650a5b",
+        "output/pixel_evidence_rebuild_20260917/ramen/text_evaluation.json": "303ad324ba7ba0e3217f45c0388628d216ee677f70247ed07dcb145787c4f28f",
+        "output/pixel_evidence_rebuild_20260917/ramen/counterfactual_extent_benefit_admission_validation/text.json": "ee4214228fe194d690d83ad7c698c7baa179d87aa09154c2fa05084592c298ee",
+        "output/pixel_evidence_rebuild_20260917/ramen/semantic_extent_benefit_admission_validation/text.json": "115300f22f5993eb93c86b6588eeb797573c5c40266469c3dbee4b5dd6f76058"
+      },
+      "observations": 71,
+      "metrics": {
+        "native": {
+          "observation_miou": 0.16621216595570248,
+          "category_macro_miou": 0.15676430501086053,
+          "average_precision_macro": 0.4698571226713327
+        },
+        "extent": {
+          "observation_miou": 0.32966258926991937,
+          "category_macro_miou": 0.326652626466249,
+          "average_precision_macro": 0.4975273447926778
+        },
+        "retained": {
+          "observation_miou": 0.32966258926991937,
+          "category_macro_miou": 0.326652626466249,
+          "average_precision_macro": 0.4975273447926778
+        },
+        "semantic": {
+          "observation_miou": 0.32966258926991937,
+          "category_macro_miou": 0.326652626466249,
+          "average_precision_macro": 0.4975273447926778
+        }
+      },
+      "query_fixed_binary_selection_ceiling": 0.3669461432738445,
+      "per_observation_binary_selection_ceiling": 0.3677792675387193,
+      "remaining_query_selection_gap": 0.037283554003925135,
+      "categories_both_routes_below_25_percent": [
+        "corn",
+        "hand",
+        "napkin",
+        "onion segments"
+      ],
+      "per_category": {
+        "bowl": {
+          "native": 0.20357192179462316,
+          "extent": 0.5613695873757945,
+          "retained": 0.5613695873757945,
+          "semantic": 0.5613695873757945,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.5613695873757945,
+          "observations": 5
+        },
+        "chopsticks": {
+          "native": 0.27784450405028743,
+          "extent": 0.45210576669181396,
+          "retained": 0.45210576669181396,
+          "semantic": 0.45210576669181396,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.45210576669181396,
+          "observations": 7
+        },
+        "corn": {
+          "native": 0.0,
+          "extent": 0.0,
+          "retained": 0.0,
+          "semantic": 0.0,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.0,
+          "observations": 5
+        },
+        "egg": {
+          "native": 0.5860803364942619,
+          "extent": 0.5460202102303188,
+          "retained": 0.5460202102303188,
+          "semantic": 0.5460202102303188,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.5860803364942619,
+          "observations": 7
+        },
+        "glass of water": {
+          "native": 0.627758524159491,
+          "extent": 0.472914883873896,
+          "retained": 0.472914883873896,
+          "semantic": 0.472914883873896,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.627758524159491,
+          "observations": 2
+        },
+        "hand": {
+          "native": 0.0,
+          "extent": 0.0,
+          "retained": 0.0,
+          "semantic": 0.0,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.0,
+          "observations": 1
+        },
+        "kamaboko": {
+          "native": 0.19725671452488916,
+          "extent": 0.342006387876531,
+          "retained": 0.342006387876531,
+          "semantic": 0.342006387876531,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.342006387876531,
+          "observations": 7
+        },
+        "napkin": {
+          "native": 0.0,
+          "extent": 0.2303074493797499,
+          "retained": 0.2303074493797499,
+          "semantic": 0.2303074493797499,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.2303074493797499,
+          "observations": 5
+        },
+        "nori": {
+          "native": 0.005749929969511438,
+          "extent": 0.690461388225334,
+          "retained": 0.690461388225334,
+          "semantic": 0.690461388225334,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.690461388225334,
+          "observations": 6
+        },
+        "onion segments": {
+          "native": 0.0,
+          "extent": 0.0,
+          "retained": 0.0,
+          "semantic": 0.0,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.0,
+          "observations": 7
+        },
+        "plate": {
+          "native": 0.0013685017351628146,
+          "extent": 0.6761889564895801,
+          "retained": 0.6761889564895801,
+          "semantic": 0.6761889564895801,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.6761889564895801,
+          "observations": 4
+        },
+        "sake cup": {
+          "native": 0.0,
+          "extent": 0.267463474242216,
+          "retained": 0.267463474242216,
+          "semantic": 0.267463474242216,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.267463474242216,
+          "observations": 6
+        },
+        "spoon": {
+          "native": 0.001209241729550876,
+          "extent": 0.33429866614225096,
+          "retained": 0.33429866614225096,
+          "semantic": 0.33429866614225096,
+          "oracle_route": "extent",
+          "query_fixed_ceiling": 0.33429866614225096,
+          "observations": 2
+        },
+        "wavy noodles": {
+          "native": 0.2938605956942698,
+          "extent": 0.0,
+          "retained": 0.0,
+          "semantic": 0.0,
+          "oracle_route": "native",
+          "query_fixed_ceiling": 0.2938605956942698,
+          "observations": 7
+        }
+      },
+      "semantic_changes": []
+    }
+  },
+  "interpretation": "Ceiling only for unchanged binary native/extent responses and fixed current thresholds. GT route choices are diagnostics, not trained policy, not a ceiling for new candidates, local mixing or improved geometry."
+}

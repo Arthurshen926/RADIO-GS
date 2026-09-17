@@ -1,0 +1,5591 @@
+{
+  "protocol": {
+    "schema": "oracle_crop_recognition.v2",
+    "random_projection_control_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "target_rgb_and_gt_crop_used": true,
+    "localization_or_deployment_metric": false,
+    "training_updates": false,
+    "query_template": "verbatim",
+    "crop": "GT category union bbox3px; paired masked gray127 and unmasked identical bbox",
+    "field_sha256": "22b2cce6a975af4b108e717728830155d92ef128f9dd1d530ca234752778edce",
+    "implementation_sha256": "a18b302f3d81196c661a3e05d69d069847bab7ab6dffe2df82c4a8daf3d536cc",
+    "labels": {
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json": "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00105.json": "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.json": "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00195.json": "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb"
+    }
+  },
+  "macro": {
+    "masked": {
+      "native": {
+        "top1": 0.8392857142857143,
+        "mrr": 0.8934611344537816,
+        "tasks": 56
+      },
+      "adapted": {
+        "top1": 0.23214285714285715,
+        "mrr": 0.41467840924248484,
+        "tasks": 56
+      },
+      "random64_seed0": {
+        "top1": 0.48214285714285715,
+        "mrr": 0.6250987603666174,
+        "tasks": 56
+      },
+      "random64_seed1": {
+        "top1": 0.39285714285714285,
+        "mrr": 0.5590393394199783,
+        "tasks": 56
+      },
+      "random64_seed2": {
+        "top1": 0.25,
+        "mrr": 0.4489274585125424,
+        "tasks": 56
+      },
+      "random64_seed3": {
+        "top1": 0.23214285714285715,
+        "mrr": 0.45005688755688744,
+        "tasks": 56
+      },
+      "random64_seed4": {
+        "top1": 0.3392857142857143,
+        "mrr": 0.4909894246160001,
+        "tasks": 56
+      }
+    },
+    "unmasked": {
+      "native": {
+        "top1": 0.875,
+        "mrr": 0.910849567099567,
+        "tasks": 56
+      },
+      "adapted": {
+        "top1": 0.26785714285714285,
+        "mrr": 0.42629076251712805,
+        "tasks": 56
+      },
+      "random64_seed0": {
+        "top1": 0.39285714285714285,
+        "mrr": 0.561488989535208,
+        "tasks": 56
+      },
+      "random64_seed1": {
+        "top1": 0.25,
+        "mrr": 0.4337104768143302,
+        "tasks": 56
+      },
+      "random64_seed2": {
+        "top1": 0.30357142857142855,
+        "mrr": 0.4797479306407877,
+        "tasks": 56
+      },
+      "random64_seed3": {
+        "top1": 0.2857142857142857,
+        "mrr": 0.4793808282882529,
+        "tasks": 56
+      },
+      "random64_seed4": {
+        "top1": 0.21428571428571427,
+        "mrr": 0.41702161925376197,
+        "tasks": 56
+      }
+    }
+  },
+  "observations": [
+    {
+      "frame": 41,
+      "category": "green apple",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.13785499334335327,
+        "margin": 0.06422170996665955
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.7825320363044739,
+        "margin": 0.05846858024597168
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.1537918895483017,
+        "margin": 0.0505690798163414
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.2849634289741516,
+        "margin": 0.04586416482925415
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.14626093208789825,
+        "margin": -0.0088052898645401
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "pumpkin",
+        "target_cosine": 0.09584107995033264,
+        "margin": -0.08242246508598328
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2010403573513031,
+        "margin": -0.08278962969779968
+      }
+    },
+    {
+      "frame": 41,
+      "category": "green apple",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.1256134808063507,
+        "margin": 0.04418463259935379
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.7971053123474121,
+        "margin": 0.06446671485900879
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.016689710319042206,
+        "margin": -0.022548146545886993
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.19945450127124786,
+        "margin": -0.019372209906578064
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.25070205330848694,
+        "margin": 0.04199501872062683
+      },
+      "random64_seed3": {
+        "rank": 7,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.10742577910423279,
+        "margin": -0.1089932769536972
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.28760257363319397,
+        "margin": -0.07145142555236816
+      }
+    },
+    {
+      "frame": 41,
+      "category": "jake",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.1588018834590912,
+        "margin": 0.07297701388597488
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2299901247024536,
+        "margin": -0.29181402921676636
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.407722145318985,
+        "margin": 0.14386671781539917
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.26970523595809937,
+        "margin": 0.022091731429100037
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.2689753770828247,
+        "margin": -0.0434836745262146
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.17440487444400787,
+        "margin": -0.02808736264705658
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.2787408232688904,
+        "margin": 0.041285887360572815
+      }
+    },
+    {
+      "frame": 41,
+      "category": "jake",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.1432676464319229,
+        "margin": 0.04709593951702118
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.29682791233062744,
+        "margin": -0.2992584705352783
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.3784545660018921,
+        "margin": 0.13559429347515106
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.1650068163871765,
+        "margin": -0.04488527774810791
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.2273983359336853,
+        "margin": -0.02172824740409851
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.18505272269248962,
+        "margin": -0.01884901523590088
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.2333780974149704,
+        "margin": 0.020120278000831604
+      }
+    },
+    {
+      "frame": 41,
+      "category": "miffy",
+      "category_index": 4,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 2,
+        "top_category": "red toy chair",
+        "target_cosine": 0.08228331804275513,
+        "margin": -0.005331546068191528
+      },
+      "adapted": {
+        "rank": 18,
+        "top_category": "green toy chair",
+        "target_cosine": -0.03304624930024147,
+        "margin": -0.5577729344367981
+      },
+      "random64_seed0": {
+        "rank": 12,
+        "top_category": "pirate hat",
+        "target_cosine": 0.08035003393888474,
+        "margin": -0.17176494002342224
+      },
+      "random64_seed1": {
+        "rank": 9,
+        "top_category": "jake",
+        "target_cosine": 0.13905465602874756,
+        "margin": -0.07655000686645508
+      },
+      "random64_seed2": {
+        "rank": 13,
+        "top_category": "bag",
+        "target_cosine": 0.041406381875276566,
+        "margin": -0.19108527898788452
+      },
+      "random64_seed3": {
+        "rank": 11,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.09717993438243866,
+        "margin": -0.188556507229805
+      },
+      "random64_seed4": {
+        "rank": 8,
+        "top_category": "red toy chair",
+        "target_cosine": 0.1803291141986847,
+        "margin": -0.07503563165664673
+      }
+    },
+    {
+      "frame": 41,
+      "category": "miffy",
+      "category_index": 4,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 4,
+        "top_category": "red toy chair",
+        "target_cosine": 0.08131304383277893,
+        "margin": -0.036721162497997284
+      },
+      "adapted": {
+        "rank": 20,
+        "top_category": "red toy chair",
+        "target_cosine": -0.25595006346702576,
+        "margin": -0.9099667072296143
+      },
+      "random64_seed0": {
+        "rank": 9,
+        "top_category": "pirate hat",
+        "target_cosine": 0.10850129276514053,
+        "margin": -0.13462039828300476
+      },
+      "random64_seed1": {
+        "rank": 9,
+        "top_category": "green toy chair",
+        "target_cosine": 0.038660429418087006,
+        "margin": -0.1403220295906067
+      },
+      "random64_seed2": {
+        "rank": 8,
+        "top_category": "bag",
+        "target_cosine": 0.12370346486568451,
+        "margin": -0.1288578063249588
+      },
+      "random64_seed3": {
+        "rank": 14,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.05716170370578766,
+        "margin": -0.23140357434749603
+      },
+      "random64_seed4": {
+        "rank": 6,
+        "top_category": "red toy chair",
+        "target_cosine": 0.15205734968185425,
+        "margin": -0.06769117712974548
+      }
+    },
+    {
+      "frame": 41,
+      "category": "old camera",
+      "category_index": 5,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.12604746222496033,
+        "margin": 0.07649955153465271
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.838499128818512,
+        "margin": 0.3583991825580597
+      },
+      "random64_seed0": {
+        "rank": 13,
+        "top_category": "jake",
+        "target_cosine": 0.19322647154331207,
+        "margin": -0.0951603502035141
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "toy elephant",
+        "target_cosine": 0.16820038855075836,
+        "margin": -0.030715271830558777
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.16903099417686462,
+        "margin": -0.0989522933959961
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.2076650708913803,
+        "margin": -0.02388264238834381
+      },
+      "random64_seed4": {
+        "rank": 8,
+        "top_category": "red toy chair",
+        "target_cosine": 0.14074566960334778,
+        "margin": -0.14835885167121887
+      }
+    },
+    {
+      "frame": 41,
+      "category": "old camera",
+      "category_index": 5,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.1403983235359192,
+        "margin": 0.08509044349193573
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.8066833019256592,
+        "margin": 0.2931913137435913
+      },
+      "random64_seed0": {
+        "rank": 12,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.0815264955163002,
+        "margin": -0.12376431375741959
+      },
+      "random64_seed1": {
+        "rank": 7,
+        "top_category": "green toy chair",
+        "target_cosine": 0.12939748167991638,
+        "margin": -0.07353980839252472
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.069463349878788,
+        "margin": -0.06309662014245987
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.17687711119651794,
+        "margin": -0.13223940134048462
+      },
+      "random64_seed4": {
+        "rank": 10,
+        "top_category": "red toy chair",
+        "target_cosine": 0.07355541735887527,
+        "margin": -0.16893646121025085
+      }
+    },
+    {
+      "frame": 41,
+      "category": "pikachu",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.12145083397626877,
+        "margin": 0.02639242261648178
+      },
+      "adapted": {
+        "rank": 14,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.17280517518520355,
+        "margin": -0.37156879901885986
+      },
+      "random64_seed0": {
+        "rank": 6,
+        "top_category": "bag",
+        "target_cosine": 0.0848156288266182,
+        "margin": -0.05087599903345108
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "pumpkin",
+        "target_cosine": 0.030145006254315376,
+        "margin": -0.0476793497800827
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.2896234095096588,
+        "margin": -0.03179702162742615
+      },
+      "random64_seed3": {
+        "rank": 10,
+        "top_category": "rubber duck with hat",
+        "target_cosine": -0.020319845527410507,
+        "margin": -0.08722095191478729
+      },
+      "random64_seed4": {
+        "rank": 6,
+        "top_category": "red toy chair",
+        "target_cosine": 0.13302594423294067,
+        "margin": -0.048682913184165955
+      }
+    },
+    {
+      "frame": 41,
+      "category": "pikachu",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.10759385675191879,
+        "margin": 0.04054629057645798
+      },
+      "adapted": {
+        "rank": 16,
+        "top_category": "old camera",
+        "target_cosine": 0.13133521378040314,
+        "margin": -0.4528995156288147
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.1206960380077362,
+        "margin": 0.0038418546319007874
+      },
+      "random64_seed1": {
+        "rank": 7,
+        "top_category": "green toy chair",
+        "target_cosine": -0.00961802713572979,
+        "margin": -0.10701382160186768
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.27380669116973877,
+        "margin": 0.024278610944747925
+      },
+      "random64_seed3": {
+        "rank": 18,
+        "top_category": "rubber duck with hat",
+        "target_cosine": -0.11737269908189774,
+        "margin": -0.17922072112560272
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "red toy chair",
+        "target_cosine": 0.0674576610326767,
+        "margin": -0.09156931936740875
+      }
+    },
+    {
+      "frame": 41,
+      "category": "pink ice cream",
+      "category_index": 7,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.14396315813064575,
+        "margin": 0.08394433557987213
+      },
+      "adapted": {
+        "rank": 11,
+        "top_category": "green apple",
+        "target_cosine": 0.33393019437789917,
+        "margin": -0.3124936819076538
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.24149399995803833,
+        "margin": 0.0237320214509964
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.22282886505126953,
+        "margin": 0.059566810727119446
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.2803332209587097,
+        "margin": 0.03471869230270386
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.24763381481170654,
+        "margin": 0.11209116876125336
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.4258624315261841,
+        "margin": 0.038425296545028687
+      }
+    },
+    {
+      "frame": 41,
+      "category": "pink ice cream",
+      "category_index": 7,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.127533420920372,
+        "margin": 0.07774222642183304
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "green apple",
+        "target_cosine": 0.3313531279563904,
+        "margin": -0.23890960216522217
+      },
+      "random64_seed0": {
+        "rank": 5,
+        "top_category": "jake",
+        "target_cosine": 0.11829636991024017,
+        "margin": -0.10911525785923004
+      },
+      "random64_seed1": {
+        "rank": 4,
+        "top_category": "waldo",
+        "target_cosine": 0.05982460826635361,
+        "margin": -0.11003217846155167
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.23820143938064575,
+        "margin": 0.06649816036224365
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.2301926612854004,
+        "margin": 0.08795902132987976
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.49242398142814636,
+        "margin": 0.12679865956306458
+      }
+    },
+    {
+      "frame": 41,
+      "category": "pirate hat",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 10,
+        "top_category": "red apple",
+        "target_cosine": 0.04564749449491501,
+        "margin": -0.03600449115037918
+      },
+      "adapted": {
+        "rank": 12,
+        "top_category": "green apple",
+        "target_cosine": 0.2542847990989685,
+        "margin": -0.34150558710098267
+      },
+      "random64_seed0": {
+        "rank": 8,
+        "top_category": "jake",
+        "target_cosine": 0.05838780850172043,
+        "margin": -0.199512779712677
+      },
+      "random64_seed1": {
+        "rank": 18,
+        "top_category": "waldo",
+        "target_cosine": 0.057693980634212494,
+        "margin": -0.23859506845474243
+      },
+      "random64_seed2": {
+        "rank": 9,
+        "top_category": "bag",
+        "target_cosine": 0.08429521322250366,
+        "margin": -0.1619570106267929
+      },
+      "random64_seed3": {
+        "rank": 9,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.1278950572013855,
+        "margin": -0.17765215039253235
+      },
+      "random64_seed4": {
+        "rank": 15,
+        "top_category": "red toy chair",
+        "target_cosine": 0.13957975804805756,
+        "margin": -0.18213872611522675
+      }
+    },
+    {
+      "frame": 41,
+      "category": "pirate hat",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 11,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.05211174488067627,
+        "margin": -0.05126168578863144
+      },
+      "adapted": {
+        "rank": 12,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.19857090711593628,
+        "margin": -0.5289368033409119
+      },
+      "random64_seed0": {
+        "rank": 4,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.23380722105503082,
+        "margin": -0.057966843247413635
+      },
+      "random64_seed1": {
+        "rank": 20,
+        "top_category": "waldo",
+        "target_cosine": -0.06285794079303741,
+        "margin": -0.2670857906341553
+      },
+      "random64_seed2": {
+        "rank": 12,
+        "top_category": "pikachu",
+        "target_cosine": 0.1408793330192566,
+        "margin": -0.07453382015228271
+      },
+      "random64_seed3": {
+        "rank": 19,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.04637433588504791,
+        "margin": -0.3005032539367676
+      },
+      "random64_seed4": {
+        "rank": 10,
+        "top_category": "green toy chair",
+        "target_cosine": 0.17556066811084747,
+        "margin": -0.1467074304819107
+      }
+    },
+    {
+      "frame": 41,
+      "category": "porcelain hand",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.1673564314842224,
+        "margin": 0.09172618389129639
+      },
+      "adapted": {
+        "rank": 21,
+        "top_category": "old camera",
+        "target_cosine": -0.4881036877632141,
+        "margin": -0.8564070463180542
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.16314277052879333,
+        "margin": 0.06541401892900467
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.1876920908689499,
+        "margin": 0.03836806118488312
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.09845986217260361,
+        "margin": -0.04378507286310196
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "spatula",
+        "target_cosine": 0.23132877051830292,
+        "margin": -0.004823863506317139
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.2925611734390259,
+        "margin": 0.10493573546409607
+      }
+    },
+    {
+      "frame": 41,
+      "category": "porcelain hand",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.1545238196849823,
+        "margin": 0.10682830214500427
+      },
+      "adapted": {
+        "rank": 17,
+        "top_category": "green toy chair",
+        "target_cosine": -0.22719444334506989,
+        "margin": -0.8637192249298096
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "pirate hat",
+        "target_cosine": 0.11856172978878021,
+        "margin": -0.027311712503433228
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "waldo",
+        "target_cosine": 0.1534290909767151,
+        "margin": -0.0004562884569168091
+      },
+      "random64_seed2": {
+        "rank": 7,
+        "top_category": "green toy chair",
+        "target_cosine": 0.04015074670314789,
+        "margin": -0.09369458258152008
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.1551903784275055,
+        "margin": 0.0376894474029541
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "red toy chair",
+        "target_cosine": 0.22035188972949982,
+        "margin": -0.016279593110084534
+      }
+    },
+    {
+      "frame": 41,
+      "category": "red apple",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.14280664920806885,
+        "margin": 0.04882102459669113
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.7608397603034973,
+        "margin": -0.03193944692611694
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.16094326972961426,
+        "margin": 0.013536930084228516
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.2696828842163086,
+        "margin": -0.0052779316902160645
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.12446850538253784,
+        "margin": -0.049414485692977905
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.14670217037200928,
+        "margin": 0.00033661723136901855
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "red toy chair",
+        "target_cosine": 0.2694057524204254,
+        "margin": -0.05630931258201599
+      }
+    },
+    {
+      "frame": 41,
+      "category": "red apple",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.11680613458156586,
+        "margin": 0.037010058760643005
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.7822415828704834,
+        "margin": -0.026178181171417236
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.136358842253685,
+        "margin": 0.0016185939311981201
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.17676743865013123,
+        "margin": -0.0008544921875
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.12224927544593811,
+        "margin": -0.03312702476978302
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.17460280656814575,
+        "margin": -0.010248720645904541
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2352251410484314,
+        "margin": -0.11233866214752197
+      }
+    },
+    {
+      "frame": 41,
+      "category": "red toy chair",
+      "category_index": 12,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.17284691333770752,
+        "margin": 0.06983915716409683
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.7325814962387085,
+        "margin": 0.01687842607498169
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.2870030403137207,
+        "margin": 0.06676483154296875
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.27916619181632996,
+        "margin": 0.11408662796020508
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.12472833693027496,
+        "margin": -0.054900944232940674
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.10957887768745422,
+        "margin": -0.10862657427787781
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.38599395751953125,
+        "margin": 0.07499948143959045
+      }
+    },
+    {
+      "frame": 41,
+      "category": "red toy chair",
+      "category_index": 12,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.1647375077009201,
+        "margin": 0.05898866802453995
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.7731946110725403,
+        "margin": 0.03274661302566528
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.30315375328063965,
+        "margin": 0.07157473266124725
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.24607905745506287,
+        "margin": 0.10112431645393372
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.04811011999845505,
+        "margin": -0.07910998910665512
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.13934282958507538,
+        "margin": -0.03508658707141876
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "red toy chair",
+        "target_cosine": 0.3619639277458191,
+        "margin": 0.08579891920089722
+      }
+    },
+    {
+      "frame": 41,
+      "category": "rubber duck with buoy",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.12378828972578049,
+        "margin": -0.013790212571620941
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "toy elephant",
+        "target_cosine": 0.8535945415496826,
+        "margin": -0.07015419006347656
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3897174596786499,
+        "margin": -0.01809975504875183
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.2688315212726593,
+        "margin": 0.07484729588031769
+      },
+      "random64_seed2": {
+        "rank": 8,
+        "top_category": "bag",
+        "target_cosine": 0.12412790954113007,
+        "margin": -0.10228016972541809
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.30961596965789795,
+        "margin": -0.012592792510986328
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.35103052854537964,
+        "margin": 0.011515647172927856
+      }
+    },
+    {
+      "frame": 41,
+      "category": "rubber duck with buoy",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.14059452712535858,
+        "margin": 0.010229378938674927
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "toy elephant",
+        "target_cosine": 0.826768159866333,
+        "margin": -0.09525692462921143
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3842920660972595,
+        "margin": -0.003110229969024658
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.2677344083786011,
+        "margin": 0.0591275691986084
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.1766880750656128,
+        "margin": 0.012760430574417114
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.3453666865825653,
+        "margin": 0.05789417028427124
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.26446008682250977,
+        "margin": -0.035677433013916016
+      }
+    },
+    {
+      "frame": 41,
+      "category": "rubber duck with hat",
+      "category_index": 14,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.16564257442951202,
+        "margin": 0.03363502025604248
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.5841728448867798,
+        "margin": -0.256614089012146
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.38580507040023804,
+        "margin": 0.029491066932678223
+      },
+      "random64_seed1": {
+        "rank": 6,
+        "top_category": "waldo",
+        "target_cosine": 0.13408410549163818,
+        "margin": -0.0775468647480011
+      },
+      "random64_seed2": {
+        "rank": 8,
+        "top_category": "bag",
+        "target_cosine": 0.14547061920166016,
+        "margin": -0.13861072063446045
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.383228600025177,
+        "margin": 0.06298869848251343
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.289607435464859,
+        "margin": -0.012925058603286743
+      }
+    },
+    {
+      "frame": 41,
+      "category": "rubber duck with hat",
+      "category_index": 14,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.13774047791957855,
+        "margin": 0.0048382580280303955
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.590093731880188,
+        "margin": -0.28057461977005005
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3861198425292969,
+        "margin": 0.03677862882614136
+      },
+      "random64_seed1": {
+        "rank": 9,
+        "top_category": "waldo",
+        "target_cosine": 0.0197206512093544,
+        "margin": -0.15647611021995544
+      },
+      "random64_seed2": {
+        "rank": 11,
+        "top_category": "green toy chair",
+        "target_cosine": 0.11201229691505432,
+        "margin": -0.11210295557975769
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.3789399266242981,
+        "margin": -0.024532556533813477
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2333310842514038,
+        "margin": -0.09088325500488281
+      }
+    },
+    {
+      "frame": 41,
+      "category": "spatula",
+      "category_index": 16,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.16439472138881683,
+        "margin": 0.10527533292770386
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "red toy chair",
+        "target_cosine": 0.5594221353530884,
+        "margin": -0.052616000175476074
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.3770661950111389,
+        "margin": 0.13626272976398468
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "green apple",
+        "target_cosine": 0.17908787727355957,
+        "margin": -0.0119858980178833
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.30973637104034424,
+        "margin": 0.10327105224132538
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.21258868277072906,
+        "margin": 0.011293530464172363
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.3101837933063507,
+        "margin": 0.04541024565696716
+      }
+    },
+    {
+      "frame": 41,
+      "category": "spatula",
+      "category_index": 16,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.14664070308208466,
+        "margin": 0.08347918093204498
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "red toy chair",
+        "target_cosine": 0.534980297088623,
+        "margin": -0.0577964186668396
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.3084110617637634,
+        "margin": 0.044341057538986206
+      },
+      "random64_seed1": {
+        "rank": 8,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.036719612777233124,
+        "margin": -0.07100620120763779
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.3562631905078888,
+        "margin": 0.1370360255241394
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.25207552313804626,
+        "margin": 0.006671234965324402
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "red toy chair",
+        "target_cosine": 0.16722708940505981,
+        "margin": -0.07699592411518097
+      }
+    },
+    {
+      "frame": 41,
+      "category": "tesla door handle",
+      "category_index": 17,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.12676244974136353,
+        "margin": 0.06966868042945862
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "bag",
+        "target_cosine": 0.25822335481643677,
+        "margin": -0.2502836585044861
+      },
+      "random64_seed0": {
+        "rank": 4,
+        "top_category": "jake",
+        "target_cosine": 0.1645761877298355,
+        "margin": -0.05179762840270996
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.2505980134010315,
+        "margin": 0.10579511523246765
+      },
+      "random64_seed2": {
+        "rank": 15,
+        "top_category": "bag",
+        "target_cosine": 0.06207747012376785,
+        "margin": -0.23130309581756592
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.28305575251579285,
+        "margin": 0.1943199187517166
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.2618159353733063,
+        "margin": -0.016675174236297607
+      }
+    },
+    {
+      "frame": 41,
+      "category": "tesla door handle",
+      "category_index": 17,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.11718965321779251,
+        "margin": 0.041963234543800354
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "red toy chair",
+        "target_cosine": 0.46115046739578247,
+        "margin": -0.15614300966262817
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "red toy chair",
+        "target_cosine": 0.10533346980810165,
+        "margin": -0.024321697652339935
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.08932127058506012,
+        "margin": -0.02447754144668579
+      },
+      "random64_seed2": {
+        "rank": 4,
+        "top_category": "spatula",
+        "target_cosine": 0.10016437619924545,
+        "margin": -0.05662918835878372
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.3308541476726532,
+        "margin": 0.11308161914348602
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "red apple",
+        "target_cosine": 0.23718807101249695,
+        "margin": -0.052449703216552734
+      }
+    },
+    {
+      "frame": 41,
+      "category": "toy cat statue",
+      "category_index": 18,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 2,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.08723936975002289,
+        "margin": -0.03159455209970474
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.4027303457260132,
+        "margin": -0.059692978858947754
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "jake",
+        "target_cosine": 0.1354721039533615,
+        "margin": -0.09787975251674652
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "toy elephant",
+        "target_cosine": 0.24573680758476257,
+        "margin": -0.05769413709640503
+      },
+      "random64_seed2": {
+        "rank": 17,
+        "top_category": "bag",
+        "target_cosine": 0.054794792085886,
+        "margin": -0.2283061444759369
+      },
+      "random64_seed3": {
+        "rank": 15,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.06889098882675171,
+        "margin": -0.15067332983016968
+      },
+      "random64_seed4": {
+        "rank": 12,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.18820658326148987,
+        "margin": -0.09095054864883423
+      }
+    },
+    {
+      "frame": 41,
+      "category": "toy cat statue",
+      "category_index": 18,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.12157124280929565,
+        "margin": 0.05764418840408325
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.6996738314628601,
+        "margin": 0.17871159315109253
+      },
+      "random64_seed0": {
+        "rank": 6,
+        "top_category": "waldo",
+        "target_cosine": 0.14498299360275269,
+        "margin": -0.0754137635231018
+      },
+      "random64_seed1": {
+        "rank": 6,
+        "top_category": "waldo",
+        "target_cosine": 0.05395534634590149,
+        "margin": -0.07146839797496796
+      },
+      "random64_seed2": {
+        "rank": 7,
+        "top_category": "pikachu",
+        "target_cosine": -0.01875970885157585,
+        "margin": -0.0884542465209961
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.2237364947795868,
+        "margin": -0.013818338513374329
+      },
+      "random64_seed4": {
+        "rank": 11,
+        "top_category": "pikachu",
+        "target_cosine": 0.1922302395105362,
+        "margin": -0.07022525370121002
+      }
+    },
+    {
+      "frame": 41,
+      "category": "toy elephant",
+      "category_index": 19,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.14483709633350372,
+        "margin": 0.058412402868270874
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "red toy chair",
+        "target_cosine": 0.6646966934204102,
+        "margin": -0.025374293327331543
+      },
+      "random64_seed0": {
+        "rank": 7,
+        "top_category": "jake",
+        "target_cosine": 0.21609392762184143,
+        "margin": -0.12380003929138184
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.16488203406333923,
+        "margin": 0.006562918424606323
+      },
+      "random64_seed2": {
+        "rank": 4,
+        "top_category": "bag",
+        "target_cosine": 0.22270433604717255,
+        "margin": -0.06572814285755157
+      },
+      "random64_seed3": {
+        "rank": 12,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.12570388615131378,
+        "margin": -0.10320645570755005
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.2354060411453247,
+        "margin": -0.029412269592285156
+      }
+    },
+    {
+      "frame": 41,
+      "category": "toy elephant",
+      "category_index": 19,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.14647960662841797,
+        "margin": 0.0761302188038826
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.7306685447692871,
+        "margin": 0.019579589366912842
+      },
+      "random64_seed0": {
+        "rank": 15,
+        "top_category": "jake",
+        "target_cosine": 0.13740138709545135,
+        "margin": -0.19036023318767548
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.12784546613693237,
+        "margin": 0.021830379962921143
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.2630584239959717,
+        "margin": -0.015751540660858154
+      },
+      "random64_seed3": {
+        "rank": 5,
+        "top_category": "rubics cube",
+        "target_cosine": 0.22682076692581177,
+        "margin": -0.0403672456741333
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.2828836143016815,
+        "margin": -0.02397620677947998
+      }
+    },
+    {
+      "frame": 41,
+      "category": "waldo",
+      "category_index": 20,
+      "crop": "masked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.17781314253807068,
+        "margin": 0.08243668079376221
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "green toy chair",
+        "target_cosine": 0.18201014399528503,
+        "margin": -0.3482818901538849
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.19026315212249756,
+        "margin": -0.0045552849769592285
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.3037932217121124,
+        "margin": 0.13348957896232605
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.1865934580564499,
+        "margin": -0.033357203006744385
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.16501587629318237,
+        "margin": -0.09747347235679626
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.18162474036216736,
+        "margin": 0.02411957085132599
+      }
+    },
+    {
+      "frame": 41,
+      "category": "waldo",
+      "category_index": 20,
+      "crop": "unmasked",
+      "rgb_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "native": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.1668318659067154,
+        "margin": 0.07462752610445023
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.201790913939476,
+        "margin": -0.31101274490356445
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.13833898305892944,
+        "margin": -0.03063899278640747
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.17834626138210297,
+        "margin": 0.10164372622966766
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.24953985214233398,
+        "margin": -0.01862114667892456
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.13075706362724304,
+        "margin": -0.09174463152885437
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.24457696080207825,
+        "margin": -0.0088595449924469
+      }
+    },
+    {
+      "frame": 105,
+      "category": "green apple",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.1320999562740326,
+        "margin": 0.03831333667039871
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.7039852142333984,
+        "margin": 0.08788150548934937
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.12850604951381683,
+        "margin": -0.004546940326690674
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.28890085220336914,
+        "margin": 0.010941535234451294
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.23741373419761658,
+        "margin": 0.04945005476474762
+      },
+      "random64_seed3": {
+        "rank": 5,
+        "top_category": "pumpkin",
+        "target_cosine": 0.0763501524925232,
+        "margin": -0.0556490421295166
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2401265650987625,
+        "margin": -0.09738384187221527
+      }
+    },
+    {
+      "frame": 105,
+      "category": "green apple",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.13912583887577057,
+        "margin": 0.04785426706075668
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.6260702610015869,
+        "margin": 0.022520065307617188
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.13560175895690918,
+        "margin": -0.027235761284828186
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.22547978162765503,
+        "margin": -0.06966498494148254
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.2663136124610901,
+        "margin": 0.06034615635871887
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.1596793234348297,
+        "margin": -0.07024694979190826
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.22150883078575134,
+        "margin": -0.10256189107894897
+      }
+    },
+    {
+      "frame": 105,
+      "category": "green toy chair",
+      "category_index": 2,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.17835378646850586,
+        "margin": 0.08230214565992355
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.7876508235931396,
+        "margin": 0.0206373929977417
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.3524125814437866,
+        "margin": 0.11953473091125488
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.3035780191421509,
+        "margin": 0.027426987886428833
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2804705500602722,
+        "margin": 0.11694487929344177
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.19073006510734558,
+        "margin": -0.006068900227546692
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.36513417959213257,
+        "margin": 0.017766714096069336
+      }
+    },
+    {
+      "frame": 105,
+      "category": "green toy chair",
+      "category_index": 2,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.19685207307338715,
+        "margin": 0.05466209352016449
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.7762939929962158,
+        "margin": 0.021712660789489746
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2866077721118927,
+        "margin": 0.04380461573600769
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.3040279746055603,
+        "margin": 0.03814131021499634
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2583751082420349,
+        "margin": 0.1329251229763031
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.19648689031600952,
+        "margin": 0.04054194688796997
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "red toy chair",
+        "target_cosine": 0.40725526213645935,
+        "margin": -0.011616945266723633
+      }
+    },
+    {
+      "frame": 105,
+      "category": "jake",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.15086765587329865,
+        "margin": 0.06940484046936035
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.5155644416809082,
+        "margin": -0.12976861000061035
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.3642672896385193,
+        "margin": 0.21142634749412537
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.2097855508327484,
+        "margin": -0.02477666735649109
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.22527499496936798,
+        "margin": -0.06106342375278473
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.12252761423587799,
+        "margin": -0.1071784496307373
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.2711883783340454,
+        "margin": 0.09475837647914886
+      }
+    },
+    {
+      "frame": 105,
+      "category": "jake",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.1090875044465065,
+        "margin": 0.02891247719526291
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2649938464164734,
+        "margin": -0.36645030975341797
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.18191221356391907,
+        "margin": 0.03259196877479553
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.1156177669763565,
+        "margin": -0.12207166850566864
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.21382227540016174,
+        "margin": -0.08465313911437988
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.16107094287872314,
+        "margin": -0.07998102903366089
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.26616427302360535,
+        "margin": -0.03774866461753845
+      }
+    },
+    {
+      "frame": 105,
+      "category": "old camera",
+      "category_index": 5,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.1288706511259079,
+        "margin": 0.08387628942728043
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.7894535064697266,
+        "margin": 0.27959585189819336
+      },
+      "random64_seed0": {
+        "rank": 11,
+        "top_category": "bag",
+        "target_cosine": 0.20924295485019684,
+        "margin": -0.09914188086986542
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.15805086493492126,
+        "margin": -0.013142392039299011
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.11767253279685974,
+        "margin": -0.0268172025680542
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.23399928212165833,
+        "margin": -0.07240670919418335
+      },
+      "random64_seed4": {
+        "rank": 13,
+        "top_category": "red toy chair",
+        "target_cosine": 0.12528610229492188,
+        "margin": -0.09072190523147583
+      }
+    },
+    {
+      "frame": 105,
+      "category": "old camera",
+      "category_index": 5,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.12147225439548492,
+        "margin": 0.05177083611488342
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.7776259779930115,
+        "margin": 0.2533683180809021
+      },
+      "random64_seed0": {
+        "rank": 15,
+        "top_category": "green toy chair",
+        "target_cosine": 0.1090112030506134,
+        "margin": -0.12568996846675873
+      },
+      "random64_seed1": {
+        "rank": 6,
+        "top_category": "green toy chair",
+        "target_cosine": 0.14731785655021667,
+        "margin": -0.0594344437122345
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.00657760351896286,
+        "margin": -0.03906688094139099
+      },
+      "random64_seed3": {
+        "rank": 9,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.0892316997051239,
+        "margin": -0.22163304686546326
+      },
+      "random64_seed4": {
+        "rank": 15,
+        "top_category": "red toy chair",
+        "target_cosine": -0.005255416035652161,
+        "margin": -0.1863957792520523
+      }
+    },
+    {
+      "frame": 105,
+      "category": "pink ice cream",
+      "category_index": 7,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.14312094449996948,
+        "margin": 0.10030201077461243
+      },
+      "adapted": {
+        "rank": 12,
+        "top_category": "green apple",
+        "target_cosine": 0.23715566098690033,
+        "margin": -0.24023522436618805
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.25763165950775146,
+        "margin": 0.0731593519449234
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.17963522672653198,
+        "margin": 0.013794422149658203
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.3255375027656555,
+        "margin": 0.03169149160385132
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.25660818815231323,
+        "margin": 0.11481502652168274
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.33947011828422546,
+        "margin": 0.03373342752456665
+      }
+    },
+    {
+      "frame": 105,
+      "category": "pink ice cream",
+      "category_index": 7,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.136368528008461,
+        "margin": 0.06667698174715042
+      },
+      "adapted": {
+        "rank": 10,
+        "top_category": "green apple",
+        "target_cosine": 0.2589116096496582,
+        "margin": -0.22264158725738525
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.15356549620628357,
+        "margin": -0.04364229738712311
+      },
+      "random64_seed1": {
+        "rank": 12,
+        "top_category": "waldo",
+        "target_cosine": -0.0015471801161766052,
+        "margin": -0.13199901580810547
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.3323713541030884,
+        "margin": 0.039558351039886475
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.25851938128471375,
+        "margin": 0.04200524091720581
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.39250510931015015,
+        "margin": 0.07487499713897705
+      }
+    },
+    {
+      "frame": 105,
+      "category": "pirate hat",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 8,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.05548596754670143,
+        "margin": -0.027670513838529587
+      },
+      "adapted": {
+        "rank": 11,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.3318740725517273,
+        "margin": -0.2256796956062317
+      },
+      "random64_seed0": {
+        "rank": 9,
+        "top_category": "jake",
+        "target_cosine": 0.02553832344710827,
+        "margin": -0.11561021208763123
+      },
+      "random64_seed1": {
+        "rank": 20,
+        "top_category": "waldo",
+        "target_cosine": -0.06642922013998032,
+        "margin": -0.27481168508529663
+      },
+      "random64_seed2": {
+        "rank": 17,
+        "top_category": "spatula",
+        "target_cosine": 0.032258689403533936,
+        "margin": -0.20894110202789307
+      },
+      "random64_seed3": {
+        "rank": 13,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.09390424191951752,
+        "margin": -0.18733341991901398
+      },
+      "random64_seed4": {
+        "rank": 17,
+        "top_category": "red toy chair",
+        "target_cosine": 0.18130584061145782,
+        "margin": -0.1223972886800766
+      }
+    },
+    {
+      "frame": 105,
+      "category": "pirate hat",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 12,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.05829198658466339,
+        "margin": -0.04072610288858414
+      },
+      "adapted": {
+        "rank": 12,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.20504388213157654,
+        "margin": -0.3310141861438751
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "jake",
+        "target_cosine": 0.20614323019981384,
+        "margin": -0.007358819246292114
+      },
+      "random64_seed1": {
+        "rank": 19,
+        "top_category": "waldo",
+        "target_cosine": -0.008846865966916084,
+        "margin": -0.272583931684494
+      },
+      "random64_seed2": {
+        "rank": 15,
+        "top_category": "pikachu",
+        "target_cosine": 0.11071201413869858,
+        "margin": -0.14918473362922668
+      },
+      "random64_seed3": {
+        "rank": 16,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.03058817982673645,
+        "margin": -0.18648774921894073
+      },
+      "random64_seed4": {
+        "rank": 16,
+        "top_category": "green toy chair",
+        "target_cosine": 0.18186715245246887,
+        "margin": -0.14088979363441467
+      }
+    },
+    {
+      "frame": 105,
+      "category": "pumpkin",
+      "category_index": 10,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.12970834970474243,
+        "margin": 0.08320567011833191
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "green apple",
+        "target_cosine": 0.6142326593399048,
+        "margin": -0.08520537614822388
+      },
+      "random64_seed0": {
+        "rank": 5,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.08270268887281418,
+        "margin": -0.1205543503165245
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.2678929567337036,
+        "margin": 0.10667768120765686
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.06403408944606781,
+        "margin": -0.02523702383041382
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.2602417469024658,
+        "margin": 0.14730267226696014
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.4551931619644165,
+        "margin": 0.12072867155075073
+      }
+    },
+    {
+      "frame": 105,
+      "category": "pumpkin",
+      "category_index": 10,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.12031789124011993,
+        "margin": 0.10195890814065933
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.7580567598342896,
+        "margin": -0.05254697799682617
+      },
+      "random64_seed0": {
+        "rank": 5,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.07028186321258545,
+        "margin": -0.08218368887901306
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.11396591365337372,
+        "margin": 0.07909040153026581
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.05922176316380501,
+        "margin": 0.056008175015449524
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.22130036354064941,
+        "margin": 0.14247050881385803
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "pumpkin",
+        "target_cosine": 0.34952908754348755,
+        "margin": 0.08546507358551025
+      }
+    },
+    {
+      "frame": 105,
+      "category": "red apple",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.13798640668392181,
+        "margin": 0.04863101243972778
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.7188944220542908,
+        "margin": -0.04683917760848999
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.18352672457695007,
+        "margin": -0.015759289264678955
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.33773621916770935,
+        "margin": -0.0034648478031158447
+      },
+      "random64_seed2": {
+        "rank": 5,
+        "top_category": "bag",
+        "target_cosine": 0.1542779952287674,
+        "margin": -0.12560568749904633
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "pumpkin",
+        "target_cosine": 0.15823224186897278,
+        "margin": -0.011988773941993713
+      },
+      "random64_seed4": {
+        "rank": 7,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2347193956375122,
+        "margin": -0.1323491334915161
+      }
+    },
+    {
+      "frame": 105,
+      "category": "red apple",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.11385387182235718,
+        "margin": 0.04361983388662338
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.71727454662323,
+        "margin": -0.0565638542175293
+      },
+      "random64_seed0": {
+        "rank": 4,
+        "top_category": "pirate hat",
+        "target_cosine": 0.06847228109836578,
+        "margin": -0.06630472838878632
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.20132939517498016,
+        "margin": -0.009681373834609985
+      },
+      "random64_seed2": {
+        "rank": 5,
+        "top_category": "bag",
+        "target_cosine": 0.08720017224550247,
+        "margin": -0.08344968408346176
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "pumpkin",
+        "target_cosine": 0.05835369974374771,
+        "margin": -0.01808788627386093
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "red toy chair",
+        "target_cosine": 0.25893011689186096,
+        "margin": -0.061648786067962646
+      }
+    },
+    {
+      "frame": 105,
+      "category": "rubber duck with buoy",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.1288951188325882,
+        "margin": -0.013077810406684875
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.6816460490226746,
+        "margin": -0.03250133991241455
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.2745637893676758,
+        "margin": 0.03228253126144409
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.34023645520210266,
+        "margin": 0.1125258058309555
+      },
+      "random64_seed2": {
+        "rank": 15,
+        "top_category": "bag",
+        "target_cosine": 0.05239652842283249,
+        "margin": -0.15943175554275513
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.31781095266342163,
+        "margin": -0.07101976871490479
+      },
+      "random64_seed4": {
+        "rank": 8,
+        "top_category": "pumpkin",
+        "target_cosine": 0.2396656572818756,
+        "margin": -0.06469765305519104
+      }
+    },
+    {
+      "frame": 105,
+      "category": "rubber duck with buoy",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.13910242915153503,
+        "margin": 0.0030797570943832397
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "toy elephant",
+        "target_cosine": 0.8322431445121765,
+        "margin": -0.052041709423065186
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.22217178344726562,
+        "margin": -0.06490775942802429
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.2750251293182373,
+        "margin": 0.057560279965400696
+      },
+      "random64_seed2": {
+        "rank": 4,
+        "top_category": "green apple",
+        "target_cosine": 0.1316833198070526,
+        "margin": -0.0476592481136322
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.34800073504447937,
+        "margin": 0.019485443830490112
+      },
+      "random64_seed4": {
+        "rank": 10,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.2298363447189331,
+        "margin": -0.07362353801727295
+      }
+    },
+    {
+      "frame": 105,
+      "category": "rubber duck with hat",
+      "category_index": 14,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.14222994446754456,
+        "margin": 0.022686123847961426
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.5148683190345764,
+        "margin": -0.30318373441696167
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.20521850883960724,
+        "margin": -0.00369088351726532
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "waldo",
+        "target_cosine": 0.13296350836753845,
+        "margin": -0.06141011416912079
+      },
+      "random64_seed2": {
+        "rank": 15,
+        "top_category": "bag",
+        "target_cosine": 0.04386717826128006,
+        "margin": -0.19464844465255737
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.41152164340019226,
+        "margin": 0.06573468446731567
+      },
+      "random64_seed4": {
+        "rank": 13,
+        "top_category": "green toy chair",
+        "target_cosine": 0.269197016954422,
+        "margin": -0.07874974608421326
+      }
+    },
+    {
+      "frame": 105,
+      "category": "rubber duck with hat",
+      "category_index": 14,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.13920341432094574,
+        "margin": 0.013074502348899841
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.47629234194755554,
+        "margin": -0.34080758690834045
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.33497193455696106,
+        "margin": 0.045951515436172485
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "waldo",
+        "target_cosine": 0.1405017375946045,
+        "margin": -0.11302083730697632
+      },
+      "random64_seed2": {
+        "rank": 18,
+        "top_category": "spatula",
+        "target_cosine": 0.0915917158126831,
+        "margin": -0.15626536309719086
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.3364541530609131,
+        "margin": -0.005302309989929199
+      },
+      "random64_seed4": {
+        "rank": 9,
+        "top_category": "green toy chair",
+        "target_cosine": 0.26560166478157043,
+        "margin": -0.07347232103347778
+      }
+    },
+    {
+      "frame": 105,
+      "category": "rubics cube",
+      "category_index": 15,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.15587253868579865,
+        "margin": 0.0947999507188797
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "old camera",
+        "target_cosine": 0.2500664293766022,
+        "margin": -0.31370171904563904
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "jake",
+        "target_cosine": 0.13046495616436005,
+        "margin": -0.11586098372936249
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "pumpkin",
+        "target_cosine": 0.19288714230060577,
+        "margin": -0.009340688586235046
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.26687610149383545,
+        "margin": -0.019870609045028687
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.2696934938430786,
+        "margin": 0.0299796462059021
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.15860971808433533,
+        "margin": -0.08462895452976227
+      }
+    },
+    {
+      "frame": 105,
+      "category": "rubics cube",
+      "category_index": 15,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.1568775177001953,
+        "margin": 0.07962314784526825
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "old camera",
+        "target_cosine": 0.3244008421897888,
+        "margin": -0.333015501499176
+      },
+      "random64_seed0": {
+        "rank": 8,
+        "top_category": "jake",
+        "target_cosine": 0.16113130748271942,
+        "margin": -0.15829993784427643
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "waldo",
+        "target_cosine": 0.19523119926452637,
+        "margin": -0.003170788288116455
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.23594999313354492,
+        "margin": -0.055795490741729736
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.26072564721107483,
+        "margin": -0.018558979034423828
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.15862733125686646,
+        "margin": -0.11468690633773804
+      }
+    },
+    {
+      "frame": 105,
+      "category": "spatula",
+      "category_index": 16,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.10083690285682678,
+        "margin": 0.017689459025859833
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.6188475489616394,
+        "margin": 0.0700298547744751
+      },
+      "random64_seed0": {
+        "rank": 4,
+        "top_category": "red toy chair",
+        "target_cosine": 0.21428464353084564,
+        "margin": -0.07503582537174225
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "jake",
+        "target_cosine": 0.15846189856529236,
+        "margin": -0.08411192893981934
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.2275722622871399,
+        "margin": 0.022296994924545288
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.1615026593208313,
+        "margin": -0.0616479218006134
+      },
+      "random64_seed4": {
+        "rank": 9,
+        "top_category": "jake",
+        "target_cosine": 0.24525272846221924,
+        "margin": -0.09482306241989136
+      }
+    },
+    {
+      "frame": 105,
+      "category": "spatula",
+      "category_index": 16,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.11723415553569794,
+        "margin": 0.0456596314907074
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.6232800483703613,
+        "margin": 0.06719684600830078
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.3071412444114685,
+        "margin": 0.10494136810302734
+      },
+      "random64_seed1": {
+        "rank": 9,
+        "top_category": "waldo",
+        "target_cosine": 0.1213725283741951,
+        "margin": -0.11283683031797409
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.37932151556015015,
+        "margin": 0.08131837844848633
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.19632025063037872,
+        "margin": -0.07659624516963959
+      },
+      "random64_seed4": {
+        "rank": 9,
+        "top_category": "red apple",
+        "target_cosine": 0.2306145280599594,
+        "margin": -0.04512317478656769
+      }
+    },
+    {
+      "frame": 105,
+      "category": "tesla door handle",
+      "category_index": 17,
+      "crop": "masked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.11410486698150635,
+        "margin": 0.06803090870380402
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "spatula",
+        "target_cosine": 0.41150346398353577,
+        "margin": -0.15706804394721985
+      },
+      "random64_seed0": {
+        "rank": 10,
+        "top_category": "jake",
+        "target_cosine": 0.1520606279373169,
+        "margin": -0.15199723839759827
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "toy elephant",
+        "target_cosine": 0.18879130482673645,
+        "margin": -0.03464825451374054
+      },
+      "random64_seed2": {
+        "rank": 15,
+        "top_category": "bag",
+        "target_cosine": 0.09833234548568726,
+        "margin": -0.2391168475151062
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.30086347460746765,
+        "margin": 0.19954338669776917
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.29048848152160645,
+        "margin": -0.005390584468841553
+      }
+    },
+    {
+      "frame": 105,
+      "category": "tesla door handle",
+      "category_index": 17,
+      "crop": "unmasked",
+      "rgb_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "native": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.1032615378499031,
+        "margin": 0.062436945736408234
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "spatula",
+        "target_cosine": 0.6665676832199097,
+        "margin": -0.09965378046035767
+      },
+      "random64_seed0": {
+        "rank": 6,
+        "top_category": "jake",
+        "target_cosine": 0.13800276815891266,
+        "margin": -0.06793299317359924
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.1828504204750061,
+        "margin": 0.023652836680412292
+      },
+      "random64_seed2": {
+        "rank": 12,
+        "top_category": "bag",
+        "target_cosine": 0.0909065455198288,
+        "margin": -0.20472384989261627
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.27965155243873596,
+        "margin": 0.18742136657238007
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "tesla door handle",
+        "target_cosine": 0.29697859287261963,
+        "margin": 0.0008195936679840088
+      }
+    },
+    {
+      "frame": 152,
+      "category": "green apple",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.14191363751888275,
+        "margin": 0.050329506397247314
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.7179479002952576,
+        "margin": 0.08824610710144043
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.2742612957954407,
+        "margin": 0.04937441647052765
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.24923892319202423,
+        "margin": 0.04979263246059418
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.17684626579284668,
+        "margin": 0.0017158687114715576
+      },
+      "random64_seed3": {
+        "rank": 4,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.20264120399951935,
+        "margin": -0.013947650790214539
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.3483145833015442,
+        "margin": 0.08220469951629639
+      }
+    },
+    {
+      "frame": 152,
+      "category": "green apple",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.1421668827533722,
+        "margin": -0.0019504278898239136
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.6696991920471191,
+        "margin": 0.08306884765625
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.2110326886177063,
+        "margin": -0.06434795260429382
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "waldo",
+        "target_cosine": 0.2639760375022888,
+        "margin": -0.0012171268463134766
+      },
+      "random64_seed2": {
+        "rank": 4,
+        "top_category": "bag",
+        "target_cosine": 0.16360482573509216,
+        "margin": -0.06867888569831848
+      },
+      "random64_seed3": {
+        "rank": 5,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.1635371744632721,
+        "margin": -0.05000855028629303
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.24734646081924438,
+        "margin": -0.009788811206817627
+      }
+    },
+    {
+      "frame": 152,
+      "category": "jake",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.1693510264158249,
+        "margin": 0.09544970840215683
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.36079835891723633,
+        "margin": -0.33169126510620117
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.3747721016407013,
+        "margin": 0.1479494571685791
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.23784632980823517,
+        "margin": 0.042798444628715515
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.30423563718795776,
+        "margin": -0.006498873233795166
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.1889316588640213,
+        "margin": -0.032303109765052795
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.24356791377067566,
+        "margin": 0.1104615330696106
+      }
+    },
+    {
+      "frame": 152,
+      "category": "jake",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.13803787529468536,
+        "margin": 0.050713732838630676
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.44428759813308716,
+        "margin": -0.15053421258926392
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.39461737871170044,
+        "margin": 0.165957510471344
+      },
+      "random64_seed1": {
+        "rank": 4,
+        "top_category": "green toy chair",
+        "target_cosine": 0.1867099553346634,
+        "margin": -0.032625943422317505
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.21813905239105225,
+        "margin": -0.07191646099090576
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.200246199965477,
+        "margin": -0.005199119448661804
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "jake",
+        "target_cosine": 0.23687072098255157,
+        "margin": 0.05120745301246643
+      }
+    },
+    {
+      "frame": 152,
+      "category": "pikachu",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.11871602386236191,
+        "margin": 0.041761234402656555
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.39701753854751587,
+        "margin": -0.3286799192428589
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.13485512137413025,
+        "margin": -0.00684809684753418
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "pumpkin",
+        "target_cosine": 0.05200676620006561,
+        "margin": -0.020658358931541443
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.29307323694229126,
+        "margin": 0.03008502721786499
+      },
+      "random64_seed3": {
+        "rank": 8,
+        "top_category": "rubber duck with hat",
+        "target_cosine": -0.032245513051748276,
+        "margin": -0.10188861191272736
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "red toy chair",
+        "target_cosine": 0.13474243879318237,
+        "margin": -0.0519932359457016
+      }
+    },
+    {
+      "frame": 152,
+      "category": "pikachu",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.11750148236751556,
+        "margin": 0.04397746920585632
+      },
+      "adapted": {
+        "rank": 11,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.31510695815086365,
+        "margin": -0.39618292450904846
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.14968210458755493,
+        "margin": 0.0059788525104522705
+      },
+      "random64_seed1": {
+        "rank": 7,
+        "top_category": "green toy chair",
+        "target_cosine": -0.03845231980085373,
+        "margin": -0.07272271811962128
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pikachu",
+        "target_cosine": 0.3064383566379547,
+        "margin": 0.05407601594924927
+      },
+      "random64_seed3": {
+        "rank": 12,
+        "top_category": "rubber duck with hat",
+        "target_cosine": -0.08129318803548813,
+        "margin": -0.12294907867908478
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "red toy chair",
+        "target_cosine": 0.11160878837108612,
+        "margin": -0.023379623889923096
+      }
+    },
+    {
+      "frame": 152,
+      "category": "pirate hat",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "pirate hat",
+        "target_cosine": 0.15846268832683563,
+        "margin": 0.07965283840894699
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "green toy chair",
+        "target_cosine": 0.33297693729400635,
+        "margin": -0.31219351291656494
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "pirate hat",
+        "target_cosine": 0.1454578936100006,
+        "margin": 0.03654368966817856
+      },
+      "random64_seed1": {
+        "rank": 8,
+        "top_category": "waldo",
+        "target_cosine": 0.12980058789253235,
+        "margin": -0.07930223643779755
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.1720348298549652,
+        "margin": -0.04537445306777954
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.2359541356563568,
+        "margin": -0.13689881563186646
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "pirate hat",
+        "target_cosine": 0.28795963525772095,
+        "margin": 0.04712045192718506
+      }
+    },
+    {
+      "frame": 152,
+      "category": "pirate hat",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.12858562171459198,
+        "margin": -0.008015498518943787
+      },
+      "adapted": {
+        "rank": 12,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.27817660570144653,
+        "margin": -0.4849091172218323
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "pirate hat",
+        "target_cosine": 0.26811736822128296,
+        "margin": 0.0009396076202392578
+      },
+      "random64_seed1": {
+        "rank": 15,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.028272084891796112,
+        "margin": -0.16130408644676208
+      },
+      "random64_seed2": {
+        "rank": 13,
+        "top_category": "bag",
+        "target_cosine": 0.15779225528240204,
+        "margin": -0.12398765981197357
+      },
+      "random64_seed3": {
+        "rank": 5,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.19020596146583557,
+        "margin": -0.20057207345962524
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "green toy chair",
+        "target_cosine": 0.1842053085565567,
+        "margin": -0.07451896369457245
+      }
+    },
+    {
+      "frame": 152,
+      "category": "porcelain hand",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.14067375659942627,
+        "margin": 0.06421811133623123
+      },
+      "adapted": {
+        "rank": 21,
+        "top_category": "old camera",
+        "target_cosine": -0.4777493476867676,
+        "margin": -0.8758238554000854
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.0935807079076767,
+        "margin": -0.06035424768924713
+      },
+      "random64_seed1": {
+        "rank": 12,
+        "top_category": "jake",
+        "target_cosine": 0.13071873784065247,
+        "margin": -0.17750421166419983
+      },
+      "random64_seed2": {
+        "rank": 6,
+        "top_category": "bag",
+        "target_cosine": 0.16923213005065918,
+        "margin": -0.09044209122657776
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.15910999476909637,
+        "margin": -0.04342512786388397
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.24267247319221497,
+        "margin": 0.012975767254829407
+      }
+    },
+    {
+      "frame": 152,
+      "category": "porcelain hand",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.17088086903095245,
+        "margin": 0.11501278728246689
+      },
+      "adapted": {
+        "rank": 20,
+        "top_category": "green toy chair",
+        "target_cosine": -0.16780927777290344,
+        "margin": -0.8392157554626465
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.15868687629699707,
+        "margin": 0.047144822776317596
+      },
+      "random64_seed1": {
+        "rank": 11,
+        "top_category": "waldo",
+        "target_cosine": 0.13885755836963654,
+        "margin": -0.11193160712718964
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.14052540063858032,
+        "margin": -0.024156123399734497
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.15379706025123596,
+        "margin": -0.045919984579086304
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.3808855414390564,
+        "margin": 0.09476548433303833
+      }
+    },
+    {
+      "frame": 152,
+      "category": "red apple",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.13831724226474762,
+        "margin": 0.050800010561943054
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.7044227123260498,
+        "margin": -0.04360651969909668
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.2625916004180908,
+        "margin": 0.0006585121154785156
+      },
+      "random64_seed1": {
+        "rank": 4,
+        "top_category": "green apple",
+        "target_cosine": 0.1995801478624344,
+        "margin": -0.057735756039619446
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.19568845629692078,
+        "margin": -0.10165634751319885
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "pumpkin",
+        "target_cosine": 0.10621867328882217,
+        "margin": -0.04502811282873154
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2935561537742615,
+        "margin": -0.028663933277130127
+      }
+    },
+    {
+      "frame": 152,
+      "category": "red apple",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 3,
+        "top_category": "red toy chair",
+        "target_cosine": 0.11176155507564545,
+        "margin": -0.004784032702445984
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green apple",
+        "target_cosine": 0.6118812561035156,
+        "margin": -0.06993472576141357
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "red apple",
+        "target_cosine": 0.16231021285057068,
+        "margin": 0.032546818256378174
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "red toy chair",
+        "target_cosine": 0.11932110786437988,
+        "margin": -0.10770644247531891
+      },
+      "random64_seed2": {
+        "rank": 5,
+        "top_category": "bag",
+        "target_cosine": 0.1253986358642578,
+        "margin": -0.06903371214866638
+      },
+      "random64_seed3": {
+        "rank": 5,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.07238779962062836,
+        "margin": -0.07905079424381256
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2233363687992096,
+        "margin": -0.0563330352306366
+      }
+    },
+    {
+      "frame": 152,
+      "category": "rubber duck with hat",
+      "category_index": 14,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.15508656203746796,
+        "margin": 0.03882114589214325
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.5878543853759766,
+        "margin": -0.27531033754348755
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.40182095766067505,
+        "margin": 0.05807337164878845
+      },
+      "random64_seed1": {
+        "rank": 7,
+        "top_category": "waldo",
+        "target_cosine": 0.09121859073638916,
+        "margin": -0.06721431016921997
+      },
+      "random64_seed2": {
+        "rank": 8,
+        "top_category": "bag",
+        "target_cosine": 0.15821869671344757,
+        "margin": -0.09535925090312958
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3796728551387787,
+        "margin": 0.046379297971725464
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.19797787070274353,
+        "margin": -0.02841302752494812
+      }
+    },
+    {
+      "frame": 152,
+      "category": "rubber duck with hat",
+      "category_index": 14,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.15036454796791077,
+        "margin": 0.03108755499124527
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.5662606358528137,
+        "margin": -0.30864232778549194
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3587310314178467,
+        "margin": 0.058226168155670166
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "waldo",
+        "target_cosine": 0.10714955627918243,
+        "margin": -0.12083427608013153
+      },
+      "random64_seed2": {
+        "rank": 14,
+        "top_category": "bag",
+        "target_cosine": 0.05060039088129997,
+        "margin": -0.1168619692325592
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.36808037757873535,
+        "margin": 0.02633601427078247
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2326584905385971,
+        "margin": -0.07029975950717926
+      }
+    },
+    {
+      "frame": 152,
+      "category": "rubics cube",
+      "category_index": 15,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.14732077717781067,
+        "margin": 0.0823303610086441
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "old camera",
+        "target_cosine": 0.2968798279762268,
+        "margin": -0.28937655687332153
+      },
+      "random64_seed0": {
+        "rank": 7,
+        "top_category": "jake",
+        "target_cosine": 0.07088807225227356,
+        "margin": -0.2124786674976349
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.17822812497615814,
+        "margin": -0.02483944594860077
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.28466716408729553,
+        "margin": -0.004510611295700073
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.16541852056980133,
+        "margin": 0.0123053640127182
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.1172693744301796,
+        "margin": -0.0708419606089592
+      }
+    },
+    {
+      "frame": 152,
+      "category": "rubics cube",
+      "category_index": 15,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.1487976312637329,
+        "margin": 0.030971288681030273
+      },
+      "adapted": {
+        "rank": 10,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.12038327753543854,
+        "margin": -0.4834033250808716
+      },
+      "random64_seed0": {
+        "rank": 11,
+        "top_category": "jake",
+        "target_cosine": 0.19196848571300507,
+        "margin": -0.17409007251262665
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "pikachu",
+        "target_cosine": 0.18725185096263885,
+        "margin": -0.01427854597568512
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.20647339522838593,
+        "margin": -0.05431614816188812
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.2165718823671341,
+        "margin": -0.09147687256336212
+      },
+      "random64_seed4": {
+        "rank": 9,
+        "top_category": "green toy chair",
+        "target_cosine": 0.09621983766555786,
+        "margin": -0.15450933575630188
+      }
+    },
+    {
+      "frame": 152,
+      "category": "toy cat statue",
+      "category_index": 18,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.1542445719242096,
+        "margin": 0.08426626026630402
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.728844165802002,
+        "margin": 0.11933165788650513
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.32351404428482056,
+        "margin": 0.07591325044631958
+      },
+      "random64_seed1": {
+        "rank": 7,
+        "top_category": "waldo",
+        "target_cosine": 0.05121202394366264,
+        "margin": -0.06459112465381622
+      },
+      "random64_seed2": {
+        "rank": 9,
+        "top_category": "bag",
+        "target_cosine": 0.033596426248550415,
+        "margin": -0.13704046607017517
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.174264058470726,
+        "margin": -0.042651042342185974
+      },
+      "random64_seed4": {
+        "rank": 6,
+        "top_category": "pumpkin",
+        "target_cosine": 0.27367907762527466,
+        "margin": -0.06776580214500427
+      }
+    },
+    {
+      "frame": 152,
+      "category": "toy cat statue",
+      "category_index": 18,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.1384480595588684,
+        "margin": 0.09218762814998627
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.7368654012680054,
+        "margin": 0.09560227394104004
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.32026979327201843,
+        "margin": 0.05338391661643982
+      },
+      "random64_seed1": {
+        "rank": 8,
+        "top_category": "waldo",
+        "target_cosine": -0.014391377568244934,
+        "margin": -0.12172536551952362
+      },
+      "random64_seed2": {
+        "rank": 6,
+        "top_category": "spatula",
+        "target_cosine": 0.0571758970618248,
+        "margin": -0.059508539736270905
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.21719752252101898,
+        "margin": 0.007289901375770569
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "pumpkin",
+        "target_cosine": 0.2424139678478241,
+        "margin": -0.05757930874824524
+      }
+    },
+    {
+      "frame": 152,
+      "category": "toy elephant",
+      "category_index": 19,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.14270564913749695,
+        "margin": 0.056734293699264526
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.6203436851501465,
+        "margin": -0.125801682472229
+      },
+      "random64_seed0": {
+        "rank": 9,
+        "top_category": "jake",
+        "target_cosine": 0.21611201763153076,
+        "margin": -0.13782000541687012
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.18422764539718628,
+        "margin": 0.013669520616531372
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.28164008259773254,
+        "margin": -0.02458098530769348
+      },
+      "random64_seed3": {
+        "rank": 12,
+        "top_category": "rubics cube",
+        "target_cosine": 0.12105792760848999,
+        "margin": -0.14595884084701538
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "jake",
+        "target_cosine": 0.19141323864459991,
+        "margin": -0.07239995896816254
+      }
+    },
+    {
+      "frame": 152,
+      "category": "toy elephant",
+      "category_index": 19,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.14558057487010956,
+        "margin": 0.08725768327713013
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.7563116550445557,
+        "margin": -0.07792210578918457
+      },
+      "random64_seed0": {
+        "rank": 17,
+        "top_category": "spatula",
+        "target_cosine": 0.1584799587726593,
+        "margin": -0.22662293910980225
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "waldo",
+        "target_cosine": 0.15058910846710205,
+        "margin": -0.026941239833831787
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.31289494037628174,
+        "margin": -0.0132216215133667
+      },
+      "random64_seed3": {
+        "rank": 9,
+        "top_category": "rubics cube",
+        "target_cosine": 0.15674638748168945,
+        "margin": -0.08645346760749817
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "jake",
+        "target_cosine": 0.10458020865917206,
+        "margin": -0.06038329005241394
+      }
+    },
+    {
+      "frame": 152,
+      "category": "waldo",
+      "category_index": 20,
+      "crop": "masked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.16999799013137817,
+        "margin": 0.07966858148574829
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "old camera",
+        "target_cosine": 0.11922775208950043,
+        "margin": -0.4084886312484741
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.20672115683555603,
+        "margin": 0.005107313394546509
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.21616435050964355,
+        "margin": 0.08294741809368134
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.2563401758670807,
+        "margin": 0.002413123846054077
+      },
+      "random64_seed3": {
+        "rank": 6,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.07968616485595703,
+        "margin": -0.11959001421928406
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.1660863757133484,
+        "margin": 0.02924826741218567
+      }
+    },
+    {
+      "frame": 152,
+      "category": "waldo",
+      "category_index": 20,
+      "crop": "unmasked",
+      "rgb_sha256": "3fead52b17ad62765fc24780ba13176b772399a39d84822990c759fce1c66fa5",
+      "native": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.1794920414686203,
+        "margin": 0.09874527901411057
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "green toy chair",
+        "target_cosine": 0.1860046535730362,
+        "margin": -0.31131964921951294
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.18194875121116638,
+        "margin": -0.006898343563079834
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.19279181957244873,
+        "margin": 0.10845772922039032
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.26603949069976807,
+        "margin": 0.024061724543571472
+      },
+      "random64_seed3": {
+        "rank": 6,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.07958464324474335,
+        "margin": -0.10036639869213104
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.1728762984275818,
+        "margin": 0.05736801028251648
+      }
+    },
+    {
+      "frame": 195,
+      "category": "bag",
+      "category_index": 0,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "bag",
+        "target_cosine": 0.0949893668293953,
+        "margin": 0.022202618420124054
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.5051226019859314,
+        "margin": -0.01212853193283081
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "bag",
+        "target_cosine": 0.24318672716617584,
+        "margin": 0.03655633330345154
+      },
+      "random64_seed1": {
+        "rank": 12,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.12861327826976776,
+        "margin": -0.10181699693202972
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "bag",
+        "target_cosine": 0.3489076495170593,
+        "margin": 0.12629835307598114
+      },
+      "random64_seed3": {
+        "rank": 6,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.08544740825891495,
+        "margin": -0.13832861185073853
+      },
+      "random64_seed4": {
+        "rank": 9,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.24506494402885437,
+        "margin": -0.06983569264411926
+      }
+    },
+    {
+      "frame": 195,
+      "category": "bag",
+      "category_index": 0,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "bag",
+        "target_cosine": 0.07340041548013687,
+        "margin": 0.0120086669921875
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "green toy chair",
+        "target_cosine": 0.3989483714103699,
+        "margin": -0.20274919271469116
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "bag",
+        "target_cosine": 0.19177930057048798,
+        "margin": 0.06836758553981781
+      },
+      "random64_seed1": {
+        "rank": 6,
+        "top_category": "waldo",
+        "target_cosine": 0.07448374480009079,
+        "margin": -0.055512480437755585
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "bag",
+        "target_cosine": 0.18253155052661896,
+        "margin": 0.05783098191022873
+      },
+      "random64_seed3": {
+        "rank": 11,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.03399377316236496,
+        "margin": -0.15641674399375916
+      },
+      "random64_seed4": {
+        "rank": 16,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.11719194054603577,
+        "margin": -0.15611878037452698
+      }
+    },
+    {
+      "frame": 195,
+      "category": "green apple",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.14090384542942047,
+        "margin": 0.05953924357891083
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.7156988382339478,
+        "margin": 0.07564496994018555
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.17067167162895203,
+        "margin": 0.03723028302192688
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.29456964135169983,
+        "margin": 0.07091641426086426
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.1704421490430832,
+        "margin": 0.003087669610977173
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "pumpkin",
+        "target_cosine": 0.12067185342311859,
+        "margin": -0.028395876288414
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.24948115646839142,
+        "margin": -0.045832738280296326
+      }
+    },
+    {
+      "frame": 195,
+      "category": "green apple",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.14078882336616516,
+        "margin": 0.05611938238143921
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.8062717914581299,
+        "margin": 0.05449330806732178
+      },
+      "random64_seed0": {
+        "rank": 5,
+        "top_category": "jake",
+        "target_cosine": -0.03133411705493927,
+        "margin": -0.08127617090940475
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "green toy chair",
+        "target_cosine": 0.18743842840194702,
+        "margin": -0.016883105039596558
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green apple",
+        "target_cosine": 0.1808995008468628,
+        "margin": 0.04973869025707245
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.15390433371067047,
+        "margin": -0.014003589749336243
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.25840792059898376,
+        "margin": -0.03107425570487976
+      }
+    },
+    {
+      "frame": 195,
+      "category": "green toy chair",
+      "category_index": 2,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.17183814942836761,
+        "margin": 0.07576864212751389
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.6880923509597778,
+        "margin": 0.04462277889251709
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.3130071461200714,
+        "margin": 0.02990385890007019
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "toy elephant",
+        "target_cosine": 0.2522974908351898,
+        "margin": -0.10520234704017639
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.29342928528785706,
+        "margin": 0.0374244749546051
+      },
+      "random64_seed3": {
+        "rank": 12,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.030487429350614548,
+        "margin": -0.1773129254579544
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.2536901533603668,
+        "margin": -0.08086657524108887
+      }
+    },
+    {
+      "frame": 195,
+      "category": "green toy chair",
+      "category_index": 2,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.21631836891174316,
+        "margin": 0.08304402232170105
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.733572244644165,
+        "margin": 0.03411400318145752
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2537168562412262,
+        "margin": 0.07061484456062317
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.22158925235271454,
+        "margin": 0.0156916081905365
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.35029810667037964,
+        "margin": 0.1736026257276535
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "green toy chair",
+        "target_cosine": 0.211300790309906,
+        "margin": 0.02658848464488983
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "red toy chair",
+        "target_cosine": 0.27724701166152954,
+        "margin": -0.03503906726837158
+      }
+    },
+    {
+      "frame": 195,
+      "category": "miffy",
+      "category_index": 4,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "miffy",
+        "target_cosine": 0.12575772404670715,
+        "margin": 0.039875611662864685
+      },
+      "adapted": {
+        "rank": 17,
+        "top_category": "green toy chair",
+        "target_cosine": 0.18892090022563934,
+        "margin": -0.4176751971244812
+      },
+      "random64_seed0": {
+        "rank": 4,
+        "top_category": "jake",
+        "target_cosine": 0.15684480965137482,
+        "margin": -0.029299870133399963
+      },
+      "random64_seed1": {
+        "rank": 7,
+        "top_category": "jake",
+        "target_cosine": 0.14173772931098938,
+        "margin": -0.09986171126365662
+      },
+      "random64_seed2": {
+        "rank": 7,
+        "top_category": "bag",
+        "target_cosine": 0.07637911289930344,
+        "margin": -0.17661988735198975
+      },
+      "random64_seed3": {
+        "rank": 8,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.15649855136871338,
+        "margin": -0.14573237299919128
+      },
+      "random64_seed4": {
+        "rank": 7,
+        "top_category": "red toy chair",
+        "target_cosine": 0.15587517619132996,
+        "margin": -0.1637750267982483
+      }
+    },
+    {
+      "frame": 195,
+      "category": "miffy",
+      "category_index": 4,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "miffy",
+        "target_cosine": 0.12457747012376785,
+        "margin": 0.059113167226314545
+      },
+      "adapted": {
+        "rank": 14,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.24826505780220032,
+        "margin": -0.4311555325984955
+      },
+      "random64_seed0": {
+        "rank": 10,
+        "top_category": "spatula",
+        "target_cosine": 0.10259506106376648,
+        "margin": -0.08729958534240723
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "miffy",
+        "target_cosine": 0.2569114565849304,
+        "margin": 0.016735538840293884
+      },
+      "random64_seed2": {
+        "rank": 9,
+        "top_category": "bag",
+        "target_cosine": 0.05366288125514984,
+        "margin": -0.15552538633346558
+      },
+      "random64_seed3": {
+        "rank": 9,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.16718259453773499,
+        "margin": -0.08763390779495239
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "red toy chair",
+        "target_cosine": 0.22292768955230713,
+        "margin": -0.08642968535423279
+      }
+    },
+    {
+      "frame": 195,
+      "category": "old camera",
+      "category_index": 5,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.12352213263511658,
+        "margin": 0.05713321268558502
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.8506407737731934,
+        "margin": 0.3252676725387573
+      },
+      "random64_seed0": {
+        "rank": 14,
+        "top_category": "red toy chair",
+        "target_cosine": 0.19339565932750702,
+        "margin": -0.09975017607212067
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.1993006467819214,
+        "margin": -0.009624987840652466
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.15021908283233643,
+        "margin": -0.09786100685596466
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.28302323818206787,
+        "margin": -0.008685380220413208
+      },
+      "random64_seed4": {
+        "rank": 9,
+        "top_category": "red toy chair",
+        "target_cosine": 0.17895206809043884,
+        "margin": -0.10480418801307678
+      }
+    },
+    {
+      "frame": 195,
+      "category": "old camera",
+      "category_index": 5,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.1342562735080719,
+        "margin": 0.08773717284202576
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "old camera",
+        "target_cosine": 0.8200835585594177,
+        "margin": 0.2833179831504822
+      },
+      "random64_seed0": {
+        "rank": 14,
+        "top_category": "red toy chair",
+        "target_cosine": 0.1243738979101181,
+        "margin": -0.11835949122905731
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.19465798139572144,
+        "margin": -0.05404718220233917
+      },
+      "random64_seed2": {
+        "rank": 2,
+        "top_category": "bag",
+        "target_cosine": 0.10699652135372162,
+        "margin": -0.05212421715259552
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.27600929141044617,
+        "margin": -0.0691053569316864
+      },
+      "random64_seed4": {
+        "rank": 7,
+        "top_category": "red toy chair",
+        "target_cosine": 0.10527919977903366,
+        "margin": -0.1680261492729187
+      }
+    },
+    {
+      "frame": 195,
+      "category": "pink ice cream",
+      "category_index": 7,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 17,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.015751484781503677,
+        "margin": -0.032697539776563644
+      },
+      "adapted": {
+        "rank": 10,
+        "top_category": "jake",
+        "target_cosine": -0.1564253270626068,
+        "margin": -0.6551089286804199
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "jake",
+        "target_cosine": 0.015072289854288101,
+        "margin": -0.04459456354379654
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.2200048416852951,
+        "margin": -0.03820718824863434
+      },
+      "random64_seed2": {
+        "rank": 9,
+        "top_category": "bag",
+        "target_cosine": 0.15048521757125854,
+        "margin": -0.17315885424613953
+      },
+      "random64_seed3": {
+        "rank": 6,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.14233843982219696,
+        "margin": -0.09613332152366638
+      },
+      "random64_seed4": {
+        "rank": 7,
+        "top_category": "pumpkin",
+        "target_cosine": 0.23408152163028717,
+        "margin": -0.02778063714504242
+      }
+    },
+    {
+      "frame": 195,
+      "category": "pink ice cream",
+      "category_index": 7,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.14313851296901703,
+        "margin": 0.06852775067090988
+      },
+      "adapted": {
+        "rank": 11,
+        "top_category": "green apple",
+        "target_cosine": 0.32274144887924194,
+        "margin": -0.3132394552230835
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.18805968761444092,
+        "margin": -0.010732486844062805
+      },
+      "random64_seed1": {
+        "rank": 10,
+        "top_category": "waldo",
+        "target_cosine": 0.09068546444177628,
+        "margin": -0.14928680658340454
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.3343678116798401,
+        "margin": 0.090189129114151
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.2670580744743347,
+        "margin": 0.034738898277282715
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.39801621437072754,
+        "margin": 0.059921473264694214
+      }
+    },
+    {
+      "frame": 195,
+      "category": "pirate hat",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 4,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.06888587772846222,
+        "margin": -0.009976707398891449
+      },
+      "adapted": {
+        "rank": 14,
+        "top_category": "green apple",
+        "target_cosine": 0.2513072192668915,
+        "margin": -0.37068262696266174
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "pirate hat",
+        "target_cosine": 0.17841239273548126,
+        "margin": 0.0013619810342788696
+      },
+      "random64_seed1": {
+        "rank": 19,
+        "top_category": "waldo",
+        "target_cosine": 0.10286436975002289,
+        "margin": -0.2274380475282669
+      },
+      "random64_seed2": {
+        "rank": 11,
+        "top_category": "bag",
+        "target_cosine": 0.10690885782241821,
+        "margin": -0.20671182870864868
+      },
+      "random64_seed3": {
+        "rank": 5,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.1440507024526596,
+        "margin": -0.12357307970523834
+      },
+      "random64_seed4": {
+        "rank": 16,
+        "top_category": "red toy chair",
+        "target_cosine": 0.16121815145015717,
+        "margin": -0.0967462807893753
+      }
+    },
+    {
+      "frame": 195,
+      "category": "pirate hat",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 4,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.08588746935129166,
+        "margin": -0.03988207131624222
+      },
+      "adapted": {
+        "rank": 15,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.19367951154708862,
+        "margin": -0.5520424842834473
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.2320505678653717,
+        "margin": -0.0022304952144622803
+      },
+      "random64_seed1": {
+        "rank": 18,
+        "top_category": "waldo",
+        "target_cosine": 0.014967881143093109,
+        "margin": -0.2649792730808258
+      },
+      "random64_seed2": {
+        "rank": 10,
+        "top_category": "bag",
+        "target_cosine": 0.1416536271572113,
+        "margin": -0.08869260549545288
+      },
+      "random64_seed3": {
+        "rank": 9,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.11937741190195084,
+        "margin": -0.2142070233821869
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.306053102016449,
+        "margin": -0.021528959274291992
+      }
+    },
+    {
+      "frame": 195,
+      "category": "porcelain hand",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.14728951454162598,
+        "margin": 0.08247768133878708
+      },
+      "adapted": {
+        "rank": 21,
+        "top_category": "green toy chair",
+        "target_cosine": -0.32638078927993774,
+        "margin": -0.7215030193328857
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.13810525834560394,
+        "margin": -0.028806433081626892
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "waldo",
+        "target_cosine": 0.09763390570878983,
+        "margin": -0.060054682195186615
+      },
+      "random64_seed2": {
+        "rank": 5,
+        "top_category": "bag",
+        "target_cosine": 0.13837748765945435,
+        "margin": -0.0605320930480957
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "spatula",
+        "target_cosine": 0.2466280162334442,
+        "margin": -0.061755985021591187
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.3410373628139496,
+        "margin": 0.10895688831806183
+      }
+    },
+    {
+      "frame": 195,
+      "category": "porcelain hand",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.1608532965183258,
+        "margin": 0.10823307931423187
+      },
+      "adapted": {
+        "rank": 17,
+        "top_category": "green toy chair",
+        "target_cosine": -0.24736978113651276,
+        "margin": -0.7745731472969055
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.12765927612781525,
+        "margin": 0.009365648031234741
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "waldo",
+        "target_cosine": 0.14467798173427582,
+        "margin": -0.07545511424541473
+      },
+      "random64_seed2": {
+        "rank": 4,
+        "top_category": "bag",
+        "target_cosine": 0.13720162212848663,
+        "margin": -0.0638299435377121
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "spatula",
+        "target_cosine": 0.1586456000804901,
+        "margin": -0.02839687466621399
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "porcelain hand",
+        "target_cosine": 0.2770421504974365,
+        "margin": 0.00562015175819397
+      }
+    },
+    {
+      "frame": 195,
+      "category": "rubber duck with buoy",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.13757671415805817,
+        "margin": -0.012497425079345703
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.8004995584487915,
+        "margin": -0.07275164127349854
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.4212455153465271,
+        "margin": 0.010480225086212158
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.2957417964935303,
+        "margin": 0.09057649970054626
+      },
+      "random64_seed2": {
+        "rank": 9,
+        "top_category": "bag",
+        "target_cosine": 0.09580181539058685,
+        "margin": -0.11917667090892792
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3738688826560974,
+        "margin": -0.006184637546539307
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "pumpkin",
+        "target_cosine": 0.336850643157959,
+        "margin": -0.02840113639831543
+      }
+    },
+    {
+      "frame": 195,
+      "category": "rubber duck with buoy",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.13776154816150665,
+        "margin": 0.0247819647192955
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.7236278057098389,
+        "margin": -0.1666330099105835
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3036919832229614,
+        "margin": -0.01689562201499939
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.26772555708885193,
+        "margin": 0.030442699790000916
+      },
+      "random64_seed2": {
+        "rank": 8,
+        "top_category": "bag",
+        "target_cosine": 0.14791464805603027,
+        "margin": -0.07988682389259338
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.3284572660923004,
+        "margin": 0.04563552141189575
+      },
+      "random64_seed4": {
+        "rank": 2,
+        "top_category": "pumpkin",
+        "target_cosine": 0.31196510791778564,
+        "margin": -0.0004086494445800781
+      }
+    },
+    {
+      "frame": 195,
+      "category": "rubber duck with hat",
+      "category_index": 14,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.14883239567279816,
+        "margin": 0.02231292426586151
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.5681127905845642,
+        "margin": -0.3121641278266907
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.30178385972976685,
+        "margin": 0.026176363229751587
+      },
+      "random64_seed1": {
+        "rank": 2,
+        "top_category": "waldo",
+        "target_cosine": 0.17251062393188477,
+        "margin": -0.0829596221446991
+      },
+      "random64_seed2": {
+        "rank": 6,
+        "top_category": "bag",
+        "target_cosine": 0.16750817000865936,
+        "margin": -0.10391820967197418
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3798343539237976,
+        "margin": 0.03622746467590332
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2611706554889679,
+        "margin": -0.033861249685287476
+      }
+    },
+    {
+      "frame": 195,
+      "category": "rubber duck with hat",
+      "category_index": 14,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.14506591856479645,
+        "margin": 0.021461695432662964
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.5478885173797607,
+        "margin": -0.32881009578704834
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3214929699897766,
+        "margin": 0.05483013391494751
+      },
+      "random64_seed1": {
+        "rank": 7,
+        "top_category": "waldo",
+        "target_cosine": 0.07763976603746414,
+        "margin": -0.14899247884750366
+      },
+      "random64_seed2": {
+        "rank": 15,
+        "top_category": "bag",
+        "target_cosine": 0.011933162808418274,
+        "margin": -0.1451587826013565
+      },
+      "random64_seed3": {
+        "rank": 1,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.3493230938911438,
+        "margin": 0.0019208192825317383
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "green toy chair",
+        "target_cosine": 0.2962021827697754,
+        "margin": -0.05342075228691101
+      }
+    },
+    {
+      "frame": 195,
+      "category": "rubics cube",
+      "category_index": 15,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.1427665501832962,
+        "margin": 0.08097292482852936
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "old camera",
+        "target_cosine": 0.2635531425476074,
+        "margin": -0.32946956157684326
+      },
+      "random64_seed0": {
+        "rank": 2,
+        "top_category": "jake",
+        "target_cosine": 0.19804663956165314,
+        "margin": -0.13310123980045319
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.08777303248643875,
+        "margin": -0.018977582454681396
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.2569887638092041,
+        "margin": 0.02054685354232788
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.24659034609794617,
+        "margin": -0.05214545130729675
+      },
+      "random64_seed4": {
+        "rank": 5,
+        "top_category": "green toy chair",
+        "target_cosine": 0.09872972965240479,
+        "margin": -0.07250702381134033
+      }
+    },
+    {
+      "frame": 195,
+      "category": "rubics cube",
+      "category_index": 15,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "rubics cube",
+        "target_cosine": 0.15162470936775208,
+        "margin": 0.03629283607006073
+      },
+      "adapted": {
+        "rank": 14,
+        "top_category": "toy cat statue",
+        "target_cosine": -0.005676997825503349,
+        "margin": -0.7952595949172974
+      },
+      "random64_seed0": {
+        "rank": 8,
+        "top_category": "jake",
+        "target_cosine": 0.19563305377960205,
+        "margin": -0.17030921578407288
+      },
+      "random64_seed1": {
+        "rank": 3,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.08888036757707596,
+        "margin": -0.050818733870983124
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "green apple",
+        "target_cosine": 0.13147351145744324,
+        "margin": -0.025525152683258057
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.21908214688301086,
+        "margin": -0.133407860994339
+      },
+      "random64_seed4": {
+        "rank": 4,
+        "top_category": "green toy chair",
+        "target_cosine": 0.18073628842830658,
+        "margin": -0.07299749553203583
+      }
+    },
+    {
+      "frame": 195,
+      "category": "spatula",
+      "category_index": 16,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.16015025973320007,
+        "margin": 0.09124557673931122
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "red toy chair",
+        "target_cosine": 0.4846552014350891,
+        "margin": -0.025896012783050537
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.37501388788223267,
+        "margin": 0.12212520837783813
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "waldo",
+        "target_cosine": 0.09512141346931458,
+        "margin": -0.029757462441921234
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.32244008779525757,
+        "margin": 0.12528041005134583
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "pumpkin",
+        "target_cosine": 0.22843515872955322,
+        "margin": -0.0064604878425598145
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.27387309074401855,
+        "margin": 0.014338880777359009
+      }
+    },
+    {
+      "frame": 195,
+      "category": "spatula",
+      "category_index": 16,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.13986045122146606,
+        "margin": 0.04517769068479538
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "old camera",
+        "target_cosine": 0.04442717507481575,
+        "margin": -0.38585227727890015
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.22285059094429016,
+        "margin": 0.0024728626012802124
+      },
+      "random64_seed1": {
+        "rank": 16,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": -0.09412679076194763,
+        "margin": -0.14034727215766907
+      },
+      "random64_seed2": {
+        "rank": 1,
+        "top_category": "spatula",
+        "target_cosine": 0.3510774075984955,
+        "margin": 0.10776259005069733
+      },
+      "random64_seed3": {
+        "rank": 2,
+        "top_category": "pink ice cream",
+        "target_cosine": 0.2222450077533722,
+        "margin": -0.010092303156852722
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "red toy chair",
+        "target_cosine": 0.2267179787158966,
+        "margin": -0.01985602080821991
+      }
+    },
+    {
+      "frame": 195,
+      "category": "toy cat statue",
+      "category_index": 18,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.0987798348069191,
+        "margin": 0.0033447518944740295
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.511345386505127,
+        "margin": 0.013668954372406006
+      },
+      "random64_seed0": {
+        "rank": 4,
+        "top_category": "bag",
+        "target_cosine": 0.1431090384721756,
+        "margin": -0.04555581510066986
+      },
+      "random64_seed1": {
+        "rank": 5,
+        "top_category": "waldo",
+        "target_cosine": 0.13303086161613464,
+        "margin": -0.07258772850036621
+      },
+      "random64_seed2": {
+        "rank": 17,
+        "top_category": "bag",
+        "target_cosine": 0.009440813213586807,
+        "margin": -0.2469722032546997
+      },
+      "random64_seed3": {
+        "rank": 10,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.07921768724918365,
+        "margin": -0.1417091190814972
+      },
+      "random64_seed4": {
+        "rank": 6,
+        "top_category": "red toy chair",
+        "target_cosine": 0.17396706342697144,
+        "margin": -0.08951187133789062
+      }
+    },
+    {
+      "frame": 195,
+      "category": "toy cat statue",
+      "category_index": 18,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.11663220822811127,
+        "margin": 0.04315508157014847
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.7304171323776245,
+        "margin": 0.13983917236328125
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "waldo",
+        "target_cosine": 0.2330951988697052,
+        "margin": -0.002248793840408325
+      },
+      "random64_seed1": {
+        "rank": 14,
+        "top_category": "waldo",
+        "target_cosine": -0.04388578236103058,
+        "margin": -0.19677232205867767
+      },
+      "random64_seed2": {
+        "rank": 11,
+        "top_category": "bag",
+        "target_cosine": 0.05608989670872688,
+        "margin": -0.11788889765739441
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.1966104805469513,
+        "margin": -0.09744212031364441
+      },
+      "random64_seed4": {
+        "rank": 9,
+        "top_category": "pumpkin",
+        "target_cosine": 0.14244776964187622,
+        "margin": -0.08040112257003784
+      }
+    },
+    {
+      "frame": 195,
+      "category": "toy elephant",
+      "category_index": 19,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.13140365481376648,
+        "margin": 0.0559706836938858
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "red toy chair",
+        "target_cosine": 0.5915672779083252,
+        "margin": -0.07623296976089478
+      },
+      "random64_seed0": {
+        "rank": 4,
+        "top_category": "jake",
+        "target_cosine": 0.22999033331871033,
+        "margin": -0.11466053128242493
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.18307647109031677,
+        "margin": 0.0028242021799087524
+      },
+      "random64_seed2": {
+        "rank": 4,
+        "top_category": "bag",
+        "target_cosine": 0.2918998897075653,
+        "margin": -0.1135425865650177
+      },
+      "random64_seed3": {
+        "rank": 11,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.06766651570796967,
+        "margin": -0.09875337779521942
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "jake",
+        "target_cosine": 0.23883084952831268,
+        "margin": -0.043312057852745056
+      }
+    },
+    {
+      "frame": 195,
+      "category": "toy elephant",
+      "category_index": 19,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.1304652839899063,
+        "margin": 0.07629933953285217
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "red toy chair",
+        "target_cosine": 0.6609679460525513,
+        "margin": -0.022743284702301025
+      },
+      "random64_seed0": {
+        "rank": 9,
+        "top_category": "jake",
+        "target_cosine": 0.1386243849992752,
+        "margin": -0.15184463560581207
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "toy elephant",
+        "target_cosine": 0.13018053770065308,
+        "margin": 0.02593909204006195
+      },
+      "random64_seed2": {
+        "rank": 5,
+        "top_category": "bag",
+        "target_cosine": 0.23633858561515808,
+        "margin": -0.049082785844802856
+      },
+      "random64_seed3": {
+        "rank": 8,
+        "top_category": "rubber duck with buoy",
+        "target_cosine": 0.11878423392772675,
+        "margin": -0.09069949388504028
+      },
+      "random64_seed4": {
+        "rank": 3,
+        "top_category": "green toy chair",
+        "target_cosine": 0.32549652457237244,
+        "margin": -0.0426633358001709
+      }
+    },
+    {
+      "frame": 195,
+      "category": "waldo",
+      "category_index": 20,
+      "crop": "masked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.17963701486587524,
+        "margin": 0.08763197064399719
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "old camera",
+        "target_cosine": 0.24655009806156158,
+        "margin": -0.278340220451355
+      },
+      "random64_seed0": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.21860553324222565,
+        "margin": 0.027242645621299744
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.3051251769065857,
+        "margin": 0.15024389326572418
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.2024959921836853,
+        "margin": -0.03794004023075104
+      },
+      "random64_seed3": {
+        "rank": 6,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.12722454965114594,
+        "margin": -0.13322971761226654
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.17997753620147705,
+        "margin": 0.036129534244537354
+      }
+    },
+    {
+      "frame": 195,
+      "category": "waldo",
+      "category_index": 20,
+      "crop": "unmasked",
+      "rgb_sha256": "25db29279ea2de8aa6521270d8cd9294a228542567778c81824a3397b6af18d5",
+      "native": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.166603222489357,
+        "margin": 0.08868429064750671
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "toy cat statue",
+        "target_cosine": 0.2810973823070526,
+        "margin": -0.25604239106178284
+      },
+      "random64_seed0": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.10455117374658585,
+        "margin": -0.07266842573881149
+      },
+      "random64_seed1": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.24713177978992462,
+        "margin": 0.11817292869091034
+      },
+      "random64_seed2": {
+        "rank": 3,
+        "top_category": "bag",
+        "target_cosine": 0.207932710647583,
+        "margin": -0.04215574264526367
+      },
+      "random64_seed3": {
+        "rank": 3,
+        "top_category": "rubber duck with hat",
+        "target_cosine": 0.2147015780210495,
+        "margin": -0.03288291394710541
+      },
+      "random64_seed4": {
+        "rank": 1,
+        "top_category": "waldo",
+        "target_cosine": 0.22288717329502106,
+        "margin": 0.0412994921207428
+      }
+    }
+  ]
+}

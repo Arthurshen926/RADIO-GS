@@ -21,5 +21,6 @@ def render_selected_surface_support(carrier, probability, camera, *, threshold):
         confidence=carrier.confidence[selected], maximum_splat_radius=carrier.maximum_splat_radius,
         surface_band_voxels=carrier.surface_band_voxels,
         maximum_contributors_per_pixel=carrier.maximum_contributors_per_pixel,
-        reference_raster_shape=carrier.reference_raster_shape)
+        reference_raster_shape=carrier.reference_raster_shape,
+        projection_contract=carrier.projection_contract)
     return subset.render_posterior(torch.ones(subset.num_elements), camera) > 0

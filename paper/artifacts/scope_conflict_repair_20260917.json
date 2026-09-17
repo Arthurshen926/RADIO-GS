@@ -1,0 +1,259 @@
+{
+  "schema": "scope_conflict_repair.v1",
+  "promoted": false,
+  "retained": "counterfactual_extent_benefit_admission",
+  "scenes": {
+    "figurines": {
+      "source_bias": 0.2,
+      "source_selection_passed": true,
+      "native_geometry_and_independent_region_tensors_exact": true,
+      "image_prompt_observations_exact": true,
+      "gate_refit_on_changed_scopes": true,
+      "diagnostics": {
+        "scope_conflict_audit": {
+          "strong_conflict": 0.593205491674045,
+          "weak_vote_conflict": 0.1098489390325177,
+          "strong_negative_no_positive": 0.2526722339748618,
+          "unobserved": 6.678780081770945e-10,
+          "other": 0.04427335809026079
+        },
+        "scope_core_conflict_audit": {
+          "strong_core_conflict": 0.1559414016114673,
+          "strong_boundary_conflict": 0.4372640887907148,
+          "weak_vote_conflict": 0.10984893659645346,
+          "strong_negative_no_positive": 0.2526722307643231,
+          "unobserved": 6.678780018752957e-10,
+          "other": 0.044273357591791525
+        },
+        "scope_core_conflict_radius1_audit": {
+          "strong_core_conflict": 0.37606209481255853,
+          "strong_boundary_conflict": 0.21714339747956443,
+          "weak_vote_conflict": 0.10984893839450179,
+          "strong_negative_no_positive": 0.2526722339748618,
+          "unobserved": 6.678780069886973e-10,
+          "other": 0.04427335761174885
+        }
+      },
+      "metrics": {
+        "source_scope_precision_calibration": {
+          "observation_miou": 0.4388581005918756,
+          "category_macro_miou": 0.4222436555311974,
+          "average_precision_macro": 0.6262571942326788
+        },
+        "scope_precision_benefit_admission": {
+          "observation_miou": 0.45555392545708884,
+          "category_macro_miou": 0.43801549136085843,
+          "average_precision_macro": 0.6728563239057503
+        },
+        "counterfactual_extent_benefit_admission": {
+          "observation_miou": 0.4619885515628849,
+          "category_macro_miou": 0.45085980395430814,
+          "average_precision_macro": 0.6679990673159864
+        }
+      },
+      "cold": {
+        "schema": "native_three_query_cold.v1",
+        "training_cache_reads_forbidden": true,
+        "native_queries_encoded_online": true,
+        "geometry_unchanged": true,
+        "field_sha256": "6629ad4135cfaa029a43dc8864f9a407a121ef82c9086d0938c7154ce5270da8",
+        "fixture_sha256": "14c2be931b08e89dc671344be4ebc94d939dc3f1bc8f1e3e5efcc872c1b0b04e",
+        "modalities": {
+          "text": {
+            "native_vs_training_encoding_cosine": 0.9999995231628418,
+            "elements": 274805,
+            "valid_elements": 207621,
+            "posterior_max_difference": 0.0,
+            "membership_changed_elements": 0,
+            "concept_route_consistent": true,
+            "online_concept_route": {
+              "index": [
+                0
+              ],
+              "accepted": [
+                true
+              ]
+            },
+            "cached_concept_route": {
+              "index": [
+                0
+              ],
+              "accepted": [
+                true
+              ]
+            }
+          },
+          "image": {
+            "native_vs_training_encoding_cosine": 0.9997752904891968,
+            "elements": 274805,
+            "valid_elements": 207621,
+            "posterior_max_difference": 0.023212850093841553,
+            "membership_changed_elements": 20
+          },
+          "prompt": {
+            "native_vs_training_encoding_cosine": 1.0,
+            "elements": 274805,
+            "valid_elements": 207621,
+            "posterior_max_difference": 0.0,
+            "membership_changed_elements": 0
+          }
+        },
+        "quality_evaluation": false,
+        "registered_prompt_refinement": null
+      },
+      "artifacts": {
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_conflict_audit/report.json": "e43ce291bb27d1dbcf3f10382f5094d3721095cce5488b87afc269fb4e610027",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_core_conflict_audit/report.json": "3a38f016a9daa839d8180cd99e93eafa300875a08f6e85ba69930cb4231bb950",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_core_conflict_radius1_audit/report.json": "8e47ad889d89b48c061b7c3446c58a8f2ea0686d7c0698995e00123cc65f61e8",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_depth_correspondence.json": "f43cf124afbd865116ffb822a8af3442ee3c8737a2815e7c77df56a51937c2fe",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_depth_scope_pairs.json": "451d86159c5a7ea43b8df4cc7a1ad337816d8e6d4ad703169d71081e8aa3e0d0",
+        "output/pixel_evidence_rebuild_20260917/figurines/source_scope_precision_calibration_validation/execution.json": "a280f9bae2b74a5ee6ff9c063970d0452b108e58a4c863e84135dd9f998c889f",
+        "output/pixel_evidence_rebuild_20260917/figurines/source_scope_precision_calibration_validation/text.json": "ed78a154b8c3520214f6116a5703e2b269679de97e638a317c9322cf90100c1d",
+        "output/pixel_evidence_rebuild_20260917/figurines/source_scope_precision_calibration_validation/reference.json": "53d1583219a43dc13d93ab292c9517f6d73808ce6202d3d9180d26f6df09bf46",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_precision_benefit_admission_validation/execution.json": "5fb2794e447614cc58ce7ea8b9c7201887491a5099cd963cfd06a4831b648943",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_precision_benefit_admission_validation/text.json": "d90e8da88aae86238d11520a9c42b3032f025797eed0920bdda9874af5fe67bd",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_precision_benefit_admission_validation/reference.json": "5b62fe6a5045fcab8117212608f85285a8e9ef487d56224c533f3983424a4432",
+        "output/pixel_evidence_rebuild_20260917/figurines/counterfactual_extent_benefit_admission_validation/execution.json": "b64a5cada7b8c5b4c09b257d6c742cd3550d01ba5d6210eaf27c7cea10e56aa2",
+        "output/pixel_evidence_rebuild_20260917/figurines/counterfactual_extent_benefit_admission_validation/text.json": "610183c4d5a93e7089c8def5ebbbc32d98aea90180fedc28a27a583b6e97d3be",
+        "output/pixel_evidence_rebuild_20260917/figurines/counterfactual_extent_benefit_admission_validation/reference.json": "8c669ca822e66edbf36f7d85fbdc2e582c0f5242de6ef85d413a2d602b7841c8",
+        "output/pixel_evidence_rebuild_20260917/figurines/field/source_scope_precision_calibration/report.json": "0c214f01bb3aaac0eb0b06f59f4bc3c207583697eb84ad79839440e581918c11",
+        "output/pixel_evidence_rebuild_20260917/figurines/field/scope_precision_benefit_admission/report.json": "979653ed2736a27ddfbf0ea5f8b51ba4b44d82ac6db88764080137a3b24a5148",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_precision_benefit_admission_validation/cold.json": "d5e82cb8f6ba7e17e7e44ef77f2e4d933154a66453cf7105d575d29b064a9297"
+      }
+    },
+    "ramen": {
+      "source_bias": 0.2,
+      "source_selection_passed": true,
+      "native_geometry_and_independent_region_tensors_exact": true,
+      "image_prompt_observations_exact": true,
+      "gate_refit_on_changed_scopes": true,
+      "diagnostics": {
+        "scope_conflict_audit": {
+          "strong_conflict": 0.6740009816171695,
+          "weak_vote_conflict": 0.09608724057428553,
+          "strong_negative_no_positive": 0.1523914980605225,
+          "unobserved": 7.591646683360601e-10,
+          "other": 0.07752025757570497
+        },
+        "scope_core_conflict_audit": {
+          "strong_core_conflict": 0.28587845148490876,
+          "strong_boundary_conflict": 0.38812253391777835,
+          "weak_vote_conflict": 0.0960872419262561,
+          "strong_negative_no_positive": 0.15239149968288718,
+          "unobserved": 7.591646695951808e-10,
+          "other": 0.07752025730531086
+        },
+        "scope_core_conflict_radius1_audit": {
+          "strong_core_conflict": 0.49665765611790197,
+          "strong_boundary_conflict": 0.17734334452204734,
+          "weak_vote_conflict": 0.09608724317336452,
+          "strong_negative_no_positive": 0.15239150057918746,
+          "unobserved": 7.591646804556132e-10,
+          "other": 0.0775202583114399
+        }
+      },
+      "metrics": {
+        "source_scope_precision_calibration": {
+          "observation_miou": 0.34765995017187135,
+          "category_macro_miou": 0.3478909386870596,
+          "average_precision_macro": 0.5028090693944076
+        },
+        "scope_precision_benefit_admission": {
+          "observation_miou": 0.34765995017187135,
+          "category_macro_miou": 0.3478909386870596,
+          "average_precision_macro": 0.5028090693944076
+        },
+        "counterfactual_extent_benefit_admission": {
+          "observation_miou": 0.32966258926991937,
+          "category_macro_miou": 0.326652626466249,
+          "average_precision_macro": 0.4975273447926778
+        }
+      },
+      "cold": {
+        "schema": "native_three_query_cold.v1",
+        "training_cache_reads_forbidden": true,
+        "native_queries_encoded_online": true,
+        "geometry_unchanged": true,
+        "field_sha256": "8cd3148aebdb95b754f70cb08b814717d869114ffbbd204f6033dd9f68789d8d",
+        "fixture_sha256": "eb1eec0325b408657818a13cfed6c8a15c4c9c8225cbaadac811facedbbc4c2a",
+        "modalities": {
+          "text": {
+            "native_vs_training_encoding_cosine": 0.9999995827674866,
+            "elements": 362198,
+            "valid_elements": 256877,
+            "posterior_max_difference": 0.0008784234523773193,
+            "membership_changed_elements": 0,
+            "concept_route_consistent": true,
+            "online_concept_route": {
+              "index": [
+                49
+              ],
+              "accepted": [
+                false
+              ]
+            },
+            "cached_concept_route": {
+              "index": [
+                49
+              ],
+              "accepted": [
+                false
+              ]
+            }
+          },
+          "image": {
+            "native_vs_training_encoding_cosine": 0.9999266862869263,
+            "elements": 362198,
+            "valid_elements": 256877,
+            "posterior_max_difference": 0.010591566562652588,
+            "membership_changed_elements": 43
+          },
+          "prompt": {
+            "native_vs_training_encoding_cosine": 1.0,
+            "elements": 362198,
+            "valid_elements": 256877,
+            "posterior_max_difference": 0.0,
+            "membership_changed_elements": 0
+          }
+        },
+        "quality_evaluation": false,
+        "registered_prompt_refinement": null
+      },
+      "artifacts": {
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_conflict_audit/report.json": "008d0565774f08f799d67462617f95a2ec86c771b8faf9578667ea539873a5a9",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_core_conflict_audit/report.json": "cc6c1dc3b1327b9b42b20d84144094c9e6f5e4ac9f111f81b0ced86830d747b8",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_core_conflict_radius1_audit/report.json": "a487c159e8dd753eeb03f14823965d2ccc6f7aa834b78f92a71d68b7dbfb61c0",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_depth_correspondence.json": "7517ce7effa6112852bcb23e8b67b786854bcf9bf7f0dd25e547fb8817d38afd",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_depth_scope_pairs.json": "11bc3e55ddaf5c5c111c2248c48e736b0d30d385153cae8817d5c51cda10cd6e",
+        "output/pixel_evidence_rebuild_20260917/ramen/source_scope_precision_calibration_validation/execution.json": "390a23b0635d4bc37352f53991b4257434e379baf57c6cfd5a732b0937606542",
+        "output/pixel_evidence_rebuild_20260917/ramen/source_scope_precision_calibration_validation/text.json": "0188696491eda452756906607ed4e28ca56f4a883bda073972c1b1bbf5e2dd16",
+        "output/pixel_evidence_rebuild_20260917/ramen/source_scope_precision_calibration_validation/reference.json": "d352d6fbe117f7bc0269edd16c5c2e36badd086b6ec317a5a006e070e4c24447",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_precision_benefit_admission_validation/execution.json": "56ef5abc65948d62c8d0535edbb40907cab6807a57f24daf7e11ae1b7050230f",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_precision_benefit_admission_validation/text.json": "01085c99c247ca7005f48e2ad13e38ccd698d45b76f693421d15f9619b06c53e",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_precision_benefit_admission_validation/reference.json": "27cc8c418d34467204c8f2ddeb00937e7f7a9502e0d2be7d3176780340548814",
+        "output/pixel_evidence_rebuild_20260917/ramen/counterfactual_extent_benefit_admission_validation/execution.json": "04fe9ff2e1561fcb71b22b23cdc99f86a69663af6d2e8f7e51be1e95b5dccf5b",
+        "output/pixel_evidence_rebuild_20260917/ramen/counterfactual_extent_benefit_admission_validation/text.json": "ee4214228fe194d690d83ad7c698c7baa179d87aa09154c2fa05084592c298ee",
+        "output/pixel_evidence_rebuild_20260917/ramen/counterfactual_extent_benefit_admission_validation/reference.json": "308968e8b25a16c7cc8e325a165e2b02236f70a27139c925f9a4c34d21ccea81",
+        "output/pixel_evidence_rebuild_20260917/ramen/field/source_scope_precision_calibration/report.json": "fc80a05c644ea158559aa6cd17010014f107954ada32b1dc3e2b82e4522bcb35",
+        "output/pixel_evidence_rebuild_20260917/ramen/field/scope_precision_benefit_admission/report.json": "57c74523a2fbbdb4322a2ff4610201de8b98ee626dc32f7e9725c4eac4e31883",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_precision_benefit_admission_validation/cold.json": "8fed3a6724bb9f67fa07ebef0140acf5513a2715ec27f3977c16f140d0c0bbc9"
+      }
+    }
+  },
+  "additional_artifacts": {
+    "paper/artifacts/scope_boundary_sensitivity_20260917.json": "a98f6a23eb417bb68fb5aac6235b521d9675c3be1d7ee36c5308d7c7777b94e9",
+    "paper/artifacts/scope_resolution_audit_20260917.json": "a33e0c88b312852ffd1758a848931e03767b4f7143076673205694a264fb3e17"
+  },
+  "current_implementations": {
+    "scripts/audits/diagnose_scope_conflicts.py": "1c95ef12d6665050310a62716087523bf25d1b992bba2d2db6fe96f136744d99",
+    "scripts/audits/diagnose_scope_core_conflicts.py": "50aa2636f85d0d11431990992598abfb646c2982c25a65d416f704a6cf0c8716",
+    "scripts/audits/calibrate_scope_false_positives.py": "52cbe1c3fbd126b037d6f945db1d1de51776e591882b23aaa7b9c19bdfef0e8b",
+    "scripts/audits/fit_counterfactual_extent_admission.py": "ae5c74262ea19097a3ce25c44fb2f18888dcf533e0d97a9196ca9a1d673c0b27",
+    "scripts/audits/audit_scope_resolution.py": "4a65d45f1d853e2706695f3368bbd63be0ee522c1eb964e26a2495135c7a6b9b",
+    "tests/test_scope_precision_contract.py": "ee1adc4abaa62db5bcb5828a4276ae78defd858d825e7665d1ce20c7fe867a45",
+    "scripts/audits/diagnose_scope_depth_correspondence.py": "ae745ae19e38662b4da6e415a77b81580b4191457e61b0788eee83a5d078fc2c",
+    "scripts/audits/diagnose_depth_consistent_scope_pairs.py": "d6eec4c1b741df13a99f98b56dcd1eb2ed9da5e57d54bbda1dc8efc8f26c1116",
+    "/root/RADIO-GS/scripts/audits/verify_scope_conflict_repair.py": "6c0ba61768727258aca1fd2b63c96f69646bb334d668053d161ee7a97c5874d2"
+  },
+  "acceptance": "Ramen improves but figurines IoU regresses; reject shared replacement and do not route by benchmark scene identity."
+}

@@ -1,0 +1,1423 @@
+{
+  "schema": "source_region_identity_audit.v1",
+  "episode_sha256": "f17a34f70864c77acaa510a81f0d7ed45dbf71048fd17405021e5de06d1bbd61",
+  "graph": {
+    "train": {
+      "unique_pairs": 42,
+      "matched_regions": 46,
+      "components": [
+        {
+          "regions": [
+            0,
+            14,
+            15,
+            25,
+            53,
+            54
+          ],
+          "views": [
+            0,
+            1,
+            2,
+            4
+          ],
+          "same_view_conflicts": {
+            "1": [
+              14,
+              15
+            ],
+            "4": [
+              53,
+              54
+            ]
+          },
+          "track_consistent": false
+        },
+        {
+          "regions": [
+            1,
+            13,
+            19,
+            24,
+            46,
+            64,
+            68,
+            77,
+            82
+          ],
+          "views": [
+            0,
+            1,
+            3,
+            4,
+            5
+          ],
+          "same_view_conflicts": {
+            "0": [
+              1,
+              13
+            ],
+            "1": [
+              19,
+              24
+            ],
+            "4": [
+              64,
+              68
+            ],
+            "5": [
+              77,
+              82
+            ]
+          },
+          "track_consistent": false
+        },
+        {
+          "regions": [
+            5,
+            17,
+            30,
+            61,
+            79
+          ],
+          "views": [
+            0,
+            1,
+            2,
+            4,
+            5
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            8,
+            10,
+            21,
+            23,
+            29,
+            40,
+            52,
+            67,
+            88,
+            89
+          ],
+          "views": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "same_view_conflicts": {
+            "0": [
+              8,
+              10
+            ],
+            "1": [
+              21,
+              23
+            ],
+            "4": [
+              52,
+              67
+            ],
+            "5": [
+              88,
+              89
+            ]
+          },
+          "track_consistent": false
+        },
+        {
+          "regions": [
+            9,
+            41
+          ],
+          "views": [
+            0,
+            3
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            12,
+            20
+          ],
+          "views": [
+            0,
+            1
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            28,
+            49
+          ],
+          "views": [
+            2,
+            3
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            32,
+            38
+          ],
+          "views": [
+            2,
+            3
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            37,
+            81
+          ],
+          "views": [
+            3,
+            5
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            39,
+            74
+          ],
+          "views": [
+            3,
+            5
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            42,
+            56
+          ],
+          "views": [
+            3,
+            4
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            43,
+            69
+          ],
+          "views": [
+            3,
+            4
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        }
+      ],
+      "inconsistent_components": 3
+    },
+    "validation": {
+      "unique_pairs": 2,
+      "matched_regions": 4,
+      "components": [
+        {
+          "regions": [
+            92,
+            107
+          ],
+          "views": [
+            6,
+            7
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            94,
+            109
+          ],
+          "views": [
+            6,
+            7
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        }
+      ],
+      "inconsistent_components": 0
+    }
+  },
+  "pairs": [
+    {
+      "split": "train",
+      "regions": [
+        0,
+        15
+      ],
+      "views": [
+        0,
+        1
+      ],
+      "top_text": [
+        "a photo of a hat",
+        "a photo of a paper"
+      ],
+      "top_margin": [
+        0.005951717495918274,
+        0.008204124867916107
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8818830251693726,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        0,
+        25
+      ],
+      "views": [
+        0,
+        2
+      ],
+      "top_text": [
+        "a photo of a hat",
+        "a photo of a paper"
+      ],
+      "top_margin": [
+        0.005951717495918274,
+        0.043813273310661316
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9084563851356506,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        0,
+        53
+      ],
+      "views": [
+        0,
+        4
+      ],
+      "top_text": [
+        "a photo of a hat",
+        "a photo of a utensil"
+      ],
+      "top_margin": [
+        0.005951717495918274,
+        0.0065987855195999146
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8311086297035217,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        1,
+        19
+      ],
+      "views": [
+        0,
+        1
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.031079649925231934,
+        0.015532702207565308
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9467886686325073,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        1,
+        46
+      ],
+      "views": [
+        0,
+        3
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.031079649925231934,
+        0.0522972047328949
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8932161331176758,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        1,
+        77
+      ],
+      "views": [
+        0,
+        5
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.031079649925231934,
+        0.057522714138031006
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9646713733673096,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        5,
+        17
+      ],
+      "views": [
+        0,
+        1
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.04707223176956177,
+        0.054147206246852875
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9650102853775024,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        5,
+        30
+      ],
+      "views": [
+        0,
+        2
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.04707223176956177,
+        0.003154471516609192
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9009952545166016,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        5,
+        61
+      ],
+      "views": [
+        0,
+        4
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.04707223176956177,
+        0.013004004955291748
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8733493089675903,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        5,
+        79
+      ],
+      "views": [
+        0,
+        5
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.04707223176956177,
+        0.06560349464416504
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9389947652816772,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        8,
+        21
+      ],
+      "views": [
+        0,
+        1
+      ],
+      "top_text": [
+        "a photo of a cushion",
+        "a photo of a blanket"
+      ],
+      "top_margin": [
+        0.0030219852924346924,
+        0.012034736573696136
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9173331260681152,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        9,
+        41
+      ],
+      "views": [
+        0,
+        3
+      ],
+      "top_text": [
+        "a photo of a utensil",
+        "a photo of a shoe"
+      ],
+      "top_margin": [
+        0.008630111813545227,
+        0.01162026822566986
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8785203099250793,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        10,
+        40
+      ],
+      "views": [
+        0,
+        3
+      ],
+      "top_text": [
+        "a photo of a chair",
+        "a photo of a blanket"
+      ],
+      "top_margin": [
+        0.007144808769226074,
+        0.012212850153446198
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9183662533760071,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        10,
+        89
+      ],
+      "views": [
+        0,
+        5
+      ],
+      "top_text": [
+        "a photo of a chair",
+        "a photo of a blanket"
+      ],
+      "top_margin": [
+        0.007144808769226074,
+        0.012134134769439697
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9292152523994446,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        12,
+        20
+      ],
+      "views": [
+        0,
+        1
+      ],
+      "top_text": [
+        "a photo of a banana",
+        "a photo of a banana"
+      ],
+      "top_margin": [
+        0.00879167765378952,
+        0.00785864144563675
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9636763334274292,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        13,
+        24
+      ],
+      "views": [
+        0,
+        1
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a glass"
+      ],
+      "top_margin": [
+        0.0002569258213043213,
+        0.008156836032867432
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9433343410491943,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        13,
+        68
+      ],
+      "views": [
+        0,
+        4
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a table"
+      ],
+      "top_margin": [
+        0.0002569258213043213,
+        0.01101762056350708
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8943285942077637,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        13,
+        82
+      ],
+      "views": [
+        0,
+        5
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.0002569258213043213,
+        0.019175030291080475
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9473944902420044,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        14,
+        53
+      ],
+      "views": [
+        1,
+        4
+      ],
+      "top_text": [
+        "a photo of a paper",
+        "a photo of a utensil"
+      ],
+      "top_margin": [
+        0.014416426420211792,
+        0.0065987855195999146
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8461808562278748,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        15,
+        25
+      ],
+      "views": [
+        1,
+        2
+      ],
+      "top_text": [
+        "a photo of a paper",
+        "a photo of a paper"
+      ],
+      "top_margin": [
+        0.008204124867916107,
+        0.043813273310661316
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8736401796340942,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        17,
+        61
+      ],
+      "views": [
+        1,
+        4
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.054147206246852875,
+        0.013004004955291748
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.880885899066925,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        17,
+        79
+      ],
+      "views": [
+        1,
+        5
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.054147206246852875,
+        0.06560349464416504
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9658546447753906,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        19,
+        68
+      ],
+      "views": [
+        1,
+        4
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a table"
+      ],
+      "top_margin": [
+        0.015532702207565308,
+        0.01101762056350708
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8706872463226318,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        21,
+        29
+      ],
+      "views": [
+        1,
+        2
+      ],
+      "top_text": [
+        "a photo of a blanket",
+        "a photo of a shirt"
+      ],
+      "top_margin": [
+        0.012034736573696136,
+        0.015986375510692596
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.901317298412323,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        23,
+        40
+      ],
+      "views": [
+        1,
+        3
+      ],
+      "top_text": [
+        "a photo of a person",
+        "a photo of a blanket"
+      ],
+      "top_margin": [
+        0.009316548705101013,
+        0.012212850153446198
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9162675142288208,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        23,
+        88
+      ],
+      "views": [
+        1,
+        5
+      ],
+      "top_text": [
+        "a photo of a person",
+        "a photo of a cushion"
+      ],
+      "top_margin": [
+        0.009316548705101013,
+        0.013019658625125885
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9354190826416016,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        24,
+        82
+      ],
+      "views": [
+        1,
+        5
+      ],
+      "top_text": [
+        "a photo of a glass",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.008156836032867432,
+        0.019175030291080475
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.932192325592041,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        25,
+        54
+      ],
+      "views": [
+        2,
+        4
+      ],
+      "top_text": [
+        "a photo of a paper",
+        "a photo of a utensil"
+      ],
+      "top_margin": [
+        0.043813273310661316,
+        0.0077245235443115234
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8284203410148621,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        28,
+        49
+      ],
+      "views": [
+        2,
+        3
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.013719722628593445,
+        0.03684438765048981
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8525516986846924,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        29,
+        40
+      ],
+      "views": [
+        2,
+        3
+      ],
+      "top_text": [
+        "a photo of a shirt",
+        "a photo of a blanket"
+      ],
+      "top_margin": [
+        0.015986375510692596,
+        0.012212850153446198
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8992285132408142,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        29,
+        67
+      ],
+      "views": [
+        2,
+        4
+      ],
+      "top_text": [
+        "a photo of a shirt",
+        "a photo of a person"
+      ],
+      "top_margin": [
+        0.015986375510692596,
+        0.00826667994260788
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8931642770767212,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        30,
+        79
+      ],
+      "views": [
+        2,
+        5
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.003154471516609192,
+        0.06560349464416504
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8883074522018433,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        32,
+        38
+      ],
+      "views": [
+        2,
+        3
+      ],
+      "top_text": [
+        "a photo of a paper",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.0022330135107040405,
+        0.009120956063270569
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9359317421913147,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        37,
+        81
+      ],
+      "views": [
+        3,
+        5
+      ],
+      "top_text": [
+        "a photo of a ball",
+        "a photo of a cup"
+      ],
+      "top_margin": [
+        0.006957516074180603,
+        0.00044029951095581055
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8104531764984131,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        39,
+        74
+      ],
+      "views": [
+        3,
+        5
+      ],
+      "top_text": [
+        "a photo of a blanket",
+        "a photo of a cushion"
+      ],
+      "top_margin": [
+        0.003486223518848419,
+        0.00110587477684021
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9034106731414795,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        40,
+        52
+      ],
+      "views": [
+        3,
+        4
+      ],
+      "top_text": [
+        "a photo of a blanket",
+        "a photo of a blanket"
+      ],
+      "top_margin": [
+        0.012212850153446198,
+        0.007997110486030579
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8641662001609802,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        40,
+        88
+      ],
+      "views": [
+        3,
+        5
+      ],
+      "top_text": [
+        "a photo of a blanket",
+        "a photo of a cushion"
+      ],
+      "top_margin": [
+        0.012212850153446198,
+        0.013019658625125885
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9025556445121765,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        42,
+        56
+      ],
+      "views": [
+        3,
+        4
+      ],
+      "top_text": [
+        "a photo of a rock",
+        "a photo of a rock"
+      ],
+      "top_margin": [
+        0.0099315345287323,
+        0.025951355695724487
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8946601152420044,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        43,
+        69
+      ],
+      "views": [
+        3,
+        4
+      ],
+      "top_text": [
+        "a photo of a cup",
+        "a photo of a rock"
+      ],
+      "top_margin": [
+        0.0038468539714813232,
+        0.006554096937179565
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8619632124900818,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        46,
+        64
+      ],
+      "views": [
+        3,
+        4
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.0522972047328949,
+        0.055810049176216125
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9564927816390991,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        46,
+        82
+      ],
+      "views": [
+        3,
+        5
+      ],
+      "top_text": [
+        "a photo of a floor",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.0522972047328949,
+        0.019175030291080475
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8607251644134521,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        68,
+        82
+      ],
+      "views": [
+        4,
+        5
+      ],
+      "top_text": [
+        "a photo of a table",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.01101762056350708,
+        0.019175030291080475
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.887698769569397,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "validation",
+      "regions": [
+        92,
+        107
+      ],
+      "views": [
+        6,
+        7
+      ],
+      "top_text": [
+        "a photo of a paper",
+        "a photo of a paper"
+      ],
+      "top_margin": [
+        0.04231799393892288,
+        0.03801794350147247
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9129195809364319,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "validation",
+      "regions": [
+        94,
+        109
+      ],
+      "views": [
+        6,
+        7
+      ],
+      "top_text": [
+        "a photo of a rock",
+        "a photo of a rock"
+      ],
+      "top_margin": [
+        0.03441525995731354,
+        0.03997156769037247
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9044487476348877,
+      "physical_identity_ground_truth": null
+    }
+  ],
+  "cross_view_training_label_conflicts": [
+    {
+      "modality": "image",
+      "query_id": 0,
+      "episodes": 3,
+      "conflicting_rows": 33,
+      "labelled_rows": 22540
+    },
+    {
+      "modality": "prompt",
+      "query_id": 0,
+      "episodes": 3,
+      "conflicting_rows": 33,
+      "labelled_rows": 22540
+    },
+    {
+      "modality": "image",
+      "query_id": 15,
+      "episodes": 2,
+      "conflicting_rows": 12,
+      "labelled_rows": 24368
+    },
+    {
+      "modality": "prompt",
+      "query_id": 15,
+      "episodes": 2,
+      "conflicting_rows": 12,
+      "labelled_rows": 24368
+    },
+    {
+      "modality": "image",
+      "query_id": 1,
+      "episodes": 3,
+      "conflicting_rows": 58,
+      "labelled_rows": 21117
+    },
+    {
+      "modality": "prompt",
+      "query_id": 1,
+      "episodes": 3,
+      "conflicting_rows": 58,
+      "labelled_rows": 21117
+    },
+    {
+      "modality": "text",
+      "query_id": 73,
+      "episodes": 26,
+      "conflicting_rows": 1666,
+      "labelled_rows": 45884
+    },
+    {
+      "modality": "image",
+      "query_id": 19,
+      "episodes": 2,
+      "conflicting_rows": 10,
+      "labelled_rows": 18394
+    },
+    {
+      "modality": "prompt",
+      "query_id": 19,
+      "episodes": 2,
+      "conflicting_rows": 10,
+      "labelled_rows": 18394
+    },
+    {
+      "modality": "image",
+      "query_id": 5,
+      "episodes": 4,
+      "conflicting_rows": 15,
+      "labelled_rows": 19676
+    },
+    {
+      "modality": "prompt",
+      "query_id": 5,
+      "episodes": 4,
+      "conflicting_rows": 15,
+      "labelled_rows": 19676
+    },
+    {
+      "modality": "image",
+      "query_id": 17,
+      "episodes": 3,
+      "conflicting_rows": 7,
+      "labelled_rows": 7664
+    },
+    {
+      "modality": "prompt",
+      "query_id": 17,
+      "episodes": 3,
+      "conflicting_rows": 7,
+      "labelled_rows": 7664
+    },
+    {
+      "modality": "text",
+      "query_id": 62,
+      "episodes": 2,
+      "conflicting_rows": 5,
+      "labelled_rows": 17846
+    },
+    {
+      "modality": "image",
+      "query_id": 13,
+      "episodes": 3,
+      "conflicting_rows": 18,
+      "labelled_rows": 24982
+    },
+    {
+      "modality": "prompt",
+      "query_id": 13,
+      "episodes": 3,
+      "conflicting_rows": 18,
+      "labelled_rows": 24982
+    },
+    {
+      "modality": "image",
+      "query_id": 24,
+      "episodes": 2,
+      "conflicting_rows": 37,
+      "labelled_rows": 22639
+    },
+    {
+      "modality": "prompt",
+      "query_id": 24,
+      "episodes": 2,
+      "conflicting_rows": 37,
+      "labelled_rows": 22639
+    },
+    {
+      "modality": "image",
+      "query_id": 46,
+      "episodes": 3,
+      "conflicting_rows": 294,
+      "labelled_rows": 25796
+    },
+    {
+      "modality": "prompt",
+      "query_id": 46,
+      "episodes": 3,
+      "conflicting_rows": 294,
+      "labelled_rows": 25796
+    },
+    {
+      "modality": "image",
+      "query_id": 40,
+      "episodes": 5,
+      "conflicting_rows": 5,
+      "labelled_rows": 38959
+    },
+    {
+      "modality": "prompt",
+      "query_id": 40,
+      "episodes": 5,
+      "conflicting_rows": 5,
+      "labelled_rows": 38959
+    },
+    {
+      "modality": "image",
+      "query_id": 68,
+      "episodes": 3,
+      "conflicting_rows": 4,
+      "labelled_rows": 16097
+    },
+    {
+      "modality": "prompt",
+      "query_id": 68,
+      "episodes": 3,
+      "conflicting_rows": 4,
+      "labelled_rows": 16097
+    },
+    {
+      "modality": "image",
+      "query_id": 82,
+      "episodes": 4,
+      "conflicting_rows": 59,
+      "labelled_rows": 27199
+    },
+    {
+      "modality": "prompt",
+      "query_id": 82,
+      "episodes": 4,
+      "conflicting_rows": 59,
+      "labelled_rows": 27199
+    }
+  ],
+  "text_disagreement_pairs": 24,
+  "total_pairs": 44,
+  "semantic_ground_truth": false,
+  "interpretation": "track consistency and teacher agreement are diagnostics, not proof of identity"
+}

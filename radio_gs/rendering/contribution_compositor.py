@@ -417,6 +417,8 @@ def rasterize_single_view_contributions(
     scales = gaussian_model.get_scaling().float()
     opacities = gaussian_model.get_opacity().float().reshape(-1)
     if opacity_scale is not None:
+        if getattr(gaussian_model, "feature_confidence_contract", None) == "post_visibility_normalized_v1":
+            raise ValueError("frozen geometry forbids opacity scaling; weight features after visibility")
         scale = torch.as_tensor(
             opacity_scale, device=device, dtype=opacities.dtype
         ).reshape(-1)
@@ -543,6 +545,8 @@ def iter_single_view_contribution_chunks(
         scales = gaussian_model.get_scaling().float()
         opacities = gaussian_model.get_opacity().float().reshape(-1)
         if opacity_scale is not None:
+            if getattr(gaussian_model, "feature_confidence_contract", None) == "post_visibility_normalized_v1":
+                raise ValueError("frozen geometry forbids opacity scaling; weight features after visibility")
             scale = torch.as_tensor(
                 opacity_scale, device=device, dtype=opacities.dtype
             ).reshape(-1)

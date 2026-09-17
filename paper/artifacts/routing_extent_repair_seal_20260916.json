@@ -1,0 +1,219 @@
+{
+  "schema": "routing_extent_repair.v1",
+  "source_files": {
+    "radio_gs/models/grounded_semantic_transfer.py": "6b425f66697f4cc2bc9ab6c54201d79cc89f0dde6ffc7086d558568fec3b60aa",
+    "radio_gs/models/element_retrieval_field.py": "9ab016da267acca3ff594fb9b3f3242d51634291011acc26cce9dd7b7452d133",
+    "tests/test_grounded_semantic_transfer.py": "d59f53d9950ebeabf3ddff557ed6a0305530b2f6f3c8fa936fb74d002d3bccbd",
+    "tests/test_rendered_extent_objective.py": "3616f9beda453f303f1e9dba2676da30be901d4701898a710e8a13e3918c240a",
+    "scripts/audits/export_source_routing_controls.py": "df8995fd108ff8889c6de87be621b64af645d1e7151295fd3732b9b162c9d7d2",
+    "scripts/audits/audit_source_routing.py": "bc141f9eeb5df4413a61f8911111efe193b60126f1f33489f1764b2134da03d5",
+    "scripts/audits/train_rendered_extent.py": "d268ba99c343bcb63fbdf35ef2acf085a5835d324c03822a5adb99c66909043c",
+    "scripts/audits/train_native_mask_extent.py": "ddf3ebb559b8df263485315b5781aa55605583e36461a5289c6a060f794d0356",
+    "scripts/audits/train_source_region_extents.py": "872c9e0a7185ec73735bff5a24a4bae30dbc3d572b49f807c254c1a534a92b9c",
+    "scripts/audits/diagnose_extent_routing_ceiling.py": "b98141468ab777e5e27f1d4bbd140147dc75259e90bbfa3a71a92c6fc690bcd1",
+    "scripts/audits/evaluate_frozen_field_lerf_labels.py": "dbe80835062c110f801b6647cea449a7df6267614aeff4ac4934ac91cc9d8b2c",
+    "scripts/audits/evaluate_real_reference_queries.py": "c857390cd855d6cb4ce553abfaea4c57f5c7b8f17649de7d35bacc421a5a7f97",
+    "scripts/audits/seal_routing_extent_repair.py": "eedab2e76679945884a7bc3e0cbf74250928a973861a136629636633430b42e2"
+  },
+  "artifacts": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_route_centered96/report.json": "ef8f5365118c1cb3688f58d14814bc24342c23e0ef48f2c263a456a4d9f283f7",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_route_competition96/report.json": "8c2280afc1f81cedf94cd029fd573b212f079da47f0fb6dc69898936f3e9f132",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_route_centered_competition96/report.json": "6216ab6a91e0a7d648f0883b82622e4b2817711b7c1374e6d23e001999012a8d",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_extent_lifted96/report.json": "12b6016e6dac1af7389257aa306a0c0e7a8579528a62a4ed4fa42a1ff7a2afd9",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_extent_rendered96/report.json": "77c2678e7ddc48bbdc51c285ee0693f35b9964b577d8c333bb1a4dae46fc67a6",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_extent_lifted_residual96/report.json": "769d3f5d33383c1aca0aa9c8071e15a5eb5f7c459a40166718744742fbc24467",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_extent_rendered_residual96/report.json": "e322e98d7f16a13ad96918ca541d6148a68629e7204bf1d0849a4e61f469c17d",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_native_mask_w128_96/report.json": "92be25d8771b48a6719ac6a8c5ded3cd3a2759fad6bb0818b27bfe0c49116907",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_native_mask_w480_96/report.json": "53da26f105eae4e96fe30882eceb68dd671574200b169b4733fc501f2ff5404f",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_region_extent96/report.json": "40e30094ccd5895e7add179dab8c7b930f57b900584b7da2bd06c16ed86f74d4",
+    "paper/artifacts/figurines_source_routing_text_20260916.json": "faca81c36cdf153482e65efa543ed46e91df93c2715361179fb5b111e21fe32d",
+    "paper/artifacts/figurines_source_routing_text_20260916.protocol.json": "36a1f33208118583e0dfbab6121d7a6a2f9e24b0a9ab033743822df909c644b6",
+    "paper/artifacts/figurines_source_extent_objective_text_20260916.json": "e28a045c8bc574c96b3a336b5467cf1baf7908e315020cf05c4c58d9f11b3f23",
+    "paper/artifacts/figurines_source_extent_objective_text_20260916.protocol.json": "cd459c3086cf66620b8b62667f166042d497feddfa7898b5a0554ff269e0093b",
+    "paper/artifacts/figurines_source_extent_residual_text_20260916.json": "e7e553f477ea387a99771a91163aa613023eb921c42845689504898e9a09b0d8",
+    "paper/artifacts/figurines_source_extent_residual_text_20260916.protocol.json": "3116efc304473e8da3cc4cf026c3966e92ad04b25e27dd8d774d56e0348ff55c",
+    "paper/artifacts/figurines_native_mask_resolution_text_20260916.json": "3ac0b812006b4352e644bdd04b72310e784ba584435ffe3916b21d334f0f7e55",
+    "paper/artifacts/figurines_native_mask_resolution_text_20260916.protocol.json": "5abc3eccdc39b3b64a6b376c8847071c1e7b7ed629d5bf17f599a0acf0e1a23b",
+    "paper/artifacts/figurines_source_region_extent_text_20260916.json": "91da85c7c47c7c6036d0a62e8fb98195347d9b1128c2b62e8c6e76efce542208",
+    "paper/artifacts/figurines_source_region_extent_text_20260916.protocol.json": "8d9dbe0b794bdba5b795e559bec3a4c1332462ca8d38f4c631480e01213fac27",
+    "paper/artifacts/figurines_extent_repair_reference_20260916.json": "7d8c5b71c47fadb72e3b4f5c27ca813ddbf3f0981841018fd1c568eb813e540a",
+    "paper/artifacts/figurines_extent_repair_reference_20260916.protocol.json": "adf0d0a6e9b3738ca2080ed4770d3f99bafe6b52791dbac2d2216e41224d4a40",
+    "paper/artifacts/figurines_source_region_extent_reference_20260916.json": "9d968458954d40779c3281b0ea62df0b0400291b5e8eaeec6968a002fe8d8de6",
+    "paper/artifacts/figurines_source_region_extent_reference_20260916.protocol.json": "b9348f123ee450a81c9dc00cf11a367d2daa3ac7768b27a742f800874dbca75d",
+    "paper/artifacts/figurines_source_routing_audit_20260916.json": "b97e73dd83eae31cecbc89514f200591ac44b53fe8b18ba6b04859cecccf36d6",
+    "paper/artifacts/figurines_extent_capacity_oracle_20260916.json": "292a6a2280a9e54e5cc0344ded616d3255a7ddf7918b32150071b9913fbee9ad",
+    "paper/artifacts/figurines_extent_region_oracle_20260916.json": "58bf8a6b0f86de076889057eae0744dbc1a5e900feca88577f25ee47db281145",
+    "paper/artifacts/figurines_learned_region_oracle_20260916.json": "6f48fbd3a3adfddc5336c4f2cb22865582d67d5e6875a35048d9a3c22b7a72e3",
+    "paper/artifacts/figurines_region_selection_oracle_20260916.json": "0d79e4bc6c3bee36f5a447411cdce4abaea79b904173b225ffbd8df152163735",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_route_centered96/report.json": "03721ea5c95b48202eed5ea2bf6ae16e61c929e6003420354efe327eff8c4bc1",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_route_competition96/report.json": "f3fffb577ed479e0ecdcf3a463f88e17ef1d2d1a205e70243cf211efc8c97a8c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_route_centered_competition96/report.json": "fb5c6e3edc9f6ba8d290d314f535329c875457451238e69875625463376fa659",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_extent_lifted96/report.json": "a979d55fa0bec9474219be44a3dcf23a31447c81707996abcbcd87a475123469",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_extent_rendered96/report.json": "19c71bf71a4b28549d14dc9edb258ff59a17295318462d3102cb705b9f209e04",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_extent_lifted_residual96/report.json": "3940e54453d28b862b0ca3d98b69788801d829b5ffd71967fae3a9e1d4d993f1",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_extent_rendered_residual96/report.json": "3c0ba43c863e12c0f3e6221cbfbe07a56319a30112d84c40c2c18b9a8b415e00",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_native_mask_w128_96/report.json": "e6b8a43ade1b9703962e98eb2d5abedbe47530fc93477c50ac9240739bacc04b",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_native_mask_w480_96/report.json": "e54aa276ea3af02e7fc6e4931c2b009c88636241f997168b241402481409c479",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_region_extent96/report.json": "748669baebab37e5e356f662f6f89ea564a2dc896626fdfefac5c345ff917d7c",
+    "paper/artifacts/ramen_source_routing_text_20260916.json": "81d5aea0f2aea2112fcd9e0a16b45c308167262e66816edb8562143d1321885d",
+    "paper/artifacts/ramen_source_routing_text_20260916.protocol.json": "c27b85d12500d2d691423fc30ac6068665c72adc7bd9ba4fec48ccb54958f222",
+    "paper/artifacts/ramen_source_extent_objective_text_20260916.json": "614ede8616bff683cd1ef8e34485ad99eceaa2a714a97725ff77bac356f53b9c",
+    "paper/artifacts/ramen_source_extent_objective_text_20260916.protocol.json": "08794ce35b86eadca7cef4274301730813cb77daf75c6e074752f63a1b0dbc1f",
+    "paper/artifacts/ramen_source_extent_residual_text_20260916.json": "089724f8b0228bf50588d40d090c3b4cfe5e57f92775e46c15e024329ffee62c",
+    "paper/artifacts/ramen_source_extent_residual_text_20260916.protocol.json": "23a7cd87c8a5cc6ea9272e3391f2e474f6753407a29eb6af3bc5d87459a326be",
+    "paper/artifacts/ramen_native_mask_resolution_text_20260916.json": "c7e1970e25b525525b754a5b6902159b8f100b5e5055a2983004104d815d2d51",
+    "paper/artifacts/ramen_native_mask_resolution_text_20260916.protocol.json": "4d4b9aae540c146def575c244135eb59cfc9afd1eeeb039953596806e899cdfb",
+    "paper/artifacts/ramen_source_region_extent_text_20260916.json": "fdc31f0a92af4c8ed5b987ecec9d2a62fda9e42fb53512c429a5a5d86d0a232b",
+    "paper/artifacts/ramen_source_region_extent_text_20260916.protocol.json": "1cb01507898b0a1178f65d05a30981732130b26cdf4c58677c8c576eba3a41f4",
+    "paper/artifacts/ramen_extent_repair_reference_20260916.json": "cae24952daa35d62f3cea62bf071c46fa75bd1cf0273cba48015098b1540c633",
+    "paper/artifacts/ramen_extent_repair_reference_20260916.protocol.json": "4d68dec32d8f34b0c24a0431b39cc69db34ecc07b6a682537d8cef6ad4039311",
+    "paper/artifacts/ramen_source_region_extent_reference_20260916.json": "d788dcf76a99270915a41419631f9647cb9b0fa08fc81afc202de55e3d9c29a3",
+    "paper/artifacts/ramen_source_region_extent_reference_20260916.protocol.json": "8feed9679ff76685f608beba3b6dde8747247ecc0fcb3ab6ffbef78ad2c80d49",
+    "paper/artifacts/ramen_source_routing_audit_20260916.json": "05b18559d41e8092bbdf3334353ed926f7e4e963a6b3f00c0be340dbdb0634c6",
+    "paper/artifacts/ramen_extent_capacity_oracle_20260916.json": "4b76749e927255b62dc6a3fb15c940a724a6305f649353b3c57d137f065c27fd",
+    "paper/artifacts/ramen_extent_region_oracle_20260916.json": "b26e1e720145618561e654543a53505fa22e18f0c148373630a279305d744a10",
+    "paper/artifacts/ramen_learned_region_oracle_20260916.json": "4816036101d2286255699d8ad0eb55d2f2f5b0032bb6b6b834d39e7e5927c08e",
+    "paper/artifacts/ramen_region_selection_oracle_20260916.json": "8057c8ad18ef033e32eeb52e3e9de7dc22f670fb8066445c1398d11b4f0382d8"
+  },
+  "scenes": {
+    "figurines": {
+      "fields": {
+        "grounded_semantic_transfer96": "203cc91f0c4ff0f75da6179abfc09055b99a3f5f2c6921598b1b048d7dbf742c",
+        "source_route_centered96": "151686d6f2dbd79f0a4ba9f1793cf1d7341382f2868446dcd086295be53a9a6c",
+        "source_route_competition96": "debbea4ae50686eb2d0b819acbce48b551816add7e25c6eb735872ec887facf1",
+        "source_route_centered_competition96": "12503c0cb82b9294665fe0bd971681178782fd959f79e59dc0d01c8f858bfc49",
+        "source_extent_lifted96": "1b65793c45855f40b5ce63d2be39e4cf3078f5c037a923e350b896c373d40481",
+        "source_extent_rendered96": "4caf3e9c5a94b340c3de2d6aa05c75692302df138b830c91c76b37401447b298",
+        "source_extent_lifted_residual96": "72c1745aaae0fe63b1195b0cc057ff6c6bf3032538be8b0f0c5c30cdca7ddb91",
+        "source_extent_rendered_residual96": "1990fb2fbcd862a4734e60158c6732936234b897298b9aafcf59fdf65d59bebb",
+        "source_native_mask_w128_96": "6f1c1de420cecad52c334f62d817d26c9972810f97ebc4470d276da8fecbb314",
+        "source_native_mask_w480_96": "794cf7b7d0e468c962ecce61ef8c3a93245aec0f49eb1a20845f4c1751eb8ea7",
+        "source_region_extent96": "156a1d0b192045fc8bf495c7a047e8280f404dbc708ffc7ae7da4823b6f90f73"
+      },
+      "text": {
+        "grounded_semantic_transfer96": {
+          "observation_miou": 0.3536554034554653,
+          "average_precision_macro": 0.5734436390008477
+        },
+        "source_route_centered96": {
+          "observation_miou": 0.36269335911182854,
+          "average_precision_macro": 0.5921402850503125
+        },
+        "source_route_competition96": {
+          "observation_miou": 0.35597461553525844,
+          "average_precision_macro": 0.590141942692895
+        },
+        "source_route_centered_competition96": {
+          "observation_miou": 0.36269335911182854,
+          "average_precision_macro": 0.5921402850503125
+        },
+        "source_extent_lifted96": {
+          "observation_miou": 0.3637606947968087,
+          "average_precision_macro": 0.5845731573430796
+        },
+        "source_extent_rendered96": {
+          "observation_miou": 0.3647640785134209,
+          "average_precision_macro": 0.5871226210140794
+        },
+        "source_extent_lifted_residual96": {
+          "observation_miou": 0.3653449720758148,
+          "average_precision_macro": 0.5883124345191738
+        },
+        "source_extent_rendered_residual96": {
+          "observation_miou": 0.3650629531468538,
+          "average_precision_macro": 0.5897141038905914
+        },
+        "source_native_mask_w128_96": {
+          "observation_miou": 0.36682585183138394,
+          "average_precision_macro": 0.5893940905892665
+        },
+        "source_native_mask_w480_96": {
+          "observation_miou": 0.36771515851065234,
+          "average_precision_macro": 0.5906469038628507
+        },
+        "source_region_extent96": {
+          "observation_miou": 0.3399755185191529,
+          "average_precision_macro": 0.58694391522715
+        }
+      },
+      "all_parent_field_tensors_exact": true,
+      "reference_image_prompt_exact": true,
+      "oracle_including_native_fallback": {
+        "grounded_semantic_transfer96": 0.4019327625053381,
+        "source_extent_rendered_residual96": 0.42600764398641305,
+        "uncompressed_source_membership_diagnostic": 0.39101048013209916
+      },
+      "oracle_is_not_a_deployable_score": true
+    },
+    "ramen": {
+      "fields": {
+        "grounded_semantic_transfer96": "e09d43cbfd8a9376dc80a146a7fea0162b4433441abe6b4c0d2389cae85f8f64",
+        "source_route_centered96": "6f00825e06e224394beb3d84bed3cbfd9966e48300d469fd480a8c937df0d482",
+        "source_route_competition96": "c3f58cc13ca96b55269f4eb0c7306acce365518c78901b1f5b03531ab1008f72",
+        "source_route_centered_competition96": "f80fe48543b91321edb5f5953c5e24581f775e1b3f14d269f2108e0cc2afef03",
+        "source_extent_lifted96": "43cc50182f943ccc54a9857a6010cf4790b0ddbaaf999fa8a47b59a46ac64981",
+        "source_extent_rendered96": "f8969a4a7d9e492b98615723c0fc01f1733ebfced07e3e3ee2146a101482579e",
+        "source_extent_lifted_residual96": "58bafb3e0f7f714b57c068292347bdb37ad616654268a3c7ed264ba414abc1e5",
+        "source_extent_rendered_residual96": "66517468358d7de166ba950647a62ff1307177c796237849096e44a9f1942682",
+        "source_native_mask_w128_96": "6bd901495a49568b9da5822606d8dacdb99cedb7cca7e6de915331f550174ec5",
+        "source_native_mask_w480_96": "6121c61907e0ca0d28be6389cbd39b73e3711195a6af8198b837d04ed4f4dd8a",
+        "source_region_extent96": "1032fe9de6d624a11ebe0cbd7bf65ce93d39e4e318aec0654fb965b7c80a8dcf"
+      },
+      "text": {
+        "grounded_semantic_transfer96": {
+          "observation_miou": 0.2308645617704632,
+          "average_precision_macro": 0.37237943526092593
+        },
+        "source_route_centered96": {
+          "observation_miou": 0.1819019202190099,
+          "average_precision_macro": 0.3988096344176304
+        },
+        "source_route_competition96": {
+          "observation_miou": 0.22757165915966637,
+          "average_precision_macro": 0.3653416979529365
+        },
+        "source_route_centered_competition96": {
+          "observation_miou": 0.1819019202190099,
+          "average_precision_macro": 0.3988096344176304
+        },
+        "source_extent_lifted96": {
+          "observation_miou": 0.19620809518829258,
+          "average_precision_macro": 0.36292531335018513
+        },
+        "source_extent_rendered96": {
+          "observation_miou": 0.2260371901596429,
+          "average_precision_macro": 0.37396799758753096
+        },
+        "source_extent_lifted_residual96": {
+          "observation_miou": 0.1939416370669424,
+          "average_precision_macro": 0.3639743146086127
+        },
+        "source_extent_rendered_residual96": {
+          "observation_miou": 0.2510434469707862,
+          "average_precision_macro": 0.378400622305469
+        },
+        "source_native_mask_w128_96": {
+          "observation_miou": 0.22413550052425585,
+          "average_precision_macro": 0.37385032977766897
+        },
+        "source_native_mask_w480_96": {
+          "observation_miou": 0.21489005503888328,
+          "average_precision_macro": 0.37298137312944596
+        },
+        "source_region_extent96": {
+          "observation_miou": 0.18719041418265375,
+          "average_precision_macro": 0.3162060250908803
+        }
+      },
+      "all_parent_field_tensors_exact": true,
+      "reference_image_prompt_exact": true,
+      "oracle_including_native_fallback": {
+        "grounded_semantic_transfer96": 0.3317105239393562,
+        "source_extent_rendered_residual96": 0.36356222252561404,
+        "uncompressed_source_membership_diagnostic": 0.2769454617532366
+      },
+      "oracle_is_not_a_deployable_score": true
+    }
+  },
+  "status": "paired development controls; no independent benchmark promotion"
+}

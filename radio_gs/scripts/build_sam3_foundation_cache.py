@@ -190,7 +190,10 @@ def cast_sam3_model_for_inference(model: torch.nn.Module, dtype: torch.dtype) ->
     if dtype == torch.float32:
         return model.float()
     if dtype == torch.bfloat16:
-        return model.to(dtype=torch.bfloat16)
+        # Module.to(dtype=...) also casts complex RoPE buffers to a real dtype,
+        # silently discarding their imaginary component. Module.bfloat16()
+        # casts floating-point tensors only, preserving rotary phases.
+        return model.bfloat16()
     raise ValueError(f"Unsupported SAM3 inference dtype: {dtype}")
 
 
@@ -275,8 +278,8 @@ def _load_sam3_model(
         # interactive SAM decoder.  Cast/move exactly those registered
         # submodules; the unused text-grounding stack remains on CPU.  This is
         # a deployment-only placement change, not a replacement of weights.
-        model.backbone.vision_backbone.to(dtype=target_dtype, device=device)
-        model.inst_interactive_predictor.to(dtype=target_dtype, device=device)
+        cast_sam3_model_for_inference(model.backbone.vision_backbone, target_dtype).to(device=device)
+        cast_sam3_model_for_inference(model.inst_interactive_predictor, target_dtype).to(device=device)
         model._device = None
     else:
         model = cast_sam3_model_for_inference(model, target_dtype)

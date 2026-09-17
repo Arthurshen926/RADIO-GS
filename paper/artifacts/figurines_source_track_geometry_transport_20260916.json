@@ -1,0 +1,164 @@
+{
+  "schema": "source_track_geometry_transport.v1",
+  "scene": "figurines",
+  "source_only": true,
+  "benchmark_data_used": false,
+  "semantic_masks_used": false,
+  "diagnostic_only": true,
+  "track_identity_not_manual_gt": true,
+  "resolution": [
+    96,
+    128
+  ],
+  "strict_point_statistics": {
+    "total_colmap_points": 50517,
+    "points_touching_source_views": 45374,
+    "strict_source_only_points": 971
+  },
+  "shared_points": 3,
+  "macro": {
+    "gaussian": {
+      "count": 6,
+      "median": 3.0716872215270996,
+      "p90": 4.677746772766113,
+      "mean": 3.4595651626586914,
+      "fraction_over_2_pixels": 0.8333333134651184
+    },
+    "quantized": {
+      "count": 6,
+      "median": 0.3794991374015808,
+      "p90": 0.5584660172462463,
+      "mean": 0.38451752066612244,
+      "fraction_over_2_pixels": 0.0
+    },
+    "moge": {
+      "count": 6,
+      "median": 1.1565308570861816,
+      "p90": 3.2167530059814453,
+      "mean": 1.8205572366714478,
+      "fraction_over_2_pixels": 0.3333333432674408
+    }
+  },
+  "matched_accepted_depth": {
+    "gaussian": {
+      "count": 6,
+      "median": 3.0716872215270996,
+      "p90": 4.677746772766113,
+      "mean": 3.4595651626586914,
+      "fraction_over_2_pixels": 0.8333333134651184
+    },
+    "quantized": {
+      "count": 6,
+      "median": 0.3794991374015808,
+      "p90": 0.5584660172462463,
+      "mean": 0.38451752066612244,
+      "fraction_over_2_pixels": 0.0
+    },
+    "moge": {
+      "count": 6,
+      "median": 1.1565308570861816,
+      "p90": 3.2167530059814453,
+      "mean": 1.8205572366714478,
+      "fraction_over_2_pixels": 0.3333333432674408
+    }
+  },
+  "rows": [
+    {
+      "point_id": 8359,
+      "source_frame": 11,
+      "target_frame": 49,
+      "gaussian_pixels": 3.051232099533081,
+      "quantized_pixels": 0.11489588022232056,
+      "moge_pixels": 1.7771334648132324
+    },
+    {
+      "point_id": 8359,
+      "source_frame": 49,
+      "target_frame": 11,
+      "gaussian_pixels": 3.637742519378662,
+      "quantized_pixels": 0.4707852900028229,
+      "moge_pixels": 4.090663433074951
+    },
+    {
+      "point_id": 19070,
+      "source_frame": 38,
+      "target_frame": 49,
+      "gaussian_pixels": 3.0716872215270996,
+      "quantized_pixels": 0.22499272227287292,
+      "moge_pixels": 1.1565308570861816
+    },
+    {
+      "point_id": 19070,
+      "source_frame": 49,
+      "target_frame": 38,
+      "gaussian_pixels": 5.088762283325195,
+      "quantized_pixels": 0.5809018611907959,
+      "moge_pixels": 0.7325059175491333
+    },
+    {
+      "point_id": 19814,
+      "source_frame": 38,
+      "target_frame": 49,
+      "gaussian_pixels": 1.641235113143921,
+      "quantized_pixels": 0.5360301733016968,
+      "moge_pixels": 2.3428423404693604
+    },
+    {
+      "point_id": 19814,
+      "source_frame": 49,
+      "target_frame": 38,
+      "gaussian_pixels": 4.266730785369873,
+      "quantized_pixels": 0.3794991374015808,
+      "moge_pixels": 0.8236674070358276
+    }
+  ],
+  "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+  "authority_sha256": "27debbdd7b4c88aa3e6c34754aa227663934e79d37792918d969d2267c65cec9",
+  "geometry_report_sha256": "14aa139766f39f2eea58b0728b2def3e0e1a12a923714b2d79cf51f761355050",
+  "source_geometry_receipt_inputs": [
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_moge3_lerf_figurines_scene_manifest_20260830.json",
+      "role": "moge3_scene_manifest",
+      "sha256": "535a60b2e75dda95d85af2b2d762ed3b32628e6114f151743a0d2fadb5dd01f4"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_direct_capability/figurines/exact_marginal_responsibility_current.json",
+      "role": "source_authority",
+      "sha256": "8876cd8a6da5d737792a34895f05d52940f4cfc646fdb1e31939fcc0fd0b43a9"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/cameras.bin",
+      "role": "colmap_cameras",
+      "sha256": "f15177de04831c7052822d0694ede2de78151052de5199df9afaacf141ae7154"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/images.bin",
+      "role": "colmap_images",
+      "sha256": "ecbf431d68982126fcae865cf2d951f4cdf14c70348f760939543b5cb8c7ee9e"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/points3D.bin",
+      "role": "colmap_sparse_points",
+      "sha256": "338ab2a8d30e1ba14a33c78c8f30484adc2b3c6ecd75d77c75eaa1808bebd229"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/moge_pixel_calibration_v2_20260914/figurines.pt",
+      "role": "fused_surface",
+      "sha256": "6dcd55963026d82339aa7aa0e31767c1bd9c2145e7cd66437fe92769d1aa2ee2"
+    }
+  ],
+  "input_bindings": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00000.pt": "f328c773e1c56e61aed8a6e9964b051e77b826113c7422b2d36a95d0568ddae2",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00011.pt": "483e3cfeaf522c5126189fac5467aed71d32ba8943668d6f27ea2c35577d9d46",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00001.pt": "de8eeda3605510a78145ac488963d93cdf61cdbc9dc0ee04c8939bf58f289aab",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00002.pt": "d974a3f56f3c9995d6e26896a6c33c1a4390ed5e0e3ec51887a81153d5b4ec8c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00003.pt": "7b715cb88bb9dbaa1e34400d929a81314f9b63719fd680181ededb0bded36a5f",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00038.pt": "7202f7c04727ac70680b152b36946767707a4df9f46a5d192d7b1df0aee7a51a",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00004.pt": "fb312467fdb80a6419311aeac1bd998bf35a5a28f48d964d616523ad5d7e8c9a",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00049.pt": "832d49bda5cd481255e35418ae698f5edc8ef7834d1c08838a1c758a270aa57d",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00005.pt": "c97fa50cb0e9ed32851fb51d48f23596083d2e00ea0236735ff502d2911c090c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00069.pt": "58879f7a1ca5ba1a47a0b028d37dd62b0047ebafa91975f6576157fd91e702e9"
+  },
+  "implementation_sha256": "debb6cc795316b634889f4b1a0ba9c6c2b0c1c59a19e330c5a64c97049b1559f",
+  "limitations": "centroid of source pixel Gaussian contributions is a diagnostic, not exact distribution transport; sparse COLMAP tracks favor textured locations; quantized reference uses the original track depth, not deployable inference"
+}

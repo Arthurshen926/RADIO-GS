@@ -1,0 +1,143 @@
+{
+  "schema": "pixel_evidence_rebuild_comparison.v1",
+  "independent_final_test": false,
+  "scenes": {
+    "figurines": {
+      "execution_sha256": "18a9a48d701e5331645a2ebcf57cec90c1503fa4e8b20455e231bcccc526c779",
+      "evaluations": {
+        "text": {
+          "before": {
+            "observation_miou": 0.3791587332910762,
+            "category_macro_miou": 0.3672772559542608,
+            "average_precision_macro": 0.6146629907507407
+          },
+          "after": {
+            "observation_miou": 0.44351034325352706,
+            "category_macro_miou": 0.4347089275274808,
+            "average_precision_macro": 0.625773920800291
+          }
+        },
+        "reference": {
+          "before": {
+            "text": {
+              "iou": 0.3643035144567034,
+              "average_precision": 0.606347171322187,
+              "auroc": 0.9608048417732822
+            },
+            "image": {
+              "iou": 0.38493459666940755,
+              "average_precision": 0.6140708583235521,
+              "auroc": 0.9433111728419624
+            },
+            "prompt": {
+              "iou": 0.46560042794770057,
+              "average_precision": 0.6438973990345687,
+              "auroc": 0.9459871714889784
+            }
+          },
+          "after": {
+            "text": {
+              "iou": 0.4337886662218008,
+              "average_precision": 0.6176416173385215,
+              "auroc": 0.963408514457212
+            },
+            "image": {
+              "iou": 0.49945541362903806,
+              "average_precision": 0.6684136928018093,
+              "auroc": 0.9509263432817949
+            },
+            "prompt": {
+              "iou": 0.46560042794770057,
+              "average_precision": 0.6438973990345687,
+              "auroc": 0.9459871714889784
+            }
+          }
+        },
+        "native_text": {
+          "before": {
+            "observation_miou": 0.29532187958278533,
+            "category_macro_miou": 0.26061958992943346,
+            "average_precision_macro": 0.5668677203554056
+          },
+          "after": {
+            "observation_miou": 0.43829759934315915,
+            "category_macro_miou": 0.4171510055601668,
+            "average_precision_macro": 0.6607672642279155
+          }
+        }
+      },
+      "report_metadata_correction": "Initial fusion export inherited parent native_text_image_max_error=0.0; it is not a measurement of changed native responses. Native prefix changed; prompt preservation independently verified here. Future exporter sets this inherited field to null.",
+      "native_prefix_max_change": 0.48998668789863586,
+      "prompt_observations_exact": true
+    },
+    "ramen": {
+      "execution_sha256": "304ae6706f96f3667f14b0e5bf5738d7094df580b4ae5d8c9cff5ca9431baee6",
+      "evaluations": {
+        "text": {
+          "before": {
+            "observation_miou": 0.316172940312777,
+            "category_macro_miou": 0.3261134771174775,
+            "average_precision_macro": 0.49309876306628814
+          },
+          "after": {
+            "observation_miou": 0.32966258926991937,
+            "category_macro_miou": 0.326652626466249,
+            "average_precision_macro": 0.4975273447926778
+          }
+        },
+        "reference": {
+          "before": {
+            "text": {
+              "iou": 0.318061162252576,
+              "average_precision": 0.5065256136055275,
+              "auroc": 0.9431664142214775
+            },
+            "image": {
+              "iou": 0.26233593079185313,
+              "average_precision": 0.5846633777482929,
+              "auroc": 0.9637059515378393
+            },
+            "prompt": {
+              "iou": 0.32943610073497664,
+              "average_precision": 0.4919894968755744,
+              "auroc": 0.9449512961250053
+            }
+          },
+          "after": {
+            "text": {
+              "iou": 0.3370247662706783,
+              "average_precision": 0.5141318571302473,
+              "auroc": 0.9342084910435812
+            },
+            "image": {
+              "iou": 0.2977147302999911,
+              "average_precision": 0.5669140535431688,
+              "auroc": 0.9657425333906009
+            },
+            "prompt": {
+              "iou": 0.32943610073497664,
+              "average_precision": 0.4919894968755744,
+              "auroc": 0.9449512961250053
+            }
+          }
+        },
+        "native_text": {
+          "before": {
+            "observation_miou": 0.057936038763048814,
+            "category_macro_miou": 0.0864720983878029,
+            "average_precision_macro": 0.4244546871756483
+          },
+          "after": {
+            "observation_miou": 0.16621216595570248,
+            "category_macro_miou": 0.15676430501086053,
+            "average_precision_macro": 0.4698571226713327
+          }
+        }
+      },
+      "report_metadata_correction": "Initial fusion export inherited parent native_text_image_max_error=0.0; it is not a measurement of changed native responses. Native prefix changed; prompt preservation independently verified here. Future exporter sets this inherited field to null.",
+      "native_prefix_max_change": 0.58561772108078,
+      "prompt_observations_exact": true
+    }
+  },
+  "implementation_sha256": "3d7d1bbd02d21d4054c275c355e03854a9dc8846377df9836f903d831ad6e5b3"
+}

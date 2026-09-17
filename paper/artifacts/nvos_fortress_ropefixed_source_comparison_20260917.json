@@ -1,0 +1,205 @@
+{
+  "scene": "fortress",
+  "old_report_sha256": "a1beeca198d556e83380545705ffeb7b431c5f1d01895a2d266fb3d42a918f16",
+  "new_report_sha256": "495e674c54c67c3feb59add902e5e22b7618f98c8624ffc5765ecffb172913fe",
+  "same_corrected_query": true,
+  "same_signed_solver": true,
+  "source_inventory_and_all_dependent_training_rebuilt": true,
+  "geometry_bitwise_exact": false,
+  "geometry_retention_audit": null,
+  "pure_single_variable_model_ablation": false,
+  "independent_final_test": false,
+  "implementation_sha256": "91596c0423084e0c2a80eff6f8a4c53b2bf8f9f9123126928fe87115f7922d58",
+  "results": {
+    "nvos96_protected_imagecal_balanced": {
+      "iou": {
+        "old": 0.8910340666770935,
+        "new": 0.9386377334594727,
+        "delta": 0.04760366678237915
+      },
+      "average_precision": {
+        "old": 0.9953551578552742,
+        "new": 0.9960746523897888,
+        "delta": 0.0007194945345145864
+      },
+      "positive_support_recall": {
+        "old": 1.0,
+        "new": 1.0,
+        "delta": 0.0
+      },
+      "signed_constraints": {
+        "schema": "adaptive_signed_native_image.v1",
+        "objective": "bce",
+        "native_prediction_prior_weight": 0.0,
+        "requested_steps": 240,
+        "selected_step": 40,
+        "maximum_logit_correction": 8.0,
+        "feasibility_trials": [
+          {
+            "bound": 8.0,
+            "impossible_positive": 0,
+            "impossible_negative": 0
+          }
+        ],
+        "initial_balanced_error": 0.16782504320144653,
+        "final_balanced_error": 0.0,
+        "supported_positive_pixels": 19136,
+        "supported_negative_pixels": 38740,
+        "unsupported_positive_pixels": 0,
+        "unsupported_negative_pixels": 7468,
+        "all_supported_signs_satisfied": true,
+        "all_input_signs_satisfied": true,
+        "positive_agreement": 1.0,
+        "negative_agreement": 1.0,
+        "map_and_encoder_updated": false,
+        "target_supervision_used": false,
+        "policy": "Smallest necessary-feasible cap in fixed [8,16,32,64], then supported signed error/BCE; direct rendered complement probability; no guaranteed joint feasibility"
+      }
+    },
+    "image_supervised_native_residual": {
+      "iou": {
+        "old": 0.8956618905067444,
+        "new": 0.9426974654197693,
+        "delta": 0.0470355749130249
+      },
+      "average_precision": {
+        "old": 0.9899196795308339,
+        "new": 0.9968419894649337,
+        "delta": 0.006922309934099813
+      },
+      "positive_support_recall": {
+        "old": 1.0,
+        "new": 1.0,
+        "delta": 0.0
+      },
+      "signed_constraints": {
+        "schema": "adaptive_signed_native_image.v1",
+        "objective": "bce",
+        "native_prediction_prior_weight": 0.0,
+        "requested_steps": 240,
+        "selected_step": 79,
+        "maximum_logit_correction": 16.0,
+        "feasibility_trials": [
+          {
+            "bound": 8.0,
+            "impossible_positive": 1178,
+            "impossible_negative": 0
+          },
+          {
+            "bound": 16.0,
+            "impossible_positive": 0,
+            "impossible_negative": 0
+          }
+        ],
+        "initial_balanced_error": 0.21360263228416443,
+        "final_balanced_error": 0.0,
+        "supported_positive_pixels": 19136,
+        "supported_negative_pixels": 38740,
+        "unsupported_positive_pixels": 0,
+        "unsupported_negative_pixels": 7468,
+        "all_supported_signs_satisfied": true,
+        "all_input_signs_satisfied": true,
+        "positive_agreement": 1.0,
+        "negative_agreement": 1.0,
+        "map_and_encoder_updated": false,
+        "target_supervision_used": false,
+        "policy": "Smallest necessary-feasible cap in fixed [8,16,32,64], then supported signed error/BCE; direct rendered complement probability; no guaranteed joint feasibility"
+      }
+    },
+    "nvos96_protected_imagecal_balanced_measured_support512": {
+      "iou": {
+        "old": 0.8910552859306335,
+        "new": 0.9386377334594727,
+        "delta": 0.04758244752883911
+      },
+      "average_precision": {
+        "old": 0.9952477653903412,
+        "new": 0.9961035484159549,
+        "delta": 0.0008557830256137322
+      },
+      "positive_support_recall": {
+        "old": 1.0,
+        "new": 1.0,
+        "delta": 0.0
+      },
+      "signed_constraints": {
+        "schema": "adaptive_signed_native_image.v1",
+        "objective": "bce",
+        "native_prediction_prior_weight": 0.0,
+        "requested_steps": 240,
+        "selected_step": 40,
+        "maximum_logit_correction": 8.0,
+        "feasibility_trials": [
+          {
+            "bound": 8.0,
+            "impossible_positive": 0,
+            "impossible_negative": 0
+          }
+        ],
+        "initial_balanced_error": 0.16782504320144653,
+        "final_balanced_error": 0.0,
+        "supported_positive_pixels": 19136,
+        "supported_negative_pixels": 38740,
+        "unsupported_positive_pixels": 0,
+        "unsupported_negative_pixels": 7468,
+        "all_supported_signs_satisfied": true,
+        "all_input_signs_satisfied": true,
+        "positive_agreement": 1.0,
+        "negative_agreement": 1.0,
+        "map_and_encoder_updated": false,
+        "target_supervision_used": false,
+        "policy": "Smallest necessary-feasible cap in fixed [8,16,32,64], then supported signed error/BCE; direct rendered complement probability; no guaranteed joint feasibility"
+      }
+    },
+    "image_supervised_native_residual_measured_support512": {
+      "iou": {
+        "old": 0.8956760764122009,
+        "new": 0.9426940679550171,
+        "delta": 0.04701799154281616
+      },
+      "average_precision": {
+        "old": 0.9898530834462278,
+        "new": 0.996806594081101,
+        "delta": 0.00695351063487315
+      },
+      "positive_support_recall": {
+        "old": 1.0,
+        "new": 1.0,
+        "delta": 0.0
+      },
+      "signed_constraints": {
+        "schema": "adaptive_signed_native_image.v1",
+        "objective": "bce",
+        "native_prediction_prior_weight": 0.0,
+        "requested_steps": 240,
+        "selected_step": 79,
+        "maximum_logit_correction": 16.0,
+        "feasibility_trials": [
+          {
+            "bound": 8.0,
+            "impossible_positive": 1178,
+            "impossible_negative": 0
+          },
+          {
+            "bound": 16.0,
+            "impossible_positive": 0,
+            "impossible_negative": 0
+          }
+        ],
+        "initial_balanced_error": 0.21360263228416443,
+        "final_balanced_error": 0.0,
+        "supported_positive_pixels": 19136,
+        "supported_negative_pixels": 38740,
+        "unsupported_positive_pixels": 0,
+        "unsupported_negative_pixels": 7468,
+        "all_supported_signs_satisfied": true,
+        "all_input_signs_satisfied": true,
+        "positive_agreement": 1.0,
+        "negative_agreement": 1.0,
+        "map_and_encoder_updated": false,
+        "target_supervision_used": false,
+        "policy": "Smallest necessary-feasible cap in fixed [8,16,32,64], then supported signed error/BCE; direct rendered complement probability; no guaranteed joint feasibility"
+      }
+    }
+  }
+}

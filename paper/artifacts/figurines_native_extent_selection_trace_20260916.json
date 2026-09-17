@@ -1,0 +1,1695 @@
+{
+  "schema": "native_extent_selection_trace.v1",
+  "diagnostic_only": true,
+  "benchmark_queries_used": true,
+  "benchmark_masks_used": false,
+  "field_sha256": "e6abcbd2156a1cb04c0aea4d7da5c44a3c3db26f740759e05a5f2ae1d52c9cc6",
+  "implementation_sha256": "f6452b8f39e279accfc7b0b0fa97674358a9f452e75f6168fd285d70d9940ca4",
+  "records": [
+    {
+      "category": "bag",
+      "source_gate": true,
+      "source_concept": "table",
+      "native_threshold": 0.07922704517841339,
+      "native_positive_elements": 3,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 253,
+          "accepted": true,
+          "score": 0.03219791129231453,
+          "candidate_elements": 24359,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "table"
+          ]
+        },
+        "mean_global": {
+          "candidate": 240,
+          "accepted": false,
+          "score": 0.06734878569841385,
+          "candidate_elements": 320,
+          "native_support_precision": 0.00937500037252903,
+          "native_support_recall": 1.0,
+          "source_concepts": [
+            "small toy",
+            "toys"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 39,
+          "accepted": false,
+          "score": 0.0,
+          "candidate_elements": 36805,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "table"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 240,
+          "accepted": true,
+          "score": 0.00937500037252903,
+          "candidate_elements": 320,
+          "native_support_precision": 0.00937500037252903,
+          "native_support_recall": 1.0,
+          "source_concepts": [
+            "small toy",
+            "toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 202,
+          "accepted": true,
+          "score": 0.09008089452981949,
+          "candidate_elements": 21145,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "table"
+          ]
+        },
+        "crop_global": {
+          "candidate": 215,
+          "accepted": true,
+          "score": 0.09483584016561508,
+          "candidate_elements": 21039,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "white table"
+          ]
+        }
+      }
+    },
+    {
+      "category": "green apple",
+      "source_gate": true,
+      "source_concept": "green apple",
+      "native_threshold": 0.07972532510757446,
+      "native_positive_elements": 1932,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 129,
+          "accepted": true,
+          "score": 0.13077864050865173,
+          "candidate_elements": 674,
+          "native_support_precision": 0.9629080295562744,
+          "native_support_recall": 0.3359213173389435,
+          "source_concepts": [
+            "fruit",
+            "green apple"
+          ]
+        },
+        "mean_global": {
+          "candidate": 132,
+          "accepted": true,
+          "score": 0.13732407987117767,
+          "candidate_elements": 494,
+          "native_support_precision": 1.0,
+          "native_support_recall": 0.25569358468055725,
+          "source_concepts": [
+            "green leaf"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 13,
+          "accepted": true,
+          "score": 0.5612090826034546,
+          "candidate_elements": 1167,
+          "native_support_precision": 0.9545844197273254,
+          "native_support_recall": 0.5766045451164246,
+          "source_concepts": [
+            "fruit",
+            "green apple",
+            "small toy",
+            "toys"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 13,
+          "accepted": true,
+          "score": 0.5612090826034546,
+          "candidate_elements": 1167,
+          "native_support_precision": 0.9545844197273254,
+          "native_support_recall": 0.5766045451164246,
+          "source_concepts": [
+            "fruit",
+            "green apple",
+            "small toy",
+            "toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 270,
+          "accepted": true,
+          "score": 0.15304099023342133,
+          "candidate_elements": 699,
+          "native_support_precision": 0.9442059993743896,
+          "native_support_recall": 0.34161490201950073,
+          "source_concepts": [
+            "green apple"
+          ]
+        },
+        "crop_global": {
+          "candidate": 270,
+          "accepted": true,
+          "score": 0.15304099023342133,
+          "candidate_elements": 699,
+          "native_support_precision": 0.9442059993743896,
+          "native_support_recall": 0.34161490201950073,
+          "source_concepts": [
+            "green apple"
+          ]
+        }
+      }
+    },
+    {
+      "category": "green toy chair",
+      "source_gate": true,
+      "source_concept": "green chair",
+      "native_threshold": 0.07915935665369034,
+      "native_positive_elements": 3134,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 131,
+          "accepted": true,
+          "score": 0.12407593429088593,
+          "candidate_elements": 1692,
+          "native_support_precision": 0.9473995566368103,
+          "native_support_recall": 0.5114868879318237,
+          "source_concepts": [
+            "green chair"
+          ]
+        },
+        "mean_global": {
+          "candidate": 239,
+          "accepted": true,
+          "score": 0.15079930424690247,
+          "candidate_elements": 391,
+          "native_support_precision": 0.8900255560874939,
+          "native_support_recall": 0.11104020476341248,
+          "source_concepts": [
+            "metal object"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 271,
+          "accepted": true,
+          "score": 0.592860996723175,
+          "candidate_elements": 2801,
+          "native_support_precision": 0.788646936416626,
+          "native_support_recall": 0.7048500180244446,
+          "source_concepts": [
+            "green chair"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 271,
+          "accepted": true,
+          "score": 0.592860996723175,
+          "candidate_elements": 2801,
+          "native_support_precision": 0.788646936416626,
+          "native_support_recall": 0.7048500180244446,
+          "source_concepts": [
+            "green chair"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 186,
+          "accepted": true,
+          "score": 0.19286496937274933,
+          "candidate_elements": 1774,
+          "native_support_precision": 0.8821871280670166,
+          "native_support_recall": 0.4993618428707123,
+          "source_concepts": [
+            "green chair"
+          ]
+        },
+        "crop_global": {
+          "candidate": 186,
+          "accepted": true,
+          "score": 0.19286496937274933,
+          "candidate_elements": 1774,
+          "native_support_precision": 0.8821871280670166,
+          "native_support_recall": 0.4993618428707123,
+          "source_concepts": [
+            "green chair"
+          ]
+        }
+      }
+    },
+    {
+      "category": "jake",
+      "source_gate": false,
+      "source_concept": "person",
+      "native_threshold": 0.07941769063472748,
+      "native_positive_elements": 1819,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 192,
+          "accepted": false,
+          "score": 0.06487175077199936,
+          "candidate_elements": 129,
+          "native_support_precision": 0.06976744532585144,
+          "native_support_recall": 0.0049477736465632915,
+          "source_concepts": [
+            "person"
+          ]
+        },
+        "mean_global": {
+          "candidate": 207,
+          "accepted": true,
+          "score": 0.1261018067598343,
+          "candidate_elements": 219,
+          "native_support_precision": 1.0,
+          "native_support_recall": 0.12039582431316376,
+          "source_concepts": [
+            "toys",
+            "yellow toy"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 192,
+          "accepted": false,
+          "score": 0.004641567822545767,
+          "candidate_elements": 129,
+          "native_support_precision": 0.06976744532585144,
+          "native_support_recall": 0.0049477736465632915,
+          "source_concepts": [
+            "person"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 264,
+          "accepted": true,
+          "score": 0.25014325976371765,
+          "candidate_elements": 2544,
+          "native_support_precision": 0.34316039085388184,
+          "native_support_recall": 0.47993403673171997,
+          "source_concepts": [
+            "colorful plastic toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 279,
+          "accepted": false,
+          "score": 0.10008217394351959,
+          "candidate_elements": 91,
+          "native_support_precision": 0.06593406945466995,
+          "native_support_recall": 0.003298515686765313,
+          "source_concepts": [
+            "person"
+          ]
+        },
+        "crop_global": {
+          "candidate": 7,
+          "accepted": true,
+          "score": 0.170156329870224,
+          "candidate_elements": 237,
+          "native_support_precision": 1.0,
+          "native_support_recall": 0.13029137253761292,
+          "source_concepts": [
+            "colorful plastic toys"
+          ]
+        }
+      }
+    },
+    {
+      "category": "miffy",
+      "source_gate": false,
+      "source_concept": "fruit",
+      "native_threshold": 0.07948297262191772,
+      "native_positive_elements": 83,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 182,
+          "accepted": false,
+          "score": 0.04785282909870148,
+          "candidate_elements": 816,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "fruit"
+          ]
+        },
+        "mean_global": {
+          "candidate": 147,
+          "accepted": true,
+          "score": 0.09609238803386688,
+          "candidate_elements": 31,
+          "native_support_precision": 0.8387096524238586,
+          "native_support_recall": 0.3132530152797699,
+          "source_concepts": [
+            "plastic toys",
+            "small red plastic object",
+            "small toy",
+            "toys"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 13,
+          "accepted": false,
+          "score": 0.0,
+          "candidate_elements": 1167,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "fruit",
+            "green apple",
+            "small toy",
+            "toys"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 147,
+          "accepted": true,
+          "score": 0.2954545319080353,
+          "candidate_elements": 31,
+          "native_support_precision": 0.8387096524238586,
+          "native_support_recall": 0.3132530152797699,
+          "source_concepts": [
+            "plastic toys",
+            "small red plastic object",
+            "small toy",
+            "toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 63,
+          "accepted": false,
+          "score": 0.05498548969626427,
+          "candidate_elements": 627,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "fruit"
+          ]
+        },
+        "crop_global": {
+          "candidate": 55,
+          "accepted": true,
+          "score": 0.1654704213142395,
+          "candidate_elements": 42,
+          "native_support_precision": 0.6666666865348816,
+          "native_support_recall": 0.33734938502311707,
+          "source_concepts": [
+            "colorful plastic toys",
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        }
+      }
+    },
+    {
+      "category": "old camera",
+      "source_gate": true,
+      "source_concept": "camera",
+      "native_threshold": 0.07962467521429062,
+      "native_positive_elements": 1242,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 122,
+          "accepted": true,
+          "score": 0.12659022212028503,
+          "candidate_elements": 850,
+          "native_support_precision": 0.9917647242546082,
+          "native_support_recall": 0.6787439584732056,
+          "source_concepts": [
+            "camera"
+          ]
+        },
+        "mean_global": {
+          "candidate": 122,
+          "accepted": true,
+          "score": 0.12659022212028503,
+          "candidate_elements": 850,
+          "native_support_precision": 0.9917647242546082,
+          "native_support_recall": 0.6787439584732056,
+          "source_concepts": [
+            "camera"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 263,
+          "accepted": true,
+          "score": 0.7760869860649109,
+          "candidate_elements": 1209,
+          "native_support_precision": 0.8858560919761658,
+          "native_support_recall": 0.8623188138008118,
+          "source_concepts": [
+            "camera"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 263,
+          "accepted": true,
+          "score": 0.7760869860649109,
+          "candidate_elements": 1209,
+          "native_support_precision": 0.8858560919761658,
+          "native_support_recall": 0.8623188138008118,
+          "source_concepts": [
+            "camera"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 3,
+          "accepted": true,
+          "score": 0.1425025463104248,
+          "candidate_elements": 2032,
+          "native_support_precision": 0.5172244310379028,
+          "native_support_recall": 0.8462157845497131,
+          "source_concepts": [
+            "camera"
+          ]
+        },
+        "crop_global": {
+          "candidate": 3,
+          "accepted": true,
+          "score": 0.1425025463104248,
+          "candidate_elements": 2032,
+          "native_support_precision": 0.5172244310379028,
+          "native_support_recall": 0.8462157845497131,
+          "source_concepts": [
+            "camera"
+          ]
+        }
+      }
+    },
+    {
+      "category": "pikachu",
+      "source_gate": false,
+      "source_concept": "yellow duck",
+      "native_threshold": 0.079501673579216,
+      "native_positive_elements": 758,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 216,
+          "accepted": false,
+          "score": 0.0740044116973877,
+          "candidate_elements": 221,
+          "native_support_precision": 0.3710407316684723,
+          "native_support_recall": 0.10817942023277283,
+          "source_concepts": [
+            "yellow duck"
+          ]
+        },
+        "mean_global": {
+          "candidate": 240,
+          "accepted": true,
+          "score": 0.1083291545510292,
+          "candidate_elements": 320,
+          "native_support_precision": 0.981249988079071,
+          "native_support_recall": 0.4142480194568634,
+          "source_concepts": [
+            "small toy",
+            "toys"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 216,
+          "accepted": false,
+          "score": 0.09141582995653152,
+          "candidate_elements": 221,
+          "native_support_precision": 0.3710407316684723,
+          "native_support_recall": 0.10817942023277283,
+          "source_concepts": [
+            "yellow duck"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 83,
+          "accepted": true,
+          "score": 0.7103960514068604,
+          "candidate_elements": 624,
+          "native_support_precision": 0.9198718070983887,
+          "native_support_recall": 0.7572559118270874,
+          "source_concepts": [
+            "toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 227,
+          "accepted": false,
+          "score": 0.07908207178115845,
+          "candidate_elements": 317,
+          "native_support_precision": 0.05047318711876869,
+          "native_support_recall": 0.021108180284500122,
+          "source_concepts": [
+            "colorful plastic toys",
+            "plastic toys",
+            "small toy",
+            "toys",
+            "yellow duck",
+            "yellow toy"
+          ]
+        },
+        "crop_global": {
+          "candidate": 220,
+          "accepted": true,
+          "score": 0.12909790873527527,
+          "candidate_elements": 559,
+          "native_support_precision": 0.949910581111908,
+          "native_support_recall": 0.7005277276039124,
+          "source_concepts": [
+            "yellow toy"
+          ]
+        }
+      }
+    },
+    {
+      "category": "pink ice cream",
+      "source_gate": false,
+      "source_concept": "ice cream cone",
+      "native_threshold": 0.0793597400188446,
+      "native_positive_elements": 120,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 18,
+          "accepted": false,
+          "score": 0.10115766525268555,
+          "candidate_elements": 111,
+          "native_support_precision": 0.8648648858070374,
+          "native_support_recall": 0.800000011920929,
+          "source_concepts": [
+            "ice cream cone"
+          ]
+        },
+        "mean_global": {
+          "candidate": 18,
+          "accepted": true,
+          "score": 0.10115766525268555,
+          "candidate_elements": 111,
+          "native_support_precision": 0.8648648858070374,
+          "native_support_recall": 0.800000011920929,
+          "source_concepts": [
+            "ice cream cone"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 67,
+          "accepted": false,
+          "score": 0.720588207244873,
+          "candidate_elements": 114,
+          "native_support_precision": 0.859649121761322,
+          "native_support_recall": 0.8166666626930237,
+          "source_concepts": [
+            "ice cream cone"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 67,
+          "accepted": true,
+          "score": 0.720588207244873,
+          "candidate_elements": 114,
+          "native_support_precision": 0.859649121761322,
+          "native_support_recall": 0.8166666626930237,
+          "source_concepts": [
+            "ice cream cone"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 136,
+          "accepted": false,
+          "score": 0.1432579755783081,
+          "candidate_elements": 128,
+          "native_support_precision": 0.8046875,
+          "native_support_recall": 0.8583333492279053,
+          "source_concepts": [
+            "ice cream cone"
+          ]
+        },
+        "crop_global": {
+          "candidate": 152,
+          "accepted": true,
+          "score": 0.1459752321243286,
+          "candidate_elements": 127,
+          "native_support_precision": 0.8110235929489136,
+          "native_support_recall": 0.8583333492279053,
+          "source_concepts": [
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        }
+      }
+    },
+    {
+      "category": "pirate hat",
+      "source_gate": false,
+      "source_concept": "ice cream cone",
+      "native_threshold": 0.07896304130554199,
+      "native_positive_elements": 17,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 67,
+          "accepted": false,
+          "score": 0.029393315315246582,
+          "candidate_elements": 114,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "ice cream cone"
+          ]
+        },
+        "mean_global": {
+          "candidate": 48,
+          "accepted": false,
+          "score": 0.06715820729732513,
+          "candidate_elements": 106,
+          "native_support_precision": 0.15094339847564697,
+          "native_support_recall": 0.9411764740943909,
+          "source_concepts": [
+            "yellow toy"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 18,
+          "accepted": false,
+          "score": 0.0,
+          "candidate_elements": 111,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "ice cream cone"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 48,
+          "accepted": true,
+          "score": 0.14953270554542542,
+          "candidate_elements": 106,
+          "native_support_precision": 0.15094339847564697,
+          "native_support_recall": 0.9411764740943909,
+          "source_concepts": [
+            "yellow toy"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 18,
+          "accepted": false,
+          "score": 0.06976989656686783,
+          "candidate_elements": 111,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "ice cream cone"
+          ]
+        },
+        "crop_global": {
+          "candidate": 219,
+          "accepted": true,
+          "score": 0.10800812393426895,
+          "candidate_elements": 189,
+          "native_support_precision": 0.0317460335791111,
+          "native_support_recall": 0.3529411852359772,
+          "source_concepts": [
+            "yellow toy"
+          ]
+        }
+      }
+    },
+    {
+      "category": "porcelain hand",
+      "source_gate": false,
+      "source_concept": "hand",
+      "native_threshold": 0.07919599115848541,
+      "native_positive_elements": 557,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 135,
+          "accepted": false,
+          "score": 0.10896524786949158,
+          "candidate_elements": 134,
+          "native_support_precision": 0.8731343150138855,
+          "native_support_recall": 0.21005386114120483,
+          "source_concepts": [
+            "hand"
+          ]
+        },
+        "mean_global": {
+          "candidate": 135,
+          "accepted": true,
+          "score": 0.10896524786949158,
+          "candidate_elements": 134,
+          "native_support_precision": 0.8731343150138855,
+          "native_support_recall": 0.21005386114120483,
+          "source_concepts": [
+            "hand"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 17,
+          "accepted": false,
+          "score": 0.23661485314369202,
+          "candidate_elements": 159,
+          "native_support_precision": 0.8616352081298828,
+          "native_support_recall": 0.24596050381660461,
+          "source_concepts": [
+            "hand",
+            "small toy",
+            "white plastic object"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 17,
+          "accepted": true,
+          "score": 0.23661485314369202,
+          "candidate_elements": 159,
+          "native_support_precision": 0.8616352081298828,
+          "native_support_recall": 0.24596050381660461,
+          "source_concepts": [
+            "hand",
+            "small toy",
+            "white plastic object"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 275,
+          "accepted": false,
+          "score": 0.1735045611858368,
+          "candidate_elements": 206,
+          "native_support_precision": 0.6941747665405273,
+          "native_support_recall": 0.2567324936389923,
+          "source_concepts": [
+            "hand"
+          ]
+        },
+        "crop_global": {
+          "candidate": 275,
+          "accepted": true,
+          "score": 0.1735045611858368,
+          "candidate_elements": 206,
+          "native_support_precision": 0.6941747665405273,
+          "native_support_recall": 0.2567324936389923,
+          "source_concepts": [
+            "hand"
+          ]
+        }
+      }
+    },
+    {
+      "category": "pumpkin",
+      "source_gate": true,
+      "source_concept": "fruit",
+      "native_threshold": 0.07950421422719955,
+      "native_positive_elements": 732,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 62,
+          "accepted": true,
+          "score": 0.09195589274168015,
+          "candidate_elements": 591,
+          "native_support_precision": 0.8206430077552795,
+          "native_support_recall": 0.6625683307647705,
+          "source_concepts": [
+            "fruit"
+          ]
+        },
+        "mean_global": {
+          "candidate": 62,
+          "accepted": true,
+          "score": 0.09195589274168015,
+          "candidate_elements": 591,
+          "native_support_precision": 0.8206430077552795,
+          "native_support_recall": 0.6625683307647705,
+          "source_concepts": [
+            "fruit"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 127,
+          "accepted": true,
+          "score": 0.7427386045455933,
+          "candidate_elements": 948,
+          "native_support_precision": 0.75527423620224,
+          "native_support_recall": 0.9781420826911926,
+          "source_concepts": [
+            "food",
+            "fruit"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 160,
+          "accepted": true,
+          "score": 0.7528917193412781,
+          "candidate_elements": 935,
+          "native_support_precision": 0.7657753825187683,
+          "native_support_recall": 0.9781420826911926,
+          "source_concepts": [
+            "small toy"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 127,
+          "accepted": true,
+          "score": 0.11670329421758652,
+          "candidate_elements": 948,
+          "native_support_precision": 0.75527423620224,
+          "native_support_recall": 0.9781420826911926,
+          "source_concepts": [
+            "food",
+            "fruit"
+          ]
+        },
+        "crop_global": {
+          "candidate": 249,
+          "accepted": true,
+          "score": 0.12560661137104034,
+          "candidate_elements": 965,
+          "native_support_precision": 0.7419689297676086,
+          "native_support_recall": 0.9781420826911926,
+          "source_concepts": [
+            "small toy"
+          ]
+        }
+      }
+    },
+    {
+      "category": "red apple",
+      "source_gate": true,
+      "source_concept": "red apple",
+      "native_threshold": 0.0798860564827919,
+      "native_positive_elements": 2412,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 195,
+          "accepted": true,
+          "score": 0.1270170509815216,
+          "candidate_elements": 274,
+          "native_support_precision": 0.9963503479957581,
+          "native_support_recall": 0.11318407952785492,
+          "source_concepts": [
+            "red apple"
+          ]
+        },
+        "mean_global": {
+          "candidate": 195,
+          "accepted": true,
+          "score": 0.1270170509815216,
+          "candidate_elements": 274,
+          "native_support_precision": 0.9963503479957581,
+          "native_support_recall": 0.11318407952785492,
+          "source_concepts": [
+            "red apple"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 244,
+          "accepted": true,
+          "score": 0.23517382144927979,
+          "candidate_elements": 608,
+          "native_support_precision": 0.9457237124443054,
+          "native_support_recall": 0.23839136958122253,
+          "source_concepts": [
+            "red apple"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 269,
+          "accepted": true,
+          "score": 0.3732176125049591,
+          "candidate_elements": 2018,
+          "native_support_precision": 0.596630334854126,
+          "native_support_recall": 0.49917080998420715,
+          "source_concepts": [
+            "fruit"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 73,
+          "accepted": true,
+          "score": 0.1350814700126648,
+          "candidate_elements": 665,
+          "native_support_precision": 0.795488715171814,
+          "native_support_recall": 0.21932007372379303,
+          "source_concepts": [
+            "red apple"
+          ]
+        },
+        "crop_global": {
+          "candidate": 59,
+          "accepted": true,
+          "score": 0.14171554148197174,
+          "candidate_elements": 659,
+          "native_support_precision": 0.8133535385131836,
+          "native_support_recall": 0.2222222238779068,
+          "source_concepts": [
+            "food"
+          ]
+        }
+      }
+    },
+    {
+      "category": "red toy chair",
+      "source_gate": false,
+      "source_concept": "small red plastic object",
+      "native_threshold": 0.07924292236566544,
+      "native_positive_elements": 3873,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 247,
+          "accepted": false,
+          "score": 0.12355518341064453,
+          "candidate_elements": 964,
+          "native_support_precision": 0.9066389799118042,
+          "native_support_recall": 0.22566485404968262,
+          "source_concepts": [
+            "small red plastic object"
+          ]
+        },
+        "mean_global": {
+          "candidate": 247,
+          "accepted": true,
+          "score": 0.12355518341064453,
+          "candidate_elements": 964,
+          "native_support_precision": 0.9066389799118042,
+          "native_support_recall": 0.22566485404968262,
+          "source_concepts": [
+            "small red plastic object"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 286,
+          "accepted": false,
+          "score": 0.4645450711250305,
+          "candidate_elements": 2984,
+          "native_support_precision": 0.7288873791694641,
+          "native_support_recall": 0.5615801811218262,
+          "source_concepts": [
+            "small red plastic object"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 286,
+          "accepted": true,
+          "score": 0.4645450711250305,
+          "candidate_elements": 2984,
+          "native_support_precision": 0.7288873791694641,
+          "native_support_recall": 0.5615801811218262,
+          "source_concepts": [
+            "small red plastic object"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 247,
+          "accepted": false,
+          "score": 0.16526077687740326,
+          "candidate_elements": 964,
+          "native_support_precision": 0.9066389799118042,
+          "native_support_recall": 0.22566485404968262,
+          "source_concepts": [
+            "small red plastic object"
+          ]
+        },
+        "crop_global": {
+          "candidate": 256,
+          "accepted": true,
+          "score": 0.16774551570415497,
+          "candidate_elements": 1011,
+          "native_support_precision": 0.8911968469619751,
+          "native_support_recall": 0.2326361984014511,
+          "source_concepts": [
+            "toys"
+          ]
+        }
+      }
+    },
+    {
+      "category": "rubber duck with buoy",
+      "source_gate": false,
+      "source_concept": "yellow rubber duck",
+      "native_threshold": 0.07966801524162292,
+      "native_positive_elements": 529,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 25,
+          "accepted": false,
+          "score": 0.1377524435520172,
+          "candidate_elements": 428,
+          "native_support_precision": 0.9883177280426025,
+          "native_support_recall": 0.7996219396591187,
+          "source_concepts": [
+            "plastic toys",
+            "rubber ducks",
+            "two rubber ducks",
+            "yellow duck",
+            "yellow rubber duck",
+            "yellow rubber ducks",
+            "yellow toy"
+          ]
+        },
+        "mean_global": {
+          "candidate": 157,
+          "accepted": true,
+          "score": 0.14165686070919037,
+          "candidate_elements": 94,
+          "native_support_precision": 0.9468085169792175,
+          "native_support_recall": 0.1682419627904892,
+          "source_concepts": [
+            "small toy"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 25,
+          "accepted": false,
+          "score": 0.7921348214149475,
+          "candidate_elements": 428,
+          "native_support_precision": 0.9883177280426025,
+          "native_support_recall": 0.7996219396591187,
+          "source_concepts": [
+            "plastic toys",
+            "rubber ducks",
+            "two rubber ducks",
+            "yellow duck",
+            "yellow rubber duck",
+            "yellow rubber ducks",
+            "yellow toy"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 5,
+          "accepted": true,
+          "score": 0.7943925261497498,
+          "candidate_elements": 431,
+          "native_support_precision": 0.9860788583755493,
+          "native_support_recall": 0.8034026622772217,
+          "source_concepts": [
+            "colorful plastic toys",
+            "small toy",
+            "toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 70,
+          "accepted": false,
+          "score": 0.14557982981204987,
+          "candidate_elements": 505,
+          "native_support_precision": 0.895049512386322,
+          "native_support_recall": 0.8544423580169678,
+          "source_concepts": [
+            "plastic toys",
+            "rubber ducks",
+            "small toy",
+            "toys",
+            "two rubber ducks",
+            "yellow duck",
+            "yellow rubber duck",
+            "yellow toy"
+          ]
+        },
+        "crop_global": {
+          "candidate": 90,
+          "accepted": true,
+          "score": 0.1456279456615448,
+          "candidate_elements": 512,
+          "native_support_precision": 0.884765625,
+          "native_support_recall": 0.8563327193260193,
+          "source_concepts": [
+            "yellow rubber ducks"
+          ]
+        }
+      }
+    },
+    {
+      "category": "rubber duck with hat",
+      "source_gate": false,
+      "source_concept": "yellow rubber duck",
+      "native_threshold": 0.07911316305398941,
+      "native_positive_elements": 552,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 25,
+          "accepted": false,
+          "score": 0.12695473432540894,
+          "candidate_elements": 428,
+          "native_support_precision": 0.9626168012619019,
+          "native_support_recall": 0.7463768124580383,
+          "source_concepts": [
+            "plastic toys",
+            "rubber ducks",
+            "two rubber ducks",
+            "yellow duck",
+            "yellow rubber duck",
+            "yellow rubber ducks",
+            "yellow toy"
+          ]
+        },
+        "mean_global": {
+          "candidate": 157,
+          "accepted": true,
+          "score": 0.13165804743766785,
+          "candidate_elements": 94,
+          "native_support_precision": 0.9468085169792175,
+          "native_support_recall": 0.1612318903207779,
+          "source_concepts": [
+            "small toy"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 25,
+          "accepted": false,
+          "score": 0.7253521084785461,
+          "candidate_elements": 428,
+          "native_support_precision": 0.9626168012619019,
+          "native_support_recall": 0.7463768124580383,
+          "source_concepts": [
+            "plastic toys",
+            "rubber ducks",
+            "two rubber ducks",
+            "yellow duck",
+            "yellow rubber duck",
+            "yellow rubber ducks",
+            "yellow toy"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 290,
+          "accepted": true,
+          "score": 0.7291666865348816,
+          "candidate_elements": 610,
+          "native_support_precision": 0.8032786846160889,
+          "native_support_recall": 0.8876811861991882,
+          "source_concepts": [
+            "two rubber ducks"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 74,
+          "accepted": false,
+          "score": 0.15238545835018158,
+          "candidate_elements": 249,
+          "native_support_precision": 0.3012048304080963,
+          "native_support_recall": 0.135869562625885,
+          "source_concepts": [
+            "rubber ducks",
+            "yellow duck",
+            "yellow rubber duck",
+            "yellow rubber ducks"
+          ]
+        },
+        "crop_global": {
+          "candidate": 197,
+          "accepted": true,
+          "score": 0.15299372375011444,
+          "candidate_elements": 212,
+          "native_support_precision": 0.3820754587650299,
+          "native_support_recall": 0.14673912525177002,
+          "source_concepts": [
+            "small toy"
+          ]
+        }
+      }
+    },
+    {
+      "category": "rubics cube",
+      "source_gate": true,
+      "source_concept": "cube",
+      "native_threshold": 0.07951585203409195,
+      "native_positive_elements": 949,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 56,
+          "accepted": true,
+          "score": 0.12308614701032639,
+          "candidate_elements": 590,
+          "native_support_precision": 0.9677966237068176,
+          "native_support_recall": 0.6016860008239746,
+          "source_concepts": [
+            "cube"
+          ]
+        },
+        "mean_global": {
+          "candidate": 77,
+          "accepted": true,
+          "score": 0.12417887151241302,
+          "candidate_elements": 510,
+          "native_support_precision": 0.9823529124259949,
+          "native_support_recall": 0.527924120426178,
+          "source_concepts": [
+            "small toy"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 265,
+          "accepted": true,
+          "score": 0.6720647811889648,
+          "candidate_elements": 703,
+          "native_support_precision": 0.9445234537124634,
+          "native_support_recall": 0.6996839046478271,
+          "source_concepts": [
+            "cube"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 265,
+          "accepted": true,
+          "score": 0.6720647811889648,
+          "candidate_elements": 703,
+          "native_support_precision": 0.9445234537124634,
+          "native_support_recall": 0.6996839046478271,
+          "source_concepts": [
+            "cube"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 56,
+          "accepted": true,
+          "score": 0.1500605195760727,
+          "candidate_elements": 590,
+          "native_support_precision": 0.9677966237068176,
+          "native_support_recall": 0.6016860008239746,
+          "source_concepts": [
+            "cube"
+          ]
+        },
+        "crop_global": {
+          "candidate": 84,
+          "accepted": true,
+          "score": 0.15039728581905365,
+          "candidate_elements": 500,
+          "native_support_precision": 0.9819999933242798,
+          "native_support_recall": 0.5173867344856262,
+          "source_concepts": [
+            "toys"
+          ]
+        }
+      }
+    },
+    {
+      "category": "spatula",
+      "source_gate": false,
+      "source_concept": "cup",
+      "native_threshold": 0.07921809703111649,
+      "native_positive_elements": 251,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 9,
+          "accepted": false,
+          "score": 0.05225245654582977,
+          "candidate_elements": 197,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "cup",
+            "plastic cups"
+          ]
+        },
+        "mean_global": {
+          "candidate": 31,
+          "accepted": true,
+          "score": 0.11311039328575134,
+          "candidate_elements": 209,
+          "native_support_precision": 0.9521530866622925,
+          "native_support_recall": 0.7928286790847778,
+          "source_concepts": [
+            "small red plastic object"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 9,
+          "accepted": false,
+          "score": 0.0,
+          "candidate_elements": 197,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "cup",
+            "plastic cups"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 36,
+          "accepted": true,
+          "score": 0.8269230723381042,
+          "candidate_elements": 224,
+          "native_support_precision": 0.9598214030265808,
+          "native_support_recall": 0.8565737009048462,
+          "source_concepts": [
+            "small toy",
+            "toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 95,
+          "accepted": false,
+          "score": 0.0392276830971241,
+          "candidate_elements": 417,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "cup",
+            "green cup",
+            "green object",
+            "plastic container"
+          ]
+        },
+        "crop_global": {
+          "candidate": 237,
+          "accepted": true,
+          "score": 0.15972717106342316,
+          "candidate_elements": 218,
+          "native_support_precision": 0.9587156176567078,
+          "native_support_recall": 0.8326693177223206,
+          "source_concepts": [
+            "metal object",
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        }
+      }
+    },
+    {
+      "category": "tesla door handle",
+      "source_gate": false,
+      "source_concept": "hand",
+      "native_threshold": 0.07954704761505127,
+      "native_positive_elements": 0,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 17,
+          "accepted": false,
+          "score": 0.0206108670681715,
+          "candidate_elements": 159,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "hand",
+            "small toy",
+            "white plastic object"
+          ]
+        },
+        "mean_global": {
+          "candidate": 175,
+          "accepted": false,
+          "score": 0.043540943413972855,
+          "candidate_elements": 4478,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "white wall"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 17,
+          "accepted": false,
+          "score": 0.0,
+          "candidate_elements": 159,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "hand",
+            "small toy",
+            "white plastic object"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 0,
+          "accepted": false,
+          "score": 0.0,
+          "candidate_elements": 178,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "blue lid"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 275,
+          "accepted": false,
+          "score": 0.060160815715789795,
+          "candidate_elements": 206,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "hand"
+          ]
+        },
+        "crop_global": {
+          "candidate": 97,
+          "accepted": true,
+          "score": 0.10710003972053528,
+          "candidate_elements": 504,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "metal legs"
+          ]
+        }
+      }
+    },
+    {
+      "category": "toy cat statue",
+      "source_gate": false,
+      "source_concept": "small toy",
+      "native_threshold": 0.07969533652067184,
+      "native_positive_elements": 613,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 6,
+          "accepted": false,
+          "score": 0.11212992668151855,
+          "candidate_elements": 136,
+          "native_support_precision": 0.9338235259056091,
+          "native_support_recall": 0.20717781782150269,
+          "source_concepts": [
+            "colorful plastic toys",
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        },
+        "mean_global": {
+          "candidate": 6,
+          "accepted": true,
+          "score": 0.11212992668151855,
+          "candidate_elements": 136,
+          "native_support_precision": 0.9338235259056091,
+          "native_support_recall": 0.20717781782150269,
+          "source_concepts": [
+            "colorful plastic toys",
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 159,
+          "accepted": false,
+          "score": 0.32098764181137085,
+          "candidate_elements": 243,
+          "native_support_precision": 0.855967104434967,
+          "native_support_recall": 0.33931484818458557,
+          "source_concepts": [
+            "small toy"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 148,
+          "accepted": true,
+          "score": 0.3706505298614502,
+          "candidate_elements": 293,
+          "native_support_precision": 0.8361774682998657,
+          "native_support_recall": 0.399673730134964,
+          "source_concepts": [
+            "plastic toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 6,
+          "accepted": false,
+          "score": 0.15072347223758698,
+          "candidate_elements": 136,
+          "native_support_precision": 0.9338235259056091,
+          "native_support_recall": 0.20717781782150269,
+          "source_concepts": [
+            "colorful plastic toys",
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        },
+        "crop_global": {
+          "candidate": 6,
+          "accepted": true,
+          "score": 0.15072347223758698,
+          "candidate_elements": 136,
+          "native_support_precision": 0.9338235259056091,
+          "native_support_recall": 0.20717781782150269,
+          "source_concepts": [
+            "colorful plastic toys",
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        }
+      }
+    },
+    {
+      "category": "toy elephant",
+      "source_gate": false,
+      "source_concept": "small toy",
+      "native_threshold": 0.07984784990549088,
+      "native_positive_elements": 349,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 23,
+          "accepted": false,
+          "score": 0.1020304411649704,
+          "candidate_elements": 246,
+          "native_support_precision": 0.9390243887901306,
+          "native_support_recall": 0.6618911027908325,
+          "source_concepts": [
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        },
+        "mean_global": {
+          "candidate": 1,
+          "accepted": true,
+          "score": 0.10228893160820007,
+          "candidate_elements": 242,
+          "native_support_precision": 0.942148745059967,
+          "native_support_recall": 0.65329509973526,
+          "source_concepts": [
+            "blue teddy bear toy",
+            "colorful plastic toys",
+            "small blue toy"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 54,
+          "accepted": false,
+          "score": 0.6762402057647705,
+          "candidate_elements": 293,
+          "native_support_precision": 0.8839590549468994,
+          "native_support_recall": 0.7421203255653381,
+          "source_concepts": [
+            "colorful plastic toys",
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 54,
+          "accepted": true,
+          "score": 0.6762402057647705,
+          "candidate_elements": 293,
+          "native_support_precision": 0.8839590549468994,
+          "native_support_recall": 0.7421203255653381,
+          "source_concepts": [
+            "colorful plastic toys",
+            "plastic toys",
+            "small toy",
+            "toys"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 103,
+          "accepted": false,
+          "score": 0.15419821441173553,
+          "candidate_elements": 288,
+          "native_support_precision": 0.8784722089767456,
+          "native_support_recall": 0.7249283790588379,
+          "source_concepts": [
+            "plastic toys",
+            "small toy"
+          ]
+        },
+        "crop_global": {
+          "candidate": 93,
+          "accepted": true,
+          "score": 0.15420106053352356,
+          "candidate_elements": 321,
+          "native_support_precision": 0.8099688291549683,
+          "native_support_recall": 0.7449856996536255,
+          "source_concepts": [
+            "blue teddy bear toy",
+            "small blue toy"
+          ]
+        }
+      }
+    },
+    {
+      "category": "waldo",
+      "source_gate": false,
+      "source_concept": "wall",
+      "native_threshold": 0.07941679656505585,
+      "native_positive_elements": 1656,
+      "policies": {
+        "mean_restricted": {
+          "candidate": 85,
+          "accepted": false,
+          "score": 0.046013034880161285,
+          "candidate_elements": 1240,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "wall"
+          ]
+        },
+        "mean_global": {
+          "candidate": 140,
+          "accepted": true,
+          "score": 0.10587438941001892,
+          "candidate_elements": 57,
+          "native_support_precision": 0.9473684430122375,
+          "native_support_recall": 0.032608695328235626,
+          "source_concepts": [
+            "person",
+            "small toy"
+          ]
+        },
+        "overlap_restricted": {
+          "candidate": 85,
+          "accepted": false,
+          "score": 0.0,
+          "candidate_elements": 1240,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "wall"
+          ]
+        },
+        "overlap_global": {
+          "candidate": 125,
+          "accepted": true,
+          "score": 0.3005478084087372,
+          "candidate_elements": 3567,
+          "native_support_precision": 0.3383795917034149,
+          "native_support_recall": 0.7288647294044495,
+          "source_concepts": [
+            "food"
+          ]
+        },
+        "crop_restricted": {
+          "candidate": 211,
+          "accepted": false,
+          "score": 0.049453042447566986,
+          "candidate_elements": 2267,
+          "native_support_precision": 0.0,
+          "native_support_recall": 0.0,
+          "source_concepts": [
+            "wall"
+          ]
+        },
+        "crop_global": {
+          "candidate": 248,
+          "accepted": true,
+          "score": 0.17910967767238617,
+          "candidate_elements": 48,
+          "native_support_precision": 0.6458333134651184,
+          "native_support_recall": 0.018719807267189026,
+          "source_concepts": [
+            "small toy"
+          ]
+        }
+      }
+    }
+  ]
+}

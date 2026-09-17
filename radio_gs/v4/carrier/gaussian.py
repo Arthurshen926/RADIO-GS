@@ -25,6 +25,7 @@ class GaussianCarrier(SurfaceCarrier):
         self._projection_paths = {str(key): Path(value) for key, value in projection_paths.items()}
         self._adjacency = adjacency
         self._cache: dict[str, ProjectionTable] = {}
+        self._camera_bindings: dict[str, str] = {}
 
     @property
     def num_elements(self) -> int:
@@ -32,6 +33,8 @@ class GaussianCarrier(SurfaceCarrier):
 
     def project(self, camera: Camera) -> ProjectionTable:
         if camera.key in self._cache:
+            if self._camera_bindings[camera.key] != camera.projection_key:
+                raise ValueError("precomputed Gaussian transport camera changed; rebuild the projection")
             return self._cache[camera.key]
         if camera.key not in self._projection_paths:
             raise KeyError(f"no sealed Gaussian projection for camera key {camera.key!r}")
@@ -54,8 +57,12 @@ class GaussianCarrier(SurfaceCarrier):
             height=camera.height,
             width=camera.width,
             normalization="sum",
-            metadata={"backend": "gaussian_exact_renderer_transport", "path": str(path)},
+            metadata={"backend": "gaussian_exact_renderer_transport", "path": str(path),
+                      "serialized_camera_binding_present": "camera_projection_key" in payload},
         )
+        if payload.get("camera_projection_key", camera.projection_key) != camera.projection_key:
+            raise ValueError("Gaussian projection is bound to a different camera")
+        self._camera_bindings[camera.key] = camera.projection_key
         self._cache[camera.key] = result
         return result
 

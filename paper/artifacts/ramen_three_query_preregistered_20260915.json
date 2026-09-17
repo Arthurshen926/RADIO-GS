@@ -1,0 +1,40 @@
+{
+  "scene": "ramen",
+  "frame_selection": "first eight sorted geometry-mapping/native-SAM intersection; no mask/semantic score selection",
+  "frames": [
+    7,
+    11,
+    15,
+    18,
+    22,
+    27,
+    31,
+    35
+  ],
+  "train": [
+    7,
+    11,
+    15,
+    18,
+    22,
+    27
+  ],
+  "validation": [
+    31,
+    35
+  ],
+  "steps": 180,
+  "latent_dim": 64,
+  "share_siglip_adapter": true,
+  "source_coverage": false,
+  "soft_query_relations": false,
+  "signed_refinement": {
+    "steps": 64,
+    "learning_rate": 0.05,
+    "prior_weight": 0.01,
+    "only_if_violated": true
+  },
+  "geometry_report_sha256": "68a0b49605f83f95a1f7f6a35a42bfe4db128bbb1030a4fc059a133ceac21698",
+  "status": "predeclared before new scene teacher extraction or query evaluation",
+  "benchmark_ground_truth": false
+}

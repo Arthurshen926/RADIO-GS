@@ -11,7 +11,7 @@ def test_unselected_candidates_cannot_suppress_selected_object():
     support = torch.tensor([[.8, 0, 0, 0, 0, 0]])
     actual, _ = compose_overlapping_candidates(expanded, support, chunk_size=2)
     assert torch.equal(actual, expected)
-    old, _ = compose_object_queries(expanded, support)
+    old, _ = compose_object_queries(expanded, support, membership_semantics="legacy_candidate_normalization")
     assert old.item() < expected.item()
 
 

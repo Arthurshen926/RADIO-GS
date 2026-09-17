@@ -298,6 +298,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         assignment_normalization=str(args.assignment_normalization),
         fragment_evidence_pooling=str(args.fragment_evidence_pooling),
         cannot_link_policy=str(args.cannot_link_policy),
+        relation_contract=getattr(args, "relation_contract", "explicit_negative_v2"),
     )
     result = build_fragment_object_hypotheses(
         fragment_positive=fragment_memory["fragment_positive"],
@@ -358,7 +359,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "sam_hierarchy_containment_treated_as_object_identity": (
                 configuration.seed_policy == "hierarchy_roots"
             ),
-            "fragment_assignment": "top2_soft_plus_explicit_null",
+            "fragment_assignment": ("uncompressed_soft_plus_explicit_null" if configuration.assignment_normalization == "full_uncompressed" else "legacy_top2_soft_plus_explicit_null"),
+            "surface_membership_semantics": "overlapping_candidate_evidence",
             "membership_composition": configuration.fragment_evidence_pooling,
             "completion_performed": False,
             "prototype_selection": "distinct_source_views_first",
@@ -420,23 +422,25 @@ def main() -> None:
     parser.add_argument("--minimum-seed-support-views", type=int, default=3)
     parser.add_argument(
         "--assignment-normalization",
-        choices=("full_then_top2", "top2_then_normalize"),
-        default="full_then_top2",
+        choices=("full_uncompressed", "full_then_top2", "top2_then_normalize"),
+        default="full_uncompressed",
     )
     parser.add_argument(
         "--fragment-evidence-pooling",
         choices=("probabilistic_union", "same_view_max_then_union", "seed_medoid"),
-        default="probabilistic_union",
+        default="same_view_max_then_union",
     )
     parser.add_argument(
         "--cannot-link-policy",
         choices=(
+            "explicit_negative",
             "exact_same_view",
             "disjoint_same_view",
             "exact_group_disjoint_assignment",
         ),
-        default="exact_same_view",
+        default="explicit_negative",
     )
+    parser.add_argument("--relation-contract", choices=("explicit_negative_v2", "legacy_visibility_absence_v1"), default="explicit_negative_v2")
     parser.add_argument("--cpu-threads", type=int, default=8)
     parser.add_argument("--output", required=True)
     run(parser.parse_args())

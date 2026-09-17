@@ -1,0 +1,9 @@
+import argparse,json
+from pathlib import Path
+import torch
+from radio_gs.training.source_fusion_initialization import fit_source_fusion
+from radio_gs.utils.immutable_artifacts import sha256_file
+
+p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();torch.set_num_threads(4)
+if a.output.exists() or a.output.with_suffix('.json').exists():raise FileExistsError(a.output)
+r=a.root;info=json.loads((r/'teachers.json').read_text());receipt=json.loads((r/'episodes.json').read_text());assert sha256_file(r/'episodes.pt')==receipt['sha256'];d=torch.load(r/'episodes.pt',weights_only=False,map_location='cpu');assert sha256_file(r/'teachers.json')==d['teacher_manifest_sha256'];record=info['teacher_files']['siglip'];assert sha256_file(r/record['path'])==record['sha256'];t=torch.load(r/record['path'],weights_only=False,map_location='cpu')['descriptors'].float();views=[info['frames'].index(f) for f in info['train_frames']];regions=torch.tensor([i for i,v in enumerate(d['proposal_views']) if int(v) in views]);bundle=fit_source_fusion(t[regions],d['region_probability'][regions].float(),d['seen'][views].any(0));bundle.update(schema='source_region_native_fusion_initialization.v1',episode_sha256=receipt['sha256'],teacher_manifest_sha256=d['teacher_manifest_sha256'],siglip_teacher_sha256=record['sha256'],geometry_binding=d['geometry_binding'],train_frames=info['train_frames'],benchmark_data_used=False,source_regions=regions.tolist(),implementation_sha256=sha256_file(fit_source_fusion.__code__.co_filename));torch.save(bundle,a.output);a.output.with_suffix('.json').write_text(json.dumps({'sha256':sha256_file(a.output),'valid_elements':int(bundle['valid'].sum()),'energy_retained':bundle['energy_retained'],'benchmark_data_used':False},indent=2)+'\n');print(a.output,int(bundle['valid'].sum()))

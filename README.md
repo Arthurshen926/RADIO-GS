@@ -1,5 +1,36 @@
 # RADIO-GS
 
+
+> Branch recovery (2026-09-14): the v4 object-candidate pipeline is a research
+> candidate, not the performance baseline. The retained identity–extent LERF3D
+> control has been re-rendered and independently scored at 43.739% sample mIoU.
+> See [the recovery protocol](docs/adr/0006-repair-v4-contracts-and-restore-performance-control.md)
+> and [the verified control](paper/artifacts/v4_repair_historical_control_20260914.json).
+> This does not promote a joint five-benchmark baseline.
+
+Geometry is now constructed and checked independently before semantic training;
+see [ADR 0008](docs/adr/0008-finish-and-freeze-geometry-before-feature-reconstruction.md).
+Frozen geometry candidates and their heldout source-depth audits do not yet
+constitute a promoted semantic benchmark result.
+
+The 2026-09-15 retrieval-field repair rebuilds text, image and registered-point
+supervision from consistent source supports, with optional RADIO supervision.
+Matched-budget experiments improve image and point retrieval in two development
+scenes; ramen text AP still regresses. Native-direction constraints are not a
+default. See the [implementation and evaluation report](docs/experiments/2026-09-15-component-pipeline-repair.md)
+for all 42 training controls, repeated seeds and cold-query validation.
+
+Reference image/point IoUs are GT-derived **2D category-union development
+tasks**, not official LERF image-query or instance-tracking scores. The
+[query-contract and reliability audit](docs/experiments/2026-09-15-reference-query-contract-and-reliability.md)
+documents the exact inputs, source-query coverage repair, and 12 further
+matched-budget controls, including regressions.
+
+The current development direction restores the Gaussian semantic field as the
+primary map, with MoGe-3 depth supporting observation registration. The first
+bounded depth-weighted teacher builder is an unpromoted candidate; voxel and
+surface carriers remain auxiliary. See [ADR 0007](docs/adr/0007-semantic-field-primary-with-moge-geometry-prior.md).
+
 RADIO-GS reconstructs one query-independent C-RADIOv4 feature field on 3D Gaussian primitives and exposes several frozen query interfaces over that same field.
 
 The executable historical mainline is the **one-field route trained with
@@ -185,3 +216,15 @@ The following modules are retained for historical and matched-baseline experimen
 - benchmark-specific auxiliary heads from earlier iterations.
 
 Legacy checkpoints must be evaluated with their matching legacy renderer. They must not be silently loaded as canonical-field checkpoints or used to support claims about direct 2D/3D query consistency.
+
+2026-09-16 iteration: [native decoder coupling and joint query contracts](docs/experiments/2026-09-16-decoder-coupling-and-joint-query-contracts.md)
+records six controlled LERF runs, optional exact teacher/query readout, ScanNet
+raw-class point output, and eight NVOS reference scribble query compilations.
+Mixed LERF results do not pass joint promotion; new ScanNet/NVOS field metrics
+are pending. [Evidence index](paper/artifacts/decoder_joint_iteration_20260916.json).
+
+2026-09-16 follow-up: [signed support and NVOS camera repair](docs/experiments/2026-09-16-signed-support-and-nvos-camera-repair.md)
+fixes prompt/render validity mismatch and NVOS camera/frame identity contracts.
+The first fern frozen geometry and source contribution assets are built;
+rendered validation rejects its joint-scale candidate. Signed image conditioning
+also remains experimental after mixed-to-negative cross-view results.

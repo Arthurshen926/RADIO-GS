@@ -1,0 +1,143 @@
+{
+  "schema": "source_inventory_repair.v1",
+  "final_model_promoted": false,
+  "benchmark": "annotated LERF development",
+  "source_fixes": [
+    "preserve query-free parent regions when appending grounded evidence",
+    "gate normalized region probabilities by the same visibility threshold as seen"
+  ],
+  "scenes": {
+    "figurines": {
+      "before": {
+        "path": "paper/artifacts/figurines_component_retrieval_pipeline_20260915_fusion_common_20260916.json",
+        "sha256": "9aec9f562da29bb59fad1e3e9eeda3ba89c042db60e0090b1ee85edf80ba4464",
+        "fixed_support_sha256": "ec6b39c9c6ec75433543246655e9013eccbbc7b19b2251ae9cc967adb8230a55",
+        "support_elements": 71739,
+        "source_regions": 223,
+        "metrics": {
+          "native_source_region_fusion": {
+            "average_precision": 0.566587151772011,
+            "auroc": 0.9250464332058776
+          },
+          "source_svd64_fusion": {
+            "average_precision": 0.560223926266568,
+            "auroc": 0.9240855048561661
+          },
+          "learned_decoded_field": {
+            "average_precision": 0.5602218981188568,
+            "auroc": 0.9240855612626515
+          }
+        }
+      },
+      "after": {
+        "path": "paper/artifacts/figurines_preserved_source_inventory_20260916_fusion_common_20260916.json",
+        "sha256": "3596784f5474dd43740944237d9ff8a8fe239ec82984aeb5d7d4eecd423d5a4b",
+        "fixed_support_sha256": "ec6b39c9c6ec75433543246655e9013eccbbc7b19b2251ae9cc967adb8230a55",
+        "support_elements": 71739,
+        "source_regions": 315,
+        "metrics": {
+          "native_source_region_fusion": {
+            "average_precision": 0.5834927608264139,
+            "auroc": 0.9348898053216853
+          },
+          "source_svd64_fusion": {
+            "average_precision": 0.5767923083690587,
+            "auroc": 0.9348993519989063
+          },
+          "learned_decoded_field": {
+            "average_precision": 0.5602218981188568,
+            "auroc": 0.9240855612626515
+          }
+        }
+      },
+      "unchanged_field_ap_error": 0.0
+    },
+    "ramen": {
+      "before": {
+        "path": "paper/artifacts/ramen_component_retrieval_pipeline_20260915_fusion_common_20260916.json",
+        "sha256": "48da6646cb535a14f8c78675b772bed0cb12c474feabf5a382a931f34402e8eb",
+        "fixed_support_sha256": "61ac25bb26d3cd826330e3d51ee2e999cfb6825829cfd24c9c1e133eb911ac91",
+        "support_elements": 168801,
+        "source_regions": 218,
+        "metrics": {
+          "native_source_region_fusion": {
+            "average_precision": 0.22146643405452543,
+            "auroc": 0.8899428372156419
+          },
+          "source_svd64_fusion": {
+            "average_precision": 0.22540470677169241,
+            "auroc": 0.8857375310866803
+          },
+          "learned_decoded_field": {
+            "average_precision": 0.22540669348683365,
+            "auroc": 0.8857370054069655
+          }
+        }
+      },
+      "after": {
+        "path": "paper/artifacts/ramen_preserved_source_inventory_20260916_fusion_common_20260916.json",
+        "sha256": "9a4b90d71a82e38856498e6ae9a167c5fa8524c4a48da4541a7008365fd4861e",
+        "fixed_support_sha256": "61ac25bb26d3cd826330e3d51ee2e999cfb6825829cfd24c9c1e133eb911ac91",
+        "support_elements": 168801,
+        "source_regions": 392,
+        "metrics": {
+          "native_source_region_fusion": {
+            "average_precision": 0.3167096071315452,
+            "auroc": 0.911986074531136
+          },
+          "source_svd64_fusion": {
+            "average_precision": 0.3087280095369545,
+            "auroc": 0.9088521522238345
+          },
+          "learned_decoded_field": {
+            "average_precision": 0.22540669348683365,
+            "auroc": 0.8857370054069655
+          }
+        }
+      },
+      "unchanged_field_ap_error": 0.0
+    }
+  },
+  "integrity": {
+    "path": "paper/artifacts/preserved_source_inventory_integrity_20260916.json",
+    "sha256": "379e30531ea0273f96f53d021c3cdf0775d1fe0142170e9557e23c5d8cde2897"
+  },
+  "implementation": {
+    "scripts/audits/prepare_component_source_root.py": {
+      "sha256": "e8d3e3d74b0548e3677062229a14f904e621d2329e6cd7f3f805b6a5fa6cb15b",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/e8d3e3d74b0548e3677062229a14f904e621d2329e6cd7f3f805b6a5fa6cb15b.py"
+    },
+    "radio_gs/scripts/compile_three_query_episodes.py": {
+      "sha256": "109041dc032038160632efebafe357145e87582ebcc452bc40bc0d1f23d14cff",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/109041dc032038160632efebafe357145e87582ebcc452bc40bc0d1f23d14cff.py"
+    },
+    "radio_gs/training/source_region_inventory.py": {
+      "sha256": "cb5ea98531b0d7cc27ceb0c25a93b881e31c33837f4a7f56dfd07509143ced92",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/cb5ea98531b0d7cc27ceb0c25a93b881e31c33837f4a7f56dfd07509143ced92.py"
+    },
+    "radio_gs/training/region_visibility.py": {
+      "sha256": "e517aa78e78622072a925167d3fccb836b83d55b823766322a68d0a1c76899d8",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/e517aa78e78622072a925167d3fccb836b83d55b823766322a68d0a1c76899d8.py"
+    },
+    "radio_gs/training/source_group_association.py": {
+      "sha256": "2b0916316f71ed9b9996350310f7e9a1705a3a9000c7a74b3cd167a930d1839b",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/2b0916316f71ed9b9996350310f7e9a1705a3a9000c7a74b3cd167a930d1839b.py"
+    },
+    "scripts/audits/build_source_group_diagnostic.py": {
+      "sha256": "ce54a0a7c4cba43b622dea1eb4c5c3913c4fb6f01fafa7bbd4e797a9d42541c5",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/ce54a0a7c4cba43b622dea1eb4c5c3913c4fb6f01fafa7bbd4e797a9d42541c5.py"
+    },
+    "scripts/audits/evaluate_source_group_diagnostic.py": {
+      "sha256": "2851351c4dc073141e9014238008666774f96d9116dd6eead55e1ba16622fb7e",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/2851351c4dc073141e9014238008666774f96d9116dd6eead55e1ba16622fb7e.py"
+    },
+    "scripts/audits/merge_source_group_diagnostic.py": {
+      "sha256": "1ea1c60009434e1e2e7a8d867f79c50882d5fb9726c1ad608b22c248722b49b6",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/1ea1c60009434e1e2e7a8d867f79c50882d5fb9726c1ad608b22c248722b49b6.py"
+    },
+    "scripts/audits/audit_actual_region_teacher_fusion.py": {
+      "sha256": "1187d5562936a6d54f6cde7dec75dd18763e4a6f86f8e452a6a11d7225e602ec",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/source_group_diagnostic_20260916/code/1187d5562936a6d54f6cde7dec75dd18763e4a6f86f8e452a6a11d7225e602ec.py"
+    }
+  }
+}

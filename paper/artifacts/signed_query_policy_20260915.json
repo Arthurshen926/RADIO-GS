@@ -1,0 +1,36 @@
+{
+  "schema": "registered_signed_query_policy.development.v1",
+  "field_candidates": {
+    "all_four_shared": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/all_four_shared/field.pt",
+      "sha256": "c3ed3939e67bfb3525bb13b8d29d7454885b25b631c0a3341872168a422ff915"
+    },
+    "without_radio_shared": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/without_radio_shared/field.pt",
+      "sha256": "d0255ff18675e92f8d0e0d16421ad47238f83b6fa0b8e0b6ef120d069b06b09d"
+    }
+  },
+  "authority_sha256": "27debbdd7b4c88aa3e6c34754aa227663934e79d37792918d969d2267c65cec9",
+  "implementation_files": {
+    "radio_gs/models/signed_query_refinement.py": "5c07bad5216a72f4c4dbdddcf32bc8152b7f31fe5094d0b133459e513bd0f31d",
+    "radio_gs/models/element_retrieval_field.py": "c3b63a1275e3125a163ffd65c574461a561d27a486383a1d74b7a2afb7d4077c",
+    "radio_gs/training/retrieval_metrics.py": "e5623684b0eac868bdb44eff5bd69c359058672c24cc2717728935dfe80189eb",
+    "scripts/audits/evaluate_three_query_coverage.py": "b105a5af031e062e1935cd9986d4843b6d1affae4ef18d5e1b287d1f7d2366e8",
+    "scripts/audits/cold_three_query_native.py": "5866092996a838cc97039f86ddb0bfe0a9024922f48cfbbe8aa19912e4950914"
+  },
+  "result_files": {
+    "paper/artifacts/three_query_signed_guarded_20260915.json": "9d53bc309211a156d93ca52e8fe77af8dd9a9278a42fba8fe9c15f396e28d497",
+    "paper/artifacts/cold_three_query_signed_guarded_20260915.json": "a80c660cd1ce25f16a8798cb55f025b1bdb2f2ca7a631d6145d98de177f9f0af"
+  },
+  "parameters": {
+    "steps": 64,
+    "learning_rate": 0.05,
+    "prior_weight": 0.01,
+    "only_if_violated": true,
+    "retrieval_threshold": 0.5
+  },
+  "authorized_evidence": "registered source RGB, one positive pixel, one negative pixel, frozen geometry contributions",
+  "target_labels_used_for_query": false,
+  "persistent_field_updated": false,
+  "promotion": "development query candidate only"
+}

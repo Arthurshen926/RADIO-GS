@@ -1,0 +1,59 @@
+{
+  "schema": "query_contract_iteration.v1",
+  "frozen_fields_unchanged_after_evaluation": true,
+  "benchmark_ground_truth": false,
+  "training_runs": {
+    "ramen/signed_target_guard660": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/signed_target_guard660/report.json",
+      "report_sha256": "decc6a0d8b9e78a2083969ac3b845ddb95e2f5770bd5c9da875376a39e32cd4d",
+      "field_sha256": "a872c4b0d5f4ae8c7d461bfb329e101bef84ba7fe15ebfda998d9881d7d95608",
+      "geometry_unchanged": true
+    },
+    "ramen/unit_teacher_features660": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/unit_teacher_features660/report.json",
+      "report_sha256": "41011f27e22f6e62d7b78016b76c8eeea3f0990ea29d52172a3bbed7609c9a03",
+      "field_sha256": "9dd2bcb21a9f8e879b589d2b5ef9eaef698527fe80f1450d86ad61e41786fe5c",
+      "geometry_unchanged": true
+    },
+    "ramen/unique_text_tasks660": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/unique_text_tasks660/report.json",
+      "report_sha256": "97fbaf3f46448bff12141ad27326c450f7a4e655f810f2ce67c22a882aaad9f4",
+      "field_sha256": "a174f69d50d03c0c31af6f73309d09e5eabf3635ac19dbbf8f9039feb1bea328",
+      "geometry_unchanged": true
+    },
+    "figurines/signed_target_guard180": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/signed_target_guard180/report.json",
+      "report_sha256": "81453dea6b7cb268b261cfd8e32206f01cd98e4d76ba814442c2a6e2f0e58e69",
+      "field_sha256": "063a37c966f53280e4e12f17f3afc9afb80c2847939d28a5482f57657c179094",
+      "geometry_unchanged": true
+    },
+    "figurines/unit_teacher_features180": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/unit_teacher_features180/report.json",
+      "report_sha256": "51c8998edad2766e987a112c749d07eadb8766456653781fe11993b2c084384c",
+      "field_sha256": "ee24ffa3fe057c6e5c6996245e041ca940af0c3b7963b4e0e16f5be04e047c1a",
+      "geometry_unchanged": true
+    },
+    "figurines/unique_text_tasks180": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/unique_text_tasks180/report.json",
+      "report_sha256": "12e194822d42389c033d2f28eaaa6dbcb0f7c5db9ff1a6f597fe089b5db3e513",
+      "field_sha256": "5ff4a28fe00db4c54558ef9ea00ddef5680d706cc942f423b2a87364510961b2",
+      "geometry_unchanged": true
+    }
+  },
+  "artifacts": {
+    "paper/artifacts/ramen_extended_holdout_integrity_20260915.json": "3429f8449cf6d914760c12f8cfabe67e0a8159404983d1c9e531b54fd400d527",
+    "paper/artifacts/ramen_new_views_unique_queries_eval_20260915.json": "bf63a554ee1ab7038dbce72e359c54f56d238268ef6013182d115fe228b27c04",
+    "paper/artifacts/ramen_new_views_minimal_prompt_eval_20260915.json": "163ebf699a6fb265fea8f7308f977d56c36cf5822a242497080a9b896dd9210f",
+    "paper/artifacts/figurines_minimal_prompt_eval_20260915.json": "ae259b668c8df030279dc642495c71284ea0058e50b451548a0f04f3f908e953",
+    "paper/artifacts/figurines_minimal_prompt_no_radio_cold_20260915.json": "2f58d35cd04bdb790784c68019d96485cda186c8f37ac17b6c4179fc614ba3f7"
+  },
+  "code_hashes": {
+    "radio_gs/scripts/train_three_query_field.py": "0c0b4aa3963140964787b399e2e16b50ed58c1acd3d416ff4883e1e2a7b38257",
+    "radio_gs/scripts/prepare_four_teacher_retrieval.py": "752e7d0b689e07cbd68ceedaf8380cc042868a64d6dbf218f5f955662d613d68",
+    "scripts/audits/evaluate_three_query_coverage.py": "29ddeeb97f6be16c0a5de3dd3e745ac3c9272d485d05ae4346feeafe06606fc0",
+    "radio_gs/training/text_task_aggregation.py": "aee4fa579d7973853f4f31bcfde1037658f3497f9b45c0d7e63e421756d56962",
+    "radio_gs/training/source_view_split.py": "6e91f94e8d6af4a30bc33d5ab7d782f3401998aa977a846a321e93505295e844",
+    "radio_gs/training/signed_label_consistency.py": "26dce796ba9bf5e2ad0d1a7ebbaaf12f141fd41da5b58313837f27335b8ed50f",
+    "radio_gs/models/signed_query_refinement.py": "279dca5fbf102426f092d2dc851fb82fbe8f23aa1e32ee1c9a92271292047c8f"
+  }
+}

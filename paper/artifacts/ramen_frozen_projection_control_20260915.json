@@ -1,0 +1,60 @@
+{
+  "benchmark_ground_truth": false,
+  "steps": 252,
+  "only_intended_change": "freeze the same initial shared random 1536-to-64 SigLIP projection; not a native-space identity projection",
+  "promoted": false,
+  "runs": {
+    "all_four_full_coverage": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_independent_scene_20260915/ramen/all_four_full_coverage/report.json",
+      "report_sha256": "cf5fb9d944ca4dabc66ce07ad16d9c62fdf86325d6d4acea5d9502039afc39a2",
+      "field_sha256": "8b80850248609e907f73eb829b266bf2e92477189ccad45f4ef28f5a95caea60",
+      "validation": {
+        "text": {
+          "known_support_pseudo_iou": 0.5539738647639751,
+          "membership_loss": 0.7883961051702499,
+          "known_pixel_fraction": 0.026916504837572575,
+          "episodes": 4
+        },
+        "image": {
+          "known_support_pseudo_iou": 0.4131082594394684,
+          "membership_loss": 0.926418274641037,
+          "known_pixel_fraction": 0.02364095114171505,
+          "episodes": 4
+        },
+        "prompt": {
+          "known_support_pseudo_iou": 0.4611373841762543,
+          "membership_loss": 0.6953664794564247,
+          "known_pixel_fraction": 0.02364095114171505,
+          "episodes": 4
+        }
+      },
+      "siglip_projection_change_norm": null
+    },
+    "frozen_siglip_projection_252": {
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_independent_scene_20260915/ramen/frozen_siglip_projection_252/report.json",
+      "report_sha256": "994f3fbe2d14fb3bfd4b7649f7915e8b3478ea486f57718e1fa7b926f746d49a",
+      "field_sha256": "3edf1043a0a4f14df3da987bb1b2783dbf4b01f4620c6712d92c647eaa57c278",
+      "validation": {
+        "text": {
+          "known_support_pseudo_iou": 0.657939039170742,
+          "membership_loss": 0.9030735045671463,
+          "known_pixel_fraction": 0.026916504837572575,
+          "episodes": 4
+        },
+        "image": {
+          "known_support_pseudo_iou": 0.0011061946861445904,
+          "membership_loss": 1.9864524453878403,
+          "known_pixel_fraction": 0.02364095114171505,
+          "episodes": 4
+        },
+        "prompt": {
+          "known_support_pseudo_iou": 0.387193500995636,
+          "membership_loss": 0.9270952045917511,
+          "known_pixel_fraction": 0.02364095114171505,
+          "episodes": 4
+        }
+      },
+      "siglip_projection_change_norm": 0.0
+    }
+  }
+}

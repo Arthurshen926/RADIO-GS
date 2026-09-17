@@ -1,0 +1,28 @@
+{
+  "schema": "native_batch_numerics_audit.v1",
+  "field_sha256": "9b7ac642eee8e3fd297934d48e23b62a24dad048cb23b97c38f1a90bd7b9f3b1",
+  "fixture_sha256": "0dfe6aaf5039ad9d69387a2fdda67b332ecff70d59892cf5d4e1f16fffe7b096",
+  "image_query_only": true,
+  "benchmark_ground_truth_used": false,
+  "single_encoding_cosine_to_fixture": 0.9999576807022095,
+  "batch8_encoding_vs_single": {
+    "encoding_cosine": 1.0,
+    "max_posterior_difference": 0.010069936513900757,
+    "mean_posterior_difference": 0.0015165024669840932,
+    "supported_threshold_flip_fraction": 0.0015741295646876097
+  },
+  "fixture_encoding_vs_single": {
+    "encoding_cosine": 1.0,
+    "max_posterior_difference": 0.010073959827423096,
+    "mean_posterior_difference": 0.0015174099244177341,
+    "supported_threshold_flip_fraction": 0.0015741295646876097
+  },
+  "identical_encoded_query_field_batch_vs_single": {
+    "encoding_cosine": 0.9999576807022095,
+    "max_posterior_difference": 1.0669231414794922e-05,
+    "mean_posterior_difference": 5.952531410002848e-07,
+    "supported_threshold_flip_fraction": 0.0
+  },
+  "implementation_sha256": "5c1ccf6cd503131fb0c5988b0a07295475bec5147479128290396f50bc29f217",
+  "limitations": "One source fixture crop, FP16 GPU inference; no final query quality measured and no encoder identity altered"
+}

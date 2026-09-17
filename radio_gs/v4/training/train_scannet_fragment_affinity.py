@@ -23,7 +23,7 @@ from radio_gs.v4.object_memory.fragment_to_object import (
     _disjoint_same_view_cannot_link,
     _pairwise_appearance,
     _pairwise_geometry,
-    _pairwise_visibility_conflict,
+    _pairwise_visibility_absence,
 )
 from radio_gs.v4.object_memory.learned_fragment_affinity import (
     PAIR_FEATURE_LAYOUT,
@@ -270,7 +270,7 @@ def build_scene_pair_dataset(
     appearance, calibration = _calibrate_cross_view_appearance(
         raw_appearance, views
     )
-    conflict = _pairwise_visibility_conflict(
+    conflict = _pairwise_visibility_absence(
         positive,
         views,
         view_visibility,

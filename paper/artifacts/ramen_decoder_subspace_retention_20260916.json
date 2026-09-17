@@ -1,0 +1,3504 @@
+{
+  "schema": "decoder_subspace_retention.v1",
+  "oracle_encodings_sha256": "e0c4afbc42a32a03872d16489c22d7824ff0b4ab54519f4492ad0ec8168d07a6",
+  "source_episode_sha256": "d2cc1d2ae9f6516d6465d0d3b47535ea8bbef69b91fb627956ae63204d0a3445",
+  "field_sha256": {
+    "decoder_coupled3240": "7e27d4be3ee68964754a003a7a0d751f3b2e85f1f24334ec462767f26bf1c361",
+    "decoder_coupled_no_radio3240": "e7e88e5601e8c67734f004b7dcfd5642b03c156bca52766cf6294026795832e0"
+  },
+  "implementation_sha256": "ee599cb0f50a89d9194d6856a188bab9d690856a316c44bbe53e86e5e56aed37",
+  "diagnostic_only": true,
+  "uses_target_gt_crops": true,
+  "field_updated": false,
+  "geometry_or_localization_evaluated": false,
+  "scope": "affine least-squares reconstruction of oracle image descriptors through fixed learned decoder; not actual map latents and not a classification ceiling",
+  "native_image_norm_mean": 1.0,
+  "reconstruction": {
+    "decoder_coupled3240": {
+      "rank": 64,
+      "mean_cosine_to_native_crop": -0.06839410215616226,
+      "relative_l2": 2.8407328128814697,
+      "least_squares_projection_not_classification_upper_bound": true
+    },
+    "decoder_coupled_no_radio3240": {
+      "rank": 64,
+      "mean_cosine_to_native_crop": -0.0802706852555275,
+      "relative_l2": 2.9089488983154297,
+      "least_squares_projection_not_classification_upper_bound": true
+    }
+  },
+  "results": {
+    "native": {
+      "macro": {
+        "masked": {
+          "tasks": 71,
+          "top1": 0.8873239436619719,
+          "mrr": 0.9366197183098591
+        },
+        "unmasked": {
+          "tasks": 71,
+          "top1": 0.676056338028169,
+          "mrr": 0.7926117309920128
+        }
+      },
+      "observations": [
+        {
+          "frame": 6,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 24,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 24,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 60,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 60,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 60,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 60,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 65,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 81,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "glass of water",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "glass of water",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 81,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 81,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 81,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "spoon",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "spoon",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 119,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "glass of water",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "glass of water",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "hand",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "hand",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 128,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 128,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "spoon",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "spoon",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        }
+      ]
+    },
+    "decoder_coupled3240": {
+      "macro": {
+        "masked": {
+          "tasks": 71,
+          "top1": 0.19718309859154928,
+          "mrr": 0.3426269348804559
+        },
+        "unmasked": {
+          "tasks": 71,
+          "top1": 0.22535211267605634,
+          "mrr": 0.3582049405993068
+        }
+      },
+      "observations": [
+        {
+          "frame": 6,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 6,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 6,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 6,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 6,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 6,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 6,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 6,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 6,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 6,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 6,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 24,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 13
+        },
+        {
+          "frame": 24,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 24,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 24,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 24,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 24,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 24,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 24,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 24,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 24,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 24,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 60,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 60,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 60,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 60,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 60,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 60,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 60,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 60,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 60,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 7
+        },
+        {
+          "frame": 60,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 65,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 13
+        },
+        {
+          "frame": 65,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 65,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 65,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 65,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 65,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 65,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 65,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 65,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 65,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 12
+        },
+        {
+          "frame": 65,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 65,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 81,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 12
+        },
+        {
+          "frame": 81,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 81,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 81,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 81,
+          "category": "glass of water",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 81,
+          "category": "glass of water",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 81,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 81,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 81,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 81,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 81,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 12
+        },
+        {
+          "frame": 81,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 13
+        },
+        {
+          "frame": 81,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 81,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 81,
+          "category": "spoon",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 81,
+          "category": "spoon",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 81,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 81,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 119,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 119,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 119,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 119,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 119,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 119,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 119,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 119,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 119,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 119,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 119,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 7
+        },
+        {
+          "frame": 119,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 128,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 13
+        },
+        {
+          "frame": 128,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 128,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 128,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 128,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 128,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 128,
+          "category": "glass of water",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 128,
+          "category": "glass of water",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 128,
+          "category": "hand",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 128,
+          "category": "hand",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 128,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 128,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 128,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 12
+        },
+        {
+          "frame": 128,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 12
+        },
+        {
+          "frame": 128,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 128,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 128,
+          "category": "spoon",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 128,
+          "category": "spoon",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 128,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 7
+        },
+        {
+          "frame": 128,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 7
+        }
+      ]
+    },
+    "decoder_coupled_no_radio3240": {
+      "macro": {
+        "masked": {
+          "tasks": 71,
+          "top1": 0.1267605633802817,
+          "mrr": 0.3204909331669895
+        },
+        "unmasked": {
+          "tasks": 71,
+          "top1": 0.16901408450704225,
+          "mrr": 0.3274146432597137
+        }
+      },
+      "observations": [
+        {
+          "frame": 6,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 12
+        },
+        {
+          "frame": 6,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 6,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 6,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 6,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 6,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 6,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 6,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 6,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 6,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 24,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 13
+        },
+        {
+          "frame": 24,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 24,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 24,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 24,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 24,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 24,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 24,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 24,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 24,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 24,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 24,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 60,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 60,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 60,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 60,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 60,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 60,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 60,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 60,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 13
+        },
+        {
+          "frame": 65,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 65,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 65,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 65,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 65,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 65,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 65,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 65,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 12
+        },
+        {
+          "frame": 65,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 81,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 12
+        },
+        {
+          "frame": 81,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 81,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 81,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 81,
+          "category": "glass of water",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 81,
+          "category": "glass of water",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 81,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 81,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 81,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 81,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 81,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 81,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 81,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 12
+        },
+        {
+          "frame": 81,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 81,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 81,
+          "category": "spoon",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 81,
+          "category": "spoon",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 81,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 81,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 119,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 119,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 119,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 119,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 119,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 119,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 119,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 119,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 119,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 119,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 119,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 119,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 119,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 12
+        },
+        {
+          "frame": 128,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 128,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 128,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 128,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 128,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 128,
+          "category": "glass of water",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 128,
+          "category": "glass of water",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "hand",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 128,
+          "category": "hand",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 128,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 128,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 128,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 128,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 12
+        },
+        {
+          "frame": 128,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 128,
+          "category": "spoon",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 128,
+          "category": "spoon",
+          "crop": "unmasked",
+          "rank": 13
+        },
+        {
+          "frame": 128,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 8
+        }
+      ]
+    },
+    "source_svd64_native_query": {
+      "macro": {
+        "masked": {
+          "tasks": 71,
+          "top1": 0.7183098591549296,
+          "mrr": 0.8264252179745137
+        },
+        "unmasked": {
+          "tasks": 71,
+          "top1": 0.4084507042253521,
+          "mrr": 0.5850435949027499
+        }
+      },
+      "observations": [
+        {
+          "frame": 6,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 6,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 6,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 6,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 6,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 6,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 24,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 24,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 24,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 24,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 24,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 24,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 24,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 24,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 24,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 60,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 60,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 60,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 60,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 60,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 60,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 65,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 65,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 65,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 65,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 65,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 65,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 65,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 65,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "glass of water",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "glass of water",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 81,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 81,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 81,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 81,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 81,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "spoon",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "spoon",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 81,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 119,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 119,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 119,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 119,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 119,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 119,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 119,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "bowl",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "bowl",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 128,
+          "category": "chopsticks",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "chopsticks",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "corn",
+          "crop": "masked",
+          "rank": 7
+        },
+        {
+          "frame": 128,
+          "category": "corn",
+          "crop": "unmasked",
+          "rank": 12
+        },
+        {
+          "frame": 128,
+          "category": "egg",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "egg",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 128,
+          "category": "glass of water",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "glass of water",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "hand",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "hand",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "kamaboko",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 128,
+          "category": "kamaboko",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "napkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "napkin",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 128,
+          "category": "nori",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "nori",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 128,
+          "category": "onion segments",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 128,
+          "category": "onion segments",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "plate",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "plate",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 128,
+          "category": "sake cup",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "sake cup",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 128,
+          "category": "spoon",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "spoon",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 128,
+          "category": "wavy noodles",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 128,
+          "category": "wavy noodles",
+          "crop": "unmasked",
+          "rank": 1
+        }
+      ]
+    }
+  }
+}

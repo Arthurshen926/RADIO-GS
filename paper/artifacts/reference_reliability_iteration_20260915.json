@@ -1,0 +1,6125 @@
+{
+  "schema": "reference_reliability_iteration.v1",
+  "completed_training_runs": 12,
+  "tests_passed": 84,
+  "official_image_prompt_benchmark": false,
+  "new_3d_ground_truth": false,
+  "status": "source-query coverage implemented and evaluated; stricter correspondence and semantic relations remain opt-in, no joint performance promotion",
+  "training_inventory": [
+    {
+      "scene": "figurines",
+      "run": "reliable_pairs768",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines/reliable_pairs768/field.pt",
+      "field_sha256": "cf8966ffc1841c86cb3911009b88f598b06915baff6b024cbe159cb3668c839b",
+      "report_sha256": "7eee9541c04b28a566d2bbdc8d7dc1232c1e1083e146b03e00fa7d4c71ade418",
+      "steps": 768,
+      "correspondence_admission": {
+        "schema": "source_correspondence_admission.v1",
+        "minimum_bidirectional_coverage": 0.5,
+        "candidate_pairs": 64,
+        "accepted_pairs": 31,
+        "dropped_image_prompt_tasks": 132,
+        "removed_negative_region_entries": 346,
+        "retained_positive_only_tasks": 24,
+        "accepted_edges": [
+          [
+            0,
+            98
+          ],
+          [
+            6,
+            41
+          ],
+          [
+            16,
+            52
+          ],
+          [
+            16,
+            110
+          ],
+          [
+            16,
+            198
+          ],
+          [
+            19,
+            55
+          ],
+          [
+            22,
+            209
+          ],
+          [
+            25,
+            215
+          ],
+          [
+            29,
+            135
+          ],
+          [
+            34,
+            54
+          ],
+          [
+            37,
+            68
+          ],
+          [
+            38,
+            216
+          ],
+          [
+            43,
+            125
+          ],
+          [
+            44,
+            150
+          ],
+          [
+            45,
+            161
+          ],
+          [
+            52,
+            110
+          ],
+          [
+            62,
+            95
+          ],
+          [
+            64,
+            135
+          ],
+          [
+            66,
+            87
+          ],
+          [
+            75,
+            103
+          ],
+          [
+            80,
+            161
+          ],
+          [
+            81,
+            113
+          ],
+          [
+            84,
+            186
+          ],
+          [
+            107,
+            196
+          ],
+          [
+            108,
+            155
+          ],
+          [
+            113,
+            203
+          ],
+          [
+            123,
+            173
+          ],
+          [
+            126,
+            148
+          ],
+          [
+            133,
+            222
+          ],
+          [
+            135,
+            178
+          ],
+          [
+            171,
+            186
+          ]
+        ],
+        "rejected_edges": [
+          {
+            "pair": [
+              0,
+              146
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              187
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              3,
+              99
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              3,
+              186
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              6,
+              122
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              15,
+              193
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              16,
+              80
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              18,
+              203
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              19,
+              207
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              22,
+              58
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              25,
+              128
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              27,
+              56
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              27,
+              217
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              218
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              37,
+              178
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              38,
+              138
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              52,
+              80
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              54,
+              98
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              133
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              222
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              66,
+              207
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              68,
+              178
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              72,
+              126
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              72,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              73,
+              95
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              96,
+              147
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              98,
+              146
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              99,
+              186
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              103,
+              154
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              107,
+              156
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              110,
+              191
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              123,
+              214
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              156,
+              196
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          }
+        ],
+        "tracks": [
+          [
+            0,
+            98
+          ],
+          [
+            6,
+            41
+          ],
+          [
+            16,
+            52,
+            110,
+            198
+          ],
+          [
+            19,
+            55
+          ],
+          [
+            22,
+            209
+          ],
+          [
+            25,
+            215
+          ],
+          [
+            29,
+            64,
+            135,
+            178
+          ],
+          [
+            34,
+            54
+          ],
+          [
+            37,
+            68
+          ],
+          [
+            38,
+            216
+          ],
+          [
+            43,
+            125
+          ],
+          [
+            44,
+            150
+          ],
+          [
+            45,
+            80,
+            161
+          ],
+          [
+            62,
+            95
+          ],
+          [
+            66,
+            87
+          ],
+          [
+            75,
+            103
+          ],
+          [
+            81,
+            113,
+            203
+          ],
+          [
+            84,
+            171,
+            186
+          ],
+          [
+            107,
+            196
+          ],
+          [
+            108,
+            155
+          ],
+          [
+            123,
+            173
+          ],
+          [
+            126,
+            148
+          ],
+          [
+            133,
+            222
+          ]
+        ],
+        "benchmark_data_used": false,
+        "physical_instance_identity_verified": false
+      },
+      "source_query_coverage": null,
+      "conflicting_query_element_pairs": 1640,
+      "task_coverage": {
+        "available": {
+          "text": 63,
+          "image": 62,
+          "prompt": 62
+        },
+        "visited": {
+          "text": 63,
+          "image": 62,
+          "prompt": 62
+        },
+        "minimum_steps_for_full_coverage": 187,
+        "updates": {
+          "text": 256,
+          "image": 256,
+          "prompt": 256
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 4,
+            "maximum": 5,
+            "mean": 4.063492063492063
+          },
+          "image": {
+            "minimum": 4,
+            "maximum": 5,
+            "mean": 4.129032258064516
+          },
+          "prompt": {
+            "minimum": 4,
+            "maximum": 5,
+            "mean": 4.129032258064516
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 92249,
+        "semantically_trained_elements": 92249,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 227.97389221191406
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "f6cf893c8de8a0e24f296d92c8d6b8d6f3691e207f68c4be3918c0b6c95c8eab",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "1557a4fedc6b9b3596ced86b122b7f6334ab1b8a7e9d4c1986b148f012367739",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "semantic_relations768",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines/semantic_relations768/field.pt",
+      "field_sha256": "34f54bd9eb0c01b97f160154df8ec4e244ce0eb1002400a406c9495b6286e3ac",
+      "report_sha256": "5bfa4550fa874c408a55b619cf3a48d0bc88b96bd0b2e7bc3633d8c8ea03cb21",
+      "steps": 768,
+      "correspondence_admission": null,
+      "source_query_coverage": null,
+      "conflicting_query_element_pairs": 7930,
+      "task_coverage": {
+        "available": {
+          "text": 63,
+          "image": 128,
+          "prompt": 128
+        },
+        "visited": {
+          "text": 63,
+          "image": 128,
+          "prompt": 128
+        },
+        "minimum_steps_for_full_coverage": 384,
+        "updates": {
+          "text": 256,
+          "image": 256,
+          "prompt": 256
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 4,
+            "maximum": 5,
+            "mean": 4.063492063492063
+          },
+          "image": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          },
+          "prompt": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 92249,
+        "semantically_trained_elements": 92249,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 319.643310546875
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "f6cf893c8de8a0e24f296d92c8d6b8d6f3691e207f68c4be3918c0b6c95c8eab",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "1557a4fedc6b9b3596ced86b122b7f6334ab1b8a7e9d4c1986b148f012367739",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "reliable_semantic768",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines/reliable_semantic768/field.pt",
+      "field_sha256": "ab7c72d1d529ee3cb141e178e3f7bfdb14874151a4c479c47aa68c36b4b645c6",
+      "report_sha256": "ccc8b9f855c20a7f10a91752a52efb2b8586328a6963f66db5d50f78fa9aad09",
+      "steps": 768,
+      "correspondence_admission": {
+        "schema": "source_correspondence_admission.v1",
+        "minimum_bidirectional_coverage": 0.5,
+        "candidate_pairs": 64,
+        "accepted_pairs": 31,
+        "dropped_image_prompt_tasks": 132,
+        "removed_negative_region_entries": 346,
+        "retained_positive_only_tasks": 24,
+        "accepted_edges": [
+          [
+            0,
+            98
+          ],
+          [
+            6,
+            41
+          ],
+          [
+            16,
+            52
+          ],
+          [
+            16,
+            110
+          ],
+          [
+            16,
+            198
+          ],
+          [
+            19,
+            55
+          ],
+          [
+            22,
+            209
+          ],
+          [
+            25,
+            215
+          ],
+          [
+            29,
+            135
+          ],
+          [
+            34,
+            54
+          ],
+          [
+            37,
+            68
+          ],
+          [
+            38,
+            216
+          ],
+          [
+            43,
+            125
+          ],
+          [
+            44,
+            150
+          ],
+          [
+            45,
+            161
+          ],
+          [
+            52,
+            110
+          ],
+          [
+            62,
+            95
+          ],
+          [
+            64,
+            135
+          ],
+          [
+            66,
+            87
+          ],
+          [
+            75,
+            103
+          ],
+          [
+            80,
+            161
+          ],
+          [
+            81,
+            113
+          ],
+          [
+            84,
+            186
+          ],
+          [
+            107,
+            196
+          ],
+          [
+            108,
+            155
+          ],
+          [
+            113,
+            203
+          ],
+          [
+            123,
+            173
+          ],
+          [
+            126,
+            148
+          ],
+          [
+            133,
+            222
+          ],
+          [
+            135,
+            178
+          ],
+          [
+            171,
+            186
+          ]
+        ],
+        "rejected_edges": [
+          {
+            "pair": [
+              0,
+              146
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              187
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              3,
+              99
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              3,
+              186
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              6,
+              122
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              15,
+              193
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              16,
+              80
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              18,
+              203
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              19,
+              207
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              22,
+              58
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              25,
+              128
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              27,
+              56
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              27,
+              217
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              218
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              37,
+              178
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              38,
+              138
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              52,
+              80
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              54,
+              98
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              133
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              222
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              66,
+              207
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              68,
+              178
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              72,
+              126
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              72,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              73,
+              95
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              96,
+              147
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              98,
+              146
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              99,
+              186
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              103,
+              154
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              107,
+              156
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              110,
+              191
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              123,
+              214
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              156,
+              196
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          }
+        ],
+        "tracks": [
+          [
+            0,
+            98
+          ],
+          [
+            6,
+            41
+          ],
+          [
+            16,
+            52,
+            110,
+            198
+          ],
+          [
+            19,
+            55
+          ],
+          [
+            22,
+            209
+          ],
+          [
+            25,
+            215
+          ],
+          [
+            29,
+            64,
+            135,
+            178
+          ],
+          [
+            34,
+            54
+          ],
+          [
+            37,
+            68
+          ],
+          [
+            38,
+            216
+          ],
+          [
+            43,
+            125
+          ],
+          [
+            44,
+            150
+          ],
+          [
+            45,
+            80,
+            161
+          ],
+          [
+            62,
+            95
+          ],
+          [
+            66,
+            87
+          ],
+          [
+            75,
+            103
+          ],
+          [
+            81,
+            113,
+            203
+          ],
+          [
+            84,
+            171,
+            186
+          ],
+          [
+            107,
+            196
+          ],
+          [
+            108,
+            155
+          ],
+          [
+            123,
+            173
+          ],
+          [
+            126,
+            148
+          ],
+          [
+            133,
+            222
+          ]
+        ],
+        "benchmark_data_used": false,
+        "physical_instance_identity_verified": false
+      },
+      "source_query_coverage": null,
+      "conflicting_query_element_pairs": 1640,
+      "task_coverage": {
+        "available": {
+          "text": 63,
+          "image": 62,
+          "prompt": 62
+        },
+        "visited": {
+          "text": 63,
+          "image": 62,
+          "prompt": 62
+        },
+        "minimum_steps_for_full_coverage": 187,
+        "updates": {
+          "text": 256,
+          "image": 256,
+          "prompt": 256
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 4,
+            "maximum": 5,
+            "mean": 4.063492063492063
+          },
+          "image": {
+            "minimum": 4,
+            "maximum": 5,
+            "mean": 4.129032258064516
+          },
+          "prompt": {
+            "minimum": 4,
+            "maximum": 5,
+            "mean": 4.129032258064516
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 92249,
+        "semantically_trained_elements": 92249,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 316.042236328125
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "f6cf893c8de8a0e24f296d92c8d6b8d6f3691e207f68c4be3918c0b6c95c8eab",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "1557a4fedc6b9b3596ced86b122b7f6334ab1b8a7e9d4c1986b148f012367739",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "source_budget_control2106",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines/source_budget_control2106/field.pt",
+      "field_sha256": "62af23edee93cef2d7d87f71402650ea244194f66c1f80d11f421b9c7c31b30b",
+      "report_sha256": "8e59fc848679a8063ea25fb8bf1bf1d0327de4c8c83087f3f18979e76884e6b4",
+      "steps": 2106,
+      "correspondence_admission": null,
+      "source_query_coverage": null,
+      "conflicting_query_element_pairs": 7930,
+      "task_coverage": {
+        "available": {
+          "text": 63,
+          "image": 128,
+          "prompt": 128
+        },
+        "visited": {
+          "text": 63,
+          "image": 128,
+          "prompt": 128
+        },
+        "minimum_steps_for_full_coverage": 384,
+        "updates": {
+          "text": 702,
+          "image": 702,
+          "prompt": 702
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 11,
+            "maximum": 12,
+            "mean": 11.142857142857142
+          },
+          "image": {
+            "minimum": 5,
+            "maximum": 6,
+            "mean": 5.484375
+          },
+          "prompt": {
+            "minimum": 5,
+            "maximum": 6,
+            "mean": 5.484375
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 92249,
+        "semantically_trained_elements": 92249,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 652.124755859375
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "0289de42b42e4e7252c1ea56ea6d0565696ddde80e711cc4796a7fe01261330a",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "db1dadf1a307c5e6adf722858789adaf212bb3de9ee8313df87f9c333cb2d120",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "source_queries2106",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines/source_queries2106/field.pt",
+      "field_sha256": "a72a36b8c9dc2ee8fa05897a03aa4a4a1b299e522ebb3ce73318a58db280a9a2",
+      "report_sha256": "8aef9f026ad45900909e78c0829c3413ab2c564be5060e5b67154926c6e3d43c",
+      "steps": 2106,
+      "correspondence_admission": null,
+      "source_query_coverage": {
+        "schema": "source_region_query_tasks.v1",
+        "regions": 223,
+        "added_tasks_per_modality": 223,
+        "regions_with_explicit_negatives": 223,
+        "source_views": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "benchmark_data_used": false,
+        "cross_view_identity_claim": false
+      },
+      "conflicting_query_element_pairs": 28912,
+      "task_coverage": {
+        "available": {
+          "text": 63,
+          "image": 351,
+          "prompt": 351
+        },
+        "visited": {
+          "text": 63,
+          "image": 351,
+          "prompt": 351
+        },
+        "minimum_steps_for_full_coverage": 1053,
+        "updates": {
+          "text": 702,
+          "image": 702,
+          "prompt": 702
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 11,
+            "maximum": 12,
+            "mean": 11.142857142857142
+          },
+          "image": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          },
+          "prompt": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 92249,
+        "semantically_trained_elements": 92249,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 707.83154296875
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "0289de42b42e4e7252c1ea56ea6d0565696ddde80e711cc4796a7fe01261330a",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "db1dadf1a307c5e6adf722858789adaf212bb3de9ee8313df87f9c333cb2d120",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "reliable_source_queries2106",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines/reliable_source_queries2106/field.pt",
+      "field_sha256": "41a643b61bcbb9c7b8c492845e0d9c505d50378851284dd85c8ca7bbef212663",
+      "report_sha256": "5edf805d500bdc5566a64906af66e95ca015ed939b0b31ff533fd18ed2544c40",
+      "steps": 2106,
+      "correspondence_admission": {
+        "schema": "source_correspondence_admission.v1",
+        "minimum_bidirectional_coverage": 0.5,
+        "candidate_pairs": 64,
+        "accepted_pairs": 31,
+        "dropped_image_prompt_tasks": 132,
+        "removed_negative_region_entries": 346,
+        "retained_positive_only_tasks": 24,
+        "accepted_edges": [
+          [
+            0,
+            98
+          ],
+          [
+            6,
+            41
+          ],
+          [
+            16,
+            52
+          ],
+          [
+            16,
+            110
+          ],
+          [
+            16,
+            198
+          ],
+          [
+            19,
+            55
+          ],
+          [
+            22,
+            209
+          ],
+          [
+            25,
+            215
+          ],
+          [
+            29,
+            135
+          ],
+          [
+            34,
+            54
+          ],
+          [
+            37,
+            68
+          ],
+          [
+            38,
+            216
+          ],
+          [
+            43,
+            125
+          ],
+          [
+            44,
+            150
+          ],
+          [
+            45,
+            161
+          ],
+          [
+            52,
+            110
+          ],
+          [
+            62,
+            95
+          ],
+          [
+            64,
+            135
+          ],
+          [
+            66,
+            87
+          ],
+          [
+            75,
+            103
+          ],
+          [
+            80,
+            161
+          ],
+          [
+            81,
+            113
+          ],
+          [
+            84,
+            186
+          ],
+          [
+            107,
+            196
+          ],
+          [
+            108,
+            155
+          ],
+          [
+            113,
+            203
+          ],
+          [
+            123,
+            173
+          ],
+          [
+            126,
+            148
+          ],
+          [
+            133,
+            222
+          ],
+          [
+            135,
+            178
+          ],
+          [
+            171,
+            186
+          ]
+        ],
+        "rejected_edges": [
+          {
+            "pair": [
+              0,
+              146
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              187
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              3,
+              99
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              3,
+              186
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              6,
+              122
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              15,
+              193
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              16,
+              80
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              18,
+              203
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              19,
+              207
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              22,
+              58
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              25,
+              128
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              27,
+              56
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              27,
+              217
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              218
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              37,
+              178
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              38,
+              138
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              52,
+              80
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              54,
+              98
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              133
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              222
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              66,
+              207
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              68,
+              178
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              72,
+              126
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              72,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              73,
+              95
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              96,
+              147
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              98,
+              146
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              99,
+              186
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              103,
+              154
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              107,
+              156
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              110,
+              191
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              123,
+              214
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              156,
+              196
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          }
+        ],
+        "tracks": [
+          [
+            0,
+            98
+          ],
+          [
+            6,
+            41
+          ],
+          [
+            16,
+            52,
+            110,
+            198
+          ],
+          [
+            19,
+            55
+          ],
+          [
+            22,
+            209
+          ],
+          [
+            25,
+            215
+          ],
+          [
+            29,
+            64,
+            135,
+            178
+          ],
+          [
+            34,
+            54
+          ],
+          [
+            37,
+            68
+          ],
+          [
+            38,
+            216
+          ],
+          [
+            43,
+            125
+          ],
+          [
+            44,
+            150
+          ],
+          [
+            45,
+            80,
+            161
+          ],
+          [
+            62,
+            95
+          ],
+          [
+            66,
+            87
+          ],
+          [
+            75,
+            103
+          ],
+          [
+            81,
+            113,
+            203
+          ],
+          [
+            84,
+            171,
+            186
+          ],
+          [
+            107,
+            196
+          ],
+          [
+            108,
+            155
+          ],
+          [
+            123,
+            173
+          ],
+          [
+            126,
+            148
+          ],
+          [
+            133,
+            222
+          ]
+        ],
+        "benchmark_data_used": false,
+        "physical_instance_identity_verified": false
+      },
+      "source_query_coverage": {
+        "schema": "source_region_query_tasks.v1",
+        "regions": 223,
+        "added_tasks_per_modality": 223,
+        "regions_with_explicit_negatives": 223,
+        "source_views": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "benchmark_data_used": false,
+        "cross_view_identity_claim": false
+      },
+      "conflicting_query_element_pairs": 12018,
+      "task_coverage": {
+        "available": {
+          "text": 63,
+          "image": 285,
+          "prompt": 285
+        },
+        "visited": {
+          "text": 63,
+          "image": 285,
+          "prompt": 285
+        },
+        "minimum_steps_for_full_coverage": 855,
+        "updates": {
+          "text": 702,
+          "image": 702,
+          "prompt": 702
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 11,
+            "maximum": 12,
+            "mean": 11.142857142857142
+          },
+          "image": {
+            "minimum": 2,
+            "maximum": 3,
+            "mean": 2.463157894736842
+          },
+          "prompt": {
+            "minimum": 2,
+            "maximum": 3,
+            "mean": 2.463157894736842
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 92249,
+        "semantically_trained_elements": 92249,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 710.2113647460938
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "0289de42b42e4e7252c1ea56ea6d0565696ddde80e711cc4796a7fe01261330a",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "db1dadf1a307c5e6adf722858789adaf212bb3de9ee8313df87f9c333cb2d120",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "reliable_pairs1932",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen/reliable_pairs1932/field.pt",
+      "field_sha256": "5203bae21cb155fb456d8c3264fb67e3fcbdc02797d65088bf545b30b67d96f6",
+      "report_sha256": "3cb9adea57b45df7e0592191fd7f17d66e9eb7a64ffaa1144d814580373941a8",
+      "steps": 1932,
+      "correspondence_admission": {
+        "schema": "source_correspondence_admission.v1",
+        "minimum_bidirectional_coverage": 0.5,
+        "candidate_pairs": 161,
+        "accepted_pairs": 85,
+        "dropped_image_prompt_tasks": 304,
+        "removed_negative_region_entries": 446,
+        "retained_positive_only_tasks": 98,
+        "accepted_edges": [
+          [
+            1,
+            45
+          ],
+          [
+            1,
+            59
+          ],
+          [
+            2,
+            23
+          ],
+          [
+            2,
+            34
+          ],
+          [
+            2,
+            43
+          ],
+          [
+            2,
+            49
+          ],
+          [
+            2,
+            56
+          ],
+          [
+            2,
+            117
+          ],
+          [
+            6,
+            20
+          ],
+          [
+            11,
+            24
+          ],
+          [
+            11,
+            50
+          ],
+          [
+            11,
+            58
+          ],
+          [
+            13,
+            99
+          ],
+          [
+            13,
+            134
+          ],
+          [
+            14,
+            46
+          ],
+          [
+            14,
+            60
+          ],
+          [
+            16,
+            27
+          ],
+          [
+            16,
+            62
+          ],
+          [
+            16,
+            124
+          ],
+          [
+            18,
+            29
+          ],
+          [
+            19,
+            66
+          ],
+          [
+            21,
+            36
+          ],
+          [
+            21,
+            54
+          ],
+          [
+            21,
+            99
+          ],
+          [
+            23,
+            34
+          ],
+          [
+            23,
+            56
+          ],
+          [
+            23,
+            117
+          ],
+          [
+            24,
+            50
+          ],
+          [
+            24,
+            58
+          ],
+          [
+            27,
+            62
+          ],
+          [
+            27,
+            124
+          ],
+          [
+            34,
+            56
+          ],
+          [
+            36,
+            99
+          ],
+          [
+            36,
+            176
+          ],
+          [
+            43,
+            49
+          ],
+          [
+            43,
+            56
+          ],
+          [
+            46,
+            60
+          ],
+          [
+            49,
+            56
+          ],
+          [
+            49,
+            117
+          ],
+          [
+            50,
+            58
+          ],
+          [
+            56,
+            117
+          ],
+          [
+            59,
+            83
+          ],
+          [
+            59,
+            141
+          ],
+          [
+            62,
+            124
+          ],
+          [
+            73,
+            159
+          ],
+          [
+            73,
+            170
+          ],
+          [
+            73,
+            217
+          ],
+          [
+            78,
+            160
+          ],
+          [
+            78,
+            171
+          ],
+          [
+            81,
+            174
+          ],
+          [
+            82,
+            184
+          ],
+          [
+            83,
+            166
+          ],
+          [
+            85,
+            177
+          ],
+          [
+            86,
+            144
+          ],
+          [
+            86,
+            161
+          ],
+          [
+            86,
+            207
+          ],
+          [
+            90,
+            146
+          ],
+          [
+            95,
+            180
+          ],
+          [
+            96,
+            149
+          ],
+          [
+            96,
+            163
+          ],
+          [
+            97,
+            148
+          ],
+          [
+            97,
+            181
+          ],
+          [
+            98,
+            183
+          ],
+          [
+            100,
+            212
+          ],
+          [
+            102,
+            125
+          ],
+          [
+            103,
+            150
+          ],
+          [
+            103,
+            186
+          ],
+          [
+            103,
+            213
+          ],
+          [
+            106,
+            188
+          ],
+          [
+            110,
+            193
+          ],
+          [
+            111,
+            167
+          ],
+          [
+            134,
+            198
+          ],
+          [
+            144,
+            207
+          ],
+          [
+            148,
+            181
+          ],
+          [
+            149,
+            163
+          ],
+          [
+            149,
+            210
+          ],
+          [
+            150,
+            186
+          ],
+          [
+            150,
+            213
+          ],
+          [
+            159,
+            170
+          ],
+          [
+            160,
+            171
+          ],
+          [
+            160,
+            199
+          ],
+          [
+            162,
+            178
+          ],
+          [
+            165,
+            187
+          ],
+          [
+            186,
+            213
+          ],
+          [
+            191,
+            206
+          ]
+        ],
+        "rejected_edges": [
+          {
+            "pair": [
+              1,
+              21
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              1,
+              36
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              2,
+              78
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              2,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              160
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              13,
+              170
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              13,
+              217
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              16,
+              148
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              17,
+              64
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              21,
+              166
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              21,
+              190
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              21,
+              217
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              22,
+              43
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              44
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              160
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              34,
+              78
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              34,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              36,
+              59
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              36,
+              141
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              36,
+              164
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              36,
+              211
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              43,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              45,
+              54
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              46,
+              143
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              46,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              47,
+              51
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              49,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              54,
+              164
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              78
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              56,
+              199
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              176
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              59,
+              217
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              62,
+              97
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              62,
+              148
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              69,
+              168
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              73,
+              134
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              78,
+              137
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              79,
+              202
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              85,
+              143
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              85,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              86,
+              189
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              89,
+              145
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              89,
+              162
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              92,
+              147
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              96,
+              182
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              97,
+              124
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              102,
+              151
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              110,
+              210
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              111,
+              154
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              111,
+              194
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              113,
+              195
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              117,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              124,
+              148
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              125,
+              151
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              134,
+              159
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              134,
+              170
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              137,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              137,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              143,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              144,
+              189
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              146,
+              209
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              149,
+              182
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              151,
+              165
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              154,
+              167
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              159,
+              198
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              163,
+              182
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              167,
+              194
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              170,
+              198
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              193,
+              210
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          }
+        ],
+        "tracks": [
+          [
+            1,
+            45,
+            59,
+            83,
+            141,
+            166
+          ],
+          [
+            6,
+            20
+          ],
+          [
+            13,
+            21,
+            36,
+            54,
+            99,
+            134,
+            176,
+            198
+          ],
+          [
+            16,
+            27,
+            62,
+            124
+          ],
+          [
+            18,
+            29
+          ],
+          [
+            19,
+            66
+          ],
+          [
+            2,
+            23,
+            34,
+            43,
+            49,
+            56,
+            117
+          ],
+          [
+            14,
+            46,
+            60
+          ],
+          [
+            11,
+            24,
+            50,
+            58
+          ],
+          [
+            73,
+            159,
+            170,
+            217
+          ],
+          [
+            78,
+            160,
+            171,
+            199
+          ],
+          [
+            81,
+            174
+          ],
+          [
+            82,
+            184
+          ],
+          [
+            85,
+            177
+          ],
+          [
+            86,
+            144,
+            161,
+            207
+          ],
+          [
+            90,
+            146
+          ],
+          [
+            95,
+            180
+          ],
+          [
+            96,
+            149,
+            163,
+            210
+          ],
+          [
+            97,
+            148,
+            181
+          ],
+          [
+            98,
+            183
+          ],
+          [
+            100,
+            212
+          ],
+          [
+            102,
+            125
+          ],
+          [
+            103,
+            150,
+            186,
+            213
+          ],
+          [
+            106,
+            188
+          ],
+          [
+            110,
+            193
+          ],
+          [
+            111,
+            167
+          ],
+          [
+            162,
+            178
+          ],
+          [
+            165,
+            187
+          ],
+          [
+            191,
+            206
+          ]
+        ],
+        "benchmark_data_used": false,
+        "physical_instance_identity_verified": false
+      },
+      "source_query_coverage": null,
+      "conflicting_query_element_pairs": 4788,
+      "task_coverage": {
+        "available": {
+          "text": 99,
+          "image": 170,
+          "prompt": 170
+        },
+        "visited": {
+          "text": 99,
+          "image": 170,
+          "prompt": 170
+        },
+        "minimum_steps_for_full_coverage": 510,
+        "updates": {
+          "text": 644,
+          "image": 644,
+          "prompt": 644
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 6,
+            "maximum": 7,
+            "mean": 6.505050505050505
+          },
+          "image": {
+            "minimum": 3,
+            "maximum": 4,
+            "mean": 3.788235294117647
+          },
+          "prompt": {
+            "minimum": 3,
+            "maximum": 4,
+            "mean": 3.788235294117647
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 255984,
+        "semantically_trained_elements": 255984,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 314.5986328125
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "f6cf893c8de8a0e24f296d92c8d6b8d6f3691e207f68c4be3918c0b6c95c8eab",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "1557a4fedc6b9b3596ced86b122b7f6334ab1b8a7e9d4c1986b148f012367739",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "semantic_relations1932",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen/semantic_relations1932/field.pt",
+      "field_sha256": "a77ad1986068effc5385714f6b68f740e27a7cd40473a655e45af5f17fd451de",
+      "report_sha256": "d448ee86448e47dc34c9a2bdfd02ae47e8a196b4eb41ab7a6307b293c2ed221b",
+      "steps": 1932,
+      "correspondence_admission": null,
+      "source_query_coverage": null,
+      "conflicting_query_element_pairs": 53522,
+      "task_coverage": {
+        "available": {
+          "text": 99,
+          "image": 322,
+          "prompt": 322
+        },
+        "visited": {
+          "text": 99,
+          "image": 322,
+          "prompt": 322
+        },
+        "minimum_steps_for_full_coverage": 966,
+        "updates": {
+          "text": 644,
+          "image": 644,
+          "prompt": 644
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 6,
+            "maximum": 7,
+            "mean": 6.505050505050505
+          },
+          "image": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          },
+          "prompt": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 255984,
+        "semantically_trained_elements": 255984,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 519.9725341796875
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "f6cf893c8de8a0e24f296d92c8d6b8d6f3691e207f68c4be3918c0b6c95c8eab",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "1557a4fedc6b9b3596ced86b122b7f6334ab1b8a7e9d4c1986b148f012367739",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "reliable_semantic1932",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen/reliable_semantic1932/field.pt",
+      "field_sha256": "bfd5aabde84a21601636be084fa51b57f3a5a56138508c7f67b3075d871f87dc",
+      "report_sha256": "8a4409e880a60427f1d41faf2dca17338f751303286899c1e23966830a357548",
+      "steps": 1932,
+      "correspondence_admission": {
+        "schema": "source_correspondence_admission.v1",
+        "minimum_bidirectional_coverage": 0.5,
+        "candidate_pairs": 161,
+        "accepted_pairs": 85,
+        "dropped_image_prompt_tasks": 304,
+        "removed_negative_region_entries": 446,
+        "retained_positive_only_tasks": 98,
+        "accepted_edges": [
+          [
+            1,
+            45
+          ],
+          [
+            1,
+            59
+          ],
+          [
+            2,
+            23
+          ],
+          [
+            2,
+            34
+          ],
+          [
+            2,
+            43
+          ],
+          [
+            2,
+            49
+          ],
+          [
+            2,
+            56
+          ],
+          [
+            2,
+            117
+          ],
+          [
+            6,
+            20
+          ],
+          [
+            11,
+            24
+          ],
+          [
+            11,
+            50
+          ],
+          [
+            11,
+            58
+          ],
+          [
+            13,
+            99
+          ],
+          [
+            13,
+            134
+          ],
+          [
+            14,
+            46
+          ],
+          [
+            14,
+            60
+          ],
+          [
+            16,
+            27
+          ],
+          [
+            16,
+            62
+          ],
+          [
+            16,
+            124
+          ],
+          [
+            18,
+            29
+          ],
+          [
+            19,
+            66
+          ],
+          [
+            21,
+            36
+          ],
+          [
+            21,
+            54
+          ],
+          [
+            21,
+            99
+          ],
+          [
+            23,
+            34
+          ],
+          [
+            23,
+            56
+          ],
+          [
+            23,
+            117
+          ],
+          [
+            24,
+            50
+          ],
+          [
+            24,
+            58
+          ],
+          [
+            27,
+            62
+          ],
+          [
+            27,
+            124
+          ],
+          [
+            34,
+            56
+          ],
+          [
+            36,
+            99
+          ],
+          [
+            36,
+            176
+          ],
+          [
+            43,
+            49
+          ],
+          [
+            43,
+            56
+          ],
+          [
+            46,
+            60
+          ],
+          [
+            49,
+            56
+          ],
+          [
+            49,
+            117
+          ],
+          [
+            50,
+            58
+          ],
+          [
+            56,
+            117
+          ],
+          [
+            59,
+            83
+          ],
+          [
+            59,
+            141
+          ],
+          [
+            62,
+            124
+          ],
+          [
+            73,
+            159
+          ],
+          [
+            73,
+            170
+          ],
+          [
+            73,
+            217
+          ],
+          [
+            78,
+            160
+          ],
+          [
+            78,
+            171
+          ],
+          [
+            81,
+            174
+          ],
+          [
+            82,
+            184
+          ],
+          [
+            83,
+            166
+          ],
+          [
+            85,
+            177
+          ],
+          [
+            86,
+            144
+          ],
+          [
+            86,
+            161
+          ],
+          [
+            86,
+            207
+          ],
+          [
+            90,
+            146
+          ],
+          [
+            95,
+            180
+          ],
+          [
+            96,
+            149
+          ],
+          [
+            96,
+            163
+          ],
+          [
+            97,
+            148
+          ],
+          [
+            97,
+            181
+          ],
+          [
+            98,
+            183
+          ],
+          [
+            100,
+            212
+          ],
+          [
+            102,
+            125
+          ],
+          [
+            103,
+            150
+          ],
+          [
+            103,
+            186
+          ],
+          [
+            103,
+            213
+          ],
+          [
+            106,
+            188
+          ],
+          [
+            110,
+            193
+          ],
+          [
+            111,
+            167
+          ],
+          [
+            134,
+            198
+          ],
+          [
+            144,
+            207
+          ],
+          [
+            148,
+            181
+          ],
+          [
+            149,
+            163
+          ],
+          [
+            149,
+            210
+          ],
+          [
+            150,
+            186
+          ],
+          [
+            150,
+            213
+          ],
+          [
+            159,
+            170
+          ],
+          [
+            160,
+            171
+          ],
+          [
+            160,
+            199
+          ],
+          [
+            162,
+            178
+          ],
+          [
+            165,
+            187
+          ],
+          [
+            186,
+            213
+          ],
+          [
+            191,
+            206
+          ]
+        ],
+        "rejected_edges": [
+          {
+            "pair": [
+              1,
+              21
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              1,
+              36
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              2,
+              78
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              2,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              160
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              13,
+              170
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              13,
+              217
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              16,
+              148
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              17,
+              64
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              21,
+              166
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              21,
+              190
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              21,
+              217
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              22,
+              43
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              44
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              160
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              34,
+              78
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              34,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              36,
+              59
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              36,
+              141
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              36,
+              164
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              36,
+              211
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              43,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              45,
+              54
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              46,
+              143
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              46,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              47,
+              51
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              49,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              54,
+              164
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              78
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              56,
+              199
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              176
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              59,
+              217
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              62,
+              97
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              62,
+              148
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              69,
+              168
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              73,
+              134
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              78,
+              137
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              79,
+              202
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              85,
+              143
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              85,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              86,
+              189
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              89,
+              145
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              89,
+              162
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              92,
+              147
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              96,
+              182
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              97,
+              124
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              102,
+              151
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              110,
+              210
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              111,
+              154
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              111,
+              194
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              113,
+              195
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              117,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              124,
+              148
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              125,
+              151
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              134,
+              159
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              134,
+              170
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              137,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              137,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              143,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              144,
+              189
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              146,
+              209
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              149,
+              182
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              151,
+              165
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              154,
+              167
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              159,
+              198
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              163,
+              182
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              167,
+              194
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              170,
+              198
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              193,
+              210
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          }
+        ],
+        "tracks": [
+          [
+            1,
+            45,
+            59,
+            83,
+            141,
+            166
+          ],
+          [
+            6,
+            20
+          ],
+          [
+            13,
+            21,
+            36,
+            54,
+            99,
+            134,
+            176,
+            198
+          ],
+          [
+            16,
+            27,
+            62,
+            124
+          ],
+          [
+            18,
+            29
+          ],
+          [
+            19,
+            66
+          ],
+          [
+            2,
+            23,
+            34,
+            43,
+            49,
+            56,
+            117
+          ],
+          [
+            14,
+            46,
+            60
+          ],
+          [
+            11,
+            24,
+            50,
+            58
+          ],
+          [
+            73,
+            159,
+            170,
+            217
+          ],
+          [
+            78,
+            160,
+            171,
+            199
+          ],
+          [
+            81,
+            174
+          ],
+          [
+            82,
+            184
+          ],
+          [
+            85,
+            177
+          ],
+          [
+            86,
+            144,
+            161,
+            207
+          ],
+          [
+            90,
+            146
+          ],
+          [
+            95,
+            180
+          ],
+          [
+            96,
+            149,
+            163,
+            210
+          ],
+          [
+            97,
+            148,
+            181
+          ],
+          [
+            98,
+            183
+          ],
+          [
+            100,
+            212
+          ],
+          [
+            102,
+            125
+          ],
+          [
+            103,
+            150,
+            186,
+            213
+          ],
+          [
+            106,
+            188
+          ],
+          [
+            110,
+            193
+          ],
+          [
+            111,
+            167
+          ],
+          [
+            162,
+            178
+          ],
+          [
+            165,
+            187
+          ],
+          [
+            191,
+            206
+          ]
+        ],
+        "benchmark_data_used": false,
+        "physical_instance_identity_verified": false
+      },
+      "source_query_coverage": null,
+      "conflicting_query_element_pairs": 4788,
+      "task_coverage": {
+        "available": {
+          "text": 99,
+          "image": 170,
+          "prompt": 170
+        },
+        "visited": {
+          "text": 99,
+          "image": 170,
+          "prompt": 170
+        },
+        "minimum_steps_for_full_coverage": 510,
+        "updates": {
+          "text": 644,
+          "image": 644,
+          "prompt": 644
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 6,
+            "maximum": 7,
+            "mean": 6.505050505050505
+          },
+          "image": {
+            "minimum": 3,
+            "maximum": 4,
+            "mean": 3.788235294117647
+          },
+          "prompt": {
+            "minimum": 3,
+            "maximum": 4,
+            "mean": 3.788235294117647
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 255984,
+        "semantically_trained_elements": 255984,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 512.6165771484375
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "f6cf893c8de8a0e24f296d92c8d6b8d6f3691e207f68c4be3918c0b6c95c8eab",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "1557a4fedc6b9b3596ced86b122b7f6334ab1b8a7e9d4c1986b148f012367739",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "source_budget_control3240",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen/source_budget_control3240/field.pt",
+      "field_sha256": "ea08036944c0a91a1c62a613ab931d553687753c23fd91832ef975c04f75c249",
+      "report_sha256": "4ba317692eeedbfbd669442f802ea031f1bd23ff57bd1e8d117d29a1a1dfefa1",
+      "steps": 3240,
+      "correspondence_admission": null,
+      "source_query_coverage": null,
+      "conflicting_query_element_pairs": 53522,
+      "task_coverage": {
+        "available": {
+          "text": 99,
+          "image": 322,
+          "prompt": 322
+        },
+        "visited": {
+          "text": 99,
+          "image": 322,
+          "prompt": 322
+        },
+        "minimum_steps_for_full_coverage": 966,
+        "updates": {
+          "text": 1080,
+          "image": 1080,
+          "prompt": 1080
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 10,
+            "maximum": 11,
+            "mean": 10.909090909090908
+          },
+          "image": {
+            "minimum": 3,
+            "maximum": 4,
+            "mean": 3.3540372670807455
+          },
+          "prompt": {
+            "minimum": 3,
+            "maximum": 4,
+            "mean": 3.3540372670807455
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 255984,
+        "semantically_trained_elements": 255984,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 545.4544067382812
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "0289de42b42e4e7252c1ea56ea6d0565696ddde80e711cc4796a7fe01261330a",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "db1dadf1a307c5e6adf722858789adaf212bb3de9ee8313df87f9c333cb2d120",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "source_queries3240",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen/source_queries3240/field.pt",
+      "field_sha256": "ae49a066e852b5c068dec5482dbf33188537898b164bad381d05aaf6aabdcb3f",
+      "report_sha256": "c1a2e34ba3e44caf19eca5a28b38b8ebf4e43430647ffd8e5f36a875109c8188",
+      "steps": 3240,
+      "correspondence_admission": null,
+      "source_query_coverage": {
+        "schema": "source_region_query_tasks.v1",
+        "regions": 218,
+        "added_tasks_per_modality": 218,
+        "regions_with_explicit_negatives": 218,
+        "source_views": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "benchmark_data_used": false,
+        "cross_view_identity_claim": false
+      },
+      "conflicting_query_element_pairs": 85764,
+      "task_coverage": {
+        "available": {
+          "text": 99,
+          "image": 540,
+          "prompt": 540
+        },
+        "visited": {
+          "text": 99,
+          "image": 540,
+          "prompt": 540
+        },
+        "minimum_steps_for_full_coverage": 1620,
+        "updates": {
+          "text": 1080,
+          "image": 1080,
+          "prompt": 1080
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 10,
+            "maximum": 11,
+            "mean": 10.909090909090908
+          },
+          "image": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          },
+          "prompt": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 255984,
+        "semantically_trained_elements": 255984,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 596.1265869140625
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "0289de42b42e4e7252c1ea56ea6d0565696ddde80e711cc4796a7fe01261330a",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "db1dadf1a307c5e6adf722858789adaf212bb3de9ee8313df87f9c333cb2d120",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "reliable_source_queries3240",
+      "field": "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen/reliable_source_queries3240/field.pt",
+      "field_sha256": "53373cfd440cb237d3f62cb066ba41299868abd5ff03a83b2f06068da220d63a",
+      "report_sha256": "abb47926f276529e89979ad84570a2903232a965a4772723af9b71b6ac84d0bb",
+      "steps": 3240,
+      "correspondence_admission": {
+        "schema": "source_correspondence_admission.v1",
+        "minimum_bidirectional_coverage": 0.5,
+        "candidate_pairs": 161,
+        "accepted_pairs": 85,
+        "dropped_image_prompt_tasks": 304,
+        "removed_negative_region_entries": 446,
+        "retained_positive_only_tasks": 98,
+        "accepted_edges": [
+          [
+            1,
+            45
+          ],
+          [
+            1,
+            59
+          ],
+          [
+            2,
+            23
+          ],
+          [
+            2,
+            34
+          ],
+          [
+            2,
+            43
+          ],
+          [
+            2,
+            49
+          ],
+          [
+            2,
+            56
+          ],
+          [
+            2,
+            117
+          ],
+          [
+            6,
+            20
+          ],
+          [
+            11,
+            24
+          ],
+          [
+            11,
+            50
+          ],
+          [
+            11,
+            58
+          ],
+          [
+            13,
+            99
+          ],
+          [
+            13,
+            134
+          ],
+          [
+            14,
+            46
+          ],
+          [
+            14,
+            60
+          ],
+          [
+            16,
+            27
+          ],
+          [
+            16,
+            62
+          ],
+          [
+            16,
+            124
+          ],
+          [
+            18,
+            29
+          ],
+          [
+            19,
+            66
+          ],
+          [
+            21,
+            36
+          ],
+          [
+            21,
+            54
+          ],
+          [
+            21,
+            99
+          ],
+          [
+            23,
+            34
+          ],
+          [
+            23,
+            56
+          ],
+          [
+            23,
+            117
+          ],
+          [
+            24,
+            50
+          ],
+          [
+            24,
+            58
+          ],
+          [
+            27,
+            62
+          ],
+          [
+            27,
+            124
+          ],
+          [
+            34,
+            56
+          ],
+          [
+            36,
+            99
+          ],
+          [
+            36,
+            176
+          ],
+          [
+            43,
+            49
+          ],
+          [
+            43,
+            56
+          ],
+          [
+            46,
+            60
+          ],
+          [
+            49,
+            56
+          ],
+          [
+            49,
+            117
+          ],
+          [
+            50,
+            58
+          ],
+          [
+            56,
+            117
+          ],
+          [
+            59,
+            83
+          ],
+          [
+            59,
+            141
+          ],
+          [
+            62,
+            124
+          ],
+          [
+            73,
+            159
+          ],
+          [
+            73,
+            170
+          ],
+          [
+            73,
+            217
+          ],
+          [
+            78,
+            160
+          ],
+          [
+            78,
+            171
+          ],
+          [
+            81,
+            174
+          ],
+          [
+            82,
+            184
+          ],
+          [
+            83,
+            166
+          ],
+          [
+            85,
+            177
+          ],
+          [
+            86,
+            144
+          ],
+          [
+            86,
+            161
+          ],
+          [
+            86,
+            207
+          ],
+          [
+            90,
+            146
+          ],
+          [
+            95,
+            180
+          ],
+          [
+            96,
+            149
+          ],
+          [
+            96,
+            163
+          ],
+          [
+            97,
+            148
+          ],
+          [
+            97,
+            181
+          ],
+          [
+            98,
+            183
+          ],
+          [
+            100,
+            212
+          ],
+          [
+            102,
+            125
+          ],
+          [
+            103,
+            150
+          ],
+          [
+            103,
+            186
+          ],
+          [
+            103,
+            213
+          ],
+          [
+            106,
+            188
+          ],
+          [
+            110,
+            193
+          ],
+          [
+            111,
+            167
+          ],
+          [
+            134,
+            198
+          ],
+          [
+            144,
+            207
+          ],
+          [
+            148,
+            181
+          ],
+          [
+            149,
+            163
+          ],
+          [
+            149,
+            210
+          ],
+          [
+            150,
+            186
+          ],
+          [
+            150,
+            213
+          ],
+          [
+            159,
+            170
+          ],
+          [
+            160,
+            171
+          ],
+          [
+            160,
+            199
+          ],
+          [
+            162,
+            178
+          ],
+          [
+            165,
+            187
+          ],
+          [
+            186,
+            213
+          ],
+          [
+            191,
+            206
+          ]
+        ],
+        "rejected_edges": [
+          {
+            "pair": [
+              1,
+              21
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              1,
+              36
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              2,
+              78
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              2,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              160
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              2,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              13,
+              170
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              13,
+              217
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              16,
+              148
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              17,
+              64
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              21,
+              166
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              21,
+              190
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              21,
+              217
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              22,
+              43
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              44
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              160
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              23,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              34,
+              78
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              34,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              34,
+              199
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              36,
+              59
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              36,
+              141
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              36,
+              164
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              36,
+              211
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              43,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              45,
+              54
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              46,
+              143
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              46,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              47,
+              51
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              49,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              54,
+              164
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              78
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              137
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              56,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              56,
+              199
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              59,
+              176
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              59,
+              217
+            ],
+            "reason": "same_view_track_collision"
+          },
+          {
+            "pair": [
+              62,
+              97
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              62,
+              148
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              69,
+              168
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              73,
+              134
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              78,
+              137
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              79,
+              202
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              85,
+              143
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              85,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              86,
+              189
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              89,
+              145
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              89,
+              162
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              92,
+              147
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              96,
+              182
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              97,
+              124
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              102,
+              151
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              110,
+              210
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              111,
+              154
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              111,
+              194
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              113,
+              195
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              117,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              124,
+              148
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              125,
+              151
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              134,
+              159
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              134,
+              170
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              137,
+              160
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              137,
+              171
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              143,
+              206
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              144,
+              189
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              146,
+              209
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              149,
+              182
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              151,
+              165
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              154,
+              167
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              159,
+              198
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              163,
+              182
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              167,
+              194
+            ],
+            "reason": "inconsistent_observed_pair"
+          },
+          {
+            "pair": [
+              170,
+              198
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          },
+          {
+            "pair": [
+              193,
+              210
+            ],
+            "reason": "insufficient_bidirectional_coverage"
+          }
+        ],
+        "tracks": [
+          [
+            1,
+            45,
+            59,
+            83,
+            141,
+            166
+          ],
+          [
+            6,
+            20
+          ],
+          [
+            13,
+            21,
+            36,
+            54,
+            99,
+            134,
+            176,
+            198
+          ],
+          [
+            16,
+            27,
+            62,
+            124
+          ],
+          [
+            18,
+            29
+          ],
+          [
+            19,
+            66
+          ],
+          [
+            2,
+            23,
+            34,
+            43,
+            49,
+            56,
+            117
+          ],
+          [
+            14,
+            46,
+            60
+          ],
+          [
+            11,
+            24,
+            50,
+            58
+          ],
+          [
+            73,
+            159,
+            170,
+            217
+          ],
+          [
+            78,
+            160,
+            171,
+            199
+          ],
+          [
+            81,
+            174
+          ],
+          [
+            82,
+            184
+          ],
+          [
+            85,
+            177
+          ],
+          [
+            86,
+            144,
+            161,
+            207
+          ],
+          [
+            90,
+            146
+          ],
+          [
+            95,
+            180
+          ],
+          [
+            96,
+            149,
+            163,
+            210
+          ],
+          [
+            97,
+            148,
+            181
+          ],
+          [
+            98,
+            183
+          ],
+          [
+            100,
+            212
+          ],
+          [
+            102,
+            125
+          ],
+          [
+            103,
+            150,
+            186,
+            213
+          ],
+          [
+            106,
+            188
+          ],
+          [
+            110,
+            193
+          ],
+          [
+            111,
+            167
+          ],
+          [
+            162,
+            178
+          ],
+          [
+            165,
+            187
+          ],
+          [
+            191,
+            206
+          ]
+        ],
+        "benchmark_data_used": false,
+        "physical_instance_identity_verified": false
+      },
+      "source_query_coverage": {
+        "schema": "source_region_query_tasks.v1",
+        "regions": 218,
+        "added_tasks_per_modality": 218,
+        "regions_with_explicit_negatives": 218,
+        "source_views": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "benchmark_data_used": false,
+        "cross_view_identity_claim": false
+      },
+      "conflicting_query_element_pairs": 18278,
+      "task_coverage": {
+        "available": {
+          "text": 99,
+          "image": 388,
+          "prompt": 388
+        },
+        "visited": {
+          "text": 99,
+          "image": 388,
+          "prompt": 388
+        },
+        "minimum_steps_for_full_coverage": 1164,
+        "updates": {
+          "text": 1080,
+          "image": 1080,
+          "prompt": 1080
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 10,
+            "maximum": 11,
+            "mean": 10.909090909090908
+          },
+          "image": {
+            "minimum": 2,
+            "maximum": 3,
+            "mean": 2.783505154639175
+          },
+          "prompt": {
+            "minimum": 2,
+            "maximum": 3,
+            "mean": 2.783505154639175
+          }
+        },
+        "complete": true
+      },
+      "feature_coverage": {
+        "geometrically_visible_elements": 255984,
+        "semantically_trained_elements": 255984,
+        "excluded_untrained_visible_elements": 0,
+        "mean_feature_update_steps_on_valid": 601.2478637695312
+      },
+      "implementation_sources": {
+        "/root/RADIO-GS/radio_gs/scripts/train_three_query_field.py": "0289de42b42e4e7252c1ea56ea6d0565696ddde80e711cc4796a7fe01261330a",
+        "/root/RADIO-GS/radio_gs/training/pipeline_contracts.py": "a8ae0aff8a285aa42e6eba5e85670145fc09196d99f73e1a2ee59607b19410a5",
+        "/root/RADIO-GS/radio_gs/training/reliable_correspondence.py": "db1dadf1a307c5e6adf722858789adaf212bb3de9ee8313df87f9c333cb2d120",
+        "/root/RADIO-GS/radio_gs/training/native_space_alignment.py": "f7df77df8cac8e0ead102f5d7f42f74cef7c51d345f554bd78821eabfe5244a3",
+        "/root/RADIO-GS/radio_gs/training/retrieval_supervision.py": "8a635751771bc292bbf77686779ae68d8964bb23827d6923990228eb43e0dfad",
+        "/root/RADIO-GS/radio_gs/models/element_retrieval_field.py": "63e6a66744c0eb5351acb47f66457a6c472244b302634a8eaff62e1aa2072646",
+        "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py": "b6d60b1eb77c04fb67c2a050e6ae2e6e07c9658e2927e81a351e5b8808d2f16f"
+      }
+    }
+  ],
+  "evaluations": {
+    "paper/artifacts/figurines_reliability_text_20260915.json": {
+      "sha256": "efd9538cee71341e16231eadc821ac739dcf4c35535632fdf113d0c3474827ed",
+      "runs": {
+        "reliable_pairs768": {
+          "field_sha256": "cf8966ffc1841c86cb3911009b88f598b06915baff6b024cbe159cb3668c839b",
+          "tasks": 56,
+          "categories": 21,
+          "observation_miou": 0.16162107512604812,
+          "category_macro_miou": 0.14585087889095527,
+          "positive_support_recall_macro": 0.9906321327601161,
+          "average_precision_macro": 0.2972588341479659,
+          "auroc_macro": 0.8580865284463959,
+          "per_category_iou": {
+            "bag": 0.0,
+            "green apple": 0.43758377973919416,
+            "green toy chair": 0.024884573154280706,
+            "jake": 0.12293361018567162,
+            "miffy": 0.008345971875597595,
+            "old camera": 0.5891637506134687,
+            "pikachu": 0.2538541473020166,
+            "pink ice cream": 0.014080459770114942,
+            "pirate hat": 0.0,
+            "porcelain hand": 0.0,
+            "pumpkin": 0.03299334811529934,
+            "red apple": 0.37002196017418854,
+            "red toy chair": 0.14412479511671283,
+            "rubber duck with buoy": 0.5602000620033224,
+            "rubber duck with hat": 0.06591203598523743,
+            "rubics cube": 0.0,
+            "spatula": 0.20324659011984456,
+            "tesla door handle": 0.0,
+            "toy cat statue": 0.03958424462060476,
+            "toy elephant": 0.1959391279345065,
+            "waldo": 0.0
+          }
+        },
+        "semantic_relations768": {
+          "field_sha256": "34f54bd9eb0c01b97f160154df8ec4e244ce0eb1002400a406c9495b6286e3ac",
+          "tasks": 56,
+          "categories": 21,
+          "observation_miou": 0.10408654769973748,
+          "category_macro_miou": 0.09870852005225399,
+          "positive_support_recall_macro": 0.9906321327601161,
+          "average_precision_macro": 0.24006016892614984,
+          "auroc_macro": 0.8237809909070958,
+          "per_category_iou": {
+            "bag": 0.0,
+            "green apple": 0.3518251624130572,
+            "green toy chair": 0.018230071709836284,
+            "jake": 0.021022333330793633,
+            "miffy": 0.0,
+            "old camera": 0.38285255646365757,
+            "pikachu": 0.4064890160812311,
+            "pink ice cream": 0.0,
+            "pirate hat": 0.0,
+            "porcelain hand": 0.002933541750274092,
+            "pumpkin": 0.0,
+            "red apple": 0.27755034071662105,
+            "red toy chair": 0.15844808336434685,
+            "rubber duck with buoy": 0.047932053586256594,
+            "rubber duck with hat": 0.0,
+            "rubics cube": 0.0,
+            "spatula": 0.011267138599718465,
+            "tesla door handle": 0.0,
+            "toy cat statue": 0.05491737298106638,
+            "toy elephant": 0.3394112501004745,
+            "waldo": 0.0
+          }
+        },
+        "reliable_semantic768": {
+          "field_sha256": "ab7c72d1d529ee3cb141e178e3f7bfdb14874151a4c479c47aa68c36b4b645c6",
+          "tasks": 56,
+          "categories": 21,
+          "observation_miou": 0.0998304892117954,
+          "category_macro_miou": 0.09132129014913473,
+          "positive_support_recall_macro": 0.9906321327601161,
+          "average_precision_macro": 0.24402093347716497,
+          "auroc_macro": 0.8148295219699733,
+          "per_category_iou": {
+            "bag": 0.0,
+            "green apple": 0.38855176214203635,
+            "green toy chair": 0.014803406523171898,
+            "jake": 0.00032536196518626975,
+            "miffy": 0.0014268699275597567,
+            "old camera": 0.4837574268742921,
+            "pikachu": 0.25252923231864477,
+            "pink ice cream": 0.0,
+            "pirate hat": 0.0,
+            "porcelain hand": 0.0,
+            "pumpkin": 0.012510756602899319,
+            "red apple": 0.28092862826533355,
+            "red toy chair": 0.1287523118509034,
+            "rubber duck with buoy": 0.0,
+            "rubber duck with hat": 0.0,
+            "rubics cube": 0.0016818028927009755,
+            "spatula": 0.08121857749023835,
+            "tesla door handle": 0.0,
+            "toy cat statue": 0.04217632875257205,
+            "toy elephant": 0.22908462752629066,
+            "waldo": 0.0
+          }
+        }
+      }
+    },
+    "paper/artifacts/figurines_reliability_reference_20260915.json": {
+      "sha256": "faf35925cf989da044934bb3f3f4c1bbb287fbc9bef8920b730451bb6b2e34c4",
+      "runs": {
+        "reliable_pairs768": {
+          "field_sha256": "cf8966ffc1841c86cb3911009b88f598b06915baff6b024cbe159cb3668c839b",
+          "tasks_per_modality": 35,
+          "macro": {
+            "text": {
+              "iou": 0.16556649804813217,
+              "average_precision": 0.28827108876456076,
+              "auroc": 0.8555040915978825
+            },
+            "image": {
+              "iou": 0.21358455286358055,
+              "average_precision": 0.33277385671847215,
+              "auroc": 0.8599646605305177
+            },
+            "prompt": {
+              "iou": 0.11092036579374201,
+              "average_precision": 0.2045305742283949,
+              "auroc": 0.8489184141798111
+            },
+            "prompt_refined": {
+              "iou": 0.18478521511204477,
+              "average_precision": 0.3283224349090289,
+              "auroc": 0.9112080335516743
+            }
+          }
+        },
+        "semantic_relations768": {
+          "field_sha256": "34f54bd9eb0c01b97f160154df8ec4e244ce0eb1002400a406c9495b6286e3ac",
+          "tasks_per_modality": 35,
+          "macro": {
+            "text": {
+              "iou": 0.10591678424093383,
+              "average_precision": 0.23706671104213362,
+              "auroc": 0.8291799077192706
+            },
+            "image": {
+              "iou": 0.1442772218056751,
+              "average_precision": 0.2661601864782525,
+              "auroc": 0.8578434584826202
+            },
+            "prompt": {
+              "iou": 0.1118728368302779,
+              "average_precision": 0.19731520823415613,
+              "auroc": 0.8595949971300838
+            },
+            "prompt_refined": {
+              "iou": 0.17025784046718834,
+              "average_precision": 0.2541585458313246,
+              "auroc": 0.8705749479191189
+            }
+          }
+        },
+        "reliable_semantic768": {
+          "field_sha256": "ab7c72d1d529ee3cb141e178e3f7bfdb14874151a4c479c47aa68c36b4b645c6",
+          "tasks_per_modality": 35,
+          "macro": {
+            "text": {
+              "iou": 0.10305959083280627,
+              "average_precision": 0.2411055942448091,
+              "auroc": 0.8247072306618007
+            },
+            "image": {
+              "iou": 0.17053318647301338,
+              "average_precision": 0.27494859138109995,
+              "auroc": 0.851948834004792
+            },
+            "prompt": {
+              "iou": 0.10071665246772647,
+              "average_precision": 0.18660766266305132,
+              "auroc": 0.8261948050573318
+            },
+            "prompt_refined": {
+              "iou": 0.14428386975714105,
+              "average_precision": 0.24396635136677314,
+              "auroc": 0.8687845199155432
+            }
+          }
+        }
+      }
+    },
+    "paper/artifacts/figurines_source_query_text_20260915.json": {
+      "sha256": "b681c5fb82096489ea49a0f05f3dd62853a769a690175e65c34a09d3adbcac2b",
+      "runs": {
+        "source_budget_control2106": {
+          "field_sha256": "62af23edee93cef2d7d87f71402650ea244194f66c1f80d11f421b9c7c31b30b",
+          "tasks": 56,
+          "categories": 21,
+          "observation_miou": 0.25839887605505024,
+          "category_macro_miou": 0.24101012315785078,
+          "positive_support_recall_macro": 0.9906321327601161,
+          "average_precision_macro": 0.4008494239213713,
+          "auroc_macro": 0.9031255745790627,
+          "per_category_iou": {
+            "bag": 0.0,
+            "green apple": 0.4559055403695612,
+            "green toy chair": 0.014010491747630815,
+            "jake": 0.4293629899430396,
+            "miffy": 0.0,
+            "old camera": 0.6170406005035659,
+            "pikachu": 0.6515257054887935,
+            "pink ice cream": 0.40016822105710426,
+            "pirate hat": 0.0,
+            "porcelain hand": 0.36124599825366893,
+            "pumpkin": 0.051761868607922826,
+            "red apple": 0.36503464770331395,
+            "red toy chair": 0.20007315288953914,
+            "rubber duck with buoy": 0.5321369430478212,
+            "rubber duck with hat": 0.0,
+            "rubics cube": 0.2668556899822918,
+            "spatula": 0.3833918950365823,
+            "tesla door handle": 0.0,
+            "toy cat statue": 0.050722280830138744,
+            "toy elephant": 0.2819765608538915,
+            "waldo": 0.0
+          }
+        },
+        "source_queries2106": {
+          "field_sha256": "a72a36b8c9dc2ee8fa05897a03aa4a4a1b299e522ebb3ce73318a58db280a9a2",
+          "tasks": 56,
+          "categories": 21,
+          "observation_miou": 0.2796697784621,
+          "category_macro_miou": 0.2709640421029797,
+          "positive_support_recall_macro": 0.9906321327601161,
+          "average_precision_macro": 0.44040957254280977,
+          "auroc_macro": 0.9125904687080585,
+          "per_category_iou": {
+            "bag": 0.0,
+            "green apple": 0.44167827369145995,
+            "green toy chair": 0.015254371015653993,
+            "jake": 0.3108773282092195,
+            "miffy": 0.026186864116707453,
+            "old camera": 0.615800237656195,
+            "pikachu": 0.6884926010267236,
+            "pink ice cream": 0.36327812139634075,
+            "pirate hat": 0.0,
+            "porcelain hand": 0.6025846017475661,
+            "pumpkin": 0.3168589174800355,
+            "red apple": 0.38504504090320824,
+            "red toy chair": 0.24362683059121315,
+            "rubber duck with buoy": 0.539873009017306,
+            "rubber duck with hat": 0.0,
+            "rubics cube": 0.40414559172611764,
+            "spatula": 0.42228537911285713,
+            "tesla door handle": 0.0,
+            "toy cat statue": 0.05986117052524862,
+            "toy elephant": 0.25439654594672173,
+            "waldo": 0.0
+          }
+        },
+        "reliable_source_queries2106": {
+          "field_sha256": "41a643b61bcbb9c7b8c492845e0d9c505d50378851284dd85c8ca7bbef212663",
+          "tasks": 56,
+          "categories": 21,
+          "observation_miou": 0.2861000297694984,
+          "category_macro_miou": 0.2699956446843719,
+          "positive_support_recall_macro": 0.9906321327601161,
+          "average_precision_macro": 0.4390000398663612,
+          "auroc_macro": 0.9257424403032698,
+          "per_category_iou": {
+            "bag": 0.0,
+            "green apple": 0.44108085367137595,
+            "green toy chair": 0.008830961573255991,
+            "jake": 0.308916538923341,
+            "miffy": 0.028056608790034902,
+            "old camera": 0.6244465353568215,
+            "pikachu": 0.5732954122474776,
+            "pink ice cream": 0.33758598449417504,
+            "pirate hat": 0.0,
+            "porcelain hand": 0.5968982092816569,
+            "pumpkin": 0.30798515734181486,
+            "red apple": 0.3829433862627421,
+            "red toy chair": 0.1872476681052485,
+            "rubber duck with buoy": 0.5422152874123131,
+            "rubber duck with hat": 0.17144383181000156,
+            "rubics cube": 0.39519522446267025,
+            "spatula": 0.4477809559527426,
+            "tesla door handle": 0.0,
+            "toy cat statue": 0.05067826822519992,
+            "toy elephant": 0.26530765446093957,
+            "waldo": 0.0
+          }
+        }
+      }
+    },
+    "paper/artifacts/figurines_source_query_reference_20260915.json": {
+      "sha256": "70e01905036b20d36d63787b95097d3ad5546a5f9e4d0960fd3088b2eef2f13b",
+      "runs": {
+        "source_budget_control2106": {
+          "field_sha256": "62af23edee93cef2d7d87f71402650ea244194f66c1f80d11f421b9c7c31b30b",
+          "tasks_per_modality": 35,
+          "unavailable_prompt_tasks": 0,
+          "macro": {
+            "text": {
+              "iou": 0.24862522356826341,
+              "average_precision": 0.3920759322068654,
+              "auroc": 0.8965336722953409
+            },
+            "image": {
+              "iou": 0.26063580101325445,
+              "average_precision": 0.40220622817503987,
+              "auroc": 0.8813007513186646
+            },
+            "prompt": {
+              "iou": 0.196877731503328,
+              "average_precision": 0.3059813245101366,
+              "auroc": 0.8661411804376911
+            },
+            "prompt_refined": {
+              "iou": 0.3196326743283046,
+              "average_precision": 0.4910866837525378,
+              "auroc": 0.9335556870657239
+            }
+          }
+        },
+        "source_queries2106": {
+          "field_sha256": "a72a36b8c9dc2ee8fa05897a03aa4a4a1b299e522ebb3ce73318a58db280a9a2",
+          "tasks_per_modality": 35,
+          "unavailable_prompt_tasks": 0,
+          "macro": {
+            "text": {
+              "iou": 0.26579798769741236,
+              "average_precision": 0.4326854954909477,
+              "auroc": 0.9101654126761419
+            },
+            "image": {
+              "iou": 0.2749162924128578,
+              "average_precision": 0.4314218578678756,
+              "auroc": 0.9250204495818197
+            },
+            "prompt": {
+              "iou": 0.21396718450528104,
+              "average_precision": 0.37294012693124545,
+              "auroc": 0.9078082468685439
+            },
+            "prompt_refined": {
+              "iou": 0.26963053526244346,
+              "average_precision": 0.4586941110684645,
+              "auroc": 0.9396965731572152
+            }
+          }
+        },
+        "reliable_source_queries2106": {
+          "field_sha256": "41a643b61bcbb9c7b8c492845e0d9c505d50378851284dd85c8ca7bbef212663",
+          "tasks_per_modality": 35,
+          "unavailable_prompt_tasks": 0,
+          "macro": {
+            "text": {
+              "iou": 0.27698648937575854,
+              "average_precision": 0.4358295920762024,
+              "auroc": 0.9251707723674377
+            },
+            "image": {
+              "iou": 0.2936644681902942,
+              "average_precision": 0.4613119792869616,
+              "auroc": 0.9295209733801404
+            },
+            "prompt": {
+              "iou": 0.2448896159801806,
+              "average_precision": 0.384290308536173,
+              "auroc": 0.9070329383313201
+            },
+            "prompt_refined": {
+              "iou": 0.2494654928395769,
+              "average_precision": 0.4067355829329758,
+              "auroc": 0.9234978655577176
+            }
+          }
+        }
+      }
+    },
+    "paper/artifacts/ramen_reliability_text_20260915.json": {
+      "sha256": "3110c8d76a2e37beb8adfa4fe760c79ce6a7c8472c84cf3d66a8d54d402dd0a9",
+      "runs": {
+        "reliable_pairs1932": {
+          "field_sha256": "5203bae21cb155fb456d8c3264fb67e3fcbdc02797d65088bf545b30b67d96f6",
+          "tasks": 71,
+          "categories": 14,
+          "observation_miou": 0.152531016997775,
+          "category_macro_miou": 0.18043094553678504,
+          "positive_support_recall_macro": 0.9982530491452821,
+          "average_precision_macro": 0.22149142964927165,
+          "auroc_macro": 0.8229346052026995,
+          "per_category_iou": {
+            "bowl": 0.5209076095517384,
+            "chopsticks": 0.0,
+            "corn": 0.01160032378833141,
+            "egg": 0.0,
+            "glass of water": 0.37446946553519067,
+            "hand": 0.0041647385469689956,
+            "kamaboko": 0.03842358145080963,
+            "napkin": 0.1921557722870943,
+            "nori": 0.27523701590841787,
+            "onion segments": 0.06636510984371576,
+            "plate": 0.5615735470255011,
+            "sake cup": 0.1829364105397999,
+            "spoon": 0.27259464360521846,
+            "wavy noodles": 0.025605019432204914
+          }
+        },
+        "semantic_relations1932": {
+          "field_sha256": "a77ad1986068effc5385714f6b68f740e27a7cd40473a655e45af5f17fd451de",
+          "tasks": 71,
+          "categories": 14,
+          "observation_miou": 0.11326231395367324,
+          "category_macro_miou": 0.14200845615937221,
+          "positive_support_recall_macro": 0.9982530491452821,
+          "average_precision_macro": 0.19950347019121656,
+          "auroc_macro": 0.8194975385972345,
+          "per_category_iou": {
+            "bowl": 0.4651216668454875,
+            "chopsticks": 0.0,
+            "corn": 0.0,
+            "egg": 0.0,
+            "glass of water": 0.3637124081794464,
+            "hand": 0.010350076103500762,
+            "kamaboko": 0.0026208220489943486,
+            "napkin": 0.08157029007726634,
+            "nori": 0.09676914299330519,
+            "onion segments": 0.0,
+            "plate": 0.6177383230929082,
+            "sake cup": 0.16932708187125814,
+            "spoon": 0.15636936148012892,
+            "wavy noodles": 0.024539213538915028
+          }
+        },
+        "reliable_semantic1932": {
+          "field_sha256": "bfd5aabde84a21601636be084fa51b57f3a5a56138508c7f67b3075d871f87dc",
+          "tasks": 71,
+          "categories": 14,
+          "observation_miou": 0.09754521037630468,
+          "category_macro_miou": 0.12634444509710782,
+          "positive_support_recall_macro": 0.9982530491452821,
+          "average_precision_macro": 0.19026206890234335,
+          "auroc_macro": 0.7531221001412468,
+          "per_category_iou": {
+            "bowl": 0.5047539260093442,
+            "chopsticks": 0.01999588661393815,
+            "corn": 0.0,
+            "egg": 0.0,
+            "glass of water": 0.3453306604186144,
+            "hand": 0.006756756756756757,
+            "kamaboko": 0.011674953619541791,
+            "napkin": 0.11856954068272899,
+            "nori": 0.0,
+            "onion segments": 0.009086156841685789,
+            "plate": 0.5209595577398781,
+            "sake cup": 0.055120612254008654,
+            "spoon": 0.16484112426150727,
+            "wavy noodles": 0.011733056161505507
+          }
+        }
+      }
+    },
+    "paper/artifacts/ramen_reliability_reference_20260915.json": {
+      "sha256": "ba8fc90f9ad3560dff51633bb0d83261f481c2182cb31e502dd2a7a160dc8a74",
+      "runs": {
+        "reliable_pairs1932": {
+          "field_sha256": "5203bae21cb155fb456d8c3264fb67e3fcbdc02797d65088bf545b30b67d96f6",
+          "tasks_per_modality": 57,
+          "macro": {
+            "text": {
+              "iou": 0.14039030017570123,
+              "average_precision": 0.2029765564146526,
+              "auroc": 0.8143193557668261
+            },
+            "image": {
+              "iou": 0.12108041674119524,
+              "average_precision": 0.1892969819013054,
+              "auroc": 0.794200661940752
+            },
+            "prompt": {
+              "iou": 0.14318772432466118,
+              "average_precision": 0.22240935327448633,
+              "auroc": 0.8280894303686497
+            },
+            "prompt_refined": {
+              "iou": 0.16714633004428214,
+              "average_precision": 0.32466590762473524,
+              "auroc": 0.9128997838128644
+            }
+          }
+        },
+        "semantic_relations1932": {
+          "field_sha256": "a77ad1986068effc5385714f6b68f740e27a7cd40473a655e45af5f17fd451de",
+          "tasks_per_modality": 57,
+          "macro": {
+            "text": {
+              "iou": 0.10645740997787756,
+              "average_precision": 0.19085628731832582,
+              "auroc": 0.8148193972120411
+            },
+            "image": {
+              "iou": 0.14139801464664165,
+              "average_precision": 0.21300777647926575,
+              "auroc": 0.8182368571429982
+            },
+            "prompt": {
+              "iou": 0.1638384407895961,
+              "average_precision": 0.29244473325229964,
+              "auroc": 0.8741189382914133
+            },
+            "prompt_refined": {
+              "iou": 0.18775798939590585,
+              "average_precision": 0.3495159950102239,
+              "auroc": 0.9143064068777899
+            }
+          }
+        },
+        "reliable_semantic1932": {
+          "field_sha256": "bfd5aabde84a21601636be084fa51b57f3a5a56138508c7f67b3075d871f87dc",
+          "tasks_per_modality": 57,
+          "macro": {
+            "text": {
+              "iou": 0.0887726758605636,
+              "average_precision": 0.17769277085624124,
+              "auroc": 0.7506299180202451
+            },
+            "image": {
+              "iou": 0.11976013826919137,
+              "average_precision": 0.20350914177691032,
+              "auroc": 0.8069271745042003
+            },
+            "prompt": {
+              "iou": 0.13405678918053623,
+              "average_precision": 0.2374987670388376,
+              "auroc": 0.8264267934007001
+            },
+            "prompt_refined": {
+              "iou": 0.16149717578766404,
+              "average_precision": 0.3429276033524191,
+              "auroc": 0.9107193537201286
+            }
+          }
+        }
+      }
+    },
+    "paper/artifacts/ramen_source_query_text_20260915.json": {
+      "sha256": "15adcf6297c8621ec0933f56f62abf8c7b6e9fb74e6b18df2c543ccd53ff558c",
+      "runs": {
+        "source_budget_control3240": {
+          "field_sha256": "ea08036944c0a91a1c62a613ab931d553687753c23fd91832ef975c04f75c249",
+          "tasks": 71,
+          "categories": 14,
+          "observation_miou": 0.16864321807116567,
+          "category_macro_miou": 0.19828108929026741,
+          "positive_support_recall_macro": 0.9982530491452821,
+          "average_precision_macro": 0.228919502350725,
+          "auroc_macro": 0.8350424160278668,
+          "per_category_iou": {
+            "bowl": 0.4668675278230204,
+            "chopsticks": 0.0,
+            "corn": 0.011742012976341235,
+            "egg": 0.018153325344638798,
+            "glass of water": 0.3562895243316787,
+            "hand": 0.00472193074501574,
+            "kamaboko": 0.016882300156087573,
+            "napkin": 0.313421380660543,
+            "nori": 0.2913373495379407,
+            "onion segments": 0.061362170206309456,
+            "plate": 0.6274067357620937,
+            "sake cup": 0.20145177252543076,
+            "spoon": 0.3378055777990985,
+            "wavy noodles": 0.06849364219554517
+          }
+        },
+        "source_queries3240": {
+          "field_sha256": "ae49a066e852b5c068dec5482dbf33188537898b164bad381d05aaf6aabdcb3f",
+          "tasks": 71,
+          "categories": 14,
+          "observation_miou": 0.1622160563986553,
+          "category_macro_miou": 0.1934715286416881,
+          "positive_support_recall_macro": 0.9982530491452821,
+          "average_precision_macro": 0.22407594783320395,
+          "auroc_macro": 0.8623347294861913,
+          "per_category_iou": {
+            "bowl": 0.4887801644825777,
+            "chopsticks": 0.015566511661236791,
+            "corn": 0.012380790169034633,
+            "egg": 0.0004616805170821791,
+            "glass of water": 0.37645604487613393,
+            "hand": 0.0,
+            "kamaboko": 0.0,
+            "napkin": 0.14542215713247678,
+            "nori": 0.3372400572955052,
+            "onion segments": 0.0759546080483393,
+            "plate": 0.6270662867607997,
+            "sake cup": 0.1838505640804715,
+            "spoon": 0.3730267745947362,
+            "wavy noodles": 0.07239576136523904
+          }
+        },
+        "reliable_source_queries3240": {
+          "field_sha256": "53373cfd440cb237d3f62cb066ba41299868abd5ff03a83b2f06068da220d63a",
+          "tasks": 71,
+          "categories": 14,
+          "observation_miou": 0.13161395712626486,
+          "category_macro_miou": 0.16125337701367148,
+          "positive_support_recall_macro": 0.9982530491452821,
+          "average_precision_macro": 0.22279370869452478,
+          "auroc_macro": 0.8740403251790573,
+          "per_category_iou": {
+            "bowl": 0.5059719296044302,
+            "chopsticks": 0.011545743589981894,
+            "corn": 0.013583807866503225,
+            "egg": 0.0,
+            "glass of water": 0.3766517340856251,
+            "hand": 0.0,
+            "kamaboko": 0.0,
+            "napkin": 0.06638214148582897,
+            "nori": 0.024866075830590837,
+            "onion segments": 0.13123911207395653,
+            "plate": 0.6086242115984528,
+            "sake cup": 0.16291167524834738,
+            "spoon": 0.2778910354318097,
+            "wavy noodles": 0.07787981137587373
+          }
+        }
+      }
+    },
+    "paper/artifacts/ramen_source_query_reference_20260915.json": {
+      "sha256": "6b25215953839d085cff80d1dc92c6025bf361b55a5b3da263f7b2da1f36ca29",
+      "runs": {
+        "source_budget_control3240": {
+          "field_sha256": "ea08036944c0a91a1c62a613ab931d553687753c23fd91832ef975c04f75c249",
+          "tasks_per_modality": 57,
+          "unavailable_prompt_tasks": 0,
+          "macro": {
+            "text": {
+              "iou": 0.15439918113040987,
+              "average_precision": 0.2085542068905926,
+              "auroc": 0.8196387413862649
+            },
+            "image": {
+              "iou": 0.15253431019838146,
+              "average_precision": 0.24949710036687828,
+              "auroc": 0.8502348258099398
+            },
+            "prompt": {
+              "iou": 0.19010667257949773,
+              "average_precision": 0.3339537402693174,
+              "auroc": 0.8947921773375962
+            },
+            "prompt_refined": {
+              "iou": 0.20606516016592993,
+              "average_precision": 0.3701641645016851,
+              "auroc": 0.9131523086697768
+            }
+          }
+        },
+        "source_queries3240": {
+          "field_sha256": "ae49a066e852b5c068dec5482dbf33188537898b164bad381d05aaf6aabdcb3f",
+          "tasks_per_modality": 57,
+          "unavailable_prompt_tasks": 0,
+          "macro": {
+            "text": {
+              "iou": 0.1498297632557019,
+              "average_precision": 0.2082338974837697,
+              "auroc": 0.8536239997589877
+            },
+            "image": {
+              "iou": 0.1741483388272488,
+              "average_precision": 0.28797483756765024,
+              "auroc": 0.8778640728054586
+            },
+            "prompt": {
+              "iou": 0.2348827877805322,
+              "average_precision": 0.36248367931698594,
+              "auroc": 0.9270820577756778
+            },
+            "prompt_refined": {
+              "iou": 0.22440697271704058,
+              "average_precision": 0.41357445641762525,
+              "auroc": 0.9340772270949529
+            }
+          }
+        },
+        "reliable_source_queries3240": {
+          "field_sha256": "53373cfd440cb237d3f62cb066ba41299868abd5ff03a83b2f06068da220d63a",
+          "tasks_per_modality": 57,
+          "unavailable_prompt_tasks": 0,
+          "macro": {
+            "text": {
+              "iou": 0.12114070956529491,
+              "average_precision": 0.21260225546475944,
+              "auroc": 0.8638757990228202
+            },
+            "image": {
+              "iou": 0.14987308443209582,
+              "average_precision": 0.2382022573827765,
+              "auroc": 0.8532954455264449
+            },
+            "prompt": {
+              "iou": 0.2232697260915639,
+              "average_precision": 0.32099142914016354,
+              "auroc": 0.9263049674767003
+            },
+            "prompt_refined": {
+              "iou": 0.22232283689873625,
+              "average_precision": 0.3567678388027462,
+              "auroc": 0.9334944494693985
+            }
+          }
+        }
+      }
+    }
+  },
+  "audits": {
+    "paper/artifacts/figurines_reference_contract_audit_20260915.json": "370bb7d2a0237877766dac42a2cb7428a86f69fae9c432247616b9416555a412",
+    "paper/artifacts/figurines_correspondence_admission_fp32_20260915.json": "1a39f31553f6cebe804802142654c1545b9dc9109b4a658ad7b339dc73f416a6",
+    "paper/artifacts/ramen_reference_contract_audit_20260915.json": "cc2a3805d60168da212bff1f9b04e5248944e441e4a14fb1f2566c908e722b90",
+    "paper/artifacts/ramen_correspondence_admission_fp32_20260915.json": "b9bede6a1a743e7e7d60aed6540596346a7a1c7db41669b217650ae6e03412a3"
+  },
+  "cold": {
+    "figurines": {
+      "sha256": "5624234583dcac038306ca92493091c6b223f772fedd2ac6f1efc1d2090773cf",
+      "schema": "native_three_query_cold.v1",
+      "training_cache_reads_forbidden": true,
+      "native_queries_encoded_online": true,
+      "geometry_unchanged": true,
+      "field_sha256": "41a643b61bcbb9c7b8c492845e0d9c505d50378851284dd85c8ca7bbef212663",
+      "fixture_sha256": "5d3bd3ff86a4763db58f13170710d1628c83414723f7f5037412216228f2bc99",
+      "modalities": {
+        "text": {
+          "native_vs_training_encoding_cosine": 0.9999995231628418,
+          "elements": 274805,
+          "valid_elements": 92249,
+          "posterior_max_difference": 0.0005010664463043213
+        },
+        "image": {
+          "native_vs_training_encoding_cosine": 0.9998960494995117,
+          "elements": 274805,
+          "valid_elements": 92249,
+          "posterior_max_difference": 0.003213047981262207
+        },
+        "prompt": {
+          "native_vs_training_encoding_cosine": 0.9999999403953552,
+          "elements": 274805,
+          "valid_elements": 92249,
+          "posterior_max_difference": 0.0
+        }
+      },
+      "quality_evaluation": false,
+      "registered_prompt_refinement": null
+    },
+    "ramen": {
+      "sha256": "7c5d82f52aa98a1ae9d205d237508f3419fdb4df9949a2d4e3d9ebfd75168393",
+      "schema": "native_three_query_cold.v1",
+      "training_cache_reads_forbidden": true,
+      "native_queries_encoded_online": true,
+      "geometry_unchanged": true,
+      "field_sha256": "53373cfd440cb237d3f62cb066ba41299868abd5ff03a83b2f06068da220d63a",
+      "fixture_sha256": "9913fc0479ac37c9e196a8fe2469894e86f6d675b11ad13a414c3689a31e7277",
+      "modalities": {
+        "text": {
+          "native_vs_training_encoding_cosine": 0.9999995827674866,
+          "elements": 362198,
+          "valid_elements": 255984,
+          "posterior_max_difference": 0.0008056461811065674
+        },
+        "image": {
+          "native_vs_training_encoding_cosine": 0.9998043179512024,
+          "elements": 362198,
+          "valid_elements": 255984,
+          "posterior_max_difference": 0.02044561505317688
+        },
+        "prompt": {
+          "native_vs_training_encoding_cosine": 1.0,
+          "elements": 362198,
+          "valid_elements": 255984,
+          "posterior_max_difference": 0.0
+        }
+      },
+      "quality_evaluation": false,
+      "registered_prompt_refinement": null
+    }
+  }
+}

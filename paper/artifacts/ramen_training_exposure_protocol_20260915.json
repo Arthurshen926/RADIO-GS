@@ -1,0 +1,10 @@
+{
+ "status":"declared before new training runs",
+ "steps":660,
+ "runs":["expanded_exposure660","original_exposure660"],
+ "teachers":["radio","dino","sam","siglip"],
+ "share_siglip_adapter":true,
+ "rationale":"408 steps give original image tasks 136/84=1.619 visits on average but expanded tasks only 136/136=1. 660 steps give expanded tasks 220/136=1.618 visits. Also run original at 660 to separate total budget effects.",
+ "no_validation_based_early_stopping":true,
+ "benchmark_ground_truth":false
+}

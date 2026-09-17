@@ -127,7 +127,8 @@ class FeatureFieldRenderer(nn.Module):
         color semantics.  ``contribution_gamma != 1`` selects the shared,
         inference-only contribution-sharpened observation operator; it always
         returns a normalized feature mixture and leaves geometric alpha/depth
-        unchanged.
+        unchanged. Frozen geometry uses post-visibility confidence weighting;
+        legacy geometry retains the original opacity-weighted replay contract.
         """
 
         fH = feature_height or self.image_height
@@ -144,6 +145,39 @@ class FeatureFieldRenderer(nn.Module):
                 "depth_map": torch.zeros(fH, fW, device=features.device),
                 "alpha_map": torch.zeros(fH, fW, device=features.device),
             }
+        # Frozen geometry must retain its visibility even when semantic evidence
+        # is missing. Rasterize confidence as an extra feature channel instead
+        # of modifying opacity: sum(w*c*f) / sum(w*c), with the original w.
+        if row_confidence is not None and getattr(
+            gaussian_model, "feature_confidence_contract", None
+        ) == "post_visibility_normalized_v1":
+            confidence = torch.as_tensor(
+                row_confidence, device=features.device, dtype=features.dtype
+            ).reshape(-1)
+            if (confidence.shape != means.shape[:1]
+                    or not bool(torch.isfinite(confidence).all())
+                    or bool(((confidence < 0) | (confidence > 1)).any())):
+                raise ValueError("frozen feature confidence must be finite [N] in [0,1]")
+            if not alpha_normalize:
+                raise ValueError("frozen feature confidence requires alpha_normalize=True")
+            weighted = torch.cat(
+                (features * confidence[:, None], confidence[:, None]), dim=1
+            )
+            result = self.render_feature_rows(
+                gaussian_model, viewmat, weighted,
+                feature_height=fH, feature_width=fW,
+                alpha_normalize=True, alpha_eps=alpha_eps,
+                contribution_gamma=contribution_gamma,
+                contribution_cache=contribution_cache,
+            )
+            support = result["feature_map"][-1]
+            result["feature_map"] = torch.where(
+                (support > alpha_eps)[None],
+                result["feature_map"][:-1] / support.clamp_min(alpha_eps)[None],
+                torch.zeros_like(result["feature_map"][:-1]),
+            )
+            result["feature_support_map"] = support
+            return result
         gamma = float(contribution_gamma)
         if not torch.isfinite(torch.tensor(gamma)) or gamma <= 0:
             raise ValueError("contribution_gamma must be finite and positive")
@@ -178,8 +212,9 @@ class FeatureFieldRenderer(nn.Module):
             confidence = torch.as_tensor(
                 row_confidence, device=opacities.device, dtype=opacities.dtype
             ).reshape(-1)
-            if confidence.shape != opacities.shape or bool((confidence < 0).any()):
-                raise ValueError("row_confidence must be non-negative [num_gaussians]")
+            if (confidence.shape != opacities.shape or not bool(torch.isfinite(confidence).all())
+                    or bool((confidence < 0).any())):
+                raise ValueError("row_confidence must be finite non-negative [num_gaussians]")
             opacities = opacities * confidence.clamp(max=1.0)
         rendered, depth, alpha = self._chunk_render(
             means,

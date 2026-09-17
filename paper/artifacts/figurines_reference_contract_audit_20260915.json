@@ -1,0 +1,994 @@
+{
+  "schema": "polygon_reference_query_contract_audit.v1",
+  "evaluation_sha256": "9f3c7a7433babf7c8a678ad096a676150a9a58e4cb3a7a43e5d46dcf0e9bb039",
+  "scene": "figurines",
+  "tasks": 35,
+  "multiple_connected_support_tasks": 0,
+  "missing_registered_prompt_tasks": 0,
+  "truth_domain": "2D category polygon union; not independently verified 3D/instance tracks",
+  "query_source": "reference GT masked crop or GT-derived positive and negative registered points",
+  "target_truth_used_for_encoding": false,
+  "cohort_has_absent_category_targets": false,
+  "single_connected_support_does_not_prove_identity": true,
+  "source_annotations": [
+    {
+      "file": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json",
+      "sha256": "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a",
+      "object_fields": [
+        "area",
+        "bbox",
+        "category",
+        "group",
+        "iscrowd",
+        "layer",
+        "note",
+        "segmentation"
+      ],
+      "category_group_pairs": [
+        [
+          "old camera",
+          3
+        ],
+        [
+          "toy elephant",
+          4
+        ],
+        [
+          "waldo",
+          5
+        ],
+        [
+          "tesla door handle",
+          6
+        ],
+        [
+          "porcelain hand",
+          7
+        ],
+        [
+          "rubber duck with hat",
+          8
+        ],
+        [
+          "rubber duck with buoy",
+          9
+        ],
+        [
+          "pink ice cream",
+          10
+        ],
+        [
+          "red toy chair",
+          12
+        ],
+        [
+          "green apple",
+          13
+        ],
+        [
+          "pikachu",
+          15
+        ],
+        [
+          "red apple",
+          16
+        ],
+        [
+          "spatula",
+          17
+        ],
+        [
+          "jake",
+          18
+        ],
+        [
+          "toy cat statue",
+          19
+        ],
+        [
+          "pirate hat",
+          20
+        ],
+        [
+          "miffy",
+          21
+        ]
+      ]
+    },
+    {
+      "file": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00105.json",
+      "sha256": "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b",
+      "object_fields": [
+        "area",
+        "bbox",
+        "category",
+        "group",
+        "iscrowd",
+        "layer",
+        "note",
+        "segmentation"
+      ],
+      "category_group_pairs": [
+        [
+          "rubics cube",
+          1
+        ],
+        [
+          "green apple",
+          2
+        ],
+        [
+          "green toy chair",
+          3
+        ],
+        [
+          "jake",
+          4
+        ],
+        [
+          "old camera",
+          6
+        ],
+        [
+          "pink ice cream",
+          7
+        ],
+        [
+          "pumpkin",
+          8
+        ],
+        [
+          "red apple",
+          9
+        ],
+        [
+          "rubber duck with hat",
+          10
+        ],
+        [
+          "tesla door handle",
+          11
+        ],
+        [
+          "spatula",
+          14
+        ],
+        [
+          "rubber duck with buoy",
+          15
+        ],
+        [
+          "pirate hat",
+          16
+        ]
+      ]
+    },
+    {
+      "file": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.json",
+      "sha256": "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb",
+      "object_fields": [
+        "area",
+        "bbox",
+        "category",
+        "group",
+        "iscrowd",
+        "layer",
+        "note",
+        "segmentation"
+      ],
+      "category_group_pairs": [
+        [
+          "rubber duck with hat",
+          1
+        ],
+        [
+          "rubics cube",
+          2
+        ],
+        [
+          "toy elephant",
+          3
+        ],
+        [
+          "green apple",
+          4
+        ],
+        [
+          "jake",
+          5
+        ],
+        [
+          "toy cat statue",
+          6
+        ],
+        [
+          "pikachu",
+          8
+        ],
+        [
+          "porcelain hand",
+          9
+        ],
+        [
+          "red apple",
+          10
+        ],
+        [
+          "waldo",
+          11
+        ],
+        [
+          "pirate hat",
+          12
+        ]
+      ]
+    },
+    {
+      "file": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00195.json",
+      "sha256": "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb",
+      "object_fields": [
+        "area",
+        "bbox",
+        "category",
+        "group",
+        "iscrowd",
+        "layer",
+        "note",
+        "segmentation"
+      ],
+      "category_group_pairs": [
+        [
+          "toy elephant",
+          4
+        ],
+        [
+          "pink ice cream",
+          5
+        ],
+        [
+          "porcelain hand",
+          7
+        ],
+        [
+          "green apple",
+          8
+        ],
+        [
+          "green toy chair",
+          9
+        ],
+        [
+          "old camera",
+          10
+        ],
+        [
+          "pink ice cream",
+          11
+        ],
+        [
+          "rubics cube",
+          13
+        ],
+        [
+          "spatula",
+          14
+        ],
+        [
+          "toy cat statue",
+          15
+        ],
+        [
+          "waldo",
+          16
+        ],
+        [
+          "rubber duck with buoy",
+          17
+        ],
+        [
+          "pirate hat",
+          18
+        ],
+        [
+          "miffy",
+          19
+        ],
+        [
+          "bag",
+          20
+        ],
+        [
+          "rubber duck with hat",
+          21
+        ]
+      ]
+    }
+  ],
+  "diagnostic_strata": {
+    "component_pipeline768": {
+      "single_connected_support": {
+        "tasks": 35,
+        "is_verified_instance_evaluation": false,
+        "iou": {
+          "text": 0.17747852557091,
+          "image": 0.17890245393746343,
+          "prompt": 0.12607515727229193,
+          "prompt_refined": 0.22929769179035847
+        }
+      },
+      "multiple_connected_supports": {
+        "tasks": 0,
+        "is_verified_instance_evaluation": false,
+        "iou": {
+          "text": null,
+          "image": null,
+          "prompt": null,
+          "prompt_refined": null
+        }
+      }
+    },
+    "component_native_constrained768": {
+      "single_connected_support": {
+        "tasks": 35,
+        "is_verified_instance_evaluation": false,
+        "iou": {
+          "text": 0.1980671285786005,
+          "image": 0.0,
+          "prompt": 0.09565816905641807,
+          "prompt_refined": 0.10486212574599264
+        }
+      },
+      "multiple_connected_supports": {
+        "tasks": 0,
+        "is_verified_instance_evaluation": false,
+        "iou": {
+          "text": null,
+          "image": null,
+          "prompt": null,
+          "prompt_refined": null
+        }
+      }
+    },
+    "component_native_no_radio768": {
+      "single_connected_support": {
+        "tasks": 35,
+        "is_verified_instance_evaluation": false,
+        "iou": {
+          "text": 0.1998750746803865,
+          "image": 0.0,
+          "prompt": 0.09554792359887786,
+          "prompt_refined": 0.10482024941422459
+        }
+      },
+      "multiple_connected_supports": {
+        "tasks": 0,
+        "is_verified_instance_evaluation": false,
+        "iou": {
+          "text": null,
+          "image": null,
+          "prompt": null,
+          "prompt_refined": null
+        }
+      }
+    },
+    "component_area_constrained768": {
+      "single_connected_support": {
+        "tasks": 35,
+        "is_verified_instance_evaluation": false,
+        "iou": {
+          "text": 0.206596749785676,
+          "image": 0.0,
+          "prompt": 0.09450237436781028,
+          "prompt_refined": 0.10339702337962302
+        }
+      },
+      "multiple_connected_supports": {
+        "tasks": 0,
+        "is_verified_instance_evaluation": false,
+        "iou": {
+          "text": null,
+          "image": null,
+          "prompt": null,
+          "prompt_refined": null
+        }
+      }
+    }
+  },
+  "observations": [
+    {
+      "category": "green apple",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1800
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 3625
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "jake",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1914
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1006
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "old camera",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2982
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 13233
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "pink ice cream",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1160
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1176
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "pirate hat",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 456
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 223
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "red apple",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1914
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 8337
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "rubber duck with buoy",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1821
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1048
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "rubber duck with hat",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1462
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 525
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "spatula",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1545
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 482
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "tesla door handle",
+      "reference_frame": 41,
+      "target_frame": 105,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1668
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2581
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "green apple",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1800
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1622
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "jake",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1914
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2653
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "pikachu",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2912
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 4692
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "pirate hat",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 456
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 513
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "porcelain hand",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 930
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1373
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "red apple",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1914
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 733
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "rubber duck with hat",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1462
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1984
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "rubics cube",
+      "reference_frame": 105,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1205
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 4344
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "toy cat statue",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 378
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1644
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "toy elephant",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2055
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 5019
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "waldo",
+      "reference_frame": 41,
+      "target_frame": 152,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 875
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1461
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "green apple",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1800
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1810
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "green toy chair",
+      "reference_frame": 105,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2462
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 7540
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "miffy",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 564
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 241
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "old camera",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2982
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 4659
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "pink ice cream",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1160
+      },
+      "target_support": {
+        "annotation_regions": 2,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 188
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "pirate hat",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 456
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 466
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "porcelain hand",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 930
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 489
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "rubber duck with buoy",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1821
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1027
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "rubber duck with hat",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1462
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1054
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "rubics cube",
+      "reference_frame": 105,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1205
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1670
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "spatula",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1545
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2136
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "toy cat statue",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 378
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 735
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "toy elephant",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 2055
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 1219
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    },
+    {
+      "category": "waldo",
+      "reference_frame": 41,
+      "target_frame": 195,
+      "reference_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 875
+      },
+      "target_support": {
+        "annotation_regions": 1,
+        "components_at_least_8_pixels": 1,
+        "positive_pixels": 765
+      },
+      "multiple_disconnected_supports": false,
+      "prompt_available": true
+    }
+  ]
+}

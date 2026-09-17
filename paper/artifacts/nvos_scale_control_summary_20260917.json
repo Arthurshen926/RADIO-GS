@@ -1,0 +1,618 @@
+{
+  "schema": "nvos_scale_controls_summary.v1",
+  "source_only": true,
+  "benchmark_queries_used": false,
+  "physical_scenes": 7,
+  "query_tasks": 8,
+  "scenes": [
+    {
+      "scene": "fern",
+      "task_names": [
+        "fern"
+      ],
+      "pure_scale_accepted": 0,
+      "total_views": 19,
+      "local_scale_accepted": 19,
+      "materialized_maps_hash_verified": true,
+      "frozen_geometry_audit": {
+        "mapping": {
+          "candidates": 2012,
+          "covered": 1924,
+          "coverage": 0.9562624254473161,
+          "unique_reference_points": 707,
+          "absrel": {
+            "count": 1924,
+            "median": 0.01303664967417717,
+            "p90": 0.04806671999394894,
+            "mean": 0.025154184280180368
+          },
+          "centre_depth_cv": {
+            "count": 1924,
+            "median": 0.0035908205900341272,
+            "p90": 0.019328223727643496,
+            "mean": 0.00888520114164778
+          },
+          "mass_within_5pct": {
+            "count": 1924,
+            "median": 0.9999999403953552,
+            "p90": 1.0000001192092896,
+            "mean": 0.8975446237095478
+          },
+          "mass_in_front_20pct": {
+            "count": 1924,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.0021183227698111486
+          },
+          "mass_behind_20pct": {
+            "count": 1924,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.011673443241099944
+          },
+          "relative_interval_width": {
+            "count": 1924,
+            "median": 0.007057762239128351,
+            "p90": 0.023772935010492807,
+            "mean": 0.01580873383804195
+          }
+        },
+        "fusion_heldout": {
+          "candidates": 523,
+          "covered": 503,
+          "coverage": 0.9617590822179732,
+          "unique_reference_points": 404,
+          "absrel": {
+            "count": 503,
+            "median": 0.013412832282483578,
+            "p90": 0.05227509066462517,
+            "mean": 0.026297978172726767
+          },
+          "centre_depth_cv": {
+            "count": 503,
+            "median": 0.0035222109872847795,
+            "p90": 0.017449554800987258,
+            "mean": 0.0097605013417044
+          },
+          "mass_within_5pct": {
+            "count": 503,
+            "median": 0.9999999403953552,
+            "p90": 1.0000001192092896,
+            "mean": 0.892627862939624
+          },
+          "mass_in_front_20pct": {
+            "count": 503,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.00022176265805426459
+          },
+          "mass_behind_20pct": {
+            "count": 503,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.01812603960647124
+          },
+          "relative_interval_width": {
+            "count": 503,
+            "median": 0.006595301907509565,
+            "p90": 0.022963128611445432,
+            "mean": 0.017611453806669633
+          }
+        },
+        "rejected_source_views": {
+          "candidates": 0,
+          "covered": 0,
+          "coverage": 0.0,
+          "unique_reference_points": 0,
+          "absrel": {
+            "count": 0
+          },
+          "centre_depth_cv": {
+            "count": 0
+          },
+          "mass_within_5pct": {
+            "count": 0
+          },
+          "mass_in_front_20pct": {
+            "count": 0
+          },
+          "mass_behind_20pct": {
+            "count": 0
+          },
+          "relative_interval_width": {
+            "count": 0
+          }
+        }
+      },
+      "bounded_conclusion": "geometry candidate measured; coverage and retrieval acceptance remain separate"
+    },
+    {
+      "scene": "flower",
+      "task_names": [
+        "flower"
+      ],
+      "pure_scale_accepted": 0,
+      "total_views": 33,
+      "local_scale_accepted": 0,
+      "materialized_maps_hash_verified": true,
+      "bounded_conclusion": "fewer than four admitted views; no complete field build"
+    },
+    {
+      "scene": "fortress",
+      "task_names": [
+        "fortress"
+      ],
+      "pure_scale_accepted": 41,
+      "total_views": 41,
+      "bounded_conclusion": "pure-scale candidate; local-scale control unnecessary for this diagnostic"
+    },
+    {
+      "scene": "horns_center",
+      "task_names": [
+        "horns_center",
+        "horns_left"
+      ],
+      "pure_scale_accepted": 0,
+      "total_views": 61,
+      "local_scale_accepted": 15,
+      "materialized_maps_hash_verified": true,
+      "frozen_geometry_audit": {
+        "mapping": {
+          "candidates": 5201,
+          "covered": 4790,
+          "coverage": 0.9209767352432224,
+          "unique_reference_points": 1836,
+          "absrel": {
+            "count": 4790,
+            "median": 0.006506139878183603,
+            "p90": 0.03851093426346786,
+            "mean": 0.026549196736031493
+          },
+          "centre_depth_cv": {
+            "count": 4790,
+            "median": 0.0038090671878308058,
+            "p90": 0.013618747889995578,
+            "mean": 0.01154964775307011
+          },
+          "mass_within_5pct": {
+            "count": 4790,
+            "median": 1.0,
+            "p90": 1.0000001192092896,
+            "mean": 0.9137786056291152
+          },
+          "mass_in_front_20pct": {
+            "count": 4790,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.005652389956039371
+          },
+          "mass_behind_20pct": {
+            "count": 4790,
+            "median": 0.0,
+            "p90": 8.804945264273608e-06,
+            "mean": 0.007801399893699829
+          },
+          "relative_interval_width": {
+            "count": 4790,
+            "median": 0.008001644164323807,
+            "p90": 0.016482083685696126,
+            "mean": 0.02090980028487041
+          }
+        },
+        "fusion_heldout": {
+          "candidates": 1484,
+          "covered": 1387,
+          "coverage": 0.9346361185983828,
+          "unique_reference_points": 1021,
+          "absrel": {
+            "count": 1387,
+            "median": 0.006475187838077545,
+            "p90": 0.04163646027445794,
+            "mean": 0.027957614872965754
+          },
+          "centre_depth_cv": {
+            "count": 1387,
+            "median": 0.003723112866282463,
+            "p90": 0.013249866850674176,
+            "mean": 0.011982375984676481
+          },
+          "mass_within_5pct": {
+            "count": 1387,
+            "median": 1.0,
+            "p90": 1.0000001192092896,
+            "mean": 0.9127688621732025
+          },
+          "mass_in_front_20pct": {
+            "count": 1387,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.004404871913899212
+          },
+          "mass_behind_20pct": {
+            "count": 1387,
+            "median": 0.0,
+            "p90": 9.941299504134811e-06,
+            "mean": 0.00828455531971124
+          },
+          "relative_interval_width": {
+            "count": 1387,
+            "median": 0.007781109306961298,
+            "p90": 0.017043365538120282,
+            "mean": 0.020078174647671677
+          }
+        },
+        "rejected_source_views": {
+          "candidates": 19231,
+          "covered": 17110,
+          "coverage": 0.8897093234881182,
+          "unique_reference_points": 2834,
+          "absrel": {
+            "count": 17110,
+            "median": 0.0072758616879582405,
+            "p90": 0.10179603770375256,
+            "mean": 0.05794877805587345
+          },
+          "centre_depth_cv": {
+            "count": 17110,
+            "median": 0.004216148983687162,
+            "p90": 0.02266351748257876,
+            "mean": 0.016235094385478602
+          },
+          "mass_within_5pct": {
+            "count": 17110,
+            "median": 0.9999999403953552,
+            "p90": 1.0000001192092896,
+            "mean": 0.8775439751856394
+          },
+          "mass_in_front_20pct": {
+            "count": 17110,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.008008827779018596
+          },
+          "mass_behind_20pct": {
+            "count": 17110,
+            "median": 0.0,
+            "p90": 0.0006577327207196511,
+            "mean": 0.033115793158789646
+          },
+          "relative_interval_width": {
+            "count": 17110,
+            "median": 0.008614672347903252,
+            "p90": 0.020907849073410038,
+            "mean": 0.03580293184289755
+          }
+        }
+      },
+      "bounded_conclusion": "geometry candidate measured; coverage and retrieval acceptance remain separate"
+    },
+    {
+      "scene": "leaves",
+      "task_names": [
+        "leaves"
+      ],
+      "pure_scale_accepted": 0,
+      "total_views": 25,
+      "local_scale_accepted": 3,
+      "materialized_maps_hash_verified": true,
+      "bounded_conclusion": "fewer than four admitted views; no complete field build"
+    },
+    {
+      "scene": "orchids",
+      "task_names": [
+        "orchids"
+      ],
+      "pure_scale_accepted": 0,
+      "total_views": 24,
+      "local_scale_accepted": 6,
+      "materialized_maps_hash_verified": true,
+      "frozen_geometry_audit": {
+        "mapping": {
+          "candidates": 465,
+          "covered": 421,
+          "coverage": 0.9053763440860215,
+          "unique_reference_points": 251,
+          "absrel": {
+            "count": 421,
+            "median": 0.011028546839952469,
+            "p90": 0.08703043311834335,
+            "mean": 0.03195598156255631
+          },
+          "centre_depth_cv": {
+            "count": 421,
+            "median": 0.005427229218184948,
+            "p90": 0.05909379571676254,
+            "mean": 0.024536517174276268
+          },
+          "mass_within_5pct": {
+            "count": 421,
+            "median": 0.9999969005584717,
+            "p90": 1.0,
+            "mean": 0.8591882913020017
+          },
+          "mass_in_front_20pct": {
+            "count": 421,
+            "median": 0.0,
+            "p90": 0.010332603938877583,
+            "mean": 0.031213503541101893
+          },
+          "mass_behind_20pct": {
+            "count": 421,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.0005291768032605642
+          },
+          "relative_interval_width": {
+            "count": 421,
+            "median": 0.009676835499703884,
+            "p90": 0.0822025015950203,
+            "mean": 0.043427829170472936
+          }
+        },
+        "fusion_heldout": {
+          "candidates": 256,
+          "covered": 202,
+          "coverage": 0.7890625,
+          "unique_reference_points": 233,
+          "absrel": {
+            "count": 202,
+            "median": 0.011608168482780457,
+            "p90": 0.09552909657359127,
+            "mean": 0.03626860768984236
+          },
+          "centre_depth_cv": {
+            "count": 202,
+            "median": 0.006347128190100193,
+            "p90": 0.05469366535544396,
+            "mean": 0.024338734963226437
+          },
+          "mass_within_5pct": {
+            "count": 202,
+            "median": 0.9994943141937256,
+            "p90": 1.0,
+            "mean": 0.7798937227247608
+          },
+          "mass_in_front_20pct": {
+            "count": 202,
+            "median": 0.0,
+            "p90": 0.004116305010393263,
+            "mean": 0.02855543386523086
+          },
+          "mass_behind_20pct": {
+            "count": 202,
+            "median": 0.0,
+            "p90": 0.0005542982951737944,
+            "mean": 0.006093438192502474
+          },
+          "relative_interval_width": {
+            "count": 202,
+            "median": 0.010833816602826118,
+            "p90": 0.0758756257593632,
+            "mean": 0.040141422891531754
+          }
+        },
+        "rejected_source_views": {
+          "candidates": 2585,
+          "covered": 1548,
+          "coverage": 0.5988394584139265,
+          "unique_reference_points": 871,
+          "absrel": {
+            "count": 1548,
+            "median": 0.012587284669280052,
+            "p90": 0.10942594781517982,
+            "mean": 0.042017124004274896
+          },
+          "centre_depth_cv": {
+            "count": 1548,
+            "median": 0.009339578449726105,
+            "p90": 0.0774149991571903,
+            "mean": 0.029778208018456393
+          },
+          "mass_within_5pct": {
+            "count": 1548,
+            "median": 0.9988369345664978,
+            "p90": 1.0,
+            "mean": 0.8092037360923241
+          },
+          "mass_in_front_20pct": {
+            "count": 1548,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.03870843216513334
+          },
+          "mass_behind_20pct": {
+            "count": 1548,
+            "median": 0.0,
+            "p90": 0.003930449672043322,
+            "mean": 0.010948075763645648
+          },
+          "relative_interval_width": {
+            "count": 1548,
+            "median": 0.010892714373767376,
+            "p90": 0.06613624468445778,
+            "mean": 0.04047637470628413
+          }
+        }
+      },
+      "bounded_conclusion": "geometry candidate measured; coverage and retrieval acceptance remain separate"
+    },
+    {
+      "scene": "trex",
+      "task_names": [
+        "trex"
+      ],
+      "pure_scale_accepted": 0,
+      "total_views": 54,
+      "local_scale_accepted": 34,
+      "materialized_maps_hash_verified": true,
+      "frozen_geometry_audit": {
+        "mapping": {
+          "candidates": 10705,
+          "covered": 9595,
+          "coverage": 0.8963101354507239,
+          "unique_reference_points": 2399,
+          "absrel": {
+            "count": 9595,
+            "median": 0.00547886174172163,
+            "p90": 0.038368652760982516,
+            "mean": 0.02290915012657889
+          },
+          "centre_depth_cv": {
+            "count": 9595,
+            "median": 0.0019184773555025458,
+            "p90": 0.011967058479785932,
+            "mean": 0.008995248721718984
+          },
+          "mass_within_5pct": {
+            "count": 9595,
+            "median": 1.0,
+            "p90": 1.0000001192092896,
+            "mean": 0.9245256878849006
+          },
+          "mass_in_front_20pct": {
+            "count": 9595,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.006714238694744255
+          },
+          "mass_behind_20pct": {
+            "count": 9595,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.01849889843903856
+          },
+          "relative_interval_width": {
+            "count": 9595,
+            "median": 0.0038875227328389883,
+            "p90": 0.014406062662601485,
+            "mean": 0.016722659437018752
+          }
+        },
+        "fusion_heldout": {
+          "candidates": 2481,
+          "covered": 2201,
+          "coverage": 0.8871422813381701,
+          "unique_reference_points": 1389,
+          "absrel": {
+            "count": 2201,
+            "median": 0.005531744100153446,
+            "p90": 0.03843637928366661,
+            "mean": 0.024180509795294913
+          },
+          "centre_depth_cv": {
+            "count": 2201,
+            "median": 0.0019478234462440014,
+            "p90": 0.010182904079556465,
+            "mean": 0.007335434320381267
+          },
+          "mass_within_5pct": {
+            "count": 2201,
+            "median": 1.0,
+            "p90": 1.0000001192092896,
+            "mean": 0.9237927941993465
+          },
+          "mass_in_front_20pct": {
+            "count": 2201,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.009116744519766084
+          },
+          "mass_behind_20pct": {
+            "count": 2201,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.018376513713107202
+          },
+          "relative_interval_width": {
+            "count": 2201,
+            "median": 0.003855884773656726,
+            "p90": 0.01303371973335743,
+            "mean": 0.01337376484975537
+          }
+        },
+        "rejected_source_views": {
+          "candidates": 6355,
+          "covered": 5536,
+          "coverage": 0.8711250983477576,
+          "unique_reference_points": 2093,
+          "absrel": {
+            "count": 5536,
+            "median": 0.005916954949498177,
+            "p90": 0.04406760632991791,
+            "mean": 0.027063767959349422
+          },
+          "centre_depth_cv": {
+            "count": 5536,
+            "median": 0.0019669572357088327,
+            "p90": 0.011994753032922745,
+            "mean": 0.00931593591847275
+          },
+          "mass_within_5pct": {
+            "count": 5536,
+            "median": 1.0,
+            "p90": 1.0000001192092896,
+            "mean": 0.912516342104089
+          },
+          "mass_in_front_20pct": {
+            "count": 5536,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.012891560883094379
+          },
+          "mass_behind_20pct": {
+            "count": 5536,
+            "median": 0.0,
+            "p90": 0.0,
+            "mean": 0.0203569605332072
+          },
+          "relative_interval_width": {
+            "count": 5536,
+            "median": 0.00394389359280467,
+            "p90": 0.015272220131009817,
+            "mean": 0.017312840073994765
+          }
+        }
+      },
+      "bounded_conclusion": "geometry candidate measured; coverage and retrieval acceptance remain separate"
+    }
+  ],
+  "fern_common_heldout_observations": {
+    "old": {
+      "count": 483,
+      "median": 0.03943967819213867,
+      "p90": 0.24422326683998108
+    },
+    "local": {
+      "count": 483,
+      "median": 0.013775892555713654,
+      "p90": 0.05227508768439293
+    }
+  },
+  "artifacts": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/fern/source_scale_prior.json": "5a1b5d9ea1642938ff5feb2cca3ce46a3d307b74985f55dc8ac168c8424687d1",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/fern/source_scale_prior.json": "92501e9b153cc82b18294a78ee1a30e764764f247eacf06a53f5bb1709b41203",
+    "paper/artifacts/nvos_fern_local_frozen_distribution_20260917.json": "9d0630eac070278d4c1d394997aeacf7e30e913203332d34bc8c9b47a25ca3fb",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/flower/source_scale_prior.json": "f25ed44707127b512a314c33bc4140e1bd24347faaa259096a5e2f9f5db12a80",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/flower/source_scale_prior.json": "26bcc8a085234bdf3d18dc97458f19a6ff2acac064470a229043b28ba6d74c70",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/fortress/source_scale_prior.json": "c29aad77394a61b5c820affff648766020ba6ef613dfbf370909f57280583491",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/horns_center/source_scale_prior.json": "ebba9957c3bd727c926cf91847441ce3722b5d2928a66c478bc433ffd9f05845",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/horns_center/source_scale_prior.json": "f7543183e9d423726c6a13e1fe5051b16517f850ba3fc9210f6059fae1a37223",
+    "paper/artifacts/nvos_horns_local_frozen_distribution_20260917.json": "3e1f7979a7652b0c1cdb465a94f31d006d45e00c46ec9380264c33294427f93e",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/leaves/source_scale_prior.json": "aba506a987953b42cd682972d480b59d72904934938ad667de24dfd8a80037e3",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/leaves/source_scale_prior.json": "efde9589897627749e09f3a632bcd6ec934e2898c991acf59e135c55db3d12fb",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/orchids/source_scale_prior.json": "a21f2b254dc01e94bc7aa9ee610da80221e48d70eeffac17f8cc79c5b7df6f1e",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/orchids/source_scale_prior.json": "7002670a9b15a4f0344a6044b0e98af1cce5312ee314e1d7a63dc078a93cfade",
+    "paper/artifacts/nvos_orchids_local_frozen_distribution_20260917.json": "2170e1a523c2e7b57011688a5aa1c69fbcd8d2dcc9bb7c34b310fe7744ad9ba1",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/trex/source_scale_prior.json": "d931d8b41e6b48d96a3eec918f81e9cf7be7c9ab906a190b311151e671d06cbc",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/trex/source_scale_prior.json": "39ff34b99ed4ddb9a863e612e237bae7dc4c71e2ab59c3b6b5b6b04590b9c0be",
+    "paper/artifacts/nvos_trex_local_frozen_distribution_20260917.json": "41d8353919ebac2613f1f1c2a195babaca61c29a6bfcda046a0b1a188d01b091",
+    "paper/artifacts/nvos_fern_old_frozen_distribution_20260917.json": "c185cded2b85a03519dcde174bbe807293c1288bfac0f2e304cb2602cc079c98"
+  },
+  "implementation_sha256": "920b578389a8a03e4f4ca533af1b7ed05c93f742cc0d8bb494cd422bb07c8c7c",
+  "limitations": [
+    "Sparse SfM reference, existing poses; not independent dense truth",
+    "Old fern calibration may have seen audit point IDs; new local calibration excludes them",
+    "No scene dropped from the task inventory; failed controls are not zero-filled retrieval scores",
+    "No new retrieval result is inferred from geometry errors"
+  ]
+}

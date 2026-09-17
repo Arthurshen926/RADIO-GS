@@ -11,6 +11,18 @@ from radio_gs.field.boundary_screen_residual import BoundaryConditionedScreenRes
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 
 
+
+def decode_visible_coefficients(field, compact, gaussian_geometry, alpha_eps=1e-6):
+    """An affine decoder's bias must not invent evidence in unsupported pixels."""
+    decoded = field.decoder.decode_map(compact["feature_map"])
+    if getattr(gaussian_geometry, "feature_confidence_contract", None) == "post_visibility_normalized_v1":
+        valid = compact["alpha_map"] > alpha_eps
+        if "feature_support_map" in compact:
+            valid = valid & (compact["feature_support_map"] > alpha_eps)
+        decoded = torch.where(valid[None], decoded, torch.zeros_like(decoded))
+    return decoded
+
+
 def render_canonical_radio(
     renderer: FeatureFieldRenderer,
     gaussian_geometry,
@@ -39,7 +51,7 @@ def render_canonical_radio(
     return {
         **compact,
         "coefficient_map": compact["feature_map"],
-        "feature_map": field.decoder.decode_map(compact["feature_map"]),
+        "feature_map": decode_visible_coefficients(field, compact, gaussian_geometry, alpha_eps),
     }
 
 
@@ -141,6 +153,6 @@ def render_view_conditioned_radio(
     return {
         **compact,
         "coefficient_map": compact["feature_map"],
-        "feature_map": field.decoder.decode_map(compact["feature_map"]),
+        "feature_map": decode_visible_coefficients(field, compact, gaussian_geometry, alpha_eps),
         "primitive_delta": delta,
     }

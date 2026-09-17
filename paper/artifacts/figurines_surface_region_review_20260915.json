@@ -1,0 +1,22 @@
+{
+  "schema": "source_region_visual_review.v1",
+  "scene": "figurines",
+  "episode_sha256": "54871ee82c9a7e7cebf6921daa54cf73eeb47ed0c089137f1fd47e56384f3835",
+  "regions": [
+    15,
+    16,
+    35,
+    62,
+    63,
+    68,
+    74
+  ],
+  "reviewer": "assistant visual inspection of source RGB with native SAM outlines",
+  "split": "train",
+  "observation": "regions primarily cover overlapping tabletop/background support-surface fragments, not independent complete foreground instances",
+  "suggested_semantic_description": "table surface",
+  "teacher_top1_labels_unreliable": true,
+  "human_ground_truth": false,
+  "used_to_modify_training_labels": false,
+  "recommended_action": "do not fuse component into a physical instance; review/deduplicate source proposals and replace unstable hard text labels only with separately validated evidence"
+}

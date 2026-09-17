@@ -1,0 +1,1456 @@
+{
+  "schema": "supervision_coverage_development.v1",
+  "training_runs": {
+    "coverage_only_v1": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "d98d45ded10a053f98ec7315dd7d70d50384dabcd007914014c742f2b1e28c66",
+      "supervision_implementation_sha256": "a5fa8fa34e776a9fd3764f50471b1743a859fd77bd3e4f44fd5070b4d9d888c3",
+      "source_coverage_enabled": true,
+      "soft_query_relations_enabled": false,
+      "source_regions_available": 92,
+      "source_regions_supervised": 92,
+      "soft_text_queries_supervised": 0,
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.3558925837278366,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482223659754,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.087362766265869,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9911520580450693,
+            "membership_loss": 0.06693980609998107,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9717463813722134,
+            "membership_loss": 0.11163602449232712,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.9410655554383993,
+            "membership_loss": 0.17875623860163614,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.5084714901944002,
+            "membership_loss": 1.2445014317830403,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.3935282578895567,
+            "membership_loss": 1.0963904932141304,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.252282434143126,
+            "membership_loss": 1.72797092795372,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.05649985745549202,
+        "text": 16.228212356567383,
+        "teacher_radio": 0.002064133994281292,
+        "teacher_dino": 0.0020346203818917274,
+        "teacher_siglip": 0.009749197401106358,
+        "image": 26.323068618774414,
+        "prompt": 64.31421661376953
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 8.822134017944336,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "radio": 0.09854674339294434,
+            "radio_relation": 0.000723043573088944,
+            "dino": 0.09917820245027542,
+            "dino_relation": 0.0009416526881977916,
+            "siglip": 0.10148938745260239,
+            "sam": 0.0022188029251992702,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 2.4098293781280518,
+          "membership_2d": 0.7528160810470581,
+          "membership_3d": 0.7891362905502319,
+          "aux": {
+            "radio": 0.06416302174329758,
+            "radio_relation": 0.0010379909072071314,
+            "dino": 0.05814911052584648,
+            "dino_relation": 0.0008974182419478893,
+            "siglip": 0.07184053212404251,
+            "sam": 0.002142026089131832,
+            "sam_membership_boundary": 0.0001144326088251546
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.811631441116333,
+          "membership_2d": 1.3688631057739258,
+          "membership_3d": 0.956791341304779,
+          "aux": {
+            "radio": 0.0520365834236145,
+            "radio_relation": 0.0012207833351567388,
+            "dino": 0.04540587589144707,
+            "dino_relation": 0.000981209916062653,
+            "siglip": 0.04015040025115013,
+            "sam": 0.002311504678800702,
+            "sam_membership_boundary": 5.9894489822909236e-05
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 0.9508682489395142,
+          "membership_2d": 0.4018368721008301,
+          "membership_3d": 0.35024309158325195,
+          "aux": {
+            "radio": 0.0473749153316021,
+            "radio_relation": 0.0016204770654439926,
+            "dino": 0.043251991271972656,
+            "dino_relation": 0.0012709252769127488,
+            "siglip": 0.038166165351867676,
+            "sam": 0.0023361551575362682,
+            "sam_membership_boundary": 2.653063893376384e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 0.289279580116272,
+          "membership_2d": 0.06563559174537659,
+          "membership_3d": 0.062240514904260635,
+          "aux": {
+            "radio": 0.04910056293010712,
+            "radio_relation": 0.0010131150484085083,
+            "dino": 0.04771916940808296,
+            "dino_relation": 0.0008554448140785098,
+            "siglip": 0.017291737720370293,
+            "sam": 0.0028548804111778736,
+            "sam_membership_boundary": 1.5250300293701002e-06
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.22872844338417053,
+          "membership_2d": 0.04574236273765564,
+          "membership_3d": 0.03625143691897392,
+          "aux": {
+            "radio": 0.04139673709869385,
+            "radio_relation": 0.001045168493874371,
+            "dino": 0.040794577449560165,
+            "dino_relation": 0.0009112163679674268,
+            "siglip": 0.01275973953306675,
+            "sam": 0.0024360634852200747,
+            "sam_membership_boundary": 3.7974452880007448e-06
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.4189235270023346,
+          "membership_2d": 0.08997035026550293,
+          "membership_3d": 0.13966387510299683,
+          "aux": {
+            "radio": 0.034110404551029205,
+            "radio_relation": 0.0013993608299642801,
+            "dino": 0.03264617919921875,
+            "dino_relation": 0.0011548618786036968,
+            "siglip": 0.011707603931427002,
+            "sam": 0.002692129462957382,
+            "sam_membership_boundary": 3.4717359085334465e-06
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "339f3d204c35547ec5d4b53a8183b04811bdbb452b300343ad991918693b0b9d",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "coverage_soft_v1": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "d98d45ded10a053f98ec7315dd7d70d50384dabcd007914014c742f2b1e28c66",
+      "supervision_implementation_sha256": "a5fa8fa34e776a9fd3764f50471b1743a859fd77bd3e4f44fd5070b4d9d888c3",
+      "source_coverage_enabled": true,
+      "soft_query_relations_enabled": true,
+      "source_regions_available": 92,
+      "source_regions_supervised": 92,
+      "soft_text_queries_supervised": 79,
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.355892553925514,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482238560915,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.087362766265869,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9891852041085561,
+            "membership_loss": 0.08514257458349068,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9665667451918125,
+            "membership_loss": 0.12350912461988628,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.9375625383108854,
+            "membership_loss": 0.1709303940879181,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.47288579505402595,
+            "membership_loss": 1.34196937084198,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.31860855215927586,
+            "membership_loss": 1.2283519729971886,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.24345599324442446,
+            "membership_loss": 1.837430626153946,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.05649985373020172,
+        "text": 13.846409797668457,
+        "teacher_radio": 0.0018946194322779775,
+        "teacher_dino": 0.0018219836056232452,
+        "teacher_siglip": 0.008588473312556744,
+        "image": 25.063364028930664,
+        "prompt": 57.955413818359375
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 8.829615592956543,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "radio": 0.09854674339294434,
+            "radio_relation": 0.000723043573088944,
+            "dino": 0.09917820245027542,
+            "dino_relation": 0.0009416526881977916,
+            "siglip": 0.10148938745260239,
+            "siglip_query_relations": 0.007481136359274387,
+            "sam": 0.0022188029251992702,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 2.6966421604156494,
+          "membership_2d": 0.7762501239776611,
+          "membership_3d": 0.7171735763549805,
+          "aux": {
+            "radio": 0.06586635857820511,
+            "radio_relation": 0.0012287106364965439,
+            "dino": 0.06004146486520767,
+            "dino_relation": 0.0010736981639638543,
+            "siglip": 0.07241548597812653,
+            "siglip_query_relations": 0.19380809366703033,
+            "sam": 0.002028848510235548,
+            "sam_membership_boundary": 0.00013034934818278998
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.235663890838623,
+          "membership_2d": 1.256858229637146,
+          "membership_3d": 0.7376636862754822,
+          "aux": {
+            "radio": 0.054918237030506134,
+            "radio_relation": 0.001664837822318077,
+            "dino": 0.04800880700349808,
+            "dino_relation": 0.0013126886915415525,
+            "siglip": 0.04237480089068413,
+            "siglip_query_relations": 0.04678614065051079,
+            "sam": 0.002267330652102828,
+            "sam_membership_boundary": 0.00018175269360654056
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 1.043259859085083,
+          "membership_2d": 0.4316786527633667,
+          "membership_3d": 0.3466682732105255,
+          "aux": {
+            "radio": 0.05078151822090149,
+            "radio_relation": 0.0018977363361045718,
+            "dino": 0.045651815831661224,
+            "dino_relation": 0.001464456901885569,
+            "siglip": 0.03481919318437576,
+            "siglip_query_relations": 0.04859709367156029,
+            "sam": 0.002336692763492465,
+            "sam_membership_boundary": 3.447238850640133e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 0.5643748641014099,
+          "membership_2d": 0.15434403717517853,
+          "membership_3d": 0.1689087450504303,
+          "aux": {
+            "radio": 0.05239192396402359,
+            "radio_relation": 0.0011391431326046586,
+            "dino": 0.05014505609869957,
+            "dino_relation": 0.0009727549622766674,
+            "siglip": 0.01761971227824688,
+            "siglip_query_relations": 0.049624212086200714,
+            "sam": 0.0027777026407420635,
+            "sam_membership_boundary": 2.8811105039494578e-06
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.2850102186203003,
+          "membership_2d": 0.04586707055568695,
+          "membership_3d": 0.03412001579999924,
+          "aux": {
+            "radio": 0.04389386996626854,
+            "radio_relation": 0.0011804102687165141,
+            "dino": 0.04305253177881241,
+            "dino_relation": 0.0010541095398366451,
+            "siglip": 0.014278602786362171,
+            "siglip_query_relations": 0.04206886887550354,
+            "sam": 0.0020558114629238844,
+            "sam_membership_boundary": 8.526454621460289e-06
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.34724944829940796,
+          "membership_2d": 0.07465177029371262,
+          "membership_3d": 0.12059298902750015,
+          "aux": {
+            "radio": 0.036303140223026276,
+            "radio_relation": 0.0015162030467763543,
+            "dino": 0.034294914454221725,
+            "dino_relation": 0.001272338442504406,
+            "siglip": 0.012144416570663452,
+            "siglip_query_relations": 0.018136246129870415,
+            "sam": 0.0026440683286637068,
+            "sam_membership_boundary": 1.4596157598134596e-05
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "19087929defaea83283bfc174160014d1e92ba5d437c27d74bba6e79306973f6",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "coverage_soft_no_radio_v1": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "d98d45ded10a053f98ec7315dd7d70d50384dabcd007914014c742f2b1e28c66",
+      "supervision_implementation_sha256": "a5fa8fa34e776a9fd3764f50471b1743a859fd77bd3e4f44fd5070b4d9d888c3",
+      "source_coverage_enabled": true,
+      "soft_query_relations_enabled": true,
+      "source_regions_available": 92,
+      "source_regions_supervised": 92,
+      "soft_text_queries_supervised": 79,
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.3558925837278366,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482238560915,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.087362766265869,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9901720682779948,
+            "membership_loss": 0.08505896851420403,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9735470395535231,
+            "membership_loss": 0.12246374925598502,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.9348685122095048,
+            "membership_loss": 0.17971442471025512,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.4655498377978802,
+            "membership_loss": 1.3109772304693859,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.26698786031920463,
+            "membership_loss": 1.2983602955937386,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.24327638396061957,
+            "membership_loss": 1.8218747973442078,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.05649985373020172,
+        "text": 14.00017261505127,
+        "teacher_dino": 0.0018361704424023628,
+        "teacher_siglip": 0.008586382493376732,
+        "image": 25.081775665283203,
+        "prompt": 57.932334899902344
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 8.730345726013184,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "dino": 0.09917820245027542,
+            "dino_relation": 0.0009416528046131134,
+            "siglip": 0.10148938745260239,
+            "siglip_query_relations": 0.007481135427951813,
+            "sam": 0.0022188029251992702,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 2.709494113922119,
+          "membership_2d": 0.7867041826248169,
+          "membership_3d": 0.7162613868713379,
+          "aux": {
+            "dino": 0.06013571843504906,
+            "dino_relation": 0.0010886777890846133,
+            "siglip": 0.073035828769207,
+            "siglip_query_relations": 0.19857452809810638,
+            "sam": 0.002075896132737398,
+            "sam_membership_boundary": 0.0001333078689640388
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.180047035217285,
+          "membership_2d": 1.256927490234375,
+          "membership_3d": 0.7311305999755859,
+          "aux": {
+            "dino": 0.0482758954167366,
+            "dino_relation": 0.0013957795454189181,
+            "siglip": 0.0428437665104866,
+            "siglip_query_relations": 0.05123152956366539,
+            "sam": 0.0022839438170194626,
+            "sam_membership_boundary": 0.00019426189828664064
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 0.9831470251083374,
+          "membership_2d": 0.4290164113044739,
+          "membership_3d": 0.34548914432525635,
+          "aux": {
+            "dino": 0.04598435387015343,
+            "dino_relation": 0.0015362666454166174,
+            "siglip": 0.0354636013507843,
+            "siglip_query_relations": 0.04940579831600189,
+            "sam": 0.0023436816409230232,
+            "sam_membership_boundary": 3.134660073556006e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 0.496614009141922,
+          "membership_2d": 0.14648857712745667,
+          "membership_3d": 0.15909117460250854,
+          "aux": {
+            "dino": 0.05015001818537712,
+            "dino_relation": 0.0010792040266096592,
+            "siglip": 0.017943114042282104,
+            "siglip_query_relations": 0.04966078698635101,
+            "sam": 0.0027945302426815033,
+            "sam_membership_boundary": 2.561438350312528e-06
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.23950397968292236,
+          "membership_2d": 0.045845236629247665,
+          "membership_3d": 0.034385789185762405,
+          "aux": {
+            "dino": 0.042939022183418274,
+            "dino_relation": 0.0011484689312055707,
+            "siglip": 0.014542603865265846,
+            "siglip_query_relations": 0.040239859372377396,
+            "sam": 0.002017960650846362,
+            "sam_membership_boundary": 8.051992153923493e-06
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.3235093057155609,
+          "membership_2d": 0.08033588528633118,
+          "membership_3d": 0.12738952040672302,
+          "aux": {
+            "dino": 0.0344158373773098,
+            "dino_relation": 0.0013409509556367993,
+            "siglip": 0.012253177352249622,
+            "siglip_query_relations": 0.017712442204356194,
+            "sam": 0.002671761903911829,
+            "sam_membership_boundary": 1.3665540791407693e-05
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "3c9321f8a73cf649b020e7ea6626aa550b10715155a3a8f2a90ca79540a4e49e",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "auxiliary_coverage_v2": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "05087939f9f1f8add7bc239b226c47ba687128cd176f608a88aa8d440ec64e9b",
+      "supervision_implementation_sha256": "a5fa8fa34e776a9fd3764f50471b1743a859fd77bd3e4f44fd5070b4d9d888c3",
+      "source_coverage_enabled": true,
+      "source_membership_enabled": false,
+      "soft_query_relations_enabled": false,
+      "source_regions_available": 92,
+      "source_regions_supervised": 92,
+      "soft_text_queries_supervised": 0,
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.3558925576508045,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482238560915,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.087362766265869,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9910533875226974,
+            "membership_loss": 0.0767602597673734,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9656661581248045,
+            "membership_loss": 0.1476463828003034,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.9275300628505647,
+            "membership_loss": 0.2189835550962016,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.47308543510735035,
+            "membership_loss": 1.3338186740875244,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.35001512500457466,
+            "membership_loss": 1.2918459326028824,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.29416924802353606,
+            "membership_loss": 1.4460602439939976,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.05649985745549202,
+        "text": 11.844489097595215,
+        "teacher_radio": 0.0017767079407349229,
+        "teacher_dino": 0.0019202717812731862,
+        "teacher_siglip": 0.009481274522840977,
+        "image": 31.340295791625977,
+        "prompt": 56.224361419677734
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 5.91721248626709,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "radio": 0.09854674339294434,
+            "radio_relation": 0.000723043573088944,
+            "dino": 0.09917820245027542,
+            "dino_relation": 0.0009416526881977916,
+            "siglip": 0.10148938745260239,
+            "sam": 0.002218803158029914,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 3.907581090927124,
+          "membership_2d": 1.7151811122894287,
+          "membership_3d": 1.9933828115463257,
+          "aux": {
+            "radio": 0.06459369510412216,
+            "radio_relation": 0.0007834602729417384,
+            "dino": 0.05889970064163208,
+            "dino_relation": 0.0008032987825572491,
+            "siglip": 0.07166343182325363,
+            "sam": 0.0021378721576184034,
+            "sam_membership_boundary": 0.00013583817053586245
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 3.1253836154937744,
+          "membership_2d": 1.72959303855896,
+          "membership_3d": 1.2564438581466675,
+          "aux": {
+            "radio": 0.05140465125441551,
+            "radio_relation": 0.0010725267929956317,
+            "dino": 0.04475967586040497,
+            "dino_relation": 0.0009004042949527502,
+            "siglip": 0.039207663387060165,
+            "sam": 0.0019323769956827164,
+            "sam_membership_boundary": 6.950613897060975e-05
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 1.1006245613098145,
+          "membership_2d": 0.507517397403717,
+          "membership_3d": 0.46402105689048767,
+          "aux": {
+            "radio": 0.04580600932240486,
+            "radio_relation": 0.0012346971780061722,
+            "dino": 0.04188399389386177,
+            "dino_relation": 0.0011395614128559828,
+            "siglip": 0.0365201011300087,
+            "sam": 0.002465752651914954,
+            "sam_membership_boundary": 3.600231866585091e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 1.064424991607666,
+          "membership_2d": 0.46173909306526184,
+          "membership_3d": 0.49077504873275757,
+          "aux": {
+            "radio": 0.04715057462453842,
+            "radio_relation": 0.0007276083924807608,
+            "dino": 0.046179044991731644,
+            "dino_relation": 0.0006418149569071829,
+            "siglip": 0.0151893375441432,
+            "sam": 0.0020095084328204393,
+            "sam_membership_boundary": 1.2982884072698653e-05
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.23018307983875275,
+          "membership_2d": 0.08005164563655853,
+          "membership_3d": 0.05620449408888817,
+          "aux": {
+            "radio": 0.03926525264978409,
+            "radio_relation": 0.0007168642478063703,
+            "dino": 0.038671042770147324,
+            "dino_relation": 0.0006047852803021669,
+            "siglip": 0.013063323684036732,
+            "sam": 0.001592646585777402,
+            "sam_membership_boundary": 1.302304463024484e-05
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.2736397981643677,
+          "membership_2d": 0.0793774276971817,
+          "membership_3d": 0.106673963367939,
+          "aux": {
+            "radio": 0.03296874091029167,
+            "radio_relation": 0.0009529344388283789,
+            "dino": 0.030855372548103333,
+            "dino_relation": 0.0007937899208627641,
+            "siglip": 0.010621512308716774,
+            "sam": 0.002281935652717948,
+            "sam_membership_boundary": 8.694635653228033e-06
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "3ff858d973bef060cf05c0d3ecf8e45dd2f8a5f0962f1732b1b13cf557757ad7",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "auxiliary_soft_v2": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "05087939f9f1f8add7bc239b226c47ba687128cd176f608a88aa8d440ec64e9b",
+      "supervision_implementation_sha256": "a5fa8fa34e776a9fd3764f50471b1743a859fd77bd3e4f44fd5070b4d9d888c3",
+      "source_coverage_enabled": true,
+      "source_membership_enabled": false,
+      "soft_query_relations_enabled": true,
+      "source_regions_available": 92,
+      "source_regions_supervised": 92,
+      "soft_text_queries_supervised": 79,
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.3558925800025463,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482223659754,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.087362766265869,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9885341078042984,
+            "membership_loss": 0.09020070328066747,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9146455400623381,
+            "membership_loss": 0.2053539294283837,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.8714457958703861,
+            "membership_loss": 0.29954273253679276,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.4099295424918334,
+            "membership_loss": 1.3972986141840618,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.24719244381412864,
+            "membership_loss": 1.4243983440101147,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.2689964296296239,
+            "membership_loss": 1.4061606749892235,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.05649985745549202,
+        "text": 8.245014190673828,
+        "teacher_radio": 0.0017097573727369308,
+        "teacher_dino": 0.001781892846338451,
+        "teacher_siglip": 0.00834133941680193,
+        "image": 22.60172462463379,
+        "prompt": 46.49079895019531
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 5.924693584442139,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "radio": 0.09854674339294434,
+            "radio_relation": 0.000723043573088944,
+            "dino": 0.09917820245027542,
+            "dino_relation": 0.0009416528046131134,
+            "siglip": 0.10148938745260239,
+            "siglip_query_relations": 0.007481135427951813,
+            "sam": 0.002218803158029914,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 2.293520927429199,
+          "membership_2d": 0.8451667428016663,
+          "membership_3d": 1.0181989669799805,
+          "aux": {
+            "radio": 0.06624726206064224,
+            "radio_relation": 0.0013529309071600437,
+            "dino": 0.0603351965546608,
+            "dino_relation": 0.001184689113870263,
+            "siglip": 0.06964828819036484,
+            "siglip_query_relations": 0.22913077473640442,
+            "sam": 0.0020855434704571962,
+            "sam_membership_boundary": 0.00017052316979970783
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.8566818237304688,
+          "membership_2d": 1.6410908699035645,
+          "membership_3d": 0.9964062571525574,
+          "aux": {
+            "radio": 0.055973637849092484,
+            "radio_relation": 0.0016892356798052788,
+            "dino": 0.04886920377612114,
+            "dino_relation": 0.0013304371386766434,
+            "siglip": 0.0418691448867321,
+            "siglip_query_relations": 0.06710407882928848,
+            "sam": 0.0021274485625326633,
+            "sam_membership_boundary": 0.00022134953178465366
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 0.853467583656311,
+          "membership_2d": 0.3547391891479492,
+          "membership_3d": 0.3185778856277466,
+          "aux": {
+            "radio": 0.05104576423764229,
+            "radio_relation": 0.0018162750639021397,
+            "dino": 0.04595596343278885,
+            "dino_relation": 0.001414493890479207,
+            "siglip": 0.034305889159440994,
+            "siglip_query_relations": 0.04309124872088432,
+            "sam": 0.0024539318401366472,
+            "sam_membership_boundary": 6.697166099911556e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 0.7966951131820679,
+          "membership_2d": 0.3046748638153076,
+          "membership_3d": 0.34716397523880005,
+          "aux": {
+            "radio": 0.05320211127400398,
+            "radio_relation": 0.0011448432924225926,
+            "dino": 0.0506819449365139,
+            "dino_relation": 0.0009793080389499664,
+            "siglip": 0.017373526468873024,
+            "siglip_query_relations": 0.018937718123197556,
+            "sam": 0.002518551889806986,
+            "sam_membership_boundary": 1.8288003047928214e-05
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.2240387201309204,
+          "membership_2d": 0.050744444131851196,
+          "membership_3d": 0.04111327975988388,
+          "aux": {
+            "radio": 0.04488183557987213,
+            "radio_relation": 0.0010530687868595123,
+            "dino": 0.04342493414878845,
+            "dino_relation": 0.000925455882679671,
+            "siglip": 0.017722470685839653,
+            "siglip_query_relations": 0.022163672372698784,
+            "sam": 0.002005216898396611,
+            "sam_membership_boundary": 4.342028660175856e-06
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.29433274269104004,
+          "membership_2d": 0.06733915954828262,
+          "membership_3d": 0.10901471972465515,
+          "aux": {
+            "radio": 0.03584529086947441,
+            "radio_relation": 0.0013940150383859873,
+            "dino": 0.03413478657603264,
+            "dino_relation": 0.0011479757959023118,
+            "siglip": 0.013277816586196423,
+            "siglip_query_relations": 0.021138770505785942,
+            "sam": 0.002745182951912284,
+            "sam_membership_boundary": 1.653276922297664e-05
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "06e7eee05f03db897912a4710b6c2b009da1cbf5cb5655e035b80afa142f3c1c",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "auxiliary_soft_no_radio_v2": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "05087939f9f1f8add7bc239b226c47ba687128cd176f608a88aa8d440ec64e9b",
+      "supervision_implementation_sha256": "a5fa8fa34e776a9fd3764f50471b1743a859fd77bd3e4f44fd5070b4d9d888c3",
+      "source_coverage_enabled": true,
+      "source_membership_enabled": false,
+      "soft_query_relations_enabled": true,
+      "source_regions_available": 92,
+      "source_regions_supervised": 92,
+      "soft_text_queries_supervised": 79,
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.355892587453127,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482238560915,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.087362766265869,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9884422719478607,
+            "membership_loss": 0.09008606461187203,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9115848271176219,
+            "membership_loss": 0.21307801688089967,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.8655903782928362,
+            "membership_loss": 0.3059645127505064,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.38993772119283676,
+            "membership_loss": 1.3759367366631825,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.23394720768556,
+            "membership_loss": 1.4152483120560646,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.2644298749510199,
+            "membership_loss": 1.4345969036221504,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.05649985373020172,
+        "text": 8.291427612304688,
+        "teacher_dino": 0.0017808955162763596,
+        "teacher_siglip": 0.008327297866344452,
+        "image": 22.766695022583008,
+        "prompt": 46.45417022705078
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 5.825423717498779,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "dino": 0.09917820245027542,
+            "dino_relation": 0.0009416526881977916,
+            "siglip": 0.10148938745260239,
+            "siglip_query_relations": 0.007481136359274387,
+            "sam": 0.0022188029251992702,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 2.3156628608703613,
+          "membership_2d": 0.9012836813926697,
+          "membership_3d": 1.0519680976867676,
+          "aux": {
+            "dino": 0.06030116230249405,
+            "dino_relation": 0.0012065302580595016,
+            "siglip": 0.07051582634449005,
+            "siglip_query_relations": 0.22812223434448242,
+            "sam": 0.0020942336414009333,
+            "sam_membership_boundary": 0.00017098062380682677
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.770953416824341,
+          "membership_2d": 1.6260088682174683,
+          "membership_3d": 0.9834558367729187,
+          "aux": {
+            "dino": 0.04897076264023781,
+            "dino_relation": 0.001424680813215673,
+            "siglip": 0.04234577342867851,
+            "siglip_query_relations": 0.06639344990253448,
+            "sam": 0.0021404409781098366,
+            "sam_membership_boundary": 0.00021372176706790924
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 0.8118312358856201,
+          "membership_2d": 0.3590794801712036,
+          "membership_3d": 0.32324671745300293,
+          "aux": {
+            "dino": 0.046300258487463,
+            "dino_relation": 0.0014861894305795431,
+            "siglip": 0.03443087264895439,
+            "siglip_query_relations": 0.044733926653862,
+            "sam": 0.002485313219949603,
+            "sam_membership_boundary": 6.849118653917685e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 0.7563618421554565,
+          "membership_2d": 0.31043076515197754,
+          "membership_3d": 0.3563776910305023,
+          "aux": {
+            "dino": 0.050576210021972656,
+            "dino_relation": 0.0010587368160486221,
+            "siglip": 0.01719062402844429,
+            "siglip_query_relations": 0.018176211044192314,
+            "sam": 0.0025324306916445494,
+            "sam_membership_boundary": 1.913362939376384e-05
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.1776922047138214,
+          "membership_2d": 0.05053152143955231,
+          "membership_3d": 0.04103316366672516,
+          "aux": {
+            "dino": 0.04330551251769066,
+            "dino_relation": 0.0010198854142799973,
+            "siglip": 0.01762491464614868,
+            "siglip_query_relations": 0.022104360163211823,
+            "sam": 0.002068600384518504,
+            "sam_membership_boundary": 4.256654847267782e-06
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.25915125012397766,
+          "membership_2d": 0.06838330626487732,
+          "membership_3d": 0.10959991067647934,
+          "aux": {
+            "dino": 0.03458162024617195,
+            "dino_relation": 0.001254154834896326,
+            "siglip": 0.013266933150589466,
+            "siglip_query_relations": 0.02108795754611492,
+            "sam": 0.0027856805827468634,
+            "sam_membership_boundary": 1.625177355890628e-05
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "b0c3deec21ccdb178c909ba877545f3ff3134bc320efc53648efa3998e2c51e2",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    }
+  },
+  "training_candidates_promoted": false,
+  "retained_fields": [
+    "all_four_shared",
+    "without_radio_shared"
+  ],
+  "query_change": "conditional signed-source-evidence refinement, temporary query only",
+  "tests_passed": 479,
+  "benchmark_ground_truth": false
+}

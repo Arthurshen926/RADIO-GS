@@ -1,0 +1,16 @@
+{
+  "supervision": "source_grounded_text_fp32_v2 compiled with2-view corroboration and unknown negatives excluded; same original fixed79 text embeddings, new spatial supports",
+  "steps": {
+    "figurines": 183,
+    "ramen": 660
+  },
+  "reason_figurines_183": "61 canonical text tasks require183 balanced updates; baseline183 controls isolate3-extra-step effect",
+  "runs": [
+    "seed42 four teachers",
+    "seed43 four teachers",
+    "seed42 without RADIO"
+  ],
+  "comparison": "absolute membership realGT text IoU/AP and original image/prompt pseudo validation; old text pseudo labels are a legacy diagnostic, not a truth gate for corrected text",
+  "geometry_and_native_encoders": "unchanged",
+  "no_default_promotion_before_results": true
+}

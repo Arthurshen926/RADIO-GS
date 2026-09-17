@@ -2148,6 +2148,10 @@ def _sparse_exact_marginal_authority_metadata(
         "config": str(Path(args.config).resolve()),
         "checkpoint": str(Path(args.checkpoint).resolve()),
         "geometry_checkpoint_sha256": expected_geometry,
+        **({"geometry_source": "frozen_moge_surface_gaussians_v1",
+            "near_plane": float(renderer.near_plane), "far_plane": float(renderer.far_plane),
+            "geometry_trainable_during_semantics": False}
+           if str(getattr(args, "frozen_geometry", "")) else {}),
         "selected_dataset_indices": list(selected),
         "selected_frame_indices": list(selected_frame_indices),
         "excluded_frame_ids": sorted(_parse_frame_ids(args.exclude_frame_ids)),
@@ -2689,6 +2693,22 @@ def _build_cache(args: argparse.Namespace) -> dict:
         CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
     }:
         observation_contract = apply_canonical_observation_contract(args)
+    moge_prior = None
+    if str(getattr(args, "moge_geometry_report", "")):
+        if (observation_contract is not None or factorized_radio_builder
+                or getattr(args, "capability_storage", "dense") != "dense"
+                or args.aggregation_mode != "raster_marginal_responsibility"
+                or args.raster_view_fusion != "contribution_mean"
+                or args.benchmark_images_opened or args.text_queries_opened):
+            raise ValueError("MoGe candidate requires source-only dense exact-marginal contribution_mean; frozen contracts cannot be relabelled")
+        from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
+        moge_prior = MogeGeometryPrior(
+            args.moge_geometry_report, args.expected_moge_geometry_report_sha256,
+            strength=args.moge_geometry_strength,
+        )
+        if (not args.responsibility_cache or
+                getattr(args, "expected_responsibility_cache_sha256", "") != moge_prior.source_authority_sha256):
+            raise ValueError("MoGe candidate must use the same sealed Gaussian source authority")
     expected_feature_bundle_sha256 = str(
         getattr(args, "expected_feature_output_bundle_sha256", "")
     )
@@ -2724,16 +2744,52 @@ def _build_cache(args: argparse.Namespace) -> dict:
         )
     device = torch.device(args.device)
     config = load_config(args.config)
-    model, _codec, renderer, _sharpener, _refiner, _cfg, _is_hybrid = (
-        load_render_pipeline(
-            args.config,
-            args.checkpoint,
-            device,
-            strict_checkpoint_contract=True,
-            load_ply_rgb_features=False,
-            expected_checkpoint_sha256=(expected_geometry_sha256 or None),
+    frozen_geometry_binding = None
+    frozen_prior = None
+    frozen_report = None
+    if str(getattr(args, "frozen_geometry", "")):
+        if (formal_builder or moge_prior is not None or args.aggregation_mode != "raster_marginal_responsibility"
+                or getattr(args, "capability_storage", "dense") != "dense"):
+            raise ValueError("frozen repaired geometry requires an explicit dense exact-marginal candidate build")
+        if Path(args.checkpoint).resolve() != Path(args.frozen_geometry).resolve():
+            raise ValueError("--checkpoint must name the frozen geometry bundle, not a historical semantic checkpoint")
+        if args.expected_frozen_geometry_sha256 != expected_geometry_sha256:
+            raise ValueError("frozen geometry and checkpoint authorities differ")
+        from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
+        from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
+        model = FrozenGaussianGeometry.load(
+            args.frozen_geometry, expected_sha256=args.expected_frozen_geometry_sha256, device=device)
+        frozen_geometry_binding = model.fingerprint()
+        report_path = Path(args.frozen_geometry_report)
+        if not args.expected_frozen_geometry_report_sha256 or _sha256_file(report_path) != args.expected_frozen_geometry_report_sha256:
+            raise ValueError("frozen geometry report authority differs")
+        frozen_report = json.loads(report_path.read_text())
+        if not any(row.get("geometry_sha256") == args.expected_frozen_geometry_sha256
+                   for row in frozen_report["results"].values()):
+            raise ValueError("frozen geometry is absent from the sealed geometry report")
+        if args.benchmark_images_opened or args.text_queries_opened:
+            raise ValueError("frozen geometry teacher construction must be source-only")
+        from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
+        frozen_prior = MogeGeometryPrior(frozen_report["source_report"], frozen_report["source_report_sha256"])
+        fH, fW = int(config.feature_height), int(config.feature_width)
+        camera = frozen_prior.cameras[frozen_report["mapping_frames"][0]]
+        k = camera.intrinsic.clone()
+        k[0] *= fW / camera.width
+        k[1] *= fH / camera.height
+        renderer = FeatureFieldRenderer(fH, fW,
+            fx=float(k[0,0]), fy=float(k[1,1]), cx=float(k[0,2]), cy=float(k[1,2]),
+            near_plane=.001*frozen_prior.scale, far_plane=100*frozen_prior.scale).to(device)
+    else:
+        model, _codec, renderer, _sharpener, _refiner, _cfg, _is_hybrid = (
+            load_render_pipeline(
+                args.config,
+                args.checkpoint,
+                device,
+                strict_checkpoint_contract=True,
+                load_ply_rgb_features=False,
+                expected_checkpoint_sha256=(expected_geometry_sha256 or None),
+            )
         )
-    )
     feature_height = int(getattr(config, "feature_height", renderer.image_height))
     feature_width = int(getattr(config, "feature_width", renderer.image_width))
     feature_dir = Path(str(getattr(config, "feature_dir", "")))
@@ -2763,6 +2819,11 @@ def _build_cache(args: argparse.Namespace) -> dict:
     included_frame_ids = _parse_frame_ids(
         str(getattr(args, "include_frame_ids", "") or "")
     )
+    if frozen_report is not None:
+        mapping_frames = set(map(int, frozen_report["mapping_frames"]))
+        if included_frame_ids and not included_frame_ids <= mapping_frames:
+            raise ValueError("frozen teacher includes non-mapping or heldout source frames")
+        included_frame_ids = included_frame_ids or mapping_frames
     dataset = SimpleRadioDataset(
         feature_dir=str(feature_dir),
         pose_file=pose_file,
@@ -2804,6 +2865,16 @@ def _build_cache(args: argparse.Namespace) -> dict:
         ],
         dim=0,
     )
+    if frozen_prior is not None:
+        for index, pose in zip(selected, poses):
+            camera = frozen_prior.cameras[int(dataset.frame_indices[index])]
+            if not torch.allclose(pose, camera.world_to_camera, atol=1e-4, rtol=1e-5):
+                raise ValueError("feature and frozen geometry camera poses differ")
+            k = camera.intrinsic.clone()
+            k[0] *= feature_width / camera.width
+            k[1] *= feature_height / camera.height
+            if not torch.allclose(k, renderer.K.cpu(), atol=1e-5, rtol=1e-5):
+                raise ValueError("per-view intrinsics require per-view renderers")
     feature_space = str(args.feature_space).lower()
     capability_map_source = str(args.capability_map_source).lower()
     capability_storage = str(getattr(args, "capability_storage", "dense")).lower()
@@ -3910,6 +3981,14 @@ def _build_cache(args: argparse.Namespace) -> dict:
                         ),
                         normalize_each_view=bool(args.normalize_each_view),
                     )
+                    if moge_prior is not None:
+                        weights = moge_prior.apply(
+                            frame_index=selected_frame_indices[view_index], xyz=xyz_cpu,
+                            world_to_camera=poses[view_index],
+                            intrinsic=renderer.scaled_intrinsics(feature_width, feature_height),
+                            gaussian_ids=gaussian_ids, pixel_ids=pixel_ids, weights=weights,
+                            height=feature_height, width=feature_width,
+                        )
                     if args.raster_view_fusion == "contribution_mean":
                         counts_cpu = accumulate_contribution_mean_channel_chunked(
                             view_features,
@@ -4198,6 +4277,18 @@ def _build_cache(args: argparse.Namespace) -> dict:
                 ),
             }
         )
+    if frozen_geometry_binding is not None:
+        model.assert_binding(frozen_geometry_binding)
+        metadata["frozen_geometry_report_sha256"] = args.expected_frozen_geometry_report_sha256
+        metadata["feature_confidence_contract"] = model.feature_confidence_contract
+        metadata["frozen_geometry_binding"] = frozen_geometry_binding
+        metadata["frozen_geometry_sha256"] = args.expected_frozen_geometry_sha256
+        metadata["frozen_geometry_path"] = str(Path(args.frozen_geometry).resolve())
+        metadata["geometry_trainable_during_semantics"] = False
+    if moge_prior is not None:
+        metadata["geometry_prior"] = moge_prior.metadata()
+        metadata["construction"] += "_moge_depth_residual_v1"
+        metadata["visibility_purity_semantics"] = "unmodified_compositor_diagnostic_not_depth_conditioned_purity"
     if observation_contract is not None:
         metadata["observation_lifting_contract"] = observation_contract
         metadata["observation_lifting_contract_sha256"] = observation_contract_sha256(
@@ -4400,6 +4491,13 @@ def main(argv: list[str] | None = None) -> None:
             "available memory."
         ),
     )
+    parser.add_argument("--frozen-geometry", default="")
+    parser.add_argument("--frozen-geometry-report", default="")
+    parser.add_argument("--expected-frozen-geometry-report-sha256", default="")
+    parser.add_argument("--expected-frozen-geometry-sha256", default="")
+    parser.add_argument("--moge-geometry-report", default="")
+    parser.add_argument("--expected-moge-geometry-report-sha256", default="")
+    parser.add_argument("--moge-geometry-strength", type=float, default=0.5)
     parser.add_argument("--depth-tolerance", type=float, default=0.08)
     parser.add_argument("--relative-depth-tolerance", type=float, default=0.02)
     parser.add_argument("--alpha-threshold", type=float, default=0.02)

@@ -1,0 +1,142 @@
+{
+  "schema": "grounded_transfer_audit.v1",
+  "scene": "ramen",
+  "all_parent_tensors_exact": true,
+  "cold_native_cosine_exact": true,
+  "cold_image_response_exact": true,
+  "reference_image_prompt_observations_exact": true,
+  "fallback_query_response_exact": true,
+  "unsupported_scores_zero": true,
+  "gates": [
+    {
+      "query": "bowl",
+      "source_phrase": "bowl",
+      "cosine": 0.9999998807907104,
+      "acceptance": 0.8021301627159119,
+      "accepted": true,
+      "before_iou": 0.21971473245587775,
+      "after_iou": 0.5770682846995163
+    },
+    {
+      "query": "chopsticks",
+      "source_phrase": "noodles",
+      "cosine": 0.8564831614494324,
+      "acceptance": 0.826458215713501,
+      "accepted": true,
+      "before_iou": 0.0,
+      "after_iou": 0.0
+    },
+    {
+      "query": "corn",
+      "source_phrase": "vegetables",
+      "cosine": 0.8603362441062927,
+      "acceptance": 0.7935476303100586,
+      "accepted": true,
+      "before_iou": 0.0,
+      "after_iou": 0.046759217073315214
+    },
+    {
+      "query": "egg",
+      "source_phrase": "egg",
+      "cosine": 0.9999998211860657,
+      "acceptance": 0.8270555734634399,
+      "accepted": true,
+      "before_iou": 0.0,
+      "after_iou": 0.3257860585234333
+    },
+    {
+      "query": "glass of water",
+      "source_phrase": "glass of water",
+      "cosine": 0.9999998807907104,
+      "acceptance": 0.9024908542633057,
+      "accepted": true,
+      "before_iou": 0.376609571100184,
+      "after_iou": 0.41996747340158586
+    },
+    {
+      "query": "hand",
+      "source_phrase": "person",
+      "cosine": 0.8163298964500427,
+      "acceptance": 0.8998367190361023,
+      "accepted": false,
+      "before_iou": 0.0,
+      "after_iou": 0.0
+    },
+    {
+      "query": "kamaboko",
+      "source_phrase": "meat",
+      "cosine": 0.6299009323120117,
+      "acceptance": 0.799614429473877,
+      "accepted": false,
+      "before_iou": 0.0,
+      "after_iou": 0.0
+    },
+    {
+      "query": "napkin",
+      "source_phrase": "white napkin",
+      "cosine": 0.8840823769569397,
+      "acceptance": 0.824971079826355,
+      "accepted": true,
+      "before_iou": 0.0,
+      "after_iou": 0.2522245274419478
+    },
+    {
+      "query": "nori",
+      "source_phrase": "egg",
+      "cosine": 0.7686302661895752,
+      "acceptance": 0.8270555734634399,
+      "accepted": false,
+      "before_iou": 0.5819512655398871,
+      "after_iou": 0.5819512655398871
+    },
+    {
+      "query": "onion segments",
+      "source_phrase": "vegetables",
+      "cosine": 0.7092021107673645,
+      "acceptance": 0.7935476303100586,
+      "accepted": false,
+      "before_iou": 0.0,
+      "after_iou": 0.0
+    },
+    {
+      "query": "plate",
+      "source_phrase": "plate",
+      "cosine": 0.9999998211860657,
+      "acceptance": 0.8308182954788208,
+      "accepted": true,
+      "before_iou": 0.0,
+      "after_iou": 0.6376750521165846
+    },
+    {
+      "query": "sake cup",
+      "source_phrase": "cup",
+      "cosine": 0.8311314582824707,
+      "acceptance": 0.830030083656311,
+      "accepted": true,
+      "before_iou": 0.0,
+      "after_iou": 0.22378322231088232
+    },
+    {
+      "query": "spoon",
+      "source_phrase": "spoon",
+      "cosine": 0.9999998211860657,
+      "acceptance": 0.8032339215278625,
+      "accepted": true,
+      "before_iou": 0.00026728439059158947,
+      "after_iou": 0.3741118377843068
+    },
+    {
+      "query": "wavy noodles",
+      "source_phrase": "noodles",
+      "cosine": 0.8031390905380249,
+      "acceptance": 0.826458215713501,
+      "accepted": false,
+      "before_iou": 0.10819365314603101,
+      "after_iou": 0.10819365314603101
+    }
+  ],
+  "selection": "alphabetical quarter indices; first annotated frame containing category",
+  "plot": "paper/artifacts/ramen_grounded_transfer_audit_20260916.png",
+  "plot_sha256": "07dddd83bbf19fb513ff295bbb599a66dcefd0960033bbb4c3b4b43e014c72ab",
+  "implementation_sha256": "544fc42aa67595a69d93b0125518c6397ef62802020f387bfd3ba70ff4ac7539"
+}

@@ -1,0 +1,11 @@
+{
+  "reason": "hard train text label vocabulary is5/6 coarse top1 pseudo classes; no verified scene semantics, native relations show degeneration",
+  "change": "disable text hard2D/3D membership and text membership boundary only; retain image/prompt hard losses, native teacher region contours and symmetric soft native query relations",
+  "inputs": "existing79 source vocabulary, no benchmark strings or masks in training",
+  "steps": {
+    "figurines": 180,
+    "ramen": 660
+  },
+  "status": "diagnostic development after real label evaluations; not automatic default",
+  "template_control": "separately compare verbatim category text and exact existing source prefix a photo of a; no template search"
+}

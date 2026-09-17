@@ -23,6 +23,7 @@ class SparseObjectAssignments:
     weights: torch.Tensor
     unknown_weight: torch.Tensor
     num_tokens: int
+    compression_discarded_weight: torch.Tensor | None = None
 
     def __post_init__(self) -> None:
         token_ids = torch.as_tensor(self.token_ids, dtype=torch.long).cpu()
@@ -43,9 +44,23 @@ class SparseObjectAssignments:
             raise ValueError("zero-weight slots must use token id -1")
         if bool((weights.sum(-1) + unknown > 1.0 + 1e-5).any()):
             raise ValueError("known and unknown assignment mass exceeds one")
+        discarded = (
+            torch.zeros_like(unknown) if self.compression_discarded_weight is None
+            else torch.as_tensor(self.compression_discarded_weight, dtype=torch.float32).cpu()
+        )
+        if discarded.shape != unknown.shape or not torch.isfinite(discarded).all() or bool(((discarded < 0) | (discarded > unknown + 1e-6)).any()):
+            raise ValueError("discarded compression mass must be a finite subset of unknown")
+        object.__setattr__(self, "compression_discarded_weight", discarded)
         object.__setattr__(self, "token_ids", token_ids)
         object.__setattr__(self, "weights", weights)
         object.__setattr__(self, "unknown_weight", unknown)
+
+    @property
+    def precompression_unknown_weight(self) -> torch.Tensor:
+        """Unknown mass before top-k loss; historical unknown includes both."""
+        if self.compression_discarded_weight is None:
+            return self.unknown_weight
+        return (self.unknown_weight - self.compression_discarded_weight).clamp_min(0)
 
     @property
     def num_elements(self) -> int:
@@ -80,9 +95,10 @@ class SparseObjectAssignments:
             values = torch.cat([values, torch.zeros(dense.shape[0], top_k - count)], dim=-1)
             ids = torch.cat([ids, torch.full((dense.shape[0], top_k - count), -1)], dim=-1)
         retained = values.sum(-1)
-        normalized_unknown = normalized_unknown + (1.0 - normalized_unknown - retained).clamp_min(0)
+        discarded = (1.0 - normalized_unknown - retained).clamp_min(0)
+        normalized_unknown = normalized_unknown + discarded
         ids[values <= 0] = -1
-        return cls(ids, values, normalized_unknown, dense.shape[1])
+        return cls(ids, values, normalized_unknown, dense.shape[1], discarded)
 
     def to_dense(self) -> torch.Tensor:
         result = torch.zeros(self.num_elements, self.num_tokens)

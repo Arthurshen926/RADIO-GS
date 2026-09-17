@@ -18,6 +18,8 @@ class MeshCarrier(SurfaceCarrier):
             raise ValueError("triangles must have shape [F, 3]")
         if int(triangles.min()) < 0 or int(triangles.max()) >= vertices.shape[0]:
             raise ValueError("triangle index outside vertex domain")
+        if not torch.isfinite(vertices).all():
+            raise ValueError("mesh vertices must be finite")
         self.vertices = vertices
         self.triangles = triangles
         first, second, third = (vertices[triangles[:, index]] for index in range(3))
@@ -58,8 +60,9 @@ class MeshCarrier(SurfaceCarrier):
         return self._scene
 
     def project(self, camera: Camera) -> ProjectionTable:
-        if camera.key in self._projection_cache:
-            return self._projection_cache[camera.key]
+        cache_key = camera.projection_key
+        if cache_key in self._projection_cache:
+            return self._projection_cache[cache_key]
         try:
             import open3d as o3d
         except ImportError as error:
@@ -95,7 +98,7 @@ class MeshCarrier(SurfaceCarrier):
                 camera.width,
                 metadata={"backend": "mesh_raycast"},
             )
-            self._projection_cache[camera.key] = result
+            self._projection_cache[cache_key] = result
             return result
         face_ids = primitive_ids.reshape(-1)[pixels]
         faces = self.triangles.numpy()[face_ids]
@@ -124,7 +127,7 @@ class MeshCarrier(SurfaceCarrier):
                 "pixel_sampling": "centres",
             },
         )
-        self._projection_cache[camera.key] = result
+        self._projection_cache[cache_key] = result
         return result
 
     def neighbors(self) -> SparseAdjacency:

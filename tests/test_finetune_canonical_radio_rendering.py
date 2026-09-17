@@ -662,3 +662,22 @@ def test_semantic_stage_automatically_enables_optimizer_state_offload() -> None:
     assert not finetune._optimizer_state_offload_enabled(
         requested=False, semantic_enabled=False
     )
+
+
+def test_frozen_training_binding_rejects_same_centres_changed_opacity():
+    from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
+    model = FrozenGaussianGeometry(torch.tensor([[0.,0.,1.]]), torch.tensor([[0.,0.,1.]]),
+                                   tangent_sigma=.01, normal_sigma=.001)
+    meta = {"frozen_geometry_binding": model.fingerprint(),
+            "geometry_trainable_during_semantics": False,
+            "feature_confidence_contract": model.feature_confidence_contract}
+    finetune._validate_frozen_feature_binding(model, meta)
+    model.opacities.mul_(.9)
+    with pytest.raises(ValueError, match="geometry changed"):
+        finetune._validate_frozen_feature_binding(model, meta)
+
+
+def test_frozen_training_rejects_unbound_field():
+    args = SimpleNamespace(frozen_geometry_report="new-geometry.json")
+    with pytest.raises(ValueError, match="unbound historical"):
+        finetune._load_finetune_geometry(args, None, {}, "cpu")

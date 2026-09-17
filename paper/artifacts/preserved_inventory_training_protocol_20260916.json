@@ -1,0 +1,80 @@
+{
+  "source_only": true,
+  "training_budget": "two passes over largest modality; same rule as previous protected runs",
+  "jobs": [
+    {
+      "scene": "figurines",
+      "counts": {
+        "image": 461,
+        "prompt": 461,
+        "text": 63
+      },
+      "steps": 2766,
+      "command": [
+        "/root/miniconda3/envs/cybersim_agent/bin/python",
+        "radio_gs/scripts/train_three_query_field.py",
+        "--root",
+        "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines",
+        "--geometry",
+        "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/figurines/independent_scale.pt",
+        "--name",
+        "preserved96_protected",
+        "--steps",
+        "2766",
+        "--latent-dim",
+        "96",
+        "--native-semantic-dim",
+        "64",
+        "--source-region-query-tasks",
+        "--share-siglip-adapter",
+        "--calibrated-readout",
+        "--native-decoder-readout",
+        "--source-fusion-initialization",
+        "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_fusion_initialization.pt",
+        "--freeze-native-decoder",
+        "--grounded-text-supervision",
+        "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/grounded_text_supervision.pt",
+        "--protect-native-semantic",
+        "--device",
+        "cuda:0"
+      ]
+    },
+    {
+      "scene": "ramen",
+      "counts": {
+        "image": 852,
+        "prompt": 852,
+        "text": 99
+      },
+      "steps": 5112,
+      "command": [
+        "/root/miniconda3/envs/cybersim_agent/bin/python",
+        "radio_gs/scripts/train_three_query_field.py",
+        "--root",
+        "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen",
+        "--geometry",
+        "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/ramen/independent_scale.pt",
+        "--name",
+        "preserved96_protected",
+        "--steps",
+        "5112",
+        "--latent-dim",
+        "96",
+        "--native-semantic-dim",
+        "64",
+        "--source-region-query-tasks",
+        "--share-siglip-adapter",
+        "--calibrated-readout",
+        "--native-decoder-readout",
+        "--source-fusion-initialization",
+        "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_fusion_initialization.pt",
+        "--freeze-native-decoder",
+        "--grounded-text-supervision",
+        "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/grounded_text_supervision.pt",
+        "--protect-native-semantic",
+        "--device",
+        "cuda:1"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "reason": "native directions and fixed cosine>.5 membership boundary need not agree",
+  "calibration": "positive per-modality scale and bias, training-only, initialized10/-5, learning_rate .03",
+  "shared_implementation": "ordinary retrieval and transient prompt refinement share cosine_logits; refinement detaches calibration",
+  "cases": [
+    "learned_adapter",
+    "frozen_source_basis",
+    "frozen_source_basis_direct_alignment"
+  ],
+  "selection": "no target threshold fitting; all results retained"
+}

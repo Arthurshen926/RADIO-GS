@@ -1,0 +1,13 @@
+{
+  "source_only": true,
+  "geometry_and_budget_unchanged": true,
+  "minimum_bidirectional_coverage": 0.5,
+  "correspondence_rule": "view-unique source region tracks, remove orphan/same-track negatives, remaining conflicts still abstain",
+  "semantic_preservation": "0.1 native query-neighborhood KL plus 0.1 soft query-to-source-region relations; learned shared adapter, no fixed native cone",
+  "runs": [
+    "reliable_pairs",
+    "semantic_relations",
+    "reliable_semantic"
+  ],
+  "test_threshold": 0.5
+}

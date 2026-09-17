@@ -1,0 +1,31 @@
+{
+  "schema": "native_image_support_retention.v1",
+  "fields": {
+    "image_supervised_native_residual": "169278d555c9f713e508315c306129c795e9625f2c491d72b12c3eceb73ec5d1",
+    "image_supervised_native_residual_measured_support512": "d7b82cc497321629e52854a2b362f682e99ac17a47be74914a7db5d8f57b3324"
+  },
+  "modalities": {
+    "text": {
+      "max_error": 0.0,
+      "checked_rows": 137687,
+      "queries": 5,
+      "new_supported_rows": 116890
+    },
+    "image": {
+      "max_error": 0.0,
+      "checked_rows": 116890,
+      "queries": 5,
+      "new_supported_rows": 135499
+    },
+    "prompt": {
+      "max_error": 0.0,
+      "checked_rows": 137687,
+      "queries": 5,
+      "new_supported_rows": 116890
+    }
+  },
+  "query_set": "one sealed native fixture and four seeded random encoder vectors per modality",
+  "arbitrary_query_guarantee": "structural parameter/row isolation; this numerical fixture is finite, not exhaustive",
+  "implementation_sha256": "f37f4f1a1c0c4f72337190e50ad20e72bf076cb8ab4befafa8a8ddefca8b2782",
+  "module_sha256": "dd53b6ef0f0c61be667443ab667b05360d581fce77e29bf2a2395c8119177c49"
+}

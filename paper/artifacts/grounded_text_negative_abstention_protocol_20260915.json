@@ -1,0 +1,11 @@
+{
+  "bug": "absence of text detection could vote negative on other detected objects",
+  "fix": "require a positive detection of this query in each view contributing negative evidence; still require2 views and conflict abstention",
+  "assets": "grounded_text_supervision_v2.pt; v1 immutable rejected control",
+  "runs": "two scenes, seeds42/43 plus noRADIO seed42",
+  "steps": {
+    "figurines": 366,
+    "ramen": 660
+  },
+  "evaluation": "absolute text GT plus reference-derived three-query GT and legacy partial diagnostics; no threshold search"
+}

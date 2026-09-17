@@ -1,0 +1,2784 @@
+{
+  "schema": "decoder_subspace_retention.v1",
+  "oracle_encodings_sha256": "aca3ac73f7eab2a32e2fdcc2a6fc987d02a61c0b634385455c209188ee4d72da",
+  "source_episode_sha256": "f3778e924ac11ebe9c989015bcc7cb8645131c1a951ba3c46d64f8c6450712c7",
+  "field_sha256": {
+    "decoder_coupled2106": "6b326071d1e3dbff96113922abed8f838590fb8b514109216652d1897936d4c7",
+    "decoder_coupled_no_radio2106": "d65ca74bd0b666d90ff3b4ee973b3534e1036453413b68d09c37c14473134227"
+  },
+  "implementation_sha256": "ee599cb0f50a89d9194d6856a188bab9d690856a316c44bbe53e86e5e56aed37",
+  "diagnostic_only": true,
+  "uses_target_gt_crops": true,
+  "field_updated": false,
+  "geometry_or_localization_evaluated": false,
+  "scope": "affine least-squares reconstruction of oracle image descriptors through fixed learned decoder; not actual map latents and not a classification ceiling",
+  "native_image_norm_mean": 1.0,
+  "reconstruction": {
+    "decoder_coupled2106": {
+      "rank": 64,
+      "mean_cosine_to_native_crop": -0.09536351263523102,
+      "relative_l2": 2.6300134658813477,
+      "least_squares_projection_not_classification_upper_bound": true
+    },
+    "decoder_coupled_no_radio2106": {
+      "rank": 64,
+      "mean_cosine_to_native_crop": -0.07002530992031097,
+      "relative_l2": 2.553088665008545,
+      "least_squares_projection_not_classification_upper_bound": true
+    }
+  },
+  "results": {
+    "native": {
+      "macro": {
+        "masked": {
+          "tasks": 56,
+          "top1": 0.8392857142857143,
+          "mrr": 0.8934611344537816
+        },
+        "unmasked": {
+          "tasks": 56,
+          "top1": 0.875,
+          "mrr": 0.910849567099567
+        }
+      },
+      "observations": [
+        {
+          "frame": 41,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "miffy",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "miffy",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pikachu",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pikachu",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 41,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 41,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "red toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "red toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "tesla door handle",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "tesla door handle",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 105,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 12
+        },
+        {
+          "frame": 105,
+          "category": "pumpkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pumpkin",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "tesla door handle",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "tesla door handle",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 152,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "pikachu",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "pikachu",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 152,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 152,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "bag",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "bag",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "miffy",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "miffy",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 17
+        },
+        {
+          "frame": 195,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        }
+      ]
+    },
+    "decoder_coupled2106": {
+      "macro": {
+        "masked": {
+          "tasks": 56,
+          "top1": 0.17857142857142858,
+          "mrr": 0.35638201552550836
+        },
+        "unmasked": {
+          "tasks": 56,
+          "top1": 0.14285714285714285,
+          "mrr": 0.31792321969580367
+        }
+      },
+      "observations": [
+        {
+          "frame": 41,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 14
+        },
+        {
+          "frame": 41,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 41,
+          "category": "miffy",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 41,
+          "category": "miffy",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 41,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 41,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 41,
+          "category": "pikachu",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 41,
+          "category": "pikachu",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 41,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 15
+        },
+        {
+          "frame": 41,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 41,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 19
+        },
+        {
+          "frame": 41,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 18
+        },
+        {
+          "frame": 41,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 14
+        },
+        {
+          "frame": 41,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 16
+        },
+        {
+          "frame": 41,
+          "category": "red toy chair",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "red toy chair",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 41,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 41,
+          "category": "tesla door handle",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 41,
+          "category": "tesla door handle",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 41,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 105,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 105,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 105,
+          "category": "green toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 16
+        },
+        {
+          "frame": 105,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 18
+        },
+        {
+          "frame": 105,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 105,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 105,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 105,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 15
+        },
+        {
+          "frame": 105,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 105,
+          "category": "pumpkin",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 105,
+          "category": "pumpkin",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 105,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 15
+        },
+        {
+          "frame": 105,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 105,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 105,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 105,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 105,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 105,
+          "category": "tesla door handle",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 105,
+          "category": "tesla door handle",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 152,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 152,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 152,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 15
+        },
+        {
+          "frame": 152,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 16
+        },
+        {
+          "frame": 152,
+          "category": "pikachu",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 152,
+          "category": "pikachu",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 152,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 12
+        },
+        {
+          "frame": 152,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 13
+        },
+        {
+          "frame": 152,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 19
+        },
+        {
+          "frame": 152,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 18
+        },
+        {
+          "frame": 152,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 17
+        },
+        {
+          "frame": 152,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 18
+        },
+        {
+          "frame": 152,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 152,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 152,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 152,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 11
+        },
+        {
+          "frame": 152,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 152,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 195,
+          "category": "bag",
+          "crop": "masked",
+          "rank": 14
+        },
+        {
+          "frame": 195,
+          "category": "bag",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 195,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 195,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 195,
+          "category": "green toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "miffy",
+          "crop": "masked",
+          "rank": 8
+        },
+        {
+          "frame": 195,
+          "category": "miffy",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 195,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 195,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 195,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 195,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 195,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 15
+        },
+        {
+          "frame": 195,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 16
+        },
+        {
+          "frame": 195,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 19
+        },
+        {
+          "frame": 195,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 18
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 195,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 195,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 3
+        },
+        {
+          "frame": 195,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 195,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 195,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 2
+        }
+      ]
+    },
+    "decoder_coupled_no_radio2106": {
+      "macro": {
+        "masked": {
+          "tasks": 56,
+          "top1": 0.23214285714285715,
+          "mrr": 0.3644047281990945
+        },
+        "unmasked": {
+          "tasks": 56,
+          "top1": 0.19642857142857142,
+          "mrr": 0.33440010872770154
+        }
+      },
+      "observations": [
+        {
+          "frame": 41,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 41,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 15
+        },
+        {
+          "frame": 41,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 15
+        },
+        {
+          "frame": 41,
+          "category": "miffy",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 41,
+          "category": "miffy",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 41,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "pikachu",
+          "crop": "masked",
+          "rank": 7
+        },
+        {
+          "frame": 41,
+          "category": "pikachu",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 41,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 17
+        },
+        {
+          "frame": 41,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 41,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 19
+        },
+        {
+          "frame": 41,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 41,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 16
+        },
+        {
+          "frame": 41,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 18
+        },
+        {
+          "frame": 41,
+          "category": "red toy chair",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "red toy chair",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 41,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 41,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 41,
+          "category": "tesla door handle",
+          "crop": "masked",
+          "rank": 11
+        },
+        {
+          "frame": 41,
+          "category": "tesla door handle",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 41,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 105,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 105,
+          "category": "green toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 17
+        },
+        {
+          "frame": 105,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 105,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 105,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 105,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 105,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 17
+        },
+        {
+          "frame": 105,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 16
+        },
+        {
+          "frame": 105,
+          "category": "pumpkin",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 105,
+          "category": "pumpkin",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 105,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 18
+        },
+        {
+          "frame": 105,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 18
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 105,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 105,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 105,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 105,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 105,
+          "category": "tesla door handle",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 105,
+          "category": "tesla door handle",
+          "crop": "unmasked",
+          "rank": 10
+        },
+        {
+          "frame": 152,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 152,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 8
+        },
+        {
+          "frame": 152,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 14
+        },
+        {
+          "frame": 152,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 15
+        },
+        {
+          "frame": 152,
+          "category": "pikachu",
+          "crop": "masked",
+          "rank": 7
+        },
+        {
+          "frame": 152,
+          "category": "pikachu",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 152,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 15
+        },
+        {
+          "frame": 152,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 15
+        },
+        {
+          "frame": 152,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 18
+        },
+        {
+          "frame": 152,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 152,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 18
+        },
+        {
+          "frame": 152,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 19
+        },
+        {
+          "frame": 152,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 152,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 152,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 152,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 14
+        },
+        {
+          "frame": 152,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 152,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "bag",
+          "crop": "masked",
+          "rank": 10
+        },
+        {
+          "frame": 195,
+          "category": "bag",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 195,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 195,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 6
+        },
+        {
+          "frame": 195,
+          "category": "green toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "miffy",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 195,
+          "category": "miffy",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 195,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 195,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 17
+        },
+        {
+          "frame": 195,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 195,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 19
+        },
+        {
+          "frame": 195,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 17
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 9
+        },
+        {
+          "frame": 195,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 9
+        },
+        {
+          "frame": 195,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 195,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        }
+      ]
+    },
+    "source_svd64_native_query": {
+      "macro": {
+        "masked": {
+          "tasks": 56,
+          "top1": 0.8928571428571429,
+          "mrr": 0.9227891156462587
+        },
+        "unmasked": {
+          "tasks": 56,
+          "top1": 0.8392857142857143,
+          "mrr": 0.895110544217687
+        }
+      },
+      "observations": [
+        {
+          "frame": 41,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "miffy",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "miffy",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pikachu",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pikachu",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 41,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 7
+        },
+        {
+          "frame": 41,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "red toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "red toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "tesla door handle",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "tesla door handle",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 41,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 41,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 41,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "green toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 6
+        },
+        {
+          "frame": 105,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 5
+        },
+        {
+          "frame": 105,
+          "category": "pumpkin",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "pumpkin",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 2
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "tesla door handle",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 105,
+          "category": "tesla door handle",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 152,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 152,
+          "category": "jake",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "jake",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "pikachu",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "pikachu",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 3
+        },
+        {
+          "frame": 152,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "red apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "red apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 152,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "bag",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "bag",
+          "crop": "unmasked",
+          "rank": 2
+        },
+        {
+          "frame": 195,
+          "category": "green apple",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green apple",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green toy chair",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "green toy chair",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "miffy",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "miffy",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "old camera",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "old camera",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "pink ice cream",
+          "crop": "masked",
+          "rank": 7
+        },
+        {
+          "frame": 195,
+          "category": "pink ice cream",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "pirate hat",
+          "crop": "masked",
+          "rank": 5
+        },
+        {
+          "frame": 195,
+          "category": "pirate hat",
+          "crop": "unmasked",
+          "rank": 4
+        },
+        {
+          "frame": 195,
+          "category": "porcelain hand",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "porcelain hand",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with buoy",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with buoy",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with hat",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubber duck with hat",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubics cube",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "rubics cube",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "spatula",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "spatula",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy cat statue",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy cat statue",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy elephant",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "toy elephant",
+          "crop": "unmasked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "waldo",
+          "crop": "masked",
+          "rank": 1
+        },
+        {
+          "frame": 195,
+          "category": "waldo",
+          "crop": "unmasked",
+          "rank": 1
+        }
+      ]
+    }
+  }
+}

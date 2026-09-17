@@ -1,0 +1,4179 @@
+{
+  "protocol_sha256": "068a6e913e870a208cafc4e60aecffd8c7fbabdc203e826aad95f005e871c296",
+  "protocol": {
+    "schema": "real_polygon_reference_query_development.v1",
+    "scene": "figurines",
+    "field_sha256": {
+      "component_pipeline_seed43_768": "105362cc03ed0a15ff836b369877780f7af1869e8d50d5c1f75a737cace0e1e6",
+      "component_pipeline_no_radio_768": "9e54ca22e2f563ba4abdff32f33a29199819671a67f5ec8ade5c91cee3bc879b"
+    },
+    "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+    "labels": [
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json",
+        "sha256": "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00105.json",
+        "sha256": "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.json",
+        "sha256": "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb"
+      },
+      {
+        "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00195.json",
+        "sha256": "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb"
+      }
+    ],
+    "reference_selection": "first annotated frame per category; remaining annotated frames are targets",
+    "query_contract": "text verbatim; image masked crop with3px padding and gray127 outside; prompt one positive and one negative point with registered frozen geometry",
+    "query_mask_or_points_supplied_from_reference_gt": true,
+    "target_masks_used_for_query_encoding": false,
+    "annotations_define_evaluation_cohort": true,
+    "target_rgb_encoded_for_its_own_query": false,
+    "source_training_assets_forbidden": true,
+    "source_semantic_train_frames": [
+      11,
+      21,
+      31,
+      38,
+      49,
+      69
+    ],
+    "target_width": 480,
+    "threshold": 0.5,
+    "refine_prompts": true,
+    "minimal_prompt_refinement": false,
+    "official_benchmark_protocol": false,
+    "instance_identity_assumption": "same category across frames, union of category polygons; not independently verified physical instance tracks",
+    "implementation_sha256": "e0031c6cbd695b808c9c1ca4998dffd58301e5ef4e6acab786daa052e3ddcf46"
+  },
+  "references": [
+    {
+      "category": "green apple",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        2859,
+        12240
+      ],
+      "seedrows": [
+        128680,
+        148109
+      ]
+    },
+    {
+      "category": "green toy chair",
+      "frame": 105,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00105.jpg",
+      "image_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "pixels": [
+        4772,
+        12256
+      ],
+      "seedrows": [
+        125988,
+        79092
+      ]
+    },
+    {
+      "category": "jake",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        3745,
+        12251
+      ],
+      "seedrows": [
+        145542,
+        144228
+      ]
+    },
+    {
+      "category": "miffy",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        8064,
+        12235
+      ],
+      "seedrows": [
+        167778,
+        149972
+      ]
+    },
+    {
+      "category": "old camera",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        2756,
+        12185
+      ],
+      "seedrows": [
+        110214,
+        164551
+      ]
+    },
+    {
+      "category": "pikachu",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        3511,
+        12168
+      ],
+      "seedrows": [
+        129513,
+        168428
+      ]
+    },
+    {
+      "category": "pink ice cream",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        6732,
+        12172
+      ],
+      "seedrows": [
+        127103,
+        166946
+      ]
+    },
+    {
+      "category": "pirate hat",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        6572,
+        12264
+      ],
+      "seedrows": [
+        151041,
+        134505
+      ]
+    },
+    {
+      "category": "porcelain hand",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        5257,
+        12231
+      ],
+      "seedrows": [
+        159585,
+        150958
+      ]
+    },
+    {
+      "category": "red apple",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        3819,
+        12208
+      ],
+      "seedrows": [
+        75391,
+        157387
+      ]
+    },
+    {
+      "category": "rubber duck with buoy",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        3214,
+        12225
+      ],
+      "seedrows": [
+        149602,
+        152884
+      ]
+    },
+    {
+      "category": "rubber duck with hat",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        6956,
+        12268
+      ],
+      "seedrows": [
+        151041,
+        132555
+      ]
+    },
+    {
+      "category": "rubics cube",
+      "frame": 105,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00105.jpg",
+      "image_sha256": "d741a214037ba48bd9f33f2ee3368a7a66c6dcf7d9c652f22a934840a0fb7744",
+      "pixels": [
+        3903,
+        12257
+      ],
+      "seedrows": [
+        144426,
+        79092
+      ]
+    },
+    {
+      "category": "spatula",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        6069,
+        12287
+      ],
+      "seedrows": [
+        134706,
+        123944
+      ]
+    },
+    {
+      "category": "tesla door handle",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        6769,
+        12200
+      ],
+      "seedrows": [
+        100712,
+        160134
+      ]
+    },
+    {
+      "category": "toy cat statue",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        3610,
+        12233
+      ],
+      "seedrows": [
+        142838,
+        149972
+      ]
+    },
+    {
+      "category": "toy elephant",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        5907,
+        12247
+      ],
+      "seedrows": [
+        158455,
+        146213
+      ]
+    },
+    {
+      "category": "waldo",
+      "frame": 41,
+      "image_path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/images/frame_00041.jpg",
+      "image_sha256": "c68584b566b5868aaa19906073cc32908f68c4fd6b4964c278bce5f342a64241",
+      "pixels": [
+        10686,
+        12287
+      ],
+      "seedrows": [
+        152867,
+        123944
+      ]
+    }
+  ],
+  "runs": {
+    "component_pipeline_seed43_768": {
+      "field_sha256": "105362cc03ed0a15ff836b369877780f7af1869e8d50d5c1f75a737cace0e1e6",
+      "tasks_per_modality": 35,
+      "macro": {
+        "text": {
+          "iou": 0.17386257995371343,
+          "average_precision": 0.27306665470358654,
+          "auroc": 0.875496686852709
+        },
+        "image": {
+          "iou": 0.18072238989017914,
+          "average_precision": 0.2910809389294236,
+          "auroc": 0.8543888335241685
+        },
+        "prompt": {
+          "iou": 0.13235068604826597,
+          "average_precision": 0.22049718314445418,
+          "auroc": 0.8667085713481208
+        },
+        "prompt_refined": {
+          "iou": 0.2094139420501643,
+          "average_precision": 0.3434269850296938,
+          "auroc": 0.9197342081860137
+        }
+      },
+      "observations": [
+        {
+          "reference": 0,
+          "target_frame": 105,
+          "category": "green apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.1301780140048933,
+            "average_precision": 0.1693245521265946,
+            "auroc": 0.9144206612469946,
+            "positive_fraction": 0.021333568738229756,
+            "positive_mean_response": 0.4421131908893585,
+            "negative_mean_response": 0.060298167169094086
+          },
+          "image": {
+            "iou": 0.09474188525571925,
+            "average_precision": 0.09432508891033925,
+            "auroc": 0.8802011771768284,
+            "positive_fraction": 0.021333568738229756,
+            "positive_mean_response": 0.45403847098350525,
+            "negative_mean_response": 0.0877825915813446
+          },
+          "prompt": {
+            "iou": 0.10452408184013216,
+            "average_precision": 0.12186738488335484,
+            "auroc": 0.8905835052166331,
+            "positive_fraction": 0.021333568738229756,
+            "positive_mean_response": 0.4709901213645935,
+            "negative_mean_response": 0.08234159648418427
+          },
+          "prompt_refined": {
+            "iou": 0.10452408184013216,
+            "average_precision": 0.12186738488335484,
+            "auroc": 0.8905835052166331,
+            "positive_fraction": 0.021333568738229756,
+            "positive_mean_response": 0.4709901213645935,
+            "negative_mean_response": 0.08234159648418427
+          }
+        },
+        {
+          "reference": 2,
+          "target_frame": 105,
+          "category": "jake",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.06370494551550712,
+            "average_precision": 0.13923296388778358,
+            "auroc": 0.9575028957646428,
+            "positive_fraction": 0.005920433145009416,
+            "positive_mean_response": 0.2565121352672577,
+            "negative_mean_response": 0.012914278544485569
+          },
+          "image": {
+            "iou": 0.026220614828209764,
+            "average_precision": 0.13283638708149947,
+            "auroc": 0.937930023138576,
+            "positive_fraction": 0.005920433145009416,
+            "positive_mean_response": 0.1856754869222641,
+            "negative_mean_response": 0.010928763076663017
+          },
+          "prompt": {
+            "iou": 0.09198578760363206,
+            "average_precision": 0.126524897670106,
+            "auroc": 0.9480446494458777,
+            "positive_fraction": 0.005920433145009416,
+            "positive_mean_response": 0.31020861864089966,
+            "negative_mean_response": 0.015453706495463848
+          },
+          "prompt_refined": {
+            "iou": 0.09198578760363206,
+            "average_precision": 0.126524897670106,
+            "auroc": 0.9480446494458777,
+            "positive_fraction": 0.005920433145009416,
+            "positive_mean_response": 0.31020861864089966,
+            "negative_mean_response": 0.015453706495463848
+          }
+        },
+        {
+          "reference": 4,
+          "target_frame": 105,
+          "category": "old camera",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.5566324316505136,
+            "average_precision": 0.7941220529555538,
+            "auroc": 0.929253288629671,
+            "positive_fraction": 0.07787782485875706,
+            "positive_mean_response": 0.5251656770706177,
+            "negative_mean_response": 0.013151871040463448
+          },
+          "image": {
+            "iou": 0.5285756370599499,
+            "average_precision": 0.8166630304639999,
+            "auroc": 0.9507643308994055,
+            "positive_fraction": 0.07787782485875706,
+            "positive_mean_response": 0.49998939037323,
+            "negative_mean_response": 0.012484081089496613
+          },
+          "prompt": {
+            "iou": 0.0020353733857383493,
+            "average_precision": 0.1354075713820211,
+            "auroc": 0.7550158988973734,
+            "positive_fraction": 0.07787782485875706,
+            "positive_mean_response": 0.05656697601079941,
+            "negative_mean_response": 0.03819023445248604
+          },
+          "prompt_refined": {
+            "iou": 0.3694347729461442,
+            "average_precision": 0.7681696961509046,
+            "auroc": 0.9363035225644206,
+            "positive_fraction": 0.07787782485875706,
+            "positive_mean_response": 0.3823202848434448,
+            "negative_mean_response": 0.022716108709573746
+          }
+        },
+        {
+          "reference": 6,
+          "target_frame": 105,
+          "category": "pink ice cream",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.008971095601876734,
+            "auroc": 0.6456854243202519,
+            "positive_fraction": 0.00692090395480226,
+            "positive_mean_response": 0.017495330423116684,
+            "negative_mean_response": 0.019782209768891335
+          },
+          "image": {
+            "iou": 0.056079170593779454,
+            "average_precision": 0.05858686700652222,
+            "auroc": 0.7343968778249933,
+            "positive_fraction": 0.00692090395480226,
+            "positive_mean_response": 0.15837490558624268,
+            "negative_mean_response": 0.04809632524847984
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.010677966798097118,
+            "auroc": 0.686670610470282,
+            "positive_fraction": 0.00692090395480226,
+            "positive_mean_response": 0.04872515797615051,
+            "negative_mean_response": 0.056433070451021194
+          },
+          "prompt_refined": {
+            "iou": 0.037935957576993674,
+            "average_precision": 0.04098958138012655,
+            "auroc": 0.7523479696007734,
+            "positive_fraction": 0.00692090395480226,
+            "positive_mean_response": 0.19164854288101196,
+            "negative_mean_response": 0.054789092391729355
+          }
+        },
+        {
+          "reference": 7,
+          "target_frame": 105,
+          "category": "pirate hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.001810956418478915,
+            "auroc": 0.5629130168725154,
+            "positive_fraction": 0.0013123822975517892,
+            "positive_mean_response": 0.026319017633795738,
+            "negative_mean_response": 0.02656351774930954
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.000992022458900789,
+            "auroc": 0.36704106033779915,
+            "positive_fraction": 0.0013123822975517892,
+            "positive_mean_response": 0.0018423909787088633,
+            "negative_mean_response": 0.04358509182929993
+          },
+          "prompt": {
+            "iou": 0.0014698677119059284,
+            "average_precision": 0.01381231860517555,
+            "auroc": 0.6748324651764577,
+            "positive_fraction": 0.0013123822975517892,
+            "positive_mean_response": 0.15038853883743286,
+            "negative_mean_response": 0.016254836693406105
+          },
+          "prompt_refined": {
+            "iou": 0.03189276635082043,
+            "average_precision": 0.049887667250009454,
+            "auroc": 0.6818063300425916,
+            "positive_fraction": 0.0013123822975517892,
+            "positive_mean_response": 0.5678236484527588,
+            "negative_mean_response": 0.033804286271333694
+          }
+        },
+        {
+          "reference": 9,
+          "target_frame": 105,
+          "category": "red apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.534359063013225,
+            "average_precision": 0.8031065299183491,
+            "auroc": 0.9850704133581829,
+            "positive_fraction": 0.04906426553672316,
+            "positive_mean_response": 0.7041734457015991,
+            "negative_mean_response": 0.03378913924098015
+          },
+          "image": {
+            "iou": 0.36861167002012074,
+            "average_precision": 0.779801024007967,
+            "auroc": 0.9783543116114778,
+            "positive_fraction": 0.04906426553672316,
+            "positive_mean_response": 0.8265525698661804,
+            "negative_mean_response": 0.07195770740509033
+          },
+          "prompt": {
+            "iou": 0.4459796700955627,
+            "average_precision": 0.8115548873161653,
+            "auroc": 0.9833531314211572,
+            "positive_fraction": 0.04906426553672316,
+            "positive_mean_response": 0.8008630871772766,
+            "negative_mean_response": 0.06395211070775986
+          },
+          "prompt_refined": {
+            "iou": 0.4459796700955627,
+            "average_precision": 0.8115548902584918,
+            "auroc": 0.9833531295653428,
+            "positive_fraction": 0.04906426553672316,
+            "positive_mean_response": 0.8008631467819214,
+            "negative_mean_response": 0.06395212560892105
+          }
+        },
+        {
+          "reference": 10,
+          "target_frame": 105,
+          "category": "rubber duck with buoy",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.33092948717948717,
+            "average_precision": 0.46761308458442785,
+            "auroc": 0.9042547927578013,
+            "positive_fraction": 0.006167608286252354,
+            "positive_mean_response": 0.3705904185771942,
+            "negative_mean_response": 0.008193324320018291
+          },
+          "image": {
+            "iou": 0.3375897845171588,
+            "average_precision": 0.4503025543046496,
+            "auroc": 0.893991743238205,
+            "positive_fraction": 0.006167608286252354,
+            "positive_mean_response": 0.38994479179382324,
+            "negative_mean_response": 0.008395361714065075
+          },
+          "prompt": {
+            "iou": 0.1873873873873874,
+            "average_precision": 0.36105885460569426,
+            "auroc": 0.8988353294324009,
+            "positive_fraction": 0.006167608286252354,
+            "positive_mean_response": 0.39391839504241943,
+            "negative_mean_response": 0.015518303960561752
+          },
+          "prompt_refined": {
+            "iou": 0.1873873873873874,
+            "average_precision": 0.36105885460569426,
+            "auroc": 0.8988353294324009,
+            "positive_fraction": 0.006167608286252354,
+            "positive_mean_response": 0.39391839504241943,
+            "negative_mean_response": 0.015518303960561752
+          }
+        },
+        {
+          "reference": 11,
+          "target_frame": 105,
+          "category": "rubber duck with hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.013810603792844798,
+            "auroc": 0.8137346495019391,
+            "positive_fraction": 0.0030896892655367233,
+            "positive_mean_response": 0.010414821095764637,
+            "negative_mean_response": 0.006968257017433643
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.005449635576063622,
+            "auroc": 0.7088871741027944,
+            "positive_fraction": 0.0030896892655367233,
+            "positive_mean_response": 0.013149930164217949,
+            "negative_mean_response": 0.011061761528253555
+          },
+          "prompt": {
+            "iou": 0.07112676056338028,
+            "average_precision": 0.0569183661609513,
+            "auroc": 0.8756000387935216,
+            "positive_fraction": 0.0030896892655367233,
+            "positive_mean_response": 0.380641907453537,
+            "negative_mean_response": 0.021295279264450073
+          },
+          "prompt_refined": {
+            "iou": 0.07112676056338028,
+            "average_precision": 0.0569183661609513,
+            "auroc": 0.8756000387935216,
+            "positive_fraction": 0.0030896892655367233,
+            "positive_mean_response": 0.380641907453537,
+            "negative_mean_response": 0.021295279264450073
+          }
+        },
+        {
+          "reference": 13,
+          "target_frame": 105,
+          "category": "spatula",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.22395833333333334,
+            "average_precision": 0.2575600380496424,
+            "auroc": 0.9356618969648208,
+            "positive_fraction": 0.002836629001883239,
+            "positive_mean_response": 0.2619982361793518,
+            "negative_mean_response": 0.008881052024662495
+          },
+          "image": {
+            "iou": 0.25285714285714284,
+            "average_precision": 0.26042595820011727,
+            "auroc": 0.9553080689645275,
+            "positive_fraction": 0.002836629001883239,
+            "positive_mean_response": 0.3699445426464081,
+            "negative_mean_response": 0.014372915029525757
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.003698361144318087,
+            "auroc": 0.6529183443102285,
+            "positive_fraction": 0.002836629001883239,
+            "positive_mean_response": 0.08928155899047852,
+            "negative_mean_response": 0.10040384531021118
+          },
+          "prompt_refined": {
+            "iou": 0.2670157068062827,
+            "average_precision": 0.2633729594431724,
+            "auroc": 0.9489083547812615,
+            "positive_fraction": 0.002836629001883239,
+            "positive_mean_response": 0.4355320334434509,
+            "negative_mean_response": 0.03211219981312752
+          }
+        },
+        {
+          "reference": 14,
+          "target_frame": 105,
+          "category": "tesla door handle",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.06535116337926886,
+            "auroc": 0.893444652099853,
+            "positive_fraction": 0.015189500941619586,
+            "positive_mean_response": 0.023195531219244003,
+            "negative_mean_response": 0.007038458250463009
+          },
+          "image": {
+            "iou": 0.11186868686868687,
+            "average_precision": 0.30040206864472974,
+            "auroc": 0.9818864597926031,
+            "positive_fraction": 0.015189500941619586,
+            "positive_mean_response": 0.36404404044151306,
+            "negative_mean_response": 0.024559076875448227
+          },
+          "prompt": {
+            "iou": 0.2115050830647161,
+            "average_precision": 0.2135494720879876,
+            "auroc": 0.9227351825926773,
+            "positive_fraction": 0.015189500941619586,
+            "positive_mean_response": 0.3159051537513733,
+            "negative_mean_response": 0.04157206043601036
+          },
+          "prompt_refined": {
+            "iou": 0.2940296790521109,
+            "average_precision": 0.6495667725516765,
+            "auroc": 0.9941202281048233,
+            "positive_fraction": 0.015189500941619586,
+            "positive_mean_response": 0.879469633102417,
+            "negative_mean_response": 0.05217749997973442
+          }
+        },
+        {
+          "reference": 0,
+          "target_frame": 152,
+          "category": "green apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.5638427239562221,
+            "average_precision": 0.7583286458197648,
+            "auroc": 0.9916283046693098,
+            "positive_fraction": 0.009545668549905838,
+            "positive_mean_response": 0.7881269454956055,
+            "negative_mean_response": 0.00937842857092619
+          },
+          "image": {
+            "iou": 0.5263358778625954,
+            "average_precision": 0.5054583946557681,
+            "auroc": 0.9912326447132508,
+            "positive_fraction": 0.009545668549905838,
+            "positive_mean_response": 0.7839328050613403,
+            "negative_mean_response": 0.012136204168200493
+          },
+          "prompt": {
+            "iou": 0.5203703703703704,
+            "average_precision": 0.5295579507897508,
+            "auroc": 0.9931146588242372,
+            "positive_fraction": 0.009545668549905838,
+            "positive_mean_response": 0.8006455898284912,
+            "negative_mean_response": 0.01669435203075409
+          },
+          "prompt_refined": {
+            "iou": 0.5203703703703704,
+            "average_precision": 0.5295579507897508,
+            "auroc": 0.9931146588242372,
+            "positive_fraction": 0.009545668549905838,
+            "positive_mean_response": 0.8006455898284912,
+            "negative_mean_response": 0.01669435203075409
+          }
+        },
+        {
+          "reference": 2,
+          "target_frame": 152,
+          "category": "jake",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.24547634619577066,
+            "average_precision": 0.32956892744900146,
+            "auroc": 0.9756580949209113,
+            "positive_fraction": 0.015613229755178908,
+            "positive_mean_response": 0.7085406184196472,
+            "negative_mean_response": 0.04010533541440964
+          },
+          "image": {
+            "iou": 0.2424807647470273,
+            "average_precision": 0.6157558110478435,
+            "auroc": 0.9738835261186417,
+            "positive_fraction": 0.015613229755178908,
+            "positive_mean_response": 0.6369918584823608,
+            "negative_mean_response": 0.03284589573740959
+          },
+          "prompt": {
+            "iou": 0.22881606141127842,
+            "average_precision": 0.6829939487598533,
+            "auroc": 0.9751536413257463,
+            "positive_fraction": 0.015613229755178908,
+            "positive_mean_response": 0.8196022510528564,
+            "negative_mean_response": 0.054063498973846436
+          },
+          "prompt_refined": {
+            "iou": 0.22881606141127842,
+            "average_precision": 0.6829939487598533,
+            "auroc": 0.9751536413257463,
+            "positive_fraction": 0.015613229755178908,
+            "positive_mean_response": 0.8196022510528564,
+            "negative_mean_response": 0.054063498973846436
+          }
+        },
+        {
+          "reference": 5,
+          "target_frame": 152,
+          "category": "pikachu",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.5475869051636855,
+            "average_precision": 0.6657884104937161,
+            "auroc": 0.9918213294653052,
+            "positive_fraction": 0.027612994350282485,
+            "positive_mean_response": 0.6439411640167236,
+            "negative_mean_response": 0.018744293600320816
+          },
+          "image": {
+            "iou": 0.7266382978723405,
+            "average_precision": 0.9065459849168214,
+            "auroc": 0.9965071463625939,
+            "positive_fraction": 0.027612994350282485,
+            "positive_mean_response": 0.8243114948272705,
+            "negative_mean_response": 0.014738772064447403
+          },
+          "prompt": {
+            "iou": 0.5174002667636717,
+            "average_precision": 0.8518425529330018,
+            "auroc": 0.9908605545988575,
+            "positive_fraction": 0.027612994350282485,
+            "positive_mean_response": 0.8535162806510925,
+            "negative_mean_response": 0.046133335679769516
+          },
+          "prompt_refined": {
+            "iou": 0.5174002667636717,
+            "average_precision": 0.8518425529330018,
+            "auroc": 0.9908605545988575,
+            "positive_fraction": 0.027612994350282485,
+            "positive_mean_response": 0.8535162806510925,
+            "negative_mean_response": 0.046133335679769516
+          }
+        },
+        {
+          "reference": 7,
+          "target_frame": 152,
+          "category": "pirate hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.007206361338966926,
+            "auroc": 0.7965759842172082,
+            "positive_fraction": 0.0030190677966101696,
+            "positive_mean_response": 0.033876147121191025,
+            "negative_mean_response": 0.018579255789518356
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.005032162422223385,
+            "auroc": 0.637988669822935,
+            "positive_fraction": 0.0030190677966101696,
+            "positive_mean_response": 0.02735781855881214,
+            "negative_mean_response": 0.013082300312817097
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.009511602899427523,
+            "auroc": 0.8213502423561164,
+            "positive_fraction": 0.0030190677966101696,
+            "positive_mean_response": 0.08945781737565994,
+            "negative_mean_response": 0.06478521972894669
+          },
+          "prompt_refined": {
+            "iou": 0.020821977542788618,
+            "average_precision": 0.01638843333163468,
+            "auroc": 0.8713241388022117,
+            "positive_fraction": 0.0030190677966101696,
+            "positive_mean_response": 0.3907662332057953,
+            "negative_mean_response": 0.07002992928028107
+          }
+        },
+        {
+          "reference": 8,
+          "target_frame": 152,
+          "category": "porcelain hand",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.32488357659798694,
+            "auroc": 0.9869231355157738,
+            "positive_fraction": 0.00808027306967985,
+            "positive_mean_response": 0.18091236054897308,
+            "negative_mean_response": 0.01521215122193098
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.06907365933938187,
+            "auroc": 0.9464324899448732,
+            "positive_fraction": 0.00808027306967985,
+            "positive_mean_response": 0.11624185740947723,
+            "negative_mean_response": 0.018964827060699463
+          },
+          "prompt": {
+            "iou": 0.03712848651120256,
+            "average_precision": 0.05294196430897161,
+            "auroc": 0.9326893852456801,
+            "positive_fraction": 0.00808027306967985,
+            "positive_mean_response": 0.38661375641822815,
+            "negative_mean_response": 0.06332603096961975
+          },
+          "prompt_refined": {
+            "iou": 0.03712848651120256,
+            "average_precision": 0.05294196430897161,
+            "auroc": 0.9326893852456801,
+            "positive_fraction": 0.00808027306967985,
+            "positive_mean_response": 0.38661375641822815,
+            "negative_mean_response": 0.06332603096961975
+          }
+        },
+        {
+          "reference": 9,
+          "target_frame": 152,
+          "category": "red apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.1672669067627051,
+            "average_precision": 0.21210199737021612,
+            "auroc": 0.9202656890442699,
+            "positive_fraction": 0.00431379472693032,
+            "positive_mean_response": 0.5305106043815613,
+            "negative_mean_response": 0.01430229377001524
+          },
+          "image": {
+            "iou": 0.12449392712550607,
+            "average_precision": 0.47983267614798625,
+            "auroc": 0.9874055662602996,
+            "positive_fraction": 0.00431379472693032,
+            "positive_mean_response": 0.6725407242774963,
+            "negative_mean_response": 0.020646868273615837
+          },
+          "prompt": {
+            "iou": 0.17664023071377072,
+            "average_precision": 0.35457528497566926,
+            "auroc": 0.986901163820354,
+            "positive_fraction": 0.00431379472693032,
+            "positive_mean_response": 0.6605689525604248,
+            "negative_mean_response": 0.02144191786646843
+          },
+          "prompt_refined": {
+            "iou": 0.17664023071377072,
+            "average_precision": 0.35457528497566926,
+            "auroc": 0.9869011678521544,
+            "positive_fraction": 0.00431379472693032,
+            "positive_mean_response": 0.6605690121650696,
+            "negative_mean_response": 0.02144191786646843
+          }
+        },
+        {
+          "reference": 11,
+          "target_frame": 152,
+          "category": "rubber duck with hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.044515462869437604,
+            "auroc": 0.860458878247781,
+            "positive_fraction": 0.011676082862523541,
+            "positive_mean_response": 0.013039342127740383,
+            "negative_mean_response": 0.00854852981865406
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.03463432153086428,
+            "auroc": 0.8338492473779374,
+            "positive_fraction": 0.011676082862523541,
+            "positive_mean_response": 0.015221976675093174,
+            "negative_mean_response": 0.008023438975214958
+          },
+          "prompt": {
+            "iou": 0.10198570293884035,
+            "average_precision": 0.07192763978520818,
+            "auroc": 0.9158339196542039,
+            "positive_fraction": 0.011676082862523541,
+            "positive_mean_response": 0.517056405544281,
+            "negative_mean_response": 0.07160931825637817
+          },
+          "prompt_refined": {
+            "iou": 0.10198570293884035,
+            "average_precision": 0.07192763978520818,
+            "auroc": 0.9158339196542039,
+            "positive_fraction": 0.011676082862523541,
+            "positive_mean_response": 0.517056405544281,
+            "negative_mean_response": 0.07160931825637817
+          }
+        },
+        {
+          "reference": 12,
+          "target_frame": 152,
+          "category": "rubics cube",
+          "reference_frame": 105,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.10461805200059529,
+            "auroc": 0.888475264311978,
+            "positive_fraction": 0.02556497175141243,
+            "positive_mean_response": 0.02511727064847946,
+            "negative_mean_response": 0.015091102570295334
+          },
+          "image": {
+            "iou": 0.015303682448589193,
+            "average_precision": 0.1430254101735904,
+            "auroc": 0.9186764088893854,
+            "positive_fraction": 0.02556497175141243,
+            "positive_mean_response": 0.1027102917432785,
+            "negative_mean_response": 0.020568279549479485
+          },
+          "prompt": {
+            "iou": 0.1473225404732254,
+            "average_precision": 0.29631450833179407,
+            "auroc": 0.9178715444810063,
+            "positive_fraction": 0.02556497175141243,
+            "positive_mean_response": 0.35699263215065,
+            "negative_mean_response": 0.05479329451918602
+          },
+          "prompt_refined": {
+            "iou": 0.04701298701298701,
+            "average_precision": 0.11548176311468233,
+            "auroc": 0.8932579600630282,
+            "positive_fraction": 0.02556497175141243,
+            "positive_mean_response": 0.35993000864982605,
+            "negative_mean_response": 0.08498094230890274
+          }
+        },
+        {
+          "reference": 15,
+          "target_frame": 152,
+          "category": "toy cat statue",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.07816509168283373,
+            "average_precision": 0.32667906967500904,
+            "auroc": 0.946952135291118,
+            "positive_fraction": 0.009675141242937854,
+            "positive_mean_response": 0.7089590430259705,
+            "negative_mean_response": 0.0925721749663353
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.026230141319751495,
+            "auroc": 0.806931268026303,
+            "positive_fraction": 0.009675141242937854,
+            "positive_mean_response": 0.020649416372179985,
+            "negative_mean_response": 0.013668556697666645
+          },
+          "prompt": {
+            "iou": 0.10764818355640535,
+            "average_precision": 0.11062061916142978,
+            "auroc": 0.9501069696557486,
+            "positive_fraction": 0.009675141242937854,
+            "positive_mean_response": 0.6392715573310852,
+            "negative_mean_response": 0.06142335757613182
+          },
+          "prompt_refined": {
+            "iou": 0.10764818355640535,
+            "average_precision": 0.11062061916142978,
+            "auroc": 0.9501069696557486,
+            "positive_fraction": 0.009675141242937854,
+            "positive_mean_response": 0.6392715573310852,
+            "negative_mean_response": 0.06142335757613182
+          }
+        },
+        {
+          "reference": 16,
+          "target_frame": 152,
+          "category": "toy elephant",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.38880918220946914,
+            "average_precision": 0.48315728657524404,
+            "auroc": 0.9855169938106729,
+            "positive_fraction": 0.029537429378531075,
+            "positive_mean_response": 0.9244161248207092,
+            "negative_mean_response": 0.05853532254695892
+          },
+          "image": {
+            "iou": 0.49964150363617743,
+            "average_precision": 0.8946301208067674,
+            "auroc": 0.9952458140705817,
+            "positive_fraction": 0.029537429378531075,
+            "positive_mean_response": 0.9240685105323792,
+            "negative_mean_response": 0.036030303686857224
+          },
+          "prompt": {
+            "iou": 0.48882653572502255,
+            "average_precision": 0.7325026400925173,
+            "auroc": 0.9918254671399445,
+            "positive_fraction": 0.029537429378531075,
+            "positive_mean_response": 0.921130359172821,
+            "negative_mean_response": 0.03883795440196991
+          },
+          "prompt_refined": {
+            "iou": 0.48882653572502255,
+            "average_precision": 0.7325026400925173,
+            "auroc": 0.9918254671399445,
+            "positive_fraction": 0.029537429378531075,
+            "positive_mean_response": 0.921130359172821,
+            "negative_mean_response": 0.03883795440196991
+          }
+        },
+        {
+          "reference": 17,
+          "target_frame": 152,
+          "category": "waldo",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.009205315649726487,
+            "auroc": 0.5636025987617457,
+            "positive_fraction": 0.008598163841807909,
+            "positive_mean_response": 0.0009937777649611235,
+            "negative_mean_response": 0.0405869223177433
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.01123102184650457,
+            "auroc": 0.6538615982451614,
+            "positive_fraction": 0.008598163841807909,
+            "positive_mean_response": 0.00608178973197937,
+            "negative_mean_response": 0.01851700246334076
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.018001348455670158,
+            "auroc": 0.7834732270680608,
+            "positive_fraction": 0.008598163841807909,
+            "positive_mean_response": 0.030264919623732567,
+            "negative_mean_response": 0.07679767161607742
+          },
+          "prompt_refined": {
+            "iou": 0.4936454849498328,
+            "average_precision": 0.7734238842211781,
+            "auroc": 0.9549161581242382,
+            "positive_fraction": 0.008598163841807909,
+            "positive_mean_response": 0.4780527651309967,
+            "negative_mean_response": 0.010813940316438675
+          }
+        },
+        {
+          "reference": 0,
+          "target_frame": 195,
+          "category": "green apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.6203531598513011,
+            "average_precision": 0.8252226546308246,
+            "auroc": 0.9888037430109397,
+            "positive_fraction": 0.010652071563088512,
+            "positive_mean_response": 0.6988251805305481,
+            "negative_mean_response": 0.0065438756719231606
+          },
+          "image": {
+            "iou": 0.5836298932384342,
+            "average_precision": 0.7719484269441672,
+            "auroc": 0.9779979203303809,
+            "positive_fraction": 0.010652071563088512,
+            "positive_mean_response": 0.6961867213249207,
+            "negative_mean_response": 0.01493096724152565
+          },
+          "prompt": {
+            "iou": 0.5228706624605678,
+            "average_precision": 0.7578582592232308,
+            "auroc": 0.9774678970721289,
+            "positive_fraction": 0.010652071563088512,
+            "positive_mean_response": 0.7072468400001526,
+            "negative_mean_response": 0.01786232180893421
+          },
+          "prompt_refined": {
+            "iou": 0.5228706624605678,
+            "average_precision": 0.7578582592232308,
+            "auroc": 0.9774678970721289,
+            "positive_fraction": 0.010652071563088512,
+            "positive_mean_response": 0.7072468400001526,
+            "negative_mean_response": 0.01786232180893421
+          }
+        },
+        {
+          "reference": 1,
+          "target_frame": 195,
+          "category": "green toy chair",
+          "reference_frame": 105,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.02628107559614409,
+            "average_precision": 0.06634902208448781,
+            "auroc": 0.6585366104265366,
+            "positive_fraction": 0.04437382297551789,
+            "positive_mean_response": 0.05228959396481514,
+            "negative_mean_response": 0.03192148730158806
+          },
+          "image": {
+            "iou": 0.030391715443493922,
+            "average_precision": 0.07341105036583596,
+            "auroc": 0.6476898819058546,
+            "positive_fraction": 0.04437382297551789,
+            "positive_mean_response": 0.051535218954086304,
+            "negative_mean_response": 0.01894061267375946
+          },
+          "prompt": {
+            "iou": 0.014788732394366197,
+            "average_precision": 0.05482328208533917,
+            "auroc": 0.6039420667471886,
+            "positive_fraction": 0.04437382297551789,
+            "positive_mean_response": 0.035603564232587814,
+            "negative_mean_response": 0.028894519433379173
+          },
+          "prompt_refined": {
+            "iou": 0.11479224376731302,
+            "average_precision": 0.14713089312192884,
+            "auroc": 0.8685010481521062,
+            "positive_fraction": 0.04437382297551789,
+            "positive_mean_response": 0.7217239141464233,
+            "negative_mean_response": 0.2837321162223816
+          }
+        },
+        {
+          "reference": 3,
+          "target_frame": 195,
+          "category": "miffy",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.015039577604052574,
+            "auroc": 0.9563364937146756,
+            "positive_fraction": 0.0014183145009416195,
+            "positive_mean_response": 0.09734885394573212,
+            "negative_mean_response": 0.02239418961107731
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.0029177075337565987,
+            "auroc": 0.7755111745172524,
+            "positive_fraction": 0.0014183145009416195,
+            "positive_mean_response": 0.00235355063341558,
+            "negative_mean_response": 0.007192673627287149
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.010635522294383885,
+            "auroc": 0.9288391976854318,
+            "positive_fraction": 0.0014183145009416195,
+            "positive_mean_response": 0.0846099928021431,
+            "negative_mean_response": 0.020600855350494385
+          },
+          "prompt_refined": {
+            "iou": 0.06310456011054813,
+            "average_precision": 0.15036238819907197,
+            "auroc": 0.9853304282954201,
+            "positive_fraction": 0.0014183145009416195,
+            "positive_mean_response": 0.5228341817855835,
+            "negative_mean_response": 0.07966500520706177
+          }
+        },
+        {
+          "reference": 4,
+          "target_frame": 195,
+          "category": "old camera",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.5219550963639976,
+            "average_precision": 0.7852215519203076,
+            "auroc": 0.9548753783745659,
+            "positive_fraction": 0.027418785310734464,
+            "positive_mean_response": 0.5367395877838135,
+            "negative_mean_response": 0.004784769844263792
+          },
+          "image": {
+            "iou": 0.5359852368259176,
+            "average_precision": 0.7849091118397717,
+            "auroc": 0.9357609385996783,
+            "positive_fraction": 0.027418785310734464,
+            "positive_mean_response": 0.5213451981544495,
+            "negative_mean_response": 0.0054812952876091
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.07498956598211273,
+            "auroc": 0.8144139338924347,
+            "positive_fraction": 0.027418785310734464,
+            "positive_mean_response": 0.04657946527004242,
+            "negative_mean_response": 0.028993353247642517
+          },
+          "prompt_refined": {
+            "iou": 0.5512523679225426,
+            "average_precision": 0.7973853138119243,
+            "auroc": 0.9642076949886521,
+            "positive_fraction": 0.027418785310734464,
+            "positive_mean_response": 0.4889655113220215,
+            "negative_mean_response": 0.01603887416422367
+          }
+        },
+        {
+          "reference": 6,
+          "target_frame": 195,
+          "category": "pink ice cream",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.0038066729843056306,
+            "auroc": 0.843541003439214,
+            "positive_fraction": 0.0011064030131826743,
+            "positive_mean_response": 0.0247166957706213,
+            "negative_mean_response": 0.008435120806097984
+          },
+          "image": {
+            "iou": 0.03407601572739188,
+            "average_precision": 0.02218227748832158,
+            "auroc": 0.8957164197776619,
+            "positive_fraction": 0.0011064030131826743,
+            "positive_mean_response": 0.21263213455677032,
+            "negative_mean_response": 0.016139088198542595
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.005377050683888774,
+            "auroc": 0.866250709503994,
+            "positive_fraction": 0.0011064030131826743,
+            "positive_mean_response": 0.07867424935102463,
+            "negative_mean_response": 0.01831855997443199
+          },
+          "prompt_refined": {
+            "iou": 0.008925506350841057,
+            "average_precision": 0.007720194684708868,
+            "auroc": 0.8696338432903735,
+            "positive_fraction": 0.0011064030131826743,
+            "positive_mean_response": 0.29862532019615173,
+            "negative_mean_response": 0.04687448590993881
+          }
+        },
+        {
+          "reference": 7,
+          "target_frame": 195,
+          "category": "pirate hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.006019426442446597,
+            "auroc": 0.7027911685655788,
+            "positive_fraction": 0.002742467043314501,
+            "positive_mean_response": 0.022838326171040535,
+            "negative_mean_response": 0.013027515262365341
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.002700632237438847,
+            "auroc": 0.5339054312332905,
+            "positive_fraction": 0.002742467043314501,
+            "positive_mean_response": 0.0005187400965951383,
+            "negative_mean_response": 0.012469522655010223
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.013303067166478466,
+            "auroc": 0.858312479095318,
+            "positive_fraction": 0.002742467043314501,
+            "positive_mean_response": 0.07199078798294067,
+            "negative_mean_response": 0.02006400190293789
+          },
+          "prompt_refined": {
+            "iou": 0.05141388174807198,
+            "average_precision": 0.08242615638632345,
+            "auroc": 0.7528615828033597,
+            "positive_fraction": 0.002742467043314501,
+            "positive_mean_response": 0.32628539204597473,
+            "negative_mean_response": 0.029224295169115067
+          }
+        },
+        {
+          "reference": 8,
+          "target_frame": 195,
+          "category": "porcelain hand",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.03706546902158802,
+            "auroc": 0.8756347647368597,
+            "positive_fraction": 0.002877824858757062,
+            "positive_mean_response": 0.10001037269830704,
+            "negative_mean_response": 0.022111045196652412
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.010968609096002689,
+            "auroc": 0.8150688870709432,
+            "positive_fraction": 0.002877824858757062,
+            "positive_mean_response": 0.03509433940052986,
+            "negative_mean_response": 0.011482616886496544
+          },
+          "prompt": {
+            "iou": 0.010546500479386385,
+            "average_precision": 0.016708433239217137,
+            "auroc": 0.8698733602022861,
+            "positive_fraction": 0.002877824858757062,
+            "positive_mean_response": 0.12122208625078201,
+            "negative_mean_response": 0.02145582064986229
+          },
+          "prompt_refined": {
+            "iou": 0.010546500479386385,
+            "average_precision": 0.016708433239217137,
+            "auroc": 0.8698733602022861,
+            "positive_fraction": 0.002877824858757062,
+            "positive_mean_response": 0.12122208625078201,
+            "negative_mean_response": 0.02145582064986229
+          }
+        },
+        {
+          "reference": 10,
+          "target_frame": 195,
+          "category": "rubber duck with buoy",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.6434859154929577,
+            "average_precision": 0.807928648609698,
+            "auroc": 0.9701076332957788,
+            "positive_fraction": 0.006044020715630885,
+            "positive_mean_response": 0.6363623142242432,
+            "negative_mean_response": 0.003824444254860282
+          },
+          "image": {
+            "iou": 0.648861646234676,
+            "average_precision": 0.7913178042692022,
+            "auroc": 0.9683977245008883,
+            "positive_fraction": 0.006044020715630885,
+            "positive_mean_response": 0.6672073602676392,
+            "negative_mean_response": 0.0057359919883310795
+          },
+          "prompt": {
+            "iou": 0.2937595129375951,
+            "average_precision": 0.6586673412522422,
+            "auroc": 0.964130744244766,
+            "positive_fraction": 0.006044020715630885,
+            "positive_mean_response": 0.690815269947052,
+            "negative_mean_response": 0.014271797612309456
+          },
+          "prompt_refined": {
+            "iou": 0.2937595129375951,
+            "average_precision": 0.6586673412522422,
+            "auroc": 0.964130744244766,
+            "positive_fraction": 0.006044020715630885,
+            "positive_mean_response": 0.690815269947052,
+            "negative_mean_response": 0.014271797612309456
+          }
+        },
+        {
+          "reference": 11,
+          "target_frame": 195,
+          "category": "rubber duck with hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.030167453907335533,
+            "auroc": 0.886236914076533,
+            "positive_fraction": 0.006202919020715631,
+            "positive_mean_response": 0.008336891420185566,
+            "negative_mean_response": 0.007396308239549398
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.01697957255376719,
+            "auroc": 0.8045976171308686,
+            "positive_fraction": 0.006202919020715631,
+            "positive_mean_response": 0.008830438368022442,
+            "negative_mean_response": 0.007496903650462627
+          },
+          "prompt": {
+            "iou": 0.07197268190175991,
+            "average_precision": 0.06410830826637792,
+            "auroc": 0.8922056131725973,
+            "positive_fraction": 0.006202919020715631,
+            "positive_mean_response": 0.27598798274993896,
+            "negative_mean_response": 0.02301856316626072
+          },
+          "prompt_refined": {
+            "iou": 0.07197268190175991,
+            "average_precision": 0.06410830826637792,
+            "auroc": 0.8922056131725973,
+            "positive_fraction": 0.006202919020715631,
+            "positive_mean_response": 0.27598798274993896,
+            "negative_mean_response": 0.02301856316626072
+          }
+        },
+        {
+          "reference": 12,
+          "target_frame": 195,
+          "category": "rubics cube",
+          "reference_frame": 105,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.025636739942155096,
+            "auroc": 0.826101358649714,
+            "positive_fraction": 0.009828154425612053,
+            "positive_mean_response": 0.01397195365279913,
+            "negative_mean_response": 0.008871672675013542
+          },
+          "image": {
+            "iou": 0.0047413793103448275,
+            "average_precision": 0.03644951809920407,
+            "auroc": 0.8680391561601908,
+            "positive_fraction": 0.009828154425612053,
+            "positive_mean_response": 0.048857998102903366,
+            "negative_mean_response": 0.01462612021714449
+          },
+          "prompt": {
+            "iou": 0.013355201499531396,
+            "average_precision": 0.022498741258103014,
+            "auroc": 0.7622780827646342,
+            "positive_fraction": 0.009828154425612053,
+            "positive_mean_response": 0.09357356280088425,
+            "negative_mean_response": 0.060767266899347305
+          },
+          "prompt_refined": {
+            "iou": 0.026786156359855425,
+            "average_precision": 0.299881202823485,
+            "auroc": 0.8614460517301208,
+            "positive_fraction": 0.009828154425612053,
+            "positive_mean_response": 0.5740136504173279,
+            "negative_mean_response": 0.22178059816360474
+          }
+        },
+        {
+          "reference": 13,
+          "target_frame": 195,
+          "category": "spatula",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.256816182937555,
+            "average_precision": 0.6181893432453458,
+            "auroc": 0.9561616674622321,
+            "positive_fraction": 0.012570621468926554,
+            "positive_mean_response": 0.29257839918136597,
+            "negative_mean_response": 0.003937138710170984
+          },
+          "image": {
+            "iou": 0.38598622924260834,
+            "average_precision": 0.6289039078956072,
+            "auroc": 0.9439135708368401,
+            "positive_fraction": 0.012570621468926554,
+            "positive_mean_response": 0.42240747809410095,
+            "negative_mean_response": 0.005660628899931908
+          },
+          "prompt": {
+            "iou": 0.003944419542805917,
+            "average_precision": 0.017578086687243134,
+            "auroc": 0.6653027206729679,
+            "positive_fraction": 0.012570621468926554,
+            "positive_mean_response": 0.11712934821844101,
+            "negative_mean_response": 0.10924199223518372
+          },
+          "prompt_refined": {
+            "iou": 0.4258013454689355,
+            "average_precision": 0.5357736877283763,
+            "auroc": 0.9298079941733539,
+            "positive_fraction": 0.012570621468926554,
+            "positive_mean_response": 0.4725336730480194,
+            "negative_mean_response": 0.025605564936995506
+          }
+        },
+        {
+          "reference": 15,
+          "target_frame": 195,
+          "category": "toy cat statue",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.03534126791352927,
+            "average_precision": 0.09330395664191754,
+            "auroc": 0.9230889665320277,
+            "positive_fraction": 0.0043255649717514125,
+            "positive_mean_response": 0.4147491753101349,
+            "negative_mean_response": 0.053910672664642334
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.01707757401781427,
+            "auroc": 0.8710798528117694,
+            "positive_fraction": 0.0043255649717514125,
+            "positive_mean_response": 0.011527304537594318,
+            "negative_mean_response": 0.0051216487772762775
+          },
+          "prompt": {
+            "iou": 0.0747896540978498,
+            "average_precision": 0.052937683816398136,
+            "auroc": 0.9316335919360504,
+            "positive_fraction": 0.0043255649717514125,
+            "positive_mean_response": 0.3259289860725403,
+            "negative_mean_response": 0.022817548364400864
+          },
+          "prompt_refined": {
+            "iou": 0.0747896540978498,
+            "average_precision": 0.052937683816398136,
+            "auroc": 0.9316335919360504,
+            "positive_fraction": 0.0043255649717514125,
+            "positive_mean_response": 0.3259289860725403,
+            "negative_mean_response": 0.022817548364400864
+          }
+        },
+        {
+          "reference": 16,
+          "target_frame": 195,
+          "category": "toy elephant",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.15004816955684008,
+            "average_precision": 0.24959166540022829,
+            "auroc": 0.9552038223413838,
+            "positive_fraction": 0.007173964218455744,
+            "positive_mean_response": 0.5173801779747009,
+            "negative_mean_response": 0.02912570908665657
+          },
+          "image": {
+            "iou": 0.19017288444040037,
+            "average_precision": 0.42831581559705506,
+            "auroc": 0.9742251022493603,
+            "positive_fraction": 0.007173964218455744,
+            "positive_mean_response": 0.5189371705055237,
+            "negative_mean_response": 0.01609770581126213
+          },
+          "prompt": {
+            "iou": 0.18409425625920472,
+            "average_precision": 0.3953789486059179,
+            "auroc": 0.9760065522917993,
+            "positive_fraction": 0.007173964218455744,
+            "positive_mean_response": 0.5182370543479919,
+            "negative_mean_response": 0.016690699383616447
+          },
+          "prompt_refined": {
+            "iou": 0.18409425625920472,
+            "average_precision": 0.3953789486059179,
+            "auroc": 0.9760065522917993,
+            "positive_fraction": 0.007173964218455744,
+            "positive_mean_response": 0.5182370543479919,
+            "negative_mean_response": 0.016690699383616447
+          }
+        },
+        {
+          "reference": 17,
+          "target_frame": 195,
+          "category": "waldo",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.006834585636350201,
+            "auroc": 0.6951444154460185,
+            "positive_fraction": 0.004502118644067797,
+            "positive_mean_response": 0.0006593955331481993,
+            "negative_mean_response": 0.01347519550472498
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.00851651372959094,
+            "auroc": 0.7609298893017445,
+            "positive_fraction": 0.004502118644067797,
+            "positive_mean_response": 0.004000755026936531,
+            "negative_mean_response": 0.011312682181596756
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.006676978347797987,
+            "auroc": 0.6763731179760682,
+            "positive_fraction": 0.004502118644067797,
+            "positive_mean_response": 0.018793603405356407,
+            "negative_mean_response": 0.031116904690861702
+          },
+          "prompt_refined": {
+            "iou": 0.28776978417266186,
+            "average_precision": 0.5114379130516953,
+            "auroc": 0.981703805323771,
+            "positive_fraction": 0.004502118644067797,
+            "positive_mean_response": 0.341732382774353,
+            "negative_mean_response": 0.012149574235081673
+          }
+        }
+      ],
+      "prompt_refinement": [
+        {
+          "seed_before": [
+            0.9738087058067322,
+            0.0014832268934696913
+          ],
+          "seed_after": [
+            0.9738087058067322,
+            0.0014832268934696913
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.18639561533927917,
+            0.010442382656037807
+          ],
+          "seed_after": [
+            0.8532497882843018,
+            0.0466984398663044
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.13726024329662323,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9785627722740173,
+            0.0006138722528703511
+          ],
+          "seed_after": [
+            0.9785627722740173,
+            0.0006138722528703511
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.4348653256893158,
+            0.0006371518247760832
+          ],
+          "seed_after": [
+            0.9535994529724121,
+            0.0024251516442745924
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.35806721448898315,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.053951505571603775,
+            0.00232305726967752
+          ],
+          "seed_after": [
+            0.931448757648468,
+            0.0024360674433410168
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.18803885579109192,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9473042488098145,
+            0.000631672446615994
+          ],
+          "seed_after": [
+            0.9473042488098145,
+            0.000631672446615994
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.19889412820339203,
+            6.883450987515971e-05
+          ],
+          "seed_after": [
+            0.9003428816795349,
+            0.0002611447125673294
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.39494913816452026,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.15483906865119934,
+            0.0001784533087629825
+          ],
+          "seed_after": [
+            0.9770098924636841,
+            0.0025909857358783484
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.4407414495944977,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.7075166702270508,
+            0.00043754500802606344
+          ],
+          "seed_after": [
+            0.7075166702270508,
+            0.00043754500802606344
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9619273543357849,
+            0.00641720462590456
+          ],
+          "seed_after": [
+            0.9619273543357849,
+            0.00641720462590456
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.9999998807907104,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9348909854888916,
+            0.0002956747484859079
+          ],
+          "seed_after": [
+            0.9348909854888916,
+            0.0002956747484859079
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.5647301077842712,
+            0.0005665590288117528
+          ],
+          "seed_after": [
+            0.5647301077842712,
+            0.0005665590288117528
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.06018144637346268,
+            0.01157852541655302
+          ],
+          "seed_after": [
+            0.8499606847763062,
+            0.009918877854943275
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.22757896780967712,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.14522603154182434,
+            0.04635115712881088
+          ],
+          "seed_after": [
+            0.8600634336471558,
+            0.004959339275956154
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.44840359687805176,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.06866282224655151,
+            0.03770356997847557
+          ],
+          "seed_after": [
+            0.9634474515914917,
+            0.0041296700946986675
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.22539903223514557,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9375845193862915,
+            0.0009036191622726619
+          ],
+          "seed_after": [
+            0.9375845193862915,
+            0.0009036191622726619
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0000001192092896,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9828550219535828,
+            0.0007829724927432835
+          ],
+          "seed_after": [
+            0.9828550219535828,
+            0.0007829724927432835
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.02859971858561039,
+            0.007824348285794258
+          ],
+          "seed_after": [
+            0.9580261707305908,
+            0.003670633304864168
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.1784568428993225,
+          "available": true
+        }
+      ]
+    },
+    "component_pipeline_no_radio_768": {
+      "field_sha256": "9e54ca22e2f563ba4abdff32f33a29199819671a67f5ec8ade5c91cee3bc879b",
+      "tasks_per_modality": 35,
+      "macro": {
+        "text": {
+          "iou": 0.17540126407741996,
+          "average_precision": 0.28370050864055113,
+          "auroc": 0.8695789344274114
+        },
+        "image": {
+          "iou": 0.17635355359232474,
+          "average_precision": 0.28520002884915197,
+          "auroc": 0.8380723649740003
+        },
+        "prompt": {
+          "iou": 0.1276322245236829,
+          "average_precision": 0.21199722703659485,
+          "auroc": 0.8554685619156196
+        },
+        "prompt_refined": {
+          "iou": 0.21450303181263086,
+          "average_precision": 0.33697858918334694,
+          "auroc": 0.918653289731915
+        }
+      },
+      "observations": [
+        {
+          "reference": 0,
+          "target_frame": 105,
+          "category": "green apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.1300109252878393,
+            "average_precision": 0.2001202042180106,
+            "auroc": 0.9127237109789313,
+            "positive_fraction": 0.021333568738229756,
+            "positive_mean_response": 0.45093193650245667,
+            "negative_mean_response": 0.06091649830341339
+          },
+          "image": {
+            "iou": 0.09439474164688698,
+            "average_precision": 0.09632148816667677,
+            "auroc": 0.8794566813649611,
+            "positive_fraction": 0.021333568738229756,
+            "positive_mean_response": 0.45185261964797974,
+            "negative_mean_response": 0.08845321834087372
+          },
+          "prompt": {
+            "iou": 0.1056005179669796,
+            "average_precision": 0.1304058718338154,
+            "auroc": 0.8879834884205572,
+            "positive_fraction": 0.021333568738229756,
+            "positive_mean_response": 0.4682714343070984,
+            "negative_mean_response": 0.08200514316558838
+          },
+          "prompt_refined": {
+            "iou": 0.1056005179669796,
+            "average_precision": 0.130406011602274,
+            "auroc": 0.8879834933971723,
+            "positive_fraction": 0.021333568738229756,
+            "positive_mean_response": 0.468271404504776,
+            "negative_mean_response": 0.08200512826442719
+          }
+        },
+        {
+          "reference": 2,
+          "target_frame": 105,
+          "category": "jake",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.06687197536295644,
+            "average_precision": 0.1416459514640784,
+            "auroc": 0.9588610309795442,
+            "positive_fraction": 0.005920433145009416,
+            "positive_mean_response": 0.2549314498901367,
+            "negative_mean_response": 0.012183774262666702
+          },
+          "image": {
+            "iou": 0.0078125,
+            "average_precision": 0.12650554945143536,
+            "auroc": 0.9338357178289064,
+            "positive_fraction": 0.005920433145009416,
+            "positive_mean_response": 0.14850856363773346,
+            "negative_mean_response": 0.008837576024234295
+          },
+          "prompt": {
+            "iou": 0.09660033167495855,
+            "average_precision": 0.12679797850729582,
+            "auroc": 0.9422791724498198,
+            "positive_fraction": 0.005920433145009416,
+            "positive_mean_response": 0.29283884167671204,
+            "negative_mean_response": 0.014881680719554424
+          },
+          "prompt_refined": {
+            "iou": 0.09660033167495855,
+            "average_precision": 0.12679797850729582,
+            "auroc": 0.9422791724498198,
+            "positive_fraction": 0.005920433145009416,
+            "positive_mean_response": 0.29283884167671204,
+            "negative_mean_response": 0.014881680719554424
+          }
+        },
+        {
+          "reference": 4,
+          "target_frame": 105,
+          "category": "old camera",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.5709006593725092,
+            "average_precision": 0.810268751873408,
+            "auroc": 0.9365289504569193,
+            "positive_fraction": 0.07787782485875706,
+            "positive_mean_response": 0.5393924117088318,
+            "negative_mean_response": 0.011058853007853031
+          },
+          "image": {
+            "iou": 0.5656875639339471,
+            "average_precision": 0.8345375138718097,
+            "auroc": 0.9557513144305941,
+            "positive_fraction": 0.07787782485875706,
+            "positive_mean_response": 0.5222902894020081,
+            "negative_mean_response": 0.00993288867175579
+          },
+          "prompt": {
+            "iou": 0.002826086956521739,
+            "average_precision": 0.1319492398869253,
+            "auroc": 0.7487231263329464,
+            "positive_fraction": 0.07787782485875706,
+            "positive_mean_response": 0.04428298771381378,
+            "negative_mean_response": 0.0319058895111084
+          },
+          "prompt_refined": {
+            "iou": 0.4314754583086931,
+            "average_precision": 0.7937846162591741,
+            "auroc": 0.9332330354259056,
+            "positive_fraction": 0.07787782485875706,
+            "positive_mean_response": 0.4231235682964325,
+            "negative_mean_response": 0.020310495048761368
+          }
+        },
+        {
+          "reference": 6,
+          "target_frame": 105,
+          "category": "pink ice cream",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.007332761968256261,
+            "auroc": 0.5775804732064447,
+            "positive_fraction": 0.00692090395480226,
+            "positive_mean_response": 0.004121171310544014,
+            "negative_mean_response": 0.013887996785342693
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.009542732276910056,
+            "auroc": 0.657008689107132,
+            "positive_fraction": 0.00692090395480226,
+            "positive_mean_response": 0.04096150025725365,
+            "negative_mean_response": 0.04553189501166344
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.00809941038116583,
+            "auroc": 0.6134845565484052,
+            "positive_fraction": 0.00692090395480226,
+            "positive_mean_response": 0.01233734842389822,
+            "negative_mean_response": 0.05657510086894035
+          },
+          "prompt_refined": {
+            "iou": 0.01813001813001813,
+            "average_precision": 0.018466664712487594,
+            "auroc": 0.7628796642928256,
+            "positive_fraction": 0.00692090395480226,
+            "positive_mean_response": 0.13888788223266602,
+            "negative_mean_response": 0.05309062451124191
+          }
+        },
+        {
+          "reference": 7,
+          "target_frame": 105,
+          "category": "pirate hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.0027722250382272054,
+            "auroc": 0.603721785209835,
+            "positive_fraction": 0.0013123822975517892,
+            "positive_mean_response": 0.039562273770570755,
+            "negative_mean_response": 0.020396312698721886
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.0009836409908424376,
+            "auroc": 0.36833455546235916,
+            "positive_fraction": 0.0013123822975517892,
+            "positive_mean_response": 0.002454482950270176,
+            "negative_mean_response": 0.04460267350077629
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.009088873816179215,
+            "auroc": 0.6675982840531571,
+            "positive_fraction": 0.0013123822975517892,
+            "positive_mean_response": 0.08995319902896881,
+            "negative_mean_response": 0.016674768179655075
+          },
+          "prompt_refined": {
+            "iou": 0.037096774193548385,
+            "average_precision": 0.0337667545039783,
+            "auroc": 0.6801593956794161,
+            "positive_fraction": 0.0013123822975517892,
+            "positive_mean_response": 0.5066796541213989,
+            "negative_mean_response": 0.03128787875175476
+          }
+        },
+        {
+          "reference": 9,
+          "target_frame": 105,
+          "category": "red apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.5745677233429395,
+            "average_precision": 0.8007570563299162,
+            "auroc": 0.9864494033423459,
+            "positive_fraction": 0.04906426553672316,
+            "positive_mean_response": 0.6953672766685486,
+            "negative_mean_response": 0.03166012838482857
+          },
+          "image": {
+            "iou": 0.35822565876487944,
+            "average_precision": 0.7581914992012985,
+            "auroc": 0.9759719726031227,
+            "positive_fraction": 0.04906426553672316,
+            "positive_mean_response": 0.8070660829544067,
+            "negative_mean_response": 0.07137227058410645
+          },
+          "prompt": {
+            "iou": 0.45042027428426973,
+            "average_precision": 0.8122166283134242,
+            "auroc": 0.9830457736673508,
+            "positive_fraction": 0.04906426553672316,
+            "positive_mean_response": 0.7877691388130188,
+            "negative_mean_response": 0.061745960265398026
+          },
+          "prompt_refined": {
+            "iou": 0.45042027428426973,
+            "average_precision": 0.8122166283134242,
+            "auroc": 0.9830457736673508,
+            "positive_fraction": 0.04906426553672316,
+            "positive_mean_response": 0.7877691388130188,
+            "negative_mean_response": 0.061745960265398026
+          }
+        },
+        {
+          "reference": 10,
+          "target_frame": 105,
+          "category": "rubber duck with buoy",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.3354683746997598,
+            "average_precision": 0.4809582913601495,
+            "auroc": 0.9041109838057932,
+            "positive_fraction": 0.006167608286252354,
+            "positive_mean_response": 0.37608999013900757,
+            "negative_mean_response": 0.007133274804800749
+          },
+          "image": {
+            "iou": 0.33385703063629224,
+            "average_precision": 0.4534920147279938,
+            "auroc": 0.8957786023806278,
+            "positive_fraction": 0.006167608286252354,
+            "positive_mean_response": 0.3944799304008484,
+            "negative_mean_response": 0.008093980140984058
+          },
+          "prompt": {
+            "iou": 0.18640252138676272,
+            "average_precision": 0.32674094780774005,
+            "auroc": 0.8947707220501078,
+            "positive_fraction": 0.006167608286252354,
+            "positive_mean_response": 0.38850951194763184,
+            "negative_mean_response": 0.015970049425959587
+          },
+          "prompt_refined": {
+            "iou": 0.18640252138676272,
+            "average_precision": 0.3267416455238328,
+            "auroc": 0.8947707220501078,
+            "positive_fraction": 0.006167608286252354,
+            "positive_mean_response": 0.3885095417499542,
+            "negative_mean_response": 0.015970051288604736
+          }
+        },
+        {
+          "reference": 11,
+          "target_frame": 105,
+          "category": "rubber duck with hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.007826055772010858,
+            "auroc": 0.7633522999919884,
+            "positive_fraction": 0.0030896892655367233,
+            "positive_mean_response": 0.007109327707439661,
+            "negative_mean_response": 0.007588420063257217
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.0048645381094982705,
+            "auroc": 0.6838240292132084,
+            "positive_fraction": 0.0030896892655367233,
+            "positive_mean_response": 0.00764657324180007,
+            "negative_mean_response": 0.012765036895871162
+          },
+          "prompt": {
+            "iou": 0.040915395284327326,
+            "average_precision": 0.04836004358803162,
+            "auroc": 0.8733162698061309,
+            "positive_fraction": 0.0030896892655367233,
+            "positive_mean_response": 0.3229479491710663,
+            "negative_mean_response": 0.021619759500026703
+          },
+          "prompt_refined": {
+            "iou": 0.040915395284327326,
+            "average_precision": 0.04836068973850779,
+            "auroc": 0.8733162698061309,
+            "positive_fraction": 0.0030896892655367233,
+            "positive_mean_response": 0.32294800877571106,
+            "negative_mean_response": 0.021619763225317
+          }
+        },
+        {
+          "reference": 13,
+          "target_frame": 105,
+          "category": "spatula",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.2220496894409938,
+            "average_precision": 0.24916219374134282,
+            "auroc": 0.9586024844446706,
+            "positive_fraction": 0.002836629001883239,
+            "positive_mean_response": 0.3023683726787567,
+            "negative_mean_response": 0.007717447821050882
+          },
+          "image": {
+            "iou": 0.2332859174964438,
+            "average_precision": 0.23253912621294487,
+            "auroc": 0.9658965697632872,
+            "positive_fraction": 0.002836629001883239,
+            "positive_mean_response": 0.3575327694416046,
+            "negative_mean_response": 0.011765662580728531
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.0036624171013059864,
+            "auroc": 0.6533145528353704,
+            "positive_fraction": 0.002836629001883239,
+            "positive_mean_response": 0.09842073917388916,
+            "negative_mean_response": 0.09946049004793167
+          },
+          "prompt_refined": {
+            "iou": 0.2751031636863824,
+            "average_precision": 0.33014850164535764,
+            "auroc": 0.9694863967916586,
+            "positive_fraction": 0.002836629001883239,
+            "positive_mean_response": 0.4194011390209198,
+            "negative_mean_response": 0.015607873909175396
+          }
+        },
+        {
+          "reference": 14,
+          "target_frame": 105,
+          "category": "tesla door handle",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.1292915004204947,
+            "auroc": 0.9529330486319929,
+            "positive_fraction": 0.015189500941619586,
+            "positive_mean_response": 0.05651260167360306,
+            "negative_mean_response": 0.009406003169715405
+          },
+          "image": {
+            "iou": 0.10627218934911242,
+            "average_precision": 0.23467777356518102,
+            "auroc": 0.9762118050499512,
+            "positive_fraction": 0.015189500941619586,
+            "positive_mean_response": 0.3079586327075958,
+            "negative_mean_response": 0.024289874359965324
+          },
+          "prompt": {
+            "iou": 0.036205648081100654,
+            "average_precision": 0.08414349954136421,
+            "auroc": 0.8614063961677932,
+            "positive_fraction": 0.015189500941619586,
+            "positive_mean_response": 0.2115393429994583,
+            "negative_mean_response": 0.04945360869169235
+          },
+          "prompt_refined": {
+            "iou": 0.3770322199231451,
+            "average_precision": 0.6117774235106496,
+            "auroc": 0.993924993982257,
+            "positive_fraction": 0.015189500941619586,
+            "positive_mean_response": 0.861348569393158,
+            "negative_mean_response": 0.04330463707447052
+          }
+        },
+        {
+          "reference": 0,
+          "target_frame": 152,
+          "category": "green apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.548425667596652,
+            "average_precision": 0.7666594955827155,
+            "auroc": 0.9923890838104256,
+            "positive_fraction": 0.009545668549905838,
+            "positive_mean_response": 0.788605809211731,
+            "negative_mean_response": 0.009005505591630936
+          },
+          "image": {
+            "iou": 0.5284332688588008,
+            "average_precision": 0.5151115754286855,
+            "auroc": 0.9914278206444299,
+            "positive_fraction": 0.009545668549905838,
+            "positive_mean_response": 0.7771050333976746,
+            "negative_mean_response": 0.011766701005399227
+          },
+          "prompt": {
+            "iou": 0.5027282648235722,
+            "average_precision": 0.5425448315978143,
+            "auroc": 0.99281860163814,
+            "positive_fraction": 0.009545668549905838,
+            "positive_mean_response": 0.7919465899467468,
+            "negative_mean_response": 0.018133696168661118
+          },
+          "prompt_refined": {
+            "iou": 0.5027282648235722,
+            "average_precision": 0.5425448315978143,
+            "auroc": 0.9928185998064997,
+            "positive_fraction": 0.009545668549905838,
+            "positive_mean_response": 0.7919464707374573,
+            "negative_mean_response": 0.01813369244337082
+          }
+        },
+        {
+          "reference": 2,
+          "target_frame": 152,
+          "category": "jake",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.2493788118364581,
+            "average_precision": 0.4251156124010619,
+            "auroc": 0.9798204736873252,
+            "positive_fraction": 0.015613229755178908,
+            "positive_mean_response": 0.6883311867713928,
+            "negative_mean_response": 0.037310969084501266
+          },
+          "image": {
+            "iou": 0.25364093310993685,
+            "average_precision": 0.5755926216370779,
+            "auroc": 0.9742871502892566,
+            "positive_fraction": 0.015613229755178908,
+            "positive_mean_response": 0.5607025027275085,
+            "negative_mean_response": 0.028215616941452026
+          },
+          "prompt": {
+            "iou": 0.23162939297124602,
+            "average_precision": 0.5311438998939682,
+            "auroc": 0.9696422329588272,
+            "positive_fraction": 0.015613229755178908,
+            "positive_mean_response": 0.7846871614456177,
+            "negative_mean_response": 0.05237381160259247
+          },
+          "prompt_refined": {
+            "iou": 0.23162939297124602,
+            "average_precision": 0.5311438998939682,
+            "auroc": 0.9696422329588272,
+            "positive_fraction": 0.015613229755178908,
+            "positive_mean_response": 0.7846871614456177,
+            "negative_mean_response": 0.05237381160259247
+          }
+        },
+        {
+          "reference": 5,
+          "target_frame": 152,
+          "category": "pikachu",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.5303263283786093,
+            "average_precision": 0.7060177651702528,
+            "auroc": 0.9928407009304315,
+            "positive_fraction": 0.027612994350282485,
+            "positive_mean_response": 0.6424273252487183,
+            "negative_mean_response": 0.015470580197870731
+          },
+          "image": {
+            "iou": 0.7223270979921057,
+            "average_precision": 0.8868675959307845,
+            "auroc": 0.9964115365316791,
+            "positive_fraction": 0.027612994350282485,
+            "positive_mean_response": 0.8033204078674316,
+            "negative_mean_response": 0.013500559143722057
+          },
+          "prompt": {
+            "iou": 0.6541106595811191,
+            "average_precision": 0.8695272720888109,
+            "auroc": 0.992348497627944,
+            "positive_fraction": 0.027612994350282485,
+            "positive_mean_response": 0.8323716521263123,
+            "negative_mean_response": 0.034933581948280334
+          },
+          "prompt_refined": {
+            "iou": 0.6541106595811191,
+            "average_precision": 0.8695272720888109,
+            "auroc": 0.992348497627944,
+            "positive_fraction": 0.027612994350282485,
+            "positive_mean_response": 0.8323716521263123,
+            "negative_mean_response": 0.034933581948280334
+          }
+        },
+        {
+          "reference": 7,
+          "target_frame": 152,
+          "category": "pirate hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.009806972623011131,
+            "auroc": 0.8181750109149803,
+            "positive_fraction": 0.0030190677966101696,
+            "positive_mean_response": 0.05842341482639313,
+            "negative_mean_response": 0.020351072773337364
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.0031792669273922295,
+            "auroc": 0.5739122148948624,
+            "positive_fraction": 0.0030190677966101696,
+            "positive_mean_response": 0.004331125412136316,
+            "negative_mean_response": 0.015252881683409214
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.008669354935342632,
+            "auroc": 0.8083336759457146,
+            "positive_fraction": 0.0030190677966101696,
+            "positive_mean_response": 0.07314475625753403,
+            "negative_mean_response": 0.06441003084182739
+          },
+          "prompt_refined": {
+            "iou": 0.026927437641723357,
+            "average_precision": 0.0176187892777593,
+            "auroc": 0.873361160707921,
+            "positive_fraction": 0.0030190677966101696,
+            "positive_mean_response": 0.38408514857292175,
+            "negative_mean_response": 0.05995602905750275
+          }
+        },
+        {
+          "reference": 8,
+          "target_frame": 152,
+          "category": "porcelain hand",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.19035056897317817,
+            "auroc": 0.9764704264175477,
+            "positive_fraction": 0.00808027306967985,
+            "positive_mean_response": 0.18666723370552063,
+            "negative_mean_response": 0.021918177604675293
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.09392858315187287,
+            "auroc": 0.9636824433413749,
+            "positive_fraction": 0.00808027306967985,
+            "positive_mean_response": 0.14041976630687714,
+            "negative_mean_response": 0.019591588526964188
+          },
+          "prompt": {
+            "iou": 0.03716003949376178,
+            "average_precision": 0.050453824839658774,
+            "auroc": 0.9295677254430375,
+            "positive_fraction": 0.00808027306967985,
+            "positive_mean_response": 0.3947013020515442,
+            "negative_mean_response": 0.06667877733707428
+          },
+          "prompt_refined": {
+            "iou": 0.03716003949376178,
+            "average_precision": 0.050453820902362605,
+            "auroc": 0.929567721121797,
+            "positive_fraction": 0.00808027306967985,
+            "positive_mean_response": 0.3947013318538666,
+            "negative_mean_response": 0.06667879223823547
+          }
+        },
+        {
+          "reference": 9,
+          "target_frame": 152,
+          "category": "red apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.1691744611630744,
+            "average_precision": 0.17030790237600854,
+            "auroc": 0.9306442613274102,
+            "positive_fraction": 0.00431379472693032,
+            "positive_mean_response": 0.5233059525489807,
+            "negative_mean_response": 0.012564899399876595
+          },
+          "image": {
+            "iou": 0.1194984017703467,
+            "average_precision": 0.4360676808239212,
+            "auroc": 0.9860428983094991,
+            "positive_fraction": 0.00431379472693032,
+            "positive_mean_response": 0.6584917902946472,
+            "negative_mean_response": 0.020637698471546173
+          },
+          "prompt": {
+            "iou": 0.16998950682056663,
+            "average_precision": 0.34910989759237776,
+            "auroc": 0.9846726021920529,
+            "positive_fraction": 0.00431379472693032,
+            "positive_mean_response": 0.6540760397911072,
+            "negative_mean_response": 0.024198351427912712
+          },
+          "prompt_refined": {
+            "iou": 0.16998950682056663,
+            "average_precision": 0.34910989759237776,
+            "auroc": 0.9846726021920529,
+            "positive_fraction": 0.00431379472693032,
+            "positive_mean_response": 0.6540760397911072,
+            "negative_mean_response": 0.024198351427912712
+          }
+        },
+        {
+          "reference": 11,
+          "target_frame": 152,
+          "category": "rubber duck with hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.03474174885808089,
+            "auroc": 0.8304371762519555,
+            "positive_fraction": 0.011676082862523541,
+            "positive_mean_response": 0.01078248955309391,
+            "negative_mean_response": 0.010174712166190147
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.025936258933302404,
+            "auroc": 0.7870306349663543,
+            "positive_fraction": 0.011676082862523541,
+            "positive_mean_response": 0.007325862534344196,
+            "negative_mean_response": 0.0066514890640974045
+          },
+          "prompt": {
+            "iou": 0.09109170980452755,
+            "average_precision": 0.06876500392460226,
+            "auroc": 0.9123272014170721,
+            "positive_fraction": 0.011676082862523541,
+            "positive_mean_response": 0.49725812673568726,
+            "negative_mean_response": 0.07194837182760239
+          },
+          "prompt_refined": {
+            "iou": 0.09109170980452755,
+            "average_precision": 0.06876500691145557,
+            "auroc": 0.9123272044184074,
+            "positive_fraction": 0.011676082862523541,
+            "positive_mean_response": 0.4972582161426544,
+            "negative_mean_response": 0.07194837182760239
+          }
+        },
+        {
+          "reference": 12,
+          "target_frame": 152,
+          "category": "rubics cube",
+          "reference_frame": 105,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.11114169250907507,
+            "auroc": 0.8960048097568165,
+            "positive_fraction": 0.02556497175141243,
+            "positive_mean_response": 0.036847375333309174,
+            "negative_mean_response": 0.014627765864133835
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.16622623902990954,
+            "auroc": 0.9233336545514065,
+            "positive_fraction": 0.02556497175141243,
+            "positive_mean_response": 0.0912960022687912,
+            "negative_mean_response": 0.018372954800724983
+          },
+          "prompt": {
+            "iou": 0.10677939564740879,
+            "average_precision": 0.17408812165375034,
+            "auroc": 0.9102373174529257,
+            "positive_fraction": 0.02556497175141243,
+            "positive_mean_response": 0.2584313452243805,
+            "negative_mean_response": 0.04374648258090019
+          },
+          "prompt_refined": {
+            "iou": 0.040872822015958314,
+            "average_precision": 0.11931677916133732,
+            "auroc": 0.9036449351906946,
+            "positive_fraction": 0.02556497175141243,
+            "positive_mean_response": 0.36016204953193665,
+            "negative_mean_response": 0.08291610330343246
+          }
+        },
+        {
+          "reference": 15,
+          "target_frame": 152,
+          "category": "toy cat statue",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.07759751878802339,
+            "average_precision": 0.3687565423832829,
+            "auroc": 0.9500399055479415,
+            "positive_fraction": 0.009675141242937854,
+            "positive_mean_response": 0.7247942686080933,
+            "negative_mean_response": 0.09540940821170807
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.011792576966450499,
+            "auroc": 0.6171927571746775,
+            "positive_fraction": 0.009675141242937854,
+            "positive_mean_response": 0.0036628791131079197,
+            "negative_mean_response": 0.01702343486249447
+          },
+          "prompt": {
+            "iou": 0.11404515882127822,
+            "average_precision": 0.18280971380060568,
+            "auroc": 0.9510112344254968,
+            "positive_fraction": 0.009675141242937854,
+            "positive_mean_response": 0.6507525444030762,
+            "negative_mean_response": 0.06167929619550705
+          },
+          "prompt_refined": {
+            "iou": 0.11404515882127822,
+            "average_precision": 0.18280971380060568,
+            "auroc": 0.9510112344254968,
+            "positive_fraction": 0.009675141242937854,
+            "positive_mean_response": 0.6507525444030762,
+            "negative_mean_response": 0.06167929619550705
+          }
+        },
+        {
+          "reference": 16,
+          "target_frame": 152,
+          "category": "toy elephant",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.382461369519178,
+            "average_precision": 0.6547040472513632,
+            "auroc": 0.9894049768870058,
+            "positive_fraction": 0.029537429378531075,
+            "positive_mean_response": 0.9233705401420593,
+            "negative_mean_response": 0.06001653894782066
+          },
+          "image": {
+            "iou": 0.5004103405826836,
+            "average_precision": 0.9002100336221772,
+            "auroc": 0.9954278000092937,
+            "positive_fraction": 0.029537429378531075,
+            "positive_mean_response": 0.9251300096511841,
+            "negative_mean_response": 0.036235544830560684
+          },
+          "prompt": {
+            "iou": 0.47766895200783543,
+            "average_precision": 0.8184077134961907,
+            "auroc": 0.9932321501735953,
+            "positive_fraction": 0.029537429378531075,
+            "positive_mean_response": 0.9191023111343384,
+            "negative_mean_response": 0.039077028632164
+          },
+          "prompt_refined": {
+            "iou": 0.47766895200783543,
+            "average_precision": 0.8184078498455578,
+            "auroc": 0.9932321507777241,
+            "positive_fraction": 0.029537429378531075,
+            "positive_mean_response": 0.9191023111343384,
+            "negative_mean_response": 0.039077028632164
+          }
+        },
+        {
+          "reference": 17,
+          "target_frame": 152,
+          "category": "waldo",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.008627589751362524,
+            "auroc": 0.5264771700573511,
+            "positive_fraction": 0.008598163841807909,
+            "positive_mean_response": 0.00048142552259378135,
+            "negative_mean_response": 0.03812037780880928
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.009953451422907026,
+            "auroc": 0.6087481385346257,
+            "positive_fraction": 0.008598163841807909,
+            "positive_mean_response": 0.0038884147070348263,
+            "negative_mean_response": 0.01717744767665863
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.015764968026565428,
+            "auroc": 0.7531370008326758,
+            "positive_fraction": 0.008598163841807909,
+            "positive_mean_response": 0.026469845324754715,
+            "negative_mean_response": 0.0735333040356636
+          },
+          "prompt_refined": {
+            "iou": 0.4949290060851927,
+            "average_precision": 0.7521342025725062,
+            "auroc": 0.9408924698941585,
+            "positive_fraction": 0.008598163841807909,
+            "positive_mean_response": 0.4723444879055023,
+            "negative_mean_response": 0.01458041463047266
+          }
+        },
+        {
+          "reference": 0,
+          "target_frame": 195,
+          "category": "green apple",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.6238834038551951,
+            "average_precision": 0.8319954845384041,
+            "auroc": 0.9862437627165322,
+            "positive_fraction": 0.010652071563088512,
+            "positive_mean_response": 0.7048937678337097,
+            "negative_mean_response": 0.006258864421397448
+          },
+          "image": {
+            "iou": 0.6216343882853094,
+            "average_precision": 0.7833417785714835,
+            "auroc": 0.9785686085570781,
+            "positive_fraction": 0.010652071563088512,
+            "positive_mean_response": 0.7009839415550232,
+            "negative_mean_response": 0.014481188729405403
+          },
+          "prompt": {
+            "iou": 0.5273017138302113,
+            "average_precision": 0.765124243275849,
+            "auroc": 0.9755467628239994,
+            "positive_fraction": 0.010652071563088512,
+            "positive_mean_response": 0.7071657180786133,
+            "negative_mean_response": 0.017490873113274574
+          },
+          "prompt_refined": {
+            "iou": 0.5273017138302113,
+            "average_precision": 0.765124249361957,
+            "auroc": 0.9755467661104559,
+            "positive_fraction": 0.010652071563088512,
+            "positive_mean_response": 0.7071657180786133,
+            "negative_mean_response": 0.017490869387984276
+          }
+        },
+        {
+          "reference": 1,
+          "target_frame": 195,
+          "category": "green toy chair",
+          "reference_frame": 105,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.027762656505171474,
+            "average_precision": 0.0679534121577554,
+            "auroc": 0.6704911813269656,
+            "positive_fraction": 0.04437382297551789,
+            "positive_mean_response": 0.050695810467004776,
+            "negative_mean_response": 0.03293077275156975
+          },
+          "image": {
+            "iou": 0.03120649651972158,
+            "average_precision": 0.0760097524115011,
+            "auroc": 0.6445946625183813,
+            "positive_fraction": 0.04437382297551789,
+            "positive_mean_response": 0.05092481151223183,
+            "negative_mean_response": 0.01697537861764431
+          },
+          "prompt": {
+            "iou": 0.008215263721871651,
+            "average_precision": 0.05321774081521092,
+            "auroc": 0.5888611410409417,
+            "positive_fraction": 0.04437382297551789,
+            "positive_mean_response": 0.02836732193827629,
+            "negative_mean_response": 0.02277667261660099
+          },
+          "prompt_refined": {
+            "iou": 0.11745473663457431,
+            "average_precision": 0.11450061762984734,
+            "auroc": 0.8361705248650462,
+            "positive_fraction": 0.04437382297551789,
+            "positive_mean_response": 0.6440436244010925,
+            "negative_mean_response": 0.2680320739746094
+          }
+        },
+        {
+          "reference": 3,
+          "target_frame": 195,
+          "category": "miffy",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.015077584599979228,
+            "auroc": 0.957562802439823,
+            "positive_fraction": 0.0014183145009416195,
+            "positive_mean_response": 0.08057176321744919,
+            "negative_mean_response": 0.0190998837351799
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.0023572447916161425,
+            "auroc": 0.7268512310980957,
+            "positive_fraction": 0.0014183145009416195,
+            "positive_mean_response": 0.0010980068473145366,
+            "negative_mean_response": 0.005982200615108013
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.009830003802046263,
+            "auroc": 0.922009802302072,
+            "positive_fraction": 0.0014183145009416195,
+            "positive_mean_response": 0.061010558158159256,
+            "negative_mean_response": 0.019669758155941963
+          },
+          "prompt_refined": {
+            "iou": 0.03294573643410853,
+            "average_precision": 0.041511378936343504,
+            "auroc": 0.9753554790142059,
+            "positive_fraction": 0.0014183145009416195,
+            "positive_mean_response": 0.3828597068786621,
+            "negative_mean_response": 0.04917094111442566
+          }
+        },
+        {
+          "reference": 4,
+          "target_frame": 195,
+          "category": "old camera",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.5121758067709364,
+            "average_precision": 0.7786295601166049,
+            "auroc": 0.9559748119763138,
+            "positive_fraction": 0.027418785310734464,
+            "positive_mean_response": 0.5357552170753479,
+            "negative_mean_response": 0.004689200781285763
+          },
+          "image": {
+            "iou": 0.50219473264166,
+            "average_precision": 0.7746924139033023,
+            "auroc": 0.9400084063011912,
+            "positive_fraction": 0.027418785310734464,
+            "positive_mean_response": 0.518434464931488,
+            "negative_mean_response": 0.004737040027976036
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.06711006979737742,
+            "auroc": 0.7932323995854703,
+            "positive_fraction": 0.027418785310734464,
+            "positive_mean_response": 0.030866198241710663,
+            "negative_mean_response": 0.025108350440859795
+          },
+          "prompt_refined": {
+            "iou": 0.5681483041921214,
+            "average_precision": 0.821415049720981,
+            "auroc": 0.9696061346366277,
+            "positive_fraction": 0.027418785310734464,
+            "positive_mean_response": 0.519697904586792,
+            "negative_mean_response": 0.0132635198533535
+          }
+        },
+        {
+          "reference": 6,
+          "target_frame": 195,
+          "category": "pink ice cream",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.0021340044691230326,
+            "auroc": 0.7650292626523615,
+            "positive_fraction": 0.0011064030131826743,
+            "positive_mean_response": 0.004418442491441965,
+            "negative_mean_response": 0.006980419624596834
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.005363698774174797,
+            "auroc": 0.8525729986847851,
+            "positive_fraction": 0.0011064030131826743,
+            "positive_mean_response": 0.047018129378557205,
+            "negative_mean_response": 0.010200971737504005
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.003583152940136847,
+            "auroc": 0.8301434589498037,
+            "positive_fraction": 0.0011064030131826743,
+            "positive_mean_response": 0.029974114149808884,
+            "negative_mean_response": 0.016155866906046867
+          },
+          "prompt_refined": {
+            "iou": 0.005716798592788039,
+            "average_precision": 0.005969437476828184,
+            "auroc": 0.8802329993566829,
+            "positive_fraction": 0.0011064030131826743,
+            "positive_mean_response": 0.24913005530834198,
+            "negative_mean_response": 0.04679377004504204
+          }
+        },
+        {
+          "reference": 7,
+          "target_frame": 195,
+          "category": "pirate hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.0064267213950852655,
+            "auroc": 0.6774719800646266,
+            "positive_fraction": 0.002742467043314501,
+            "positive_mean_response": 0.03324073553085327,
+            "negative_mean_response": 0.013674899004399776
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.002680185289142861,
+            "auroc": 0.528997399423374,
+            "positive_fraction": 0.002742467043314501,
+            "positive_mean_response": 0.0004461768257897347,
+            "negative_mean_response": 0.017010454088449478
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.011394757177741232,
+            "auroc": 0.8419318071355761,
+            "positive_fraction": 0.002742467043314501,
+            "positive_mean_response": 0.04932919517159462,
+            "negative_mean_response": 0.01933635026216507
+          },
+          "prompt_refined": {
+            "iou": 0.06349206349206349,
+            "average_precision": 0.041658798857558584,
+            "auroc": 0.7824042262270171,
+            "positive_fraction": 0.002742467043314501,
+            "positive_mean_response": 0.2991531193256378,
+            "negative_mean_response": 0.025137092918157578
+          }
+        },
+        {
+          "reference": 8,
+          "target_frame": 195,
+          "category": "porcelain hand",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.013440687612729287,
+            "auroc": 0.806880720540888,
+            "positive_fraction": 0.002877824858757062,
+            "positive_mean_response": 0.09290999174118042,
+            "negative_mean_response": 0.027413370087742805
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.018497811030989776,
+            "auroc": 0.83408364329356,
+            "positive_fraction": 0.002877824858757062,
+            "positive_mean_response": 0.05449747294187546,
+            "negative_mean_response": 0.011878619901835918
+          },
+          "prompt": {
+            "iou": 0.013082322910019146,
+            "average_precision": 0.017116733696042576,
+            "auroc": 0.8670898888217932,
+            "positive_fraction": 0.002877824858757062,
+            "positive_mean_response": 0.13363531231880188,
+            "negative_mean_response": 0.022346358746290207
+          },
+          "prompt_refined": {
+            "iou": 0.013082322910019146,
+            "average_precision": 0.017116734324467874,
+            "auroc": 0.8670899069264179,
+            "positive_fraction": 0.002877824858757062,
+            "positive_mean_response": 0.13363532721996307,
+            "negative_mean_response": 0.022346358746290207
+          }
+        },
+        {
+          "reference": 10,
+          "target_frame": 195,
+          "category": "rubber duck with buoy",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.6384814495254529,
+            "average_precision": 0.807207781841366,
+            "auroc": 0.9694217015225516,
+            "positive_fraction": 0.006044020715630885,
+            "positive_mean_response": 0.6378681659698486,
+            "negative_mean_response": 0.0041132294572889805
+          },
+          "image": {
+            "iou": 0.6463414634146342,
+            "average_precision": 0.78867068805802,
+            "auroc": 0.9682632212921221,
+            "positive_fraction": 0.006044020715630885,
+            "positive_mean_response": 0.6715542674064636,
+            "negative_mean_response": 0.005610557273030281
+          },
+          "prompt": {
+            "iou": 0.2868944799098761,
+            "average_precision": 0.6187498724109876,
+            "auroc": 0.9632705232943329,
+            "positive_fraction": 0.006044020715630885,
+            "positive_mean_response": 0.6757699847221375,
+            "negative_mean_response": 0.014579595066606998
+          },
+          "prompt_refined": {
+            "iou": 0.2868944799098761,
+            "average_precision": 0.6187498724109876,
+            "auroc": 0.9632705232943329,
+            "positive_fraction": 0.006044020715630885,
+            "positive_mean_response": 0.6757699847221375,
+            "negative_mean_response": 0.014579595066606998
+          }
+        },
+        {
+          "reference": 11,
+          "target_frame": 195,
+          "category": "rubber duck with hat",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.024490677458658332,
+            "auroc": 0.8639353703331596,
+            "positive_fraction": 0.006202919020715631,
+            "positive_mean_response": 0.007006685249507427,
+            "negative_mean_response": 0.007678213529288769
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.017350039025520646,
+            "auroc": 0.802127209045826,
+            "positive_fraction": 0.006202919020715631,
+            "positive_mean_response": 0.006941501051187515,
+            "negative_mean_response": 0.007536754012107849
+          },
+          "prompt": {
+            "iou": 0.04677119319691735,
+            "average_precision": 0.06464933728298188,
+            "auroc": 0.8917049017746261,
+            "positive_fraction": 0.006202919020715631,
+            "positive_mean_response": 0.2543741762638092,
+            "negative_mean_response": 0.022205641493201256
+          },
+          "prompt_refined": {
+            "iou": 0.04677119319691735,
+            "average_precision": 0.06464935842359396,
+            "auroc": 0.891704913011543,
+            "positive_fraction": 0.006202919020715631,
+            "positive_mean_response": 0.2543742060661316,
+            "negative_mean_response": 0.022205643355846405
+          }
+        },
+        {
+          "reference": 12,
+          "target_frame": 195,
+          "category": "rubics cube",
+          "reference_frame": 105,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.02642226837025207,
+            "auroc": 0.8220532017688249,
+            "positive_fraction": 0.009828154425612053,
+            "positive_mean_response": 0.018354276195168495,
+            "negative_mean_response": 0.007616548333317041
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.039684356710606,
+            "auroc": 0.8763495173101049,
+            "positive_fraction": 0.009828154425612053,
+            "positive_mean_response": 0.04599224776029587,
+            "negative_mean_response": 0.013641749508678913
+          },
+          "prompt": {
+            "iou": 0.02329450915141431,
+            "average_precision": 0.021978451579804985,
+            "auroc": 0.764594873254976,
+            "positive_fraction": 0.009828154425612053,
+            "positive_mean_response": 0.08823619037866592,
+            "negative_mean_response": 0.05005675554275513
+          },
+          "prompt_refined": {
+            "iou": 0.030703538023586822,
+            "average_precision": 0.22029037885785305,
+            "auroc": 0.8457898230285343,
+            "positive_fraction": 0.009828154425612053,
+            "positive_mean_response": 0.5140886902809143,
+            "negative_mean_response": 0.21072831749916077
+          }
+        },
+        {
+          "reference": 13,
+          "target_frame": 195,
+          "category": "spatula",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.29451476793248943,
+            "average_precision": 0.6360455713571949,
+            "auroc": 0.9568072454065696,
+            "positive_fraction": 0.012570621468926554,
+            "positive_mean_response": 0.33934643864631653,
+            "negative_mean_response": 0.0035839059855788946
+          },
+          "image": {
+            "iou": 0.35595286468915077,
+            "average_precision": 0.6492910355874414,
+            "auroc": 0.9413297774193715,
+            "positive_fraction": 0.012570621468926554,
+            "positive_mean_response": 0.4094797670841217,
+            "negative_mean_response": 0.003943813033401966
+          },
+          "prompt": {
+            "iou": 0.0038914388345639593,
+            "average_precision": 0.017292462071988913,
+            "auroc": 0.6617946335519487,
+            "positive_fraction": 0.012570621468926554,
+            "positive_mean_response": 0.12183188647031784,
+            "negative_mean_response": 0.1093711331486702
+          },
+          "prompt_refined": {
+            "iou": 0.4084563222975668,
+            "average_precision": 0.5969882777121924,
+            "auroc": 0.9360121515026186,
+            "positive_fraction": 0.012570621468926554,
+            "positive_mean_response": 0.4647723138332367,
+            "negative_mean_response": 0.013645010069012642
+          }
+        },
+        {
+          "reference": 15,
+          "target_frame": 195,
+          "category": "toy cat statue",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.03195384444691002,
+            "average_precision": 0.10562651363245308,
+            "auroc": 0.9205603896551676,
+            "positive_fraction": 0.0043255649717514125,
+            "positive_mean_response": 0.40299853682518005,
+            "negative_mean_response": 0.05607030168175697
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.008901567277005404,
+            "auroc": 0.775581317315767,
+            "positive_fraction": 0.0043255649717514125,
+            "positive_mean_response": 0.002199404640123248,
+            "negative_mean_response": 0.006975084077566862
+          },
+          "prompt": {
+            "iou": 0.06775921840529467,
+            "average_precision": 0.0585399725448711,
+            "auroc": 0.9325727924529744,
+            "positive_fraction": 0.0043255649717514125,
+            "positive_mean_response": 0.3021772801876068,
+            "negative_mean_response": 0.022114640101790428
+          },
+          "prompt_refined": {
+            "iou": 0.06775921840529467,
+            "average_precision": 0.0585399725448711,
+            "auroc": 0.9325727924529744,
+            "positive_fraction": 0.0043255649717514125,
+            "positive_mean_response": 0.3021772801876068,
+            "negative_mean_response": 0.022114640101790428
+          }
+        },
+        {
+          "reference": 16,
+          "target_frame": 195,
+          "category": "toy elephant",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.15303880888454968,
+            "average_precision": 0.33097766481915836,
+            "auroc": 0.9529593836694119,
+            "positive_fraction": 0.007173964218455744,
+            "positive_mean_response": 0.516273558139801,
+            "negative_mean_response": 0.029836416244506836
+          },
+          "image": {
+            "iou": 0.19119878603945373,
+            "average_precision": 0.4293646667851756,
+            "auroc": 0.9754252344042839,
+            "positive_fraction": 0.007173964218455744,
+            "positive_mean_response": 0.5209530591964722,
+            "negative_mean_response": 0.015722736716270447
+          },
+          "prompt": {
+            "iou": 0.1857438627624963,
+            "average_precision": 0.41335372213898625,
+            "auroc": 0.9767522541920586,
+            "positive_fraction": 0.007173964218455744,
+            "positive_mean_response": 0.5189307928085327,
+            "negative_mean_response": 0.016151778399944305
+          },
+          "prompt_refined": {
+            "iou": 0.1857438627624963,
+            "average_precision": 0.41335372213898625,
+            "auroc": 0.9767522541920586,
+            "positive_fraction": 0.007173964218455744,
+            "positive_mean_response": 0.5189307928085327,
+            "negative_mean_response": 0.016151780262589455
+          }
+        },
+        {
+          "reference": 17,
+          "target_frame": 195,
+          "category": "waldo",
+          "reference_frame": 41,
+          "prompt_available": true,
+          "text": {
+            "iou": 0.0,
+            "average_precision": 0.00672493998523742,
+            "auroc": 0.692302724248538,
+            "positive_fraction": 0.004502118644067797,
+            "positive_mean_response": 0.00039644187199883163,
+            "negative_mean_response": 0.012402159161865711
+          },
+          "image": {
+            "iou": 0.0,
+            "average_precision": 0.009274011055266365,
+            "auroc": 0.7782125609744553,
+            "positive_fraction": 0.004502118644067797,
+            "positive_mean_response": 0.0031481110490858555,
+            "negative_mean_response": 0.01054716669023037
+          },
+          "prompt": {
+            "iou": 0.0,
+            "average_precision": 0.005212914119859523,
+            "auroc": 0.6086438454269907,
+            "positive_fraction": 0.004502118644067797,
+            "positive_mean_response": 0.014947919175028801,
+            "negative_mean_response": 0.031194092705845833
+          },
+          "prompt_refined": {
+            "iou": 0.2932061978545888,
+            "average_precision": 0.4800837950591389,
+            "auroc": 0.9557589193343383,
+            "positive_fraction": 0.004502118644067797,
+            "positive_mean_response": 0.334244042634964,
+            "negative_mean_response": 0.01613864116370678
+          }
+        }
+      ],
+      "prompt_refinement": [
+        {
+          "seed_before": [
+            0.9801405668258667,
+            0.0014783341903239489
+          ],
+          "seed_after": [
+            0.9801405668258667,
+            0.0014783341903239489
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.000000238418579,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.17294380068778992,
+            0.00551270879805088
+          ],
+          "seed_after": [
+            0.8395029306411743,
+            0.06110484153032303
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.09485595673322678,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9569528102874756,
+            0.0004610787727870047
+          ],
+          "seed_after": [
+            0.9569528102874756,
+            0.0004610787727870047
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.3962116837501526,
+            0.00024433498037979007
+          ],
+          "seed_after": [
+            0.9478124380111694,
+            0.0038763938937336206
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.3845711946487427,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.024755585938692093,
+            0.004752476233989
+          ],
+          "seed_after": [
+            0.9358333945274353,
+            0.0014360834611579776
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.10230815410614014,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9409217834472656,
+            0.00023857066116761416
+          ],
+          "seed_after": [
+            0.9409217834472656,
+            0.00023857066116761416
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.1715400069952011,
+            3.160232517984696e-05
+          ],
+          "seed_after": [
+            0.8561108112335205,
+            0.0018141273176297545
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.38690078258514404,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.1300710141658783,
+            8.487856393912807e-05
+          ],
+          "seed_after": [
+            0.9828765988349915,
+            0.0012773412745445967
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.44076886773109436,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.7392606735229492,
+            0.0004151147441007197
+          ],
+          "seed_after": [
+            0.7392606735229492,
+            0.0004151147441007197
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.9999998807907104,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9651246070861816,
+            0.013128581456840038
+          ],
+          "seed_after": [
+            0.9651246070861816,
+            0.013128581456840038
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9228898286819458,
+            0.00038985320134088397
+          ],
+          "seed_after": [
+            0.9228898286819458,
+            0.00038985320134088397
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.9999999403953552,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.5557401180267334,
+            0.0002256790321553126
+          ],
+          "seed_after": [
+            0.5557401180267334,
+            0.0002256790321553126
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.9999999403953552,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.056437987834215164,
+            0.009114392101764679
+          ],
+          "seed_after": [
+            0.8141085505485535,
+            0.015853794291615486
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.13738606870174408,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.11959594488143921,
+            0.06329059600830078
+          ],
+          "seed_after": [
+            0.8285491466522217,
+            0.006083589047193527
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            false,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.20981675386428833,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.07180258631706238,
+            0.050856489688158035
+          ],
+          "seed_after": [
+            0.9713121056556702,
+            0.0019893557764589787
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.19309604167938232,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9336125254631042,
+            0.00048550887731835246
+          ],
+          "seed_after": [
+            0.9336125254631042,
+            0.00048550887731835246
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 1.0,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.9826488494873047,
+            0.0005030606989748776
+          ],
+          "seed_after": [
+            0.9826488494873047,
+            0.0005030606989748776
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            true,
+            true
+          ],
+          "refinement_applied": false,
+          "steps": 0,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.9999998807907104,
+          "available": true
+        },
+        {
+          "seed_before": [
+            0.017305580899119377,
+            0.011336792260408401
+          ],
+          "seed_after": [
+            0.9585412740707397,
+            0.0025629771407693624
+          ],
+          "constraints_satisfied": [
+            true,
+            true
+          ],
+          "confidence_targets_satisfied": [
+            true,
+            true
+          ],
+          "before_constraints_satisfied": [
+            false,
+            true
+          ],
+          "refinement_applied": true,
+          "steps": 64,
+          "requested_steps": 64,
+          "field_updated": false,
+          "stop_when_satisfied": false,
+          "feasibility_margin": 0.001,
+          "cosine_to_initial": 0.08438164740800858,
+          "available": true
+        }
+      ]
+    }
+  },
+  "geometry_unchanged": true
+}

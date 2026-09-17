@@ -1,0 +1,51 @@
+{
+  "schema": "real_polygon_reference_query_development.v1",
+  "scene": "figurines",
+  "field_sha256": {
+    "pipeline_checked366": "052c6cf17fff564c7b4f8c88fe16b8866523f50190f051dc89a64a48da65a5c0",
+    "pipeline_aligned_calibrated_fixed366": "83f859c2edb16ee04663fbccdd3415c35c76b13bf9bdedf1fb0c5e9a2ca35b8a",
+    "pipeline_checked_no_radio366": "95c00c95f83ae45f37b1bbd9e1660d509db90886b06dba74a3eac275dc87322e",
+    "pipeline_aligned_calibrated_no_radio366": "6580c44a0281f36656c16dc9837e4ea5c5821dd8f23505ebad0d3c658b8f89a0"
+  },
+  "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+  "labels": [
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json",
+      "sha256": "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00105.json",
+      "sha256": "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.json",
+      "sha256": "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00195.json",
+      "sha256": "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb"
+    }
+  ],
+  "reference_selection": "first annotated frame per category; remaining annotated frames are targets",
+  "query_contract": "text verbatim; image masked crop with3px padding and gray127 outside; prompt one positive and one negative point with registered frozen geometry",
+  "query_mask_or_points_supplied_from_reference_gt": true,
+  "target_masks_used_for_query_encoding": false,
+  "annotations_define_evaluation_cohort": true,
+  "target_rgb_encoded_for_its_own_query": false,
+  "source_training_assets_forbidden": true,
+  "source_semantic_train_frames": [
+    11,
+    21,
+    31,
+    38,
+    49,
+    69
+  ],
+  "target_width": 480,
+  "threshold": 0.5,
+  "refine_prompts": true,
+  "minimal_prompt_refinement": false,
+  "official_benchmark_protocol": false,
+  "instance_identity_assumption": "same category across frames, union of category polygons; not independently verified physical instance tracks",
+  "implementation_sha256": "e8400ca71c117402fe5e71e01ec4647508cbc40db8898c72a1aaf9071b72bea9"
+}

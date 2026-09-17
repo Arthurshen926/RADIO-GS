@@ -1,0 +1,286 @@
+{
+  "schema": "preserved_inventory_full_training.v1",
+  "independent_final_test": false,
+  "joint_model_promoted": false,
+  "final_image_readout": "source-only balanced calibration, selected before benchmark evaluation",
+  "scenes": {
+    "figurines": {
+      "native_semantics_exactly_preserved": true,
+      "native_decoder_exactly_preserved": true,
+      "new_supervision_binding_verified": true,
+      "original_rgb_text_predictions_exactly_preserved": true,
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/preserved96_protected/report.json",
+      "report_sha256": "14bfa2486782e0aa84d88bfd24eb074a057517aac20b31338598a9ddddce8427",
+      "finalized_field_path": "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/preserved96_protected_imagecal_balanced/field.pt",
+      "finalized_field_sha256": "9a47d7bacf32aa8cf64c3af0e3d443731c80625b936ed247ead6ab586b000f18",
+      "steps": 2766,
+      "coverage": {
+        "available": {
+          "text": 63,
+          "image": 461,
+          "prompt": 461
+        },
+        "visited": {
+          "text": 63,
+          "image": 461,
+          "prompt": 461
+        },
+        "minimum_steps_for_full_coverage": 1383,
+        "updates": {
+          "text": 922,
+          "image": 922,
+          "prompt": 922
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 14,
+            "maximum": 15,
+            "mean": 14.634920634920634
+          },
+          "image": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          },
+          "prompt": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          }
+        },
+        "complete": true
+      },
+      "field_support": {
+        "geometrically_visible_elements": 92249,
+        "training_domain_elements": 79500,
+        "native_anchor_domain_used": true,
+        "semantically_trained_elements": 79500,
+        "excluded_untrained_visible_elements": 0,
+        "excluded_outside_training_domain": 12749,
+        "mean_feature_update_steps_on_valid": 831.3219604492188
+      },
+      "direct_text_supervision": {
+        "tasks": 63,
+        "text_categories": 14,
+        "conflicting_query_elements": 2107
+      },
+      "cold_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "gradients": {
+        "native_calibration_text": 0.1636580377817154,
+        "teacher_sam": 0.09221898764371872,
+        "teacher_radio": 0.0030639769975095987,
+        "teacher_dino": 0.003434592392295599,
+        "native_calibration_image": 1.7470892667770386,
+        "prompt": 57.04240417480469
+      },
+      "text_before": {
+        "observation_miou": 0.34630529793277404,
+        "average_precision_macro": 0.5763598996050233
+      },
+      "text_after": {
+        "observation_miou": 0.3314470385582126,
+        "average_precision_macro": 0.582980339056547
+      },
+      "reference_before": {
+        "text": {
+          "iou": 0.33814985972852657,
+          "average_precision": 0.5558493239335123,
+          "auroc": 0.9306443692406402
+        },
+        "image": {
+          "iou": 0.3341717740407836,
+          "average_precision": 0.548160632271684,
+          "auroc": 0.9234277923669495
+        },
+        "prompt": {
+          "iou": 0.2435521432341541,
+          "average_precision": 0.38842520222473764,
+          "auroc": 0.9327112309236041
+        }
+      },
+      "reference_after": {
+        "text": {
+          "iou": 0.3239903380341535,
+          "average_precision": 0.5597827036043382,
+          "auroc": 0.9396612801393228
+        },
+        "image": {
+          "iou": 0.33119808687572816,
+          "average_precision": 0.5452359584926347,
+          "auroc": 0.926273703546741
+        },
+        "prompt": {
+          "iou": 0.2160332039438799,
+          "average_precision": 0.4028026798810781,
+          "auroc": 0.9382057691837342
+        }
+      },
+      "reference_raw_after": {
+        "text": {
+          "iou": 0.3239903380341535,
+          "average_precision": 0.5597827036043382,
+          "auroc": 0.9396612801393228
+        },
+        "image": {
+          "iou": 0.0,
+          "average_precision": 0.5229188705514817,
+          "auroc": 0.9096101293006486
+        },
+        "prompt": {
+          "iou": 0.2160332039438799,
+          "average_precision": 0.4028026798810781,
+          "auroc": 0.9382057691837342
+        }
+      },
+      "evaluation_hashes": {
+        "paper/artifacts/figurines_preserved96_text_20260916.json": "731b68af47135be6538eef5deb4da8c4c3f9e98bcc188fa5f23bdb8ddd7d6dbd",
+        "paper/artifacts/figurines_preserved96_reference_20260916.json": "7ecc39a1890ed58dc6775524f2e21ead5441abc3cc44789aa0d8f5638b6f79cb",
+        "paper/artifacts/figurines_partitioned_system_text_20260916.json": "10579c38da0c443386303bea75834be8c0c6841e3470de26868526984ec090c4",
+        "paper/artifacts/figurines_partitioned_system_reference_20260916.json": "313f38ed69147977e45b6eb5bfe783c70832e9832a12d2ec3a9bb97798996319"
+      }
+    },
+    "ramen": {
+      "native_semantics_exactly_preserved": true,
+      "native_decoder_exactly_preserved": true,
+      "new_supervision_binding_verified": true,
+      "original_rgb_text_predictions_exactly_preserved": true,
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/preserved96_protected/report.json",
+      "report_sha256": "02ab4d9482e5939c875e67ecaf9a72884abf3518eaa39ba0ca7e6371763d6cb7",
+      "finalized_field_path": "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/preserved96_protected_imagecal_balanced/field.pt",
+      "finalized_field_sha256": "d2a29c03d548ee1073018a83306b43008b6ce3ee7c0747aa8551bbbaf7339409",
+      "steps": 5112,
+      "coverage": {
+        "available": {
+          "text": 99,
+          "image": 852,
+          "prompt": 852
+        },
+        "visited": {
+          "text": 99,
+          "image": 852,
+          "prompt": 852
+        },
+        "minimum_steps_for_full_coverage": 2556,
+        "updates": {
+          "text": 1704,
+          "image": 1704,
+          "prompt": 1704
+        },
+        "episode_repetitions": {
+          "text": {
+            "minimum": 17,
+            "maximum": 18,
+            "mean": 17.21212121212121
+          },
+          "image": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          },
+          "prompt": {
+            "minimum": 2,
+            "maximum": 2,
+            "mean": 2.0
+          }
+        },
+        "complete": true
+      },
+      "field_support": {
+        "geometrically_visible_elements": 255984,
+        "training_domain_elements": 226194,
+        "native_anchor_domain_used": true,
+        "semantically_trained_elements": 226194,
+        "excluded_untrained_visible_elements": 0,
+        "excluded_outside_training_domain": 29790,
+        "mean_feature_update_steps_on_valid": 788.9007568359375
+      },
+      "direct_text_supervision": {
+        "tasks": 99,
+        "text_categories": 14,
+        "conflicting_query_elements": 12293
+      },
+      "cold_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "gradients": {
+        "native_calibration_text": 0.07349232584238052,
+        "teacher_sam": 0.12835921347141266,
+        "teacher_radio": 0.0026716459542512894,
+        "teacher_dino": 0.003379490692168474,
+        "native_calibration_image": 1.8588889837265015,
+        "prompt": 55.116703033447266
+      },
+      "text_before": {
+        "observation_miou": 0.02143899859752897,
+        "average_precision_macro": 0.22719180492684143
+      },
+      "text_after": {
+        "observation_miou": 0.04069863018934019,
+        "average_precision_macro": 0.3101657861793202
+      },
+      "reference_before": {
+        "text": {
+          "iou": 0.02122962079702646,
+          "average_precision": 0.229797112293672,
+          "auroc": 0.8895399921295302
+        },
+        "image": {
+          "iou": 0.1312542173625904,
+          "average_precision": 0.3493172496363982,
+          "auroc": 0.8762803132610394
+        },
+        "prompt": {
+          "iou": 0.2287264744004645,
+          "average_precision": 0.3864269433907703,
+          "auroc": 0.9358366131300926
+        }
+      },
+      "reference_after": {
+        "text": {
+          "iou": 0.037735554932472236,
+          "average_precision": 0.310188683191199,
+          "auroc": 0.9160046419649736
+        },
+        "image": {
+          "iou": 0.13809865233204907,
+          "average_precision": 0.34208514025020786,
+          "auroc": 0.8930794990026406
+        },
+        "prompt": {
+          "iou": 0.21878475219469098,
+          "average_precision": 0.3292206031966601,
+          "auroc": 0.9315882094671141
+        }
+      },
+      "reference_raw_after": {
+        "text": {
+          "iou": 0.037735554932472236,
+          "average_precision": 0.310188683191199,
+          "auroc": 0.9160046419649736
+        },
+        "image": {
+          "iou": 0.0,
+          "average_precision": 0.33595837517919286,
+          "auroc": 0.8889336406251355
+        },
+        "prompt": {
+          "iou": 0.21878475219469098,
+          "average_precision": 0.3292206031966601,
+          "auroc": 0.9315882094671141
+        }
+      },
+      "evaluation_hashes": {
+        "paper/artifacts/ramen_preserved96_text_20260916.json": "d2cb904bcb83250ed076eda1cc0013cce01fd4b4c9e39c2ac6d42fe2f1fdbcc2",
+        "paper/artifacts/ramen_preserved96_reference_20260916.json": "b77266aa02fa6668ad1b1bac85430540e9d717ef187e2570861470295e7f309f",
+        "paper/artifacts/ramen_partitioned_system_text_20260916.json": "68dc0efdd50d0b227c4d369214f97f8b4a73040a954a09ad05de9e51080ac386",
+        "paper/artifacts/ramen_partitioned_system_reference_20260916.json": "ca41190f8ba8dc12ba5a939c0bd10e02984b879041b550babd4275aa7d80636a"
+      }
+    }
+  }
+}

@@ -160,7 +160,11 @@ def automatic_mask_generation_contract(
     args: argparse.Namespace, *, checkpoint_sha256: str,
 ) -> dict:
     return {
-        "schema_version": 2,
+        "schema_version": 3,
+        "complex_rope_buffers_preserved": True,
+        "model_cast_implementation_sha256": sha256_file(
+            Path(__file__).with_name("build_sam3_foundation_cache.py")
+        ),
         "source": "official_sam3_interactive_grid_multimask_hierarchy",
         "official_decoder": True,
         "query_free": True,

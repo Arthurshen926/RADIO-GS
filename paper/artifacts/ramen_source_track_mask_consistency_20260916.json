@@ -1,0 +1,1368 @@
+{
+  "schema": "source_track_mask_consistency.v1",
+  "scene": "ramen",
+  "source_only": true,
+  "benchmark_data_used": false,
+  "teacher_masks_are_not_gt": true,
+  "no_moge_depth_or_gaussian_or_feature_in_computation": true,
+  "colmap_track_identity_not_manual_ground_truth": true,
+  "maximum_track_reprojection_error": 2.0,
+  "native_boundary_exclusion_radius": 3,
+  "input_bindings": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/caption_grounded_regions.pt": "aa4fcf6d4e81edb5a2d5002e5bf4508050a22c990a8a8fca0a718ab2ef44baa2",
+    "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/ramen/report.json": "68a0b49605f83f95a1f7f6a35a42bfe4db128bbb1030a4fc059a133ceac21698",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/points3D.bin": "4707a21530d22e8bbf7fae182a1a12832305ce9c6df8a535fcc061b4679f7c82"
+  },
+  "source_geometry_receipt_inputs": [
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_moge3_lerf_ramen_scene_manifest_20260830.json",
+      "role": "moge3_scene_manifest",
+      "sha256": "1a2e0bb9fc182a1d9d589dcbb0c2712fa23d8e17c4556db32f96345251ad6778"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+      "role": "source_authority",
+      "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/cameras.bin",
+      "role": "colmap_cameras",
+      "sha256": "72b479230bcca2ca5952de882ef09f84f048d23e4297ab4585e24c3427c3347c"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/images.bin",
+      "role": "colmap_images",
+      "sha256": "a2710cb4285f7930ee382a6f739fc352b9a579c98f1dd912c05c42ac2a6d21af"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/points3D.bin",
+      "role": "colmap_sparse_points",
+      "sha256": "4707a21530d22e8bbf7fae182a1a12832305ce9c6df8a535fcc061b4679f7c82"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/moge_pixel_calibration_v2_20260914/ramen.pt",
+      "role": "fused_surface",
+      "sha256": "df481dc17ebd151c9bd5238dd3ec22355e6fa61a222ffff2b2f7c3bc72d3647b"
+    }
+  ],
+  "strict_point_statistics": {
+    "total_colmap_points": 29746,
+    "points_touching_source_views": 29730,
+    "strict_source_only_points": 15999
+  },
+  "source_views": [
+    {
+      "frame": 7,
+      "strict_source_tracks": 436,
+      "grounded_phrases": 37
+    },
+    {
+      "frame": 11,
+      "strict_source_tracks": 700,
+      "grounded_phrases": 35
+    },
+    {
+      "frame": 15,
+      "strict_source_tracks": 536,
+      "grounded_phrases": 37
+    },
+    {
+      "frame": 18,
+      "strict_source_tracks": 577,
+      "grounded_phrases": 31
+    },
+    {
+      "frame": 22,
+      "strict_source_tracks": 419,
+      "grounded_phrases": 35
+    },
+    {
+      "frame": 27,
+      "strict_source_tracks": 301,
+      "grounded_phrases": 42
+    },
+    {
+      "frame": 109,
+      "strict_source_tracks": 276,
+      "grounded_phrases": 39
+    },
+    {
+      "frame": 76,
+      "strict_source_tracks": 1466,
+      "grounded_phrases": 39
+    },
+    {
+      "frame": 131,
+      "strict_source_tracks": 442,
+      "grounded_phrases": 42
+    },
+    {
+      "frame": 101,
+      "strict_source_tracks": 651,
+      "grounded_phrases": 30
+    },
+    {
+      "frame": 105,
+      "strict_source_tracks": 257,
+      "grounded_phrases": 37
+    },
+    {
+      "frame": 90,
+      "strict_source_tracks": 868,
+      "grounded_phrases": 37
+    }
+  ],
+  "rows": [
+    {
+      "phrase": "black cup",
+      "shared_track_concept_pairs": 125,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "black handle",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "bottle",
+      "shared_track_concept_pairs": 28,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "bowl",
+      "shared_track_concept_pairs": 655,
+      "positive_shared_pairs": 2,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "bowl of food",
+      "shared_track_concept_pairs": 649,
+      "positive_shared_pairs": 88,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 0.011363636363636364
+    },
+    {
+      "phrase": "bowl of noodles",
+      "shared_track_concept_pairs": 451,
+      "positive_shared_pairs": 67,
+      "conflicting_pairs": 5,
+      "conflict_fraction_of_positive_shared": 0.07462686567164178
+    },
+    {
+      "phrase": "bowl of pasta",
+      "shared_track_concept_pairs": 34,
+      "positive_shared_pairs": 9,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "bowl of soup",
+      "shared_track_concept_pairs": 650,
+      "positive_shared_pairs": 79,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "bowls",
+      "shared_track_concept_pairs": 655,
+      "positive_shared_pairs": 2,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "chair",
+      "shared_track_concept_pairs": 52,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "close up a wooden table",
+      "shared_track_concept_pairs": 588,
+      "positive_shared_pairs": 229,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "cup",
+      "shared_track_concept_pairs": 296,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "egg",
+      "shared_track_concept_pairs": 420,
+      "positive_shared_pairs": 8,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "floor",
+      "shared_track_concept_pairs": 299,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "food",
+      "shared_track_concept_pairs": 649,
+      "positive_shared_pairs": 91,
+      "conflicting_pairs": 7,
+      "conflict_fraction_of_positive_shared": 0.07692307692307693
+    },
+    {
+      "phrase": "glass",
+      "shared_track_concept_pairs": 580,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "glass of water",
+      "shared_track_concept_pairs": 580,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "glass of wine",
+      "shared_track_concept_pairs": 208,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "liquid",
+      "shared_track_concept_pairs": 356,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "man",
+      "shared_track_concept_pairs": 28,
+      "positive_shared_pairs": 6,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "meat",
+      "shared_track_concept_pairs": 429,
+      "positive_shared_pairs": 13,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "metal",
+      "shared_track_concept_pairs": 657,
+      "positive_shared_pairs": 3,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "metal object",
+      "shared_track_concept_pairs": 657,
+      "positive_shared_pairs": 3,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "noodles",
+      "shared_track_concept_pairs": 436,
+      "positive_shared_pairs": 21,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 0.047619047619047616
+    },
+    {
+      "phrase": "paper",
+      "shared_track_concept_pairs": 276,
+      "positive_shared_pairs": 2,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 0.5
+    },
+    {
+      "phrase": "pasta",
+      "shared_track_concept_pairs": 33,
+      "positive_shared_pairs": 8,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "person",
+      "shared_track_concept_pairs": 196,
+      "positive_shared_pairs": 7,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 0.14285714285714285
+    },
+    {
+      "phrase": "person s shadow",
+      "shared_track_concept_pairs": 79,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "piece of metal",
+      "shared_track_concept_pairs": 484,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "piece of paper",
+      "shared_track_concept_pairs": 52,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 1.0
+    },
+    {
+      "phrase": "piece of wood",
+      "shared_track_concept_pairs": 637,
+      "positive_shared_pairs": 445,
+      "conflicting_pairs": 84,
+      "conflict_fraction_of_positive_shared": 0.18876404494382024
+    },
+    {
+      "phrase": "plate",
+      "shared_track_concept_pairs": 434,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "plate of food",
+      "shared_track_concept_pairs": 261,
+      "positive_shared_pairs": 35,
+      "conflicting_pairs": 10,
+      "conflict_fraction_of_positive_shared": 0.2857142857142857
+    },
+    {
+      "phrase": "plates",
+      "shared_track_concept_pairs": 552,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "plates of food",
+      "shared_track_concept_pairs": 315,
+      "positive_shared_pairs": 48,
+      "conflicting_pairs": 23,
+      "conflict_fraction_of_positive_shared": 0.4791666666666667
+    },
+    {
+      "phrase": "shadow",
+      "shared_track_concept_pairs": 504,
+      "positive_shared_pairs": 24,
+      "conflicting_pairs": 14,
+      "conflict_fraction_of_positive_shared": 0.5833333333333334
+    },
+    {
+      "phrase": "shadow of a person s shadow",
+      "shared_track_concept_pairs": 428,
+      "positive_shared_pairs": 12,
+      "conflicting_pairs": 3,
+      "conflict_fraction_of_positive_shared": 0.25
+    },
+    {
+      "phrase": "small black object",
+      "shared_track_concept_pairs": 274,
+      "positive_shared_pairs": 4,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "soup",
+      "shared_track_concept_pairs": 254,
+      "positive_shared_pairs": 55,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "spoon",
+      "shared_track_concept_pairs": 240,
+      "positive_shared_pairs": 4,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "table",
+      "shared_track_concept_pairs": 638,
+      "positive_shared_pairs": 237,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "tiled floor",
+      "shared_track_concept_pairs": 49,
+      "positive_shared_pairs": 2,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 0.5
+    },
+    {
+      "phrase": "vegetables",
+      "shared_track_concept_pairs": 13,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 1.0
+    },
+    {
+      "phrase": "water",
+      "shared_track_concept_pairs": 451,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "white napkin",
+      "shared_track_concept_pairs": 553,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "wood",
+      "shared_track_concept_pairs": 638,
+      "positive_shared_pairs": 470,
+      "conflicting_pairs": 43,
+      "conflict_fraction_of_positive_shared": 0.09148936170212765
+    },
+    {
+      "phrase": "wooden surface",
+      "shared_track_concept_pairs": 634,
+      "positive_shared_pairs": 467,
+      "conflicting_pairs": 49,
+      "conflict_fraction_of_positive_shared": 0.10492505353319058
+    },
+    {
+      "phrase": "wooden table",
+      "shared_track_concept_pairs": 639,
+      "positive_shared_pairs": 238,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "wooden wall",
+      "shared_track_concept_pairs": 113,
+      "positive_shared_pairs": 44,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 0.022727272727272728
+    },
+    {
+      "phrase": "yellow bowl",
+      "shared_track_concept_pairs": 655,
+      "positive_shared_pairs": 2,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "yellow bowl of food",
+      "shared_track_concept_pairs": 625,
+      "positive_shared_pairs": 22,
+      "conflicting_pairs": 15,
+      "conflict_fraction_of_positive_shared": 0.6818181818181818
+    },
+    {
+      "phrase": "yellow cup",
+      "shared_track_concept_pairs": 144,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "yellow plate",
+      "shared_track_concept_pairs": 121,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    }
+  ],
+  "examples": [
+    {
+      "phrase": "bowl of food",
+      "point_id": 15245,
+      "positive": [
+        {
+          "frame": 90,
+          "xy": [
+            538.21533203125,
+            277.9998474121094
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            414.9802551269531,
+            108.58484649658203
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "bowl of noodles",
+      "point_id": 18807,
+      "positive": [
+        {
+          "frame": 15,
+          "xy": [
+            440.64007568359375,
+            395.1587829589844
+          ]
+        },
+        {
+          "frame": 22,
+          "xy": [
+            806.6741333007812,
+            215.57449340820312
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 18,
+          "xy": [
+            725.9848022460938,
+            431.9535217285156
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "bowl of noodles",
+      "point_id": 22749,
+      "positive": [
+        {
+          "frame": 15,
+          "xy": [
+            337.30657958984375,
+            263.1922912597656
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 18,
+          "xy": [
+            568.7677612304688,
+            341.2926025390625
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "bowl of noodles",
+      "point_id": 30505,
+      "positive": [
+        {
+          "frame": 15,
+          "xy": [
+            95.24116516113281,
+            390.7823181152344
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 18,
+          "xy": [
+            386.91302490234375,
+            489.76483154296875
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "food",
+      "point_id": 2924,
+      "positive": [
+        {
+          "frame": 131,
+          "xy": [
+            389.6623840332031,
+            117.50582122802734
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 90,
+          "xy": [
+            512.6963500976562,
+            297.50006103515625
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "food",
+      "point_id": 12772,
+      "positive": [
+        {
+          "frame": 131,
+          "xy": [
+            355.9577331542969,
+            123.73809051513672
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 101,
+          "xy": [
+            874.4091796875,
+            157.07778930664062
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "food",
+      "point_id": 15245,
+      "positive": [
+        {
+          "frame": 131,
+          "xy": [
+            414.9802551269531,
+            108.58484649658203
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 90,
+          "xy": [
+            538.21533203125,
+            277.9998474121094
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "noodles",
+      "point_id": 32665,
+      "positive": [
+        {
+          "frame": 22,
+          "xy": [
+            520.2157592773438,
+            102.99309539794922
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 15,
+          "xy": [
+            322.60809326171875,
+            211.46873474121094
+          ]
+        },
+        {
+          "frame": 18,
+          "xy": [
+            515.2823486328125,
+            313.10833740234375
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "paper",
+      "point_id": 9397,
+      "positive": [
+        {
+          "frame": 131,
+          "xy": [
+            815.0421142578125,
+            172.56344604492188
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 90,
+          "xy": [
+            876.9127197265625,
+            176.6631622314453
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "person",
+      "point_id": 25881,
+      "positive": [
+        {
+          "frame": 15,
+          "xy": [
+            587.92333984375,
+            10.71522045135498
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 11,
+          "xy": [
+            643.677001953125,
+            184.58267211914062
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "piece of paper",
+      "point_id": 9397,
+      "positive": [
+        {
+          "frame": 131,
+          "xy": [
+            815.0421142578125,
+            172.56344604492188
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 90,
+          "xy": [
+            876.9127197265625,
+            176.6631622314453
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "piece of wood",
+      "point_id": 509,
+      "positive": [
+        {
+          "frame": 76,
+          "xy": [
+            701.87109375,
+            261.28155517578125
+          ]
+        },
+        {
+          "frame": 90,
+          "xy": [
+            74.73625946044922,
+            294.29168701171875
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            142.21673583984375,
+            101.87657928466797
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "piece of wood",
+      "point_id": 1158,
+      "positive": [
+        {
+          "frame": 101,
+          "xy": [
+            577.9857788085938,
+            102.43128204345703
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            127.74333190917969,
+            46.82268142700195
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "piece of wood",
+      "point_id": 2911,
+      "positive": [
+        {
+          "frame": 90,
+          "xy": [
+            100.35643768310547,
+            321.1864318847656
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            156.30979919433594,
+            130.9559326171875
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "plate of food",
+      "point_id": 2924,
+      "positive": [
+        {
+          "frame": 90,
+          "xy": [
+            512.6963500976562,
+            297.50006103515625
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            389.6623840332031,
+            117.50582122802734
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "plate of food",
+      "point_id": 12772,
+      "positive": [
+        {
+          "frame": 101,
+          "xy": [
+            874.4091796875,
+            157.07778930664062
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            355.9577331542969,
+            123.73809051513672
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "plate of food",
+      "point_id": 12876,
+      "positive": [
+        {
+          "frame": 22,
+          "xy": [
+            844.995361328125,
+            63.904666900634766
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            287.0149841308594,
+            194.6159210205078
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "plates of food",
+      "point_id": 2924,
+      "positive": [
+        {
+          "frame": 90,
+          "xy": [
+            512.6963500976562,
+            297.50006103515625
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            389.6623840332031,
+            117.50582122802734
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "plates of food",
+      "point_id": 12772,
+      "positive": [
+        {
+          "frame": 101,
+          "xy": [
+            874.4091796875,
+            157.07778930664062
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            355.9577331542969,
+            123.73809051513672
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "plates of food",
+      "point_id": 12876,
+      "positive": [
+        {
+          "frame": 22,
+          "xy": [
+            844.995361328125,
+            63.904666900634766
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            287.0149841308594,
+            194.6159210205078
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "shadow",
+      "point_id": 950,
+      "positive": [
+        {
+          "frame": 131,
+          "xy": [
+            269.9891662597656,
+            463.44488525390625
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 101,
+          "xy": [
+            760.3125610351562,
+            489.00994873046875
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "shadow",
+      "point_id": 1148,
+      "positive": [
+        {
+          "frame": 131,
+          "xy": [
+            422.84356689453125,
+            499.1688537597656
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 76,
+          "xy": [
+            322.7684631347656,
+            542.861083984375
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "shadow",
+      "point_id": 4137,
+      "positive": [
+        {
+          "frame": 105,
+          "xy": [
+            520.7481689453125,
+            488.7947998046875
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 76,
+          "xy": [
+            309.8708801269531,
+            481.4313049316406
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "shadow of a person s shadow",
+      "point_id": 8185,
+      "positive": [
+        {
+          "frame": 90,
+          "xy": [
+            402.56475830078125,
+            622.8626708984375
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 15,
+          "xy": [
+            612.92626953125,
+            369.1818542480469
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "shadow of a person s shadow",
+      "point_id": 11035,
+      "positive": [
+        {
+          "frame": 131,
+          "xy": [
+            713.7413940429688,
+            82.1492919921875
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 109,
+          "xy": [
+            471.12896728515625,
+            132.53570556640625
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "shadow of a person s shadow",
+      "point_id": 15080,
+      "positive": [
+        {
+          "frame": 109,
+          "xy": [
+            110.24186706542969,
+            295.0992431640625
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 105,
+          "xy": [
+            120.97935485839844,
+            383.64508056640625
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "tiled floor",
+      "point_id": 36473,
+      "positive": [
+        {
+          "frame": 105,
+          "xy": [
+            739.7354736328125,
+            676.8463134765625
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 109,
+          "xy": [
+            648.1209716796875,
+            653.6385498046875
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "vegetables",
+      "point_id": 33652,
+      "positive": [
+        {
+          "frame": 76,
+          "xy": [
+            634.449951171875,
+            425.50299072265625
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 22,
+          "xy": [
+            835.248779296875,
+            363.8612060546875
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "wood",
+      "point_id": 509,
+      "positive": [
+        {
+          "frame": 76,
+          "xy": [
+            701.87109375,
+            261.28155517578125
+          ]
+        },
+        {
+          "frame": 90,
+          "xy": [
+            74.73625946044922,
+            294.29168701171875
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            142.21673583984375,
+            101.87657928466797
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "wood",
+      "point_id": 1158,
+      "positive": [
+        {
+          "frame": 101,
+          "xy": [
+            577.9857788085938,
+            102.43128204345703
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            127.74333190917969,
+            46.82268142700195
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "wood",
+      "point_id": 2911,
+      "positive": [
+        {
+          "frame": 90,
+          "xy": [
+            100.35643768310547,
+            321.1864318847656
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            156.30979919433594,
+            130.9559326171875
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "wooden surface",
+      "point_id": 509,
+      "positive": [
+        {
+          "frame": 76,
+          "xy": [
+            701.87109375,
+            261.28155517578125
+          ]
+        },
+        {
+          "frame": 90,
+          "xy": [
+            74.73625946044922,
+            294.29168701171875
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            142.21673583984375,
+            101.87657928466797
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "wooden surface",
+      "point_id": 1158,
+      "positive": [
+        {
+          "frame": 101,
+          "xy": [
+            577.9857788085938,
+            102.43128204345703
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            127.74333190917969,
+            46.82268142700195
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "wooden surface",
+      "point_id": 2911,
+      "positive": [
+        {
+          "frame": 90,
+          "xy": [
+            100.35643768310547,
+            321.1864318847656
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 131,
+          "xy": [
+            156.30979919433594,
+            130.9559326171875
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "wooden wall",
+      "point_id": 30126,
+      "positive": [
+        {
+          "frame": 7,
+          "xy": [
+            827.6406860351562,
+            33.251216888427734
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 76,
+          "xy": [
+            66.14437866210938,
+            228.58485412597656
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "yellow bowl of food",
+      "point_id": 8429,
+      "positive": [
+        {
+          "frame": 15,
+          "xy": [
+            256.1435241699219,
+            385.625244140625
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 90,
+          "xy": [
+            688.0728759765625,
+            420.3605651855469
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "yellow bowl of food",
+      "point_id": 9037,
+      "positive": [
+        {
+          "frame": 15,
+          "xy": [
+            468.5787048339844,
+            364.2384033203125
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 90,
+          "xy": [
+            522.7691040039062,
+            465.5451965332031
+          ]
+        }
+      ]
+    },
+    {
+      "phrase": "yellow bowl of food",
+      "point_id": 9056,
+      "positive": [
+        {
+          "frame": 15,
+          "xy": [
+            378.82086181640625,
+            270.86883544921875
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 90,
+          "xy": [
+            618.6497192382812,
+            518.9459838867188
+          ]
+        }
+      ]
+    }
+  ],
+  "macro": {
+    "shared_track_concept_pairs": 19777,
+    "positive_shared_pairs": 2760,
+    "conflicting_pairs": 261,
+    "conflict_fraction_of_positive_shared": 0.09456522017717361
+  },
+  "implementation_sha256": "cc95d370ca09a42da431cbd56d83cbeb122152b5738a9147f01b5c864d5dd193"
+}

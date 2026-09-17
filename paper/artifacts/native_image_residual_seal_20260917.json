@@ -1,0 +1,109 @@
+{
+  "schema": "native_image_residual_seal.v1",
+  "scenes": {
+    "figurines": {
+      "control_sha256": "502469ad7f43febf39022aa2bc8d5c78aed57d0d662a14ee2090b994c86c7561",
+      "candidate_sha256": "4b9dd66ee749193e91a413789b283c5e9f9cf6dd58ed3daa6e48548cb0c4c71f",
+      "all_parent_tensors_exact": true,
+      "geometry_encoder_exact": true,
+      "full_text_observations_exact": true,
+      "reference_text_prompt_observations_exact": true,
+      "image": {
+        "before": {
+          "iou": 0.33119808687572816,
+          "average_precision": 0.5452359584926347,
+          "auroc": 0.926273703546741
+        },
+        "after": {
+          "iou": 0.3941110984240229,
+          "average_precision": 0.5765607456443269,
+          "auroc": 0.93392656764776
+        }
+      },
+      "artifacts": {
+        "paper/artifacts/figurines_exact_render_query_threshold_reference_20260916.json": "3751a70f8d8fb6de3eb9b66caea26af3e8b86bc1a2b298298b5150737a531e33",
+        "paper/artifacts/figurines_image_supervised_native_residual_reference_20260917.json": "1e889a78416bcaec6aed9e27dc1959e8920b684f1b6e6ca687831e4b3a080448",
+        "paper/artifacts/figurines_exact_render_query_threshold_text_20260916.json": "0cfe88278aed1ff89d4bfc42e6f4cb72489bd38dac987260d6c0ff1d08cbd722",
+        "paper/artifacts/figurines_image_supervised_native_residual_text_20260917.json": "9855c9851385005bb950d00eab61bd34e7ac9536c23b4ce52cc3363fc4bf8317"
+      }
+    },
+    "ramen": {
+      "control_sha256": "d86d5d324500c45ec74a7b35b55916be09da01cc5aa0e9bbbe89f684f7fa1856",
+      "candidate_sha256": "7aab952e093188b48086e3f7e83e0c8bf87c64ebdd7aa3851627c5609d25dac7",
+      "all_parent_tensors_exact": true,
+      "geometry_encoder_exact": true,
+      "full_text_observations_exact": true,
+      "reference_text_prompt_observations_exact": true,
+      "image": {
+        "before": {
+          "iou": 0.13809865233204907,
+          "average_precision": 0.34208514025020786,
+          "auroc": 0.8930794990026406
+        },
+        "after": {
+          "iou": 0.1991107723279313,
+          "average_precision": 0.47676602010521896,
+          "auroc": 0.9651928364281164
+        }
+      },
+      "artifacts": {
+        "paper/artifacts/ramen_exact_render_query_threshold_reference_20260916.json": "7f333a2ab8bd03cc5db436b554994e35e69a791c3b3a6a79f6b47988c748ce68",
+        "paper/artifacts/ramen_image_supervised_native_residual_reference_20260917.json": "1e797abb3bee5aa7c155de02add2b2011ed05bce65d6c0779c6636652078d6bc",
+        "paper/artifacts/ramen_exact_render_query_threshold_text_20260916.json": "d67ac6751bdfaccc416f7d2411365a025f1fc0194bae6d52c73ccd7cf5fa214b",
+        "paper/artifacts/ramen_image_supervised_native_residual_text_20260917.json": "b9c33f5d2ea2e8c2451e2f07ec66301158d3bcb200ef8e29886c0eadde085ed3"
+      }
+    }
+  },
+  "current_sources": {
+    "radio_gs/models/element_retrieval_field.py": {
+      "sha256": "3f2e4919bbf8fd69eeb463e71a46628bd12da0c7d12ea65b10ab6abf452c35db",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/radio_gs/models/element_retrieval_field.py"
+    },
+    "radio_gs/models/native_decoder_readout.py": {
+      "sha256": "d0b26408f9228b74b8adf2bc958954e97ef74d09703a766b9393a9fd7b00cc01",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/radio_gs/models/native_decoder_readout.py"
+    },
+    "radio_gs/models/bounded_native_residual.py": {
+      "sha256": "dc73121931f38fa3557ce22be5f007ae4799afeec120a957abe1f28623dac04f",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/radio_gs/models/bounded_native_residual.py"
+    },
+    "radio_gs/models/bounded_extent_readout.py": {
+      "sha256": "72e7bea51a6d3d1bef12d6f267ef6300042558027cfbfbfa47fa13ac45d0ccd3",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/radio_gs/models/bounded_extent_readout.py"
+    },
+    "scripts/audits/fit_bounded_native_residual.py": {
+      "sha256": "6386aa11b171a08c0928921c95cf4e37533410253a7e9968cf2f8953ec74a2a3",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/scripts/audits/fit_bounded_native_residual.py"
+    },
+    "scripts/audits/train_rendered_native_residual.py": {
+      "sha256": "10c5b5ddf5214626aad84e63e175924ab7d7efdf58049d36baf31562fd2ca556",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/scripts/audits/train_rendered_native_residual.py"
+    },
+    "scripts/audits/export_image_supervised_native_residual.py": {
+      "sha256": "e93f70ee94345f662924d293bdda1bc8534937b899007db2c58f97f03b399b2e",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/scripts/audits/export_image_supervised_native_residual.py"
+    },
+    "scripts/audits/calibrate_frozen_source_images.py": {
+      "sha256": "23294ac9e209413eb64be4cc8186d63bae3de247b059d18cdef2ff391d104787",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/scripts/audits/calibrate_frozen_source_images.py"
+    },
+    "scripts/audits/evaluate_functional_queries.py": {
+      "sha256": "bf4c35395ebe9a2829f13d46ba335e637fd475fe790a2944524e48ba56bd884f",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/scripts/audits/evaluate_functional_queries.py"
+    },
+    "scripts/audits/evaluate_real_reference_queries.py": {
+      "sha256": "c857390cd855d6cb4ce553abfaea4c57f5c7b8f17649de7d35bacc421a5a7f97",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/scripts/audits/evaluate_real_reference_queries.py"
+    },
+    "scripts/audits/evaluate_frozen_field_lerf_labels.py": {
+      "sha256": "dbe80835062c110f801b6647cea449a7df6267614aeff4ac4934ac91cc9d8b2c",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/scripts/audits/evaluate_frozen_field_lerf_labels.py"
+    },
+    "tests/test_bounded_native_residual.py": {
+      "sha256": "61327611a79af523706045456a4271ffbaa107659986342d0eb807c7b96befe9",
+      "snapshot": "/mnt/pool/sqy/results/RADIO-GS/output/native_image_residual_sources_20260917/tests/test_bounded_native_residual.py"
+    }
+  },
+  "source_version_scope": "Snapshots are final reusable source; earlier fit/evaluation receipts retain their own historical source hashes. Root/parent argument generalization and image-only scope followed shared controls.",
+  "acceptance": "Scoped two-scene development candidate; independent joint benchmark not passed; retained controls preserved"
+}

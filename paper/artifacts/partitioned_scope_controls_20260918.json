@@ -1,0 +1,361 @@
+{
+  "schema": "partitioned_scope_controls.v1",
+  "promoted": false,
+  "benchmark_data_used_for_training": false,
+  "retained": "counterfactual_extent_benefit_admission",
+  "scenes": {
+    "figurines": {
+      "native_scope_replay": {
+        "accepted_detections": 94,
+        "legacy_regions": 41,
+        "corrected_regions": 94,
+        "native_scope_assignment_errors": {
+          "coarse_only": 53,
+          "native_and_coarse": 0
+        }
+      },
+      "metrics": {
+        "partitioned_scope_validation_20260918": {
+          "macro": {
+            "merged": {
+              "iou": 0.38969580406141385,
+              "precision": 0.5967963510358104,
+              "recall": 0.4872709346819532,
+              "positive_support": 0.9088322743598758
+            },
+            "largest_supported": {
+              "iou": 0.3424829867800906,
+              "precision": 0.5365628140405492,
+              "recall": 0.44605702638107075,
+              "positive_support": 0.8447888780688285
+            },
+            "native_selected": {
+              "iou": 0.2585035451125013,
+              "precision": 0.4645898422533786,
+              "recall": 0.3379914919393281,
+              "positive_support": 0.7310180039509784
+            },
+            "separate_union": {
+              "iou": 0.3118777757944996,
+              "precision": 0.3816428544529616,
+              "recall": 0.6663069685204476,
+              "positive_support": 0.9088322743598758
+            }
+          },
+          "observations": 1466,
+          "zero_support_observations_added": 8
+        },
+        "local_partitioned_scope_validation_20260918": {
+          "macro": {
+            "merged": {
+              "iou": 0.38969580406141385,
+              "precision": 0.5967963510358104,
+              "recall": 0.4872709346819532,
+              "positive_support": 0.9088322743598758
+            },
+            "largest_supported": {
+              "iou": 0.3424829867800906,
+              "precision": 0.5365628140405492,
+              "recall": 0.44605702638107075,
+              "positive_support": 0.8447888780688285
+            },
+            "native_selected": {
+              "iou": 0.2585035451125013,
+              "precision": 0.4645898422533786,
+              "recall": 0.3379914919393281,
+              "positive_support": 0.7310180039509784
+            },
+            "separate_union": {
+              "iou": 0.3118777757944996,
+              "precision": 0.3816428544529616,
+              "recall": 0.6663069685204476,
+              "positive_support": 0.9088322743598758
+            },
+            "local_evidence_winner": {
+              "iou": 0.386085375852576,
+              "precision": 0.5641140156748894,
+              "recall": 0.5069302004036343,
+              "positive_support": 0.9088322743598758
+            }
+          },
+          "observations": 1466,
+          "zero_support_observations_added": 8
+        },
+        "bridged_scope_validation_20260918": {
+          "macro": {
+            "merged": {
+              "iou": 0.38969580406141385,
+              "precision": 0.5967963510358104,
+              "recall": 0.4872709346819532,
+              "positive_support": 0.9088322743598758
+            },
+            "largest_supported": {
+              "iou": 0.36919415275592327,
+              "precision": 0.5573209494723663,
+              "recall": 0.4722444398961085,
+              "positive_support": 0.8560187322780678
+            },
+            "native_selected": {
+              "iou": 0.28284470985772525,
+              "precision": 0.48521520684334724,
+              "recall": 0.36321414041208705,
+              "positive_support": 0.7462056217450946
+            },
+            "separate_union": {
+              "iou": 0.32384654670161395,
+              "precision": 0.40576821209838687,
+              "recall": 0.6415574108053502,
+              "positive_support": 0.9088322743598758
+            },
+            "local_evidence_winner": {
+              "iou": 0.3882823703735292,
+              "precision": 0.5727263268948587,
+              "recall": 0.5025212222277943,
+              "positive_support": 0.9088322743598758
+            }
+          },
+          "observations": 1466,
+          "zero_support_observations_added": 8
+        },
+        "local_scope_abstention_20260918": {
+          "macro": {
+            "merged": {
+              "iou": 0.38969580406141385,
+              "precision": 0.5967963510358104,
+              "recall": 0.4872709346819532,
+              "positive_support": 0.9088322743598758
+            },
+            "containment_abstention": {
+              "iou": 0.3918791863661371,
+              "precision": 0.5903593136479196,
+              "recall": 0.49362666342003425,
+              "positive_support": 0.9088322743598758
+            },
+            "incompatible_abstention": {
+              "iou": 0.3887183461053993,
+              "precision": 0.5953458884183322,
+              "recall": 0.48481767901361095,
+              "positive_support": 0.9084872209570545
+            },
+            "combined_abstention": {
+              "iou": 0.3901027942811346,
+              "precision": 0.5897988017774244,
+              "recall": 0.49018696625018177,
+              "positive_support": 0.9084872209570545
+            }
+          },
+          "observations": 1466,
+          "zero_support_observations_added": 8
+        }
+      },
+      "oracle": {
+        "baseline": 0.38969580406141385,
+        "per_observation_oracle": 0.43992609063398136,
+        "group_fold_oracle": 0.4191185928322756
+      },
+      "track_summary": {
+        "multi_view_group_tracks": 232,
+        "group_tracks_with_positive": 17,
+        "conflicting_group_tracks": 3,
+        "groups_with_positive_tracks": 15,
+        "total_groups": 201,
+        "unique_positive_track_ids": 3,
+        "unique_conflicting_track_ids": 2
+      },
+      "retained_sha256": "33a52a38afe1cce46111b90ec69ad55def58c95c55c51dc39057625bb0d3a9b7",
+      "artifacts": {
+        "output/pixel_evidence_rebuild_20260917/figurines/partitioned_scope_validation_20260918/full_cohort_report.json": "067646700b372a97d06de610e2caecedbe1d0a17efb9baf19e008247f0f95267",
+        "output/pixel_evidence_rebuild_20260917/figurines/local_partitioned_scope_validation_20260918/full_cohort_report.json": "aa600e85ed63a5182c3d6b4fc840dc7ad124d4f9f4c4ab94e515fe6d94e78cae",
+        "output/pixel_evidence_rebuild_20260917/figurines/bridged_scope_validation_20260918/full_cohort_report.json": "c4ae1c350965f677d852df926db9a1b81fa4038cf565a8a426c3684b8ba62ca5",
+        "output/pixel_evidence_rebuild_20260917/figurines/local_scope_abstention_20260918/full_cohort_report.json": "57f4312de4cf19aa025721b3f850d67da77b3db48818d30b6af5807ee9b1b619",
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_hypothesis_ceiling_20260918/report.json": "9123adbed2d8b02d85e59ed538ba4e3d8a855d49d476959897a1963ccb7cf513",
+        "output/pixel_evidence_rebuild_20260917/figurines/tracked_scope_labels_20260918.json": "860d76b54ad251e760be14085bd554d30edff6bbb4c8de350dca7fde608cdb0e",
+        "output/pixel_evidence_rebuild_20260917/figurines/native_scope_dedup_replay_20260918/report.json": "5c49728a00d12b606ef458e99b210cf1a33bc79da228af52d2e7f18451167e77"
+      }
+    },
+    "ramen": {
+      "native_scope_replay": {
+        "accepted_detections": 18,
+        "legacy_regions": 10,
+        "corrected_regions": 18,
+        "native_scope_assignment_errors": {
+          "coarse_only": 8,
+          "native_and_coarse": 0
+        }
+      },
+      "metrics": {
+        "partitioned_scope_validation_20260918": {
+          "macro": {
+            "merged": {
+              "iou": 0.517187964622478,
+              "precision": 0.689821587677967,
+              "recall": 0.6323647236626058,
+              "positive_support": 0.9644127828120708
+            },
+            "largest_supported": {
+              "iou": 0.4248000495078366,
+              "precision": 0.5755279182161305,
+              "recall": 0.5528259880946428,
+              "positive_support": 0.8705670006077108
+            },
+            "native_selected": {
+              "iou": 0.3966870064637308,
+              "precision": 0.571706951100037,
+              "recall": 0.5016359384463062,
+              "positive_support": 0.8432617226934793
+            },
+            "separate_union": {
+              "iou": 0.4407130531144458,
+              "precision": 0.5000985664041063,
+              "recall": 0.7786010831741458,
+              "positive_support": 0.9644127828120708
+            }
+          },
+          "observations": 811,
+          "zero_support_observations_added": 4
+        },
+        "local_partitioned_scope_validation_20260918": {
+          "macro": {
+            "merged": {
+              "iou": 0.517187964622478,
+              "precision": 0.689821587677967,
+              "recall": 0.6323647236626058,
+              "positive_support": 0.9644127828120708
+            },
+            "largest_supported": {
+              "iou": 0.4248000495078366,
+              "precision": 0.5755279182161305,
+              "recall": 0.5528259880946428,
+              "positive_support": 0.8705670006077108
+            },
+            "native_selected": {
+              "iou": 0.3966870064637308,
+              "precision": 0.571706951100037,
+              "recall": 0.5016359384463062,
+              "positive_support": 0.8432617226934793
+            },
+            "separate_union": {
+              "iou": 0.4407130531144458,
+              "precision": 0.5000985664041063,
+              "recall": 0.7786010831741458,
+              "positive_support": 0.9644127828120708
+            },
+            "local_evidence_winner": {
+              "iou": 0.5187412269606396,
+              "precision": 0.6668216591808858,
+              "recall": 0.6548068034709529,
+              "positive_support": 0.9644127828120708
+            }
+          },
+          "observations": 811,
+          "zero_support_observations_added": 4
+        },
+        "bridged_scope_validation_20260918": {
+          "macro": {
+            "merged": {
+              "iou": 0.517187964622478,
+              "precision": 0.689821587677967,
+              "recall": 0.6323647236626058,
+              "positive_support": 0.9644127828120708
+            },
+            "largest_supported": {
+              "iou": 0.4781781621564423,
+              "precision": 0.6211823323103065,
+              "recall": 0.5974629235668648,
+              "positive_support": 0.9038298710073664
+            },
+            "native_selected": {
+              "iou": 0.4361127669560986,
+              "precision": 0.596177102918662,
+              "recall": 0.540774734273786,
+              "positive_support": 0.8681763632500914
+            },
+            "separate_union": {
+              "iou": 0.4697330308350035,
+              "precision": 0.5563723719741979,
+              "recall": 0.7360771624313991,
+              "positive_support": 0.9644127828120708
+            },
+            "local_evidence_winner": {
+              "iou": 0.5207090041027135,
+              "precision": 0.6751450082257335,
+              "recall": 0.6484269091868646,
+              "positive_support": 0.9644127828120708
+            }
+          },
+          "observations": 811,
+          "zero_support_observations_added": 4
+        },
+        "local_scope_abstention_20260918": {
+          "macro": {
+            "merged": {
+              "iou": 0.517187964622478,
+              "precision": 0.689821587677967,
+              "recall": 0.6323647236626058,
+              "positive_support": 0.9644127828120708
+            },
+            "containment_abstention": {
+              "iou": 0.5166083033025523,
+              "precision": 0.6828960848469219,
+              "recall": 0.6396434480099308,
+              "positive_support": 0.9644127828120708
+            },
+            "incompatible_abstention": {
+              "iou": 0.5164473451072242,
+              "precision": 0.6912676866261608,
+              "recall": 0.6301899201141351,
+              "positive_support": 0.9640581861813582
+            },
+            "combined_abstention": {
+              "iou": 0.515881907201743,
+              "precision": 0.6841790888242598,
+              "recall": 0.63750855769025,
+              "positive_support": 0.9639709423997803
+            }
+          },
+          "observations": 811,
+          "zero_support_observations_added": 4
+        }
+      },
+      "oracle": {
+        "baseline": 0.517187964622478,
+        "per_observation_oracle": 0.5727227524901326,
+        "group_fold_oracle": 0.5396986156954682
+      },
+      "track_summary": {
+        "multi_view_group_tracks": 43841,
+        "group_tracks_with_positive": 7027,
+        "conflicting_group_tracks": 651,
+        "groups_with_positive_tracks": 77,
+        "total_groups": 88,
+        "unique_positive_track_ids": 1035,
+        "unique_conflicting_track_ids": 355
+      },
+      "retained_sha256": "6f4d96cbbee52c48243469f409acbe0b15ac3ac5d099cae23e9b2a8d2b7b689b",
+      "artifacts": {
+        "output/pixel_evidence_rebuild_20260917/ramen/partitioned_scope_validation_20260918/full_cohort_report.json": "7eb61be6ce7e5f9b6f1947497e6479a9fc89cc29ddaa58bca565133168de3981",
+        "output/pixel_evidence_rebuild_20260917/ramen/local_partitioned_scope_validation_20260918/full_cohort_report.json": "faeef73d2f3acdc9e868f7927a0f8a03de153d9f0ac4be06e9825a3829b6d252",
+        "output/pixel_evidence_rebuild_20260917/ramen/bridged_scope_validation_20260918/full_cohort_report.json": "dc126ec58a64a8f56c460b0a132bb4e60da433976ba6b53b8c323cbfe2f50acf",
+        "output/pixel_evidence_rebuild_20260917/ramen/local_scope_abstention_20260918/full_cohort_report.json": "060e84ab359944c90b2a33d0cc51e7b93389708545cff2651374affa6e631eec",
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_hypothesis_ceiling_20260918/report.json": "24b6d7977fd9b44318a32908283aa220b8cddf049f02a8d222dcbc2a5b818c96",
+        "output/pixel_evidence_rebuild_20260917/ramen/tracked_scope_labels_20260918.json": "dee59c5beeda982292d26cdb724d2b519d90351751713d34d900275bce9ae785",
+        "output/pixel_evidence_rebuild_20260917/ramen/native_scope_dedup_replay_20260918/report.json": "dc63788dc9fe571b341efa5c0713237c7907758d615e0d1d6dfe1eb6a5c7e071"
+      }
+    }
+  },
+  "current_implementations": {
+    "radio_gs/utils/native_scope_identity.py": "84424497c209df2b1a9095c385b82132cedb383b13fd7c7b99eb19fe95efd82e",
+    "scripts/audits/ground_source_caption_phrases.py": "45a7731520c7b73bdf838d72d427644a079197a4f1981277860b5664f590f225",
+    "scripts/audits/replay_native_scope_dedup.py": "a035814dd23b15a812d38c5121cd4a9752b4d54cc55a6ff8998598b1eeda3010",
+    "radio_gs/training/scope_correspondence.py": "0e9eda24fbd45a6328b6c5472eebbaddd9c72fb6c38cfd49d1ca7edd39b1d1b5",
+    "radio_gs/training/scope_vote_abstention.py": "cf509f06f11593de70ad3dbaf8c876629234fffbc885a7b7a464fc7e035db978",
+    "radio_gs/training/scope_validation_cohort.py": "a1566009d26d529d8755c1da3c9e570a5d0a24e3f5e8a3fa0961ac36b55b5ddb",
+    "scripts/audits/validate_partitioned_scope_fusion.py": "72559a4ff00aefa612543bbb2a9697174e3af8571107a4dd325ef4ab1b0744ff",
+    "scripts/audits/validate_local_scope_abstention.py": "173ef2a989af58e95e32d12d2d9770d14677c6190cd40566564ba78d7c0d6403",
+    "scripts/audits/complete_scope_validation_cohort.py": "096467965b87a1e41b29f24aa62fecb7e660c51bc7617a5eeab70cf118d83388",
+    "scripts/audits/audit_scope_hypothesis_ceiling.py": "af3dab32c1c19eb2f284357f9fbff606577db6e5c60a1c5f90e77b43ed6d6000",
+    "scripts/audits/audit_tracked_scope_labels.py": "9ba7a2c1d9f769acd5e953cfd13090d97e28a6961bc75a98bd54510dfa956d58",
+    "scripts/audits/verify_partitioned_scope_controls.py": "920afda722488f9bbbaaa0a77760a0d26d791049b0f94a15ddf9bdcb3e9eb275"
+  },
+  "notes": "All started source controls completed. No hypothesis policy improves both scenes; no new full-field retraining or real-query evaluation was launched. Original conditional reports remain immutable; full-cohort reports restore zero-support misses."
+}

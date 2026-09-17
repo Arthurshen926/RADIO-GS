@@ -152,6 +152,21 @@ def test_cast_sam3_model_for_inference_converts_parameters():
     assert model.weight.dtype == torch.bfloat16
 
 
+@pytest.mark.parametrize('dtype', [torch.float32, torch.bfloat16])
+def test_sam3_precision_cast_preserves_complex_rotary_phase(dtype):
+    model = torch.nn.Linear(2, 2)
+    phase = torch.polar(torch.ones(4), torch.tensor([0., .5, 1., 1.5]))
+    model.register_buffer('freqs_cis', phase.clone())
+    model.register_buffer('indices', torch.arange(4))
+    cast_sam3_model_for_inference(model, dtype)
+    assert model.weight.dtype == dtype
+    assert model.freqs_cis.dtype == torch.complex64
+    torch.testing.assert_close(model.freqs_cis, phase, rtol=0, atol=0)
+    # A rotary positional encoding must preserve length, including nonzero angles.
+    torch.testing.assert_close(model.freqs_cis.abs(), torch.ones(4))
+    assert model.indices.dtype == torch.int64
+
+
 def test_make_sam3_processor_forwards_resolution():
     class DummyProcessor:
         def __init__(self, model, *, device, confidence_threshold, resolution):

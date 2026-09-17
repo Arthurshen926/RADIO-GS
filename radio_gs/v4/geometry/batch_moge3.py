@@ -32,6 +32,22 @@ def _load_source_frames(authority_path: Path, scene_root: Path) -> list[tuple[in
         if metadata.get(key) is not False:
             raise ValueError(f"source authority is not sealed: {key}={metadata.get(key)!r}")
     requested = [int(value) for value in authority["frame_indices"]]
+    if "camera_name_to_frame_index" in authority:
+        records = authority.get("records", [])
+        if len(records) != len(requested) or len(set(requested)) != len(requested):
+            raise ValueError("explicit source records must match unique authority indices")
+        by_index = {}
+        for record in records:
+            path = Path(record["source_image"]).resolve(strict=True)
+            index = int(record["frame_index"])
+            if path.parent != (scene_root / "images").resolve() or authority["camera_name_to_frame_index"].get(path.name) != index:
+                raise ValueError("source filename/index binding differs")
+            if index in by_index or sha256_file(path) != record["source_image_sha256"]:
+                raise ValueError("source image identity differs")
+            by_index[index] = path
+        if set(by_index) != set(requested):
+            raise ValueError("explicit source indices differ")
+        return [(index, by_index[index]) for index in requested]
     available: dict[int, Path] = {}
     for path in sorted((scene_root / "images").glob("*")):
         if path.suffix.lower() not in {".jpg", ".jpeg", ".png"}:
@@ -75,6 +91,10 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         refine_steps=args.refine_steps,
         use_fp16=not args.disable_fp16,
     )
+    storage_name = getattr(args, "geometry_dtype", "float32")
+    if storage_name not in {"float32", "float16"}:
+        raise ValueError("geometry_dtype must be float32 or float16")
+    storage_dtype = getattr(torch, storage_name)
     records: list[dict[str, object]] = []
     started = time.time()
     for ordinal, (frame_index, image_path) in enumerate(frames, start=1):
@@ -88,17 +108,23 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "model_revision": revision,
             "model_checkpoint_sha256": runner.checkpoint_sha256,
             "fov_x_degrees": float(args.fov_x_degrees),
+            "geometry_dtype": storage_name,
+            "resolution_level": int(args.resolution_level),
+            "refine_steps": int(args.refine_steps),
+            "use_fp16_inference": not args.disable_fp16,
         }
         frame_started = time.time()
         if not _existing_output_is_valid(destination, expected):
+            if destination.exists():
+                raise ValueError("existing MoGe prediction has different precision/inference settings; use a new output directory")
             rgb = torch.from_numpy(np.asarray(Image.open(image_path).convert("RGB")).copy()).permute(2, 0, 1)
             rgb = rgb.float().div_(255)
             prediction = runner.predict(rgb, fov_x=float(args.fov_x_degrees))
             payload = {
                 **expected,
                 "source_image": str(image_path),
-                "point_map": prediction.point_map.to(torch.float16),
-                "normals": prediction.normals.to(torch.float16),
+                "point_map": prediction.point_map.to(storage_dtype),
+                "normals": prediction.normals.to(storage_dtype),
                 "validity": prediction.validity,
                 "intrinsics": prediction.intrinsics,
                 "confidence_semantics": "binary MoGe-3 geometry-validity observation weight",
@@ -150,6 +176,8 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         "model_checkpoint": str(runner.checkpoint),
         "model_checkpoint_sha256": runner.checkpoint_sha256,
         "fov_x_degrees": float(args.fov_x_degrees),
+        "geometry_dtype": storage_name,
+        "use_fp16_inference": not args.disable_fp16,
         "resolution_level": int(args.resolution_level),
         "refine_steps": int(args.refine_steps),
         "shard_id": int(args.shard_id),
@@ -176,6 +204,7 @@ def main() -> None:
     parser.add_argument("--resolution-level", type=int, default=9)
     parser.add_argument("--refine-steps", type=int, default=3)
     parser.add_argument("--disable-fp16", action="store_true")
+    parser.add_argument("--geometry-dtype", choices=("float32", "float16"), default="float32")
     parser.add_argument("--shard-id", type=int, required=True)
     parser.add_argument("--num-shards", type=int, required=True)
     args = parser.parse_args()

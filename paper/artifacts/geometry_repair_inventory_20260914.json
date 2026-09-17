@@ -1,0 +1,157 @@
+{
+  "schema": "radio_gs.geometry_repair_inventory.v1",
+  "role": "geometry_only_development_candidate",
+  "source_depth_reference": "heldout_source_MoGe_not_ground_truth",
+  "all_scene_geometry_acceptance_complete": false,
+  "promoted_semantic_baseline": false,
+  "tests_passed": 421,
+  "known_limits": [
+    "figurines coverage about 80 percent",
+    "ramen sparse COLMAP error regression",
+    "retained FP16 prediction cohort",
+    "no real semantic fidelity evaluation on new geometry"
+  ],
+  "feature_transport_report": "paper/artifacts/frozen_geometry_final_feature_transport_20260914.json",
+  "scenes": [
+    {
+      "scene": "figurines",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/figurines/report.json",
+      "report_sha256": "14aa139766f39f2eea58b0728b2def3e0e1a12a923714b2d79cf51f761355050",
+      "cold_report": "/root/RADIO-GS/paper/artifacts/geometry_final_cold_figurines_20260914.json",
+      "cold_report_sha256": "b520fa3beadc5195b63a03bb0f626205a7afc7079df320ae40792a21353dec6c",
+      "geometry": "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/figurines/independent_scale.pt",
+      "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+      "geometry_elements": 274805,
+      "mapping_views": 81,
+      "recovered_scale_views": 21,
+      "isolated_scale_views": 23,
+      "historical": {
+        "coverage": 1.0,
+        "absrel": 0.33535503409802914,
+        "median_absrel": 0.2641501906327903,
+        "free_space_fraction": 0.6999889574944973,
+        "depth_agreement_fraction": 0.2564272893650923,
+        "agreement_coverage": 0.2564272893650923,
+        "colmap_absrel": 0.3113192797024199,
+        "moge_reference_colmap_absrel": 0.10189681119741277
+      },
+      "repaired_candidate": {
+        "coverage": 0.799014251679182,
+        "absrel": 0.11593139264732599,
+        "median_absrel": 0.06688310764729977,
+        "free_space_fraction": 0.2609628685750067,
+        "depth_agreement_fraction": 0.46061962423846126,
+        "agreement_coverage": 0.4125934278126806,
+        "colmap_absrel": 0.04608583913707152,
+        "moge_reference_colmap_absrel": 0.10429113503636384
+      },
+      "joint_residual_scale_promoted": false,
+      "semantic_training_started": false
+    },
+    {
+      "scene": "ramen",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/ramen/report.json",
+      "report_sha256": "68a0b49605f83f95a1f7f6a35a42bfe4db128bbb1030a4fc059a133ceac21698",
+      "cold_report": "/root/RADIO-GS/paper/artifacts/geometry_final_cold_ramen_20260914.json",
+      "cold_report_sha256": "a8ad2b1a308f525bbbc32db0d662cbc99798f2d6bddb8bc02a00ef5711dad9b2",
+      "geometry": "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/ramen/independent_scale.pt",
+      "geometry_sha256": "38fd2b410293d55f3ca08000a3a2044c4253ecb98eb48466453c6408f6c4c82b",
+      "geometry_elements": 362198,
+      "mapping_views": 107,
+      "recovered_scale_views": 68,
+      "isolated_scale_views": 3,
+      "historical": {
+        "coverage": 0.9996625632047653,
+        "absrel": 0.0996294617652893,
+        "median_absrel": 0.07517084944993258,
+        "free_space_fraction": 0.4272243231534958,
+        "depth_agreement_fraction": 0.45767590776085854,
+        "agreement_coverage": 0.4575381502509117,
+        "colmap_absrel": 0.05604585299893964,
+        "moge_reference_colmap_absrel": 0.06941634557796887
+      },
+      "repaired_candidate": {
+        "coverage": 0.9820026457309723,
+        "absrel": 0.09150689840316772,
+        "median_absrel": 0.05450938758440316,
+        "free_space_fraction": 0.27665621787309647,
+        "depth_agreement_fraction": 0.592682484537363,
+        "agreement_coverage": 0.5819366313517094,
+        "colmap_absrel": 0.06681361358691987,
+        "moge_reference_colmap_absrel": 0.0686616679214317
+      },
+      "joint_residual_scale_promoted": false,
+      "semantic_training_started": false
+    },
+    {
+      "scene": "teatime",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/teatime/report.json",
+      "report_sha256": "b9508f921ced538f5781356d0a2087af163f5e727aa3591b96a55db3ac3cc540",
+      "cold_report": "/root/RADIO-GS/paper/artifacts/geometry_final_cold_teatime_20260914.json",
+      "cold_report_sha256": "618c1623738b350c33171038fce6a6c7f6f0be0b3b6a5c437c622e8940cb749c",
+      "geometry": "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/teatime/independent_scale.pt",
+      "geometry_sha256": "3de94b162ff5078f1b6ef629f07ebb534225919d4279837962d5d38b189dd78c",
+      "geometry_elements": 1347420,
+      "mapping_views": 96,
+      "recovered_scale_views": 12,
+      "isolated_scale_views": 2,
+      "historical": {
+        "coverage": 0.9996977671980858,
+        "absrel": 0.15441110916435719,
+        "median_absrel": 0.12630238477140665,
+        "free_space_fraction": 0.6725670620799065,
+        "depth_agreement_fraction": 0.3152307481504977,
+        "agreement_coverage": 0.3151364424265921,
+        "colmap_absrel": 0.11910521898182555,
+        "moge_reference_colmap_absrel": 0.04411125326739021
+      },
+      "repaired_candidate": {
+        "coverage": 0.9677582159638405,
+        "absrel": 0.08758320938795805,
+        "median_absrel": 0.05005978106055409,
+        "free_space_fraction": 0.3189337505027652,
+        "depth_agreement_fraction": 0.616155362688005,
+        "agreement_coverage": 0.594963314011693,
+        "colmap_absrel": 0.05685726074165011,
+        "moge_reference_colmap_absrel": 0.044284946311608696
+      },
+      "joint_residual_scale_promoted": false,
+      "semantic_training_started": false
+    },
+    {
+      "scene": "waldo_kitchen",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/waldo_kitchen/report.json",
+      "report_sha256": "ce11c039869dc4a2ce61e5f9b7933ed598e5b6a8a30d94a4aaa2891d1bdfe67f",
+      "cold_report": "/root/RADIO-GS/paper/artifacts/geometry_final_cold_waldo_kitchen_20260914.json",
+      "cold_report_sha256": "3843f25abdca02828e588fa57c1b92e8ab8b238f2e2dcb592a1ed17e66d6db3e",
+      "geometry": "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/waldo_kitchen/independent_scale.pt",
+      "geometry_sha256": "85173894f47b530fb1f20b2c37337f40557408300989f7e45d56e5f6fca4eaef",
+      "geometry_elements": 959761,
+      "mapping_views": 93,
+      "recovered_scale_views": 3,
+      "isolated_scale_views": 4,
+      "historical": {
+        "coverage": 0.9994835928082466,
+        "absrel": 0.29712560307234526,
+        "median_absrel": 0.26956594455987215,
+        "free_space_fraction": 0.9217942282557487,
+        "depth_agreement_fraction": 0.07783324334013741,
+        "agreement_coverage": 0.07782474525447469,
+        "colmap_absrel": 0.3353213580020251,
+        "moge_reference_colmap_absrel": 0.01699185330823761
+      },
+      "repaired_candidate": {
+        "coverage": 0.9742895662784576,
+        "absrel": 0.041313563007861376,
+        "median_absrel": 0.031241894117556512,
+        "free_space_fraction": 0.2521238666959107,
+        "depth_agreement_fraction": 0.7395780952647328,
+        "agreement_coverage": 0.7195983799174428,
+        "colmap_absrel": 0.029232744778348516,
+        "moge_reference_colmap_absrel": 0.01699185330823761
+      },
+      "joint_residual_scale_promoted": false,
+      "semantic_training_started": false
+    }
+  ]
+}

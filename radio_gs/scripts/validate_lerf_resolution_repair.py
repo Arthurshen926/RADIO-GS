@@ -41,7 +41,9 @@ def main():
     parser.add_argument("--compare-chain-stages", action="store_true")
     parser.add_argument("--compare-source-stages", action="store_true")
     parser.add_argument("--native-source-relift", action="store_true")
+    parser.add_argument("--projection-contract", choices=("pixel_centres_band_v2", "pixel_centres_nearest_v2"))
     parser.add_argument("--surface-replacement", type=Path)
+    parser.add_argument("--replacement-footprint", choices=("reference", "native"), default="reference")
     parser.add_argument("--anchored-source-only", action="store_true")
     parser.add_argument("--reuse-native-relift", type=Path)
     parser.add_argument("--pixel-threshold", type=float)
@@ -59,6 +61,8 @@ def main():
         parser.error("pixel threshold must lie in (0,1)")
     if args.formal_fragment_memory and (args.reuse_native_relift or args.native_source_relift or args.surface_replacement):
         parser.error("formal fragment memory cannot mix with another geometry/evidence override")
+    if args.projection_contract and (not args.native_source_relift or not args.compare_source_stages or args.surface_replacement):
+        parser.error("projection repair requires fresh source-stage relift on unchanged geometry")
     torch.set_num_threads(4)
     out = args.output_directory
     out.mkdir(parents=True, exist_ok=False)
@@ -91,6 +95,9 @@ def main():
     old._projection_cache.clear()
     fixed._projection_cache.clear()
     print(scene, "source replay exact", len(fragment["source_frames"]), flush=True)
+    if args.projection_contract:
+        state["method_configuration"]["carrier"]["projection_contract"] = args.projection_contract
+        fixed = _build_carrier(state)
     if args.formal_fragment_memory:
         formal = validate_memory(torch.load(args.formal_fragment_memory, weights_only=False, map_location="cpu"))
         formal_state = _load_state(Path(formal["scene_state"]), expected_sha256=formal["scene_state_sha256"])
@@ -110,12 +117,14 @@ def main():
         surface = torch.load(args.surface_replacement, weights_only=False, map_location="cpu")
         if surface["schema"] != "radio_gs.surface_object_memory_v4.calibrated_sparse_surface.v1" or surface["scene_label"] not in (scene, "lerf_" + scene):
             raise ValueError("replacement surface identity differs")
-        # Native-only physical footprint, quantized in output pixels. No coarse
-        # radius-one floor is magnified into a 16-pixel disk.
+        # Keep footprint identical for a geometry-only replacement. Native
+        # quantization remains an explicit historical diagnostic option.
         fixed = SurfaceVoxelCarrier(surface["centres"], surface["voxel_size_colmap"],
             normals=surface["normals"], confidence=surface["confidence"],
-            maximum_splat_radius=16, surface_band_voxels=1.5, maximum_contributors_per_pixel=8)
-        state["method_configuration"]["carrier"] = {"voxel_size": surface["voxel_size_colmap"], "maximum_splat_radius": 16, "surface_band_voxels": 1.5, "maximum_contributors_per_pixel": 8, "reference_raster_shape": None}
+            maximum_splat_radius=1 if args.replacement_footprint == "reference" else 16,
+            reference_raster_shape=shape if args.replacement_footprint == "reference" else None,
+            surface_band_voxels=1.5, maximum_contributors_per_pixel=8)
+        state["method_configuration"]["carrier"] = {"voxel_size": surface["voxel_size_colmap"], "maximum_splat_radius": fixed.maximum_splat_radius, "surface_band_voxels": 1.5, "maximum_contributors_per_pixel": 8, "reference_raster_shape": fixed.reference_raster_shape, "projection_contract": fixed.projection_contract}
     if args.reuse_native_relift:
         relift = torch.load(args.reuse_native_relift, weights_only=False, map_location="cpu")
         if relift["source_hypothesis_sha256"] != memory_hash or relift["source_fragment_sha256"] != memory["fragment_memory_sha256"]:
@@ -153,7 +162,7 @@ def main():
         scores = prototype_fragment_consensus_posterior(memory, text, negatives,
             temperature=config["temperature"], null_similarity=config["null_similarity"],
             consensus_fragments=config["distinct_fragment_consensus"])
-        posterior, composition = compose_object_queries(memory["observed_membership"], scores.cpu(), maximum_query_tokens=None)
+        posterior, composition = compose_object_queries(memory["observed_membership"], scores.cpu(), maximum_query_tokens=None, membership_semantics="legacy_candidate_normalization")
     torch.save({"element_probability": posterior, "categories": categories,
                 "scene_state_sha256": reference["scene_state_sha256"], "hypothesis_memory_sha256": memory_hash,
                 "diagnostic_derived_field_not_sealed_deployment": bool(args.native_source_relift or args.reuse_native_relift or args.surface_replacement or args.formal_fragment_memory),
@@ -175,7 +184,7 @@ def main():
         similarity = prototype_fragment_consensus_scores(memory, text, consensus_fragments=config["distinct_fragment_consensus"]).cpu()
         ids = similarity.argmax(-1)
         onehot = torch.zeros_like(similarity).scatter_(1, ids[:, None], 1.)
-        mixed, _ = compose_object_queries(memory["observed_membership"], onehot)
+        mixed, _ = compose_object_queries(memory["observed_membership"], onehot, membership_semantics="legacy_candidate_normalization")
         raw = memory["observed_membership"].float().cpu()
         fields = {
             "cosine_top1_raw": raw[:, ids],
@@ -233,7 +242,9 @@ def main():
                     "support_upper_bound": float((support & gt).sum() / gt.sum()) if gt.any() else 0.0})
             carrier._projection_cache.clear()
             print(scene, mode, frame, "done", flush=True)
-    result = {"scene": scene, "development_only": True, "source_projection_exact": True,
+    result = {"scene": scene, "development_only": True, "source_projection_exact": args.projection_contract is None,
+        "projection_contract_changed": args.projection_contract,
+        "projection_implementation_sha256": sha256_file(Path(__file__).parents[1] / "v4/carrier/sparse_voxel.py"),
         "source_frame_count": len(fragment["source_frames"]), "carrier_configuration": state["method_configuration"]["carrier"],
         "source_state_sha256": reference["scene_state_sha256"], "hypothesis_memory": str(memory_path.resolve()), "hypothesis_memory_sha256": memory_hash,
         "text_query_cache": str(text_path.resolve()), "text_query_cache_sha256": sha256_file(text_path),

@@ -115,6 +115,7 @@ def _build_carrier(state: dict[str, Any]):
         surface_band_voxels=float(configuration["surface_band_voxels"]),
         maximum_contributors_per_pixel=configuration["maximum_contributors_per_pixel"],
         reference_raster_shape=configuration.get("reference_raster_shape"),
+        projection_contract=configuration.get("projection_contract", "legacy_round_band_v1"),
     )
 
 

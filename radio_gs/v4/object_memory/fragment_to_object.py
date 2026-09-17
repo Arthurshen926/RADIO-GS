@@ -1,11 +1,9 @@
-"""Offline soft fragment-to-object hypothesis construction.
+"""Query-independent fragment hypotheses with explicit relation semantics.
 
-The construction is deliberately independent of the historical online token
-birth/update path.  Query-free source fragments are compared globally, a
-same-view cannot-link constrained agglomeration provides only an
-initialization, and every fragment keeps a top-2 soft assignment plus explicit
-null mass.  Object surface support is the probabilistic union of its assigned
-observed fragments; completion is a separate later stage.
+New builds retain uncompressed fragment assignments and pool correlated masks
+within each source view before cross-view aggregation. Surface support remains
+overlapping candidate evidence, not a categorical physical-instance posterior.
+Historical top-2 and visible-absence rules are explicit replay configurations.
 """
 
 from __future__ import annotations
@@ -32,11 +30,14 @@ class FragmentAssociationConfiguration:
     maximum_fragment_hypotheses: int = 2
     seed_policy: str = "all_fragments"
     minimum_seed_support_views: int = 3
-    assignment_normalization: str = "full_then_top2"
-    fragment_evidence_pooling: str = "probabilistic_union"
-    cannot_link_policy: str = "exact_same_view"
+    assignment_normalization: str = "full_uncompressed"
+    fragment_evidence_pooling: str = "same_view_max_then_union"
+    cannot_link_policy: str = "explicit_negative"
+    relation_contract: str = "explicit_negative_v2"
 
     def validate(self) -> None:
+        if self.relation_contract not in {"explicit_negative_v2", "legacy_visibility_absence_v1"}:
+            raise ValueError("unsupported relation contract")
         weights = self.geometry_weight + self.appearance_weight + self.spatial_weight
         if not 0 < self.evidence_threshold < 1:
             raise ValueError("fragment evidence threshold must lie in (0,1)")
@@ -50,8 +51,8 @@ class FragmentAssociationConfiguration:
             raise ValueError("association weights must sum to one")
         if self.assignment_temperature <= 0:
             raise ValueError("assignment temperature must be positive")
-        if self.maximum_fragment_hypotheses != 2:
-            raise ValueError("v4 deployment association is fixed to top-2")
+        if self.assignment_normalization != "full_uncompressed" and self.maximum_fragment_hypotheses != 2:
+            raise ValueError("legacy compressed association requires top-2")
         if self.seed_policy not in {
             "all_fragments", "hierarchy_roots", "cross_view_supported"
         }:
@@ -59,7 +60,7 @@ class FragmentAssociationConfiguration:
         if self.minimum_seed_support_views <= 0:
             raise ValueError("minimum seed support views must be positive")
         if self.assignment_normalization not in {
-            "full_then_top2", "top2_then_normalize"
+            "full_uncompressed", "full_then_top2", "top2_then_normalize"
         }:
             raise ValueError("fragment assignment normalization is unsupported")
         if self.fragment_evidence_pooling not in {
@@ -67,6 +68,7 @@ class FragmentAssociationConfiguration:
         }:
             raise ValueError("fragment evidence pooling is unsupported")
         if self.cannot_link_policy not in {
+            "explicit_negative",
             "exact_same_view",
             "disjoint_same_view",
             "exact_group_disjoint_assignment",
@@ -147,19 +149,17 @@ def _pairwise_appearance(descriptors: torch.Tensor | None, count: int) -> torch.
     return ((similarity + 1.0) * 0.5).clamp(0, 1)
 
 
-def _pairwise_visibility_conflict(
+def _pairwise_visibility_absence(
     positive: torch.Tensor,
     view_index: torch.Tensor,
     view_visibility: torch.Tensor,
     *,
     evidence_threshold: float,
 ) -> torch.Tensor:
-    """Return conservative symmetric explicit-negative conflict.
+    """Legacy symmetric visible-mask absence heuristic (not instance negative).
 
-    ``conflict[f,g]`` is high only when each fragment's surface is visible as
-    explicit negative evidence in the other fragment's source view.  Taking
-    the minimum of the two directional conflicts avoids declaring occluded or
-    nested part/whole observations incompatible from a one-sided absence.
+    Preserved only for frozen checkpoint replay. Symmetric absence can be
+    caused by disjoint parts of the same object and is not an instance label.
     """
 
     evidence = torch.as_tensor(positive, dtype=torch.float32).cpu()
@@ -187,6 +187,38 @@ def _pairwise_visibility_conflict(
     conflict = torch.minimum(directional, directional.T).clamp(0, 1)
     conflict.fill_diagonal_(0)
     return conflict
+
+
+def _pairwise_visibility_conflict(
+    positive, view_index, view_visibility, *, evidence_threshold, negative=None,
+):
+    """Explicit instance-negative evidence only; absent mask support is unknown.
+
+    negative[f,e] must identify elements known not to belong to fragment f's
+    physical instance, at the same granularity. A SAM mask complement is not
+    such a label. With no such observations, return no conflict.
+    """
+    evidence = torch.as_tensor(positive, dtype=torch.float32).cpu()
+    views = torch.as_tensor(view_index, dtype=torch.long).cpu()
+    visibility = torch.as_tensor(view_visibility, dtype=torch.bool).cpu()
+    if evidence.ndim != 2 or views.shape != (evidence.shape[0],) or visibility.ndim != 2 or visibility.shape[1] != evidence.shape[1]:
+        raise ValueError("explicit conflict axes do not align")
+    if views.numel() and (views.min() < 0 or views.max() >= visibility.shape[0]):
+        raise ValueError("view index outside visibility")
+    if negative is None:
+        return torch.zeros(evidence.shape[0], evidence.shape[0])
+    negatives = torch.as_tensor(negative, dtype=torch.float32).cpu()
+    if negatives.shape != evidence.shape or not torch.isfinite(negatives).all() or bool(((negatives < 0) | (negatives > 1)).any()):
+        raise ValueError("explicit negative evidence must align and lie in [0,1]")
+    binary = evidence >= evidence_threshold
+    neg = (negatives >= evidence_threshold) & visibility[views]
+    if bool((binary & neg).any()):
+        raise ValueError("positive and explicit negative evidence contradict")
+    mass = binary.float() @ visibility[views].float().T
+    directional = (binary.float() @ neg.float().T) / mass.clamp_min(1)
+    result = torch.minimum(directional, directional.T).clamp(0, 1)
+    result.fill_diagonal_(0)
+    return result
 
 
 def _constrained_groups(
@@ -387,12 +419,12 @@ def _soft_assignments(
             1, selected_indices, posterior[:, :selected_count]
         )
         null_probability = posterior[:, -1]
-    elif normalization == "full_then_top2":
+    elif normalization in {"full_then_top2", "full_uncompressed"}:
         posterior = torch.softmax(
             torch.cat([logits, null], dim=-1) / temperature, dim=-1
         )
         known, null_probability = posterior[:, :-1], posterior[:, -1]
-        if known.shape[1] > top_k:
+        if normalization == "full_then_top2" and known.shape[1] > top_k:
             indices = topk_with_mandatory(known, top_k)
             values = known.gather(1, indices)
             retained = torch.zeros_like(known).scatter(1, indices, values)
@@ -434,7 +466,7 @@ def _compose_observed_membership(
     quality: torch.Tensor,
     fragment_assignment: torch.Tensor,
     fragment_view_index: torch.Tensor,
-    pooling: str = "probabilistic_union",
+    pooling: str = "same_view_max_then_union",
 ) -> torch.Tensor:
     evidence = torch.as_tensor(positive, dtype=torch.float32).cpu()
     quality = torch.as_tensor(quality, dtype=torch.float32).cpu().clamp(0, 1)
@@ -487,10 +519,14 @@ def build_fragment_object_hypotheses(
     quality: torch.Tensor,
     appearance_prototypes: torch.Tensor | None,
     view_visibility: torch.Tensor | None = None,
+    fragment_negative: torch.Tensor | None = None,
     learned_affinity_model: torch.nn.Module | None = None,
     configuration: FragmentAssociationConfiguration,
 ) -> dict[str, Any]:
     configuration.validate()
+    if learned_affinity_model is not None and configuration.relation_contract != "legacy_visibility_absence_v1":
+        if getattr(learned_affinity_model, "relation_contract", None) != configuration.relation_contract:
+            raise ValueError("learned affinity relation contract differs; retrain or request explicit legacy replay")
     positive = torch.as_tensor(fragment_positive, dtype=torch.float32).cpu()
     view_index = torch.as_tensor(fragment_view_index, dtype=torch.long).cpu()
     parent = torch.as_tensor(parent_index, dtype=torch.long).cpu()
@@ -504,15 +540,15 @@ def build_fragment_object_hypotheses(
         evidence_threshold=configuration.evidence_threshold,
     )
     raw_appearance = _pairwise_appearance(appearance_prototypes, positive.shape[0])
-    if configuration.conflict_weight > 0 or learned_affinity_model is not None:
+    if configuration.conflict_weight > 0 or learned_affinity_model is not None or fragment_negative is not None:
         if view_visibility is None:
             raise ValueError("positive conflict weight requires view visibility")
-        conflict = _pairwise_visibility_conflict(
-            positive,
-            view_index,
-            view_visibility,
-            evidence_threshold=configuration.evidence_threshold,
-        )
+        if configuration.relation_contract == "legacy_visibility_absence_v1":
+            conflict = _pairwise_visibility_absence(positive, view_index, view_visibility,
+                evidence_threshold=configuration.evidence_threshold)
+        else:
+            conflict = _pairwise_visibility_conflict(positive, view_index, view_visibility,
+                evidence_threshold=configuration.evidence_threshold, negative=fragment_negative)
     else:
         conflict = torch.zeros_like(geometry)
     appearance_floor = 0.0
@@ -574,8 +610,15 @@ def build_fragment_object_hypotheses(
     assignment_affinity.fill_diagonal_(1.0)
     same_view = view_index[:, None] == view_index[None, :]
     off_diagonal = ~torch.eye(positive.shape[0], dtype=torch.bool)
+    if configuration.cannot_link_policy == "explicit_negative":
+        # Same-image hierarchy overlap alone supplies no positive instance
+        # merge evidence. This is not a hard different-instance constraint.
+        grouping_affinity = grouping_affinity.masked_fill(same_view & off_diagonal, 0)
     exact_cannot_link = same_view & off_diagonal
-    if configuration.cannot_link_policy == "exact_same_view":
+    if configuration.cannot_link_policy == "explicit_negative":
+        grouping_cannot_link = conflict >= 1.0
+        assignment_cannot_link = grouping_cannot_link
+    elif configuration.cannot_link_policy == "exact_same_view":
         grouping_cannot_link = exact_cannot_link
         assignment_cannot_link = exact_cannot_link
     else:
@@ -652,6 +695,8 @@ def build_fragment_object_hypotheses(
         "hypothesis_seed_fragments": groups,
         "hypothesis_representative_fragments": medoid_indices,
         "pairwise_audit": {
+            "relation_contract": configuration.relation_contract,
+            "support_semantics": "overlapping_candidate_evidence",
             "seed_policy": configuration.seed_policy,
             "pair_affinity_source": affinity_source,
             "fragment_assignment_affinity_source": assignment_affinity_source,

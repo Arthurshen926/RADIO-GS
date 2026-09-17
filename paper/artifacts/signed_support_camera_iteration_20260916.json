@@ -1,0 +1,122 @@
+{
+  "schema": "signed_support_camera_iteration.v1",
+  "tests_distinct_passed": 94,
+  "geometry_training_performed": true,
+  "semantic_field_training_performed": false,
+  "joint_default_promoted": false,
+  "benchmarks": {
+    "lerf": "two scenes, two unchanged models per scene; full existing reference cohort plus separately identified signed image conditioning",
+    "nvos": "eight source camera contracts checked; fern MoGe depth, frozen geometry, source rendering authority completed; semantic field and target metrics pending",
+    "scannet": "new field and target evaluation pending"
+  },
+  "artifacts": [
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/figurines_signed_support_repair_20260916.json",
+      "sha256": "62518a60b041e501b8cc6686a0da9d05745c9a2945d69ae69940b481b19a32ff"
+    },
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/ramen_signed_support_repair_20260916.json",
+      "sha256": "05fbfe69828f26b92e31e2d1758b9794e07e69786b4a6b29933f253e63ddcc0e"
+    },
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_camera_domain_repair_20260916.json",
+      "sha256": "f6f9c8ddaacb503c04d8d46a293f1345bf3b45c209e7a49425ac6fbdd4039ff1"
+    },
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/nvos_fern_geometry_acceptance_20260916.json",
+      "sha256": "b53d1695a52acbc4e1af02edd7ed4cd983237091339f63f3ccd4e3790ac97c63"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/report.json",
+      "sha256": "6585e942d972d4c89aacf5535609e2bfe7706167a855ba2b02a63d1bd057574b"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_moge_bound_20260916/fern/scene_manifest.json",
+      "sha256": "62c8ad02dbb1523998e2f61fd5488bd32b4eca3b5bdf8f993e82bda64b31536e"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_moge_bound_20260916/fern/calibration_report.json",
+      "sha256": "26ae2a968a7ddb1123d99b07512611fd82be7a093f9321c3ceade388ba28cbcc"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_moge_bound_20260916/fern/frozen_geometry/report.json",
+      "sha256": "45d1457ba3687d31a4fa7139b4665d194f92b5c877da75bf6892534881f2fc33"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_frozen_authority_20260916/fern/build.json",
+      "sha256": "2a8acae01dfb1cf27e66a8f5d0d126db9ce196b27310ffc09849f74a70f4da2b"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_frozen_authority_20260916/fern/responsibility.json",
+      "sha256": "72b71970cfd55f34d317ef5a74de54ed5e9a911655a95cfb7e5be15cce27d902"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/trex/source_authority.json",
+      "sha256": "08aac4b7c7ecf379ab93d297ee3bf29222492bf73e0350cbbd145ee775e6b446"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/fortress/source_authority.json",
+      "sha256": "740f571ce310e2773a64f787aa486028376f5471277fa4d22559d381cfbade8a"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/horns_left/source_authority.json",
+      "sha256": "b84f2cf13bfed352eb25e8accf1d461095c0f0d2d7022678e8afa16401fef607"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/flower/source_authority.json",
+      "sha256": "45122912a0285195d5424b2dacf051b6c502514f68b0acd320ad0239cf838d32"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/horns_center/source_authority.json",
+      "sha256": "b84f2cf13bfed352eb25e8accf1d461095c0f0d2d7022678e8afa16401fef607"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/leaves/source_authority.json",
+      "sha256": "57e3dfe3d4105821afb8523761a6334390068c2b65d522d70228dc5392338040"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/fern/source_authority.json",
+      "sha256": "e2daf80445dd2fc39affe839bf6f4a057945111a282d9d177395de4c4f388c0e"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_geometry_sources_bound_20260916/orchids/source_authority.json",
+      "sha256": "fcbe5b192383dea4793d90b42aaa051e241f2d13619a3f0bb3b7af303e76e9c5"
+    }
+  ],
+  "verified_frozen_authority_views": 14,
+  "geometry_decision": "independent-scale fern candidate; joint scales rejected by full rendered validation; reference depth is MoGe, not GT",
+  "implementation": [
+    {
+      "path": "/root/RADIO-GS/radio_gs/models/signed_query_refinement.py",
+      "sha256": "bcae93d415abff6ac4ac3a3351ac8c4cc894e15f5c0148b3d1af3c164c5eb2b2"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/querying/native_image_conditioning.py",
+      "sha256": "a98d01ab1a522af3030080d8a5beeb10354a76d77534a1b5a51f4af2ea2c6d59"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/geometry/source_camera_assets.py",
+      "sha256": "0b30da0486b964a15fb56f937047dc67cf339a3f23d8de75907ef1659b7d7271"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/geometry/quality_gate.py",
+      "sha256": "f95de363a09012f9abdc27853cdd0a067845e19c201a1c891075798b8c285d29"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/v4/geometry/batch_moge3.py",
+      "sha256": "61bc4644a43221e41af3bd71130af82b27d983801da7c2751ca11b29a500ceb3"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/v4/geometry/fuse_lerf_moge3.py",
+      "sha256": "068bcd36adb9f25792cd298110bdd630f170d9d77a30b2820174badfc350e100"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/field/moge_geometry_prior.py",
+      "sha256": "48c52eae25f2e1bb28a5bd551dac12217526110193f6c1e187b57f17a7529780"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/scripts/repair_moge_geometry.py",
+      "sha256": "6ceb81c9fc63ba6550020a840b2dfd4a95ae96016b81d4955449327bb52efe13"
+    }
+  ]
+}

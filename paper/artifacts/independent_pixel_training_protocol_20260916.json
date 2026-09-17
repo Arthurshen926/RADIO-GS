@@ -1,0 +1,53 @@
+{
+  "baseline": "fusion_init_trainable_2106/3240",
+  "only_control": "grounded 2D positive support from independent other view; hard 3D labels unchanged",
+  "geometry_frozen": true,
+  "source_only": true,
+  "budget_unchanged": true,
+  "commands": [
+    [
+      "/root/miniconda3/envs/cybersim_agent/bin/python",
+      "radio_gs/scripts/train_three_query_field.py",
+      "--root",
+      "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines",
+      "--geometry",
+      "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/figurines/independent_scale.pt",
+      "--name",
+      "fusion_init_pixel_corroboration_2106",
+      "--steps",
+      "2106",
+      "--source-region-query-tasks",
+      "--share-siglip-adapter",
+      "--calibrated-readout",
+      "--native-decoder-readout",
+      "--source-fusion-initialization",
+      "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines/source_fusion_initialization.pt",
+      "--grounded-text-supervision",
+      "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/figurines/grounded_text_independent_pixels.pt",
+      "--device",
+      "cuda:0"
+    ],
+    [
+      "/root/miniconda3/envs/cybersim_agent/bin/python",
+      "radio_gs/scripts/train_three_query_field.py",
+      "--root",
+      "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen",
+      "--geometry",
+      "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/ramen/independent_scale.pt",
+      "--name",
+      "fusion_init_pixel_corroboration_3240",
+      "--steps",
+      "3240",
+      "--source-region-query-tasks",
+      "--share-siglip-adapter",
+      "--calibrated-readout",
+      "--native-decoder-readout",
+      "--source-fusion-initialization",
+      "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen/source_fusion_initialization.pt",
+      "--grounded-text-supervision",
+      "/mnt/pool/sqy/results/RADIO-GS/output/component_retrieval_pipeline_20260915/ramen/grounded_text_independent_pixels.pt",
+      "--device",
+      "cuda:3"
+    ]
+  ]
+}

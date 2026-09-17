@@ -1,0 +1,86 @@
+{
+  "schema": "rank_completion_seal.v1",
+  "implementations": {
+    "radio_gs/models/grounded_semantic_transfer.py": "c9a2412493ef4fdd7bca5019a8b3fed3de4da092be7291602f7387980ec3cf29",
+    "radio_gs/models/element_retrieval_field.py": "f4d8d221421301dd73d457873c86ce06392b12b42173c864fde5f5495313fd48",
+    "tests/test_rank_preserving_completion.py": "684953cdc2411c8031526941d32fbc8c2f6239f9471a04340089abb543d3e1f1",
+    "scripts/audits/diagnose_current_native_compression.py": "b015832996b77bdc416202ab9569a9c59301ac4bcb6b84e863871b4ef8a3da2a",
+    "scripts/audits/fit_completion_admission.py": "e451f14cd8bb2edc3af15850ab599df1cd7c1fd124edc611e175b340321449a1",
+    "scripts/audits/export_rank_preserving_completion.py": "3159f70aa656c7666bc12e20518cc88ebc64a5c52c226caca6ab066a40cefd2e",
+    "scripts/audits/evaluate_frozen_field_lerf_labels.py": "dbe80835062c110f801b6647cea449a7df6267614aeff4ac4934ac91cc9d8b2c",
+    "scripts/audits/evaluate_real_reference_queries.py": "c857390cd855d6cb4ce553abfaea4c57f5c7b8f17649de7d35bacc421a5a7f97",
+    "scripts/audits/seal_rank_completion.py": "477e84ea39702cae8642d09c4a312bd631e9b6bf78eff4a4735143cec824a12e"
+  },
+  "artifacts": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_completion_admission96/report.json": "fe1b171d1afc3d672c588ef69b0e3a357f38b977dff95b40aa0ebc716f8d8644",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/rank_preserving_completion96/report.json": "77d030a7d933924b66258fde266fd30088017cba6308ba971910931a242017c8",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/native_within_extent96/report.json": "0ff4827cd52d624b15d1e3da8c3637b267667226e7a1a1192d6096018b6a69fd",
+    "paper/artifacts/figurines_rank_preserving_completion_text_20260916.json": "1d353f1152c7fb90bc9ef4e1a9af97dfde3e746015c1fad199b5e5739b7b002d",
+    "paper/artifacts/figurines_rank_preserving_completion_text_20260916.protocol.json": "84cec614006b0b1e740e5077dd1a552b7631155008bc302e322f40f971d5f2f0",
+    "paper/artifacts/figurines_native_within_extent_text_20260916.json": "0a883f4409c07e36baeed55b26854b5e266c24d3bcbee277d78e70d78730d63e",
+    "paper/artifacts/figurines_native_within_extent_text_20260916.protocol.json": "45f4b705ad4797d978095c1ae9b2cb66dbcc998c866c3131921e7f715bac8a03",
+    "paper/artifacts/figurines_rank_completion_reference_20260916.json": "92983a70bd8091b99c15b50b4e00c9ea62843e4a1837f8f4f609b8b698e5cff1",
+    "paper/artifacts/figurines_rank_completion_reference_20260916.protocol.json": "d2f536bdc94b028ff39e606832f3ae77d6568ae9506e8fafc8103df562bc0884",
+    "paper/artifacts/figurines_current_native_compression_20260916.json": "901a7840c7b76156406acdb87f8e17096aa9813254872b97806c3cc295d97102",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_completion_admission96/report.json": "b95527f82368e32213f01d060d471ea40130df3d57e94bb941185620a11fe09c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/rank_preserving_completion96/report.json": "10075ad19c1b15c6afde2ee3bc42c7ef19251d2e7e9071b77cfcb3380dce6924",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/native_within_extent96/report.json": "ae03169da972196a091b15fc3429657c146f5aeff1080ae12ec29763469346f9",
+    "paper/artifacts/ramen_rank_preserving_completion_text_20260916.json": "8f2390893a0b5db4c95cf981ec7f01d5283923f0f19237dbab745610dd5995a4",
+    "paper/artifacts/ramen_rank_preserving_completion_text_20260916.protocol.json": "b418be4e6134d36f9aa6d1b0fe9d04aad7d66f10aa73744cbb067cf4b82cc139",
+    "paper/artifacts/ramen_native_within_extent_text_20260916.json": "8900911436f74a3916a5be9b7308d6046053e03291f24e5f757d733f0e742dae",
+    "paper/artifacts/ramen_native_within_extent_text_20260916.protocol.json": "abfc81837063b6c56d2e70a50f86274f8682b07a6dd7017e8beab75ec4ad26fb",
+    "paper/artifacts/ramen_rank_completion_reference_20260916.json": "1f8f9bc4b81f966f4e5e14dd364eda53db377b2ba51b3cf389507009a1673f59",
+    "paper/artifacts/ramen_rank_completion_reference_20260916.protocol.json": "32222780b5f0b2c7e6739b65dbc484834680f5f5f90bdd237aed9be2fe0e05f1",
+    "paper/artifacts/ramen_current_native_compression_20260916.json": "50d58ab71e3829be244f5eca01c587bf2854be7fa04cd7b4a2481c0f2465748e"
+  },
+  "scenes": {
+    "figurines": {
+      "text": {
+        "rank_preserving_completion96": {
+          "observation_miou": 0.40487866731383493,
+          "average_precision_macro": 0.6078500268449618
+        },
+        "source_completion_admission96": {
+          "observation_miou": 0.4126411500113393,
+          "average_precision_macro": 0.601190348616367
+        },
+        "hard_source_scope_gate96": {
+          "observation_miou": 0.4338899770338517,
+          "average_precision_macro": 0.5977143815225112
+        },
+        "native_within_extent96": {
+          "observation_miou": 0.4350278747223212,
+          "average_precision_macro": 0.6292626600328862
+        }
+      },
+      "parent_tensors_exact": true,
+      "image_prompt_exact": true,
+      "parent_text_reproduced": true,
+      "compression_projection_max_error": 8.940696716308594e-07
+    },
+    "ramen": {
+      "text": {
+        "rank_preserving_completion96": {
+          "observation_miou": 0.27176084075077095,
+          "average_precision_macro": 0.4126482198099734
+        },
+        "source_completion_admission96": {
+          "observation_miou": 0.27756505343643384,
+          "average_precision_macro": 0.4022759299827126
+        },
+        "hard_source_scope_gate96": {
+          "observation_miou": 0.27756505343643384,
+          "average_precision_macro": 0.4022759299827126
+        },
+        "native_within_extent96": {
+          "observation_miou": 0.28420089672979004,
+          "average_precision_macro": 0.4281443580705971
+        }
+      },
+      "parent_tensors_exact": true,
+      "image_prompt_exact": true,
+      "parent_text_reproduced": true,
+      "compression_projection_max_error": 9.5367431640625e-07
+    }
+  }
+}

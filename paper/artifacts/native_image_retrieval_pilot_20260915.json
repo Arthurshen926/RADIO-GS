@@ -1,0 +1,107 @@
+{
+  "role": "native_image_query_response_training_diagnostic",
+  "steps": 48,
+  "radio_artifact_access_blocked": true,
+  "field_and_query_adapter_trained": true,
+  "cold_query_bit_exact": true,
+  "before": {
+    "train": [
+      {
+        "frame": 6,
+        "support_coverage": 0.9842215776443481,
+        "response_mse": 0.026896998286247253
+      },
+      {
+        "frame": 8,
+        "support_coverage": 0.9996493458747864,
+        "response_mse": 0.02725166268646717
+      },
+      {
+        "frame": 11,
+        "support_coverage": 1.0,
+        "response_mse": 0.030058231204748154
+      },
+      {
+        "frame": 16,
+        "support_coverage": 0.9225105047225952,
+        "response_mse": 0.02380583994090557
+      },
+      {
+        "frame": 21,
+        "support_coverage": 0.894810676574707,
+        "response_mse": 0.03514689952135086
+      },
+      {
+        "frame": 23,
+        "support_coverage": 0.8786816000938416,
+        "response_mse": 0.03980201110243797
+      }
+    ],
+    "validation": [
+      {
+        "frame": 3,
+        "support_coverage": 0.95652174949646,
+        "response_mse": 0.0452854186296463
+      },
+      {
+        "frame": 18,
+        "support_coverage": 0.9407433271408081,
+        "response_mse": 0.03320293501019478
+      }
+    ]
+  },
+  "after": {
+    "train": [
+      {
+        "frame": 6,
+        "support_coverage": 0.9842215776443481,
+        "response_mse": 0.009325651451945305
+      },
+      {
+        "frame": 8,
+        "support_coverage": 0.9996493458747864,
+        "response_mse": 0.00809078011661768
+      },
+      {
+        "frame": 11,
+        "support_coverage": 1.0,
+        "response_mse": 0.007733703590929508
+      },
+      {
+        "frame": 16,
+        "support_coverage": 0.9225105047225952,
+        "response_mse": 0.00751399016007781
+      },
+      {
+        "frame": 21,
+        "support_coverage": 0.894810676574707,
+        "response_mse": 0.011096490547060966
+      },
+      {
+        "frame": 23,
+        "support_coverage": 0.8786816000938416,
+        "response_mse": 0.01238168403506279
+      }
+    ],
+    "validation": [
+      {
+        "frame": 3,
+        "support_coverage": 0.95652174949646,
+        "response_mse": 0.02961023896932602
+      },
+      {
+        "frame": 18,
+        "support_coverage": 0.9407433271408081,
+        "response_mse": 0.017208430916070938
+      }
+    ]
+  },
+  "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/frozen_native_dino_pilot_v2_20260915/figurines/image_retrieval64.pth",
+  "checkpoint_sha256": "91330ff67f7996d78eec307eb36c06e711eb735639fa0e5923a70d34a40e4679",
+  "limitations": [
+    "image patch queries only; text/prompt semantic supervision not connected",
+    "teacher response targets, not object-mask ground truth",
+    "small fixed source split; no final test benchmark",
+    "validation shares training-selected queries; unseen-query generalization untested"
+  ]
+}

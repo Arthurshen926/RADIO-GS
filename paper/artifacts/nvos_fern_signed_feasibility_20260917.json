@@ -1,0 +1,120 @@
+{
+  "schema": "signed_logit_correction_feasibility.v1",
+  "scene": "fern",
+  "query_receipt_sha256": "971b826132feb6fdcd0e9baab040101e6a7679dd895303b33e4d8772ffb1c9e3",
+  "geometry_report_sha256": "92e352ad467fe28db4207a60dacc3424bd8c2fd219e7f08db099576e10d4edcc",
+  "rows": {
+    "nvos96_protected_imagecal_balanced": {
+      "field_sha256": "9b7ac642eee8e3fd297934d48e23b62a24dad048cb23b97c38f1a90bd7b9f3b1",
+      "supported_positive": 22250,
+      "supported_negative": 28415,
+      "unsupported_positive": 467,
+      "unsupported_negative": 8433,
+      "bounds": [
+        {
+          "bound": 8.0,
+          "impossible_supported_positive": 40,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0008988764020614326
+        },
+        {
+          "bound": 16.0,
+          "impossible_supported_positive": 0,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0
+        },
+        {
+          "bound": 32.0,
+          "impossible_supported_positive": 0,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0
+        }
+      ]
+    },
+    "image_supervised_native_residual": {
+      "field_sha256": "169278d555c9f713e508315c306129c795e9625f2c491d72b12c3eceb73ec5d1",
+      "supported_positive": 22250,
+      "supported_negative": 28415,
+      "unsupported_positive": 467,
+      "unsupported_negative": 8433,
+      "bounds": [
+        {
+          "bound": 8.0,
+          "impossible_supported_positive": 1136,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.025528090074658394
+        },
+        {
+          "bound": 16.0,
+          "impossible_supported_positive": 90,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0020224719773977995
+        },
+        {
+          "bound": 32.0,
+          "impossible_supported_positive": 0,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0
+        }
+      ]
+    },
+    "nvos96_protected_imagecal_balanced_measured_support512": {
+      "field_sha256": "3d1460887a9a83a3a695af84fbed31c269832663231415d0886139ccb52fef2d",
+      "supported_positive": 22282,
+      "supported_negative": 29659,
+      "unsupported_positive": 435,
+      "unsupported_negative": 7189,
+      "bounds": [
+        {
+          "bound": 8.0,
+          "impossible_supported_positive": 40,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0008975854725576937
+        },
+        {
+          "bound": 16.0,
+          "impossible_supported_positive": 0,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0
+        },
+        {
+          "bound": 32.0,
+          "impossible_supported_positive": 0,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0
+        }
+      ]
+    },
+    "image_supervised_native_residual_measured_support512": {
+      "field_sha256": "d7b82cc497321629e52854a2b362f682e99ac17a47be74914a7db5d8f57b3324",
+      "supported_positive": 22282,
+      "supported_negative": 29659,
+      "unsupported_positive": 435,
+      "unsupported_negative": 7189,
+      "bounds": [
+        {
+          "bound": 8.0,
+          "impossible_supported_positive": 1136,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.02549142763018608
+        },
+        {
+          "bound": 16.0,
+          "impossible_supported_positive": 90,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0020195674151182175
+        },
+        {
+          "bound": 32.0,
+          "impossible_supported_positive": 0,
+          "impossible_supported_negative": 0,
+          "minimum_balanced_supported_error": 0.0
+        }
+      ]
+    }
+  },
+  "target_rgb_or_gt_opened": false,
+  "map_modified": false,
+  "scope": "Necessary per-pixel feasibility under any element correction within the bound. Passing is not joint feasibility of a shared query coefficient.",
+  "implementation_sha256": "b34ecfe6b03a2c349e89c05e550d0bc96e1837f093a9e36d8df1fc4970b68f91"
+}

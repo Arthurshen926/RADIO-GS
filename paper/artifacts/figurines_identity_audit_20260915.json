@@ -1,0 +1,631 @@
+{
+  "schema": "source_region_identity_audit.v1",
+  "episode_sha256": "54871ee82c9a7e7cebf6921daa54cf73eeb47ed0c089137f1fd47e56384f3835",
+  "graph": {
+    "train": {
+      "unique_pairs": 16,
+      "matched_regions": 23,
+      "components": [
+        {
+          "regions": [
+            1,
+            55,
+            79
+          ],
+          "views": [
+            0,
+            3,
+            5
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            7,
+            87
+          ],
+          "views": [
+            0,
+            5
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            10,
+            19
+          ],
+          "views": [
+            0,
+            1
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            12,
+            53
+          ],
+          "views": [
+            0,
+            3
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            15,
+            16,
+            35,
+            62,
+            63,
+            68,
+            74
+          ],
+          "views": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "same_view_conflicts": {
+            "0": [
+              15,
+              16
+            ],
+            "3": [
+              62,
+              63,
+              68
+            ]
+          },
+          "track_consistent": false
+        },
+        {
+          "regions": [
+            21,
+            66
+          ],
+          "views": [
+            1,
+            3
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            54,
+            76,
+            85
+          ],
+          "views": [
+            3,
+            4,
+            5
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            60,
+            78
+          ],
+          "views": [
+            3,
+            4
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        }
+      ],
+      "inconsistent_components": 1
+    },
+    "validation": {
+      "unique_pairs": 4,
+      "matched_regions": 8,
+      "components": [
+        {
+          "regions": [
+            92,
+            114
+          ],
+          "views": [
+            6,
+            7
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            97,
+            119
+          ],
+          "views": [
+            6,
+            7
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            100,
+            122
+          ],
+          "views": [
+            6,
+            7
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        },
+        {
+          "regions": [
+            103,
+            106
+          ],
+          "views": [
+            6,
+            7
+          ],
+          "same_view_conflicts": {},
+          "track_consistent": true
+        }
+      ],
+      "inconsistent_components": 0
+    }
+  },
+  "pairs": [
+    {
+      "split": "train",
+      "regions": [
+        1,
+        55
+      ],
+      "views": [
+        0,
+        3
+      ],
+      "top_text": [
+        "a photo of a remote",
+        "a photo of a utensil"
+      ],
+      "top_margin": [
+        0.0017722845077514648,
+        0.01470203697681427
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8302722573280334,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        1,
+        79
+      ],
+      "views": [
+        0,
+        5
+      ],
+      "top_text": [
+        "a photo of a remote",
+        "a photo of a remote"
+      ],
+      "top_margin": [
+        0.0017722845077514648,
+        0.0016485229134559631
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.898329496383667,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        7,
+        87
+      ],
+      "views": [
+        0,
+        5
+      ],
+      "top_text": [
+        "a photo of a camera",
+        "a photo of a camera"
+      ],
+      "top_margin": [
+        0.061283811926841736,
+        0.02924242615699768
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8450654745101929,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        10,
+        19
+      ],
+      "views": [
+        0,
+        1
+      ],
+      "top_text": [
+        "a photo of a fruit",
+        "a photo of a fruit"
+      ],
+      "top_margin": [
+        0.007172226905822754,
+        0.0008383393287658691
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8823891878128052,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        12,
+        53
+      ],
+      "views": [
+        0,
+        3
+      ],
+      "top_text": [
+        "a photo of a toy",
+        "a photo of a toy"
+      ],
+      "top_margin": [
+        0.02918737381696701,
+        0.02116677165031433
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8886063098907471,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        15,
+        74
+      ],
+      "views": [
+        0,
+        4
+      ],
+      "top_text": [
+        "a photo of a water",
+        "a photo of a water"
+      ],
+      "top_margin": [
+        0.0016663521528244019,
+        0.01648813486099243
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8925799131393433,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        16,
+        35
+      ],
+      "views": [
+        0,
+        1
+      ],
+      "top_text": [
+        "a photo of a wall",
+        "a photo of a water"
+      ],
+      "top_margin": [
+        0.008047439157962799,
+        0.002797149121761322
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9201659560203552,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        16,
+        62
+      ],
+      "views": [
+        0,
+        3
+      ],
+      "top_text": [
+        "a photo of a wall",
+        "a photo of a bird"
+      ],
+      "top_margin": [
+        0.008047439157962799,
+        0.007242724299430847
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9393223524093628,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        21,
+        66
+      ],
+      "views": [
+        1,
+        3
+      ],
+      "top_text": [
+        "a photo of a wall",
+        "a photo of a wall"
+      ],
+      "top_margin": [
+        0.010800838470458984,
+        0.034158289432525635
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.8632714748382568,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        35,
+        63
+      ],
+      "views": [
+        1,
+        3
+      ],
+      "top_text": [
+        "a photo of a water",
+        "a photo of a tree"
+      ],
+      "top_margin": [
+        0.002797149121761322,
+        0.003766372799873352
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9097900390625,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        35,
+        74
+      ],
+      "views": [
+        1,
+        4
+      ],
+      "top_text": [
+        "a photo of a water",
+        "a photo of a water"
+      ],
+      "top_margin": [
+        0.002797149121761322,
+        0.01648813486099243
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9208012819290161,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        54,
+        76
+      ],
+      "views": [
+        3,
+        4
+      ],
+      "top_text": [
+        "a photo of a utensil",
+        "a photo of a floor"
+      ],
+      "top_margin": [
+        0.016325511038303375,
+        0.00611221045255661
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.7607918977737427,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        54,
+        85
+      ],
+      "views": [
+        3,
+        5
+      ],
+      "top_text": [
+        "a photo of a utensil",
+        "a photo of a cushion"
+      ],
+      "top_margin": [
+        0.016325511038303375,
+        0.018564142286777496
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.7676178216934204,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        55,
+        79
+      ],
+      "views": [
+        3,
+        5
+      ],
+      "top_text": [
+        "a photo of a utensil",
+        "a photo of a remote"
+      ],
+      "top_margin": [
+        0.01470203697681427,
+        0.0016485229134559631
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8475751280784607,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        60,
+        78
+      ],
+      "views": [
+        3,
+        4
+      ],
+      "top_text": [
+        "a photo of a toy",
+        "a photo of a toy"
+      ],
+      "top_margin": [
+        0.0006391853094100952,
+        0.006754100322723389
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9350144267082214,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "train",
+      "regions": [
+        68,
+        74
+      ],
+      "views": [
+        3,
+        4
+      ],
+      "top_text": [
+        "a photo of a picture",
+        "a photo of a water"
+      ],
+      "top_margin": [
+        0.0026927515864372253,
+        0.01648813486099243
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.9015183448791504,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "validation",
+      "regions": [
+        92,
+        114
+      ],
+      "views": [
+        6,
+        7
+      ],
+      "top_text": [
+        "a photo of a apple",
+        "a photo of a apple"
+      ],
+      "top_margin": [
+        0.0022786706686019897,
+        0.0015872418880462646
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9053068161010742,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "validation",
+      "regions": [
+        97,
+        119
+      ],
+      "views": [
+        6,
+        7
+      ],
+      "top_text": [
+        "a photo of a camera",
+        "a photo of a camera"
+      ],
+      "top_margin": [
+        0.03251875936985016,
+        0.012945391237735748
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9208170771598816,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "validation",
+      "regions": [
+        100,
+        122
+      ],
+      "views": [
+        6,
+        7
+      ],
+      "top_text": [
+        "a photo of a fruit",
+        "a photo of a fruit"
+      ],
+      "top_margin": [
+        0.016768693923950195,
+        0.007256798446178436
+      ],
+      "text_agrees": true,
+      "native_image_cosine": 0.9210129380226135,
+      "physical_identity_ground_truth": null
+    },
+    {
+      "split": "validation",
+      "regions": [
+        103,
+        106
+      ],
+      "views": [
+        6,
+        7
+      ],
+      "top_text": [
+        "a photo of a toy",
+        "a photo of a utensil"
+      ],
+      "top_margin": [
+        0.005724459886550903,
+        0.015772536396980286
+      ],
+      "text_agrees": false,
+      "native_image_cosine": 0.8785596489906311,
+      "physical_identity_ground_truth": null
+    }
+  ],
+  "text_disagreement_pairs": 9,
+  "total_pairs": 20,
+  "semantic_ground_truth": false,
+  "interpretation": "track consistency and teacher agreement are diagnostics, not proof of identity"
+}

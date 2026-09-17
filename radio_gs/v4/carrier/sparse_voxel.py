@@ -25,6 +25,9 @@ def _exact_integer(value: object, *, name: str, minimum: int) -> int:
     return int(result)
 
 
+PROJECTION_CONTRACTS = {"legacy_round_band_v1", "pixel_centres_band_v2", "pixel_centres_nearest_v2"}
+
+
 class SurfaceVoxelCarrier(SurfaceCarrier):
     def __init__(
         self,
@@ -37,6 +40,7 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         surface_band_voxels: float,
         maximum_contributors_per_pixel: int,
         reference_raster_shape: tuple[int, int] | None = None,
+        projection_contract: str = "pixel_centres_nearest_v2",
     ) -> None:
         centres = torch.as_tensor(centres, dtype=torch.float32).cpu()
         if centres.ndim != 2 or centres.shape[1] != 3 or centres.shape[0] == 0:
@@ -58,6 +62,9 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
             or surface_band_voxels < 0
         ):
             raise ValueError("voxel_size and surface_band_voxels must be finite and non-negative")
+        if projection_contract not in PROJECTION_CONTRACTS:
+            raise ValueError("unsupported projection contract")
+        self.projection_contract = projection_contract
         self.centres = centres
         self.voxel_size = float(voxel_size)
         self.maximum_splat_radius = radius
@@ -100,6 +107,7 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         surface_band_voxels: float,
         maximum_contributors_per_pixel: int,
         reference_raster_shape: tuple[int, int] | None = None,
+        projection_contract: str = "pixel_centres_nearest_v2",
     ) -> "SurfaceVoxelCarrier":
         points = torch.as_tensor(points, dtype=torch.float32).cpu()
         if points.ndim != 2 or points.shape[1] != 3 or points.shape[0] == 0:
@@ -151,6 +159,7 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
             surface_band_voxels=surface_band_voxels,
             maximum_contributors_per_pixel=contributor_cap,
             reference_raster_shape=reference_raster_shape,
+            projection_contract=projection_contract,
         )
 
     @property
@@ -179,6 +188,8 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         camera_points = homogeneous @ world_to_camera.T
         z = camera_points[:, 2]
         valid = z > 1e-6
+        if self.projection_contract != "legacy_round_band_v1":
+            valid &= self.confidence > 0
         intrinsic = camera.intrinsic.float()
         u = intrinsic[0, 0] * camera_points[:, 0] / z.clamp_min(1e-6) + intrinsic[0, 2]
         v = intrinsic[1, 1] * camera_points[:, 1] / z.clamp_min(1e-6) + intrinsic[1, 2]
@@ -194,7 +205,8 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         radius = radius.clamp(0, self.maximum_splat_radius)
         cap_x = math.ceil(self.maximum_splat_radius * scale_x)
         cap_y = math.ceil(self.maximum_splat_radius * scale_y)
-        rounded_u, rounded_v = torch.round(u).long(), torch.round(v).long()
+        quantize = torch.round if self.projection_contract == "legacy_round_band_v1" else torch.floor
+        rounded_u, rounded_v = quantize(u).long(), quantize(v).long()
         candidate_elements, candidate_pixels, candidate_depths = [], [], []
         for offset_y, offset_x in itertools.product(
             range(-cap_y, cap_y + 1), range(-cap_x, cap_x + 1)
@@ -230,6 +242,10 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
         in_surface_band = sorted_depths <= (
             group_minimum_depth + self.surface_band_voxels * self.voxel_size
         )
+        if self.projection_contract == "pixel_centres_nearest_v2":
+            # Only the nearest sampled surface contributes. Equal-depth ties
+            # represent the same depth layer, not a voxel-sized occlusion band.
+            in_surface_band = sorted_depths == group_minimum_depth
         retained = in_surface_band & (rank_in_pixel < self.maximum_contributors_per_pixel)
         chosen = order[retained]
         minimum_depth_by_choice = group_minimum_depth[retained]
@@ -248,6 +264,7 @@ class SurfaceVoxelCarrier(SurfaceCarrier):
             normalization="weighted_mean",
             metadata={
                 "backend": "sparse_surface_voxel_zbuffer",
+                "projection_contract": self.projection_contract,
                 "voxel_size": self.voxel_size,
                 "maximum_splat_radius": self.maximum_splat_radius,
                 "surface_band_voxels": self.surface_band_voxels,

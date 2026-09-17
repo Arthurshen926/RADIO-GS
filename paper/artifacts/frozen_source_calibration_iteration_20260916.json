@@ -1,0 +1,281 @@
+{
+  "schema": "frozen_source_calibration_iteration.v1",
+  "joint_default_promoted": false,
+  "text_calibration_adopted": false,
+  "image_calibration_status": "optional source-only correction; incomplete joint performance",
+  "tests_passed": 3,
+  "scenes": {
+    "figurines": {
+      "runs": {
+        "fusion_init_bounded002_2106_imagecal_count": {
+          "sha256": "f75192e8753435403a0ecec830a1bcf33441dbc5ad1a0d2ac5ec35343a162757",
+          "parent_sha256": "e69047fa0d374a5dac2775caae318c660d0b9519fb18c4c06d36a4cb3ae03841",
+          "changed_keys": [
+            "readout_log_scale.image",
+            "readout_bias.image"
+          ],
+          "report_sha256": "a19a011a84a0208e4ca301f55da5715927596f5c6a9a1ed7c7307114499def58"
+        },
+        "fusion_init_bounded002_2106_imagecal_balanced": {
+          "sha256": "0e5fbba1c3de5aaa41707f3ab9be60ea5f828b3fd89629895b291b921bcf1473",
+          "parent_sha256": "e69047fa0d374a5dac2775caae318c660d0b9519fb18c4c06d36a4cb3ae03841",
+          "changed_keys": [
+            "readout_log_scale.image",
+            "readout_bias.image"
+          ],
+          "report_sha256": "e668e5bbd4b34eb1ed3f96c2271bd3ea1751d06ad1bb158c5dd2c229eae04d68"
+        },
+        "fusion_init_bounded002_2106_imagecal_balanced_textcal_count": {
+          "sha256": "0ad09e59169219d623d64098b2a701d1314601f8746a20aa60053ba28df06f44",
+          "parent_sha256": "0e5fbba1c3de5aaa41707f3ab9be60ea5f828b3fd89629895b291b921bcf1473",
+          "changed_keys": [
+            "readout_log_scale.text",
+            "readout_bias.text"
+          ],
+          "report_sha256": "07a82eb1df58b97b25866ede1664c43471532616b8cafa3e2561f092d35ef777"
+        },
+        "fusion_init_bounded002_2106_imagecal_balanced_textcal_balanced": {
+          "sha256": "1c41a7a38b83683c0f8af4d45566a308ac1b5f38284239dd44d1a1cfa4bb0ee3",
+          "parent_sha256": "0e5fbba1c3de5aaa41707f3ab9be60ea5f828b3fd89629895b291b921bcf1473",
+          "changed_keys": [
+            "readout_log_scale.text",
+            "readout_bias.text"
+          ],
+          "report_sha256": "506ca981f4b190727ba77641869212d6f4d3870c25d8ec6af2eec3b89a799215"
+        }
+      },
+      "results": {
+        "image_calibration": {
+          "sha256": "58c46cbb441b6dd1e9f211aea3c1d506e95495465d50457665a8e16ab060853a",
+          "path": "paper/artifacts/figurines_frozen_source_image_calibration_20260916.json",
+          "runs": {
+            "fusion_init_bounded002_2106_imagecal_count": {
+              "text": {
+                "iou": 0.3278498603720758,
+                "average_precision": 0.5258834421848224,
+                "auroc": 0.9293560257374338
+              },
+              "image": {
+                "iou": 0.228455249165873,
+                "average_precision": 0.5859500623301013,
+                "auroc": 0.933454053291555
+              },
+              "prompt": {
+                "iou": 0.1528937021692912,
+                "average_precision": 0.31362057838637186,
+                "auroc": 0.9217343113577956
+              }
+            },
+            "fusion_init_bounded002_2106_imagecal_balanced": {
+              "text": {
+                "iou": 0.3278498603720758,
+                "average_precision": 0.5258834421848224,
+                "auroc": 0.9293560257374338
+              },
+              "image": {
+                "iou": 0.3373212108732332,
+                "average_precision": 0.5507684641520617,
+                "auroc": 0.9240398084872694
+              },
+              "prompt": {
+                "iou": 0.1528937021692912,
+                "average_precision": 0.31362057838637186,
+                "auroc": 0.9217343113577956
+              }
+            }
+          }
+        },
+        "text_calibration_text": {
+          "sha256": "2cb761e50033f99f974fa36660b048821a75922e71cd54e0fc6b6e5860953eee",
+          "path": "paper/artifacts/figurines_frozen_source_text_calibration_text_20260916.json",
+          "runs": {
+            "fusion_init_bounded002_2106_imagecal_balanced_textcal_count": {
+              "observation_miou": 0.3348429417988998,
+              "average_precision_macro": 0.5442525126871387
+            },
+            "fusion_init_bounded002_2106_imagecal_balanced_textcal_balanced": {
+              "observation_miou": 0.2133745379885763,
+              "average_precision_macro": 0.5150236595332102
+            }
+          }
+        },
+        "text_calibration_reference": {
+          "sha256": "52376ecf572506c5ec054214b72b6fb104fd798e748ba1659b02d73fb0127957",
+          "path": "paper/artifacts/figurines_frozen_source_text_calibration_reference_20260916.json",
+          "runs": {
+            "fusion_init_bounded002_2106_imagecal_balanced_textcal_count": {
+              "text": {
+                "iou": 0.3267301318421601,
+                "average_precision": 0.5234937897044638,
+                "auroc": 0.9291404791033188
+              },
+              "image": {
+                "iou": 0.3373212108732332,
+                "average_precision": 0.5507684641520617,
+                "auroc": 0.9240398084872694
+              },
+              "prompt": {
+                "iou": 0.1528937021692912,
+                "average_precision": 0.31362057838637186,
+                "auroc": 0.9217343113577956
+              }
+            },
+            "fusion_init_bounded002_2106_imagecal_balanced_textcal_balanced": {
+              "text": {
+                "iou": 0.212840023098564,
+                "average_precision": 0.490138315696584,
+                "auroc": 0.9203360949899062
+              },
+              "image": {
+                "iou": 0.3373212108732332,
+                "average_precision": 0.5507684641520617,
+                "auroc": 0.9240398084872694
+              },
+              "prompt": {
+                "iou": 0.1528937021692912,
+                "average_precision": 0.31362057838637186,
+                "auroc": 0.9217343113577956
+              }
+            }
+          }
+        }
+      }
+    },
+    "ramen": {
+      "runs": {
+        "fusion_init_bounded002_3240_imagecal_count": {
+          "sha256": "9bcf1f8f2ec19dd2c578f0d945e05c0c11e4f6b5daacada6fea3da7186eb66db",
+          "parent_sha256": "7377e1793a4027f65d6c50a5a411639832a683bdbe768954fa84726e5c459d1a",
+          "changed_keys": [
+            "readout_log_scale.image",
+            "readout_bias.image"
+          ],
+          "report_sha256": "c225444b27790f54ec69f6c94de1aa4747f99051382d869080aa094479ef28fa"
+        },
+        "fusion_init_bounded002_3240_imagecal_balanced": {
+          "sha256": "1ee26eee6f42316af27068aeb768119f809cfbdc1c875d5ea7557ac650d39fee",
+          "parent_sha256": "7377e1793a4027f65d6c50a5a411639832a683bdbe768954fa84726e5c459d1a",
+          "changed_keys": [
+            "readout_log_scale.image",
+            "readout_bias.image"
+          ],
+          "report_sha256": "a7aa7dea43d24198a862f85d7ed9e2521acb8b95f83762e438213e2b131b4fee"
+        },
+        "fusion_init_bounded002_3240_imagecal_balanced_textcal_count": {
+          "sha256": "a6b4637bd632afebe65468c80846ccb01d96ee19ef78572bfb6f7e9ce3ae43ba",
+          "parent_sha256": "1ee26eee6f42316af27068aeb768119f809cfbdc1c875d5ea7557ac650d39fee",
+          "changed_keys": [
+            "readout_log_scale.text",
+            "readout_bias.text"
+          ],
+          "report_sha256": "eb620addd4828858b02f453fcad483b7193c3644ca8702f4b6ff791baf8aa36c"
+        },
+        "fusion_init_bounded002_3240_imagecal_balanced_textcal_balanced": {
+          "sha256": "053f0b34d0468aa9c1ff9b636760b745696762c478880f74b313bcbfb5d10704",
+          "parent_sha256": "1ee26eee6f42316af27068aeb768119f809cfbdc1c875d5ea7557ac650d39fee",
+          "changed_keys": [
+            "readout_log_scale.text",
+            "readout_bias.text"
+          ],
+          "report_sha256": "3bb4bf84dc2eb87b6315d321cfa7f219914b6a28db73c4256546656f1629fe30"
+        }
+      },
+      "results": {
+        "image_calibration": {
+          "sha256": "0a7cb259b9ef5d2b5b71ac682ae88c1c19932e02572d7084d450ce41e44c6287",
+          "path": "paper/artifacts/ramen_frozen_source_image_calibration_20260916.json",
+          "runs": {
+            "fusion_init_bounded002_3240_imagecal_count": {
+              "text": {
+                "iou": 0.024008710862081558,
+                "average_precision": 0.23845097587978567,
+                "auroc": 0.8945150915458879
+              },
+              "image": {
+                "iou": 0.07643031116803599,
+                "average_precision": 0.35686028199431674,
+                "auroc": 0.8783055829336772
+              },
+              "prompt": {
+                "iou": 0.1586580150993343,
+                "average_precision": 0.23500036250735132,
+                "auroc": 0.9113499401456676
+              }
+            },
+            "fusion_init_bounded002_3240_imagecal_balanced": {
+              "text": {
+                "iou": 0.024008710862081558,
+                "average_precision": 0.23845097587978567,
+                "auroc": 0.8945150915458879
+              },
+              "image": {
+                "iou": 0.1358856377691853,
+                "average_precision": 0.3586800263806948,
+                "auroc": 0.8780560434528559
+              },
+              "prompt": {
+                "iou": 0.1586580150993343,
+                "average_precision": 0.23500036250735132,
+                "auroc": 0.9113499401456676
+              }
+            }
+          }
+        },
+        "text_calibration_text": {
+          "sha256": "0ce95449ba663bf97e82f2a5d3830cbf97f19a4d94e762d6547e085af9a95128",
+          "path": "paper/artifacts/ramen_frozen_source_text_calibration_text_20260916.json",
+          "runs": {
+            "fusion_init_bounded002_3240_imagecal_balanced_textcal_count": {
+              "observation_miou": 0.020067436914223337,
+              "average_precision_macro": 0.24006886989507903
+            },
+            "fusion_init_bounded002_3240_imagecal_balanced_textcal_balanced": {
+              "observation_miou": 0.05970984151592178,
+              "average_precision_macro": 0.24146925602953054
+            }
+          }
+        },
+        "text_calibration_reference": {
+          "sha256": "e7910ccaf8035642171e1d6ddbbb799a2824cf89ac212b4f01b115fa08e91524",
+          "path": "paper/artifacts/ramen_frozen_source_text_calibration_reference_20260916.json",
+          "runs": {
+            "fusion_init_bounded002_3240_imagecal_balanced_textcal_count": {
+              "text": {
+                "iou": 0.01973673863123126,
+                "average_precision": 0.23747183314959533,
+                "auroc": 0.8951058973491086
+              },
+              "image": {
+                "iou": 0.1358856377691853,
+                "average_precision": 0.3586800263806948,
+                "auroc": 0.8780560434528559
+              },
+              "prompt": {
+                "iou": 0.1586580150993343,
+                "average_precision": 0.23500036250735132,
+                "auroc": 0.9113499401456676
+              }
+            },
+            "fusion_init_bounded002_3240_imagecal_balanced_textcal_balanced": {
+              "text": {
+                "iou": 0.05658122551690967,
+                "average_precision": 0.23895638901065155,
+                "auroc": 0.8948699996188814
+              },
+              "image": {
+                "iou": 0.1358856377691853,
+                "average_precision": 0.3586800263806948,
+                "auroc": 0.8780560434528559
+              },
+              "prompt": {
+                "iou": 0.1586580150993343,
+                "average_precision": 0.23500036250735132,
+                "auroc": 0.9113499401456676
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

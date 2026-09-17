@@ -1,0 +1,17 @@
+{
+  "reason": "replicate unified-source pipeline; native-direction constraints rejected as default after modality collapse",
+  "runs": {
+    "component_pipeline_seed43": {
+      "seed": 43,
+      "teachers": "radio,dino,sam,siglip"
+    },
+    "component_pipeline_no_radio": {
+      "seed": 42,
+      "teachers": "dino,sam,siglip"
+    }
+  },
+  "steps": {
+    "figurines": 768,
+    "ramen": 1932
+  }
+}

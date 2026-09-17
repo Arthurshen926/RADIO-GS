@@ -1,0 +1,2492 @@
+{
+  "schema": "partial_source_retrieval_evaluation.v1",
+  "episode_sha256": "54871ee82c9a7e7cebf6921daa54cf73eeb47ed0c089137f1fd47e56384f3835",
+  "benchmark_ground_truth": false,
+  "evaluation_status": "development set already inspected",
+  "prompt_refinement_uses_only_authorized_source_seeds": true,
+  "unknown_response_mass_is_not_false_positive_rate": true,
+  "runs": {
+    "all_four_shared": {
+      "field_sha256": "c3ed3939e67bfb3525bb13b8d29d7454885b25b631c0a3341872168a422ff915",
+      "macro": {
+        "text": {
+          "image": {
+            "known_iou": 0.42912559075120477,
+            "known_precision": 0.4586211413197269,
+            "known_positive_recall": 0.6261239702086928,
+            "known_negative_false_positive_rate": 0.34923361846196244,
+            "known_fraction": 0.1658528670668602,
+            "supported_fraction": 0.8528645932674408,
+            "unknown_positive_pixel_fraction": 0.3771565879384677,
+            "unknown_response_mass_fraction": 0.8272564969558448,
+            "known_positive_count": 694.1666666666666,
+            "known_negative_count": 1343.8333333333333
+          },
+          "elements": {
+            "known_iou": 0.37012973655302717,
+            "known_precision": 0.43229265310847514,
+            "known_positive_recall": 0.5811648311019687,
+            "known_negative_false_positive_rate": 0.35498593247982196,
+            "known_fraction": 0.007143853620315592,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.06971003736058871,
+            "unknown_response_mass_fraction": 0.9621770447702397,
+            "known_positive_count": 670.8333333333334,
+            "known_negative_count": 1292.3333333333333
+          }
+        },
+        "image": {
+          "image": {
+            "known_iou": 0.3427837243403273,
+            "known_precision": 0.3946786058890514,
+            "known_positive_recall": 0.49796157098107097,
+            "known_negative_false_positive_rate": 0.2620235542171612,
+            "known_fraction": 0.1618245467543602,
+            "supported_fraction": 0.8528645932674408,
+            "unknown_positive_pixel_fraction": 0.25078329164534807,
+            "unknown_response_mass_fraction": 0.7959698717283843,
+            "known_positive_count": 497.125,
+            "known_negative_count": 1491.375
+          },
+          "elements": {
+            "known_iou": 0.29961031476687877,
+            "known_precision": 0.3919664492119757,
+            "known_positive_recall": 0.4536806040274028,
+            "known_negative_false_positive_rate": 0.28772522592496164,
+            "known_fraction": 0.0069176326505839825,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.04660259163938463,
+            "unknown_response_mass_fraction": 0.9504876261272103,
+            "known_positive_count": 475.25,
+            "known_negative_count": 1425.75
+          }
+        },
+        "prompt": {
+          "image": {
+            "known_iou": 0.33722380349155384,
+            "known_precision": 0.3901367175920768,
+            "known_positive_recall": 0.4552189523079388,
+            "known_negative_false_positive_rate": 0.30511655530488646,
+            "known_fraction": 0.1618245467543602,
+            "supported_fraction": 0.8528645932674408,
+            "unknown_positive_pixel_fraction": 0.2041524308733642,
+            "unknown_response_mass_fraction": 0.783204447142551,
+            "known_positive_count": 497.125,
+            "known_negative_count": 1491.375
+          },
+          "elements": {
+            "known_iou": 0.2831399827579953,
+            "known_precision": 0.3485294216293691,
+            "known_positive_recall": 0.4206194013566192,
+            "known_negative_false_positive_rate": 0.32645785647450276,
+            "known_fraction": 0.0069176326505839825,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.025347064714878798,
+            "unknown_response_mass_fraction": 0.9380814845105425,
+            "known_positive_count": 475.25,
+            "known_negative_count": 1425.75
+          },
+          "image_refined": {
+            "known_iou": 0.8416162966210258,
+            "known_precision": 0.9319188252306934,
+            "known_positive_recall": 0.8896337400607022,
+            "known_negative_false_positive_rate": 0.026133464667800668,
+            "known_fraction": 0.1618245467543602,
+            "supported_fraction": 0.8528645932674408,
+            "unknown_positive_pixel_fraction": 0.09391276189126074,
+            "unknown_response_mass_fraction": 0.6614422737180805,
+            "known_positive_count": 497.125,
+            "known_negative_count": 1491.375
+          },
+          "elements_refined": {
+            "known_iou": 0.5995973250829377,
+            "known_precision": 0.8452543427146043,
+            "known_positive_recall": 0.6858009098891811,
+            "known_negative_false_positive_rate": 0.04190283215463094,
+            "known_fraction": 0.0069176326505839825,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.015420025352796074,
+            "unknown_response_mass_fraction": 0.9041374899297772,
+            "known_positive_count": 475.25,
+            "known_negative_count": 1425.75
+          }
+        }
+      },
+      "episodes": [
+        {
+          "episode_index": 76,
+          "modality": "image",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.4453125,
+            "known_precision": 0.7737556561085973,
+            "known_positive_recall": 0.5119760479041916,
+            "known_negative_false_positive_rate": 0.02589331952356292,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.0908203125,
+            "unknown_response_mass_fraction": 0.772094346868542,
+            "known_positive_count": 334,
+            "known_negative_count": 1931,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.5986622073578596,
+            "known_precision": 0.7698924731182796,
+            "known_positive_recall": 0.7291242362525459,
+            "known_negative_false_positive_rate": 0.07524613220815753,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.018875202164053917,
+            "unknown_response_mass_fraction": 0.9295224197913625,
+            "known_positive_count": 491,
+            "known_negative_count": 1422,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 77,
+          "modality": "prompt",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.49104859335038364,
+            "known_precision": 0.7710843373493976,
+            "known_positive_recall": 0.5748502994011976,
+            "known_negative_false_positive_rate": 0.029518384256861728,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.0516764335334301,
+            "unknown_response_mass_fraction": 0.6927386723280631,
+            "known_positive_count": 334,
+            "known_negative_count": 1931,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.6230899830220713,
+            "known_precision": 0.789247311827957,
+            "known_positive_recall": 0.7474541751527495,
+            "known_negative_false_positive_rate": 0.06891701828410689,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.012270519509911537,
+            "unknown_response_mass_fraction": 0.9225903965216489,
+            "known_positive_count": 491,
+            "known_negative_count": 1422,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.49104859335038364,
+            "known_precision": 0.7710843373493976,
+            "known_positive_recall": 0.5748502994011976,
+            "known_negative_false_positive_rate": 0.029518384256861728,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.0516764335334301,
+            "unknown_response_mass_fraction": 0.6927386723280631,
+            "known_positive_count": 334,
+            "known_negative_count": 1931,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.6230899830220713,
+            "known_precision": 0.789247311827957,
+            "known_positive_recall": 0.7474541751527495,
+            "known_negative_false_positive_rate": 0.06891701828410689,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.012270519509911537,
+            "unknown_response_mass_fraction": 0.9225903965216489,
+            "known_positive_count": 491,
+            "known_negative_count": 1422,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.7793165445327759,
+              0.07557578384876251
+            ],
+            "seed_after": [
+              0.7793165445327759,
+              0.07557578384876251
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              false,
+              true
+            ],
+            "before_constraints_satisfied": [
+              true,
+              true
+            ],
+            "refinement_applied": false,
+            "steps": 0,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 78,
+          "modality": "text",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.5668103448275862,
+            "known_precision": 0.6692111959287532,
+            "known_positive_recall": 0.7874251497005988,
+            "known_negative_false_positive_rate": 0.06732263076126359,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.2215983122587204,
+            "unknown_response_mass_fraction": 0.8045644004043058,
+            "known_positive_count": 334,
+            "known_negative_count": 1931,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.5880794701986755,
+            "known_precision": 0.6271186440677966,
+            "known_positive_recall": 0.9042769857433809,
+            "known_negative_false_positive_rate": 0.18565400843881857,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.06822656095027924,
+            "unknown_response_mass_fraction": 0.9608273971041554,
+            "known_positive_count": 491,
+            "known_negative_count": 1422,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a apple",
+          "hard_training_label_seen": false
+        },
+        {
+          "episode_index": 79,
+          "modality": "image",
+          "query_region": 114,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.689051094890511,
+            "known_precision": 0.6910688140556369,
+            "known_positive_recall": 0.9957805907172996,
+            "known_negative_false_positive_rate": 0.1704361873990307,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.3194987177848816,
+            "unknown_response_mass_fraction": 0.8199091081902201,
+            "known_positive_count": 474,
+            "known_negative_count": 1238,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.6049180327868853,
+            "known_precision": 0.6109271523178808,
+            "known_positive_recall": 0.984,
+            "known_negative_false_positive_rate": 0.15521796565389695,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.044697150588035583,
+            "unknown_response_mass_fraction": 0.9451745335226569,
+            "known_positive_count": 375,
+            "known_negative_count": 1514,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 80,
+          "modality": "prompt",
+          "query_region": 114,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.9354166666666667,
+            "known_precision": 0.9868131868131869,
+            "known_positive_recall": 0.9472573839662447,
+            "known_negative_false_positive_rate": 0.004846526655896607,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.2420247495174408,
+            "unknown_response_mass_fraction": 0.8605881415899891,
+            "known_positive_count": 474,
+            "known_negative_count": 1238,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.7134146341463414,
+            "known_precision": 0.75,
+            "known_positive_recall": 0.936,
+            "known_negative_false_positive_rate": 0.0772787318361955,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.025676388293504715,
+            "unknown_response_mass_fraction": 0.948933794648601,
+            "known_positive_count": 375,
+            "known_negative_count": 1514,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.9354166666666667,
+            "known_precision": 0.9868131868131869,
+            "known_positive_recall": 0.9472573839662447,
+            "known_negative_false_positive_rate": 0.004846526655896607,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.2420247495174408,
+            "unknown_response_mass_fraction": 0.8605881415899891,
+            "known_positive_count": 474,
+            "known_negative_count": 1238,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.7134146341463414,
+            "known_precision": 0.75,
+            "known_positive_recall": 0.936,
+            "known_negative_false_positive_rate": 0.0772787318361955,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.025676388293504715,
+            "unknown_response_mass_fraction": 0.948933794648601,
+            "known_positive_count": 375,
+            "known_negative_count": 1514,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.6682543158531189,
+              0.0323086753487587
+            ],
+            "seed_after": [
+              0.6682543158531189,
+              0.0323086753487587
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              false,
+              true
+            ],
+            "before_constraints_satisfied": [
+              true,
+              true
+            ],
+            "refinement_applied": false,
+            "steps": 0,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 81,
+          "modality": "text",
+          "query_region": 114,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.7281553398058253,
+            "known_precision": 0.7575757575757576,
+            "known_positive_recall": 0.9493670886075949,
+            "known_negative_false_positive_rate": 0.11631663974151858,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.50732421875,
+            "unknown_response_mass_fraction": 0.8908784593986159,
+            "known_positive_count": 474,
+            "known_negative_count": 1238,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.6341030195381883,
+            "known_precision": 0.655045871559633,
+            "known_positive_recall": 0.952,
+            "known_negative_false_positive_rate": 0.12417437252311757,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.06881970912218094,
+            "unknown_response_mass_fraction": 0.9681978625235174,
+            "known_positive_count": 375,
+            "known_negative_count": 1514,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a apple",
+          "hard_training_label_seen": false
+        },
+        {
+          "episode_index": 82,
+          "modality": "image",
+          "query_region": 97,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.7893491124260354,
+            "known_precision": 0.7949940405244339,
+            "known_positive_recall": 0.9910846953937593,
+            "known_negative_false_positive_rate": 0.10804020100502512,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.1813151091337204,
+            "unknown_response_mass_fraction": 0.715696098978169,
+            "known_positive_count": 673,
+            "known_negative_count": 1592,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.49244712990936557,
+            "known_precision": 0.5712616822429907,
+            "known_positive_recall": 0.7811501597444089,
+            "known_negative_false_positive_rate": 0.2851592851592852,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.05596695840358734,
+            "unknown_response_mass_fraction": 0.9583874554244893,
+            "known_positive_count": 626,
+            "known_negative_count": 1287,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 83,
+          "modality": "prompt",
+          "query_region": 97,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.7078410311493019,
+            "known_precision": 0.7186477644492911,
+            "known_positive_recall": 0.9791976225854383,
+            "known_negative_false_positive_rate": 0.1620603015075377,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.197509765625,
+            "unknown_response_mass_fraction": 0.7251354143541723,
+            "known_positive_count": 673,
+            "known_negative_count": 1592,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.4145486415425066,
+            "known_precision": 0.47874493927125505,
+            "known_positive_recall": 0.755591054313099,
+            "known_negative_false_positive_rate": 0.40015540015540013,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.04069795086979866,
+            "unknown_response_mass_fraction": 0.9390277306102683,
+            "known_positive_count": 626,
+            "known_negative_count": 1287,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.9365303244005642,
+            "known_precision": 0.9485714285714286,
+            "known_positive_recall": 0.986627043090639,
+            "known_negative_false_positive_rate": 0.022613065326633167,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.086669921875,
+            "unknown_response_mass_fraction": 0.6326978361812012,
+            "known_positive_count": 673,
+            "known_negative_count": 1592,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.6246376811594203,
+            "known_precision": 0.8707070707070707,
+            "known_positive_recall": 0.6884984025559105,
+            "known_negative_false_positive_rate": 0.04972804972804973,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.021102236583828926,
+            "unknown_response_mass_fraction": 0.946402311053961,
+            "known_positive_count": 626,
+            "known_negative_count": 1287,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.8016759753227234,
+              0.8497560024261475
+            ],
+            "seed_after": [
+              0.9741388559341431,
+              0.010211709886789322
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              true,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 84,
+          "modality": "text",
+          "query_region": 97,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.7118463180362861,
+            "known_precision": 0.7164339419978518,
+            "known_positive_recall": 0.9910846953937593,
+            "known_negative_false_positive_rate": 0.1658291457286432,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.2263997495174408,
+            "unknown_response_mass_fraction": 0.7389641674640757,
+            "known_positive_count": 673,
+            "known_negative_count": 1592,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.47411444141689374,
+            "known_precision": 0.5235707121364093,
+            "known_positive_recall": 0.8338658146964856,
+            "known_negative_false_positive_rate": 0.3690753690753691,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.06975855678319931,
+            "unknown_response_mass_fraction": 0.9571522282853588,
+            "known_positive_count": 626,
+            "known_negative_count": 1287,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a camera",
+          "hard_training_label_seen": true
+        },
+        {
+          "episode_index": 85,
+          "modality": "image",
+          "query_region": 119,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.7521865889212828,
+            "known_precision": 0.7532846715328467,
+            "known_positive_recall": 0.9980657640232108,
+            "known_negative_false_positive_rate": 0.1414225941422594,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.4231770932674408,
+            "unknown_response_mass_fraction": 0.8631251060884869,
+            "known_positive_count": 517,
+            "known_negative_count": 1195,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.4851720047449585,
+            "known_precision": 0.7911025145067698,
+            "known_positive_recall": 0.5564625850340136,
+            "known_negative_false_positive_rate": 0.09358752166377816,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.06188752129673958,
+            "unknown_response_mass_fraction": 0.9688890756039799,
+            "known_positive_count": 735,
+            "known_negative_count": 1154,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 86,
+          "modality": "prompt",
+          "query_region": 119,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.4947267497603068,
+            "known_precision": 0.4952015355086372,
+            "known_positive_recall": 0.9980657640232108,
+            "known_negative_false_positive_rate": 0.4401673640167364,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.4020182490348816,
+            "unknown_response_mass_fraction": 0.838771988295311,
+            "known_positive_count": 517,
+            "known_negative_count": 1195,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.3258246178600161,
+            "known_precision": 0.44359255202628695,
+            "known_positive_recall": 0.5510204081632653,
+            "known_negative_false_positive_rate": 0.44020797227036396,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.03528684005141258,
+            "unknown_response_mass_fraction": 0.9428308601908499,
+            "known_positive_count": 735,
+            "known_negative_count": 1154,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.7926267281105991,
+            "known_precision": 0.7938461538461539,
+            "known_positive_recall": 0.9980657640232108,
+            "known_negative_false_positive_rate": 0.11213389121338913,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.341064453125,
+            "unknown_response_mass_fraction": 0.8568037340245578,
+            "known_positive_count": 517,
+            "known_negative_count": 1195,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.49095295536791317,
+            "known_precision": 0.812375249500998,
+            "known_positive_recall": 0.5537414965986395,
+            "known_negative_false_positive_rate": 0.08145580589254767,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.05609796196222305,
+            "unknown_response_mass_fraction": 0.9684934090849866,
+            "known_positive_count": 735,
+            "known_negative_count": 1154,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.7191253900527954,
+              0.5839419364929199
+            ],
+            "seed_after": [
+              0.9446430206298828,
+              0.012013843283057213
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              true,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 87,
+          "modality": "text",
+          "query_region": 119,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.5478489903424056,
+            "known_precision": 0.5488126649076517,
+            "known_positive_recall": 0.9968051118210862,
+            "known_negative_false_positive_rate": 0.4292887029288703,
+            "known_fraction": 0.148193359375,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.5620931386947632,
+            "unknown_response_mass_fraction": 0.8557846276288914,
+            "known_positive_count": 626,
+            "known_negative_count": 1195,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.4183750949126803,
+            "known_precision": 0.5751565762004175,
+            "known_positive_recall": 0.6054945054945055,
+            "known_negative_false_positive_rate": 0.35268630849220106,
+            "known_fraction": 0.007510780356824398,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.06990047544240952,
+            "unknown_response_mass_fraction": 0.9579445251547043,
+            "known_positive_count": 910,
+            "known_negative_count": 1154,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a camera",
+          "hard_training_label_seen": true
+        },
+        {
+          "episode_index": 88,
+          "modality": "image",
+          "query_region": 100,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.038202247191011236,
+            "known_precision": 0.10742496050552923,
+            "known_positive_recall": 0.05596707818930041,
+            "known_negative_false_positive_rate": 0.5380952380952381,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.240478515625,
+            "unknown_response_mass_fraction": 0.7581925497677163,
+            "known_positive_count": 1215,
+            "known_negative_count": 1050,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.09090909090909091,
+            "known_precision": 0.15476190476190477,
+            "known_positive_recall": 0.18055555555555555,
+            "known_negative_false_positive_rate": 0.595138306789606,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.05264824256300926,
+            "unknown_response_mass_fraction": 0.945315038728692,
+            "known_positive_count": 720,
+            "known_negative_count": 1193,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 89,
+          "modality": "prompt",
+          "query_region": 100,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.02626970227670753,
+            "known_precision": 0.08287292817679558,
+            "known_positive_recall": 0.037037037037037035,
+            "known_negative_false_positive_rate": 0.4742857142857143,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.1166178435087204,
+            "unknown_response_mass_fraction": 0.7225309702762616,
+            "known_positive_count": 1215,
+            "known_negative_count": 1050,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.07381507381507381,
+            "known_precision": 0.14350453172205438,
+            "known_positive_recall": 0.13194444444444445,
+            "known_negative_false_positive_rate": 0.4752724224643755,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.022623315453529358,
+            "unknown_response_mass_fraction": 0.9332612226956133,
+            "known_positive_count": 720,
+            "known_negative_count": 1193,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.8304,
+            "known_precision": 0.967381174277726,
+            "known_positive_recall": 0.854320987654321,
+            "known_negative_false_positive_rate": 0.03333333333333333,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.0049641928635537624,
+            "unknown_response_mass_fraction": 0.17342261003313872,
+            "known_positive_count": 1215,
+            "known_negative_count": 1050,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.5,
+            "known_precision": 0.9130434782608695,
+            "known_positive_recall": 0.525,
+            "known_negative_false_positive_rate": 0.030176026823134954,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.000745983503293246,
+            "unknown_response_mass_fraction": 0.73100758061798,
+            "known_positive_count": 720,
+            "known_negative_count": 1193,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.20339719951152802,
+              0.8746189475059509
+            ],
+            "seed_after": [
+              0.9813591837882996,
+              0.004924401640892029
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              false,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 90,
+          "modality": "text",
+          "query_region": 100,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.015432098765432098,
+            "known_precision": 0.05136986301369863,
+            "known_positive_recall": 0.02158273381294964,
+            "known_negative_false_positive_rate": 0.5276190476190477,
+            "known_fraction": 0.1985677182674408,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.2177734375,
+            "unknown_response_mass_fraction": 0.7822021614679993,
+            "known_positive_count": 1390,
+            "known_negative_count": 1050,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.05474452554744526,
+            "known_precision": 0.10843373493975904,
+            "known_positive_recall": 0.09955752212389381,
+            "known_negative_false_positive_rate": 0.6202849958088852,
+            "known_fraction": 0.007630865555256605,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07041720300912857,
+            "unknown_response_mass_fraction": 0.9597256796967117,
+            "known_positive_count": 904,
+            "known_negative_count": 1193,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a fruit",
+          "hard_training_label_seen": false
+        },
+        {
+          "episode_index": 91,
+          "modality": "image",
+          "query_region": 122,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.006739679865206402,
+            "known_precision": 0.014814814814814815,
+            "known_positive_recall": 0.012213740458015267,
+            "known_negative_false_positive_rate": 0.5033112582781457,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.364990234375,
+            "unknown_response_mass_fraction": 0.8409824352683115,
+            "known_positive_count": 655,
+            "known_negative_count": 1057,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.10770577933450087,
+            "known_precision": 0.21964285714285714,
+            "known_positive_recall": 0.17446808510638298,
+            "known_negative_false_positive_rate": 0.36908783783783783,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.048954714089632034,
+            "unknown_response_mass_fraction": 0.9507689558582713,
+            "known_positive_count": 705,
+            "known_negative_count": 1184,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 92,
+          "modality": "prompt",
+          "query_region": 122,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.042487684729064036,
+            "known_precision": 0.06647398843930635,
+            "known_positive_recall": 0.10534351145038168,
+            "known_negative_false_positive_rate": 0.9167455061494797,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.388916015625,
+            "unknown_response_mass_fraction": 0.8291383895953877,
+            "known_positive_count": 655,
+            "known_negative_count": 1057,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.1127348643006263,
+            "known_precision": 0.18120805369127516,
+            "known_positive_recall": 0.2297872340425532,
+            "known_negative_false_positive_rate": 0.6182432432432432,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.031036553904414177,
+            "unknown_response_mass_fraction": 0.940840277116133,
+            "known_positive_count": 705,
+            "known_negative_count": 1184,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.8459214501510574,
+            "known_precision": 0.9876543209876543,
+            "known_positive_recall": 0.8549618320610687,
+            "known_negative_false_positive_rate": 0.006622516556291391,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.0066731772385537624,
+            "unknown_response_mass_fraction": 0.32366640075996783,
+            "known_positive_count": 655,
+            "known_negative_count": 1057,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.4368932038834951,
+            "known_precision": 0.9516616314199395,
+            "known_positive_recall": 0.44680851063829785,
+            "known_negative_false_positive_rate": 0.013513513513513514,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.0009752369951456785,
+            "unknown_response_mass_fraction": 0.7849568823846025,
+            "known_positive_count": 705,
+            "known_negative_count": 1184,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.1491900235414505,
+              0.6039968132972717
+            ],
+            "seed_after": [
+              0.9636096954345703,
+              0.012963409535586834
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              false,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 93,
+          "modality": "text",
+          "query_region": 122,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.004660452729693742,
+            "known_precision": 0.008323424494649227,
+            "known_positive_recall": 0.010479041916167664,
+            "known_negative_false_positive_rate": 0.7890255439924314,
+            "known_fraction": 0.140380859375,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.5277506709098816,
+            "unknown_response_mass_fraction": 0.8911451653711809,
+            "known_positive_count": 668,
+            "known_negative_count": 1057,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.051361867704280154,
+            "known_precision": 0.10443037974683544,
+            "known_positive_recall": 0.0917941585535466,
+            "known_negative_false_positive_rate": 0.4780405405405405,
+            "known_fraction": 0.006924910470843315,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07113771885633469,
+            "unknown_response_mass_fraction": 0.9692145758569903,
+            "known_positive_count": 719,
+            "known_negative_count": 1184,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a fruit",
+          "hard_training_label_seen": false
+        },
+        {
+          "episode_index": 94,
+          "modality": "image",
+          "query_region": 103,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.02142857142857143,
+            "known_precision": 0.022085889570552148,
+            "known_positive_recall": 0.4186046511627907,
+            "known_negative_false_positive_rate": 0.3586858685868587,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.2616373896598816,
+            "unknown_response_mass_fraction": 0.7635835362593986,
+            "known_positive_count": 43,
+            "known_negative_count": 2222,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.01706827309236948,
+            "known_precision": 0.01814300960512273,
+            "known_positive_recall": 0.2236842105263158,
+            "known_negative_false_positive_rate": 0.5008165487207403,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07196375727653503,
+            "unknown_response_mass_fraction": 0.9544043858571366,
+            "known_positive_count": 76,
+            "known_negative_count": 1837,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 95,
+          "modality": "prompt",
+          "query_region": 103,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.13141314131413143,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.09619140625,
+            "unknown_response_mass_fraction": 0.7571331062137544,
+            "known_positive_count": 43,
+            "known_negative_count": 2222,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.001692047377326565,
+            "known_precision": 0.001937984496124031,
+            "known_positive_recall": 0.013157894736842105,
+            "known_negative_false_positive_rate": 0.2803483941208492,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.01951565593481064,
+            "unknown_response_mass_fraction": 0.9381132575807799,
+            "known_positive_count": 76,
+            "known_negative_count": 1837,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.9767441860465116,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.9767441860465116,
+            "known_negative_false_positive_rate": 0.0,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.013671875,
+            "unknown_response_mass_fraction": 0.8754873637098666,
+            "known_positive_count": 43,
+            "known_negative_count": 2222,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.5294117647058824,
+            "known_precision": 0.675,
+            "known_positive_recall": 0.7105263157894737,
+            "known_negative_false_positive_rate": 0.014153511159499184,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.005593056790530682,
+            "unknown_response_mass_fraction": 0.9677133123760558,
+            "known_positive_count": 76,
+            "known_negative_count": 1837,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.17166529595851898,
+              0.8754300475120544
+            ],
+            "seed_after": [
+              0.9672704935073853,
+              0.01615169458091259
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              false,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 96,
+          "modality": "image",
+          "query_region": 106,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.2503037667071689,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.1243489608168602,
+            "unknown_response_mass_fraction": 0.8341757924062301,
+            "known_positive_count": 66,
+            "known_negative_count": 1646,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.2275482093663912,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.017827186733484268,
+            "unknown_response_mass_fraction": 0.951439144231094,
+            "known_positive_count": 74,
+            "known_negative_count": 1815,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 97,
+          "modality": "prompt",
+          "query_region": 106,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.2818955042527339,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.1382649838924408,
+            "unknown_response_mass_fraction": 0.8395988944874687,
+            "known_positive_count": 66,
+            "known_negative_count": 1646,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.2512396694214876,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.015669293701648712,
+            "unknown_response_mass_fraction": 0.9390543367204458,
+            "known_positive_count": 74,
+            "known_negative_count": 1815,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.9242424242424242,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.9242424242424242,
+            "known_negative_false_positive_rate": 0.0,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.004557291977107525,
+            "unknown_response_mass_fraction": 0.8761334311178596,
+            "known_positive_count": 66,
+            "known_negative_count": 1646,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.8783783783783784,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.8783783783783784,
+            "known_negative_false_positive_rate": 0.0,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.0008988191839307547,
+            "unknown_response_mass_fraction": 0.9630022327503821,
+            "known_positive_count": 74,
+            "known_negative_count": 1815,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.17217379808425903,
+              0.41072073578834534
+            ],
+            "seed_after": [
+              0.8403470516204834,
+              0.08409197628498077
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              false,
+              true
+            ],
+            "before_constraints_satisfied": [
+              false,
+              true
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        }
+      ]
+    },
+    "contradictory_labels_excluded_v1": {
+      "field_sha256": "b1eba4b1116e9826617f7b6a9a6ad2e4754d5b5e419afc8564cc1f9379b76318",
+      "macro": {
+        "text": {
+          "image": {
+            "known_iou": 0.3924159835843899,
+            "known_precision": 0.41460187716887903,
+            "known_positive_recall": 0.6403410559700867,
+            "known_negative_false_positive_rate": 0.4130302280946681,
+            "known_fraction": 0.1658528670668602,
+            "supported_fraction": 0.8528645932674408,
+            "unknown_positive_pixel_fraction": 0.3866102596124013,
+            "unknown_response_mass_fraction": 0.8210261709377326,
+            "known_positive_count": 694.1666666666666,
+            "known_negative_count": 1343.8333333333333
+          },
+          "elements": {
+            "known_iou": 0.35659584826001384,
+            "known_precision": 0.417662903521621,
+            "known_positive_recall": 0.59119203508347,
+            "known_negative_false_positive_rate": 0.385368682765471,
+            "known_fraction": 0.007143853620315592,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07079626123110454,
+            "unknown_response_mass_fraction": 0.9611310984234039,
+            "known_positive_count": 670.8333333333334,
+            "known_negative_count": 1292.3333333333333
+          }
+        },
+        "image": {
+          "image": {
+            "known_iou": 0.3284929472933737,
+            "known_precision": 0.3787488793502961,
+            "known_positive_recall": 0.5050404911513644,
+            "known_negative_false_positive_rate": 0.30950592156970663,
+            "known_fraction": 0.1618245467543602,
+            "supported_fraction": 0.8528645932674408,
+            "unknown_positive_pixel_fraction": 0.2765604732558131,
+            "unknown_response_mass_fraction": 0.804414496741104,
+            "known_positive_count": 497.125,
+            "known_negative_count": 1491.375
+          },
+          "elements": {
+            "known_iou": 0.2920202496409079,
+            "known_precision": 0.37782456729507286,
+            "known_positive_recall": 0.4589055991337186,
+            "known_negative_false_positive_rate": 0.31593325304621317,
+            "known_fraction": 0.0069176326505839825,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.04890513280406594,
+            "unknown_response_mass_fraction": 0.9513608891481763,
+            "known_positive_count": 475.25,
+            "known_negative_count": 1425.75
+          }
+        },
+        "prompt": {
+          "image": {
+            "known_iou": 0.3302252565877464,
+            "known_precision": 0.37897265751686876,
+            "known_positive_recall": 0.4578054886386427,
+            "known_negative_false_positive_rate": 0.339327431464432,
+            "known_fraction": 0.1618245467543602,
+            "supported_fraction": 0.8528645932674408,
+            "unknown_positive_pixel_fraction": 0.2445780481211841,
+            "unknown_response_mass_fraction": 0.7882185552822903,
+            "known_positive_count": 497.125,
+            "known_negative_count": 1491.375
+          },
+          "elements": {
+            "known_iou": 0.28463954668366104,
+            "known_precision": 0.34633924523405885,
+            "known_positive_recall": 0.4329492930919191,
+            "known_negative_false_positive_rate": 0.351646625690605,
+            "known_fraction": 0.0069176326505839825,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.029464074410498142,
+            "unknown_response_mass_fraction": 0.9379963235248702,
+            "known_positive_count": 475.25,
+            "known_negative_count": 1425.75
+          },
+          "image_refined": {
+            "known_iou": 0.8332816662592034,
+            "known_precision": 0.922865196815408,
+            "known_positive_recall": 0.8865077492653932,
+            "known_negative_false_positive_rate": 0.029507929239182842,
+            "known_fraction": 0.1618245467543602,
+            "supported_fraction": 0.8528645932674408,
+            "unknown_positive_pixel_fraction": 0.09892781625967473,
+            "unknown_response_mass_fraction": 0.661531481178918,
+            "known_positive_count": 497.125,
+            "known_negative_count": 1491.375
+          },
+          "elements_refined": {
+            "known_iou": 0.6117130498881751,
+            "known_precision": 0.8642011486395687,
+            "known_positive_recall": 0.686492245465965,
+            "known_negative_false_positive_rate": 0.042062450480112944,
+            "known_fraction": 0.0069176326505839825,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.01271947367786197,
+            "unknown_response_mass_fraction": 0.9008482123479031,
+            "known_positive_count": 475.25,
+            "known_negative_count": 1425.75
+          }
+        }
+      },
+      "episodes": [
+        {
+          "episode_index": 76,
+          "modality": "image",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.4360313315926893,
+            "known_precision": 0.7731481481481481,
+            "known_positive_recall": 0.5,
+            "known_negative_false_positive_rate": 0.025375453133091662,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.0935872420668602,
+            "unknown_response_mass_fraction": 0.7900187752875598,
+            "known_positive_count": 334,
+            "known_negative_count": 1931,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.6078098471986417,
+            "known_precision": 0.7850877192982456,
+            "known_positive_recall": 0.7291242362525459,
+            "known_negative_false_positive_rate": 0.06891701828410689,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.01955568417906761,
+            "unknown_response_mass_fraction": 0.9332012074319543,
+            "known_positive_count": 491,
+            "known_negative_count": 1422,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 77,
+          "modality": "prompt",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.472636815920398,
+            "known_precision": 0.7364341085271318,
+            "known_positive_recall": 0.5688622754491018,
+            "known_negative_false_positive_rate": 0.03521491455204557,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.0558268241584301,
+            "unknown_response_mass_fraction": 0.6969596889141227,
+            "known_positive_count": 334,
+            "known_negative_count": 1931,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.6209813874788495,
+            "known_precision": 0.7858672376873662,
+            "known_positive_recall": 0.7474541751527495,
+            "known_negative_false_positive_rate": 0.07032348804500703,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.01226687990128994,
+            "unknown_response_mass_fraction": 0.9201942641474884,
+            "known_positive_count": 491,
+            "known_negative_count": 1422,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.472636815920398,
+            "known_precision": 0.7364341085271318,
+            "known_positive_recall": 0.5688622754491018,
+            "known_negative_false_positive_rate": 0.03521491455204557,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.0558268241584301,
+            "unknown_response_mass_fraction": 0.6969596889141227,
+            "known_positive_count": 334,
+            "known_negative_count": 1931,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.6209813874788495,
+            "known_precision": 0.7858672376873662,
+            "known_positive_recall": 0.7474541751527495,
+            "known_negative_false_positive_rate": 0.07032348804500703,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.01226687990128994,
+            "unknown_response_mass_fraction": 0.9201942641474884,
+            "known_positive_count": 491,
+            "known_negative_count": 1422,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.7763566970825195,
+              0.07113240659236908
+            ],
+            "seed_after": [
+              0.7763566970825195,
+              0.07113240659236908
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              false,
+              true
+            ],
+            "before_constraints_satisfied": [
+              true,
+              true
+            ],
+            "refinement_applied": false,
+            "steps": 0,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 78,
+          "modality": "text",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.49019607843137253,
+            "known_precision": 0.547808764940239,
+            "known_positive_recall": 0.8233532934131736,
+            "known_negative_false_positive_rate": 0.11755567063697565,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.229248046875,
+            "unknown_response_mass_fraction": 0.7941496554058342,
+            "known_positive_count": 334,
+            "known_negative_count": 1931,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.5495049504950495,
+            "known_precision": 0.5834428383705651,
+            "known_positive_recall": 0.9042769857433809,
+            "known_negative_false_positive_rate": 0.22292545710267228,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.06969669461250305,
+            "unknown_response_mass_fraction": 0.9600204517047297,
+            "known_positive_count": 491,
+            "known_negative_count": 1422,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a apple",
+          "hard_training_label_seen": false
+        },
+        {
+          "episode_index": 79,
+          "modality": "image",
+          "query_region": 114,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.6352624495289367,
+            "known_precision": 0.6369770580296896,
+            "known_positive_recall": 0.9957805907172996,
+            "known_negative_false_positive_rate": 0.2172859450726979,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.3678385615348816,
+            "unknown_response_mass_fraction": 0.8262965398451058,
+            "known_positive_count": 474,
+            "known_negative_count": 1238,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.5644171779141104,
+            "known_precision": 0.5705426356589147,
+            "known_positive_recall": 0.9813333333333333,
+            "known_negative_false_positive_rate": 0.18295904887714662,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.04823056235909462,
+            "unknown_response_mass_fraction": 0.9462028637468031,
+            "known_positive_count": 375,
+            "known_negative_count": 1514,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 80,
+          "modality": "prompt",
+          "query_region": 114,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.9087221095334685,
+            "known_precision": 0.9593147751605996,
+            "known_positive_recall": 0.9451476793248945,
+            "known_negative_false_positive_rate": 0.015347334410339256,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.296142578125,
+            "unknown_response_mass_fraction": 0.8632416272273945,
+            "known_positive_count": 474,
+            "known_negative_count": 1238,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.7068273092369478,
+            "known_precision": 0.7410526315789474,
+            "known_positive_recall": 0.9386666666666666,
+            "known_negative_false_positive_rate": 0.08124174372523117,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.028543876484036446,
+            "unknown_response_mass_fraction": 0.9479858887680117,
+            "known_positive_count": 375,
+            "known_negative_count": 1514,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.9087221095334685,
+            "known_precision": 0.9593147751605996,
+            "known_positive_recall": 0.9451476793248945,
+            "known_negative_false_positive_rate": 0.015347334410339256,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.296142578125,
+            "unknown_response_mass_fraction": 0.8632416272273945,
+            "known_positive_count": 474,
+            "known_negative_count": 1238,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.7068273092369478,
+            "known_precision": 0.7410526315789474,
+            "known_positive_recall": 0.9386666666666666,
+            "known_negative_false_positive_rate": 0.08124174372523117,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.028543876484036446,
+            "unknown_response_mass_fraction": 0.9479858887680117,
+            "known_positive_count": 375,
+            "known_negative_count": 1514,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.6828478574752808,
+              0.034566450864076614
+            ],
+            "seed_after": [
+              0.6828478574752808,
+              0.034566450864076614
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              false,
+              true
+            ],
+            "before_constraints_satisfied": [
+              true,
+              true
+            ],
+            "refinement_applied": false,
+            "steps": 0,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 81,
+          "modality": "text",
+          "query_region": 114,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.5846153846153846,
+            "known_precision": 0.5984251968503937,
+            "known_positive_recall": 0.9620253164556962,
+            "known_negative_false_positive_rate": 0.24717285945072698,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.5191243886947632,
+            "unknown_response_mass_fraction": 0.8867984391127829,
+            "known_positive_count": 474,
+            "known_negative_count": 1238,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.5811688311688312,
+            "known_precision": 0.5976627712854758,
+            "known_positive_recall": 0.9546666666666667,
+            "known_negative_false_positive_rate": 0.15918097754293262,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07028620690107346,
+            "unknown_response_mass_fraction": 0.9674270702516613,
+            "known_positive_count": 375,
+            "known_negative_count": 1514,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a apple",
+          "hard_training_label_seen": false
+        },
+        {
+          "episode_index": 82,
+          "modality": "image",
+          "query_region": 97,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.7539503386004515,
+            "known_precision": 0.7582292849035187,
+            "known_positive_recall": 0.9925705794947994,
+            "known_negative_false_positive_rate": 0.13379396984924624,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.2014974057674408,
+            "unknown_response_mass_fraction": 0.720032109329662,
+            "known_positive_count": 673,
+            "known_negative_count": 1592,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.48759541984732824,
+            "known_precision": 0.5476956055734191,
+            "known_positive_recall": 0.8162939297124601,
+            "known_negative_false_positive_rate": 0.3278943278943279,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.06427102535963058,
+            "unknown_response_mass_fraction": 0.9564062258332005,
+            "known_positive_count": 626,
+            "known_negative_count": 1287,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 83,
+          "modality": "prompt",
+          "query_region": 97,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.6910994764397905,
+            "known_precision": 0.7006369426751592,
+            "known_positive_recall": 0.9806835066864784,
+            "known_negative_false_positive_rate": 0.1771356783919598,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.22265625,
+            "unknown_response_mass_fraction": 0.731881155903771,
+            "known_positive_count": 673,
+            "known_negative_count": 1592,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.4232081911262799,
+            "known_precision": 0.4760076775431862,
+            "known_positive_recall": 0.792332268370607,
+            "known_negative_false_positive_rate": 0.42424242424242425,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.046833209693431854,
+            "unknown_response_mass_fraction": 0.93922685442023,
+            "known_positive_count": 626,
+            "known_negative_count": 1287,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.949928469241774,
+            "known_precision": 0.9623188405797102,
+            "known_positive_recall": 0.986627043090639,
+            "known_negative_false_positive_rate": 0.016331658291457288,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.0757649764418602,
+            "unknown_response_mass_fraction": 0.6086425620107454,
+            "known_positive_count": 673,
+            "known_negative_count": 1592,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.626453488372093,
+            "known_precision": 0.8742393509127789,
+            "known_positive_recall": 0.6884984025559105,
+            "known_negative_false_positive_rate": 0.048174048174048176,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.006797547452151775,
+            "unknown_response_mass_fraction": 0.9319739969851577,
+            "known_positive_count": 626,
+            "known_negative_count": 1287,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.8006680011749268,
+              0.867481529712677
+            ],
+            "seed_after": [
+              0.9715871810913086,
+              0.012379400432109833
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              true,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 84,
+          "modality": "text",
+          "query_region": 97,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.7038988408851422,
+            "known_precision": 0.7076271186440678,
+            "known_positive_recall": 0.9925705794947994,
+            "known_negative_false_positive_rate": 0.17336683417085427,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.2329915463924408,
+            "unknown_response_mass_fraction": 0.7318678147971208,
+            "known_positive_count": 673,
+            "known_negative_count": 1592,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.46625222024866786,
+            "known_precision": 0.5121951219512195,
+            "known_positive_recall": 0.8386581469648562,
+            "known_negative_false_positive_rate": 0.3885003885003885,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07046815007925034,
+            "unknown_response_mass_fraction": 0.955321546367558,
+            "known_positive_count": 626,
+            "known_negative_count": 1287,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a camera",
+          "hard_training_label_seen": true
+        },
+        {
+          "episode_index": 85,
+          "modality": "image",
+          "query_region": 119,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.7406876790830945,
+            "known_precision": 0.7406876790830945,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": 0.1514644351464435,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.4749349057674408,
+            "unknown_response_mass_fraction": 0.8650802854075818,
+            "known_positive_count": 517,
+            "known_negative_count": 1195,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.48056537102473496,
+            "known_precision": 0.7816091954022989,
+            "known_positive_recall": 0.5551020408163265,
+            "known_negative_false_positive_rate": 0.09878682842287695,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.0612616240978241,
+            "unknown_response_mass_fraction": 0.9677645639344881,
+            "known_positive_count": 735,
+            "known_negative_count": 1154,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 86,
+          "modality": "prompt",
+          "query_region": 119,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.49285033365109626,
+            "known_precision": 0.49285033365109626,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": 0.44518828451882847,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.4810384213924408,
+            "unknown_response_mass_fraction": 0.8450727943035843,
+            "known_positive_count": 517,
+            "known_negative_count": 1195,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.32432432432432434,
+            "known_precision": 0.43823845327604727,
+            "known_positive_recall": 0.5551020408163265,
+            "known_negative_false_positive_rate": 0.4532062391681109,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.040825311094522476,
+            "unknown_response_mass_fraction": 0.9443550111636643,
+            "known_positive_count": 735,
+            "known_negative_count": 1154,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.7926267281105991,
+            "known_precision": 0.7938461538461539,
+            "known_positive_recall": 0.9980657640232108,
+            "known_negative_false_positive_rate": 0.11213389121338913,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.33544921875,
+            "unknown_response_mass_fraction": 0.8557829903774256,
+            "known_positive_count": 517,
+            "known_negative_count": 1195,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.4891304347826087,
+            "known_precision": 0.8132530120481928,
+            "known_positive_recall": 0.5510204081632653,
+            "known_negative_false_positive_rate": 0.0805892547660312,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.048252396285533905,
+            "unknown_response_mass_fraction": 0.9668857554060456,
+            "known_positive_count": 735,
+            "known_negative_count": 1154,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.7378724813461304,
+              0.6608973741531372
+            ],
+            "seed_after": [
+              0.9448907375335693,
+              0.013728423975408077
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              true,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 87,
+          "modality": "text",
+          "query_region": 119,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.537467700258398,
+            "known_precision": 0.5383951682484901,
+            "known_positive_recall": 0.9968051118210862,
+            "known_negative_false_positive_rate": 0.4476987447698745,
+            "known_fraction": 0.148193359375,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.5675455927848816,
+            "unknown_response_mass_fraction": 0.8524471869206823,
+            "known_positive_count": 626,
+            "known_negative_count": 1195,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.4100074682598954,
+            "known_precision": 0.5613496932515337,
+            "known_positive_recall": 0.6032967032967033,
+            "known_negative_false_positive_rate": 0.3717504332755633,
+            "known_fraction": 0.007510780356824398,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07063917815685272,
+            "unknown_response_mass_fraction": 0.9565681241323497,
+            "known_positive_count": 910,
+            "known_negative_count": 1154,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a camera",
+          "hard_training_label_seen": true
+        },
+        {
+          "episode_index": 88,
+          "modality": "image",
+          "query_region": 100,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.03584607274644175,
+            "known_precision": 0.09066666666666667,
+            "known_positive_recall": 0.05596707818930041,
+            "known_negative_false_positive_rate": 0.6495238095238095,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.2600911557674408,
+            "unknown_response_mass_fraction": 0.7651089896794498,
+            "known_positive_count": 1215,
+            "known_negative_count": 1050,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.08750835003340013,
+            "known_precision": 0.14427312775330398,
+            "known_positive_recall": 0.18194444444444444,
+            "known_negative_false_positive_rate": 0.6512992455993294,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.054733358323574066,
+            "unknown_response_mass_fraction": 0.9459377885378697,
+            "known_positive_count": 720,
+            "known_negative_count": 1193,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 89,
+          "modality": "prompt",
+          "query_region": 100,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.024896265560165973,
+            "known_precision": 0.06307490144546649,
+            "known_positive_recall": 0.03950617283950617,
+            "known_negative_false_positive_rate": 0.679047619047619,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.1551920622587204,
+            "unknown_response_mass_fraction": 0.7271808027397988,
+            "known_positive_count": 1215,
+            "known_negative_count": 1050,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.08011243851018975,
+            "known_precision": 0.13953488372093023,
+            "known_positive_recall": 0.15833333333333333,
+            "known_negative_false_positive_rate": 0.5892707460184409,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.02823820523917675,
+            "unknown_response_mass_fraction": 0.9330940926286277,
+            "known_positive_count": 720,
+            "known_negative_count": 1193,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.8282988871224165,
+            "known_precision": 0.96036866359447,
+            "known_positive_recall": 0.8576131687242798,
+            "known_negative_false_positive_rate": 0.040952380952380955,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.006103515625,
+            "unknown_response_mass_fraction": 0.1779450829118755,
+            "known_positive_count": 1215,
+            "known_negative_count": 1050,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.5019762845849802,
+            "known_precision": 0.9071428571428571,
+            "known_positive_recall": 0.5291666666666667,
+            "known_negative_false_positive_rate": 0.03269069572506287,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.0008405960397794843,
+            "unknown_response_mass_fraction": 0.7270780992477084,
+            "known_positive_count": 720,
+            "known_negative_count": 1193,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.19626283645629883,
+              0.8765819072723389
+            ],
+            "seed_after": [
+              0.9813764095306396,
+              0.0058926003985106945
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              false,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 90,
+          "modality": "text",
+          "query_region": 100,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.026239067055393587,
+            "known_precision": 0.07479224376731301,
+            "known_positive_recall": 0.03884892086330935,
+            "known_negative_false_positive_rate": 0.6361904761904762,
+            "known_fraction": 0.1985677182674408,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.2246907651424408,
+            "unknown_response_mass_fraction": 0.7727370762377034,
+            "known_positive_count": 1390,
+            "known_negative_count": 1050,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.06943620178041543,
+            "known_precision": 0.13028953229398663,
+            "known_positive_recall": 0.12942477876106195,
+            "known_negative_false_positive_rate": 0.6546521374685667,
+            "known_fraction": 0.007630865555256605,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07147249579429626,
+            "unknown_response_mass_fraction": 0.9588503268644365,
+            "known_positive_count": 904,
+            "known_negative_count": 1193,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a fruit",
+          "hard_training_label_seen": false
+        },
+        {
+          "episode_index": 91,
+          "modality": "image",
+          "query_region": 122,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.0037537537537537537,
+            "known_precision": 0.007331378299120235,
+            "known_positive_recall": 0.007633587786259542,
+            "known_negative_false_positive_rate": 0.6404919583727531,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.4091796875,
+            "unknown_response_mass_fraction": 0.8470755620078262,
+            "known_positive_count": 655,
+            "known_negative_count": 1057,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.0901705930138099,
+            "known_precision": 0.17425431711145997,
+            "known_positive_recall": 0.1574468085106383,
+            "known_negative_false_positive_rate": 0.44425675675675674,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.051396444439888,
+            "unknown_response_mass_fraction": 0.9517746078336095,
+            "known_positive_count": 705,
+            "known_negative_count": 1184,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 92,
+          "modality": "prompt",
+          "query_region": 122,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.051597051597051594,
+            "known_precision": 0.07947019867549669,
+            "known_positive_recall": 0.1282442748091603,
+            "known_negative_false_positive_rate": 0.9205298013245033,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.4662272334098816,
+            "unknown_response_mass_fraction": 0.8348136764475315,
+            "known_positive_count": 655,
+            "known_negative_count": 1057,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.1184931506849315,
+            "known_precision": 0.18642241379310345,
+            "known_positive_recall": 0.2453900709219858,
+            "known_negative_false_positive_rate": 0.637668918918919,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.03722275793552399,
+            "unknown_response_mass_fraction": 0.9416242763791948,
+            "known_positive_count": 705,
+            "known_negative_count": 1184,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.8363095238095238,
+            "known_precision": 0.9706390328151986,
+            "known_positive_recall": 0.8580152671755725,
+            "known_negative_false_positive_rate": 0.01608325449385052,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.0071614584885537624,
+            "unknown_response_mass_fraction": 0.33760417543564275,
+            "known_positive_count": 655,
+            "known_negative_count": 1057,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.4346629986244842,
+            "known_precision": 0.9349112426035503,
+            "known_positive_recall": 0.4482269503546099,
+            "known_negative_false_positive_rate": 0.018581081081081082,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.0010116264456883073,
+            "unknown_response_mass_fraction": 0.7836422460025713,
+            "known_positive_count": 705,
+            "known_negative_count": 1184,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.1748257279396057,
+              0.6570932865142822
+            ],
+            "seed_after": [
+              0.9622138738632202,
+              0.014600910246372223
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              false,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 93,
+          "modality": "text",
+          "query_region": 122,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.012078830260648443,
+            "known_precision": 0.020562770562770564,
+            "known_positive_recall": 0.02844311377245509,
+            "known_negative_false_positive_rate": 0.8561967833491012,
+            "known_fraction": 0.140380859375,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.5460612177848816,
+            "unknown_response_mass_fraction": 0.8881568531522722,
+            "known_positive_count": 668,
+            "known_negative_count": 1057,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.06320541760722348,
+            "known_precision": 0.12103746397694524,
+            "known_positive_recall": 0.1168289290681502,
+            "known_negative_false_positive_rate": 0.5152027027027027,
+            "known_fraction": 0.006924910470843315,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07221484184265137,
+            "unknown_response_mass_fraction": 0.968599071219688,
+            "known_positive_count": 719,
+            "known_negative_count": 1184,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a fruit",
+          "hard_training_label_seen": false
+        },
+        {
+          "episode_index": 94,
+          "modality": "image",
+          "query_region": 103,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.022411953041622197,
+            "known_precision": 0.022950819672131147,
+            "known_positive_recall": 0.4883720930232558,
+            "known_negative_false_positive_rate": 0.40234023402340235,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.27783203125,
+            "unknown_response_mass_fraction": 0.7715420656556282,
+            "known_positive_count": 43,
+            "known_negative_count": 2222,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.018095238095238095,
+            "known_precision": 0.019133937562940583,
+            "known_positive_recall": 0.25,
+            "known_negative_false_positive_rate": 0.5302123026673925,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.07404523342847824,
+            "unknown_response_mass_fraction": 0.954865478524877,
+            "known_positive_count": 76,
+            "known_negative_count": 1837,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 95,
+          "modality": "prompt",
+          "query_region": 103,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.14446444644464446,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.11962890625,
+            "unknown_response_mass_fraction": 0.7615432926521928,
+            "known_positive_count": 43,
+            "known_negative_count": 2222,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.003169572107765452,
+            "known_precision": 0.003590664272890485,
+            "known_positive_recall": 0.02631578947368421,
+            "known_negative_false_positive_rate": 0.3021230266739249,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.023791415616869926,
+            "unknown_response_mass_fraction": 0.9377296063122057,
+            "known_positive_count": 76,
+            "known_negative_count": 1837,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.9534883720930233,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.9534883720930233,
+            "known_negative_false_positive_rate": 0.0,
+            "known_fraction": 0.184326171875,
+            "supported_fraction": 0.7109375,
+            "unknown_positive_pixel_fraction": 0.01025390625,
+            "unknown_response_mass_fraction": 0.8675144562844512,
+            "known_positive_count": 43,
+            "known_negative_count": 2222,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.6352941176470588,
+            "known_precision": 0.8571428571428571,
+            "known_positive_recall": 0.7105263157894737,
+            "known_negative_false_positive_rate": 0.004899292324442025,
+            "known_fraction": 0.006961300037801266,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.0030712687876075506,
+            "unknown_response_mass_fraction": 0.9661013803922974,
+            "known_positive_count": 76,
+            "known_negative_count": 1837,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.22275720536708832,
+              0.8745748400688171
+            ],
+            "seed_after": [
+              0.9614195227622986,
+              0.01929006539285183
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              true,
+              true
+            ],
+            "before_constraints_satisfied": [
+              false,
+              false
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        },
+        {
+          "episode_index": 96,
+          "modality": "image",
+          "query_region": 106,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.255771567436209,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.1275227963924408,
+            "unknown_response_mass_fraction": 0.8501616467160178,
+            "known_positive_count": 66,
+            "known_negative_count": 1646,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.2231404958677686,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.01774713024497032,
+            "unknown_response_mass_fraction": 0.9547343773426077,
+            "known_positive_count": 74,
+            "known_negative_count": 1815,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 97,
+          "modality": "prompt",
+          "query_region": 106,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.2976913730255164,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.159912109375,
+            "unknown_response_mass_fraction": 0.8450554040699269,
+            "known_positive_count": 66,
+            "known_negative_count": 1646,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": 0.0,
+            "known_negative_false_positive_rate": 0.2550964187327824,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.01799093931913376,
+            "unknown_response_mass_fraction": 0.9397605943795384,
+            "known_positive_count": 74,
+            "known_negative_count": 1815,
+            "unknown_is_negative": false
+          },
+          "image_refined": {
+            "known_iou": 0.9242424242424242,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.9242424242424242,
+            "known_negative_false_positive_rate": 0.0,
+            "known_fraction": 0.1393229216337204,
+            "supported_fraction": 0.9947916865348816,
+            "unknown_positive_pixel_fraction": 0.0047200522385537624,
+            "unknown_response_mass_fraction": 0.8845612662696868,
+            "known_positive_count": 66,
+            "known_negative_count": 1646,
+            "unknown_is_negative": false
+          },
+          "elements_refined": {
+            "known_iou": 0.8783783783783784,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.8783783783783784,
+            "known_negative_false_positive_rate": 0.0,
+            "known_fraction": 0.006873965263366699,
+            "supported_fraction": 0.3356889486312866,
+            "unknown_positive_pixel_fraction": 0.0009715980268083513,
+            "unknown_response_mass_fraction": 0.9629240678339437,
+            "known_positive_count": 74,
+            "known_negative_count": 1815,
+            "unknown_is_negative": false
+          },
+          "signed_evidence": {
+            "seed_before": [
+              0.227065771818161,
+              0.46301034092903137
+            ],
+            "seed_after": [
+              0.8400247097015381,
+              0.09411657601594925
+            ],
+            "constraints_satisfied": [
+              true,
+              true
+            ],
+            "confidence_targets_satisfied": [
+              false,
+              true
+            ],
+            "before_constraints_satisfied": [
+              false,
+              true
+            ],
+            "refinement_applied": true,
+            "steps": 64,
+            "requested_steps": 64,
+            "field_updated": false
+          }
+        }
+      ]
+    }
+  }
+}

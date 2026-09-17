@@ -1,0 +1,12 @@
+{
+  "supervision": "context agreement at scales1.5/2, both margin>=.01; foreground-erasure class cosine drop>=.01; both source correspondence endpoints must agree; unaccepted unknown",
+  "initialization": "seed42 and64-dimensional shared SigLIP adapter",
+  "steps": {
+    "figurines": 180,
+    "ramen": 660
+  },
+  "context_policy_not_truth": "heuristic source evidence, must verify against real labels",
+  "readout_control": "explicit optional sigmoid(10*(positive cosine - maximum generic alternative cosine)); fixed object/things/stuff/texture, common to scenes; no map updates",
+  "default_changes": "none until validation",
+  "evaluation": "same real-label polygons and fixed .5 threshold; do not tune to individual categories"
+}

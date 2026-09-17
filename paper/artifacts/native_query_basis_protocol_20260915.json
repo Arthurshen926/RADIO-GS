@@ -1,0 +1,11 @@
+{
+  "hypothesis": "freely trained SigLIP projection destroys open vocabulary relations; random frozen projection previously failed image retrieval",
+  "change": "replace random frozen projection by training-input uncentred SVD top64; no target labels or heldout features; preserve native cosine origin",
+  "training_inputs": "existing fixed79-word source vocabulary + all training image queries",
+  "teachers": "all four; same other losses, no new relation loss",
+  "steps": {
+    "figurines": 180,
+    "ramen": 660
+  },
+  "status": "development ablation after inspection of preceding trials; no default promotion"
+}

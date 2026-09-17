@@ -156,6 +156,8 @@ def mask_stability(
 def generation_contract(args: argparse.Namespace, *, checkpoint_sha256: str) -> dict[str, object]:
     payload: dict[str, object] = {
         "schema_version": 1,
+        "complex_rope_buffers_preserved": True,
+        "model_cast_implementation_sha256": sha256_file(Path(foundation.__file__).resolve()),
         "source": GENERATION_SOURCE,
         "official_decoder": True,
         "query_free": True,

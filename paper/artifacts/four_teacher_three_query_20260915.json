@@ -1,0 +1,1067 @@
+{
+  "active_candidate": "shared_native_siglip_projection",
+  "root": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines",
+  "geometry_frozen": true,
+  "teacher_rgb_identity_check": "all 8 RADIO source hashes match source-only geometric frames",
+  "episodes": {
+    "counts": {
+      "train": {
+        "text": 12,
+        "image": 32,
+        "prompt": 32
+      },
+      "validation": {
+        "text": 6,
+        "image": 8,
+        "prompt": 8
+      }
+    },
+    "matches": 56,
+    "sha256": "54871ee82c9a7e7cebf6921daa54cf73eeb47ed0c089137f1fd47e56384f3835",
+    "episodes_with_explicit_negatives": 81
+  },
+  "reports": {
+    "all_four_shared": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "7271192500d5b3ace079b86eb6afbd0c7c4cd738e743a41402fd94fb97579ca7",
+      "supervision_implementation_sha256": "0bf4adbc80a76e2e9c67baaa984484cbda650743925ba8d32618e400cb6b05d5",
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.3558925837278366,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482223659754,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.087362766265869,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9919575204451879,
+            "membership_loss": 0.07950232271105051,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9840028993785381,
+            "membership_loss": 0.13342097564600408,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.9387063740286976,
+            "membership_loss": 0.18690123443957418,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.4291255879215896,
+            "membership_loss": 1.3122425774733226,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.34278372838161886,
+            "membership_loss": 1.231825191527605,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.33722380199469626,
+            "membership_loss": 1.3604897260665894,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.04884858801960945,
+        "text": 11.926597595214844,
+        "teacher_radio": 0.002004819456487894,
+        "teacher_dino": 0.002048592083156109,
+        "teacher_siglip": 0.010149816051125526,
+        "image": 30.079635620117188,
+        "prompt": 51.23500442504883
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 5.91929292678833,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "radio": 0.09866157174110413,
+            "radio_relation": 0.0007891349960118532,
+            "dino": 0.09918250888586044,
+            "dino_relation": 0.001018774346448481,
+            "siglip": 0.09980640560388565,
+            "sam": 0.005720238201320171,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 3.4710474014282227,
+          "membership_2d": 1.4950509071350098,
+          "membership_3d": 1.767038345336914,
+          "aux": {
+            "radio": 0.07139857113361359,
+            "radio_relation": 0.000920790946111083,
+            "dino": 0.06675434112548828,
+            "dino_relation": 0.0009966929210349917,
+            "siglip": 0.06630745530128479,
+            "sam": 0.0024287416599690914,
+            "sam_membership_boundary": 0.00015156726294662803
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.7651898860931396,
+          "membership_2d": 1.4942917823791504,
+          "membership_3d": 1.1241198778152466,
+          "aux": {
+            "radio": 0.05278698727488518,
+            "radio_relation": 0.0011705966899171472,
+            "dino": 0.04836444929242134,
+            "dino_relation": 0.001158166560344398,
+            "siglip": 0.041381049901247025,
+            "sam": 0.0018355597276240587,
+            "sam_membership_boundary": 8.159597928170115e-05
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 1.0780547857284546,
+          "membership_2d": 0.48708072304725647,
+          "membership_3d": 0.45660075545310974,
+          "aux": {
+            "radio": 0.05121312662959099,
+            "radio_relation": 0.0008974588708952069,
+            "dino": 0.049730878323316574,
+            "dino_relation": 0.0007769756484776735,
+            "siglip": 0.02939477004110813,
+            "sam": 0.002294242847710848,
+            "sam_membership_boundary": 6.587961979676038e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 1.1639827489852905,
+          "membership_2d": 0.4966409206390381,
+          "membership_3d": 0.5575118660926819,
+          "aux": {
+            "radio": 0.04742511734366417,
+            "radio_relation": 0.0006693460745736957,
+            "dino": 0.04556237533688545,
+            "dino_relation": 0.0005524614825844765,
+            "siglip": 0.013560432009398937,
+            "sam": 0.0020396497566252947,
+            "sam_membership_boundary": 2.062912426481489e-05
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.21804216504096985,
+          "membership_2d": 0.07502630352973938,
+          "membership_3d": 0.05433601513504982,
+          "aux": {
+            "radio": 0.040755730122327805,
+            "radio_relation": 0.0006296767387539148,
+            "dino": 0.0393313430249691,
+            "dino_relation": 0.0005822530365549028,
+            "siglip": 0.004638039972633123,
+            "sam": 0.002731539076194167,
+            "sam_membership_boundary": 1.1265124157944229e-05
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.28599393367767334,
+          "membership_2d": 0.08236315101385117,
+          "membership_3d": 0.10987832397222519,
+          "aux": {
+            "radio": 0.03485649824142456,
+            "radio_relation": 0.0012965468922629952,
+            "dino": 0.03503178805112839,
+            "dino_relation": 0.0011618672870099545,
+            "siglip": 0.009011399932205677,
+            "sam": 0.002855963073670864,
+            "sam_membership_boundary": 6.562333055626368e-06
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "c3ed3939e67bfb3525bb13b8d29d7454885b25b631c0a3341872168a422ff915",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "without_radio_shared": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "7271192500d5b3ace079b86eb6afbd0c7c4cd738e743a41402fd94fb97579ca7",
+      "supervision_implementation_sha256": "0bf4adbc80a76e2e9c67baaa984484cbda650743925ba8d32618e400cb6b05d5",
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.355892553925514,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482223659754,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.087362766265869,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9920353790124258,
+            "membership_loss": 0.08452258290102084,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9676952175796032,
+            "membership_loss": 0.14381239924114197,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.9379464853554964,
+            "membership_loss": 0.20465256040915847,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.43623589134464663,
+            "membership_loss": 1.232303261756897,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.3165237793000415,
+            "membership_loss": 1.1991143450140953,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.31354567827656865,
+            "membership_loss": 1.3321355059742928,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.04839405417442322,
+        "text": 12.000649452209473,
+        "teacher_dino": 0.0020358699839562178,
+        "teacher_siglip": 0.010760954581201077,
+        "image": 30.077335357666016,
+        "prompt": 51.80278396606445
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 5.819842338562012,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "dino": 0.09918250888586044,
+            "dino_relation": 0.001018774346448481,
+            "siglip": 0.09980640560388565,
+            "sam": 0.005720238201320171,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 3.4344661235809326,
+          "membership_2d": 1.502495288848877,
+          "membership_3d": 1.7950975894927979,
+          "aux": {
+            "dino": 0.06683553755283356,
+            "dino_relation": 0.0009882808662950993,
+            "siglip": 0.06645900011062622,
+            "sam": 0.0024426644667983055,
+            "sam_membership_boundary": 0.00014781230129301548
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.8203253746032715,
+          "membership_2d": 1.5615646839141846,
+          "membership_3d": 1.166625738143921,
+          "aux": {
+            "dino": 0.04840899258852005,
+            "dino_relation": 0.0012104229535907507,
+            "siglip": 0.04065929725766182,
+            "sam": 0.001785343512892723,
+            "sam_membership_boundary": 7.082893716869876e-05
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 1.0405553579330444,
+          "membership_2d": 0.4833933711051941,
+          "membership_3d": 0.47773611545562744,
+          "aux": {
+            "dino": 0.048985205590724945,
+            "dino_relation": 0.0008280162583105266,
+            "siglip": 0.02722749672830105,
+            "sam": 0.002322784159332514,
+            "sam_membership_boundary": 6.233838939806446e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 1.0478583574295044,
+          "membership_2d": 0.46428537368774414,
+          "membership_3d": 0.5225714445114136,
+          "aux": {
+            "dino": 0.04524741694331169,
+            "dino_relation": 0.0005784232635051012,
+            "siglip": 0.01304768305271864,
+            "sam": 0.0021089024376124144,
+            "sam_membership_boundary": 1.9151315427734517e-05
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.1856088936328888,
+          "membership_2d": 0.08093348145484924,
+          "membership_3d": 0.05830981954932213,
+          "aux": {
+            "dino": 0.03867989778518677,
+            "dino_relation": 0.0006218986818566918,
+            "siglip": 0.004313647747039795,
+            "sam": 0.002739286283031106,
+            "sam_membership_boundary": 1.086052998289233e-05
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.27040931582450867,
+          "membership_2d": 0.09250205755233765,
+          "membership_3d": 0.11830364167690277,
+          "aux": {
+            "dino": 0.03578006848692894,
+            "dino_relation": 0.0013031549751758575,
+            "siglip": 0.009122860617935658,
+            "sam": 0.002840891946107149,
+            "sam_membership_boundary": 8.368129783775657e-06
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "d0255ff18675e92f8d0e0d16421ad47238f83b6fa0b8e0b6ef120d069b06b09d",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "all_aux_off_smoke": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "b8387633d2ecc97fdb413dbb75260574107e4abcc9109dce556fe0f74727c00c",
+      "supervision_implementation_sha256": "0bf4adbc80a76e2e9c67baaa984484cbda650743925ba8d32618e400cb6b05d5",
+      "steps": 3,
+      "enabled_auxiliary_teachers": [],
+      "opened_teacher_files": [],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.3417018577456474,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482223659754,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.1201082170009613,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.642792363961537,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.014408469200134,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.00011363636440364644,
+            "membership_loss": 3.6116395480930805,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.4469051162401834,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.0677273720502853,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.032724604010582,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "text": 2.1229310035705566,
+        "image": 0.956527054309845,
+        "prompt": 20.178062438964844
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 5.613972187042236,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {}
+        },
+        {
+          "step": 2,
+          "modality": "prompt",
+          "loss": 4.617908000946045,
+          "membership_2d": 1.1077873706817627,
+          "membership_3d": 1.265457272529602,
+          "aux": {}
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "a243640a4387664526d00d39115d9768b2c7548de596a9ebc5dfc06c70932522",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "all_four_final": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "b8387633d2ecc97fdb413dbb75260574107e4abcc9109dce556fe0f74727c00c",
+      "supervision_implementation_sha256": "0bf4adbc80a76e2e9c67baaa984484cbda650743925ba8d32618e400cb6b05d5",
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "radio",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.3417018726468086,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482238560915,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.120108187198639,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9907751729091009,
+            "membership_loss": 0.11729269567877054,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9194772467017174,
+            "membership_loss": 0.235628153081052,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.9306204720633104,
+            "membership_loss": 0.22045171493664384,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.28156630997546017,
+            "membership_loss": 1.5804941058158875,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.33237622235901654,
+            "membership_loss": 1.2681396938860416,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.315940058673732,
+            "membership_loss": 1.3060725033283234,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.04884858801960945,
+        "text": 19.318164825439453,
+        "teacher_radio": 0.002080658683553338,
+        "teacher_dino": 0.002057617297396064,
+        "teacher_siglip": 0.010099001228809357,
+        "image": 29.212068557739258,
+        "prompt": 60.896305084228516
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 5.91929292678833,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "radio": 0.09866157174110413,
+            "radio_relation": 0.0007891349960118532,
+            "dino": 0.09918250888586044,
+            "dino_relation": 0.001018774346448481,
+            "siglip": 0.09980640560388565,
+            "sam": 0.005720238201320171,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 3.4251770973205566,
+          "membership_2d": 1.4506282806396484,
+          "membership_3d": 1.7656934261322021,
+          "aux": {
+            "radio": 0.07153564691543579,
+            "radio_relation": 0.0009626209503039718,
+            "dino": 0.06688512861728668,
+            "dino_relation": 0.0010563222458586097,
+            "siglip": 0.06586014479398727,
+            "sam": 0.002415283815935254,
+            "sam_membership_boundary": 0.00014031855971552432
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.894930362701416,
+          "membership_2d": 1.609372854232788,
+          "membership_3d": 1.139087200164795,
+          "aux": {
+            "radio": 0.052899785339832306,
+            "radio_relation": 0.0011653342517092824,
+            "dino": 0.048470254987478256,
+            "dino_relation": 0.0011336832540109754,
+            "siglip": 0.04079950973391533,
+            "sam": 0.001930645084939897,
+            "sam_membership_boundary": 7.117892528185621e-05
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 1.045716404914856,
+          "membership_2d": 0.4036492705345154,
+          "membership_3d": 0.5070779323577881,
+          "aux": {
+            "radio": 0.05095638707280159,
+            "radio_relation": 0.0009159596520476043,
+            "dino": 0.049367357045412064,
+            "dino_relation": 0.0007791112875565886,
+            "siglip": 0.03060944750905037,
+            "sam": 0.0023113631177693605,
+            "sam_membership_boundary": 4.9536880396772176e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 1.9395936727523804,
+          "membership_2d": 0.8128265142440796,
+          "membership_3d": 1.0193815231323242,
+          "aux": {
+            "radio": 0.047241587191820145,
+            "radio_relation": 0.0006615367601625621,
+            "dino": 0.04532627388834953,
+            "dino_relation": 0.0005398019566200674,
+            "siglip": 0.011703538708388805,
+            "sam": 0.0018805463332682848,
+            "sam_membership_boundary": 3.233209645259194e-05
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.23713715374469757,
+          "membership_2d": 0.08438318222761154,
+          "membership_3d": 0.06390520930290222,
+          "aux": {
+            "radio": 0.04092295095324516,
+            "radio_relation": 0.0006621869397349656,
+            "dino": 0.03931276872754097,
+            "dino_relation": 0.0005744652589783072,
+            "siglip": 0.0046197413466870785,
+            "sam": 0.0027492244262248278,
+            "sam_membership_boundary": 7.4223898991476744e-06
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.3221929669380188,
+          "membership_2d": 0.08734822273254395,
+          "membership_3d": 0.1415252983570099,
+          "aux": {
+            "radio": 0.03495442867279053,
+            "radio_relation": 0.0013100820360705256,
+            "dino": 0.03497471660375595,
+            "dino_relation": 0.0011400014627724886,
+            "siglip": 0.009137595072388649,
+            "sam": 0.0028497562743723392,
+            "sam_membership_boundary": 6.256407687033061e-06
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "ea5623977f5d8ca41985313ce525aade7bf785b29257ce703fdd6721cb9375ed",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    },
+    "without_radio_final": {
+      "schema": "three_query_four_teacher_development.v1",
+      "implementation_sha256": "b8387633d2ecc97fdb413dbb75260574107e4abcc9109dce556fe0f74727c00c",
+      "supervision_implementation_sha256": "0bf4adbc80a76e2e9c67baaa984484cbda650743925ba8d32618e400cb6b05d5",
+      "steps": 180,
+      "enabled_auxiliary_teachers": [
+        "dino",
+        "sam",
+        "siglip"
+      ],
+      "opened_teacher_files": [
+        "dino",
+        "sam",
+        "siglip"
+      ],
+      "before": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 4.150360345840454,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.3417018577456474,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 3.362482238560915,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.481368601322174,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.120108187198639,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.0,
+            "membership_loss": 2.102679133415222,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "after": {
+        "train": {
+          "text": {
+            "known_support_pseudo_iou": 0.9904773831367493,
+            "membership_loss": 0.11116686463356018,
+            "known_pixel_fraction": 0.17915175234278044,
+            "episodes": 12
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.9285697964951396,
+            "membership_loss": 0.2501447548856959,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.9283607726101764,
+            "membership_loss": 0.22384703240823,
+            "known_pixel_fraction": 0.18714396498398855,
+            "episodes": 32
+          }
+        },
+        "validation": {
+          "text": {
+            "known_support_pseudo_iou": 0.2769161246639366,
+            "membership_loss": 1.5066090325514476,
+            "known_pixel_fraction": 0.1658528670668602,
+            "episodes": 6
+          },
+          "image": {
+            "known_support_pseudo_iou": 0.29436259903013706,
+            "membership_loss": 1.2973201796412468,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          },
+          "prompt": {
+            "known_support_pseudo_iou": 0.28235176554881036,
+            "membership_loss": 1.3042441010475159,
+            "known_pixel_fraction": 0.1618245467543602,
+            "episodes": 8
+          }
+        }
+      },
+      "gradient_norm_max": {
+        "teacher_sam": 0.04839405044913292,
+        "text": 19.17230987548828,
+        "teacher_dino": 0.0020541411358863115,
+        "teacher_siglip": 0.010247159749269485,
+        "image": 28.836061477661133,
+        "prompt": 59.5731201171875
+      },
+      "history": [
+        {
+          "step": 0,
+          "modality": "text",
+          "loss": 5.819842338562012,
+          "membership_2d": 2.8143506050109863,
+          "membership_3d": 2.79962158203125,
+          "aux": {
+            "dino": 0.09918250888586044,
+            "dino_relation": 0.001018774346448481,
+            "siglip": 0.09980640560388565,
+            "sam": 0.005720238201320171,
+            "sam_membership_boundary": 0.00014230298984330148
+          }
+        },
+        {
+          "step": 30,
+          "modality": "text",
+          "loss": 3.8941891193389893,
+          "membership_2d": 1.6735856533050537,
+          "membership_3d": 2.083613872528076,
+          "aux": {
+            "dino": 0.06687798351049423,
+            "dino_relation": 0.001022579031996429,
+            "siglip": 0.06653999537229538,
+            "sam": 0.0024050832726061344,
+            "sam_membership_boundary": 0.00014394028403330594
+          }
+        },
+        {
+          "step": 60,
+          "modality": "text",
+          "loss": 2.967107057571411,
+          "membership_2d": 1.6658562421798706,
+          "membership_3d": 1.2083542346954346,
+          "aux": {
+            "dino": 0.048390038311481476,
+            "dino_relation": 0.001151417731307447,
+            "siglip": 0.04139567166566849,
+            "sam": 0.0018823541468009353,
+            "sam_membership_boundary": 7.72056810092181e-05
+          }
+        },
+        {
+          "step": 90,
+          "modality": "text",
+          "loss": 1.088034987449646,
+          "membership_2d": 0.4314577281475067,
+          "membership_3d": 0.5748416781425476,
+          "aux": {
+            "dino": 0.04892934486269951,
+            "dino_relation": 0.0008297039894387126,
+            "siglip": 0.029602928087115288,
+            "sam": 0.0023236123379319906,
+            "sam_membership_boundary": 4.999886732548475e-05
+          }
+        },
+        {
+          "step": 120,
+          "modality": "text",
+          "loss": 1.7703269720077515,
+          "membership_2d": 0.7758765816688538,
+          "membership_3d": 0.9353256225585938,
+          "aux": {
+            "dino": 0.04495447129011154,
+            "dino_relation": 0.0005708896787837148,
+            "siglip": 0.011744022369384766,
+            "sam": 0.0018275491893291473,
+            "sam_membership_boundary": 2.78564930340508e-05
+          }
+        },
+        {
+          "step": 150,
+          "modality": "text",
+          "loss": 0.2039085030555725,
+          "membership_2d": 0.09030384570360184,
+          "membership_3d": 0.06738794595003128,
+          "aux": {
+            "dino": 0.038592688739299774,
+            "dino_relation": 0.000611684110481292,
+            "siglip": 0.004249286837875843,
+            "sam": 0.002754031214863062,
+            "sam_membership_boundary": 9.016733201860916e-06
+          }
+        },
+        {
+          "step": 179,
+          "modality": "prompt",
+          "loss": 0.29682740569114685,
+          "membership_2d": 0.09325245022773743,
+          "membership_3d": 0.14517037570476532,
+          "aux": {
+            "dino": 0.03559271618723869,
+            "dino_relation": 0.0012577601009979844,
+            "siglip": 0.009138173423707485,
+            "sam": 0.0028411410748958588,
+            "sam_membership_boundary": 7.695425665588118e-06
+          }
+        }
+      ],
+      "cold_encoded_query_max_error": {
+        "text": 0.0,
+        "image": 0.0,
+        "prompt": 0.0
+      },
+      "field_sha256": "8c04ac9eb9c274495c6c9251e310f8504ec13dd7c391873e65e3b2ce26018819",
+      "geometry_binding_unchanged": true,
+      "benchmark_ground_truth": false,
+      "evaluation_scope": "heldout query AND target views; teacher pseudo labels; unknown pixels excluded",
+      "sam_label_provenance_remains_when_sam_aux_disabled": true,
+      "native_online_query_encoder_cold_test": false
+    }
+  },
+  "tests": {
+    "passed": 468,
+    "warnings": 4
+  },
+  "promotion": false,
+  "scope": "source-only development; 6 train and 2 heldout query/target views; no benchmark ground truth; all_aux_off is only 3 steps"
+}

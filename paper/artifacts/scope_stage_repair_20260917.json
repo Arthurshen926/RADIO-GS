@@ -1,0 +1,162 @@
+{
+  "schema": "scope_stage_repair.v1",
+  "benchmark_data_used": false,
+  "final_retrieval_gain_claimed": false,
+  "retained": "counterfactual_extent_benefit_admission",
+  "scenes": {
+    "figurines": {
+      "observations": 1475,
+      "accepted_observations": 1455,
+      "stages": {
+        "selected_2d": {
+          "iou": 0.9834846471287941,
+          "precision": 0.9845469168750411,
+          "recall": 0.9900866377656743
+        },
+        "same_view_cycle": {
+          "iou": 0.8548522816225492,
+          "precision": 0.9504594410412898,
+          "recall": 0.8852171818337056
+        },
+        "old_full": {
+          "iou": 0.4417760677138438,
+          "precision": 0.7825627523576999,
+          "recall": 0.4853896347037911
+        },
+        "union_full": {
+          "iou": 0.44434775375161256,
+          "precision": 0.789616642601283,
+          "recall": 0.4893534086204244
+        },
+        "old_lvo": {
+          "iou": 0.33544149284440455,
+          "precision": 0.637576897593878,
+          "recall": 0.38975645392675395
+        },
+        "union_lvo": {
+          "iou": 0.33787757223487785,
+          "precision": 0.636475619106885,
+          "recall": 0.3934320924056978
+        },
+        "weighted_full": {
+          "iou": 0.5629734999092959,
+          "precision": 0.7858156523765144,
+          "recall": 0.6496755923242387
+        },
+        "weighted_lvo": {
+          "iou": 0.4025943302981145,
+          "precision": 0.6112397004553448,
+          "recall": 0.5021620173016721
+        },
+        "decoded_in_sample": {
+          "iou": 0.5275308335486453,
+          "precision": 0.6091558946785912,
+          "recall": 0.8108032079198856
+        },
+        "candidate_oracle_iou": 0.99299776237237,
+        "lvo_positive_support": 0.9183798724971711
+      },
+      "decoder_controls": {
+        "weighted_scope_decoder": {
+          "parent_in_sample": 0.5316199229887719,
+          "refit_heldout": 0.4808845501713143
+        },
+        "equal_scope_decoder": {
+          "parent_in_sample": 0.5316199229887719,
+          "refit_heldout": 0.4905448489272691
+        }
+      },
+      "only_concept_final_layer_changed": true,
+      "retained_sha256": "33a52a38afe1cce46111b90ec69ad55def58c95c55c51dc39057625bb0d3a9b7",
+      "union_initialization_executed": true,
+      "artifacts": {
+        "output/pixel_evidence_rebuild_20260917/figurines/scope_transfer_weighted_stages/report.json": "dca76e11121762b9fdf9d3dcb687bf04978fd2d605189e9e8adbe210cca13315",
+        "output/pixel_evidence_rebuild_20260917/figurines/field/weighted_scope_decoder/report.json": "f8804cda5f9771c89aca7111f94bfbe32719ba3f4ac11bc23120e101153f21ed",
+        "output/pixel_evidence_rebuild_20260917/figurines/field/equal_scope_decoder/report.json": "b300151ca4b86c00156e3b67c6e70a93136512c725b0b10e679966f76b7bcd52",
+        "output/pixel_evidence_rebuild_20260917/figurines/field/union_grounded_semantic_transfer96/report.json": "3dcaeac05e9ec6504550f47f5d3a3c6aa28d1adf2710f22025ed750968b157a3"
+      }
+    },
+    "ramen": {
+      "observations": 818,
+      "accepted_observations": 815,
+      "stages": {
+        "selected_2d": {
+          "iou": 0.9947465521199196,
+          "precision": 0.9947722866803335,
+          "recall": 0.996306694078562
+        },
+        "same_view_cycle": {
+          "iou": 0.9338565578816281,
+          "precision": 0.9726992926416886,
+          "recall": 0.9553455746115566
+        },
+        "old_full": {
+          "iou": 0.5421924022900756,
+          "precision": 0.7640106611837312,
+          "recall": 0.6181354663701396
+        },
+        "union_full": {
+          "iou": 0.5423549738220761,
+          "precision": 0.7623693731028249,
+          "recall": 0.6195736251097437
+        },
+        "old_lvo": {
+          "iou": 0.4482793249928479,
+          "precision": 0.663904505424329,
+          "recall": 0.5404595944580445
+        },
+        "union_lvo": {
+          "iou": 0.4487362896058934,
+          "precision": 0.6627796417225179,
+          "recall": 0.5418831719560059
+        },
+        "weighted_full": {
+          "iou": 0.638661663478336,
+          "precision": 0.8041803955822309,
+          "recall": 0.7343865850061397
+        },
+        "weighted_lvo": {
+          "iou": 0.5192801717083564,
+          "precision": 0.699208642711321,
+          "recall": 0.6333523750109348
+        },
+        "decoded_in_sample": {
+          "iou": 0.6014121420960276,
+          "precision": 0.6590804811914678,
+          "recall": 0.8702345058278689
+        },
+        "candidate_oracle_iou": 0.9970149106202615,
+        "lvo_positive_support": 0.9699817313300332
+      },
+      "decoder_controls": {
+        "weighted_scope_decoder": {
+          "parent_in_sample": 0.573881154259046,
+          "refit_heldout": 0.5143434032266796
+        },
+        "equal_scope_decoder": {
+          "parent_in_sample": 0.573881154259046,
+          "refit_heldout": 0.5180361047387123
+        }
+      },
+      "only_concept_final_layer_changed": true,
+      "retained_sha256": "6f4d96cbbee52c48243469f409acbe0b15ac3ac5d099cae23e9b2a8d2b7b689b",
+      "union_initialization_executed": true,
+      "artifacts": {
+        "output/pixel_evidence_rebuild_20260917/ramen/scope_transfer_weighted_stages/report.json": "0079db47e459eca1ee5bd4396c857c5e6f4ffd01e36748ed08df01a54a44dbbb",
+        "output/pixel_evidence_rebuild_20260917/ramen/field/weighted_scope_decoder/report.json": "d8815b92a9bd73130a054a6cdea9100beb992ba1f26685a5ede200066f13a66f",
+        "output/pixel_evidence_rebuild_20260917/ramen/field/equal_scope_decoder/report.json": "508909b1e6cf6a26ac934767e358df0c4073a5e520508b5065b52883021cd568",
+        "output/pixel_evidence_rebuild_20260917/ramen/field/union_grounded_semantic_transfer96/report.json": "524c395f35881338d5ddf8cd6d5625951e5a9d7905dafcfa2a1a1945bde6a12c"
+      }
+    }
+  },
+  "current_implementations": {
+    "radio_gs/training/scope_union_lifting.py": "be5177f0c9ee84e9581820146c0c0457ec95cee636adb52ee52d1d8275281817",
+    "scripts/audits/fit_grounded_semantic_transfer.py": "18c7656e2b3fc6d3cf8078f1dac53253cd27c05cfc7330b95f5e0adbf196ee5e",
+    "scripts/audits/train_rendered_extent.py": "ef60966750776dba593b0e587d6850bdccca4e47b17274996a6bbc9e9546ef59",
+    "scripts/audits/diagnose_scope_transfer_stages.py": "ef3cc85de630a4700395b88b0a9f809c15696c18baf76e3c86324814d017e726",
+    "scripts/audits/diagnose_scope_weighted_stages.py": "aa5bb3a618d2ced637e88293ff8fd719cf2ae1a68f0b4d531d8ba3e2a4ea6e1e",
+    "scripts/audits/fit_weighted_scope_decoder.py": "617d2901f417066f3bbfc5c6bfa08e29c459492a2dcafeecc7582d670e176d4c",
+    "tests/test_scope_union_lifting.py": "dda36c3684eb8a7b52897783794dadf39399e33aafe8d3b23121dfdd4472be57",
+    "/root/RADIO-GS/scripts/audits/verify_scope_stage_repair.py": "3c1924e8471b676077329e8f4afe7ee9753d1c08362cc3c2a3cf6247aa972a60"
+  }
+}

@@ -1,0 +1,337 @@
+{
+  "schema": "pose_covered_lerf_comparison.v1",
+  "independent_final_test": false,
+  "architecture_only_ablation": false,
+  "source_inputs_and_training_budget_expanded": true,
+  "scenes": {
+    "figurines": {
+      "inputs": {
+        "output/lerf_ropefix_multiscale_pipeline_20260917/figurines/scoped_joint_image_validation/text.json": "af8fa431e987bbd11ec598dce5381fc942f9229f20e976e963b746166f1ebd26",
+        "output/lerf_pose_covered_pipeline_20260917/figurines/text_evaluation.json": "cb434e8dcfb0e96f250affa2a3dadc6bf28dad01af803e9651d66720d31cc2dc",
+        "output/lerf_ropefix_multiscale_pipeline_20260917/figurines/scoped_joint_image_validation/reference.json": "0e052d046eb51b388159094c65bd853a86813bc22807036432535df2443e3e1b",
+        "output/lerf_pose_covered_pipeline_20260917/figurines/reference_evaluation.json": "ff7e56c49c3f0dc183c066c5ee0442254b477169a557b2c4e68b0a817f3387ab",
+        "output/lerf_pose_covered_pipeline_20260917/figurines/diagnostics/native_compression.json": "b01384df5025c3b8fb445484a4b8eea3b9ba24aa5f7d51de185e64d87d5e2cdd",
+        "output/lerf_pose_covered_pipeline_20260917/figurines/diagnostics/source_semantic_stages.json": "bcaadd686e5a9bca14a41236b723ca64755dc90e5a51954d4854ad819d5ca51b"
+      },
+      "metrics": {
+        "full_text_observation_miou": {
+          "before": 0.37640223695242847,
+          "after": 0.3791587332910762,
+          "delta": 0.002756496338647718
+        },
+        "full_text_average_precision_macro": {
+          "before": 0.6046193245240206,
+          "after": 0.6146629907507407,
+          "delta": 0.01004366622672015
+        },
+        "full_text_positive_support_recall_macro": {
+          "before": 0.9906321327601161,
+          "after": 0.9951160731060165,
+          "delta": 0.0044839403459003835
+        },
+        "reference_text_iou": {
+          "before": 0.35605350151913273,
+          "after": 0.3643035144567034,
+          "delta": 0.008250012937570661
+        },
+        "reference_text_average_precision": {
+          "before": 0.5764518638595539,
+          "after": 0.606347171322187,
+          "delta": 0.029895307462633025
+        },
+        "reference_image_iou": {
+          "before": 0.335767530182731,
+          "after": 0.38493459666940755,
+          "delta": 0.04916706648667657
+        },
+        "reference_image_average_precision": {
+          "before": 0.5307758461196399,
+          "after": 0.6140708583235521,
+          "delta": 0.08329501220391222
+        },
+        "reference_prompt_iou": {
+          "before": 0.38130502674895916,
+          "after": 0.46560042794770057,
+          "delta": 0.0842954011987414
+        },
+        "reference_prompt_average_precision": {
+          "before": 0.5637191428784125,
+          "after": 0.6438973990345687,
+          "delta": 0.08017825615615615
+        }
+      },
+      "per_view_text": {
+        "41": {
+          "before": {
+            "iou": 0.4567715349791805,
+            "average_precision": 0.6760520678234113
+          },
+          "after": {
+            "iou": 0.41412027699793647,
+            "average_precision": 0.6303787312719381
+          }
+        },
+        "105": {
+          "before": {
+            "iou": 0.2896921413576199,
+            "average_precision": 0.5186876882826617
+          },
+          "after": {
+            "iou": 0.35811453874780147,
+            "average_precision": 0.590674141032263
+          }
+        },
+        "152": {
+          "before": {
+            "iou": 0.5131640381897008,
+            "average_precision": 0.7632421577989785
+          },
+          "after": {
+            "iou": 0.41075138093505764,
+            "average_precision": 0.7512024913423325
+          }
+        },
+        "195": {
+          "before": {
+            "iou": 0.2601737944636108,
+            "average_precision": 0.4818128891255867
+          },
+          "after": {
+            "iou": 0.33460601075522,
+            "average_precision": 0.5175131874822299
+          }
+        }
+      },
+      "field_sha256": {
+        "before": "30280c029475f180bd2cfd45ce6d9792d648598bdbd22c144488fd012492798f",
+        "after": "6624f0a41f47483d2e6fd3b0c9981b23e979906b1c5703c66513e3e443b31ee2"
+      },
+      "native_decomposition": {
+        "native_compression": {
+          "full_native_fusion": {
+            "iou": 0.3078153637081535,
+            "average_precision": 0.5898138698393787
+          },
+          "native64": {
+            "iou": 0.298100486924524,
+            "average_precision": 0.568322154799658
+          },
+          "current_readout": {
+            "iou": 0.3791587332910762,
+            "average_precision": 0.6146629907507407
+          }
+        },
+        "source_semantic_stages": {
+          "oracle_region_iou": 0.7776572573693618,
+          "semantic_selected_region_iou": 0.48601592518430053,
+          "mask_geometry_cycle_iou": 0.8631184001415271,
+          "common_positive_support": 0.9211859300962177,
+          "before_geometry_pixel_mix": {
+            "average_precision": 0.706865721924649,
+            "positive_support": 0.9909301270185189,
+            "common_support_ap": 0.6756555024673873
+          },
+          "single_view_lift": {
+            "average_precision": 0.6456347706976955,
+            "positive_support": 0.9467138016761922,
+            "common_support_ap": 0.6511842191810504
+          },
+          "all_view_fusion": {
+            "average_precision": 0.53067663590597,
+            "positive_support": 0.9474877108027816,
+            "common_support_ap": 0.5407087942879395
+          },
+          "leave_view_out": {
+            "average_precision": 0.4518877400042052,
+            "positive_support": 0.9293210484331963,
+            "common_support_ap": 0.4638134973920311
+          }
+        }
+      },
+      "unavailable_prompt_tasks": {
+        "before": 0,
+        "after": 0
+      }
+    },
+    "ramen": {
+      "inputs": {
+        "output/lerf_ropefix_multiscale_pipeline_20260917/ramen/scoped_joint_image_validation/text.json": "566de86dec3dcd7e1b20e6abfe399c6d0f06cbdbd5018fe348e5f593811d2de8",
+        "output/lerf_pose_covered_pipeline_20260917/ramen/text_evaluation.json": "2e656138d4ebe8bae8f129665b0202ad4fb90cf210dbd1b4f32a7e512f8479c2",
+        "output/lerf_ropefix_multiscale_pipeline_20260917/ramen/scoped_joint_image_validation/reference.json": "74802f7c31486077fdc72b44beb6b5c85287bde00d0c4ca32732370fde353981",
+        "output/lerf_pose_covered_pipeline_20260917/ramen/reference_evaluation.json": "86b94775257922c091d7fc5fe02b29565ef9b6179e07d58eaaf2c808eb8651bb",
+        "output/lerf_pose_covered_pipeline_20260917/ramen/diagnostics/native_compression.json": "5560a7a8b43326eae8313e71320ec4d8c8ac74c83dff74e46f7d3021c24a6787",
+        "output/lerf_pose_covered_pipeline_20260917/ramen/diagnostics/source_semantic_stages.json": "833e9651ce6eddd9856dffa11b729309be20f53ed7eb5f02a46b14f5c619f3d0"
+      },
+      "metrics": {
+        "full_text_observation_miou": {
+          "before": 0.2848046467121281,
+          "after": 0.316172940312777,
+          "delta": 0.03136829360064891
+        },
+        "full_text_average_precision_macro": {
+          "before": 0.47207717185124765,
+          "after": 0.49309876306628814,
+          "delta": 0.02102159121504049
+        },
+        "full_text_positive_support_recall_macro": {
+          "before": 0.9982530491452821,
+          "after": 0.9982530491452821,
+          "delta": 0.0
+        },
+        "reference_text_iou": {
+          "before": 0.27338428769388207,
+          "after": 0.318061162252576,
+          "delta": 0.04467687455869396
+        },
+        "reference_text_average_precision": {
+          "before": 0.45884532979265,
+          "after": 0.5065256136055275,
+          "delta": 0.04768028381287748
+        },
+        "reference_image_iou": {
+          "before": 0.2135712832018856,
+          "after": 0.26233593079185313,
+          "delta": 0.04876464758996754
+        },
+        "reference_image_average_precision": {
+          "before": 0.528608299530317,
+          "after": 0.5846633777482929,
+          "delta": 0.05605507821797595
+        },
+        "reference_prompt_iou": {
+          "before": 0.34748943728894127,
+          "after": 0.32943610073497664,
+          "delta": -0.018053336553964627
+        },
+        "reference_prompt_average_precision": {
+          "before": 0.5235706646178658,
+          "after": 0.4919894968755744,
+          "delta": -0.031581167742291416
+        }
+      },
+      "per_view_text": {
+        "6": {
+          "before": {
+            "iou": 0.3940067851193385,
+            "average_precision": 0.5742803484991815
+          },
+          "after": {
+            "iou": 0.3375128152891598,
+            "average_precision": 0.4570514720968108
+          }
+        },
+        "24": {
+          "before": {
+            "iou": 0.2636096033591854,
+            "average_precision": 0.5012983233609375
+          },
+          "after": {
+            "iou": 0.3224361371250985,
+            "average_precision": 0.5351993366697981
+          }
+        },
+        "60": {
+          "before": {
+            "iou": 0.2556905671936321,
+            "average_precision": 0.529083797987048
+          },
+          "after": {
+            "iou": 0.2915379138198477,
+            "average_precision": 0.6029888995962033
+          }
+        },
+        "65": {
+          "before": {
+            "iou": 0.2713025313951779,
+            "average_precision": 0.44133295723872
+          },
+          "after": {
+            "iou": 0.27470145168346766,
+            "average_precision": 0.41821587288371265
+          }
+        },
+        "81": {
+          "before": {
+            "iou": 0.3164165815635457,
+            "average_precision": 0.46054094079233104
+          },
+          "after": {
+            "iou": 0.3631502440240878,
+            "average_precision": 0.5024540735872893
+          }
+        },
+        "119": {
+          "before": {
+            "iou": 0.1744392395349294,
+            "average_precision": 0.3466208114561064
+          },
+          "after": {
+            "iou": 0.27170639239439276,
+            "average_precision": 0.4769407645351221
+          }
+        },
+        "128": {
+          "before": {
+            "iou": 0.2821299971825869,
+            "average_precision": 0.45553560249143865
+          },
+          "after": {
+            "iou": 0.32915629755668974,
+            "average_precision": 0.49204585468293205
+          }
+        }
+      },
+      "field_sha256": {
+        "before": "c9d2da978ddb39646c3e636eb48cf3fd5304cca04355d67699b3e863153d056a",
+        "after": "6a13e9939ec0ca82e1c42f6f9b0ff201d4811052b8d162b1d1b9b225af0b03ff"
+      },
+      "native_decomposition": {
+        "native_compression": {
+          "full_native_fusion": {
+            "iou": 0.06512489308569445,
+            "average_precision": 0.4296870548141432
+          },
+          "native64": {
+            "iou": 0.05749355853371615,
+            "average_precision": 0.42445441278544077
+          },
+          "current_readout": {
+            "iou": 0.316172940312777,
+            "average_precision": 0.49309876306628814
+          }
+        },
+        "source_semantic_stages": {
+          "oracle_region_iou": 0.8071927114694613,
+          "semantic_selected_region_iou": 0.5005797703871946,
+          "mask_geometry_cycle_iou": 0.938202936936469,
+          "common_positive_support": 0.966706523454211,
+          "before_geometry_pixel_mix": {
+            "average_precision": 0.7842785004706662,
+            "positive_support": 0.9837250943837229,
+            "common_support_ap": 0.7807435984792969
+          },
+          "single_view_lift": {
+            "average_precision": 0.7650421980235371,
+            "positive_support": 0.9976817972033564,
+            "common_support_ap": 0.7679895284333514
+          },
+          "all_view_fusion": {
+            "average_precision": 0.6090792226919737,
+            "positive_support": 0.9981835575144367,
+            "common_support_ap": 0.6152374998304482
+          },
+          "leave_view_out": {
+            "average_precision": 0.5506913246470094,
+            "positive_support": 0.9828500251564449,
+            "common_support_ap": 0.5560244255088298
+          }
+        }
+      },
+      "unavailable_prompt_tasks": {
+        "before": 0,
+        "after": 0
+      }
+    }
+  },
+  "implementation_sha256": "5a49bda38ea76dd0ed6c60711862fccce1bafb144a711e6bf150240e1507b624"
+}

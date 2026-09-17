@@ -1,0 +1,50 @@
+{
+  "schema": "real_polygon_reference_query_development.v1",
+  "scene": "figurines",
+  "field_sha256": {
+    "reliable_pairs768": "cf8966ffc1841c86cb3911009b88f598b06915baff6b024cbe159cb3668c839b",
+    "semantic_relations768": "34f54bd9eb0c01b97f160154df8ec4e244ce0eb1002400a406c9495b6286e3ac",
+    "reliable_semantic768": "ab7c72d1d529ee3cb141e178e3f7bfdb14874151a4c479c47aa68c36b4b645c6"
+  },
+  "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+  "labels": [
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json",
+      "sha256": "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00105.json",
+      "sha256": "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.json",
+      "sha256": "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00195.json",
+      "sha256": "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb"
+    }
+  ],
+  "reference_selection": "first annotated frame per category; remaining annotated frames are targets",
+  "query_contract": "text verbatim; image masked crop with3px padding and gray127 outside; prompt one positive and one negative point with registered frozen geometry",
+  "query_mask_or_points_supplied_from_reference_gt": true,
+  "target_masks_used_for_query_encoding": false,
+  "annotations_define_evaluation_cohort": true,
+  "target_rgb_encoded_for_its_own_query": false,
+  "source_training_assets_forbidden": true,
+  "source_semantic_train_frames": [
+    11,
+    21,
+    31,
+    38,
+    49,
+    69
+  ],
+  "target_width": 480,
+  "threshold": 0.5,
+  "refine_prompts": true,
+  "minimal_prompt_refinement": false,
+  "official_benchmark_protocol": false,
+  "instance_identity_assumption": "same category across frames, union of category polygons; not independently verified physical instance tracks",
+  "implementation_sha256": "e0031c6cbd695b808c9c1ca4998dffd58301e5ef4e6acab786daa052e3ddcf46"
+}

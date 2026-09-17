@@ -1,0 +1,53 @@
+{
+  "schema": "bounded_image_extent_selection.v1",
+  "source_only": true,
+  "benchmark_data_used": false,
+  "policy": "one shared strength maximizing equal-scene source-validation AP, requiring no source IoU/AP regression in either scene; zero is eligible; ties prefer smaller",
+  "selected_strength": 2.0,
+  "source_reports": {
+    "figurines": "d66ac20cab8ae8a60aa39426c943442c1373db0dcd21f04d61cabac1c4267536",
+    "ramen": "0648d18c18bd2125dc49db979b1d6f96592253b990fda26ec5470231d4c8580d"
+  },
+  "scenes": {
+    "figurines": {
+      "schema": "bounded_image_extent_candidate.v1",
+      "field_sha256": "64e9a3b773b7faef523fc830148e75e125afc4980e91c30283aaf31c6cdd0580",
+      "parent_field_sha256": "502469ad7f43febf39022aa2bc8d5c78aed57d0d662a14ee2090b994c86c7561",
+      "source_only": true,
+      "benchmark_data_used": false,
+      "strength": 2.0,
+      "all_parent_tensors_unchanged": true,
+      "unchanged_response_errors": {
+        "text": 0.0,
+        "prompt": 0.0
+      },
+      "source_validation_report_sha256": "d66ac20cab8ae8a60aa39426c943442c1373db0dcd21f04d61cabac1c4267536",
+      "independent_test": false,
+      "implementation_sources": {
+        "radio_gs/models/element_retrieval_field.py": "28ccf1677c35bc4ac1fcaa42c84e637fbbfb6cc37537e4b0876a20e583ff4e4c",
+        "radio_gs/models/bounded_extent_readout.py": "ce8cb0498c4402fe5b2d7b97b674c31d019a5ed348d71c18524dd100c09258a1",
+        "scripts/audits/export_bounded_image_extent.py": "2793664be0dd2e2c664c7e121747388edc4910075a0ac675f56d760300db9bbf"
+      }
+    },
+    "ramen": {
+      "schema": "bounded_image_extent_candidate.v1",
+      "field_sha256": "34f862af69b828f25663e2e060de88cad721a439c2d16d8a0ab3ec4d86a54ead",
+      "parent_field_sha256": "d86d5d324500c45ec74a7b35b55916be09da01cc5aa0e9bbbe89f684f7fa1856",
+      "source_only": true,
+      "benchmark_data_used": false,
+      "strength": 2.0,
+      "all_parent_tensors_unchanged": true,
+      "unchanged_response_errors": {
+        "text": 0.0,
+        "prompt": 0.0
+      },
+      "source_validation_report_sha256": "0648d18c18bd2125dc49db979b1d6f96592253b990fda26ec5470231d4c8580d",
+      "independent_test": false,
+      "implementation_sources": {
+        "radio_gs/models/element_retrieval_field.py": "28ccf1677c35bc4ac1fcaa42c84e637fbbfb6cc37537e4b0876a20e583ff4e4c",
+        "radio_gs/models/bounded_extent_readout.py": "ce8cb0498c4402fe5b2d7b97b674c31d019a5ed348d71c18524dd100c09258a1",
+        "scripts/audits/export_bounded_image_extent.py": "2793664be0dd2e2c664c7e121747388edc4910075a0ac675f56d760300db9bbf"
+      }
+    }
+  }
+}

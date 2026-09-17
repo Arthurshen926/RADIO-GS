@@ -1,0 +1,279 @@
+{
+  "schema": "source_track_mask_consistency.v1",
+  "scene": "figurines",
+  "source_only": true,
+  "benchmark_data_used": false,
+  "teacher_masks_are_not_gt": true,
+  "no_moge_depth_or_gaussian_or_feature_in_computation": true,
+  "colmap_track_identity_not_manual_ground_truth": true,
+  "maximum_track_reprojection_error": 2.0,
+  "native_boundary_exclusion_radius": 3,
+  "input_bindings": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/caption_grounded_regions.pt": "e3c4cbeb585cba4c7ebd44f004ca4af00cfafa59413d4f26d76f5f991f4ce08b",
+    "/mnt/pool/sqy/results/RADIO-GS/output/geometry_only_repair_final_20260914/figurines/report.json": "14aa139766f39f2eea58b0728b2def3e0e1a12a923714b2d79cf51f761355050",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/points3D.bin": "338ab2a8d30e1ba14a33c78c8f30484adc2b3c6ecd75d77c75eaa1808bebd229"
+  },
+  "source_geometry_receipt_inputs": [
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_moge3_lerf_figurines_scene_manifest_20260830.json",
+      "role": "moge3_scene_manifest",
+      "sha256": "535a60b2e75dda95d85af2b2d762ed3b32628e6114f151743a0d2fadb5dd01f4"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_direct_capability/figurines/exact_marginal_responsibility_current.json",
+      "role": "source_authority",
+      "sha256": "8876cd8a6da5d737792a34895f05d52940f4cfc646fdb1e31939fcc0fd0b43a9"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/cameras.bin",
+      "role": "colmap_cameras",
+      "sha256": "f15177de04831c7052822d0694ede2de78151052de5199df9afaacf141ae7154"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/images.bin",
+      "role": "colmap_images",
+      "sha256": "ecbf431d68982126fcae865cf2d951f4cdf14c70348f760939543b5cb8c7ee9e"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/points3D.bin",
+      "role": "colmap_sparse_points",
+      "sha256": "338ab2a8d30e1ba14a33c78c8f30484adc2b3c6ecd75d77c75eaa1808bebd229"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/moge_pixel_calibration_v2_20260914/figurines.pt",
+      "role": "fused_surface",
+      "sha256": "6dcd55963026d82339aa7aa0e31767c1bd9c2145e7cd66437fe92769d1aa2ee2"
+    }
+  ],
+  "strict_point_statistics": {
+    "total_colmap_points": 50517,
+    "points_touching_source_views": 45374,
+    "strict_source_only_points": 971
+  },
+  "source_views": [
+    {
+      "frame": 11,
+      "strict_source_tracks": 23,
+      "grounded_phrases": 37
+    },
+    {
+      "frame": 21,
+      "strict_source_tracks": 11,
+      "grounded_phrases": 34
+    },
+    {
+      "frame": 31,
+      "strict_source_tracks": 8,
+      "grounded_phrases": 25
+    },
+    {
+      "frame": 38,
+      "strict_source_tracks": 23,
+      "grounded_phrases": 37
+    },
+    {
+      "frame": 49,
+      "strict_source_tracks": 30,
+      "grounded_phrases": 25
+    },
+    {
+      "frame": 69,
+      "strict_source_tracks": 22,
+      "grounded_phrases": 36
+    }
+  ],
+  "rows": [
+    {
+      "phrase": "blue lid",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "blue teddy bear toy",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "food",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 2,
+      "conflicting_pairs": 1,
+      "conflict_fraction_of_positive_shared": 0.5
+    },
+    {
+      "phrase": "fruit",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "green apple",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "green chair",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "green object",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "metal object",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "person",
+      "shared_track_concept_pairs": 2,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "plastic container",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "red apple",
+      "shared_track_concept_pairs": 2,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "rubber ducks",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "small blue toy",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "small toy",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "table",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "toys",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 1,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": 0.0
+    },
+    {
+      "phrase": "two rubber ducks",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "white surface",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "white table",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "yellow duck",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "yellow rubber duck",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "yellow rubber ducks",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    },
+    {
+      "phrase": "yellow toy",
+      "shared_track_concept_pairs": 3,
+      "positive_shared_pairs": 0,
+      "conflicting_pairs": 0,
+      "conflict_fraction_of_positive_shared": null
+    }
+  ],
+  "examples": [
+    {
+      "phrase": "food",
+      "point_id": 8359,
+      "positive": [
+        {
+          "frame": 11,
+          "xy": [
+            368.8321533203125,
+            141.22608947753906
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "frame": 49,
+          "xy": [
+            206.39208984375,
+            142.4119110107422
+          ]
+        }
+      ]
+    }
+  ],
+  "macro": {
+    "shared_track_concept_pairs": 67,
+    "positive_shared_pairs": 5,
+    "conflicting_pairs": 1,
+    "conflict_fraction_of_positive_shared": 0.20000000298023224
+  },
+  "implementation_sha256": "cc95d370ca09a42da431cbd56d83cbeb122152b5738a9147f01b5c864d5dd193"
+}

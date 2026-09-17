@@ -25,3 +25,18 @@ def compose_overlapping_candidates(membership, query_support, *, chunk_size=32):
         output = torch.maximum(output, joint.max(1).values)
     return output, {"composition": "maximum_joint_candidate_support", "membership_semantics": "overlapping_hypotheses",
                     "score_semantics": "bounded_evidence_not_calibrated_probability", "pre_query_top2": False}
+
+
+def compose_selected_candidates(membership, selected):
+    """Union explicitly selected candidate extents without a probability claim.
+
+    The caller owns identity selection/calibration. A boolean selection is
+    required so an uncalibrated similarity sigmoid cannot silently become an
+    instance probability. This operator does not choose the candidate set.
+    """
+    selected = torch.as_tensor(selected)
+    if selected.dtype != torch.bool:
+        raise ValueError("candidate selection must be explicit boolean [Q,K]")
+    output, audit = compose_overlapping_candidates(membership, selected.float())
+    audit.update(composition="union_of_selected_candidate_support", query_selection="explicit_boolean")
+    return output, audit

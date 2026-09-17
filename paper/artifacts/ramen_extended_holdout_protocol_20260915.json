@@ -1,0 +1,11 @@
+{
+ "status":"declared before new holdout teacher extraction or query evaluation",
+ "train_frames":[7,11,15,18,22,27,109,76,131,101,105,90],
+ "old_validation_frames":[31,35],
+ "new_validation_frames":[39,42,47,51,55,59],
+ "selection":"first six sorted geometry-mapping/native-SAM intersection frames absent from existing train and validation; no semantic score selection",
+ "models_frozen_before_new_holdout_extraction":["dense_view_coverage660","signed_target_guard660","unit_teacher_features660","dense_view_without_radio660"],
+ "no_training_or_checkpoint_selection_on_new_holdout":true,
+ "benchmark_ground_truth":false,
+ "scope":"new semantic holdout views; geometry uses its existing independent stage and is not newly held out"
+}

@@ -1,4 +1,4 @@
-"""Frozen four-scene transfer of affinity checkpoints, with separate processes."""
+"""Explicit legacy diagnostic transfer; not a promoted v4 method."""
 import argparse
 import json
 from pathlib import Path
@@ -37,6 +37,7 @@ def main():
         state = {"scene_state": old["scene_state"], "expected_scene_state_sha256": old["scene_state_sha256"], "scene_label": scene}
         memory = output / (scene + ".pt")
         config = dict(old["association_configuration"])
+        config.setdefault("relation_contract", "legacy_visibility_absence_v1")
         if config.pop("maximum_fragment_hypotheses", 2) != 2:
             raise ValueError("reference requires an unsupported assignment capacity")
         execute("radio_gs.v4.contracts.build_lerf_object_hypotheses", {
@@ -56,6 +57,7 @@ def main():
         execute("radio_gs.v4.evaluation.lerf_object_hypothesis_ceiling", {**common, "output": ceiling}, scene + "_ceiling.log")
         execute("radio_gs.v4.evaluation.lerf_object_hypothesis_text_evaluator", {
             **common, "hypothesis_ceiling": ceiling,
+            "allow_legacy_candidate_normalization": [],
             "text_query_cache": prior["text_query_cache"], "negative_text_query_cache": prior["negative_text_query_cache"],
             "query_temperature": prior["query_contract"]["temperature"],
             "query_set_mass": prior["query_contract"]["query_set_mass"],
@@ -66,7 +68,7 @@ def main():
         print(scene + " completed", flush=True)
     (output / "completed.json").write_text(json.dumps({"completed": True, "assignment_formula_unchanged": True,
         "geometry_only_scope": "learned_grouping_only; fixed assignment still uses appearance",
-        "development_only": True}) + "\n")
+        "development_only": True, "result_role": "legacy_contract_replay"}) + "\n")
 
 
 if __name__ == "__main__":

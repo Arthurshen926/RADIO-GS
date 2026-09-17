@@ -1,0 +1,172 @@
+{
+  "schema": "source_grounded_transfer_seal.v1",
+  "source_files": {
+    "scripts/audits/discover_source_caption_phrases.py": "496e9006143a49b654df1d6943d69fe63ffcbd491eeed5c00f286ed18d061561",
+    "scripts/audits/ground_source_caption_phrases.py": "5ccd1b9b006213f657bcf8e4817b3881dcbdb72f62de5ad07f6f1b4d81f13dbb",
+    "scripts/audits/encode_caption_region_evidence.py": "85e801341dd9ea5fcb82a14bebaf7f0cde60ce6222e815cd698bd37112db9e58",
+    "scripts/audits/export_caption_fusion_control.py": "2e56aae728f8f2da6734fd95cb15b0f000b3ec4f09dabf12fa806cb2e23e0957",
+    "scripts/audits/export_source_membership_code.py": "a0953cf95d75f00c1985644322c4296218a81dbead9782cd184ce28ffb394629",
+    "scripts/audits/fit_grounded_semantic_transfer.py": "62aaa3588128d835cb023c4df99aa552775e87f3f73a9ba1c9d4578ffcb0714d",
+    "scripts/audits/train_grounded_semantic_transfer.py": "e983da3b1d667f31a616a9c19d88419387fd07e8fef920903ed32cb8acab8249",
+    "scripts/audits/build_fixed_vocab_transfer_control.py": "d6921515556723b6e1665b009d8ad1e9d31c465ba410a620989ecafe1a148f5f",
+    "scripts/audits/evaluate_frozen_field_lerf_labels.py": "dbe80835062c110f801b6647cea449a7df6267614aeff4ac4934ac91cc9d8b2c",
+    "scripts/audits/evaluate_real_reference_queries.py": "c857390cd855d6cb4ce553abfaea4c57f5c7b8f17649de7d35bacc421a5a7f97",
+    "scripts/audits/audit_grounded_transfer.py": "544fc42aa67595a69d93b0125518c6397ef62802020f387bfd3ba70ff4ac7539",
+    "scripts/audits/seal_grounded_transfer.py": "f3bbd2d8decc52fde27bf8fbcbd48508c06c80cabec723e106ce0066b6c97355",
+    "radio_gs/models/element_retrieval_field.py": "9ab016da267acca3ff594fb9b3f3242d51634291011acc26cce9dd7b7452d133",
+    "radio_gs/models/grounded_semantic_transfer.py": "c4415f901b60c66cdb66724d839d4b9c45bbb0e84f89e34dbd31addb3ea8e062",
+    "radio_gs/models/source_membership_code.py": "d6e1a717016696478c4a1ae7c3281c949fb9e09306cbb1beed31365dfd4cae58",
+    "radio_gs/models/native_query_threshold.py": "2e5a62b6f8ab094142b40131f66b4b78bd2f654ea8a2433f0cf524422127d599"
+  },
+  "scenes": {
+    "figurines": {
+      "fields": {
+        "full_source_query_threshold_control": "12c441f4563c77847ea0029a223d0204f004cf8e8fa42f226ecfaae3190d28cb",
+        "caption_native_fusion_control": "0d6540b2a4f44472b8e874cdbe8a089aa6ed682dffd19e14cd6e6bfc0472d764",
+        "caption_coarse_fusion_control": "50318dd2615430c4092274a5edba0181f0f7e3a60b98edd7df50b733d1e419e4",
+        "source_membership_code32": "8f89458a1f919cf2005cf220d3bf950f6c7a3da847737d3a368db43ee6139627",
+        "source_membership_balanced32": "b5775c0f398383850a19c14ee275f895d7c6350a0f57975a8dcddae15f409d41",
+        "grounded_semantic_transfer96": "203cc91f0c4ff0f75da6179abfc09055b99a3f5f2c6921598b1b048d7dbf742c",
+        "grounded_semantic_transfer_mlp96": "d05fa35da93374eb966f73e6602f881b9457c68a3c4e6434814a4712486464c9",
+        "fixed_vocab_grounded_transfer96": "d02cb6f12de95412da193a501778dce3851e6d9176ac5660014df562bb3ca34b"
+      },
+      "text": {
+        "full_source_query_threshold_control": {
+          "observation_miou": 0.3362634673907155,
+          "average_precision_macro": 0.584925039017014
+        },
+        "caption_native_fusion_control": {
+          "observation_miou": 0.37039302213963543,
+          "average_precision_macro": 0.606318904612371
+        },
+        "caption_coarse_fusion_control": {
+          "observation_miou": 0.35903012236306003,
+          "average_precision_macro": 0.6032589641482887
+        },
+        "source_membership_code32": {
+          "observation_miou": 0.17538497117864044,
+          "average_precision_macro": 0.3559809993543751
+        },
+        "source_membership_balanced32": {
+          "observation_miou": 0.17433835323212735,
+          "average_precision_macro": 0.35842024489586544
+        },
+        "grounded_semantic_transfer96": {
+          "observation_miou": 0.3536554034554653,
+          "average_precision_macro": 0.5734436390008477
+        },
+        "grounded_semantic_transfer_mlp96": {
+          "observation_miou": 0.3506439224336515,
+          "average_precision_macro": 0.5689993879257161
+        },
+        "fixed_vocab_grounded_transfer96": {
+          "observation_miou": 0.27962349132748443,
+          "average_precision_macro": 0.4802614868522516
+        }
+      },
+      "accepted_categories": 7,
+      "categories": 21,
+      "all_parent_tensors_exact": true,
+      "cold_and_reference_invariants_passed": true
+    },
+    "ramen": {
+      "fields": {
+        "full_source_query_threshold_control": "7eaa1db4c8d9afa2bdda826c1a4c03abdf96bde1f4b3e33211aff326df4a1612",
+        "caption_native_fusion_control": "2d8182b80a58b36a4a81677ebb4cd16677d635106e359e9a72e0fcaafad97d16",
+        "caption_coarse_fusion_control": "05a3f10d3eaa5a73f4697969335a54d6911bfdd6cf8c7c3e65ce7e4724cfe1ba",
+        "source_membership_code32": "8f2bff1e077fa60033956b716cbe76598431a9d668fb44430bd312c5d1a05d57",
+        "source_membership_balanced32": "772eef8dcba26e04013b54d5c74fdbd7139bbeadde945e196eb5dd898364fc16",
+        "grounded_semantic_transfer96": "e09d43cbfd8a9376dc80a146a7fea0162b4433441abe6b4c0d2389cae85f8f64",
+        "grounded_semantic_transfer_mlp96": "ce50d35bf784a0bb42d3d1360088d09e5f113e19721c8a650120f328c64acd1a",
+        "fixed_vocab_grounded_transfer96": "9b9e328c155669c72010b5d46741575cbfde0943f0ac642b21dde92e9e0fcba7"
+      },
+      "text": {
+        "full_source_query_threshold_control": {
+          "observation_miou": 0.08593507800735886,
+          "average_precision_macro": 0.30972114437899273
+        },
+        "caption_native_fusion_control": {
+          "observation_miou": 0.06993278108429504,
+          "average_precision_macro": 0.28023595700824483
+        },
+        "caption_coarse_fusion_control": {
+          "observation_miou": 0.05986242979277098,
+          "average_precision_macro": 0.29084535570063225
+        },
+        "source_membership_code32": {
+          "observation_miou": 0.11088345602918603,
+          "average_precision_macro": 0.3385634943115163
+        },
+        "source_membership_balanced32": {
+          "observation_miou": 0.1688675738676198,
+          "average_precision_macro": 0.3772586382062592
+        },
+        "grounded_semantic_transfer96": {
+          "observation_miou": 0.2308645617704632,
+          "average_precision_macro": 0.37237943526092593
+        },
+        "grounded_semantic_transfer_mlp96": {
+          "observation_miou": 0.2072506717999251,
+          "average_precision_macro": 0.2989247329505674
+        },
+        "fixed_vocab_grounded_transfer96": {
+          "observation_miou": 0.18465600429469445,
+          "average_precision_macro": 0.2894393040289512
+        }
+      },
+      "accepted_categories": 9,
+      "categories": 14,
+      "all_parent_tensors_exact": true,
+      "cold_and_reference_invariants_passed": true
+    }
+  },
+  "artifacts": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/caption_grounded_regions.json": "95d17d46c8bc9ca0ebb82cc696c294a3ea87faacda86f1abc3bf406e246ab9ed",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/caption_region_evidence.json": "13b306f6c695568e272233d9640e51fd909c7ee113e224098ea1e7b2ae5fafbe",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/fixed_vocab_region_evidence.json": "a3c09bc3db315c9dfa0f984e7dd02083c2c532cb902190c8df4250744af13339",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/caption_native_fusion_control/report.json": "20f5526a5723b25f9cdb0923879340b02f581dc7f4f5fe0187a0d14fce66e317",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/caption_coarse_fusion_control/report.json": "67b4765e845e9a91fc32339fa3d934bc1b75ffb74ddfd623a972fac97a74512e",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_membership_code32/report.json": "d79785c4ba11ee6cf6edd950429ee61959b6c8a4a9fc9c3ee835658888307419",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/source_membership_balanced32/report.json": "22f4ff0c88c5fa77f3575995103016d667efbc38cacd7ced8be071ac372ae786",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/grounded_semantic_transfer96/report.json": "8ae4bf32e2e46a2b2831ff60a8be10c6680ee7cfb86c5ea8ee0fe2b412ff0611",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/grounded_semantic_transfer_mlp96/report.json": "24b5966178b954c2dd7cd1c05912c007a5d621e873c97db01c35b754ab6f006b",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/fixed_vocab_grounded_transfer96/report.json": "bf45dfb68c39c6756ca6bdc1c9a57aaf0877f3cc00a633eadeeb19c8dca38258",
+    "paper/artifacts/figurines_caption_transfer_text_20260916.json": "aea3de1adf133568e2021a2fe11ec969bf44ae8e6e66dead4d5631bc2a4ecd32",
+    "paper/artifacts/figurines_caption_transfer_text_20260916.protocol.json": "2bffdcf855437ac4125fd7afb693d2967668a2976d3979a116e47a2ce51ce94f",
+    "paper/artifacts/figurines_caption_transfer_reference_20260916.json": "c652c34a74a662c92231b333294ae5de0bef0fb57498c4f0336e9f2f335a13fa",
+    "paper/artifacts/figurines_caption_transfer_reference_20260916.protocol.json": "8d825d5556dff7f9b24cf151d1899e8b3d9bee6781977d3fd307391300e69fbe",
+    "paper/artifacts/figurines_grounded_transfer_text_20260916.json": "ed6ad91cd9312d45043a4bd9e90d53255834cacd6510542e1fd6d39eaaba400a",
+    "paper/artifacts/figurines_grounded_transfer_text_20260916.protocol.json": "81524529c591d289bd4c907cf9af2fc58be908bed6572aea1d71236d991361e0",
+    "paper/artifacts/figurines_grounded_transfer_reference_20260916.json": "465a63f6f46f706c02885c0f9e9fddcefb283f83f4d5af1f447486368d03be4b",
+    "paper/artifacts/figurines_grounded_transfer_reference_20260916.protocol.json": "3a0258a0ef2b05355fb6d70151234189a9e5cda5425571c9bcdf369d576d7108",
+    "paper/artifacts/figurines_fixed_vocab_transfer_text_20260916.json": "1635c11134df6516a6c9e6a3b642415d4bfea641ea05338cb30c43359b3d5326",
+    "paper/artifacts/figurines_fixed_vocab_transfer_text_20260916.protocol.json": "042875010f3439e546bdd747e3c80bc23b01c4484c5d9ebadd99a45fc68ad472",
+    "paper/artifacts/figurines_grounded_transfer_audit_20260916.json": "590d79afd689d6d273edd39ffff0505d313efbfa73e5f85a3a6eaf4d39b7cd4a",
+    "paper/artifacts/figurines_grounded_transfer_audit_20260916.png": "2adb4c998d111882efd0693ae8cfa8b4e6074dabfea08f25ff5f4aa814757682",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/caption_source_phrases.json": "9fa9527c92feb2d0f5ee1282b92f8765f0e89001a06a1a2ea55b914d4f30af87",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/caption_grounded_regions.json": "42dcaa94668df9b6747834ea0b6615852bd3b5a5e0046dded2d3a3bf6ad8b8d4",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/caption_region_evidence.json": "0192e5b1fcb8e55fd74d6f8505ffe927e1f6573231247f540ba31a4054bf39d8",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/fixed_vocab_region_evidence.json": "f33dd9400cb71fca0672fe908dd9a908813ea9ca243f62b23d4980992de749a0",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/caption_native_fusion_control/report.json": "3248b76f30f7c4784d3fb8133f6dd12d93297090a160d2877d0aad493c89e809",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/caption_coarse_fusion_control/report.json": "ec749520920ff39a369ac397331a97e10614a452b15fac74c6a5e31507479125",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_membership_code32/report.json": "9967df4b83be012b69573d9fa098cecb17685443f83ea4b9455e05ed6107a518",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/source_membership_balanced32/report.json": "1e0e2be016ec60346039337c688a54f634b9d5ed1e5fe47756889bd6bb5acbb9",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/grounded_semantic_transfer96/report.json": "31d7cefbef9eb1210abc20f477345d35182349bcc46a7a2f1a81ede27e404e0b",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/grounded_semantic_transfer_mlp96/report.json": "2a0996c1ba7ff7743b839e3bca31f8803dfde4bae5932378c79e589a0aaf2d67",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/fixed_vocab_grounded_transfer96/report.json": "382786ba0ea8942295b52eb4d188e7d22055ba18a1b169b0cc74f810b1262854",
+    "paper/artifacts/ramen_caption_transfer_text_20260916.json": "54458c0bbb80f45c87b31c5b4552afc57bc50b7a1a92438319e2cbbcd47579b3",
+    "paper/artifacts/ramen_caption_transfer_text_20260916.protocol.json": "13a93f55cbea062d50b9b6813bdbf9b0bede810c60c1118266cf834dd884534f",
+    "paper/artifacts/ramen_caption_transfer_reference_20260916.json": "c2fdbb1cd499ad821043fc58727adf0645969487aecc34b9cfe5c2e6183d3130",
+    "paper/artifacts/ramen_caption_transfer_reference_20260916.protocol.json": "8bc7586aa7f6b67f1c060603a9ab6276f991bb671f11edebc32c0058c00ae8f1",
+    "paper/artifacts/ramen_grounded_transfer_text_20260916.json": "e166962115fea90998fa3b89043afbad0f18960e7882196228962c9a2008f827",
+    "paper/artifacts/ramen_grounded_transfer_text_20260916.protocol.json": "ec84356bc4d1013e68e63a9fd85726d6bc6c323ca2760c769c38aa01c6207c2d",
+    "paper/artifacts/ramen_grounded_transfer_reference_20260916.json": "258012cc262959295e2af50af3802cf425d9f3362fd129e6d2461e70a101d1de",
+    "paper/artifacts/ramen_grounded_transfer_reference_20260916.protocol.json": "b8941222d2e5a22ca76c62452c00429e42ce65d9ad43ad9de69fc6b9f03666f6",
+    "paper/artifacts/ramen_fixed_vocab_transfer_text_20260916.json": "2f24c6892dceda738942a1d15a3423f8bc57d50daed52ecdb4c945f22d25ce87",
+    "paper/artifacts/ramen_fixed_vocab_transfer_text_20260916.protocol.json": "e53670cb8d343058c32a08b9e869485d29f48b0cb63341de9c4d13c9f57a7eae",
+    "paper/artifacts/ramen_grounded_transfer_audit_20260916.json": "0a0e1373f7d523a50792052e2ca52177b4813c020560c84a0905f567c1ed661c",
+    "paper/artifacts/ramen_grounded_transfer_audit_20260916.png": "07dddd83bbf19fb513ff295bbb599a66dcefd0960033bbb4c3b4b43e014c72ab",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/caption_source_phrases.json": "d4e313b956d50f81d9668acfbddca8c62b58da39095919490295ffdbb33ad969"
+  },
+  "status": "linear gated source-discovered extent is a LERF development candidate; no joint benchmark promotion"
+}

@@ -92,12 +92,32 @@ def compose_object_queries(
     token_probability: torch.Tensor,
     *,
     maximum_query_tokens: int | None = None,
+    membership_semantics: str = "categorical",
 ) -> tuple[torch.Tensor, dict[str, Any]]:
     """Compose every query through one typed canonical element posterior."""
 
     probability = torch.as_tensor(token_probability, dtype=torch.float32).cpu()
     if probability.ndim != 2:
         raise ValueError("token probability must have shape [Q,K]")
+    if membership_semantics not in {"categorical", "legacy_candidate_normalization"}:
+        raise ValueError("overlapping candidates require their own query support interface")
+    if membership_semantics == "categorical":
+        from radio_gs.v4.object_memory.dense_assignment import DenseObjectAssignments
+        values = torch.as_tensor(membership, dtype=torch.float32).cpu()
+        if values.ndim != 2 or bool((values.sum(-1) > 1 + 1e-6).any()):
+            raise ValueError("overlapping candidate support is not categorical membership")
+        assignments_dense = DenseObjectAssignments(values, (1 - values.sum(-1)).clamp_min(0))
+        if probability.shape[1] != values.shape[1] or not torch.isfinite(probability).all() or bool(((probability < 0) | (probability > 1)).any()):
+            raise ValueError("query probabilities must align and lie in [0,1]")
+        if maximum_query_tokens is not None:
+            probability = retain_top_query_tokens(probability, maximum_query_tokens)
+        return values @ probability.T, {
+            "selection_mode": "multi_instance", "assignment_compression": "none",
+            "composition": "DenseObjectAssignments.mixture_sum",
+            "membership_semantics": "categorical", "query_token_capacity": maximum_query_tokens,
+            "assignment_unknown_mass_mean": float(assignments_dense.unknown_probability.mean()),
+            "query_scores_calibrated": False,
+        }
     assignments = SparseObjectAssignments.from_dense(membership, top_k=2)
     if probability.shape[1] != assignments.num_tokens:
         raise ValueError("query token probabilities and object assignment axis differ")
@@ -113,9 +133,13 @@ def compose_object_queries(
     return posterior, {
         "selection_mode": query_packet.selection_mode.value,
         "assignment_compression": "top2",
+        "membership_semantics": "legacy_candidate_normalization",
+        "result_role": "legacy_replay_not_validated_instance_posterior",
         "composition": "SparseObjectAssignments.element_posterior.mixture_sum",
         "query_token_capacity": maximum_query_tokens,
         "assignment_unknown_mass_mean": float(assignments.unknown_weight.mean()),
+        "precompression_unknown_mass_mean": float(assignments.precompression_unknown_weight.mean()),
+        "compression_discarded_mass_mean": float(assignments.compression_discarded_weight.mean()),
         "element_probability_maximum": float(posterior.max()),
     }
 
@@ -243,6 +267,8 @@ def _evaluate_masks(
                     (element_probability[:, query_index] >= pixel_threshold).float().mean()
                 ),
             })
+    if not per_observation:
+        raise ValueError("evaluation contains no annotated nonempty target observations")
     category_metrics = {
         category: {
             "mean_iou": float(np.mean(values)) if values else None,
@@ -253,6 +279,10 @@ def _evaluate_masks(
     valid = [value["mean_iou"] for value in category_metrics.values() if value["mean_iou"] is not None]
     return {
         "macro_category_miou": float(np.mean(valid)),
+        "object_frame_mean_iou": float(np.mean([row["iou"] for row in per_observation])) if per_observation else None,
+        "object_frame_count": len(per_observation),
+        "unannotated_query_frames_evaluated": False,
+        "absent_target_rejection_validated": False,
         "micro_iou": float(intersection_sum / union_sum) if union_sum else None,
         "category_metrics": category_metrics,
         "per_observation": per_observation,
@@ -261,6 +291,8 @@ def _evaluate_masks(
 
 @torch.no_grad()
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    if not getattr(args, "allow_legacy_candidate_normalization", False):
+        raise ValueError("this evaluator replays unvalidated candidate normalization; use --allow-legacy-candidate-normalization for an explicit diagnostic")
     state_path = Path(args.scene_state)
     state = _load_state(state_path, expected_sha256=args.expected_scene_state_sha256)
     if state["scene_label"] != args.scene_label:
@@ -315,6 +347,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             assignment,
             token_probability,
             maximum_query_tokens=maximum_tokens,
+            membership_semantics="legacy_candidate_normalization",
         )
         evaluations[name] = {
             "composition": composition,
@@ -360,6 +393,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--allow-legacy-candidate-normalization", action="store_true", help="explicit historical diagnostic; not a promoted instance posterior")
     parser.add_argument("--scene-state", required=True)
     parser.add_argument("--expected-scene-state-sha256", required=True)
     parser.add_argument("--scene-root", required=True)

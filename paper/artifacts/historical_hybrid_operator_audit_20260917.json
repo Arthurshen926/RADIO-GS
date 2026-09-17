@@ -1,0 +1,15 @@
+{
+  "schema": "historical_hybrid_operator_audit.v1",
+  "synthetic": true,
+  "not_a_performance_metric": true,
+  "training_entry": "radio_gs/scripts/train_feature_field.py: hybrid decode after rasterized latent and unprojected depth",
+  "point_entry": "radio_gs/models/hybrid_gaussian.py: _decode_point_features -> decode_screen_space on individual points",
+  "maximum_difference": 0.025748401880264282,
+  "seed": 42,
+  "conclusion": "Nonlinear decode and hashing after raster do not commute with per-element decode then raster. Baking requires its own training contract, not copying screen-space supervision unchanged.",
+  "source_identity": {
+    "/root/RADIO-GS/scripts/audits/audit_historical_hybrid_order.py": "46820dee7b9f30af9314aa649e9ab144ec0c53107567a0cb994729160a1ec98c",
+    "radio_gs/models/hybrid_gaussian.py": "1bd2331d7ff7ccee74fb69c401a38cad50f06276b77abf212f0073203092a4ae",
+    "radio_gs/scripts/train_feature_field.py": "99853a79c20ed506918d22fbd2bcb429c7bf68b5327f58a95c7cac5a3923bf7a"
+  }
+}

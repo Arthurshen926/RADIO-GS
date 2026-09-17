@@ -1,0 +1,30 @@
+{
+  "schema": "pixel_evidence_extent_control_seal.v1",
+  "independent_final_test": false,
+  "scenes": {
+    "figurines": {
+      "execution_sha256": "aa42f79dcd48af514b5dfb92b6e3e0b3ebfa2a09ce27f944001298fed82ce70c",
+      "field_sha256": "33f170c24b04ef16474c669121e6585aafc5c7d6ef84a5e6a0384dd0b9822109",
+      "image_prompt_observations_exact": true,
+      "all_parent_tensors_exact": true,
+      "full_text": {
+        "observation_miou": 0.43599524079814195,
+        "category_macro_miou": 0.4263898230519428,
+        "average_precision_macro": 0.6518582548679897
+      }
+    },
+    "ramen": {
+      "execution_sha256": "066331e69ba75d2a53e3635f0395949ea75bf302d54f359452bd654c2b582ef5",
+      "field_sha256": "54cf03e45e8d3a137dd0966ea4ce05d48fed0a2e8233cf0b9ed3931004a04ae1",
+      "image_prompt_observations_exact": true,
+      "all_parent_tensors_exact": true,
+      "full_text": {
+        "observation_miou": 0.3077024035403806,
+        "category_macro_miou": 0.28211276548765907,
+        "average_precision_macro": 0.4683296281861257
+      }
+    }
+  },
+  "fusion_comparison_sha256": "19be01b24930116409a91a68d0c7e58cb519cca001c107fcfaf752e86c42ed47",
+  "decision": "Retain pixel-evidence fusion as a development candidate with ramen image AP tradeoff; reject all-concept cutoff as shared replacement."
+}

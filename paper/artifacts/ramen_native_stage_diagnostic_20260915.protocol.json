@@ -1,0 +1,70 @@
+{
+  "schema": "native_stage_diagnostic.v1",
+  "scene": "ramen",
+  "field_sha256": "2f081fc36cb265f2cce8f57abb157534cd075d2d78af801ff59365db4047983d",
+  "geometry_sha256": "38fd2b410293d55f3ca08000a3a2044c4253ecb98eb48466453c6408f6c4c82b",
+  "train_frames": [
+    7,
+    11,
+    15,
+    18,
+    22,
+    27,
+    109,
+    76,
+    131,
+    101,
+    105,
+    90
+  ],
+  "target_frames": [
+    6,
+    24,
+    60,
+    65,
+    81,
+    119,
+    128
+  ],
+  "queries": [
+    "bowl",
+    "chopsticks",
+    "corn",
+    "egg",
+    "glass of water",
+    "hand",
+    "kamaboko",
+    "napkin",
+    "nori",
+    "onion segments",
+    "plate",
+    "sake cup",
+    "spoon",
+    "wavy noodles"
+  ],
+  "crop_grid": [
+    6,
+    8
+  ],
+  "crop_extent_fraction": [
+    0.25,
+    0.5
+  ],
+  "crop_assignment": "mean normalized descriptors over two scales, nearest grid-cell assignment",
+  "source_fusion": "raw contribution-weighted native descriptor mean, normalize after fusion",
+  "target_rgb_diagnostic_only": true,
+  "target_masks_used_for_features": false,
+  "metric": "AP/AUROC primary; sigmoid(10*cos-5), fixed .5 IoU diagnostic, not calibrated native membership",
+  "common_support": "all methods restricted to frozen learned field support; unsupported positives remain misses",
+  "width": 480,
+  "implementation_sha256": "6d11347666197856df8780ce9ce47a2f5c2986198e0a71c0116070a7e3e762b2",
+  "label_files": {
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00006.json": "014168dc3df90385473efa1cc773d4978ec5e68834d618a85764770cb9e50c6c",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.json": "235ba8e4235d41e98e7ec75077999602ecec8afcd5318e2af345b50ad490a074",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00060.json": "1f4a4c2d5fc2768397301c5aa4fd975fe8125f44538e45a07b0f847ea225c854",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00065.json": "6ef6ecc8e202ca641605a68981413bd6365e1598c9e6801224578b7459b52f76",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00081.json": "c89454c750fa7ce57e5421e54f80d0fd396e3a0d836cf836165ee9fa20d8d1b9",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00119.json": "fba1938cac04d46711cf40b42bf8db556ebd92cf5a4333d53035aea9a45e92c7",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00128.json": "34abc343bc7ded19324117487bd2b28fcec1f7845d56e6176152ce70653ab264"
+  }
+}

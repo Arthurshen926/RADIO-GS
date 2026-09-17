@@ -1,0 +1,263 @@
+{
+  "schema": "source_local_scale_crossfit.v1",
+  "local_implementation_sha256": "0698a5abfbfaa27583a7c9fc51ead24cc468f3890150aac544b8c0244943dfe5",
+  "local_policy": {
+    "neighbors": 16,
+    "minimum_neighbors": 4,
+    "spatial_radius": 0.1,
+    "log_depth_radius": 0.2,
+    "maximum_ratio": 1.2
+  },
+  "scale_fits": [
+    {
+      "frame": 11,
+      "previous_calibration_accepted": true,
+      "accepted": true,
+      "scale": 1.0053831745228234,
+      "sample_count": 20,
+      "reason": null,
+      "training_median_relative_error": 0.013099827552158567,
+      "reprojection_fit": {
+        "scale": 1.0053831745228234,
+        "fitted": false,
+        "sample_count": 1,
+        "reason": "insufficient_correspondences"
+      }
+    },
+    {
+      "frame": 21,
+      "previous_calibration_accepted": false,
+      "accepted": false,
+      "scale": 1.0,
+      "sample_count": 11,
+      "reason": "insufficient_source_tracks",
+      "training_median_relative_error": null,
+      "reprojection_fit": null
+    },
+    {
+      "frame": 31,
+      "previous_calibration_accepted": false,
+      "accepted": false,
+      "scale": 1.0,
+      "sample_count": 5,
+      "reason": "insufficient_source_tracks",
+      "training_median_relative_error": null,
+      "reprojection_fit": null
+    },
+    {
+      "frame": 38,
+      "previous_calibration_accepted": true,
+      "accepted": true,
+      "scale": 1.0414684722312644,
+      "sample_count": 20,
+      "reason": null,
+      "training_median_relative_error": 0.038161400133796486,
+      "reprojection_fit": {
+        "scale": 1.0414684722312644,
+        "fitted": false,
+        "sample_count": 1,
+        "reason": "insufficient_correspondences"
+      }
+    },
+    {
+      "frame": 49,
+      "previous_calibration_accepted": true,
+      "accepted": true,
+      "scale": 0.9190413668942706,
+      "sample_count": 23,
+      "reason": null,
+      "training_median_relative_error": 0.03968924884374957,
+      "reprojection_fit": {
+        "scale": 0.9190413668942706,
+        "fitted": false,
+        "sample_count": 2,
+        "reason": "insufficient_correspondences"
+      }
+    },
+    {
+      "frame": 69,
+      "previous_calibration_accepted": true,
+      "accepted": false,
+      "scale": 1.0,
+      "sample_count": 16,
+      "reason": "insufficient_source_tracks",
+      "training_median_relative_error": null,
+      "reprojection_fit": null
+    }
+  ],
+  "calibration_split": "global point_id modulo 5: zero held out from every new scale fit; others training",
+  "fit_implementation_sha256": "5ddf80904d06baeef5b099b678a5d8d8a2483730d83bc27bbc844226c1e63aa7",
+  "scene": "figurines",
+  "source_only": true,
+  "benchmark_data_used": false,
+  "semantic_masks_used": false,
+  "diagnostic_only": true,
+  "track_identity_not_manual_gt": true,
+  "resolution": [
+    96,
+    128
+  ],
+  "strict_point_statistics": {
+    "total_colmap_points": 50517,
+    "points_touching_source_views": 45374,
+    "strict_source_only_points": 971
+  },
+  "shared_points": 1,
+  "macro": {
+    "gaussian": {
+      "count": 2,
+      "median": 3.0716872215270996,
+      "p90": 4.887054920196533,
+      "mean": 4.080224990844727,
+      "fraction_over_2_pixels": 1.0
+    },
+    "quantized": {
+      "count": 2,
+      "median": 0.22499272227287292,
+      "p90": 0.545310914516449,
+      "mean": 0.4029473066329956,
+      "fraction_over_2_pixels": 0.0
+    },
+    "moge": {
+      "count": 2,
+      "median": 0.7325059175491333,
+      "p90": 1.1141283512115479,
+      "mean": 0.9445183873176575,
+      "fraction_over_2_pixels": 0.0
+    },
+    "repaired": {
+      "count": 2,
+      "median": 0.5847026705741882,
+      "p90": 0.8226628303527832,
+      "mean": 0.7169027328491211,
+      "fraction_over_2_pixels": 0.0
+    },
+    "optimized": {
+      "count": 0
+    },
+    "exact_moge": {
+      "count": 2,
+      "median": 0.66314697265625,
+      "p90": 1.0431156158447266,
+      "mean": 0.8742406368255615,
+      "fraction_over_2_pixels": 0.0
+    },
+    "exact_optimized": {
+      "count": 0
+    },
+    "local": {
+      "count": 2,
+      "median": 0.5847026705741882,
+      "p90": 0.8226628303527832,
+      "mean": 0.7169027328491211,
+      "fraction_over_2_pixels": 0.0
+    }
+  },
+  "matched_accepted_depth": {
+    "gaussian": {
+      "count": 0
+    },
+    "quantized": {
+      "count": 0
+    },
+    "moge": {
+      "count": 0
+    },
+    "repaired": {
+      "count": 0
+    },
+    "optimized": {
+      "count": 0
+    },
+    "exact_moge": {
+      "count": 0
+    },
+    "exact_optimized": {
+      "count": 0
+    },
+    "local": {
+      "count": 0
+    }
+  },
+  "rows": [
+    {
+      "point_id": 19070,
+      "source_frame": 38,
+      "target_frame": 49,
+      "local_supported": false,
+      "gaussian_pixels": 3.0716872215270996,
+      "quantized_pixels": 0.22499272227287292,
+      "moge_pixels": 1.1565308570861816,
+      "repaired_pixels": 0.5847026705741882,
+      "optimized_pixels": null,
+      "exact_moge_pixels": 1.085334300994873,
+      "exact_optimized_pixels": null,
+      "local_pixels": 0.5847026705741882
+    },
+    {
+      "point_id": 19070,
+      "source_frame": 49,
+      "target_frame": 38,
+      "local_supported": false,
+      "gaussian_pixels": 5.088762283325195,
+      "quantized_pixels": 0.5809018611907959,
+      "moge_pixels": 0.7325059175491333,
+      "repaired_pixels": 0.8491028547286987,
+      "optimized_pixels": null,
+      "exact_moge_pixels": 0.66314697265625,
+      "exact_optimized_pixels": null,
+      "local_pixels": 0.8491028547286987
+    }
+  ],
+  "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+  "authority_sha256": "27debbdd7b4c88aa3e6c34754aa227663934e79d37792918d969d2267c65cec9",
+  "geometry_report_sha256": "14aa139766f39f2eea58b0728b2def3e0e1a12a923714b2d79cf51f761355050",
+  "source_geometry_receipt_inputs": [
+    {
+      "path": "/root/RADIO-GS/paper/artifacts/v4_moge3_lerf_figurines_scene_manifest_20260830.json",
+      "role": "moge3_scene_manifest",
+      "sha256": "535a60b2e75dda95d85af2b2d762ed3b32628e6114f151743a0d2fadb5dd01f4"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260823/lerf_direct_capability/figurines/exact_marginal_responsibility_current.json",
+      "role": "source_authority",
+      "sha256": "8876cd8a6da5d737792a34895f05d52940f4cfc646fdb1e31939fcc0fd0b43a9"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/cameras.bin",
+      "role": "colmap_cameras",
+      "sha256": "f15177de04831c7052822d0694ede2de78151052de5199df9afaacf141ae7154"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/images.bin",
+      "role": "colmap_images",
+      "sha256": "ecbf431d68982126fcae865cf2d951f4cdf14c70348f760939543b5cb8c7ee9e"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/points3D.bin",
+      "role": "colmap_sparse_points",
+      "sha256": "338ab2a8d30e1ba14a33c78c8f30484adc2b3c6ecd75d77c75eaa1808bebd229"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/moge_pixel_calibration_v2_20260914/figurines.pt",
+      "role": "fused_surface",
+      "sha256": "6dcd55963026d82339aa7aa0e31767c1bd9c2145e7cd66437fe92769d1aa2ee2"
+    }
+  ],
+  "input_bindings": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00000.pt": "f328c773e1c56e61aed8a6e9964b051e77b826113c7422b2d36a95d0568ddae2",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00011.pt": "483e3cfeaf522c5126189fac5467aed71d32ba8943668d6f27ea2c35577d9d46",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00001.pt": "de8eeda3605510a78145ac488963d93cdf61cdbc9dc0ee04c8939bf58f289aab",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00021.pt": "683e30c146ce532bc16ba216e9b4d2c012f57415835d931d1def0311faf15d2f",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00002.pt": "d974a3f56f3c9995d6e26896a6c33c1a4390ed5e0e3ec51887a81153d5b4ec8c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00031.pt": "41e6eefe7baec2bdf460a62c6445a9c689e69df6622bf7ad778ef9bd26c6f440",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00003.pt": "7b715cb88bb9dbaa1e34400d929a81314f9b63719fd680181ededb0bded36a5f",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00038.pt": "7202f7c04727ac70680b152b36946767707a4df9f46a5d192d7b1df0aee7a51a",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00004.pt": "fb312467fdb80a6419311aeac1bd998bf35a5a28f48d964d616523ad5d7e8c9a",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00049.pt": "832d49bda5cd481255e35418ae698f5edc8ef7834d1c08838a1c758a270aa57d",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/responsibility.json.views/view_00005.pt": "c97fa50cb0e9ed32851fb51d48f23596083d2e00ea0236735ff502d2911c090c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/v4_moge3_lerf_20260830/figurines/frame_00069.pt": "58879f7a1ca5ba1a47a0b028d37dd62b0047ebafa91975f6576157fd91e702e9"
+  },
+  "implementation_sha256": "a2dcf00f39f798b0d61bedd84a03805ce1a02b063ab9a70220271d979f16921a",
+  "limitations": "centroid of source pixel Gaussian contributions is a diagnostic, not exact distribution transport; sparse COLMAP tracks favor textured locations; quantized reference uses the original track depth, not deployable inference"
+}

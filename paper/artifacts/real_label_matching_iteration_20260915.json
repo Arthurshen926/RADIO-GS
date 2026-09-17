@@ -1,0 +1,488 @@
+{
+  "schema": "real_label_matching_iteration.v1",
+  "new_training_runs": 16,
+  "runs": [
+    {
+      "scene": "figurines",
+      "run": "capacity64_steps360",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/capacity64_steps360/report.json",
+      "report_sha256": "db3cc54b6611c5c076c04c90f72035ef1467dc65f54a295962728cfcc204293d",
+      "field_sha256": "c2dd78476a419b612ec5c0dee091f5f2ddcec706ed4094010090f1a3c445daaa",
+      "configuration": {
+        "steps": 360,
+        "seed": null,
+        "latent_dim": 64,
+        "native_match_relations": null,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "capacity128_steps180",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/capacity128_steps180/report.json",
+      "report_sha256": "8cfdab43d220c89225d0a17cb2ffd3924998578a047537684db2121a93ad643b",
+      "field_sha256": "aaf7fd915dd0e45430f77b68d26bbb29c3eb85d3cc53da21ff535e119025d72c",
+      "configuration": {
+        "steps": 180,
+        "seed": null,
+        "latent_dim": 128,
+        "native_match_relations": null,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "native_match_relations180",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/native_match_relations180/report.json",
+      "report_sha256": "7b63bbe5ea5992145cf04c4369c13c7519bb6089a2ebea5755d1bee2dfa111e0",
+      "field_sha256": "4f2286e8ecce6e014940d726a942ef92c3abd1e7f78d09db7e9eae77591f4e6e",
+      "configuration": {
+        "steps": 180,
+        "seed": null,
+        "latent_dim": 64,
+        "native_match_relations": true,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "baseline_seed43_180",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/baseline_seed43_180/report.json",
+      "report_sha256": "0b47834b262e012110eab62267ac1666e458a66a56c542eea3984cbb63e34e9b",
+      "field_sha256": "30ff0e420d35fb21b4d6426de75ec1acfad955ca02aeb810c0a78c4d623e532c",
+      "configuration": {
+        "steps": 180,
+        "seed": 43,
+        "latent_dim": 64,
+        "native_match_relations": false,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "native_relations_seed43_180",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/native_relations_seed43_180/report.json",
+      "report_sha256": "deea568ff459953be205332387d576b7b47f475dffe23da0de4dfc261e5f3234",
+      "field_sha256": "737caec51652ece26f3a53f67653c15561fd63d44e93e026f5721a5c65d39e47",
+      "configuration": {
+        "steps": 180,
+        "seed": 43,
+        "latent_dim": 64,
+        "native_match_relations": true,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "native_relations_no_radio_180",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/native_relations_no_radio_180/report.json",
+      "report_sha256": "f146d73ba3ea5a813503e17ccbf9fd8cf4da23a38c09faf3b34f599e90974de9",
+      "field_sha256": "02ff85581f7d544c9f8d6d94d3796d739b06a706e3a70fd9f35d76f5c1bf5f0c",
+      "configuration": {
+        "steps": 180,
+        "seed": 42,
+        "latent_dim": 64,
+        "native_match_relations": true,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "native_query_basis180",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/native_query_basis180/report.json",
+      "report_sha256": "500e65ed9afab63c7e8e646d6872e7449ca80cbdb6995f5da243796bb1b29803",
+      "field_sha256": "2ebd70babc8fbbe9db6bd8ee38d941f1f4871a9c4fb53ae6c4955aad1cd574c3",
+      "configuration": {
+        "steps": 180,
+        "seed": 42,
+        "latent_dim": 64,
+        "native_match_relations": false,
+        "native_query_basis": true,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "figurines",
+      "run": "soft_text_only180",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/four_teacher_three_query_v2_20260915/figurines/soft_text_only180/report.json",
+      "report_sha256": "e2a7dd37ebf56196a11f47b146e3fc2364380c906ff9088faa8b975ab3a2ce68",
+      "field_sha256": "584d9728a8ad8bc16ebbe19b6275cb16bc24fa9c21f0c64486fd281f4c627f71",
+      "configuration": {
+        "steps": 180,
+        "seed": 42,
+        "latent_dim": 64,
+        "native_match_relations": true,
+        "native_query_basis": false,
+        "soft_text_only": true,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "capacity64_steps1320",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/capacity64_steps1320/report.json",
+      "report_sha256": "6bbbd2639f891752ef882366f77d21c2a86da68994203e4d24004e9ba74f72be",
+      "field_sha256": "47c085c93130d2f405317f664978c6c900e628ae87637864cfc0c74710fe1a02",
+      "configuration": {
+        "steps": 1320,
+        "seed": null,
+        "latent_dim": 64,
+        "native_match_relations": null,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "capacity128_steps660",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/capacity128_steps660/report.json",
+      "report_sha256": "86e9f588335b3bc443052bc229b509eb9fee67cb5df87a334ceb20bba7c89ffb",
+      "field_sha256": "ea5a22ffb96ab65ec8ad026192243ebb7b67f1ebaad02e877012aa8acc449b6e",
+      "configuration": {
+        "steps": 660,
+        "seed": null,
+        "latent_dim": 128,
+        "native_match_relations": null,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "native_match_relations660",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/native_match_relations660/report.json",
+      "report_sha256": "420ea2ce48c206f7d4f0b944ab2593f146aca8e9b1722682c1a0b15b1a3e63ed",
+      "field_sha256": "a2ed7cbd7cb039612191dad1fa0ee68a85a26dc227a053300a1a8467af7ee5c1",
+      "configuration": {
+        "steps": 660,
+        "seed": null,
+        "latent_dim": 64,
+        "native_match_relations": true,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "baseline_seed43_660",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/baseline_seed43_660/report.json",
+      "report_sha256": "d2482fcb8df072ac329e46a9dffd0a461058cb7f061493665cc733a793a3b742",
+      "field_sha256": "9d759a9650669aa2b36ae250ae33d70c659aadafcd34ebb337380cf26667b88c",
+      "configuration": {
+        "steps": 660,
+        "seed": 43,
+        "latent_dim": 64,
+        "native_match_relations": false,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "native_relations_seed43_660",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/native_relations_seed43_660/report.json",
+      "report_sha256": "750e5e626016c6cd5d645b168c829fbbd741585c720332638b9e158c3f985809",
+      "field_sha256": "874478a7030ec3d7ddf8e974305cc3589f9e99ef5102b3786403a397037728e4",
+      "configuration": {
+        "steps": 660,
+        "seed": 43,
+        "latent_dim": 64,
+        "native_match_relations": true,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "native_relations_no_radio_660",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/native_relations_no_radio_660/report.json",
+      "report_sha256": "93fa54591f30859c13f8083c9e5c16318e0b781522c59358ed7d133178a4f923",
+      "field_sha256": "94843ef001a1c7188ba9b8059c01530119f9b68b14f697c699c4d25823d9482b",
+      "configuration": {
+        "steps": 660,
+        "seed": 42,
+        "latent_dim": 64,
+        "native_match_relations": true,
+        "native_query_basis": null,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "native_query_basis660",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/native_query_basis660/report.json",
+      "report_sha256": "02d71c066b6d21884a697d210572fc4f6faaa4593e941b98f555dbeb3f2b0638",
+      "field_sha256": "714eff577dc8dff9eef4ee163b34411aec4735f961262cec21a58a2a830fb7c4",
+      "configuration": {
+        "steps": 660,
+        "seed": 42,
+        "latent_dim": 64,
+        "native_match_relations": false,
+        "native_query_basis": true,
+        "soft_text_only": null,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    },
+    {
+      "scene": "ramen",
+      "run": "soft_text_only660",
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen/soft_text_only660/report.json",
+      "report_sha256": "1c8b1101f5ad2a576af1f2b1ebb1d46851a62946c13778c5718f0ea354f15905",
+      "field_sha256": "1fd90e9ae21470618b0c126b335aa7e5b2c7eb83fd76e2862b29e35797de2bb0",
+      "configuration": {
+        "steps": 660,
+        "seed": 42,
+        "latent_dim": 64,
+        "native_match_relations": true,
+        "native_query_basis": false,
+        "soft_text_only": true,
+        "enabled_auxiliary_teachers": [
+          "dino",
+          "radio",
+          "sam",
+          "siglip"
+        ]
+      }
+    }
+  ],
+  "decision": "no candidate promoted; stable IoU improvements have AP/prompt tradeoffs; historical performance control retained",
+  "real_label_results": {
+    "figurines": {
+      "dense_view_coverage180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.047869152727602074,
+        "average_precision_macro": 0.11287596361139059,
+        "auroc_macro": 0.7031667800207754
+      },
+      "dense_view_without_radio180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.04922982043755877,
+        "average_precision_macro": 0.10887776139950553,
+        "auroc_macro": 0.6985837839921266
+      },
+      "capacity64_steps360": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.05554728836064836,
+        "average_precision_macro": 0.1121180384498849,
+        "auroc_macro": 0.7174636056879616
+      },
+      "capacity128_steps180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.047915870156230285,
+        "average_precision_macro": 0.11749184152393978,
+        "auroc_macro": 0.6985383239612287
+      },
+      "native_match_relations180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.06104130302288751,
+        "average_precision_macro": 0.09572159651485837,
+        "auroc_macro": 0.7520132759336902
+      },
+      "baseline_seed43_180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.047471992908278464,
+        "average_precision_macro": 0.12269546272778782,
+        "auroc_macro": 0.7067776328778955
+      },
+      "native_relations_seed43_180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.06608004531426696,
+        "average_precision_macro": 0.10547121922399892,
+        "auroc_macro": 0.7403320309193887
+      },
+      "native_relations_no_radio_180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.05941289039239008,
+        "average_precision_macro": 0.09416512558462971,
+        "auroc_macro": 0.7454609794990711
+      },
+      "native_query_basis180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.020325732312201496,
+        "average_precision_macro": 0.039412150334599674,
+        "auroc_macro": 0.6379821229862471
+      },
+      "soft_text_only180": {
+        "tasks": 56,
+        "categories": 21,
+        "observation_miou": 0.05638526908294432,
+        "average_precision_macro": 0.152710778129799,
+        "auroc_macro": 0.7639575906889906
+      }
+    },
+    "ramen": {
+      "dense_view_coverage660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.04822683672508876,
+        "average_precision_macro": 0.12293818666908722,
+        "auroc_macro": 0.6488571392842485
+      },
+      "dense_view_without_radio660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.04728671328461382,
+        "average_precision_macro": 0.11483053012586016,
+        "auroc_macro": 0.6504986696276434
+      },
+      "capacity64_steps1320": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.04858175034980014,
+        "average_precision_macro": 0.12068430052376082,
+        "auroc_macro": 0.6590481414934583
+      },
+      "capacity128_steps660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.04954120737516031,
+        "average_precision_macro": 0.129106757548001,
+        "auroc_macro": 0.63949490546681
+      },
+      "native_match_relations660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.06674600719318007,
+        "average_precision_macro": 0.09162723989835883,
+        "auroc_macro": 0.6970756344133817
+      },
+      "baseline_seed43_660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.04950135634150601,
+        "average_precision_macro": 0.12903514577094216,
+        "auroc_macro": 0.6592719923896726
+      },
+      "native_relations_seed43_660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.06703459162941998,
+        "average_precision_macro": 0.09697253072224098,
+        "auroc_macro": 0.7034768746357811
+      },
+      "native_relations_no_radio_660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.06749005402193024,
+        "average_precision_macro": 0.0926224982526558,
+        "auroc_macro": 0.6900268748877609
+      },
+      "native_query_basis660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.006397464158556512,
+        "average_precision_macro": 0.0363958851164767,
+        "auroc_macro": 0.4578080571576399
+      },
+      "soft_text_only660": {
+        "tasks": 71,
+        "categories": 14,
+        "observation_miou": 0.004122483653623843,
+        "average_precision_macro": 0.12098621910904701,
+        "auroc_macro": 0.7117119964705607
+      }
+    }
+  },
+  "default_training_architecture_unchanged": true
+}

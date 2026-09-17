@@ -1,0 +1,49 @@
+{
+  "schema": "real_polygon_reference_query_development.v1",
+  "scene": "figurines",
+  "field_sha256": {
+    "matched183_seed42": "6175aba625bb94453725581cc4f0c6d32d20d0b8153b9842623d6a73833f6812",
+    "grounded_text183": "e6ce6274c9ed76f13c7e256f309c2f2fb371d580b4be7647f620fb31290a65de",
+    "grounded_text366": "7c7117173fcf14a247ee23c7908030694fda762da40560952121510faa2c8e39",
+    "grounded_text_no_radio366": "1e989fc1f029b4a3c187abe576deb848db968ba60afdb547ea8aeeac2a219cca"
+  },
+  "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+  "labels": [
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json",
+      "sha256": "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00105.json",
+      "sha256": "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.json",
+      "sha256": "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00195.json",
+      "sha256": "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb"
+    }
+  ],
+  "reference_selection": "first annotated frame per category; remaining annotated frames are targets",
+  "query_contract": "text verbatim; image masked crop with3px padding and gray127 outside; prompt one positive and one negative point with registered frozen geometry",
+  "query_mask_or_points_supplied_from_reference_gt": true,
+  "target_masks_used_for_query_encoding": false,
+  "annotations_define_evaluation_cohort": true,
+  "target_rgb_encoded_for_its_own_query": false,
+  "source_training_assets_forbidden": true,
+  "source_semantic_train_frames": [
+    11,
+    21,
+    31,
+    38,
+    49,
+    69
+  ],
+  "target_width": 480,
+  "threshold": 0.5,
+  "official_benchmark_protocol": false,
+  "instance_identity_assumption": "same category across frames, union of category polygons; not independently verified physical instance tracks",
+  "implementation_sha256": "5a7ea0855cf36aff29e68fc2546a3472e34ba48046c51f5c24931d6a814d4af5"
+}

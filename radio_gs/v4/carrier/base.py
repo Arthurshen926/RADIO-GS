@@ -16,7 +16,12 @@ import torch
 
 @dataclass(frozen=True)
 class Camera:
-    """A pinhole camera with a camera-to-world pose."""
+    """Pinhole camera in image-edge coordinates, centres (x+.5, y+.5).
+
+    Resizing scales intrinsic rows. Stride slicing is not resizing: its
+    principal point is (c-.5)/stride+.5. Gaussian transport tables retain
+    their externally sealed renderer convention rather than reprojecting.
+    """
 
     key: str
     intrinsic: torch.Tensor
@@ -37,8 +42,22 @@ class Camera:
             raise ValueError("camera values must be finite")
         if not torch.allclose(pose[3], torch.tensor([0, 0, 0, 1], dtype=pose.dtype)):
             raise ValueError("camera_to_world must be homogeneous")
+        if intrinsic[0, 0] <= 0 or intrinsic[1, 1] <= 0 or not torch.allclose(intrinsic[2], torch.tensor([0., 0., 1.], dtype=intrinsic.dtype)):
+            raise ValueError("camera must have valid pinhole intrinsics")
+        rotation = pose[:3, :3]
+        if not torch.allclose(rotation.T @ rotation, torch.eye(3, dtype=pose.dtype), atol=1e-4, rtol=1e-4) or torch.linalg.det(rotation) <= 0:
+            raise ValueError("camera pose must be rigid; apply scene scale separately")
         object.__setattr__(self, "intrinsic", intrinsic)
         object.__setattr__(self, "camera_to_world", pose)
+
+    @property
+    def projection_key(self) -> str:
+        """Bind key, raster, intrinsics and pose; frame names alone are unsafe."""
+        import hashlib
+        digest = hashlib.sha256(f"{self.key}:{self.height}:{self.width}".encode())
+        for value in (self.intrinsic, self.camera_to_world):
+            digest.update(value.detach().double().cpu().contiguous().numpy().astype('<f8').tobytes())
+        return digest.hexdigest()
 
 
 @dataclass(frozen=True)

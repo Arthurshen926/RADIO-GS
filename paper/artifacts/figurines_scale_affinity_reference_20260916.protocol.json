@@ -1,0 +1,69 @@
+{
+  "schema": "real_polygon_reference_query_development.v1",
+  "scene": "figurines",
+  "field_sha256": {
+    "preserved96_protected_imagecal_balanced": "9a47d7bacf32aa8cf64c3af0e3d443731c80625b936ed247ead6ab586b000f18",
+    "scale_affinity_v1_direct_control": "883c5efa8eddae3b0aa34aafa4f24bbb7bb7c2c4e4c2fdad0ad47eaed87ecd9f",
+    "scale_affinity_v1": "d3c3e9faddeddf7dc9df2a5b0424bfd47d773d343e536e7b4dfb8a95f58a0bfb"
+  },
+  "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+  "labels": [
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json",
+      "sha256": "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00105.json",
+      "sha256": "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.json",
+      "sha256": "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00195.json",
+      "sha256": "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb"
+    }
+  ],
+  "reference_selection": "first annotated frame per category; remaining annotated frames are targets",
+  "query_contract": "text verbatim; image masked crop with3px padding and gray127 outside; prompt one positive and one negative point with registered frozen geometry",
+  "query_mask_or_points_supplied_from_reference_gt": true,
+  "target_masks_used_for_query_encoding": false,
+  "annotations_define_evaluation_cohort": true,
+  "target_rgb_encoded_for_its_own_query": false,
+  "source_training_assets_forbidden": true,
+  "source_semantic_train_frames": [
+    11,
+    21,
+    31,
+    38,
+    49,
+    69
+  ],
+  "target_width": 480,
+  "threshold": 0.5,
+  "refine_prompts": false,
+  "condition_images": false,
+  "image_conditioning_input": "same authorized reference positive/negative pixels as prompt, in addition to reference image crop",
+  "seed_support_policy": "full alpha > 1e-8 and observed/full contribution > .5",
+  "conditioning_implementation_sha256": "a98d01ab1a522af3030080d8a5beeb10354a76d77534a1b5a51f4af2ea2c6d59",
+  "prompt_refinement_implementation_sha256": "bcae93d415abff6ac4ac3a3351ac8c4cc894e15f5c0148b3d1af3c164c5eb2b2",
+  "minimal_prompt_refinement": false,
+  "official_benchmark_protocol": false,
+  "ground_truth_domain": "2D category polygon unions; no 3D ground truth",
+  "prompt_input_count": {
+    "positive": 1,
+    "negative": 1
+  },
+  "prompt_registration_required": true,
+  "target_category_absence_evaluated": false,
+  "instance_identity_verified": false,
+  "metric_contract_names": {
+    "text": "verbatim_text_category_union",
+    "image": "GT_masked_reference_image_category_union",
+    "prompt": "GT_two_point_registered_category_union",
+    "prompt_refined": "GT_two_point_registered_category_union_with_transient_query_optimization"
+  },
+  "instance_identity_assumption": "same category across frames, union of category polygons; not independently verified physical instance tracks",
+  "implementation_sha256": "bc1e48ef09328132419b4faa496ad6c46b508e7280eac2fe8a600163465f7b6a"
+}

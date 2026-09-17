@@ -1,0 +1,65 @@
+{
+  "schema": "native_stage_diagnostic.v1",
+  "scene": "figurines",
+  "field_sha256": "22b2cce6a975af4b108e717728830155d92ef128f9dd1d530ca234752778edce",
+  "geometry_sha256": "870232321b96a24e1fb943c7554a10f78cb1453a6c4ab17d7c2319cd9196554b",
+  "train_frames": [
+    11,
+    21,
+    31,
+    38,
+    49,
+    69
+  ],
+  "target_frames": [
+    41,
+    105,
+    152,
+    195
+  ],
+  "queries": [
+    "bag",
+    "green apple",
+    "green toy chair",
+    "jake",
+    "miffy",
+    "old camera",
+    "pikachu",
+    "pink ice cream",
+    "pirate hat",
+    "porcelain hand",
+    "pumpkin",
+    "red apple",
+    "red toy chair",
+    "rubber duck with buoy",
+    "rubber duck with hat",
+    "rubics cube",
+    "spatula",
+    "tesla door handle",
+    "toy cat statue",
+    "toy elephant",
+    "waldo"
+  ],
+  "crop_grid": [
+    6,
+    8
+  ],
+  "crop_extent_fraction": [
+    0.25,
+    0.5
+  ],
+  "crop_assignment": "mean normalized descriptors over two scales, nearest grid-cell assignment",
+  "source_fusion": "raw contribution-weighted native descriptor mean, normalize after fusion",
+  "target_rgb_diagnostic_only": true,
+  "target_masks_used_for_features": false,
+  "metric": "AP/AUROC primary; sigmoid(10*cos-5), fixed .5 IoU diagnostic, not calibrated native membership",
+  "common_support": "all methods restricted to frozen learned field support; unsupported positives remain misses",
+  "width": 480,
+  "implementation_sha256": "6d11347666197856df8780ce9ce47a2f5c2986198e0a71c0116070a7e3e762b2",
+  "label_files": {
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json": "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00105.json": "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.json": "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00195.json": "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb"
+  }
+}

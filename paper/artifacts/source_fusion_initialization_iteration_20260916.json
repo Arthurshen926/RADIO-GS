@@ -1,0 +1,547 @@
+{
+  "schema": "source_fusion_initialization_iteration.v1",
+  "promote_joint_default": false,
+  "benchmark_scope": "LERF labeled development; not independent final test",
+  "scenes": {
+    "figurines": {
+      "initialization_sha256": "fdb6e6dc913500118b1042a9d6d827d376d8757e2ddeb53f480ee86167752f7a",
+      "runs": {
+        "fusion_init_trainable_2106": {
+          "field_sha256": "64d204f6948f69cbff7bd45e5b17c0886b77f590996b28fc8e49adfd453d5a7f",
+          "report_sha256": "08514bdfc5a2049264f68d6262ff2414172b12e68680442b042d08cc16b21dce",
+          "final_source_probe": {
+            "step": 2106,
+            "sampled_source_elements": 2048,
+            "native_direction_cosine": 0.24025380611419678,
+            "source_text_response_mae": 0.09537729620933533,
+            "source_text_top1_retained": 0.2509765625
+          },
+          "readout_calibration": {
+            "image": {
+              "scale": 59.03371810913086,
+              "bias": -6.190985202789307
+            },
+            "prompt": {
+              "scale": 24.232236862182617,
+              "bias": -5.646780490875244
+            },
+            "text": {
+              "scale": 126.00233459472656,
+              "bias": -4.952976703643799
+            }
+          },
+          "geometry_binding_matches": true,
+          "cosine_threshold_at_probability_half": {
+            "image": 0.1048720189256,
+            "prompt": 0.23302762031382002,
+            "text": 0.03930861058705408
+          },
+          "impossible_positive_modalities": []
+        },
+        "fusion_init_fixed_decoder_checked_2106": {
+          "field_sha256": "a7307bc3ec654e024e1ccc7b402a16f598958b73a9be7f8fd04fd7aa23488d5d",
+          "report_sha256": "32f133a04ba48c6801f1db17f700520ce9ff19ac7dc266dddbc7068cac427131",
+          "final_source_probe": {
+            "step": 2106,
+            "sampled_source_elements": 2048,
+            "native_direction_cosine": 0.5370079874992371,
+            "source_text_response_mae": 0.05385160073637962,
+            "source_text_top1_retained": 0.25146484375
+          },
+          "readout_calibration": {
+            "image": {
+              "scale": 20.04158592224121,
+              "bias": -9.132580757141113
+            },
+            "prompt": {
+              "scale": 23.16744041442871,
+              "bias": -5.411318778991699
+            },
+            "text": {
+              "scale": 221.7034149169922,
+              "bias": -5.306825160980225
+            }
+          },
+          "geometry_binding_matches": true,
+          "cosine_threshold_at_probability_half": {
+            "image": 0.45568154100051556,
+            "prompt": 0.23357430437682375,
+            "text": 0.02393659638922183
+          },
+          "impossible_positive_modalities": [],
+          "decoder_exactly_preserved": true
+        },
+        "fusion_init_bounded002_2106": {
+          "field_sha256": "e69047fa0d374a5dac2775caae318c660d0b9519fb18c4c06d36a4cb3ae03841",
+          "report_sha256": "c4539adab770add4268e2cec693cb74a0514cff1f76f8c2d86d9e51e6cf8de30",
+          "final_source_probe": {
+            "step": 2106,
+            "sampled_source_elements": 2048,
+            "native_direction_cosine": 0.9998013377189636,
+            "source_text_response_mae": 0.0013612986076623201,
+            "source_text_top1_retained": 0.95166015625
+          },
+          "readout_calibration": {
+            "image": {
+              "scale": 6.870032787322998,
+              "bias": -7.489558696746826
+            },
+            "prompt": {
+              "scale": 62.994285583496094,
+              "bias": -4.7760396003723145
+            },
+            "text": {
+              "scale": 69.31344604492188,
+              "bias": -6.046204566955566
+            }
+          },
+          "geometry_binding_matches": true,
+          "cosine_threshold_at_probability_half": {
+            "image": 1.0901780134975505,
+            "prompt": 0.07581702937232122,
+            "text": 0.08722989422625209
+          },
+          "impossible_positive_modalities": [
+            "image"
+          ],
+          "decoder_exactly_preserved": true,
+          "all_supported_elements_max_relative_drift": 0.020000027492642403,
+          "all_supported_elements_checked": 71763
+        }
+      },
+      "text": {
+        "path": "paper/artifacts/figurines_fusion_init_bounded_text_20260916.json",
+        "sha256": "68fef33f6f4424eab4abedff0fce3098b47b594a6425b2f28ad7fc9061af17a2",
+        "runs": {
+          "decoder_coupled2106": {
+            "field_sha256": "6b326071d1e3dbff96113922abed8f838590fb8b514109216652d1897936d4c7",
+            "tasks": 56,
+            "categories": 21,
+            "observation_miou": 0.2823473805743321,
+            "category_macro_miou": 0.24452379488474593,
+            "positive_support_recall_macro": 0.9906321327601161,
+            "average_precision_macro": 0.4372568968922563,
+            "auroc_macro": 0.9248989145255487
+          },
+          "fusion_init_trainable_2106": {
+            "field_sha256": "64d204f6948f69cbff7bd45e5b17c0886b77f590996b28fc8e49adfd453d5a7f",
+            "tasks": 56,
+            "categories": 21,
+            "observation_miou": 0.27873151483114866,
+            "category_macro_miou": 0.2469127244431047,
+            "positive_support_recall_macro": 0.9906321327601161,
+            "average_precision_macro": 0.45293362386530295,
+            "auroc_macro": 0.9253799527071775
+          },
+          "fusion_init_fixed_decoder_checked_2106": {
+            "field_sha256": "a7307bc3ec654e024e1ccc7b402a16f598958b73a9be7f8fd04fd7aa23488d5d",
+            "tasks": 56,
+            "categories": 21,
+            "observation_miou": 0.12606147164015777,
+            "category_macro_miou": 0.1340025857558455,
+            "positive_support_recall_macro": 0.9906321327601161,
+            "average_precision_macro": 0.3107248033698552,
+            "auroc_macro": 0.913022021616828
+          },
+          "fusion_init_bounded002_2106": {
+            "field_sha256": "e69047fa0d374a5dac2775caae318c660d0b9519fb18c4c06d36a4cb3ae03841",
+            "tasks": 56,
+            "categories": 21,
+            "observation_miou": 0.33659309304904034,
+            "category_macro_miou": 0.32658723756669084,
+            "positive_support_recall_macro": 0.9906321327601161,
+            "average_precision_macro": 0.5462076563422957,
+            "auroc_macro": 0.9307949818473883
+          }
+        }
+      },
+      "reference": {
+        "path": "paper/artifacts/figurines_fusion_init_bounded_reference_20260916.json",
+        "sha256": "b53a0c100172000f628eb3eec3b85eb39f0a5851f86b2c333914d53b7152e386",
+        "runs": {
+          "decoder_coupled2106": {
+            "field_sha256": "6b326071d1e3dbff96113922abed8f838590fb8b514109216652d1897936d4c7",
+            "tasks_per_modality": 35,
+            "unavailable_prompt_tasks": 0,
+            "macro": {
+              "text": {
+                "iou": 0.292537736732266,
+                "average_precision": 0.42957939691598007,
+                "auroc": 0.9258371746732341
+              },
+              "image": {
+                "iou": 0.3203434428498477,
+                "average_precision": 0.5043867661718534,
+                "auroc": 0.9360113744461558
+              },
+              "prompt": {
+                "iou": 0.2680704488180935,
+                "average_precision": 0.386719113066564,
+                "auroc": 0.9256375334286951
+              }
+            }
+          },
+          "fusion_init_trainable_2106": {
+            "field_sha256": "64d204f6948f69cbff7bd45e5b17c0886b77f590996b28fc8e49adfd453d5a7f",
+            "tasks_per_modality": 35,
+            "unavailable_prompt_tasks": 0,
+            "macro": {
+              "text": {
+                "iou": 0.2833250812216817,
+                "average_precision": 0.4477044651261808,
+                "auroc": 0.925645201339284
+              },
+              "image": {
+                "iou": 0.3521548695893872,
+                "average_precision": 0.5493761829852271,
+                "auroc": 0.9428631952178796
+              },
+              "prompt": {
+                "iou": 0.2913456363532763,
+                "average_precision": 0.4494428549372238,
+                "auroc": 0.9305920774765346
+              }
+            }
+          },
+          "fusion_init_fixed_decoder_checked_2106": {
+            "field_sha256": "a7307bc3ec654e024e1ccc7b402a16f598958b73a9be7f8fd04fd7aa23488d5d",
+            "tasks_per_modality": 35,
+            "unavailable_prompt_tasks": 0,
+            "macro": {
+              "text": {
+                "iou": 0.12834593922219437,
+                "average_precision": 0.3001376159117395,
+                "auroc": 0.9057325444836012
+              },
+              "image": {
+                "iou": 0.33866587142877114,
+                "average_precision": 0.5806882595195163,
+                "auroc": 0.9373725557785443
+              },
+              "prompt": {
+                "iou": 0.27658993503314894,
+                "average_precision": 0.4133280951017545,
+                "auroc": 0.9260110169037055
+              }
+            }
+          },
+          "fusion_init_bounded002_2106": {
+            "field_sha256": "e69047fa0d374a5dac2775caae318c660d0b9519fb18c4c06d36a4cb3ae03841",
+            "tasks_per_modality": 35,
+            "unavailable_prompt_tasks": 0,
+            "macro": {
+              "text": {
+                "iou": 0.3278498603720758,
+                "average_precision": 0.5258834421848224,
+                "auroc": 0.9293560257374338
+              },
+              "image": {
+                "iou": 0.0,
+                "average_precision": 0.5401953704757239,
+                "auroc": 0.9105272457324346
+              },
+              "prompt": {
+                "iou": 0.1528937021692912,
+                "average_precision": 0.31362057838637186,
+                "auroc": 0.9217343113577956
+              }
+            }
+          }
+        }
+      },
+      "common_support_ranking": {
+        "path": "paper/artifacts/figurines_bounded_fusion_ranking_20260916.json",
+        "sha256": "78ed4e3572e86cce9cb18a685e4d6d089ec7839001a83e794e645d7a60f1b547",
+        "macro": {
+          "native_source_region_fusion": {
+            "average_precision": 0.5665849120784247,
+            "auroc": 0.9250454487870067
+          },
+          "source_svd64_fusion": {
+            "average_precision": 0.5602206473344353,
+            "auroc": 0.9240845090068522
+          },
+          "learned_decoded_field": {
+            "average_precision": 0.5605148756722259,
+            "auroc": 0.9238529096628627
+          }
+        },
+        "shared_valid_elements": 71763
+      }
+    },
+    "ramen": {
+      "initialization_sha256": "7795c04d69a31be9b063055e4cea0c64795074c2db06a312bfb7c928e53a4a68",
+      "runs": {
+        "fusion_init_trainable_3240": {
+          "field_sha256": "3a523e19990c09dad62a70218c01b4ad73fddeb6b0c8690d12aeb921e3051cbb",
+          "report_sha256": "74b66ac5f2a235f2239066278a478a66acd87c8d2531db5e4bc31dd0e8eed03a",
+          "final_source_probe": {
+            "step": 3240,
+            "sampled_source_elements": 2048,
+            "native_direction_cosine": 0.21164095401763916,
+            "source_text_response_mae": 0.11682172864675522,
+            "source_text_top1_retained": 0.4033203125
+          },
+          "readout_calibration": {
+            "image": {
+              "scale": 63.488712310791016,
+              "bias": -6.2746734619140625
+            },
+            "prompt": {
+              "scale": 22.7246036529541,
+              "bias": -5.383217811584473
+            },
+            "text": {
+              "scale": 162.1422882080078,
+              "bias": -5.373326778411865
+            }
+          },
+          "geometry_binding_matches": true,
+          "cosine_threshold_at_probability_half": {
+            "image": 0.09883132345161097,
+            "prompt": 0.23688940382837775,
+            "text": 0.033139576589165776
+          },
+          "impossible_positive_modalities": []
+        },
+        "fusion_init_fixed_decoder_checked_3240": {
+          "field_sha256": "2a6b3eb69e4f256e6c67fb4abbd210c12c862c5618cc989c109df3d0010a87ea",
+          "report_sha256": "d59f89a622679ef3c87c3d4392b3b76b7f26b8213bd82908a8051357295bd1bd",
+          "final_source_probe": {
+            "step": 3240,
+            "sampled_source_elements": 2048,
+            "native_direction_cosine": 0.4978151321411133,
+            "source_text_response_mae": 0.05591389164328575,
+            "source_text_top1_retained": 0.4970703125
+          },
+          "readout_calibration": {
+            "image": {
+              "scale": 24.47321128845215,
+              "bias": -9.440858840942383
+            },
+            "prompt": {
+              "scale": 22.3592472076416,
+              "bias": -5.052334308624268
+            },
+            "text": {
+              "scale": 151.8584442138672,
+              "bias": -8.004857063293457
+            }
+          },
+          "geometry_binding_matches": true,
+          "cosine_threshold_at_probability_half": {
+            "image": 0.3857629769002614,
+            "prompt": 0.22596173572863212,
+            "text": 0.052712623948787174
+          },
+          "impossible_positive_modalities": [],
+          "decoder_exactly_preserved": true
+        },
+        "fusion_init_bounded002_3240": {
+          "field_sha256": "7377e1793a4027f65d6c50a5a411639832a683bdbe768954fa84726e5c459d1a",
+          "report_sha256": "1049db18ac20716b6570d960bd78cb0e7505522f64e2ae8d97690d05ca4966d9",
+          "final_source_probe": {
+            "step": 3240,
+            "sampled_source_elements": 2048,
+            "native_direction_cosine": 0.9998025894165039,
+            "source_text_response_mae": 0.0010352592216804624,
+            "source_text_top1_retained": 0.98681640625
+          },
+          "readout_calibration": {
+            "image": {
+              "scale": 7.410541534423828,
+              "bias": -7.580276012420654
+            },
+            "prompt": {
+              "scale": 66.72146606445312,
+              "bias": -4.387665748596191
+            },
+            "text": {
+              "scale": 67.69788360595703,
+              "bias": -8.33147144317627
+            }
+          },
+          "geometry_binding_matches": true,
+          "cosine_threshold_at_probability_half": {
+            "image": 1.022904463487367,
+            "prompt": 0.06576093133741537,
+            "text": 0.12306841808630997
+          },
+          "impossible_positive_modalities": [
+            "image"
+          ],
+          "decoder_exactly_preserved": true,
+          "all_supported_elements_max_relative_drift": 0.020000023767352104,
+          "all_supported_elements_checked": 168961
+        }
+      },
+      "text": {
+        "path": "paper/artifacts/ramen_fusion_init_bounded_text_20260916.json",
+        "sha256": "ea67ea5ba36b52698b2ea4f91de2667ca2dba68db2274d899f7f2fcd67431945",
+        "runs": {
+          "decoder_coupled3240": {
+            "field_sha256": "7e27d4be3ee68964754a003a7a0d751f3b2e85f1f24334ec462767f26bf1c361",
+            "tasks": 71,
+            "categories": 14,
+            "observation_miou": 0.15503557495098014,
+            "category_macro_miou": 0.1837191665284836,
+            "positive_support_recall_macro": 0.9982530491452821,
+            "average_precision_macro": 0.2017220804419063,
+            "auroc_macro": 0.8336822412451919
+          },
+          "fusion_init_trainable_3240": {
+            "field_sha256": "3a523e19990c09dad62a70218c01b4ad73fddeb6b0c8690d12aeb921e3051cbb",
+            "tasks": 71,
+            "categories": 14,
+            "observation_miou": 0.1556559123738744,
+            "category_macro_miou": 0.18120918960286678,
+            "positive_support_recall_macro": 0.9982530491452821,
+            "average_precision_macro": 0.22258767325232512,
+            "auroc_macro": 0.8633026089093513
+          },
+          "fusion_init_fixed_decoder_checked_3240": {
+            "field_sha256": "2a6b3eb69e4f256e6c67fb4abbd210c12c862c5618cc989c109df3d0010a87ea",
+            "tasks": 71,
+            "categories": 14,
+            "observation_miou": 0.15987762694710267,
+            "category_macro_miou": 0.17922205805669414,
+            "positive_support_recall_macro": 0.9982530491452821,
+            "average_precision_macro": 0.24155764083408485,
+            "auroc_macro": 0.8767969799306673
+          },
+          "fusion_init_bounded002_3240": {
+            "field_sha256": "7377e1793a4027f65d6c50a5a411639832a683bdbe768954fa84726e5c459d1a",
+            "tasks": 71,
+            "categories": 14,
+            "observation_miou": 0.024347978519978546,
+            "category_macro_miou": 0.04037580848665351,
+            "positive_support_recall_macro": 0.9982530491452821,
+            "average_precision_macro": 0.24047949956865086,
+            "auroc_macro": 0.898732354390377
+          }
+        }
+      },
+      "reference": {
+        "path": "paper/artifacts/ramen_fusion_init_bounded_reference_20260916.json",
+        "sha256": "818590b7bd69e8746262bf110f3a07830d1c8afb7c2604ca92cf19f6c78d5275",
+        "runs": {
+          "decoder_coupled3240": {
+            "field_sha256": "7e27d4be3ee68964754a003a7a0d751f3b2e85f1f24334ec462767f26bf1c361",
+            "tasks_per_modality": 57,
+            "unavailable_prompt_tasks": 0,
+            "macro": {
+              "text": {
+                "iou": 0.1474573135110018,
+                "average_precision": 0.19093720161832786,
+                "auroc": 0.823104384971935
+              },
+              "image": {
+                "iou": 0.18394296083156936,
+                "average_precision": 0.28508900813478927,
+                "auroc": 0.892921246617249
+              },
+              "prompt": {
+                "iou": 0.1975586946406854,
+                "average_precision": 0.32603923357676184,
+                "auroc": 0.9273779122871765
+              }
+            }
+          },
+          "fusion_init_trainable_3240": {
+            "field_sha256": "3a523e19990c09dad62a70218c01b4ad73fddeb6b0c8690d12aeb921e3051cbb",
+            "tasks_per_modality": 57,
+            "unavailable_prompt_tasks": 0,
+            "macro": {
+              "text": {
+                "iou": 0.146058038396068,
+                "average_precision": 0.20993045961746876,
+                "auroc": 0.854040873557063
+              },
+              "image": {
+                "iou": 0.1972874320321361,
+                "average_precision": 0.292830680001793,
+                "auroc": 0.9035794703070364
+              },
+              "prompt": {
+                "iou": 0.2291685895318821,
+                "average_precision": 0.3801360791429932,
+                "auroc": 0.9219377996762972
+              }
+            }
+          },
+          "fusion_init_fixed_decoder_checked_3240": {
+            "field_sha256": "2a6b3eb69e4f256e6c67fb4abbd210c12c862c5618cc989c109df3d0010a87ea",
+            "tasks_per_modality": 57,
+            "unavailable_prompt_tasks": 0,
+            "macro": {
+              "text": {
+                "iou": 0.15747324056585166,
+                "average_precision": 0.24069434588658412,
+                "auroc": 0.8761177328720076
+              },
+              "image": {
+                "iou": 0.1689644170158463,
+                "average_precision": 0.30253364874603506,
+                "auroc": 0.9056696947540441
+              },
+              "prompt": {
+                "iou": 0.217069942388388,
+                "average_precision": 0.33944686129419704,
+                "auroc": 0.9154943983410838
+              }
+            }
+          },
+          "fusion_init_bounded002_3240": {
+            "field_sha256": "7377e1793a4027f65d6c50a5a411639832a683bdbe768954fa84726e5c459d1a",
+            "tasks_per_modality": 57,
+            "unavailable_prompt_tasks": 0,
+            "macro": {
+              "text": {
+                "iou": 0.024008710862081558,
+                "average_precision": 0.23845097587978567,
+                "auroc": 0.8945150915458879
+              },
+              "image": {
+                "iou": 0.0,
+                "average_precision": 0.3574172429340386,
+                "auroc": 0.8751543220467749
+              },
+              "prompt": {
+                "iou": 0.1586580150993343,
+                "average_precision": 0.23500036250735132,
+                "auroc": 0.9113499401456676
+              }
+            }
+          }
+        }
+      },
+      "common_support_ranking": {
+        "path": "paper/artifacts/ramen_bounded_fusion_ranking_20260916.json",
+        "sha256": "ba47eccf54d59b0bb1747ca07a5bdb088ee4349b9d2e88adaa2a9b08327d2a95",
+        "macro": {
+          "native_source_region_fusion": {
+            "average_precision": 0.22146799028327344,
+            "auroc": 0.8899457328182984
+          },
+          "source_svd64_fusion": {
+            "average_precision": 0.22540715465153238,
+            "auroc": 0.8857403574157696
+          },
+          "learned_decoded_field": {
+            "average_precision": 0.2400154083879475,
+            "auroc": 0.8915657564585144
+          }
+        },
+        "shared_valid_elements": 168961
+      }
+    }
+  },
+  "training_executions": {
+    "completed_and_exported": 6,
+    "rejected_by_old_frozen_head_gradient_validator": 2,
+    "rejected_names": [
+      "figurines/fusion_init_fixed_decoder_2106",
+      "ramen/fusion_init_fixed_decoder_3240"
+    ]
+  }
+}

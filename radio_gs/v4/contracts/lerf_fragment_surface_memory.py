@@ -310,7 +310,7 @@ def main() -> None:
     parser.add_argument("--source-rgb-authority", required=True)
     parser.add_argument("--sam-manifest", action="append", required=True)
     parser.add_argument("--raster-shape", nargs=2, type=int, required=True, metavar=("H", "W"))
-    parser.add_argument("--source-mask-raster", choices=("reference", "native"), default="reference")
+    parser.add_argument("--source-mask-raster", choices=("reference", "native"), default="native")
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--cpu-threads", type=int, default=8)
     parser.add_argument("--output", required=True)

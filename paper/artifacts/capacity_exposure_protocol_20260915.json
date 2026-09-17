@@ -1,0 +1,21 @@
+{
+  "purpose": "separate training exposure from field dimension; development controls, no default promotion from one scene",
+  "controls": {
+    "baseline": "existing dense_view_coverage180/660",
+    "long64": "same seed42, same architecture64, twice original updates",
+    "wide128": "seed42, latent128, original updates; different latent initialization unavoidable"
+  },
+  "scenes": {
+    "figurines": {
+      "long64": 360,
+      "wide128": 180
+    },
+    "ramen": {
+      "long64": 1320,
+      "wide128": 660
+    }
+  },
+  "teachers": "all four; shared SigLIP adapter",
+  "evaluation": "existing canonical text full-label eval; no threshold or checkpoint selection",
+  "geometry": "immutable existing bundles"
+}

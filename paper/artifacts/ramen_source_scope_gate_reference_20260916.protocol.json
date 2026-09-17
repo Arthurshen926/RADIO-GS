@@ -1,0 +1,85 @@
+{
+  "schema": "real_polygon_reference_query_development.v1",
+  "scene": "ramen",
+  "field_sha256": {
+    "hard_source_scope_gate96": "ce8845dcb247fb6a51937ec2058ff35eea243df57070c3fea2b3168c311950b2"
+  },
+  "geometry_sha256": "38fd2b410293d55f3ca08000a3a2044c4253ecb98eb48466453c6408f6c4c82b",
+  "labels": [
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00006.json",
+      "sha256": "014168dc3df90385473efa1cc773d4978ec5e68834d618a85764770cb9e50c6c"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.json",
+      "sha256": "235ba8e4235d41e98e7ec75077999602ecec8afcd5318e2af345b50ad490a074"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00060.json",
+      "sha256": "1f4a4c2d5fc2768397301c5aa4fd975fe8125f44538e45a07b0f847ea225c854"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00065.json",
+      "sha256": "6ef6ecc8e202ca641605a68981413bd6365e1598c9e6801224578b7459b52f76"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00081.json",
+      "sha256": "c89454c750fa7ce57e5421e54f80d0fd396e3a0d836cf836165ee9fa20d8d1b9"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00119.json",
+      "sha256": "fba1938cac04d46711cf40b42bf8db556ebd92cf5a4333d53035aea9a45e92c7"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00128.json",
+      "sha256": "34abc343bc7ded19324117487bd2b28fcec1f7845d56e6176152ce70653ab264"
+    }
+  ],
+  "reference_selection": "first annotated frame per category; remaining annotated frames are targets",
+  "query_contract": "text verbatim; image masked crop with3px padding and gray127 outside; prompt one positive and one negative point with registered frozen geometry",
+  "query_mask_or_points_supplied_from_reference_gt": true,
+  "target_masks_used_for_query_encoding": false,
+  "annotations_define_evaluation_cohort": true,
+  "target_rgb_encoded_for_its_own_query": false,
+  "source_training_assets_forbidden": true,
+  "source_semantic_train_frames": [
+    7,
+    11,
+    15,
+    18,
+    22,
+    27,
+    109,
+    76,
+    131,
+    101,
+    105,
+    90
+  ],
+  "target_width": 480,
+  "threshold": 0.5,
+  "refine_prompts": false,
+  "condition_images": false,
+  "image_conditioning_input": "same authorized reference positive/negative pixels as prompt, in addition to reference image crop",
+  "seed_support_policy": "full alpha > 1e-8 and observed/full contribution > .5",
+  "conditioning_implementation_sha256": "a98d01ab1a522af3030080d8a5beeb10354a76d77534a1b5a51f4af2ea2c6d59",
+  "prompt_refinement_implementation_sha256": "bcae93d415abff6ac4ac3a3351ac8c4cc894e15f5c0148b3d1af3c164c5eb2b2",
+  "minimal_prompt_refinement": false,
+  "official_benchmark_protocol": false,
+  "ground_truth_domain": "2D category polygon unions; no 3D ground truth",
+  "prompt_input_count": {
+    "positive": 1,
+    "negative": 1
+  },
+  "prompt_registration_required": true,
+  "target_category_absence_evaluated": false,
+  "instance_identity_verified": false,
+  "metric_contract_names": {
+    "text": "verbatim_text_category_union",
+    "image": "GT_masked_reference_image_category_union",
+    "prompt": "GT_two_point_registered_category_union",
+    "prompt_refined": "GT_two_point_registered_category_union_with_transient_query_optimization"
+  },
+  "instance_identity_assumption": "same category across frames, union of category polygons; not independently verified physical instance tracks",
+  "implementation_sha256": "c857390cd855d6cb4ce553abfaea4c57f5c7b8f17649de7d35bacc421a5a7f97"
+}

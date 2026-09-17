@@ -1,0 +1,314 @@
+{
+  "schema": "joint_retrieval_contracts.v1",
+  "scannet": {
+    "task": "categorical 3D semantic point labeling",
+    "raw_label_space": "NYU40",
+    "class_splits": {
+      "19": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14,
+        16,
+        24,
+        28,
+        33,
+        34,
+        36
+      ],
+      "15": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12,
+        14,
+        16,
+        33,
+        34
+      ],
+      "10": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        33
+      ]
+    },
+    "readout": "all prescribed class queries -> per-element argmax -> geometry-bound point transfer",
+    "unobserved_prediction": 0,
+    "gt_usage": "scoring only; never select per-scene query vocabulary using GT presence",
+    "camera_split_warning": "local train/test transforms overlap; do not claim heldout-view evaluation. A transductive 3D point task is distinct.",
+    "scenes": [
+      {
+        "scene": "scene0000_00",
+        "train_camera_sha256": "b4444038d467c5e5552ab278794ee7ff0f58ee24b0af15653f2d807a2c307f02",
+        "test_camera_sha256": "b4444038d467c5e5552ab278794ee7ff0f58ee24b0af15653f2d807a2c307f02",
+        "train_frames": 279,
+        "test_frames": 279,
+        "overlapping_frame_paths": 279,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0000_00/scene0000_00_vh_clean_2.labels.ply",
+        "labels_sha256": "491607d59b85140081b70d6b4d53a319e74616cbd5b00c66c6b65b7b04de7ba9",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0062_00",
+        "train_camera_sha256": "9a034c7d116e34c5a2757664a9cab02fa11735416f589d3e2eb46204248e109e",
+        "test_camera_sha256": "9a034c7d116e34c5a2757664a9cab02fa11735416f589d3e2eb46204248e109e",
+        "train_frames": 37,
+        "test_frames": 37,
+        "overlapping_frame_paths": 37,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/scene0062_00_vh_clean_2.labels.ply",
+        "labels_sha256": "a52e318cd4c3b53a9dece4c54ac800f1263287ec26232c764d417e65bd9249cc",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0070_00",
+        "train_camera_sha256": "3340a4bc700e36c339769de9933777ce5716113c7bd647fcd2f0836acb742bac",
+        "test_camera_sha256": "3340a4bc700e36c339769de9933777ce5716113c7bd647fcd2f0836acb742bac",
+        "train_frames": 67,
+        "test_frames": 67,
+        "overlapping_frame_paths": 67,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/scene0070_00_vh_clean_2.labels.ply",
+        "labels_sha256": "2daad2157006dd9f67cb181d022a91b3daf5f937af1d65a56772d995248d270a",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0097_00",
+        "train_camera_sha256": "827a54c63a8f6b465f18cc7a966b239091f2471d93359516af827f48fbc12e8f",
+        "test_camera_sha256": "827a54c63a8f6b465f18cc7a966b239091f2471d93359516af827f48fbc12e8f",
+        "train_frames": 38,
+        "test_frames": 38,
+        "overlapping_frame_paths": 38,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0097_00/scene0097_00_vh_clean_2.labels.ply",
+        "labels_sha256": "3a0aa4656034dcba2458c569e9e7773e6c07c2e061cd8045c6decd57a797d319",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0140_00",
+        "train_camera_sha256": "29ed634c02d405fef8f2853ce3e737c34a0fee4cb221fef12f656fb78f87df4e",
+        "test_camera_sha256": "29ed634c02d405fef8f2853ce3e737c34a0fee4cb221fef12f656fb78f87df4e",
+        "train_frames": 215,
+        "test_frames": 215,
+        "overlapping_frame_paths": 215,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0140_00/scene0140_00_vh_clean_2.labels.ply",
+        "labels_sha256": "1bea3b4104aa6fb46f4e08559cacea9dfda8bc544ffcee18c4b180d5e00bfc94",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0200_00",
+        "train_camera_sha256": "dd8e052f46b3f57bcb9d927bef6a3e063e2f5296a46eb848de473d74e38ee241",
+        "test_camera_sha256": "dd8e052f46b3f57bcb9d927bef6a3e063e2f5296a46eb848de473d74e38ee241",
+        "train_frames": 46,
+        "test_frames": 46,
+        "overlapping_frame_paths": 46,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0200_00/scene0200_00_vh_clean_2.labels.ply",
+        "labels_sha256": "20ea5b2afeb18de89ed9461829babcf59d1e02d5e8408e94f33c0f9e493afedc",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0347_00",
+        "train_camera_sha256": "2f6804925ae3df1feb4515958f6aa64cb2dfb1a2b186e79bcdd2b4b499c09dd9",
+        "test_camera_sha256": "2f6804925ae3df1feb4515958f6aa64cb2dfb1a2b186e79bcdd2b4b499c09dd9",
+        "train_frames": 54,
+        "test_frames": 54,
+        "overlapping_frame_paths": 54,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0347_00/scene0347_00_vh_clean_2.labels.ply",
+        "labels_sha256": "e860d0a9b9903c8c5dcb8f8a3f215abf39462043afd9a5cefcd7f4bfa8800b4d",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0400_00",
+        "train_camera_sha256": "41a1f12520c62656e499906b38d29d530673122a28e182daa5c3f14f13a47b29",
+        "test_camera_sha256": "41a1f12520c62656e499906b38d29d530673122a28e182daa5c3f14f13a47b29",
+        "train_frames": 61,
+        "test_frames": 61,
+        "overlapping_frame_paths": 61,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/scene0400_00_vh_clean_2.labels.ply",
+        "labels_sha256": "9cf69bb253310a0b37c53a426dd875dd6fb682b35e10c937aaf531c6064654bd",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0590_00",
+        "train_camera_sha256": "c11f380c7df583f2217577b016db366a321bc5a0a0fe0b9790166abf8bbc778b",
+        "test_camera_sha256": "c11f380c7df583f2217577b016db366a321bc5a0a0fe0b9790166abf8bbc778b",
+        "train_frames": 135,
+        "test_frames": 135,
+        "overlapping_frame_paths": 135,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0590_00/scene0590_00_vh_clean_2.labels.ply",
+        "labels_sha256": "4d0cec1d735e19c0041a23f2c27fa95bdeb671f37b4700d34f06d4843a2f7cdf",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "scene0645_00",
+        "train_camera_sha256": "3f6e598bdc8e261b000cd3b4f1ee03e278162bf0c99df4e12643fd52bdf1f088",
+        "test_camera_sha256": "3f6e598bdc8e261b000cd3b4f1ee03e278162bf0c99df4e12643fd52bdf1f088",
+        "train_frames": 226,
+        "test_frames": 226,
+        "overlapping_frame_paths": 226,
+        "is_disjoint_view_test": false,
+        "labels": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0645_00/scene0645_00_vh_clean_2.labels.ply",
+        "labels_sha256": "83732343012802769820176fd912023759ff6dd967bdfa1d8587c39f73c31701",
+        "new_frozen_moge_retrieval_bundle_ready": false
+      }
+    ]
+  },
+  "nvos": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "task": "official reference positive/negative scribble -> independent target binary mask",
+    "prompt_input": "2D signed scribbles, not fabricated 3D clicks",
+    "strict_query_rgb": "reference only; target forbidden",
+    "sam_reference_parser": "may infer a transient reference mask and native image query from authorized reference RGB and prompts",
+    "rgb_assisted_alternative": "target-RGB SAM/video is a distinct protocol, never combined with strict results",
+    "scenes": [
+      {
+        "scene": "fern",
+        "source_frames": 19,
+        "reference_frame": "IMG_4038",
+        "target_frames": [
+          "IMG_4027"
+        ],
+        "target_rgb_excluded": true,
+        "official_signed_scribble_size_wh": [
+          1008,
+          756
+        ],
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "flower",
+        "source_frames": 33,
+        "reference_frame": "IMG_2983",
+        "target_frames": [
+          "IMG_2962"
+        ],
+        "target_rgb_excluded": true,
+        "official_signed_scribble_size_wh": [
+          1008,
+          756
+        ],
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "fortress",
+        "source_frames": 41,
+        "reference_frame": "IMG_1821",
+        "target_frames": [
+          "IMG_1800"
+        ],
+        "target_rgb_excluded": true,
+        "official_signed_scribble_size_wh": [
+          1008,
+          756
+        ],
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "horns_center",
+        "source_frames": 61,
+        "reference_frame": "DJI_20200223_163055_437",
+        "target_frames": [
+          "DJI_20200223_163024_597"
+        ],
+        "target_rgb_excluded": true,
+        "official_signed_scribble_size_wh": [
+          1008,
+          756
+        ],
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "horns_left",
+        "source_frames": 61,
+        "reference_frame": "DJI_20200223_163055_437",
+        "target_frames": [
+          "DJI_20200223_163024_597"
+        ],
+        "target_rgb_excluded": true,
+        "official_signed_scribble_size_wh": [
+          1008,
+          756
+        ],
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "leaves",
+        "source_frames": 25,
+        "reference_frame": "IMG_3011",
+        "target_frames": [
+          "IMG_2997"
+        ],
+        "target_rgb_excluded": true,
+        "official_signed_scribble_size_wh": [
+          1008,
+          756
+        ],
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "orchids",
+        "source_frames": 24,
+        "reference_frame": "IMG_4479",
+        "target_frames": [
+          "IMG_4480"
+        ],
+        "target_rgb_excluded": true,
+        "official_signed_scribble_size_wh": [
+          1008,
+          756
+        ],
+        "new_frozen_moge_retrieval_bundle_ready": false
+      },
+      {
+        "scene": "trex",
+        "source_frames": 54,
+        "reference_frame": "DJI_20200223_163607_906",
+        "target_frames": [
+          "DJI_20200223_163619_411"
+        ],
+        "target_rgb_excluded": true,
+        "official_signed_scribble_size_wh": [
+          1008,
+          756
+        ],
+        "new_frozen_moge_retrieval_bundle_ready": false
+      }
+    ]
+  },
+  "lerf": {
+    "current_task": "2D category-union development text/reference queries",
+    "official_point_image_protocol": false
+  },
+  "promotion": "new matched field must pass all three task contracts; LERF gains alone cannot promote",
+  "new_joint_benchmark_metrics_available": false
+}

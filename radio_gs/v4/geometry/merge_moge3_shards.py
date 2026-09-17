@@ -21,10 +21,15 @@ def merge(input_dir: Path, output: Path) -> dict[str, object]:
         "fov_x_degrees", "resolution_level", "refine_steps", "num_shards",
         "total_authority_frames",
     )
+    for optional_key in ("geometry_dtype", "use_fp16_inference"):
+        if any(optional_key in shard for shard in shards):
+            if not all(optional_key in shard for shard in shards):
+                raise ValueError("cannot mix legacy and precision-bound MoGe shards")
+            invariant_keys += (optional_key,)
     for shard in shards:
         if any(shard[key] != first[key] for key in invariant_keys):
             raise ValueError("MoGe-3 shard manifests disagree on a scene invariant")
-        if shard["target_rgb_opened"] or shard["benchmark_images_opened"] or shard["benchmark_masks_opened"]:
+        if shard["target_rgb_opened"] or shard["benchmark_images_opened"] or shard["benchmark_masks_opened"] or shard.get("text_queries_opened", False):
             raise ValueError("MoGe-3 shard opened a forbidden benchmark/target input")
     expected_shards = set(range(int(first["num_shards"])))
     actual_shards = {int(shard["shard_id"]) for shard in shards}
@@ -37,6 +42,12 @@ def merge(input_dir: Path, output: Path) -> dict[str, object]:
     frame_indices = [int(record["frame_index"]) for record in records]
     if len(frame_indices) != len(set(frame_indices)) or len(frame_indices) != int(first["total_authority_frames"]):
         raise ValueError("merged MoGe-3 records are duplicated or incomplete")
+    authority_path = Path(first["source_authority"])
+    if sha256_file(authority_path) != first["source_authority_sha256"]:
+        raise ValueError("MoGe source authority changed")
+    authority = json.loads(authority_path.read_text())
+    if set(frame_indices) != set(map(int, authority["frame_indices"])):
+        raise ValueError("MoGe merged frame IDs differ from source authority")
     for record in records:
         if sha256_file(record["source_image"]) != record["source_image_sha256"]:
             raise ValueError(f"source image digest changed for frame {record['frame_index']}")

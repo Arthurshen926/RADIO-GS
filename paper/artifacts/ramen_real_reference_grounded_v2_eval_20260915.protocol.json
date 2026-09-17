@@ -1,0 +1,69 @@
+{
+  "schema": "real_polygon_reference_query_development.v1",
+  "scene": "ramen",
+  "field_sha256": {
+    "dense_view_coverage660": "0e336b94e8b1e7ae017c1dca6c7f0961547eadfdbdcea654c0bdb4bfd7aac406",
+    "grounded_v2660": "2f081fc36cb265f2cce8f57abb157534cd075d2d78af801ff59365db4047983d",
+    "grounded_v2_seed43660": "dd6a81ae88b0b0ab47b18eeda1792d26655fb4e085c5e8d2124def930c590f14",
+    "grounded_v2_no_radio660": "f6494cdd5f2b65a2aa954e85f0c6ce29778126024ea2cc28f1a39876a2d46295"
+  },
+  "geometry_sha256": "38fd2b410293d55f3ca08000a3a2044c4253ecb98eb48466453c6408f6c4c82b",
+  "labels": [
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00006.json",
+      "sha256": "014168dc3df90385473efa1cc773d4978ec5e68834d618a85764770cb9e50c6c"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.json",
+      "sha256": "235ba8e4235d41e98e7ec75077999602ecec8afcd5318e2af345b50ad490a074"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00060.json",
+      "sha256": "1f4a4c2d5fc2768397301c5aa4fd975fe8125f44538e45a07b0f847ea225c854"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00065.json",
+      "sha256": "6ef6ecc8e202ca641605a68981413bd6365e1598c9e6801224578b7459b52f76"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00081.json",
+      "sha256": "c89454c750fa7ce57e5421e54f80d0fd396e3a0d836cf836165ee9fa20d8d1b9"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00119.json",
+      "sha256": "fba1938cac04d46711cf40b42bf8db556ebd92cf5a4333d53035aea9a45e92c7"
+    },
+    {
+      "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00128.json",
+      "sha256": "34abc343bc7ded19324117487bd2b28fcec1f7845d56e6176152ce70653ab264"
+    }
+  ],
+  "reference_selection": "first annotated frame per category; remaining annotated frames are targets",
+  "query_contract": "text verbatim; image masked crop with3px padding and gray127 outside; prompt one positive and one negative point with registered frozen geometry",
+  "query_mask_or_points_supplied_from_reference_gt": true,
+  "target_masks_used_for_query_encoding": false,
+  "annotations_define_evaluation_cohort": true,
+  "target_rgb_encoded_for_its_own_query": false,
+  "source_training_assets_forbidden": true,
+  "source_semantic_train_frames": [
+    7,
+    11,
+    15,
+    18,
+    22,
+    27,
+    109,
+    76,
+    131,
+    101,
+    105,
+    90
+  ],
+  "target_width": 480,
+  "threshold": 0.5,
+  "refine_prompts": true,
+  "minimal_prompt_refinement": false,
+  "official_benchmark_protocol": false,
+  "instance_identity_assumption": "same category across frames, union of category polygons; not independently verified physical instance tracks",
+  "implementation_sha256": "e8400ca71c117402fe5e71e01ec4647508cbc40db8898c72a1aaf9071b72bea9"
+}

@@ -1,0 +1,159 @@
+{
+  "schema": "structural_membership_acceptance.v1",
+  "benchmark": "LERF annotated development; not independent final test",
+  "scenes": {
+    "figurines": {
+      "artifact_hashes": {
+        "paper/artifacts/figurines_structural_membership_text_20260916.json": "8bb55fc0b625931e1eb85e20b7a547fe878522b54d55247dbbeef906d40dd376",
+        "paper/artifacts/figurines_structural_membership_reference_20260916.json": "6be76d746622734f3adbb7aaed33f3df766009a7d7abc89b20d3677051347c54",
+        "paper/artifacts/figurines_partitioned_system_text_20260916.json": "10579c38da0c443386303bea75834be8c0c6841e3470de26868526984ec090c4",
+        "paper/artifacts/figurines_partitioned_system_reference_20260916.json": "313f38ed69147977e45b6eb5bfe783c70832e9832a12d2ec3a9bb97798996319"
+      },
+      "runs": {
+        "structural_membership_v1": {
+          "gates": {
+            "native_state_exact": true,
+            "cold_load_exact": true,
+            "text_ap_no_regression": false,
+            "text_iou_no_regression": false,
+            "image_ap_no_regression": false,
+            "image_iou_no_regression": false,
+            "prompt_unchanged": true
+          },
+          "promote": false,
+          "text": {
+            "iou": 0.26677786535421605,
+            "ap": 0.41420007915013674
+          },
+          "reference": {
+            "text": {
+              "iou": 0.2649882931233259,
+              "average_precision": 0.407763548030976,
+              "auroc": 0.895243950548388
+            },
+            "image": {
+              "iou": 0.29839996173815425,
+              "average_precision": 0.4457458745243581,
+              "auroc": 0.9082619915494285
+            },
+            "prompt": {
+              "iou": 0.2435521432341541,
+              "average_precision": 0.38842520222473764,
+              "auroc": 0.9327112309236041
+            }
+          }
+        },
+        "structural_membership_v1_semantic_only": {
+          "gates": {
+            "native_state_exact": true,
+            "cold_load_exact": true,
+            "text_ap_no_regression": false,
+            "text_iou_no_regression": false,
+            "image_ap_no_regression": false,
+            "image_iou_no_regression": false,
+            "prompt_unchanged": true
+          },
+          "promote": false,
+          "text": {
+            "iou": 0.0,
+            "ap": 0.5653489491199505
+          },
+          "reference": {
+            "text": {
+              "iou": 0.0,
+              "average_precision": 0.5432498644842102,
+              "auroc": 0.9227604331002567
+            },
+            "image": {
+              "iou": 0.08969904842492277,
+              "average_precision": 0.5396823787404452,
+              "auroc": 0.911809817381286
+            },
+            "prompt": {
+              "iou": 0.2435521432341541,
+              "average_precision": 0.38842520222473764,
+              "auroc": 0.9327112309236041
+            }
+          }
+        }
+      }
+    },
+    "ramen": {
+      "artifact_hashes": {
+        "paper/artifacts/ramen_structural_membership_text_20260916.json": "5f2a4604b1bcd50390d66c6e2fa28360df623b749819800fe6c351ffb36a924b",
+        "paper/artifacts/ramen_structural_membership_reference_20260916.json": "c64f6528c4766591d7e6e9b0c2c4b84b58326a9a9d050ac891ce6756685493c5",
+        "paper/artifacts/ramen_partitioned_system_text_20260916.json": "68dc0efdd50d0b227c4d369214f97f8b4a73040a954a09ad05de9e51080ac386",
+        "paper/artifacts/ramen_partitioned_system_reference_20260916.json": "ca41190f8ba8dc12ba5a939c0bd10e02984b879041b550babd4275aa7d80636a"
+      },
+      "runs": {
+        "structural_membership_v1": {
+          "gates": {
+            "native_state_exact": true,
+            "cold_load_exact": true,
+            "text_ap_no_regression": false,
+            "text_iou_no_regression": true,
+            "image_ap_no_regression": false,
+            "image_iou_no_regression": true,
+            "prompt_unchanged": true
+          },
+          "promote": false,
+          "text": {
+            "iou": 0.1025943238787063,
+            "ap": 0.18061096937165233
+          },
+          "reference": {
+            "text": {
+              "iou": 0.10169332885442621,
+              "average_precision": 0.18863514289852754,
+              "auroc": 0.8231923061343474
+            },
+            "image": {
+              "iou": 0.17918435912328912,
+              "average_precision": 0.2904927838653542,
+              "auroc": 0.8732833956206693
+            },
+            "prompt": {
+              "iou": 0.2287264744004645,
+              "average_precision": 0.3864269433907703,
+              "auroc": 0.9358366131300926
+            }
+          }
+        },
+        "structural_membership_v1_semantic_only": {
+          "gates": {
+            "native_state_exact": true,
+            "cold_load_exact": true,
+            "text_ap_no_regression": false,
+            "text_iou_no_regression": false,
+            "image_ap_no_regression": true,
+            "image_iou_no_regression": true,
+            "prompt_unchanged": true
+          },
+          "promote": false,
+          "text": {
+            "iou": 0.0,
+            "ap": 0.22630314062197357
+          },
+          "reference": {
+            "text": {
+              "iou": 0.0,
+              "average_precision": 0.22917378039557945,
+              "auroc": 0.8883201874417352
+            },
+            "image": {
+              "iou": 0.2019498987611502,
+              "average_precision": 0.3493933897366093,
+              "auroc": 0.8742507332891151
+            },
+            "prompt": {
+              "iou": 0.2287264744004645,
+              "average_precision": 0.3864269433907703,
+              "auroc": 0.9358366131300926
+            }
+          }
+        }
+      }
+    }
+  },
+  "promote": false
+}

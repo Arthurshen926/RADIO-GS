@@ -1,0 +1,1309 @@
+{
+  "schema": "actual_region_teacher_native_fusion_ranking.v1",
+  "field_sha256": "7e27d4be3ee68964754a003a7a0d751f3b2e85f1f24334ec462767f26bf1c361",
+  "geometry_sha256": "38fd2b410293d55f3ca08000a3a2044c4253ecb98eb48466453c6408f6c4c82b",
+  "source_episode_sha256": "d2cc1d2ae9f6516d6465d0d3b47535ea8bbef69b91fb627956ae63204d0a3445",
+  "teacher_sha256": "17ab3e0c9a4b8fa6548ad0d77760cb22c55207a0ce2d8b02814775fe0408e44b",
+  "implementation_sha256": "38a9762a5076f5b879c962493e9fe1dbabc7fc9dafd0574f28ec4bd0990ffcb4",
+  "source_regions": 218,
+  "shared_valid_elements": 168961,
+  "shared_output_contract": "render mean of (native cosine+1)/2, no sigmoid or learned calibration; full geometry and identical observed support; unknown score zero",
+  "native_fusion": "source region_probability weighted normalized descriptors; no compression; not an accuracy ceiling",
+  "target_rgb_opened": false,
+  "ground_truth_used_only_for_evaluation": true,
+  "no_training_updates": true,
+  "macro": {
+    "native_source_region_fusion": {
+      "average_precision": 0.22146799028327344,
+      "auroc": 0.8899457328182984
+    },
+    "learned_decoded_field": {
+      "average_precision": 0.20402339029634944,
+      "auroc": 0.8229342645704016
+    }
+  },
+  "observations": {
+    "native_source_region_fusion": [
+      {
+        "frame": 6,
+        "category": "bowl",
+        "average_precision": 0.50286852542663,
+        "auroc": 0.9086789970398701,
+        "positive_fraction": 0.07525821596244131,
+        "positive_mean_response": 0.5541426539421082,
+        "negative_mean_response": 0.4965478181838989
+      },
+      {
+        "frame": 6,
+        "category": "chopsticks",
+        "average_precision": 0.17216565014976723,
+        "auroc": 0.8986727243287844,
+        "positive_fraction": 0.01034037558685446,
+        "positive_mean_response": 0.5346869230270386,
+        "negative_mean_response": 0.48860716819763184
+      },
+      {
+        "frame": 6,
+        "category": "egg",
+        "average_precision": 0.08667893516298245,
+        "auroc": 0.9195426630368678,
+        "positive_fraction": 0.00982981220657277,
+        "positive_mean_response": 0.5409866571426392,
+        "negative_mean_response": 0.49449455738067627
+      },
+      {
+        "frame": 6,
+        "category": "kamaboko",
+        "average_precision": 0.09256012615381791,
+        "auroc": 0.9820861327228602,
+        "positive_fraction": 0.00403169014084507,
+        "positive_mean_response": 0.5323213934898376,
+        "negative_mean_response": 0.4740167558193207
+      },
+      {
+        "frame": 6,
+        "category": "napkin",
+        "average_precision": 0.4664799470840955,
+        "auroc": 0.9512098388759722,
+        "positive_fraction": 0.00795774647887324,
+        "positive_mean_response": 0.535819947719574,
+        "negative_mean_response": 0.49168065190315247
+      },
+      {
+        "frame": 6,
+        "category": "nori",
+        "average_precision": 0.7482376499722551,
+        "auroc": 0.968517114960013,
+        "positive_fraction": 0.018832159624413144,
+        "positive_mean_response": 0.5433008074760437,
+        "negative_mean_response": 0.4852263927459717
+      },
+      {
+        "frame": 6,
+        "category": "onion segments",
+        "average_precision": 0.053636612236436246,
+        "auroc": 0.9538205520238799,
+        "positive_fraction": 0.004025821596244131,
+        "positive_mean_response": 0.5389174818992615,
+        "negative_mean_response": 0.49354737997055054
+      },
+      {
+        "frame": 6,
+        "category": "plate",
+        "average_precision": 0.18633988589705866,
+        "auroc": 0.852080755310718,
+        "positive_fraction": 0.0685093896713615,
+        "positive_mean_response": 0.5455259084701538,
+        "negative_mean_response": 0.4971528947353363
+      },
+      {
+        "frame": 6,
+        "category": "sake cup",
+        "average_precision": 0.09555816606116216,
+        "auroc": 0.9216834419262538,
+        "positive_fraction": 0.01687206572769953,
+        "positive_mean_response": 0.5413274765014648,
+        "negative_mean_response": 0.4880441427230835
+      },
+      {
+        "frame": 6,
+        "category": "wavy noodles",
+        "average_precision": 0.03416829690708745,
+        "auroc": 0.9090270990096984,
+        "positive_fraction": 0.006813380281690141,
+        "positive_mean_response": 0.5416902303695679,
+        "negative_mean_response": 0.48739466071128845
+      },
+      {
+        "frame": 24,
+        "category": "bowl",
+        "average_precision": 0.8290122309662981,
+        "auroc": 0.9139965757760486,
+        "positive_fraction": 0.2254518779342723,
+        "positive_mean_response": 0.5566313862800598,
+        "negative_mean_response": 0.5238290429115295
+      },
+      {
+        "frame": 24,
+        "category": "chopsticks",
+        "average_precision": 0.017903958445616507,
+        "auroc": 0.5693834949106478,
+        "positive_fraction": 0.01671948356807512,
+        "positive_mean_response": 0.532823383808136,
+        "negative_mean_response": 0.5165221095085144
+      },
+      {
+        "frame": 24,
+        "category": "corn",
+        "average_precision": 0.011657108132375615,
+        "auroc": 0.8910072015836484,
+        "positive_fraction": 0.002687793427230047,
+        "positive_mean_response": 0.5315909385681152,
+        "negative_mean_response": 0.5120460987091064
+      },
+      {
+        "frame": 24,
+        "category": "egg",
+        "average_precision": 0.2678621028869109,
+        "auroc": 0.8938035029637429,
+        "positive_fraction": 0.03898474178403756,
+        "positive_mean_response": 0.5442028045654297,
+        "negative_mean_response": 0.522101104259491
+      },
+      {
+        "frame": 24,
+        "category": "kamaboko",
+        "average_precision": 0.06416806805587326,
+        "auroc": 0.8783203289450907,
+        "positive_fraction": 0.018092723004694836,
+        "positive_mean_response": 0.5333816409111023,
+        "negative_mean_response": 0.5030456781387329
+      },
+      {
+        "frame": 24,
+        "category": "nori",
+        "average_precision": 0.7373267146850553,
+        "auroc": 0.9139224166950308,
+        "positive_fraction": 0.13783450704225353,
+        "positive_mean_response": 0.542987585067749,
+        "negative_mean_response": 0.5106909871101379
+      },
+      {
+        "frame": 24,
+        "category": "onion segments",
+        "average_precision": 0.17773270705233238,
+        "auroc": 0.9384336843565521,
+        "positive_fraction": 0.025539906103286384,
+        "positive_mean_response": 0.5403237342834473,
+        "negative_mean_response": 0.5203959345817566
+      },
+      {
+        "frame": 24,
+        "category": "wavy noodles",
+        "average_precision": 0.05877002236219358,
+        "auroc": 0.7192574352116263,
+        "positive_fraction": 0.0352406103286385,
+        "positive_mean_response": 0.5477322340011597,
+        "negative_mean_response": 0.5225884318351746
+      },
+      {
+        "frame": 60,
+        "category": "chopsticks",
+        "average_precision": 0.09426047859205258,
+        "auroc": 0.79069868200028,
+        "positive_fraction": 0.018392018779342722,
+        "positive_mean_response": 0.535552978515625,
+        "negative_mean_response": 0.4910586178302765
+      },
+      {
+        "frame": 60,
+        "category": "corn",
+        "average_precision": 0.01179504433172373,
+        "auroc": 0.9158349117967881,
+        "positive_fraction": 0.0020892018779342723,
+        "positive_mean_response": 0.5315607786178589,
+        "negative_mean_response": 0.4857448637485504
+      },
+      {
+        "frame": 60,
+        "category": "egg",
+        "average_precision": 0.29966352731769896,
+        "auroc": 0.9304578018308634,
+        "positive_fraction": 0.033386150234741785,
+        "positive_mean_response": 0.5443791151046753,
+        "negative_mean_response": 0.49472776055336
+      },
+      {
+        "frame": 60,
+        "category": "kamaboko",
+        "average_precision": 0.06111226428491181,
+        "auroc": 0.9042713360569944,
+        "positive_fraction": 0.01380868544600939,
+        "positive_mean_response": 0.5335310101509094,
+        "negative_mean_response": 0.47800302505493164
+      },
+      {
+        "frame": 60,
+        "category": "napkin",
+        "average_precision": 0.94135456159832,
+        "auroc": 0.99496873121561,
+        "positive_fraction": 0.02852112676056338,
+        "positive_mean_response": 0.5402759909629822,
+        "negative_mean_response": 0.4891035556793213
+      },
+      {
+        "frame": 60,
+        "category": "onion segments",
+        "average_precision": 0.20479531643638946,
+        "auroc": 0.9718624749071856,
+        "positive_fraction": 0.014536384976525821,
+        "positive_mean_response": 0.5404179692268372,
+        "negative_mean_response": 0.4939546585083008
+      },
+      {
+        "frame": 60,
+        "category": "sake cup",
+        "average_precision": 0.27900436402010614,
+        "auroc": 0.945365123481596,
+        "positive_fraction": 0.014131455399061034,
+        "positive_mean_response": 0.5407844185829163,
+        "negative_mean_response": 0.4881057143211365
+      },
+      {
+        "frame": 60,
+        "category": "wavy noodles",
+        "average_precision": 0.08102836697759856,
+        "auroc": 0.8586952952238758,
+        "positive_fraction": 0.026678403755868545,
+        "positive_mean_response": 0.5510178804397583,
+        "negative_mean_response": 0.49277281761169434
+      },
+      {
+        "frame": 65,
+        "category": "bowl",
+        "average_precision": 0.42851456593804504,
+        "auroc": 0.8937329685613279,
+        "positive_fraction": 0.11380868544600939,
+        "positive_mean_response": 0.5549710988998413,
+        "negative_mean_response": 0.5202919840812683
+      },
+      {
+        "frame": 65,
+        "category": "chopsticks",
+        "average_precision": 0.10913831853512881,
+        "auroc": 0.8499601972823851,
+        "positive_fraction": 0.00812793427230047,
+        "positive_mean_response": 0.5352020859718323,
+        "negative_mean_response": 0.5093926191329956
+      },
+      {
+        "frame": 65,
+        "category": "corn",
+        "average_precision": 0.011226257239367586,
+        "auroc": 0.9284091525437433,
+        "positive_fraction": 0.0017664319248826292,
+        "positive_mean_response": 0.5313535928726196,
+        "negative_mean_response": 0.5052531957626343
+      },
+      {
+        "frame": 65,
+        "category": "egg",
+        "average_precision": 0.15945494066475066,
+        "auroc": 0.937622140714151,
+        "positive_fraction": 0.018832159624413144,
+        "positive_mean_response": 0.5436087250709534,
+        "negative_mean_response": 0.51567542552948
+      },
+      {
+        "frame": 65,
+        "category": "kamaboko",
+        "average_precision": 0.05541759918850574,
+        "auroc": 0.9384773275988598,
+        "positive_fraction": 0.00784037558685446,
+        "positive_mean_response": 0.5333811044692993,
+        "negative_mean_response": 0.4947807192802429
+      },
+      {
+        "frame": 65,
+        "category": "napkin",
+        "average_precision": 0.09768392263628493,
+        "auroc": 0.9299478279335313,
+        "positive_fraction": 0.007852112676056337,
+        "positive_mean_response": 0.5359069108963013,
+        "negative_mean_response": 0.5104057192802429
+      },
+      {
+        "frame": 65,
+        "category": "nori",
+        "average_precision": 0.7035057522443999,
+        "auroc": 0.9605206612716171,
+        "positive_fraction": 0.031737089201877934,
+        "positive_mean_response": 0.5439649820327759,
+        "negative_mean_response": 0.5061548948287964
+      },
+      {
+        "frame": 65,
+        "category": "onion segments",
+        "average_precision": 0.17736385266500615,
+        "auroc": 0.9703745015392831,
+        "positive_fraction": 0.012259389671361502,
+        "positive_mean_response": 0.5402053594589233,
+        "negative_mean_response": 0.5140784978866577
+      },
+      {
+        "frame": 65,
+        "category": "plate",
+        "average_precision": 0.13962962586498126,
+        "auroc": 0.8216979628242445,
+        "positive_fraction": 0.05595657276995305,
+        "positive_mean_response": 0.5450419187545776,
+        "negative_mean_response": 0.5197697877883911
+      },
+      {
+        "frame": 65,
+        "category": "sake cup",
+        "average_precision": 0.061409607798809926,
+        "auroc": 0.8710259439830085,
+        "positive_fraction": 0.016115023474178404,
+        "positive_mean_response": 0.5399719476699829,
+        "negative_mean_response": 0.5096816420555115
+      },
+      {
+        "frame": 65,
+        "category": "wavy noodles",
+        "average_precision": 0.03213361571820549,
+        "auroc": 0.7995069332178488,
+        "positive_fraction": 0.01380868544600939,
+        "positive_mean_response": 0.5425440073013306,
+        "negative_mean_response": 0.511443018913269
+      },
+      {
+        "frame": 81,
+        "category": "bowl",
+        "average_precision": 0.7059314581142276,
+        "auroc": 0.9087473906160823,
+        "positive_fraction": 0.07241784037558685,
+        "positive_mean_response": 0.5522172451019287,
+        "negative_mean_response": 0.42423415184020996
+      },
+      {
+        "frame": 81,
+        "category": "chopsticks",
+        "average_precision": 0.05698347886665864,
+        "auroc": 0.8670633685504009,
+        "positive_fraction": 0.01159037558685446,
+        "positive_mean_response": 0.533923327922821,
+        "negative_mean_response": 0.42254745960235596
+      },
+      {
+        "frame": 81,
+        "category": "egg",
+        "average_precision": 0.23725462963951421,
+        "auroc": 0.984508323275576,
+        "positive_fraction": 0.007828638497652583,
+        "positive_mean_response": 0.5445471405982971,
+        "negative_mean_response": 0.4270778000354767
+      },
+      {
+        "frame": 81,
+        "category": "glass of water",
+        "average_precision": 0.13807256769360293,
+        "auroc": 0.914159152796611,
+        "positive_fraction": 0.019014084507042252,
+        "positive_mean_response": 0.5463373064994812,
+        "negative_mean_response": 0.4204796254634857
+      },
+      {
+        "frame": 81,
+        "category": "kamaboko",
+        "average_precision": 0.15207728444604227,
+        "auroc": 0.9879296629786566,
+        "positive_fraction": 0.0028169014084507044,
+        "positive_mean_response": 0.5373491048812866,
+        "negative_mean_response": 0.41090190410614014
+      },
+      {
+        "frame": 81,
+        "category": "napkin",
+        "average_precision": 0.03763021020168702,
+        "auroc": 0.8991713886311935,
+        "positive_fraction": 0.005845070422535212,
+        "positive_mean_response": 0.533793032169342,
+        "negative_mean_response": 0.42419183254241943
+      },
+      {
+        "frame": 81,
+        "category": "nori",
+        "average_precision": 0.6067518483966527,
+        "auroc": 0.9001323618007862,
+        "positive_fraction": 0.032811032863849766,
+        "positive_mean_response": 0.535760760307312,
+        "negative_mean_response": 0.4166852831840515
+      },
+      {
+        "frame": 81,
+        "category": "onion segments",
+        "average_precision": 0.0780626419140026,
+        "auroc": 0.9811463248230876,
+        "positive_fraction": 0.0029401408450704224,
+        "positive_mean_response": 0.5402530431747437,
+        "negative_mean_response": 0.4256506860256195
+      },
+      {
+        "frame": 81,
+        "category": "plate",
+        "average_precision": 0.21299006562140785,
+        "auroc": 0.8777587320518155,
+        "positive_fraction": 0.047758215962441314,
+        "positive_mean_response": 0.5439677834510803,
+        "negative_mean_response": 0.426054984331131
+      },
+      {
+        "frame": 81,
+        "category": "sake cup",
+        "average_precision": 0.04134063155126416,
+        "auroc": 0.8158651660656672,
+        "positive_fraction": 0.01613849765258216,
+        "positive_mean_response": 0.5380312204360962,
+        "negative_mean_response": 0.42330366373062134
+      },
+      {
+        "frame": 81,
+        "category": "spoon",
+        "average_precision": 0.24243620944249875,
+        "auroc": 0.9805148282048396,
+        "positive_fraction": 0.010768779342723005,
+        "positive_mean_response": 0.5485248565673828,
+        "negative_mean_response": 0.42689746618270874
+      },
+      {
+        "frame": 81,
+        "category": "wavy noodles",
+        "average_precision": 0.10911586074219456,
+        "auroc": 0.9772920931852439,
+        "positive_fraction": 0.006073943661971831,
+        "positive_mean_response": 0.5547516942024231,
+        "negative_mean_response": 0.42164117097854614
+      },
+      {
+        "frame": 119,
+        "category": "chopsticks",
+        "average_precision": 0.011039668698243521,
+        "auroc": 0.6649481494055989,
+        "positive_fraction": 0.007142018779342723,
+        "positive_mean_response": 0.5342420935630798,
+        "negative_mean_response": 0.5293986201286316
+      },
+      {
+        "frame": 119,
+        "category": "corn",
+        "average_precision": 0.005129688257873791,
+        "auroc": 0.8952417846367126,
+        "positive_fraction": 0.0011384976525821596,
+        "positive_mean_response": 0.5316222906112671,
+        "negative_mean_response": 0.5244778990745544
+      },
+      {
+        "frame": 119,
+        "category": "egg",
+        "average_precision": 0.2768403598896323,
+        "auroc": 0.9122979113170057,
+        "positive_fraction": 0.05255281690140845,
+        "positive_mean_response": 0.5444374680519104,
+        "negative_mean_response": 0.5357024669647217
+      },
+      {
+        "frame": 119,
+        "category": "kamaboko",
+        "average_precision": 0.08602563304312952,
+        "auroc": 0.9079104750372284,
+        "positive_fraction": 0.017400234741784038,
+        "positive_mean_response": 0.5342453122138977,
+        "negative_mean_response": 0.5163988471031189
+      },
+      {
+        "frame": 119,
+        "category": "nori",
+        "average_precision": 0.624252003775294,
+        "auroc": 0.7972074742350398,
+        "positive_fraction": 0.12858568075117371,
+        "positive_mean_response": 0.5391741991043091,
+        "negative_mean_response": 0.5255317687988281
+      },
+      {
+        "frame": 119,
+        "category": "onion segments",
+        "average_precision": 0.17677664562260936,
+        "auroc": 0.9610923858409722,
+        "positive_fraction": 0.014184272300469484,
+        "positive_mean_response": 0.5403180718421936,
+        "negative_mean_response": 0.533256471157074
+      },
+      {
+        "frame": 119,
+        "category": "sake cup",
+        "average_precision": 0.038123227548771975,
+        "auroc": 0.8511286763316482,
+        "positive_fraction": 0.010757042253521127,
+        "positive_mean_response": 0.54050612449646,
+        "negative_mean_response": 0.5279744863510132
+      },
+      {
+        "frame": 119,
+        "category": "wavy noodles",
+        "average_precision": 0.1608302090698729,
+        "auroc": 0.8617594299133388,
+        "positive_fraction": 0.05151408450704225,
+        "positive_mean_response": 0.5532671809196472,
+        "negative_mean_response": 0.5347114205360413
+      },
+      {
+        "frame": 128,
+        "category": "bowl",
+        "average_precision": 0.7533361870779945,
+        "auroc": 0.9379205803827299,
+        "positive_fraction": 0.10855633802816901,
+        "positive_mean_response": 0.5574184656143188,
+        "negative_mean_response": 0.5103695392608643
+      },
+      {
+        "frame": 128,
+        "category": "chopsticks",
+        "average_precision": 0.03871673661964753,
+        "auroc": 0.8139026289909926,
+        "positive_fraction": 0.014284037558685446,
+        "positive_mean_response": 0.53480064868927,
+        "negative_mean_response": 0.503092348575592
+      },
+      {
+        "frame": 128,
+        "category": "corn",
+        "average_precision": 0.007717174990306617,
+        "auroc": 0.9329757515834752,
+        "positive_fraction": 0.0010974178403755869,
+        "positive_mean_response": 0.531502366065979,
+        "negative_mean_response": 0.49780505895614624
+      },
+      {
+        "frame": 128,
+        "category": "egg",
+        "average_precision": 0.3040441398856448,
+        "auroc": 0.967871236672868,
+        "positive_fraction": 0.024049295774647886,
+        "positive_mean_response": 0.544590175151825,
+        "negative_mean_response": 0.5085758566856384
+      },
+      {
+        "frame": 128,
+        "category": "glass of water",
+        "average_precision": 0.4222329511576231,
+        "auroc": 0.9445751721184493,
+        "positive_fraction": 0.07245305164319249,
+        "positive_mean_response": 0.5614261031150818,
+        "negative_mean_response": 0.49698004126548767
+      },
+      {
+        "frame": 128,
+        "category": "hand",
+        "average_precision": 0.1147080434607639,
+        "auroc": 0.30463742741365335,
+        "positive_fraction": 0.013221830985915494,
+        "positive_mean_response": 0.2662466764450073,
+        "negative_mean_response": 0.5047706365585327
+      },
+      {
+        "frame": 128,
+        "category": "kamaboko",
+        "average_precision": 0.0992021946727635,
+        "auroc": 0.9586849782922617,
+        "positive_fraction": 0.007429577464788732,
+        "positive_mean_response": 0.5351556539535522,
+        "negative_mean_response": 0.4909781813621521
+      },
+      {
+        "frame": 128,
+        "category": "napkin",
+        "average_precision": 0.04751992990147956,
+        "auroc": 0.9225275764183561,
+        "positive_fraction": 0.004225352112676056,
+        "positive_mean_response": 0.5367328524589539,
+        "negative_mean_response": 0.5037173628807068
+      },
+      {
+        "frame": 128,
+        "category": "nori",
+        "average_precision": 0.6313400082698155,
+        "auroc": 0.8942056414183607,
+        "positive_fraction": 0.06338028169014084,
+        "positive_mean_response": 0.5401792526245117,
+        "negative_mean_response": 0.49847298860549927
+      },
+      {
+        "frame": 128,
+        "category": "onion segments",
+        "average_precision": 0.11561005554284727,
+        "auroc": 0.9721912453202773,
+        "positive_fraction": 0.006919014084507042,
+        "positive_mean_response": 0.5403181910514832,
+        "negative_mean_response": 0.505845844745636
+      },
+      {
+        "frame": 128,
+        "category": "plate",
+        "average_precision": 0.33253988268637996,
+        "auroc": 0.8557169769513222,
+        "positive_fraction": 0.08821009389671361,
+        "positive_mean_response": 0.5453616976737976,
+        "negative_mean_response": 0.508983850479126
+      },
+      {
+        "frame": 128,
+        "category": "sake cup",
+        "average_precision": 0.032187863703403,
+        "auroc": 0.7462122153708558,
+        "positive_fraction": 0.017975352112676056,
+        "positive_mean_response": 0.5384520292282104,
+        "negative_mean_response": 0.5049208998680115
+      },
+      {
+        "frame": 128,
+        "category": "spoon",
+        "average_precision": 0.11956921869275927,
+        "auroc": 0.8532830840595715,
+        "positive_fraction": 0.02834507042253521,
+        "positive_mean_response": 0.5410209894180298,
+        "negative_mean_response": 0.50827956199646
+      },
+      {
+        "frame": 128,
+        "category": "wavy noodles",
+        "average_precision": 0.1562199112255701,
+        "auroc": 0.9386935017480098,
+        "positive_fraction": 0.023268779342723006,
+        "positive_mean_response": 0.5546753406524658,
+        "negative_mean_response": 0.5030795335769653
+      }
+    ],
+    "learned_decoded_field": [
+      {
+        "frame": 6,
+        "category": "bowl",
+        "average_precision": 0.7309465703177197,
+        "auroc": 0.9571158586150041,
+        "positive_fraction": 0.07525821596244131,
+        "positive_mean_response": 0.532841682434082,
+        "negative_mean_response": 0.43825340270996094
+      },
+      {
+        "frame": 6,
+        "category": "chopsticks",
+        "average_precision": 0.02828174745896644,
+        "auroc": 0.7958594344279741,
+        "positive_fraction": 0.01034037558685446,
+        "positive_mean_response": 0.4941963255405426,
+        "negative_mean_response": 0.4502699673175812
+      },
+      {
+        "frame": 6,
+        "category": "egg",
+        "average_precision": 0.022412527113938107,
+        "auroc": 0.7892741973935331,
+        "positive_fraction": 0.00982981220657277,
+        "positive_mean_response": 0.49143505096435547,
+        "negative_mean_response": 0.4449456036090851
+      },
+      {
+        "frame": 6,
+        "category": "kamaboko",
+        "average_precision": 0.007663575171488797,
+        "auroc": 0.7576251279120241,
+        "positive_fraction": 0.00403169014084507,
+        "positive_mean_response": 0.4906604290008545,
+        "negative_mean_response": 0.4423213005065918
+      },
+      {
+        "frame": 6,
+        "category": "napkin",
+        "average_precision": 0.027179880801562296,
+        "auroc": 0.844056427786618,
+        "positive_fraction": 0.00795774647887324,
+        "positive_mean_response": 0.49036338925361633,
+        "negative_mean_response": 0.44268232583999634
+      },
+      {
+        "frame": 6,
+        "category": "nori",
+        "average_precision": 0.5624002751726083,
+        "auroc": 0.9581938089706524,
+        "positive_fraction": 0.018832159624413144,
+        "positive_mean_response": 0.5176994204521179,
+        "negative_mean_response": 0.4482743442058563
+      },
+      {
+        "frame": 6,
+        "category": "onion segments",
+        "average_precision": 0.016726154907956443,
+        "auroc": 0.8903980022848248,
+        "positive_fraction": 0.004025821596244131,
+        "positive_mean_response": 0.5141171813011169,
+        "negative_mean_response": 0.46099454164505005
+      },
+      {
+        "frame": 6,
+        "category": "plate",
+        "average_precision": 0.9451505084295578,
+        "auroc": 0.9816035490434801,
+        "positive_fraction": 0.0685093896713615,
+        "positive_mean_response": 0.5439487099647522,
+        "negative_mean_response": 0.4426079988479614
+      },
+      {
+        "frame": 6,
+        "category": "sake cup",
+        "average_precision": 0.29582657734673234,
+        "auroc": 0.9721593760827392,
+        "positive_fraction": 0.01687206572769953,
+        "positive_mean_response": 0.5416357517242432,
+        "negative_mean_response": 0.43138399720191956
+      },
+      {
+        "frame": 6,
+        "category": "wavy noodles",
+        "average_precision": 0.02380609485106881,
+        "auroc": 0.8268808537202197,
+        "positive_fraction": 0.006813380281690141,
+        "positive_mean_response": 0.49541789293289185,
+        "negative_mean_response": 0.4388104975223541
+      },
+      {
+        "frame": 24,
+        "category": "bowl",
+        "average_precision": 0.5022400245800208,
+        "auroc": 0.8174912589101554,
+        "positive_fraction": 0.2254518779342723,
+        "positive_mean_response": 0.523419976234436,
+        "negative_mean_response": 0.4689914584159851
+      },
+      {
+        "frame": 24,
+        "category": "chopsticks",
+        "average_precision": 0.011681294763979791,
+        "auroc": 0.353220284563577,
+        "positive_fraction": 0.01671948356807512,
+        "positive_mean_response": 0.4889964759349823,
+        "negative_mean_response": 0.4782009422779083
+      },
+      {
+        "frame": 24,
+        "category": "corn",
+        "average_precision": 0.012369783063435837,
+        "auroc": 0.9019653520114415,
+        "positive_fraction": 0.002687793427230047,
+        "positive_mean_response": 0.522666335105896,
+        "negative_mean_response": 0.48699450492858887
+      },
+      {
+        "frame": 24,
+        "category": "egg",
+        "average_precision": 0.04804131500493239,
+        "auroc": 0.6376297511852023,
+        "positive_fraction": 0.03898474178403756,
+        "positive_mean_response": 0.497231662273407,
+        "negative_mean_response": 0.4756331145763397
+      },
+      {
+        "frame": 24,
+        "category": "kamaboko",
+        "average_precision": 0.025091202882473632,
+        "auroc": 0.6719786086225767,
+        "positive_fraction": 0.018092723004694836,
+        "positive_mean_response": 0.500471830368042,
+        "negative_mean_response": 0.47279125452041626
+      },
+      {
+        "frame": 24,
+        "category": "nori",
+        "average_precision": 0.405059007308192,
+        "auroc": 0.8652592842641935,
+        "positive_fraction": 0.13783450704225353,
+        "positive_mean_response": 0.5186076760292053,
+        "negative_mean_response": 0.4755074083805084
+      },
+      {
+        "frame": 24,
+        "category": "onion segments",
+        "average_precision": 0.0713814435840379,
+        "auroc": 0.8427144697606486,
+        "positive_fraction": 0.025539906103286384,
+        "positive_mean_response": 0.5192304253578186,
+        "negative_mean_response": 0.4918983578681946
+      },
+      {
+        "frame": 24,
+        "category": "wavy noodles",
+        "average_precision": 0.051164694582141984,
+        "auroc": 0.6802552335375295,
+        "positive_fraction": 0.0352406103286385,
+        "positive_mean_response": 0.5142987370491028,
+        "negative_mean_response": 0.4819864332675934
+      },
+      {
+        "frame": 60,
+        "category": "chopsticks",
+        "average_precision": 0.02641666415403306,
+        "auroc": 0.5417824541875305,
+        "positive_fraction": 0.018392018779342722,
+        "positive_mean_response": 0.49074506759643555,
+        "negative_mean_response": 0.45365315675735474
+      },
+      {
+        "frame": 60,
+        "category": "corn",
+        "average_precision": 0.01809341107510806,
+        "auroc": 0.9483062331652957,
+        "positive_fraction": 0.0020892018779342723,
+        "positive_mean_response": 0.523104727268219,
+        "negative_mean_response": 0.45918869972229004
+      },
+      {
+        "frame": 60,
+        "category": "egg",
+        "average_precision": 0.061651762799083694,
+        "auroc": 0.7607533550305227,
+        "positive_fraction": 0.033386150234741785,
+        "positive_mean_response": 0.49726879596710205,
+        "negative_mean_response": 0.44798436760902405
+      },
+      {
+        "frame": 60,
+        "category": "kamaboko",
+        "average_precision": 0.02706792570096186,
+        "auroc": 0.7753750038020221,
+        "positive_fraction": 0.01380868544600939,
+        "positive_mean_response": 0.5033277869224548,
+        "negative_mean_response": 0.44583526253700256
+      },
+      {
+        "frame": 60,
+        "category": "napkin",
+        "average_precision": 0.6548927113464301,
+        "auroc": 0.9889137364882904,
+        "positive_fraction": 0.02852112676056338,
+        "positive_mean_response": 0.5186880826950073,
+        "negative_mean_response": 0.4438246190547943
+      },
+      {
+        "frame": 60,
+        "category": "onion segments",
+        "average_precision": 0.05810874757478248,
+        "auroc": 0.889923702245914,
+        "positive_fraction": 0.014536384976525821,
+        "positive_mean_response": 0.5194170475006104,
+        "negative_mean_response": 0.46233704686164856
+      },
+      {
+        "frame": 60,
+        "category": "sake cup",
+        "average_precision": 0.797983345352574,
+        "auroc": 0.9964389421170032,
+        "positive_fraction": 0.014131455399061034,
+        "positive_mean_response": 0.5384982228279114,
+        "negative_mean_response": 0.4290935695171356
+      },
+      {
+        "frame": 60,
+        "category": "wavy noodles",
+        "average_precision": 0.07113358004973373,
+        "auroc": 0.8335858848360531,
+        "positive_fraction": 0.026678403755868545,
+        "positive_mean_response": 0.5229505896568298,
+        "negative_mean_response": 0.4487680494785309
+      },
+      {
+        "frame": 65,
+        "category": "bowl",
+        "average_precision": 0.33907323012649215,
+        "auroc": 0.8199901746529694,
+        "positive_fraction": 0.11380868544600939,
+        "positive_mean_response": 0.5208508968353271,
+        "negative_mean_response": 0.4654903709888458
+      },
+      {
+        "frame": 65,
+        "category": "chopsticks",
+        "average_precision": 0.020898230638279714,
+        "auroc": 0.8097625026552767,
+        "positive_fraction": 0.00812793427230047,
+        "positive_mean_response": 0.49871620535850525,
+        "negative_mean_response": 0.47215062379837036
+      },
+      {
+        "frame": 65,
+        "category": "corn",
+        "average_precision": 0.015517158471287965,
+        "auroc": 0.9492074861465764,
+        "positive_fraction": 0.0017664319248826292,
+        "positive_mean_response": 0.5204658508300781,
+        "negative_mean_response": 0.4762185215950012
+      },
+      {
+        "frame": 65,
+        "category": "egg",
+        "average_precision": 0.03923801244964102,
+        "auroc": 0.7896418559017632,
+        "positive_fraction": 0.018832159624413144,
+        "positive_mean_response": 0.49745526909828186,
+        "negative_mean_response": 0.4673618972301483
+      },
+      {
+        "frame": 65,
+        "category": "kamaboko",
+        "average_precision": 0.013857699111198406,
+        "auroc": 0.7404090416739039,
+        "positive_fraction": 0.00784037558685446,
+        "positive_mean_response": 0.49561968445777893,
+        "negative_mean_response": 0.46357235312461853
+      },
+      {
+        "frame": 65,
+        "category": "napkin",
+        "average_precision": 0.013817254710597091,
+        "auroc": 0.7246708224200005,
+        "positive_fraction": 0.007852112676056337,
+        "positive_mean_response": 0.48677659034729004,
+        "negative_mean_response": 0.46241864562034607
+      },
+      {
+        "frame": 65,
+        "category": "nori",
+        "average_precision": 0.2669875552378867,
+        "auroc": 0.937129790863448,
+        "positive_fraction": 0.031737089201877934,
+        "positive_mean_response": 0.5198672413825989,
+        "negative_mean_response": 0.4699876606464386
+      },
+      {
+        "frame": 65,
+        "category": "onion segments",
+        "average_precision": 0.07214424347458573,
+        "auroc": 0.9265468354034794,
+        "positive_fraction": 0.012259389671361502,
+        "positive_mean_response": 0.5190430283546448,
+        "negative_mean_response": 0.481845885515213
+      },
+      {
+        "frame": 65,
+        "category": "plate",
+        "average_precision": 0.7968399502919185,
+        "auroc": 0.9400700238979061,
+        "positive_fraction": 0.05595657276995305,
+        "positive_mean_response": 0.5356687307357788,
+        "negative_mean_response": 0.46268513798713684
+      },
+      {
+        "frame": 65,
+        "category": "sake cup",
+        "average_precision": 0.2474494227904714,
+        "auroc": 0.9522408204995355,
+        "positive_fraction": 0.016115023474178404,
+        "positive_mean_response": 0.5383204221725464,
+        "negative_mean_response": 0.45255613327026367
+      },
+      {
+        "frame": 65,
+        "category": "wavy noodles",
+        "average_precision": 0.025151495930697983,
+        "auroc": 0.7075993877524869,
+        "positive_fraction": 0.01380868544600939,
+        "positive_mean_response": 0.498352974653244,
+        "negative_mean_response": 0.4647834599018097
+      },
+      {
+        "frame": 81,
+        "category": "bowl",
+        "average_precision": 0.8066210790943537,
+        "auroc": 0.9416675191149741,
+        "positive_fraction": 0.07241784037558685,
+        "positive_mean_response": 0.5370602011680603,
+        "negative_mean_response": 0.3768295645713806
+      },
+      {
+        "frame": 81,
+        "category": "chopsticks",
+        "average_precision": 0.01062288497778663,
+        "auroc": 0.5005661446423774,
+        "positive_fraction": 0.01159037558685446,
+        "positive_mean_response": 0.48610246181488037,
+        "negative_mean_response": 0.3915577828884125
+      },
+      {
+        "frame": 81,
+        "category": "egg",
+        "average_precision": 0.024759682072817726,
+        "auroc": 0.8617096295227162,
+        "positive_fraction": 0.007828638497652583,
+        "positive_mean_response": 0.4987231194972992,
+        "negative_mean_response": 0.38519638776779175
+      },
+      {
+        "frame": 81,
+        "category": "glass of water",
+        "average_precision": 0.36568119882257505,
+        "auroc": 0.9364799545198066,
+        "positive_fraction": 0.019014084507042252,
+        "positive_mean_response": 0.552760660648346,
+        "negative_mean_response": 0.37354958057403564
+      },
+      {
+        "frame": 81,
+        "category": "kamaboko",
+        "average_precision": 0.04531263395066765,
+        "auroc": 0.9601890411664312,
+        "positive_fraction": 0.0028169014084507044,
+        "positive_mean_response": 0.5207072496414185,
+        "negative_mean_response": 0.38114801049232483
+      },
+      {
+        "frame": 81,
+        "category": "napkin",
+        "average_precision": 0.015792868261352774,
+        "auroc": 0.8128269672394567,
+        "positive_fraction": 0.005845070422535212,
+        "positive_mean_response": 0.4966512620449066,
+        "negative_mean_response": 0.3874685764312744
+      },
+      {
+        "frame": 81,
+        "category": "nori",
+        "average_precision": 0.4086779042501716,
+        "auroc": 0.9384344735251161,
+        "positive_fraction": 0.032811032863849766,
+        "positive_mean_response": 0.5110604166984558,
+        "negative_mean_response": 0.3827892243862152
+      },
+      {
+        "frame": 81,
+        "category": "onion segments",
+        "average_precision": 0.030251164286808904,
+        "auroc": 0.9570522813489319,
+        "positive_fraction": 0.0029401408450704224,
+        "positive_mean_response": 0.520136296749115,
+        "negative_mean_response": 0.3969348669052124
+      },
+      {
+        "frame": 81,
+        "category": "plate",
+        "average_precision": 0.6867045603331466,
+        "auroc": 0.9556551281933648,
+        "positive_fraction": 0.047758215962441314,
+        "positive_mean_response": 0.5270443558692932,
+        "negative_mean_response": 0.3798752725124359
+      },
+      {
+        "frame": 81,
+        "category": "sake cup",
+        "average_precision": 0.08378608254514555,
+        "auroc": 0.8893196952525554,
+        "positive_fraction": 0.01613849765258216,
+        "positive_mean_response": 0.523932695388794,
+        "negative_mean_response": 0.3795645236968994
+      },
+      {
+        "frame": 81,
+        "category": "spoon",
+        "average_precision": 0.5311960198999668,
+        "auroc": 0.9885996564525155,
+        "positive_fraction": 0.010768779342723005,
+        "positive_mean_response": 0.5287540555000305,
+        "negative_mean_response": 0.3854719400405884
+      },
+      {
+        "frame": 81,
+        "category": "wavy noodles",
+        "average_precision": 0.07801446555464643,
+        "auroc": 0.96638538582095,
+        "positive_fraction": 0.006073943661971831,
+        "positive_mean_response": 0.5300477743148804,
+        "negative_mean_response": 0.38157185912132263
+      },
+      {
+        "frame": 119,
+        "category": "chopsticks",
+        "average_precision": 0.0038740793660330397,
+        "auroc": 0.13058998834609042,
+        "positive_fraction": 0.007142018779342723,
+        "positive_mean_response": 0.48464110493659973,
+        "negative_mean_response": 0.4940439760684967
+      },
+      {
+        "frame": 119,
+        "category": "corn",
+        "average_precision": 0.01062212983647195,
+        "auroc": 0.9504443433069765,
+        "positive_fraction": 0.0011384976525821596,
+        "positive_mean_response": 0.5237520337104797,
+        "negative_mean_response": 0.49882394075393677
+      },
+      {
+        "frame": 119,
+        "category": "egg",
+        "average_precision": 0.05394117305465561,
+        "auroc": 0.5608293732073085,
+        "positive_fraction": 0.05255281690140845,
+        "positive_mean_response": 0.4970369338989258,
+        "negative_mean_response": 0.4891430735588074
+      },
+      {
+        "frame": 119,
+        "category": "kamaboko",
+        "average_precision": 0.035826132803587776,
+        "auroc": 0.7754916294566702,
+        "positive_fraction": 0.017400234741784038,
+        "positive_mean_response": 0.5105535387992859,
+        "negative_mean_response": 0.48595649003982544
+      },
+      {
+        "frame": 119,
+        "category": "nori",
+        "average_precision": 0.3479914383449839,
+        "auroc": 0.7675635966393048,
+        "positive_fraction": 0.12858568075117371,
+        "positive_mean_response": 0.5120062828063965,
+        "negative_mean_response": 0.4906541705131531
+      },
+      {
+        "frame": 119,
+        "category": "onion segments",
+        "average_precision": 0.03784485721231639,
+        "auroc": 0.8331876473866744,
+        "positive_fraction": 0.014184272300469484,
+        "positive_mean_response": 0.5196141004562378,
+        "negative_mean_response": 0.5045334100723267
+      },
+      {
+        "frame": 119,
+        "category": "sake cup",
+        "average_precision": 0.04753273688734295,
+        "auroc": 0.8536180615916825,
+        "positive_fraction": 0.010757042253521127,
+        "positive_mean_response": 0.5179491639137268,
+        "negative_mean_response": 0.4681810438632965
+      },
+      {
+        "frame": 119,
+        "category": "wavy noodles",
+        "average_precision": 0.12985248167955718,
+        "auroc": 0.8298731000165928,
+        "positive_fraction": 0.05151408450704225,
+        "positive_mean_response": 0.52997225522995,
+        "negative_mean_response": 0.4949192702770233
+      },
+      {
+        "frame": 128,
+        "category": "bowl",
+        "average_precision": 0.802216615095956,
+        "auroc": 0.9577657834073184,
+        "positive_fraction": 0.10855633802816901,
+        "positive_mean_response": 0.5418539047241211,
+        "negative_mean_response": 0.4520206153392792
+      },
+      {
+        "frame": 128,
+        "category": "chopsticks",
+        "average_precision": 0.010046204756643229,
+        "auroc": 0.3566418966838879,
+        "positive_fraction": 0.014284037558685446,
+        "positive_mean_response": 0.4870012700557709,
+        "negative_mean_response": 0.46784281730651855
+      },
+      {
+        "frame": 128,
+        "category": "corn",
+        "average_precision": 0.029802405324253392,
+        "auroc": 0.9836954365230529,
+        "positive_fraction": 0.0010974178403755869,
+        "positive_mean_response": 0.5244717001914978,
+        "negative_mean_response": 0.46968990564346313
+      },
+      {
+        "frame": 128,
+        "category": "egg",
+        "average_precision": 0.035370053140447624,
+        "auroc": 0.7007514271386849,
+        "positive_fraction": 0.024049295774647886,
+        "positive_mean_response": 0.4982035756111145,
+        "negative_mean_response": 0.4627516567707062
+      },
+      {
+        "frame": 128,
+        "category": "glass of water",
+        "average_precision": 0.8093928076760445,
+        "auroc": 0.9685236645955092,
+        "positive_fraction": 0.07245305164319249,
+        "positive_mean_response": 0.5702627301216125,
+        "negative_mean_response": 0.4383622705936432
+      },
+      {
+        "frame": 128,
+        "category": "hand",
+        "average_precision": 0.012253661252318259,
+        "auroc": 0.3765048941823359,
+        "positive_fraction": 0.013221830985915494,
+        "positive_mean_response": 0.24812015891075134,
+        "negative_mean_response": 0.4678017199039459
+      },
+      {
+        "frame": 128,
+        "category": "kamaboko",
+        "average_precision": 0.028807748464989843,
+        "auroc": 0.8550376365722601,
+        "positive_fraction": 0.007429577464788732,
+        "positive_mean_response": 0.514763355255127,
+        "negative_mean_response": 0.4627653658390045
+      },
+      {
+        "frame": 128,
+        "category": "napkin",
+        "average_precision": 0.07019178760347819,
+        "auroc": 0.9119510090890042,
+        "positive_fraction": 0.004225352112676056,
+        "positive_mean_response": 0.5154726505279541,
+        "negative_mean_response": 0.45837846398353577
+      },
+      {
+        "frame": 128,
+        "category": "nori",
+        "average_precision": 0.3398040853109368,
+        "auroc": 0.8233459841733964,
+        "positive_fraction": 0.06338028169014084,
+        "positive_mean_response": 0.5117983222007751,
+        "negative_mean_response": 0.46274861693382263
+      },
+      {
+        "frame": 128,
+        "category": "onion segments",
+        "average_precision": 0.030826681908229774,
+        "auroc": 0.8994256493178924,
+        "positive_fraction": 0.006919014084507042,
+        "positive_mean_response": 0.5202364325523376,
+        "negative_mean_response": 0.47584259510040283
+      },
+      {
+        "frame": 128,
+        "category": "plate",
+        "average_precision": 0.6565550425769923,
+        "auroc": 0.9221665238625355,
+        "positive_fraction": 0.08821009389671361,
+        "positive_mean_response": 0.5236482620239258,
+        "negative_mean_response": 0.4529600739479065
+      },
+      {
+        "frame": 128,
+        "category": "sake cup",
+        "average_precision": 0.09284531334335851,
+        "auroc": 0.9082764839697207,
+        "positive_fraction": 0.017975352112676056,
+        "positive_mean_response": 0.5335606932640076,
+        "negative_mean_response": 0.45269981026649475
+      },
+      {
+        "frame": 128,
+        "category": "spoon",
+        "average_precision": 0.3234430359473792,
+        "auroc": 0.8503456701618387,
+        "positive_fraction": 0.02834507042253521,
+        "positive_mean_response": 0.5130374431610107,
+        "negative_mean_response": 0.45940643548965454
+      },
+      {
+        "frame": 128,
+        "category": "wavy noodles",
+        "average_precision": 0.1354546167788189,
+        "auroc": 0.9273881752382344,
+        "positive_fraction": 0.023268779342723006,
+        "positive_mean_response": 0.5331768989562988,
+        "negative_mean_response": 0.4601995050907135
+      }
+    ]
+  }
+}

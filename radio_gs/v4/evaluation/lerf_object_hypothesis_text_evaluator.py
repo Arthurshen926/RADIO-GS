@@ -198,6 +198,8 @@ def cosine_consensus_set_posterior(
 
 @torch.no_grad()
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    if not getattr(args, "allow_legacy_candidate_normalization", False):
+        raise ValueError("this evaluator replays unvalidated candidate normalization; use --allow-legacy-candidate-normalization for an explicit diagnostic")
     if args.cpu_threads <= 0:
         raise ValueError("cpu thread count must be positive")
     torch.set_num_threads(int(args.cpu_threads))
@@ -292,6 +294,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 query_membership,
                 token_probability,
                 maximum_query_tokens=capacity,
+                membership_semantics="legacy_candidate_normalization",
             )
             evaluations[score_name][name] = {
                 "composition": composition,
@@ -406,6 +409,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--allow-legacy-candidate-normalization", action="store_true", help="explicit historical diagnostic; not a promoted instance posterior")
     parser.add_argument("--scene-state", required=True)
     parser.add_argument("--expected-scene-state-sha256", required=True)
     parser.add_argument("--hypothesis-memory", required=True)

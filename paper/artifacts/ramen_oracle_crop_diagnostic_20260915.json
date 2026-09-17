@@ -1,0 +1,2747 @@
+{
+  "protocol": {
+    "schema": "oracle_crop_recognition.v1",
+    "target_rgb_and_gt_crop_used": true,
+    "localization_or_deployment_metric": false,
+    "training_updates": false,
+    "query_template": "verbatim",
+    "crop": "GT category union bbox3px; paired masked gray127 and unmasked identical bbox",
+    "field_sha256": "2f081fc36cb265f2cce8f57abb157534cd075d2d78af801ff59365db4047983d",
+    "implementation_sha256": "4bb946fd3c6c63e8bc050ea838aa1ee5bf7dd051af362b2253ca1ea5f484f6b1",
+    "labels": {
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00006.json": "014168dc3df90385473efa1cc773d4978ec5e68834d618a85764770cb9e50c6c",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.json": "235ba8e4235d41e98e7ec75077999602ecec8afcd5318e2af345b50ad490a074",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00060.json": "1f4a4c2d5fc2768397301c5aa4fd975fe8125f44538e45a07b0f847ea225c854",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00065.json": "6ef6ecc8e202ca641605a68981413bd6365e1598c9e6801224578b7459b52f76",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00081.json": "c89454c750fa7ce57e5421e54f80d0fd396e3a0d836cf836165ee9fa20d8d1b9",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00119.json": "fba1938cac04d46711cf40b42bf8db556ebd92cf5a4333d53035aea9a45e92c7",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00128.json": "34abc343bc7ded19324117487bd2b28fcec1f7845d56e6176152ce70653ab264"
+    }
+  },
+  "macro": {
+    "masked": {
+      "native": {
+        "top1": 0.8873239436619719,
+        "mrr": 0.9366197183098591,
+        "tasks": 71
+      },
+      "adapted": {
+        "top1": 0.4225352112676056,
+        "mrr": 0.5659559923644432,
+        "tasks": 71
+      }
+    },
+    "unmasked": {
+      "native": {
+        "top1": 0.676056338028169,
+        "mrr": 0.7926117309920128,
+        "tasks": 71
+      },
+      "adapted": {
+        "top1": 0.2676056338028169,
+        "mrr": 0.45523240452817904,
+        "tasks": 71
+      }
+    }
+  },
+  "observations": [
+    {
+      "frame": 6,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "bowl",
+        "target_cosine": 0.12378831952810287,
+        "margin": 0.03095144033432007
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "onion segments",
+        "target_cosine": 0.18154200911521912,
+        "margin": -0.3345019519329071
+      }
+    },
+    {
+      "frame": 6,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.0847361758351326,
+        "margin": -0.00423026829957962
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.23722705245018005,
+        "margin": -0.6309499740600586
+      }
+    },
+    {
+      "frame": 6,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.1301790177822113,
+        "margin": 0.04612424969673157
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "egg",
+        "target_cosine": 0.29291412234306335,
+        "margin": -0.38882753252983093
+      }
+    },
+    {
+      "frame": 6,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.16037173569202423,
+        "margin": 0.07656116783618927
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "egg",
+        "target_cosine": 0.23060590028762817,
+        "margin": -0.32556432485580444
+      }
+    },
+    {
+      "frame": 6,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.139668807387352,
+        "margin": 0.05625595152378082
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.7442684173583984,
+        "margin": 0.009152054786682129
+      }
+    },
+    {
+      "frame": 6,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.12576553225517273,
+        "margin": 0.027134783565998077
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.7518853545188904,
+        "margin": 0.02520674467086792
+      }
+    },
+    {
+      "frame": 6,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.14834456145763397,
+        "margin": 0.0547223836183548
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.7524817585945129,
+        "margin": -0.02753359079360962
+      }
+    },
+    {
+      "frame": 6,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.1265169084072113,
+        "margin": 0.0034969598054885864
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "egg",
+        "target_cosine": 0.6017321348190308,
+        "margin": -0.17236584424972534
+      }
+    },
+    {
+      "frame": 6,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "napkin",
+        "target_cosine": 0.07149280607700348,
+        "margin": 0.010265164077281952
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "kamaboko",
+        "target_cosine": 0.6325161457061768,
+        "margin": -0.09594833850860596
+      }
+    },
+    {
+      "frame": 6,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 2,
+        "top_category": "chopsticks",
+        "target_cosine": 0.1178329661488533,
+        "margin": -0.03861812502145767
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.45914003252983093,
+        "margin": -0.11487546563148499
+      }
+    },
+    {
+      "frame": 6,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.07181613892316818,
+        "margin": 0.001625560224056244
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.7734102606773376,
+        "margin": 0.03611356019973755
+      }
+    },
+    {
+      "frame": 6,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.1271374225616455,
+        "margin": 0.026975631713867188
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7223336100578308,
+        "margin": -0.04243189096450806
+      }
+    },
+    {
+      "frame": 6,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "onion segments",
+        "target_cosine": 0.09374772012233734,
+        "margin": 0.00010699033737182617
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "egg",
+        "target_cosine": 0.3558722138404846,
+        "margin": -0.4070240259170532
+      }
+    },
+    {
+      "frame": 6,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 2,
+        "top_category": "kamaboko",
+        "target_cosine": 0.10496620833873749,
+        "margin": -0.0007651150226593018
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "egg",
+        "target_cosine": 0.46558859944343567,
+        "margin": -0.27403226494789124
+      }
+    },
+    {
+      "frame": 6,
+      "category": "plate",
+      "category_index": 10,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "plate",
+        "target_cosine": 0.10034071654081345,
+        "margin": 0.01774463802576065
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "napkin",
+        "target_cosine": -0.031624119728803635,
+        "margin": -0.4139026701450348
+      }
+    },
+    {
+      "frame": 6,
+      "category": "plate",
+      "category_index": 10,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "plate",
+        "target_cosine": 0.12179617583751678,
+        "margin": 0.012699708342552185
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.25417521595954895,
+        "margin": -0.39323553442955017
+      }
+    },
+    {
+      "frame": 6,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.12649551033973694,
+        "margin": 0.044158823788166046
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.7710461616516113,
+        "margin": 0.22132086753845215
+      }
+    },
+    {
+      "frame": 6,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.1669655442237854,
+        "margin": 0.06909365952014923
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.79460608959198,
+        "margin": 0.2506116032600403
+      }
+    },
+    {
+      "frame": 6,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.1381651908159256,
+        "margin": 0.03943074494600296
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7907325029373169,
+        "margin": 0.07609355449676514
+      }
+    },
+    {
+      "frame": 6,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "e3fadbcd37c238dd81fcf9ce7ae9501c8aefbb3cb66bb14542733a9089be5a5e",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.10704341530799866,
+        "margin": 0.027735508978366852
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8019282817840576,
+        "margin": 0.09768706560134888
+      }
+    },
+    {
+      "frame": 24,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "masked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "bowl",
+        "target_cosine": 0.12017649412155151,
+        "margin": 0.005920879542827606
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "onion segments",
+        "target_cosine": 0.22223472595214844,
+        "margin": -0.3914681673049927
+      }
+    },
+    {
+      "frame": 24,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "unmasked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 3,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.08241192251443863,
+        "margin": -0.006159797310829163
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.27466341853141785,
+        "margin": -0.6079336404800415
+      }
+    },
+    {
+      "frame": 24,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.15121792256832123,
+        "margin": 0.06490962207317352
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "sake cup",
+        "target_cosine": 0.07541410624980927,
+        "margin": -0.251645565032959
+      }
+    },
+    {
+      "frame": 24,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.15095554292201996,
+        "margin": 0.06295584887266159
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "sake cup",
+        "target_cosine": 0.07609032839536667,
+        "margin": -0.18955472111701965
+      }
+    },
+    {
+      "frame": 24,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "masked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "corn",
+        "target_cosine": 0.1353745311498642,
+        "margin": 0.026200272142887115
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "egg",
+        "target_cosine": 0.23689506947994232,
+        "margin": -0.5219471454620361
+      }
+    },
+    {
+      "frame": 24,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "unmasked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "corn",
+        "target_cosine": 0.12204970419406891,
+        "margin": 0.006909914314746857
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "egg",
+        "target_cosine": 0.4011664390563965,
+        "margin": -0.42021626234054565
+      }
+    },
+    {
+      "frame": 24,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.13074587285518646,
+        "margin": 0.04719521105289459
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.6972441077232361,
+        "margin": -0.08711403608322144
+      }
+    },
+    {
+      "frame": 24,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.12326765805482864,
+        "margin": 0.05403214693069458
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.7643389105796814,
+        "margin": 0.03364306688308716
+      }
+    },
+    {
+      "frame": 24,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.1531035155057907,
+        "margin": 0.06003657728433609
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.7848703861236572,
+        "margin": 0.00020080804824829102
+      }
+    },
+    {
+      "frame": 24,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.1329392045736313,
+        "margin": 0.02793455868959427
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.7162084579467773,
+        "margin": -0.09554564952850342
+      }
+    },
+    {
+      "frame": 24,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.07326622307300568,
+        "margin": 0.001458577811717987
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.7430390119552612,
+        "margin": 0.07551103830337524
+      }
+    },
+    {
+      "frame": 24,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.15552747249603271,
+        "margin": 0.04830339550971985
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.7745760083198547,
+        "margin": 0.044729530811309814
+      }
+    },
+    {
+      "frame": 24,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "onion segments",
+        "target_cosine": 0.1012866348028183,
+        "margin": 0.003528773784637451
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "kamaboko",
+        "target_cosine": 0.46962425112724304,
+        "margin": -0.29506775736808777
+      }
+    },
+    {
+      "frame": 24,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 2,
+        "top_category": "corn",
+        "target_cosine": 0.0868452712893486,
+        "margin": -0.014893017709255219
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.5100244283676147,
+        "margin": -0.25496160984039307
+      }
+    },
+    {
+      "frame": 24,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.16367365419864655,
+        "margin": 0.09085384756326675
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8894703388214111,
+        "margin": 0.265730619430542
+      }
+    },
+    {
+      "frame": 24,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "b0a456628e386ace6f1e39808eee88a78874d520f3b864d4516ed7672b12f0b5",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.11281879246234894,
+        "margin": 0.025593511760234833
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8498629331588745,
+        "margin": 0.14224642515182495
+      }
+    },
+    {
+      "frame": 60,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.14985330402851105,
+        "margin": 0.06874187290668488
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "sake cup",
+        "target_cosine": 0.1427602469921112,
+        "margin": -0.30000898241996765
+      }
+    },
+    {
+      "frame": 60,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.16377228498458862,
+        "margin": 0.08071844279766083
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.3097594976425171,
+        "margin": -0.2541813850402832
+      }
+    },
+    {
+      "frame": 60,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "masked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "corn",
+        "target_cosine": 0.13303636014461517,
+        "margin": 0.03320665657520294
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "egg",
+        "target_cosine": 0.17070618271827698,
+        "margin": -0.5489754676818848
+      }
+    },
+    {
+      "frame": 60,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "unmasked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 2,
+        "top_category": "kamaboko",
+        "target_cosine": 0.0986189991235733,
+        "margin": -0.00029855966567993164
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "egg",
+        "target_cosine": 0.32502689957618713,
+        "margin": -0.4672612249851227
+      }
+    },
+    {
+      "frame": 60,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.1354265958070755,
+        "margin": 0.045982830226421356
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7035142183303833,
+        "margin": -0.03205019235610962
+      }
+    },
+    {
+      "frame": 60,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.13502457737922668,
+        "margin": 0.05954048037528992
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.7724764943122864,
+        "margin": 0.03404456377029419
+      }
+    },
+    {
+      "frame": 60,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.14744600653648376,
+        "margin": 0.060153499245643616
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.7749968767166138,
+        "margin": 0.0066149234771728516
+      }
+    },
+    {
+      "frame": 60,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.13982988893985748,
+        "margin": 0.03948160260915756
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.7171858549118042,
+        "margin": -0.12087124586105347
+      }
+    },
+    {
+      "frame": 60,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "masked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 3,
+        "top_category": "hand",
+        "target_cosine": 0.07368138432502747,
+        "margin": -0.01673039048910141
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "napkin",
+        "target_cosine": 0.47037994861602783,
+        "margin": 0.186998188495636
+      }
+    },
+    {
+      "frame": 60,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "unmasked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "napkin",
+        "target_cosine": 0.07927777618169785,
+        "margin": 0.0027084574103355408
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "sake cup",
+        "target_cosine": 0.2746131420135498,
+        "margin": -0.0374639630317688
+      }
+    },
+    {
+      "frame": 60,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 2,
+        "top_category": "corn",
+        "target_cosine": 0.09297387301921844,
+        "margin": -0.008405052125453949
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "nori",
+        "target_cosine": 0.6586741805076599,
+        "margin": -0.026688218116760254
+      }
+    },
+    {
+      "frame": 60,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 4,
+        "top_category": "egg",
+        "target_cosine": 0.09157659113407135,
+        "margin": -0.015935786068439484
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.4723914861679077,
+        "margin": -0.1744997501373291
+      }
+    },
+    {
+      "frame": 60,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.06978090852499008,
+        "margin": 0.0033702775835990906
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.5794991254806519,
+        "margin": 0.22493740916252136
+      }
+    },
+    {
+      "frame": 60,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.10799587517976761,
+        "margin": 0.03984914720058441
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.6944058537483215,
+        "margin": 0.18182849884033203
+      }
+    },
+    {
+      "frame": 60,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.16638919711112976,
+        "margin": 0.09743443131446838
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8782569169998169,
+        "margin": 0.27917635440826416
+      }
+    },
+    {
+      "frame": 60,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "5416f8e031b99c21d3287298efd3625cc56f623a529ed7ec7566ffc23e7a85a5",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.10207364708185196,
+        "margin": 0.019091323018074036
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7915889620780945,
+        "margin": 0.06063282489776611
+      }
+    },
+    {
+      "frame": 65,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "bowl",
+        "target_cosine": 0.09189295023679733,
+        "margin": 0.006334640085697174
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "sake cup",
+        "target_cosine": 0.030095577239990234,
+        "margin": -0.43560415506362915
+      }
+    },
+    {
+      "frame": 65,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 3,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.07960662990808487,
+        "margin": -0.004486806690692902
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.29676851630210876,
+        "margin": -0.5835882425308228
+      }
+    },
+    {
+      "frame": 65,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.11797599494457245,
+        "margin": 0.043286241590976715
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "egg",
+        "target_cosine": 0.17878690361976624,
+        "margin": -0.3585904538631439
+      }
+    },
+    {
+      "frame": 65,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.1603546291589737,
+        "margin": 0.05921410024166107
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "egg",
+        "target_cosine": 0.2498566061258316,
+        "margin": -0.28984010219573975
+      }
+    },
+    {
+      "frame": 65,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "corn",
+        "target_cosine": 0.12832410633563995,
+        "margin": 0.02196411043405533
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "egg",
+        "target_cosine": 0.25746089220046997,
+        "margin": -0.5015146732330322
+      }
+    },
+    {
+      "frame": 65,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 3,
+        "top_category": "egg",
+        "target_cosine": 0.07476729154586792,
+        "margin": -0.012691996991634369
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "egg",
+        "target_cosine": 0.11563459038734436,
+        "margin": -0.6085422039031982
+      }
+    },
+    {
+      "frame": 65,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.1353560984134674,
+        "margin": 0.05259758234024048
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.73517906665802,
+        "margin": 0.010229229927062988
+      }
+    },
+    {
+      "frame": 65,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.11706320196390152,
+        "margin": 0.04394129663705826
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.7719067335128784,
+        "margin": 0.07647603750228882
+      }
+    },
+    {
+      "frame": 65,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.14488476514816284,
+        "margin": 0.05745845288038254
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.765396237373352,
+        "margin": -0.04728436470031738
+      }
+    },
+    {
+      "frame": 65,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.1438807100057602,
+        "margin": 0.03342878818511963
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.6842683553695679,
+        "margin": -0.14555150270462036
+      }
+    },
+    {
+      "frame": 65,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "napkin",
+        "target_cosine": 0.13026313483715057,
+        "margin": 0.0567777156829834
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "napkin",
+        "target_cosine": 0.7260199189186096,
+        "margin": 0.11328768730163574
+      }
+    },
+    {
+      "frame": 65,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 2,
+        "top_category": "chopsticks",
+        "target_cosine": 0.11344204097986221,
+        "margin": -0.06301388889551163
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.36776837706565857,
+        "margin": -0.2263909876346588
+      }
+    },
+    {
+      "frame": 65,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 3,
+        "top_category": "onion segments",
+        "target_cosine": 0.07309362292289734,
+        "margin": -0.005115047097206116
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.8147275447845459,
+        "margin": 0.08574515581130981
+      }
+    },
+    {
+      "frame": 65,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.09908158332109451,
+        "margin": -0.0077987536787986755
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.6629762649536133,
+        "margin": -0.16289377212524414
+      }
+    },
+    {
+      "frame": 65,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 3,
+        "top_category": "corn",
+        "target_cosine": 0.09518155455589294,
+        "margin": -0.008845537900924683
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.4848475158214569,
+        "margin": -0.26590725779533386
+      }
+    },
+    {
+      "frame": 65,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 3,
+        "top_category": "corn",
+        "target_cosine": 0.0897538959980011,
+        "margin": -0.01000949740409851
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.4194298982620239,
+        "margin": -0.30021554231643677
+      }
+    },
+    {
+      "frame": 65,
+      "category": "plate",
+      "category_index": 10,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "plate",
+        "target_cosine": 0.08735454827547073,
+        "margin": 0.006442397832870483
+      },
+      "adapted": {
+        "rank": 13,
+        "top_category": "napkin",
+        "target_cosine": -0.12431575357913971,
+        "margin": -0.607814610004425
+      }
+    },
+    {
+      "frame": 65,
+      "category": "plate",
+      "category_index": 10,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 4,
+        "top_category": "bowl",
+        "target_cosine": 0.088231660425663,
+        "margin": -0.007744215428829193
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.13204722106456757,
+        "margin": -0.6173458695411682
+      }
+    },
+    {
+      "frame": 65,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.1217532753944397,
+        "margin": 0.03854949772357941
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.7524195313453674,
+        "margin": 0.2452828288078308
+      }
+    },
+    {
+      "frame": 65,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.15622609853744507,
+        "margin": 0.06987681984901428
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.7901609539985657,
+        "margin": 0.2504064440727234
+      }
+    },
+    {
+      "frame": 65,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.13473805785179138,
+        "margin": 0.0650019645690918
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8084913492202759,
+        "margin": 0.18485897779464722
+      }
+    },
+    {
+      "frame": 65,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "dd9e7a50b5498340dd1f9340a6e884618d045768bf55ffa5b1e5d44d5a9506ff",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.07252564281225204,
+        "margin": 0.00460468977689743
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7846273183822632,
+        "margin": 0.11658358573913574
+      }
+    },
+    {
+      "frame": 81,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "bowl",
+        "target_cosine": 0.12508636713027954,
+        "margin": 0.03733967989683151
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "onion segments",
+        "target_cosine": 0.21532276272773743,
+        "margin": -0.39244815707206726
+      }
+    },
+    {
+      "frame": 81,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 3,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.08069394528865814,
+        "margin": -0.0028009414672851562
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.16168208420276642,
+        "margin": -0.6420968174934387
+      }
+    },
+    {
+      "frame": 81,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.15230898559093475,
+        "margin": 0.06692387908697128
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "egg",
+        "target_cosine": 0.2129899263381958,
+        "margin": -0.2984358072280884
+      }
+    },
+    {
+      "frame": 81,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.15980276465415955,
+        "margin": 0.07999929785728455
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "egg",
+        "target_cosine": 0.22049283981323242,
+        "margin": -0.32765185832977295
+      }
+    },
+    {
+      "frame": 81,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.1413351595401764,
+        "margin": 0.06099787354469299
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.7419451475143433,
+        "margin": 0.08808082342147827
+      }
+    },
+    {
+      "frame": 81,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.11817017197608948,
+        "margin": 0.03300713747739792
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7259135842323303,
+        "margin": -0.015347421169281006
+      }
+    },
+    {
+      "frame": 81,
+      "category": "glass of water",
+      "category_index": 4,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "glass of water",
+        "target_cosine": 0.14941276609897614,
+        "margin": 0.055475786328315735
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "sake cup",
+        "target_cosine": 0.5696472525596619,
+        "margin": -0.1198769211769104
+      }
+    },
+    {
+      "frame": 81,
+      "category": "glass of water",
+      "category_index": 4,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "glass of water",
+        "target_cosine": 0.14726166427135468,
+        "margin": 0.023708157241344452
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "sake cup",
+        "target_cosine": 0.5641058683395386,
+        "margin": -0.2129751443862915
+      }
+    },
+    {
+      "frame": 81,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.14874841272830963,
+        "margin": 0.05372965335845947
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.7084836959838867,
+        "margin": -0.09345555305480957
+      }
+    },
+    {
+      "frame": 81,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.13778814673423767,
+        "margin": 0.028613507747650146
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "egg",
+        "target_cosine": 0.5804637670516968,
+        "margin": -0.17027783393859863
+      }
+    },
+    {
+      "frame": 81,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "napkin",
+        "target_cosine": 0.09532371163368225,
+        "margin": 0.002892807126045227
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "napkin",
+        "target_cosine": 0.5164863467216492,
+        "margin": 0.38186803460121155
+      }
+    },
+    {
+      "frame": 81,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 11,
+        "top_category": "sake cup",
+        "target_cosine": 0.05223722755908966,
+        "margin": -0.05519454926252365
+      },
+      "adapted": {
+        "rank": 11,
+        "top_category": "wavy noodles",
+        "target_cosine": -0.1022995263338089,
+        "margin": -0.803468644618988
+      }
+    },
+    {
+      "frame": 81,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.09591273963451385,
+        "margin": 0.03608538955450058
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.8036388158798218,
+        "margin": 0.08301544189453125
+      }
+    },
+    {
+      "frame": 81,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.14588390290737152,
+        "margin": 0.04099523276090622
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7338421940803528,
+        "margin": -0.019136488437652588
+      }
+    },
+    {
+      "frame": 81,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.0789279192686081,
+        "margin": -0.012437403202056885
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "egg",
+        "target_cosine": 0.45808130502700806,
+        "margin": -0.08337849378585815
+      }
+    },
+    {
+      "frame": 81,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 4,
+        "top_category": "kamaboko",
+        "target_cosine": 0.0791628435254097,
+        "margin": -0.02121124416589737
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "egg",
+        "target_cosine": 0.35386720299720764,
+        "margin": -0.3577474057674408
+      }
+    },
+    {
+      "frame": 81,
+      "category": "plate",
+      "category_index": 10,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 2,
+        "top_category": "bowl",
+        "target_cosine": 0.10522352159023285,
+        "margin": -0.007871396839618683
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "sake cup",
+        "target_cosine": -0.08771708607673645,
+        "margin": -0.4666570723056793
+      }
+    },
+    {
+      "frame": 81,
+      "category": "plate",
+      "category_index": 10,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 7,
+        "top_category": "chopsticks",
+        "target_cosine": 0.06573761999607086,
+        "margin": -0.028637737035751343
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.09557191282510757,
+        "margin": -0.6893123388290405
+      }
+    },
+    {
+      "frame": 81,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.11016318202018738,
+        "margin": 0.03599414974451065
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.685272753238678,
+        "margin": 0.21095043420791626
+      }
+    },
+    {
+      "frame": 81,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.15858742594718933,
+        "margin": 0.019587218761444092
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.6566388607025146,
+        "margin": 0.15897226333618164
+      }
+    },
+    {
+      "frame": 81,
+      "category": "spoon",
+      "category_index": 12,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "spoon",
+        "target_cosine": 0.12061342597007751,
+        "margin": 0.03945770114660263
+      },
+      "adapted": {
+        "rank": 10,
+        "top_category": "kamaboko",
+        "target_cosine": 0.10556969046592712,
+        "margin": -0.44298049807548523
+      }
+    },
+    {
+      "frame": 81,
+      "category": "spoon",
+      "category_index": 12,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "spoon",
+        "target_cosine": 0.1493474394083023,
+        "margin": 0.05494553595781326
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "egg",
+        "target_cosine": 0.23538076877593994,
+        "margin": -0.3074016571044922
+      }
+    },
+    {
+      "frame": 81,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.1431349515914917,
+        "margin": 0.06314730644226074
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8088129758834839,
+        "margin": 0.16777801513671875
+      }
+    },
+    {
+      "frame": 81,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "25f1e551a789e31e093a79d500a0b25496fbcb59dbefca5fe87116302e8fbcf6",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.11566045135259628,
+        "margin": 0.013237342238426208
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7918809652328491,
+        "margin": 0.10982263088226318
+      }
+    },
+    {
+      "frame": 119,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.08728120476007462,
+        "margin": 0.014480642974376678
+      },
+      "adapted": {
+        "rank": 7,
+        "top_category": "napkin",
+        "target_cosine": 0.060005493462085724,
+        "margin": -0.41987907886505127
+      }
+    },
+    {
+      "frame": 119,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.10703173279762268,
+        "margin": 0.03474748879671097
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "sake cup",
+        "target_cosine": -0.14515449106693268,
+        "margin": -0.5663569569587708
+      }
+    },
+    {
+      "frame": 119,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "masked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "corn",
+        "target_cosine": 0.12793982028961182,
+        "margin": 0.002242535352706909
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "egg",
+        "target_cosine": 0.25988027453422546,
+        "margin": -0.5326433181762695
+      }
+    },
+    {
+      "frame": 119,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "unmasked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.10224534571170807,
+        "margin": -0.012331359088420868
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "egg",
+        "target_cosine": 0.22896215319633484,
+        "margin": -0.5305294990539551
+      }
+    },
+    {
+      "frame": 119,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.1393362432718277,
+        "margin": 0.05386406183242798
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.7541255950927734,
+        "margin": 0.00736546516418457
+      }
+    },
+    {
+      "frame": 119,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.13053584098815918,
+        "margin": 0.05173025280237198
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.7914697527885437,
+        "margin": 0.09428924322128296
+      }
+    },
+    {
+      "frame": 119,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.14994797110557556,
+        "margin": 0.0528784915804863
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.8237353563308716,
+        "margin": 0.03744232654571533
+      }
+    },
+    {
+      "frame": 119,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.12101474404335022,
+        "margin": 0.026883035898208618
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "egg",
+        "target_cosine": 0.7391953468322754,
+        "margin": -0.09847080707550049
+      }
+    },
+    {
+      "frame": 119,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.15345336496829987,
+        "margin": 0.08509016036987305
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.8499734401702881,
+        "margin": 0.20045137405395508
+      }
+    },
+    {
+      "frame": 119,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.14108161628246307,
+        "margin": 0.027582265436649323
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7691824436187744,
+        "margin": -0.02640247344970703
+      }
+    },
+    {
+      "frame": 119,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "onion segments",
+        "target_cosine": 0.12843403220176697,
+        "margin": 0.03455592691898346
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.5525583624839783,
+        "margin": -0.21046042442321777
+      }
+    },
+    {
+      "frame": 119,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "onion segments",
+        "target_cosine": 0.09485034644603729,
+        "margin": 0.012988366186618805
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.426973819732666,
+        "margin": -0.32189011573791504
+      }
+    },
+    {
+      "frame": 119,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.10603096336126328,
+        "margin": 0.034274034202098846
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.7453333735466003,
+        "margin": 0.22058409452438354
+      }
+    },
+    {
+      "frame": 119,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.13096560537815094,
+        "margin": 0.058222949504852295
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.7951107025146484,
+        "margin": 0.23266100883483887
+      }
+    },
+    {
+      "frame": 119,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.16658368706703186,
+        "margin": 0.09701499342918396
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8900356292724609,
+        "margin": 0.30461883544921875
+      }
+    },
+    {
+      "frame": 119,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "c4cf2832ef5f357a1acd45f6eff499e902400e8784fcec798356cf656d50250a",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.10980212688446045,
+        "margin": 0.021459750831127167
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8235995769500732,
+        "margin": 0.1350804567337036
+      }
+    },
+    {
+      "frame": 128,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "bowl",
+        "target_cosine": 0.13295283913612366,
+        "margin": 0.029354028403759003
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "onion segments",
+        "target_cosine": 0.2556643486022949,
+        "margin": -0.366455078125
+      }
+    },
+    {
+      "frame": 128,
+      "category": "bowl",
+      "category_index": 0,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.0813920646905899,
+        "margin": -0.00618281215429306
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.2480335235595703,
+        "margin": -0.6137825846672058
+      }
+    },
+    {
+      "frame": 128,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.11054933071136475,
+        "margin": 0.03743991255760193
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "egg",
+        "target_cosine": 0.2787397801876068,
+        "margin": -0.40396061539649963
+      }
+    },
+    {
+      "frame": 128,
+      "category": "chopsticks",
+      "category_index": 1,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "chopsticks",
+        "target_cosine": 0.15999889373779297,
+        "margin": 0.08682841062545776
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "egg",
+        "target_cosine": 0.10197370499372482,
+        "margin": -0.24225884675979614
+      }
+    },
+    {
+      "frame": 128,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.10773757845163345,
+        "margin": -0.013684622943401337
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "egg",
+        "target_cosine": 0.24380262196063995,
+        "margin": -0.5180235505104065
+      }
+    },
+    {
+      "frame": 128,
+      "category": "corn",
+      "category_index": 2,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.0822947770357132,
+        "margin": -0.0073335543274879456
+      },
+      "adapted": {
+        "rank": 10,
+        "top_category": "sake cup",
+        "target_cosine": -0.16312921047210693,
+        "margin": -0.7690201997756958
+      }
+    },
+    {
+      "frame": 128,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.1431974619626999,
+        "margin": 0.0609971284866333
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.7378362417221069,
+        "margin": -0.024483680725097656
+      }
+    },
+    {
+      "frame": 128,
+      "category": "egg",
+      "category_index": 3,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.07500184327363968,
+        "margin": 0.02539578080177307
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "egg",
+        "target_cosine": 0.8007451891899109,
+        "margin": 0.029905855655670166
+      }
+    },
+    {
+      "frame": 128,
+      "category": "glass of water",
+      "category_index": 4,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "glass of water",
+        "target_cosine": 0.15515518188476562,
+        "margin": 0.06088748574256897
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "sake cup",
+        "target_cosine": 0.5959247350692749,
+        "margin": -0.1463642716407776
+      }
+    },
+    {
+      "frame": 128,
+      "category": "glass of water",
+      "category_index": 4,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "glass of water",
+        "target_cosine": 0.14825527369976044,
+        "margin": 0.021547064185142517
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "sake cup",
+        "target_cosine": 0.5947304964065552,
+        "margin": -0.1775537133216858
+      }
+    },
+    {
+      "frame": 128,
+      "category": "hand",
+      "category_index": 5,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "hand",
+        "target_cosine": 0.14514242112636566,
+        "margin": 0.10050727427005768
+      },
+      "adapted": {
+        "rank": 10,
+        "top_category": "kamaboko",
+        "target_cosine": 0.05743131786584854,
+        "margin": -0.46660116314888
+      }
+    },
+    {
+      "frame": 128,
+      "category": "hand",
+      "category_index": 5,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "hand",
+        "target_cosine": 0.13458821177482605,
+        "margin": 0.07753518968820572
+      },
+      "adapted": {
+        "rank": 12,
+        "top_category": "egg",
+        "target_cosine": -0.1878063827753067,
+        "margin": -0.7965794801712036
+      }
+    },
+    {
+      "frame": 128,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.13512000441551208,
+        "margin": 0.036604106426239014
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "egg",
+        "target_cosine": 0.7179979681968689,
+        "margin": -0.08680778741836548
+      }
+    },
+    {
+      "frame": 128,
+      "category": "kamaboko",
+      "category_index": 6,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "kamaboko",
+        "target_cosine": 0.1372005194425583,
+        "margin": 0.0178791806101799
+      },
+      "adapted": {
+        "rank": 3,
+        "top_category": "egg",
+        "target_cosine": 0.6782295107841492,
+        "margin": -0.12996238470077515
+      }
+    },
+    {
+      "frame": 128,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 2,
+        "top_category": "onion segments",
+        "target_cosine": 0.09483892470598221,
+        "margin": -0.002827085554599762
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "napkin",
+        "target_cosine": 0.6350163817405701,
+        "margin": 0.034311532974243164
+      }
+    },
+    {
+      "frame": 128,
+      "category": "napkin",
+      "category_index": 7,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 3,
+        "top_category": "nori",
+        "target_cosine": 0.10133125633001328,
+        "margin": -0.0546395406126976
+      },
+      "adapted": {
+        "rank": 5,
+        "top_category": "egg",
+        "target_cosine": 0.3715190887451172,
+        "margin": -0.30828529596328735
+      }
+    },
+    {
+      "frame": 128,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.1610908955335617,
+        "margin": 0.07897169888019562
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.8412877321243286,
+        "margin": 0.1520148515701294
+      }
+    },
+    {
+      "frame": 128,
+      "category": "nori",
+      "category_index": 8,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "nori",
+        "target_cosine": 0.14134548604488373,
+        "margin": 0.03156939148902893
+      },
+      "adapted": {
+        "rank": 2,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.766228437423706,
+        "margin": -0.02304399013519287
+      }
+    },
+    {
+      "frame": 128,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "onion segments",
+        "target_cosine": 0.10847121477127075,
+        "margin": 0.018451131880283356
+      },
+      "adapted": {
+        "rank": 6,
+        "top_category": "egg",
+        "target_cosine": 0.4917038083076477,
+        "margin": -0.2282630205154419
+      }
+    },
+    {
+      "frame": 128,
+      "category": "onion segments",
+      "category_index": 9,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "onion segments",
+        "target_cosine": 0.08939211815595627,
+        "margin": 0.0014458000659942627
+      },
+      "adapted": {
+        "rank": 4,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.49342137575149536,
+        "margin": -0.20503896474838257
+      }
+    },
+    {
+      "frame": 128,
+      "category": "plate",
+      "category_index": 10,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "plate",
+        "target_cosine": 0.10380875319242477,
+        "margin": 0.006409652531147003
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "sake cup",
+        "target_cosine": -0.1177840530872345,
+        "margin": -0.4879840612411499
+      }
+    },
+    {
+      "frame": 128,
+      "category": "plate",
+      "category_index": 10,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 6,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.05997786670923233,
+        "margin": -0.030903413891792297
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.13209795951843262,
+        "margin": -0.7455257773399353
+      }
+    },
+    {
+      "frame": 128,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.09676340967416763,
+        "margin": 0.028003990650177002
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.5746056437492371,
+        "margin": 0.19543534517288208
+      }
+    },
+    {
+      "frame": 128,
+      "category": "sake cup",
+      "category_index": 11,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "sake cup",
+        "target_cosine": 0.10913441330194473,
+        "margin": 0.011220522224903107
+      },
+      "adapted": {
+        "rank": 8,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.14662286639213562,
+        "margin": -0.494882732629776
+      }
+    },
+    {
+      "frame": 128,
+      "category": "spoon",
+      "category_index": 12,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "spoon",
+        "target_cosine": 0.15801283717155457,
+        "margin": 0.07441487908363342
+      },
+      "adapted": {
+        "rank": 9,
+        "top_category": "egg",
+        "target_cosine": 0.06668056547641754,
+        "margin": -0.3315134048461914
+      }
+    },
+    {
+      "frame": 128,
+      "category": "spoon",
+      "category_index": 12,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 8,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.052206844091415405,
+        "margin": -0.04601425677537918
+      },
+      "adapted": {
+        "rank": 11,
+        "top_category": "wavy noodles",
+        "target_cosine": -0.13729645311832428,
+        "margin": -1.0104604959487915
+      }
+    },
+    {
+      "frame": 128,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "masked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.1584143489599228,
+        "margin": 0.0774068683385849
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.870369017124176,
+        "margin": 0.20669132471084595
+      }
+    },
+    {
+      "frame": 128,
+      "category": "wavy noodles",
+      "category_index": 13,
+      "crop": "unmasked",
+      "rgb_sha256": "335c4843c8a9728d71da5c71895b1180a759a72e7cafb73c520e59ff9f938c7d",
+      "native": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.08962186425924301,
+        "margin": 0.039588119834661484
+      },
+      "adapted": {
+        "rank": 1,
+        "top_category": "wavy noodles",
+        "target_cosine": 0.8237351179122925,
+        "margin": 0.10226643085479736
+      }
+    }
+  ]
+}

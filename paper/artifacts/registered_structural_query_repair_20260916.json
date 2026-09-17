@@ -1,0 +1,132 @@
+{
+  "schema": "registered_structural_query_repair.v1",
+  "scenes": {
+    "figurines": {
+      "candidate": "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/scale_affinity_v1_direct_control/field.pt",
+      "field_sha256": "883c5efa8eddae3b0aa34aafa4f24bbb7bb7c2c4e4c2fdad0ad47eaed87ecd9f",
+      "all_parent_tensors_equal": true,
+      "text_image_observation_metrics_equal": true,
+      "source_selected_scale_index": 4,
+      "observations": 35,
+      "references": 18,
+      "before": {
+        "text": {
+          "iou": 0.3239903380341535,
+          "average_precision": 0.5597827036043382,
+          "auroc": 0.9396612801393228
+        },
+        "image": {
+          "iou": 0.33119808687572816,
+          "average_precision": 0.5452359584926347,
+          "auroc": 0.926273703546741
+        },
+        "prompt": {
+          "iou": 0.2160332039438799,
+          "average_precision": 0.4028026798810781,
+          "auroc": 0.9382057691837342
+        }
+      },
+      "after": {
+        "text": {
+          "iou": 0.3239903380341535,
+          "average_precision": 0.5597827036043382,
+          "auroc": 0.9396612801393228
+        },
+        "image": {
+          "iou": 0.33119808687572816,
+          "average_precision": 0.5452359584926347,
+          "auroc": 0.926273703546741
+        },
+        "prompt": {
+          "iou": 0.4071296308109737,
+          "average_precision": 0.5782773074589274,
+          "auroc": 0.9504188855253811
+        }
+      }
+    },
+    "ramen": {
+      "candidate": "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/scale_affinity_v1_direct_control/field.pt",
+      "field_sha256": "e7e48bc8ff9095917bceb2df7b12d24b7b2353656d486c6f1f034c977ded242a",
+      "all_parent_tensors_equal": true,
+      "text_image_observation_metrics_equal": true,
+      "source_selected_scale_index": 4,
+      "observations": 57,
+      "references": 13,
+      "before": {
+        "text": {
+          "iou": 0.037735554932472236,
+          "average_precision": 0.310188683191199,
+          "auroc": 0.9160046419649736
+        },
+        "image": {
+          "iou": 0.13809865233204907,
+          "average_precision": 0.34208514025020786,
+          "auroc": 0.8930794990026406
+        },
+        "prompt": {
+          "iou": 0.21878475219469098,
+          "average_precision": 0.3292206031966601,
+          "auroc": 0.9315882094671141
+        }
+      },
+      "after": {
+        "text": {
+          "iou": 0.037735554932472236,
+          "average_precision": 0.310188683191199,
+          "auroc": 0.9160046419649736
+        },
+        "image": {
+          "iou": 0.13809865233204907,
+          "average_precision": 0.34208514025020786,
+          "auroc": 0.8930794990026406
+        },
+        "prompt": {
+          "iou": 0.24774430629567795,
+          "average_precision": 0.5194178755758059,
+          "auroc": 0.9653015765813268
+        }
+      }
+    }
+  },
+  "status": "registered prompt development candidate; not joint benchmark promotion",
+  "rejected_controls": [
+    "scale_affinity_v1",
+    "native_seed_affinity_v1",
+    "registered_full_field_control"
+  ],
+  "evaluation_scope": "LERF derived two-point registered category-union development; not official point benchmark or independent test",
+  "implementation_sources": {
+    "/root/RADIO-GS/scripts/audits/seal_registered_structure_repair.py": "448730ad7b81e950f565087e32ebe609271f214e944cf08752af4ed488c2a534",
+    "radio_gs/models/element_retrieval_field.py": "806e0ba35f28339970ed082677724b16a8b35dca9d4ee99279d4c2a87ee92436",
+    "radio_gs/models/scale_affinity_readout.py": "189dc70393872610dcbac19a0d0e150325a879018b1ac80a82b645005be741c9",
+    "scripts/audits/train_scale_affinity.py": "10889cb59d09d677de2334a596df59c685d70982877c3c8e80988d63b76a4711",
+    "scripts/audits/export_native_seed_affinity.py": "4da14024c64298429a8c90ab63474e5a73c2dbef67f01040807b38c46d276a22",
+    "scripts/audits/plot_registered_structure_queries.py": "ab130b8ee4b99381cd499099c4e451cc8a90693177d3b9fd946e626900020c26",
+    "scripts/audits/evaluate_real_reference_queries.py": "bc1e48ef09328132419b4faa496ad6c46b508e7280eac2fe8a600163465f7b6a",
+    "scripts/audits/evaluate_frozen_field_lerf_labels.py": "75cf63ee7df37cf5ea2b01b82083475ab88de5766be9d6627dad3b8ce292f05f"
+  },
+  "artifacts": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/preserved96_protected_imagecal_balanced/report.json": "5b6f4981ed32960e930a01ce1cd224621c08ab09fc6f1cc1bfc0a84179e8a398",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/scale_affinity_v1_direct_control/report.json": "6d31765b3d00948179dbaacea939ccb958d06fb5e295300505bcf13adeb98a80",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/scale_affinity_v1/report.json": "ede38656976ab7fbcb556c88ca3e1968468a507f5cdea34e8d0e025c34a544df",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/native_seed_affinity_v1/report.json": "597078066f7b9b1d688596dbf7f8734c3256a8415defbc11b1f10406cd6e8ee2",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/figurines/registered_full_field_control/report.json": "78c483e5cb84dc61257f35df61b2804ad640fec1cc2a3d80b682a602167f488c",
+    "paper/artifacts/figurines_scale_affinity_reference_20260916.json": "236089d8b7cd1a7bacae33ea362d1122fe4fd4a4d2aad91f52b2d6ac813f5891",
+    "paper/artifacts/figurines_native_seed_affinity_text_20260916.json": "3558dc4709eff4cb8b1d93190605e5dd988e7ee807e94cdc1d16f4eab923fa38",
+    "paper/artifacts/figurines_native_seed_affinity_reference_20260916.json": "fd4372e4cfb22b715c19f37dc9c293be8d43f1750ddb4eda4a8ad3d04a3e2e6e",
+    "paper/artifacts/figurines_registered_full_reference_20260916.json": "a646ad1eff5317338aa3f609b151392ac4c8187f45a91e589c977446ef440013",
+    "paper/artifacts/figurines_registered_seed_validity_20260916.json": "518109736823d513645fb85c32971ed563054fa5a8cb7f58b9dea03997b09754",
+    "paper/artifacts/figurines_registered_structure_comparison_20260916.png": "16c1aaadb6d31a6e0f273f3550e0e42d611085a0633d3d7c1206ca9b62720f2c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/preserved96_protected_imagecal_balanced/report.json": "c8e2a77e0c0cf2352aca78cc78f1bc26a786076d6ac3de2f53b6e86d3324b939",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/scale_affinity_v1_direct_control/report.json": "324249c5f8aae56910e33c9bb4c53024f0d98dd30e3c8d42a1c56e0e3c19eb88",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/scale_affinity_v1/report.json": "c4178b5395da74e2f005be39b23bc1dee538e7f51f6a8dffcd9028fcd1308d41",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/native_seed_affinity_v1/report.json": "e108475c9bb948259f0f10731446f5d1af65c7620ac3a5f4dc72e4a1a96fca91",
+    "/mnt/pool/sqy/results/RADIO-GS/output/preserved_source_inventory_20260916/ramen/registered_full_field_control/report.json": "31eaac68ea13f816051908ccb8f7037a332d9e165e44e6435b8a9baeaf6a95c5",
+    "paper/artifacts/ramen_scale_affinity_reference_20260916.json": "5d75db0d21780714c2051268c4028e1abb02e5195d704f21d2edaf3133329b3e",
+    "paper/artifacts/ramen_native_seed_affinity_text_20260916.json": "90d1142f68b0e562fda5c761796b869eec2deca0c7c597cdef63a976ee2323fb",
+    "paper/artifacts/ramen_native_seed_affinity_reference_20260916.json": "7be7841617aede2345d11b7393161f4de9e00e9ec59f0342e9ee3e1bd45ec105",
+    "paper/artifacts/ramen_registered_full_reference_20260916.json": "771e9968a1014d07ba5843aa8f8a8deb755cd7ff1f606a1229deea87375d2d87",
+    "paper/artifacts/ramen_registered_seed_validity_20260916.json": "ae8eb16dce3c70ae97b32322d398a44260b9709338e37c25b0aba843bfe464d0",
+    "paper/artifacts/ramen_registered_structure_comparison_20260916.png": "fc1c313938d0d1271b58419823f7468080e5bacd0c7f4a92b66221a151135165"
+  }
+}

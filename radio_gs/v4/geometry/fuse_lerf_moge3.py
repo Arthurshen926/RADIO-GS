@@ -18,6 +18,7 @@ from radio_gs.data.lerf_dataset import (
     _qvec_to_rotmat,
     _read_cameras_binary,
 )
+from radio_gs.geometry.source_camera_assets import source_colmap_assets
 from radio_gs.v4.carrier import Camera
 from radio_gs.v4.contracts.geometry_receipt import GeometryReceipt, HashedInput, sha256_file
 from radio_gs.v4.geometry.depth_calibration import fit_constrained_affine_depth
@@ -45,7 +46,7 @@ def _frame_index(name: str) -> int:
     return int(values[-1])
 
 
-def _read_images(path: Path, cameras: dict[int, dict[str, object]]) -> dict[int, ColmapSourceView]:
+def _read_images(path: Path, cameras: dict[int, dict[str, object]], name_to_frame_index=None) -> dict[int, ColmapSourceView]:
     output: dict[int, ColmapSourceView] = {}
     with path.open("rb") as handle:
         (count,) = struct.unpack("<Q", handle.read(8))
@@ -75,7 +76,10 @@ def _read_images(path: Path, cameras: dict[int, dict[str, object]]) -> dict[int,
             world_to_camera[:3, :3] = _qvec_to_rotmat(qvec).astype(np.float64)
             world_to_camera[:3, 3] = tvec
             pose = np.linalg.inv(world_to_camera)
-            frame_index = _frame_index(name_bytes.decode("utf-8"))
+            name = name_bytes.decode("utf-8")
+            frame_index = int(name_to_frame_index[name]) if name_to_frame_index is not None else _frame_index(name)
+            if frame_index in output:
+                raise ValueError("ambiguous COLMAP frame index; explicit filename mapping required")
             output[frame_index] = ColmapSourceView(
                 frame_index=frame_index,
                 image_id=int(image_id),
@@ -95,7 +99,8 @@ def _read_images(path: Path, cameras: dict[int, dict[str, object]]) -> dict[int,
 
 
 def _read_strict_source_points(
-    path: Path, source_image_ids: set[int]
+    path: Path, source_image_ids: set[int], *, maximum_reprojection_error: float | None = None,
+    minimum_track_views: int = 1,
 ) -> tuple[dict[int, torch.Tensor], dict[str, int]]:
     points: dict[int, torch.Tensor] = {}
     touched_source = 0
@@ -104,7 +109,7 @@ def _read_strict_source_points(
         for _ in range(count):
             point_id, x, y, z = struct.unpack("<Qddd", handle.read(32))
             handle.read(3)
-            handle.read(8)
+            (reprojection_error,) = struct.unpack("<d", handle.read(8))
             (track_count,) = struct.unpack("<Q", handle.read(8))
             track_ids = set()
             for _track_index in range(track_count):
@@ -112,7 +117,10 @@ def _read_strict_source_points(
                 track_ids.add(int(image_id))
             if track_ids & source_image_ids:
                 touched_source += 1
-            if track_ids and track_ids <= source_image_ids:
+            quality = (len(track_ids) >= minimum_track_views and
+                       (maximum_reprojection_error is None or
+                        (np.isfinite(reprojection_error) and reprojection_error <= maximum_reprojection_error)))
+            if track_ids and track_ids <= source_image_ids and quality:
                 points[int(point_id)] = torch.tensor([x, y, z], dtype=torch.float32)
     return points, {
         "total_colmap_points": int(count),
@@ -121,14 +129,19 @@ def _read_strict_source_points(
     }
 
 
-def _bilinear(depth: torch.Tensor, xy: torch.Tensor, source_width: int, source_height: int) -> torch.Tensor:
+def _bilinear(depth: torch.Tensor, xy: torch.Tensor, source_width: int, source_height: int,
+              *, pixel_contract: str = "image_edge_v2") -> torch.Tensor:
     height, width = depth.shape
     scaled = xy.clone()
     scaled[:, 0] *= width / source_width
     scaled[:, 1] *= height / source_height
     grid = torch.empty(1, 1, scaled.shape[0], 2)
-    grid[0, 0, :, 0] = (scaled[:, 0] + 0.5) * 2 / width - 1
-    grid[0, 0, :, 1] = (scaled[:, 1] + 0.5) * 2 / height - 1
+    if pixel_contract not in {"image_edge_v2", "legacy_index_v1"}:
+        raise ValueError("unknown depth calibration pixel contract")
+    offset = 0.5 if pixel_contract == "legacy_index_v1" else 0.0
+    # COLMAP coordinates already use image-edge coordinates (centres +.5).
+    grid[0, 0, :, 0] = (scaled[:, 0] + offset) * 2 / width - 1
+    grid[0, 0, :, 1] = (scaled[:, 1] + offset) * 2 / height - 1
     return F.grid_sample(
         depth[None, None].float(), grid, mode="bilinear", padding_mode="zeros", align_corners=False
     )[0, 0, 0]
@@ -157,11 +170,13 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     scene_manifest_path = Path(args.scene_manifest).resolve(strict=True)
     scene_manifest = json.loads(scene_manifest_path.read_text())
     authority_path = Path(scene_manifest["source_authority"]).resolve(strict=True)
+    if sha256_file(authority_path) != scene_manifest.get("source_authority_sha256"):
+        raise ValueError("source authority digest differs from MoGe manifest")
     authority = json.loads(authority_path.read_text())
     frame_indices = [int(value) for value in authority["frame_indices"]]
-    sparse = scene_root / "sparse" / "0"
+    sparse, released_intrinsics = source_colmap_assets(scene_root)
     cameras = _read_cameras_binary(sparse / "cameras.bin")
-    all_views = _read_images(sparse / "images.bin", cameras)
+    all_views = _read_images(sparse / "images.bin", cameras, authority.get("camera_name_to_frame_index"))
     missing = sorted(set(frame_indices) - set(all_views))
     if missing:
         raise KeyError(f"source frames missing from COLMAP model: {missing[:8]}")
@@ -169,11 +184,16 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     source_image_ids = {view.image_id for view in views.values()}
     strict_points, point_filter = _read_strict_source_points(sparse / "points3D.bin", source_image_ids)
 
+    records = {int(row["frame_index"]): row for row in scene_manifest["records"]}
+    if len(records) != len(scene_manifest["records"]) or set(records) != set(frame_indices):
+        raise ValueError("MoGe prediction inventory differs from source authority")
     predictions: dict[int, dict[str, object]] = {}
     correspondence: dict[int, tuple[torch.Tensor, torch.Tensor]] = {}
     view_scale_ratios = []
     for frame_index, view in views.items():
         prediction_path = prediction_dir / f"frame_{frame_index:05d}.pt"
+        if sha256_file(prediction_path) != records[frame_index]["prediction_sha256"]:
+            raise ValueError(f"MoGe source prediction digest differs: {frame_index}")
         payload = torch.load(prediction_path, map_location="cpu")
         if payload["model_checkpoint_sha256"] != scene_manifest["model_checkpoint_sha256"]:
             raise ValueError("prediction checkpoint digest differs from scene manifest")
@@ -186,7 +206,8 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         xyz_camera = xyz_world @ view.world_to_camera[:3, :3].T + view.world_to_camera[:3, 3]
         reference = xyz_camera[:, 2]
         depth = torch.as_tensor(payload["point_map"])[..., 2].float()
-        predicted = _bilinear(depth, view.xy[retained_tensor], view.width, view.height)
+        predicted = _bilinear(depth, view.xy[retained_tensor], view.width, view.height,
+                              pixel_contract=getattr(args, "calibration_pixel_contract", "legacy_index_v1"))
         valid = torch.isfinite(predicted) & torch.isfinite(reference) & (predicted > 0) & (reference > 0)
         predicted, reference = predicted[valid], reference[valid]
         if predicted.numel() >= 3:
@@ -248,6 +269,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         minimum_views=args.minimum_fusion_views,
         maximum_dispersion_voxels=args.maximum_dispersion_voxels,
         device=args.fusion_device,
+        consistency_mode=getattr(args, "consistency_mode", "source_depth_v2"),
     ).fuse(observations)
     carrier_path = Path(args.output_carrier).resolve()
     carrier_path.parent.mkdir(parents=True, exist_ok=True)
@@ -260,6 +282,10 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "confidence": fused.confidence,
             "view_count": fused.view_count,
             "dispersion": fused.dispersion,
+            "agreement_count": fused.agreement_count,
+            "free_space_conflict_count": fused.free_space_conflict_count,
+            "fusion_contract": getattr(args, "consistency_mode", "source_depth_v2"),
+            "pixel_contract": "image_edge_coordinates_centres_plus_half_v2",
             "voxel_size_colmap": fused.voxel_size,
             "voxel_size_metres": args.voxel_size_metres,
             "global_colmap_units_per_metre": global_scale,
@@ -276,6 +302,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             HashedInput.seal("colmap_images", sparse / "images.bin"),
             HashedInput.seal("colmap_sparse_points", sparse / "points3D.bin"),
             HashedInput.seal("fused_surface", carrier_path),
+            *((HashedInput.seal("released_image_intrinsics", released_intrinsics),) if released_intrinsics else ()),
         ),
         source_rgb_opened=True,
         target_rgb_opened=False,
@@ -286,6 +313,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         model_checkpoint_sha256=str(scene_manifest["model_checkpoint_sha256"]),
         calibration={
             "global_colmap_units_per_metre": global_scale,
+            "pixel_contract": getattr(args, "calibration_pixel_contract", "legacy_index_v1"),
             "accepted_view_count": accepted_count,
             "rejected_view_count": len(calibration_records) - accepted_count,
             "global_scale_fallback_view_count": len(calibration_records) - accepted_count,
@@ -302,6 +330,9 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "minimum_fusion_views": args.minimum_fusion_views,
             "maximum_dispersion_voxels": args.maximum_dispersion_voxels,
             "fusion_device": args.fusion_device,
+            "fusion_contract": getattr(args, "consistency_mode", "source_depth_v2"),
+            "dispersion_is_physical_thickness_test": False,
+            "fusion_implementation_sha256": sha256_file(Path(__file__).with_name("tsdf_fusion.py")),
             "surface_element_count": int(fused.centres.shape[0]),
         },
     )
@@ -310,6 +341,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         "scene_label": args.scene_label,
         "global_colmap_units_per_metre": global_scale,
         "calibration": calibration_records,
+        "calibration_pixel_contract": getattr(args, "calibration_pixel_contract", "legacy_index_v1"),
         "accepted_view_count": accepted_count,
         "rejected_view_count": len(calibration_records) - accepted_count,
         "global_scale_fallback_view_count": len(calibration_records) - accepted_count,
@@ -342,10 +374,12 @@ def main() -> None:
     parser.add_argument("--scene-manifest", required=True)
     parser.add_argument("--output-carrier", required=True)
     parser.add_argument("--output-report", required=True)
+    parser.add_argument("--calibration-pixel-contract", choices=("image_edge_v2", "legacy_index_v1"), default="image_edge_v2")
     parser.add_argument("--voxel-size-metres", type=float, default=0.04)
     parser.add_argument("--pixel-stride", type=int, default=4)
     parser.add_argument("--minimum-fusion-views", type=int, default=2)
     parser.add_argument("--fusion-device", default="cpu")
+    parser.add_argument("--consistency-mode", choices=("source_depth_v2", "legacy_unit_weight_v1"), default="source_depth_v2")
     parser.add_argument("--maximum-dispersion-voxels", type=float, default=1.5)
     parser.add_argument("--maximum-local-scale-deviation", type=float, default=0.2)
     parser.add_argument("--maximum-offset-fraction", type=float, default=0.1)
@@ -356,6 +390,7 @@ def main() -> None:
         help="optional diagnostic floor; local acceptance does not gate global-scale fallback by default",
     )
     args = parser.parse_args()
+    torch.set_num_threads(4)
     report = run(args)
     print(json.dumps({key: report[key] for key in ("scene_label", "accepted_view_count", "rejected_view_count", "surface_element_count", "global_colmap_units_per_metre")}, indent=2))
 

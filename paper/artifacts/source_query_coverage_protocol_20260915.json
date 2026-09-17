@@ -1,0 +1,13 @@
+{
+  "source_only_budget": "two full passes through largest modality including every source-region query, 6*(source_regions+original_image_tasks)",
+  "steps": {
+    "figurines": 2106,
+    "ramen": 3240
+  },
+  "runs": [
+    "source_budget_control",
+    "source_queries",
+    "reliable_source_queries"
+  ],
+  "semantic_relations_rejected_as_default": true
+}

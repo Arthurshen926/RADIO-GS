@@ -1,0 +1,113 @@
+{
+  "schema": "view_balanced_complete_control.v1",
+  "source_inventory_identical": true,
+  "geometry_identical": true,
+  "all_field_and_readout_training_repeated": true,
+  "independent_final_test": false,
+  "decision": "reject_shared_replacement",
+  "reason": "figurines improves all query modalities; ramen image improves but text ranking and registered prompt regress",
+  "results": {
+    "figurines": {
+      "lerf_ropefix_multiscale_pipeline_20260917": {
+        "full_text_iou": 0.37640223695242847,
+        "full_text_ap": 0.6046193245240206,
+        "reference": {
+          "text": {
+            "iou": 0.35605350151913273,
+            "average_precision": 0.5764518638595539,
+            "auroc": 0.9524107071992445
+          },
+          "image": {
+            "iou": 0.25547965913287946,
+            "average_precision": 0.4590988248257926,
+            "auroc": 0.906857828697612
+          },
+          "prompt": {
+            "iou": 0.38130502674895916,
+            "average_precision": 0.5637191428784125,
+            "auroc": 0.9486093501937426
+          }
+        }
+      },
+      "lerf_view_balanced_rebuild_20260917": {
+        "full_text_iou": 0.40385151020866,
+        "full_text_ap": 0.620512198748918,
+        "reference": {
+          "text": {
+            "iou": 0.3916010965534971,
+            "average_precision": 0.5847293038915662,
+            "auroc": 0.9554132803539086
+          },
+          "image": {
+            "iou": 0.30102377219064913,
+            "average_precision": 0.5086339755949738,
+            "auroc": 0.9187602735960352
+          },
+          "prompt": {
+            "iou": 0.41382693930939524,
+            "average_precision": 0.5936792613429779,
+            "auroc": 0.9456449354015751
+          }
+        }
+      }
+    },
+    "ramen": {
+      "lerf_ropefix_multiscale_pipeline_20260917": {
+        "full_text_iou": 0.2848046467121281,
+        "full_text_ap": 0.47207717185124765,
+        "reference": {
+          "text": {
+            "iou": 0.27338428769388207,
+            "average_precision": 0.45884532979265,
+            "auroc": 0.9294096508186122
+          },
+          "image": {
+            "iou": 0.12003108049361035,
+            "average_precision": 0.3757249656694149,
+            "auroc": 0.8484252902465363
+          },
+          "prompt": {
+            "iou": 0.34748943728894127,
+            "average_precision": 0.5235706646178658,
+            "auroc": 0.9587835420529988
+          }
+        }
+      },
+      "lerf_view_balanced_rebuild_20260917": {
+        "full_text_iou": 0.2848062221957866,
+        "full_text_ap": 0.44689753873868615,
+        "reference": {
+          "text": {
+            "iou": 0.27263286564527045,
+            "average_precision": 0.43693224574597894,
+            "auroc": 0.9475292174363686
+          },
+          "image": {
+            "iou": 0.1454716937193759,
+            "average_precision": 0.45114590287361533,
+            "auroc": 0.8803168456460491
+          },
+          "prompt": {
+            "iou": 0.32473972859902134,
+            "average_precision": 0.5066998261655423,
+            "auroc": 0.953743273505251
+          }
+        }
+      }
+    }
+  },
+  "input_hashes": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_ropefix_multiscale_pipeline_20260917/figurines/text_evaluation.json": "15097f26533692edad10975c8bf6754a582dbf9bd4eeb99e5e5a0bb4ec5de207",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_ropefix_multiscale_pipeline_20260917/figurines/reference_evaluation.json": "2589b0b24bb61cb7a1f22b5bc16aa07dfd9734349abc141b2328f157c868a2d1",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_ropefix_multiscale_pipeline_20260917/figurines/execution.json": "e498e1a406f588ca4c43435ca8b0b0498cb9d1832ee024699d4ac7e0cd2ea3a5",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_view_balanced_rebuild_20260917/figurines/text_evaluation.json": "d863266b9aa330f271c67fa2a76978b9d094797ddf7b665e0188ed5fe2ea9a5e",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_view_balanced_rebuild_20260917/figurines/reference_evaluation.json": "a71f85c4b77170c2dd7a73ca32bd9f89feeda8c001f4607126133fe7c66185ec",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_view_balanced_rebuild_20260917/figurines/execution.json": "faead13cd07c5160386e43e2acbe7e6e3148f13e25f388541b4665f210bfe114",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_ropefix_multiscale_pipeline_20260917/ramen/text_evaluation.json": "79376a9a88079e0a5732c74eada94cf35c73cdf38c5facd8475c7e06d17a9808",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_ropefix_multiscale_pipeline_20260917/ramen/reference_evaluation.json": "89cea9009c8860cc5b47c6b586d350f4a093e357cfddfcda3215157d7def9cf2",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_ropefix_multiscale_pipeline_20260917/ramen/execution.json": "817978718a8532a95ef1e5ef831e81ed159cc8b731d3a705babf4544e42d1795",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_view_balanced_rebuild_20260917/ramen/text_evaluation.json": "5f21bec7f48f4dd5c612e06d46731b185db5267bfe07bc082f36a6607e5169a7",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_view_balanced_rebuild_20260917/ramen/reference_evaluation.json": "ab7d2953c07874029bdb778c9df2b22d739241e99c4f9a734496fe3fa573c551",
+    "/mnt/pool/sqy/results/RADIO-GS/output/lerf_view_balanced_rebuild_20260917/ramen/execution.json": "12a5c5af782eb07d53711a1e880767e80a82a70a0090cb3f89f3cfd9e74e0cdb"
+  }
+}

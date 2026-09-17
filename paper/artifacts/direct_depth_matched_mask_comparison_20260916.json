@@ -1,0 +1,48 @@
+{
+  "schema": "direct_depth_matched_mask_comparison.v1",
+  "source_only": true,
+  "same_source_views_and_phrase_observations": true,
+  "same_pixel_support": false,
+  "target_source_depth_used_by_direct_arm": true,
+  "not_deployable_scores": true,
+  "scenes": {
+    "figurines": {
+      "paired_observations": 121,
+      "source_frames": [
+        11,
+        38,
+        49,
+        69
+      ],
+      "direct_depth_iou": 0.42415435018772185,
+      "gaussian_equal_iou": 0.4344644572601215,
+      "gaussian_mass_iou": 0.4641149957194801,
+      "direct_positive_support": 0.8503722853897032,
+      "gaussian_positive_support": 0.9588770501869769,
+      "inputs": {
+        "paper/artifacts/figurines_direct_depth_mask_transfer_20260916.json": "c937d96bdf1dd0fc391b641a76ad8367a23cf78ac63a7962b88b467d572ca199",
+        "paper/artifacts/figurines_depth_matched_mask_mass_20260916.json": "915e40fb7a30d3bdfd7265d5b093c8707b5d85bd2ebb977196ff6a48c9f914bc"
+      }
+    },
+    "ramen": {
+      "paired_observations": 224,
+      "source_frames": [
+        7,
+        11,
+        15,
+        27,
+        131,
+        90
+      ],
+      "direct_depth_iou": 0.5357114491822098,
+      "gaussian_equal_iou": 0.4503731362471756,
+      "gaussian_mass_iou": 0.4974964721311283,
+      "direct_positive_support": 0.8461808721913258,
+      "gaussian_positive_support": 0.9369693949452734,
+      "inputs": {
+        "paper/artifacts/ramen_direct_depth_mask_transfer_20260916.json": "41d9ec5c4d94517c2a00a37e63da4b529e66fdadb9c435153b8aa3cc54a1c1be",
+        "paper/artifacts/ramen_depth_matched_mask_mass_20260916.json": "1585b43586bb624356e4c0dc98751566d5ed92ca18ea33dee2abb4503415aee0"
+      }
+    }
+  }
+}

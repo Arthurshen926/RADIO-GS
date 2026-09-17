@@ -18,6 +18,7 @@ from radio_gs.config import load_config
 from radio_gs.field import (
     CanonicalGaussianField,
     load_factorized_canonical_field_checkpoint,
+    load_canonical_field_checkpoint,
 )
 from radio_gs.interfaces.semantic_alignment import (
     GlobalRegionSummaryBridge,
@@ -40,7 +41,7 @@ from radio_gs.models.siglip_projection import (
     SigLIP2FeatureProjection,
     SigLIP2SummaryHead,
 )
-from radio_gs.rendering.coefficient_renderer import render_canonical_radio
+from radio_gs.rendering.coefficient_renderer import render_canonical_radio, decode_visible_coefficients
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
 from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     _resolve_extracted_capability_source,
@@ -430,6 +431,7 @@ def _render_direct_field_detached_by_columns(
     coefficient_parts: list[torch.Tensor] = []
     depth_map = None
     alpha_map = None
+    feature_support_map = None
     confidence = field.primitive_confidence() if reliability_splat else None
     with torch.no_grad():
         for start in range(0, field.local_codes.shape[1], chunk_size):
@@ -450,14 +452,17 @@ def _render_direct_field_detached_by_columns(
             if depth_map is None:
                 depth_map = part["depth_map"]
                 alpha_map = part["alpha_map"]
+                feature_support_map = part.get("feature_support_map")
     if depth_map is None or alpha_map is None:
         raise RuntimeError("column-staged renderer produced no coefficient chunks")
     coefficient_map = torch.cat(coefficient_parts, dim=0).detach().requires_grad_(True)
+    compact = {"feature_map": coefficient_map, "depth_map": depth_map, "alpha_map": alpha_map}
+    if feature_support_map is not None:
+        compact["feature_support_map"] = feature_support_map
     return {
+        **compact,
         "coefficient_map": coefficient_map,
-        "feature_map": field.decoder.decode_map(coefficient_map),
-        "depth_map": depth_map,
-        "alpha_map": alpha_map,
+        "feature_map": decode_visible_coefficients(field, compact, gaussian_geometry),
     }
 
 
@@ -1350,6 +1355,50 @@ def _trainable_parameters(field, args: argparse.Namespace) -> list[torch.nn.Para
     return selected
 
 
+
+def _validate_frozen_feature_binding(model, metadata):
+    """Row centres alone cannot identify the visibility used by a teacher."""
+    binding = metadata.get("frozen_geometry_binding")
+    if binding is None or metadata.get("geometry_trainable_during_semantics") is not False:
+        raise ValueError("field lacks a complete frozen geometry binding")
+    model.assert_binding(binding)
+    if metadata.get("feature_confidence_contract") != model.feature_confidence_contract:
+        raise ValueError("field feature-confidence contract differs")
+
+
+def _load_finetune_geometry(args, config, payload, device):
+    metadata = payload.get("mpr_cache_metadata", {})
+    if not metadata.get("frozen_geometry_binding"):
+        if getattr(args, "frozen_geometry_report", ""):
+            raise ValueError("cannot attach frozen geometry to an unbound historical field")
+        model, _, renderer, *_ = load_render_pipeline(
+            args.config, args.geometry_checkpoint, device,
+            strict_checkpoint_contract=True, load_ply_rgb_features=False)
+        return model, renderer, None
+    from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
+    from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
+    from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
+    path = Path(getattr(args, "frozen_geometry_report", ""))
+    expected = metadata.get("frozen_geometry_report_sha256", "")
+    if not path.is_file() or not expected or sha256_file(path) != expected:
+        raise ValueError("frozen geometry report differs from the field authority")
+    report = json.loads(path.read_text())
+    digest = metadata.get("frozen_geometry_sha256", "")
+    if not any(r.get("geometry_sha256") == digest for r in report["results"].values()):
+        raise ValueError("field geometry is absent from the report")
+    model = FrozenGaussianGeometry.load(args.geometry_checkpoint, expected_sha256=digest, device=device)
+    _validate_frozen_feature_binding(model, metadata)
+    prior = MogeGeometryPrior(report["source_report"], report["source_report_sha256"])
+    camera = prior.cameras[report["mapping_frames"][0]]
+    h, w = int(config.feature_height), int(config.feature_width)
+    k = camera.intrinsic.clone()
+    k[0] *= w / camera.width
+    k[1] *= h / camera.height
+    renderer = FeatureFieldRenderer(h,w,float(k[0,0]),float(k[1,1]),float(k[0,2]),float(k[1,2]),
+        near_plane=.001*prior.scale,far_plane=100*prior.scale).to(device)
+    return model, renderer, (report, prior)
+
+
 def finetune(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
     if bool(args.offload_capability_adaptors_after_gradient) and not bool(
@@ -1365,16 +1414,15 @@ def finetune(args: argparse.Namespace) -> dict:
     # period in which both the checkpoint payload and reconstructed field are
     # resident in host memory.
     parent_field_sha256 = sha256_file(parent_field_path)
-    model, _codec, renderer, _sharpener, _refiner, _cfg, _hybrid = load_render_pipeline(
-        args.config,
-        args.geometry_checkpoint,
-        device,
-        strict_checkpoint_contract=True,
-        load_ply_rgb_features=False,
-    )
-    field, payload, _factorized_signature = load_factorized_canonical_field_checkpoint(
-        args.field_checkpoint, map_location="cpu"
-    )
+    if getattr(args, "field_format", "factorized-v2") == "canonical-v1":
+        if not getattr(args, "frozen_geometry_report", ""):
+            raise ValueError("canonical-v1 finetuning requires explicit frozen geometry")
+        field, payload = load_canonical_field_checkpoint(args.field_checkpoint, map_location="cpu")
+    else:
+        field, payload, _factorized_signature = load_factorized_canonical_field_checkpoint(
+            args.field_checkpoint, map_location="cpu")
+
+    model, renderer, frozen_context = _load_finetune_geometry(args, config, payload, device)
     expected_hash = str(payload.get("geometry_fingerprint", {}).get("xyz_sha256", ""))
     if expected_hash != _sha256_tensor_rows(model.get_xyz()):
         raise ValueError("canonical field and geometry rows differ")
@@ -1410,6 +1458,11 @@ def finetune(args: argparse.Namespace) -> dict:
     if mpr_geometry_hash != expected_hash:
         raise ValueError("MPR override and canonical field geometry rows differ")
     mpr_metadata = dict(mpr_cache.get("metadata", {}))
+    if frozen_context is not None:
+        _validate_frozen_feature_binding(model, mpr_metadata)
+        for key in ("frozen_geometry_sha256", "frozen_geometry_report_sha256"):
+            if mpr_metadata.get(key) != payload["mpr_cache_metadata"].get(key):
+                raise ValueError("MPR override frozen authority differs")
     if field.reliability.shape[1] > 0:
         if field.reliability.shape != consensus.reliability.shape:
             raise ValueError(
@@ -1420,7 +1473,24 @@ def finetune(args: argparse.Namespace) -> dict:
     included_frames = sorted(
         _resolve_training_frame_ids(config, args.include_frame_ids)
     )
+    if frozen_context is not None:
+        report, prior = frozen_context
+        allowed = set(report["mapping_frames"])
+        if included_frames and not set(included_frames) <= allowed:
+            raise ValueError("feature training/validation must stay in mapping source frames")
+        included_frames = included_frames or sorted(allowed)
     dataset = _dataset(config, renderer, included_frames or None)
+    if frozen_context is not None:
+        for index, frame in enumerate(dataset.frame_indices):
+            camera = prior.cameras[int(frame)]
+            pose = torch.as_tensor(dataset.poses_w2c[index]).float()
+            k = camera.intrinsic.clone()
+            k[0] *= renderer.image_width / camera.width
+            k[1] *= renderer.image_height / camera.height
+            if not torch.allclose(pose, camera.world_to_camera, atol=1e-4, rtol=1e-5):
+                raise ValueError("feature pose differs from frozen geometry")
+            if not torch.allclose(k, renderer.K.cpu(), atol=1e-5, rtol=1e-5):
+                raise ValueError("feature camera requires per-view intrinsics")
     frame_to_index = {
         int(frame): index for index, frame in enumerate(dataset.frame_indices)
     }
@@ -1431,10 +1501,16 @@ def finetune(args: argparse.Namespace) -> dict:
     ]
     if not mpr_frames:
         raise RuntimeError("field checkpoint has no row-aligned MPR training frames")
-    excluded_from_field_training = _excluded_mpr_frame_ids(mpr_metadata)
+    excluded_from_field_training = (
+        set(frozen_context[0]["heldout_frames"]) if frozen_context is not None
+        else _excluded_mpr_frame_ids(mpr_metadata)
+    )
     declared_validation = _parse_frame_ids(args.validation_frame_ids)
     if declared_validation:
-        missing = declared_validation - excluded_from_field_training
+        missing = (
+            declared_validation & set(mpr_frames) if frozen_context is not None
+            else declared_validation - excluded_from_field_training
+        )
         if missing:
             raise ValueError(
                 "validation frames must have been excluded from MPR construction: "
@@ -1457,7 +1533,10 @@ def finetune(args: argparse.Namespace) -> dict:
         )
     if not validation_frames:
         raise RuntimeError("no non-benchmark validation views remain")
-    benchmark_frames = excluded_from_field_training - set(validation_frames)
+    benchmark_frames = (
+        set() if frozen_context is not None
+        else excluded_from_field_training - set(validation_frames)
+    )
     raw_training_pool = [
         int(frame)
         for frame in dataset.frame_indices
@@ -1479,7 +1558,9 @@ def finetune(args: argparse.Namespace) -> dict:
         semantic_enabled=semantic_enabled,
     )
     generic_text_response_enabled = float(args.generic_text_response_weight) > 0.0
-    if generic_text_response_enabled:
+    if frozen_context is not None:
+        current_method_v1_stage = "frozen_geometry_feature_reconstruction_candidate"
+    elif generic_text_response_enabled:
         current_method_v1_stage = "target_blind_generic_text_response"
     elif semantic_enabled and float(args.semantic_weight) > 0.0:
         current_method_v1_stage = "genuine_source_crop_region_summary"
@@ -1487,12 +1568,15 @@ def finetune(args: argparse.Namespace) -> dict:
         current_method_v1_stage = "official_siglip2_full_grid"
     else:
         raise ValueError("fine-tuning invocation does not identify a Method-v1 stage")
-    method_v1_predecessor_lineage = _method_v1_predecessor_lineage(
-        args,
-        payload,
-        current_stage=current_method_v1_stage,
-        parent_sha256=parent_field_sha256,
-    )
+    if frozen_context is None:
+        method_v1_predecessor_lineage = _method_v1_predecessor_lineage(
+            args, payload, current_stage=current_method_v1_stage,
+            parent_sha256=parent_field_sha256)
+    else:
+        method_v1_predecessor_lineage = []
+        payload["frozen_candidate_parent"] = {
+            "path": str(parent_field_path), "sha256": parent_field_sha256}
+
     # ``load_state_dict`` reconstructed the field before it moved to CUDA, so
     # the checkpoint payload still owns a second full CPU copy.  Retain only
     # metadata; the selected field state is reattached when the child stage is
@@ -2330,6 +2414,8 @@ def finetune(args: argparse.Namespace) -> dict:
         reliability_splat=reliability_splat,
         column_staged_direct=column_staged_direct_backward,
     )
+    if frozen_context is not None:
+        _validate_frozen_feature_binding(model, mpr_metadata)
     field.eval().cpu()
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -2342,6 +2428,8 @@ def finetune(args: argparse.Namespace) -> dict:
     payload["mpr_cache"] = str(Path(mpr_cache_path).resolve())
     payload["mpr_cache_metadata"] = mpr_metadata
     payload["method_v1_construction_lineage"] = method_v1_predecessor_lineage
+    if frozen_context is not None:
+        payload["frozen_geometry_heldout_frames"] = frozen_context[0]["heldout_frames"]
     payload["render_optimization"] = {
         "method_v1_stage": current_method_v1_stage,
         "config": str(Path(args.config).resolve()),
@@ -2561,7 +2649,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True)
     parser.add_argument("--geometry-checkpoint", required=True)
+    parser.add_argument("--frozen-geometry-report", default="")
     parser.add_argument("--field-checkpoint", required=True)
+    parser.add_argument("--field-format", choices=["factorized-v2", "canonical-v1"], default="factorized-v2")
     parser.add_argument(
         "--construction-prior-field",
         action="append",

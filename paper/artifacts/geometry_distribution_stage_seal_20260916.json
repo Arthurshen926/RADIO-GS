@@ -1,0 +1,52 @@
+{
+  "schema": "geometry_distribution_stage_seal.v1",
+  "artifacts": [
+    {
+      "path": "paper/artifacts/ramen_source_contribution_distribution_v2_20260916.json",
+      "sha256": "42ef490b88e4bea2b96dceb083b3a33c0f50f27b538c484d384f92867e944360"
+    },
+    {
+      "path": "paper/artifacts/ramen_source_reprojection_scale_final_20260916.json",
+      "sha256": "2420bf4c300d4f8532b82b170bef7130e9b6920eebb35a850b3e00885deba105"
+    },
+    {
+      "path": "paper/artifacts/figurines_all_source_track_render_v2_20260916.json",
+      "sha256": "1d21e5af8648276391ca18ce97ab4c689bbd04b3582507f64f84d82e1f3b7837"
+    },
+    {
+      "path": "paper/artifacts/figurines_source_track_parallax_20260916.json",
+      "sha256": "1f64e0066dfd54e10838aefc45004ef0269145c340c046835cd736fcc90b9b7b"
+    },
+    {
+      "path": "paper/artifacts/ramen_all_source_track_render_v2_20260916.json",
+      "sha256": "6cf34ec5556ba4d3ba000c59fad7c9284d0ac765127a3a97a34317e312e77baf"
+    },
+    {
+      "path": "paper/artifacts/ramen_source_track_parallax_20260916.json",
+      "sha256": "9361aa236edb88faefe719f39aa0f5ae8f147ed7f5ce87f35f13a1e8f3a49ade"
+    }
+  ],
+  "sources": {
+    "scripts/audits/audit_source_contribution_distribution.py": "e4f8333a5288ed392af96ea3a2e539eca24e475ad292dd80b29ae46d1f6f2fce",
+    "scripts/audits/audit_source_reprojection_scale.py": "e1b0e4af20dee27314d36a0ed89787a38aec3cf97a76546d14c4c300954a3928",
+    "scripts/audits/audit_geometry_all_source_tracks.py": "1927354dc69177382054554613ac7060db358add84e180a7e9d2cc430a71ba5b",
+    "scripts/audits/stratify_geometry_track_reference.py": "ce24d6cba3f6a9dbb0cafa8239ae6a5b2ec7aec84c4ed7948dc8693b645f9cc7",
+    "radio_gs/geometry/source_scale_calibration.py": "5ddf80904d06baeef5b099b678a5d8d8a2483730d83bc27bbc844226c1e63aa7",
+    "tests/test_reprojection_scale_calibration.py": "c2e5d169d66d203b9cbdd29c8c0e177fcaf04f6a6d201fc7ffe796e32877a862",
+    "/root/RADIO-GS/scripts/audits/seal_geometry_distribution_stage.py": "93526d728c476c4be7f14d5e9fd733c1e8ce7250c070cf805a0f12127df321e4"
+  },
+  "checks": {
+    "figurines": {
+      "mainline_sha256": "502469ad7f43febf39022aa2bc8d5c78aed57d0d662a14ee2090b994c86c7561",
+      "unchanged": true,
+      "new_retrieval_evaluation": false
+    },
+    "ramen": {
+      "mainline_sha256": "d86d5d324500c45ec74a7b35b55916be09da01cc5aa0e9bbbe89f684f7fa1856",
+      "unchanged": true,
+      "new_retrieval_evaluation": false
+    }
+  },
+  "tests": "15 passed: reprojection scale, source scale, geometry prior",
+  "new_geometry_promoted": false
+}

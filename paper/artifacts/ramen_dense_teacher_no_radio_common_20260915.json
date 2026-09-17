@@ -1,0 +1,578 @@
+{
+  "schema": "partial_source_retrieval_evaluation.v1",
+  "episode_sha256": "f17a34f70864c77acaa510a81f0d7ed45dbf71048fd17405021e5de06d1bbd61",
+  "benchmark_ground_truth": false,
+  "evaluation_status": "development set already inspected",
+  "reference_field_sha256": "05487fbeb89f8f55563acaa371cb78bfd6a2de947dc7cd553175b2ff64aee703",
+  "field_root": "/mnt/pool/sqy/results/RADIO-GS/output/three_query_coverage_expansion_20260915/ramen",
+  "prompt_refinement_uses_only_authorized_source_seeds": false,
+  "unknown_response_mass_is_not_false_positive_rate": true,
+  "runs": {
+    "dense_view_without_radio660": {
+      "refinement_availability": {
+        "requested": 0,
+        "available": 0,
+        "unavailable": 0
+      },
+      "field_sha256": "f55acb2736719fc32351001cdf75d670c36cb0806f14d12a124062b9300e8c22",
+      "macro": {
+        "text": {
+          "image": {
+            "known_iou": 0.9201996966632964,
+            "known_precision": 0.9412178819041044,
+            "known_positive_recall": 0.9773460545722714,
+            "known_negative_false_positive_rate": 0.24816655537805724,
+            "known_fraction": 0.026916504837572575,
+            "supported_fraction": 0.9369303584098816,
+            "unknown_positive_pixel_fraction": 0.2928670346736908,
+            "unknown_response_mass_fraction": 0.9418180422450532,
+            "known_positive_count": 185.5,
+            "known_negative_count": 145.25,
+            "defined_episode_counts": {
+              "known_iou": 4,
+              "known_precision": 4,
+              "known_positive_recall": 4,
+              "known_negative_false_positive_rate": 3,
+              "known_fraction": 4,
+              "supported_fraction": 4,
+              "unknown_positive_pixel_fraction": 4,
+              "unknown_response_mass_fraction": 4,
+              "known_positive_count": 4,
+              "known_negative_count": 4
+            },
+            "episode_count": 4,
+            "known_iou_all_episodes_zero_for_undefined": 0.9201996966632964
+          },
+          "elements": {
+            "known_iou": 0.5278719386057413,
+            "known_precision": 0.5892866103219014,
+            "known_positive_recall": 0.880876875794108,
+            "known_negative_false_positive_rate": 0.4516805075310331,
+            "known_fraction": 0.003139166976325214,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.10704642161726952,
+            "unknown_response_mass_fraction": 0.9815681842965205,
+            "known_positive_count": 594.25,
+            "known_negative_count": 542.75,
+            "defined_episode_counts": {
+              "known_iou": 4,
+              "known_precision": 4,
+              "known_positive_recall": 4,
+              "known_negative_false_positive_rate": 3,
+              "known_fraction": 4,
+              "supported_fraction": 4,
+              "unknown_positive_pixel_fraction": 4,
+              "unknown_response_mass_fraction": 4,
+              "known_positive_count": 4,
+              "known_negative_count": 4
+            },
+            "episode_count": 4,
+            "known_iou_all_episodes_zero_for_undefined": 0.5278719386057413
+          }
+        },
+        "image": {
+          "image": {
+            "known_iou": 0.48710428380718146,
+            "known_precision": 0.5093614572047671,
+            "known_positive_recall": 0.9700661815046784,
+            "known_negative_false_positive_rate": 0.2656966244333438,
+            "known_fraction": 0.02364095114171505,
+            "supported_fraction": 0.9369303584098816,
+            "unknown_positive_pixel_fraction": 0.17085774894803762,
+            "unknown_response_mass_fraction": 0.9028518492190353,
+            "known_positive_count": 145.25,
+            "known_negative_count": 145.25,
+            "defined_episode_counts": {
+              "known_iou": 4,
+              "known_precision": 4,
+              "known_positive_recall": 3,
+              "known_negative_false_positive_rate": 3,
+              "known_fraction": 4,
+              "supported_fraction": 4,
+              "unknown_positive_pixel_fraction": 4,
+              "unknown_response_mass_fraction": 4,
+              "known_positive_count": 4,
+              "known_negative_count": 4
+            },
+            "episode_count": 4,
+            "known_iou_all_episodes_zero_for_undefined": 0.48710428380718146
+          },
+          "elements": {
+            "known_iou": 0.3670391124896989,
+            "known_precision": 0.5053877904221638,
+            "known_positive_recall": 0.8152237399797159,
+            "known_negative_false_positive_rate": 0.40084132044325366,
+            "known_fraction": 0.0029969795141369104,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.07408309634774923,
+            "unknown_response_mass_fraction": 0.9712262342338178,
+            "known_positive_count": 542.75,
+            "known_negative_count": 542.75,
+            "defined_episode_counts": {
+              "known_iou": 4,
+              "known_precision": 4,
+              "known_positive_recall": 3,
+              "known_negative_false_positive_rate": 3,
+              "known_fraction": 4,
+              "supported_fraction": 4,
+              "unknown_positive_pixel_fraction": 4,
+              "unknown_response_mass_fraction": 4,
+              "known_positive_count": 4,
+              "known_negative_count": 4
+            },
+            "episode_count": 4,
+            "known_iou_all_episodes_zero_for_undefined": 0.3670391124896989
+          }
+        },
+        "prompt": {
+          "image": {
+            "known_iou": 0.5929203539823009,
+            "known_precision": 0.625,
+            "known_positive_recall": 0.9572271386430679,
+            "known_negative_false_positive_rate": 0.017445546060805842,
+            "known_fraction": 0.02364095114171505,
+            "supported_fraction": 0.9369303584098816,
+            "unknown_positive_pixel_fraction": 0.2669881284236908,
+            "unknown_response_mass_fraction": 0.9329821520674016,
+            "known_positive_count": 145.25,
+            "known_negative_count": 145.25,
+            "defined_episode_counts": {
+              "known_iou": 4,
+              "known_precision": 4,
+              "known_positive_recall": 3,
+              "known_negative_false_positive_rate": 3,
+              "known_fraction": 4,
+              "supported_fraction": 4,
+              "unknown_positive_pixel_fraction": 4,
+              "unknown_response_mass_fraction": 4,
+              "known_positive_count": 4,
+              "known_negative_count": 4
+            },
+            "episode_count": 4,
+            "known_iou_all_episodes_zero_for_undefined": 0.5929203539823009
+          },
+          "elements": {
+            "known_iou": 0.3981608861756788,
+            "known_precision": 0.5292023632337459,
+            "known_positive_recall": 0.8249469399898636,
+            "known_negative_false_positive_rate": 0.11254254458568795,
+            "known_fraction": 0.0029969795141369104,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.09595166053622961,
+            "unknown_response_mass_fraction": 0.9810873033288628,
+            "known_positive_count": 542.75,
+            "known_negative_count": 542.75,
+            "defined_episode_counts": {
+              "known_iou": 4,
+              "known_precision": 4,
+              "known_positive_recall": 3,
+              "known_negative_false_positive_rate": 3,
+              "known_fraction": 4,
+              "supported_fraction": 4,
+              "unknown_positive_pixel_fraction": 4,
+              "unknown_response_mass_fraction": 4,
+              "known_positive_count": 4,
+              "known_negative_count": 4
+            },
+            "episode_count": 4,
+            "known_iou_all_episodes_zero_for_undefined": 0.3981608861756788
+          }
+        }
+      },
+      "episodes": [
+        {
+          "episode_index": 202,
+          "modality": "image",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": null,
+            "known_negative_false_positive_rate": 0.02865329512893983,
+            "known_fraction": 0.02840169332921505,
+            "supported_fraction": 0.9488932490348816,
+            "unknown_positive_pixel_fraction": 0.3427734375,
+            "unknown_response_mass_fraction": 0.9779634704807876,
+            "known_positive_count": 0,
+            "known_negative_count": 349,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": null,
+            "known_negative_false_positive_rate": 0.3795066413662239,
+            "known_fraction": 0.002910010516643524,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.12409510463476181,
+            "unknown_response_mass_fraction": 0.9906325517960642,
+            "known_positive_count": 0,
+            "known_negative_count": 1054,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 203,
+          "modality": "prompt",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": null,
+            "known_negative_false_positive_rate": 0.025787965616045846,
+            "known_fraction": 0.02840169332921505,
+            "supported_fraction": 0.9488932490348816,
+            "unknown_positive_pixel_fraction": 0.4718424677848816,
+            "unknown_response_mass_fraction": 0.9887164717427269,
+            "known_positive_count": 0,
+            "known_negative_count": 349,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.0,
+            "known_precision": 0.0,
+            "known_positive_recall": null,
+            "known_negative_false_positive_rate": 0.15180265654648956,
+            "known_fraction": 0.002910010516643524,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.20575761795043945,
+            "unknown_response_mass_fraction": 0.9964014832627723,
+            "known_positive_count": 0,
+            "known_negative_count": 1054,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 204,
+          "modality": "text",
+          "query_region": 92,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.89,
+            "known_precision": 0.956989247311828,
+            "known_positive_recall": 0.9270833333333334,
+            "known_negative_false_positive_rate": 0.011461318051575931,
+            "known_fraction": 0.0362141951918602,
+            "supported_fraction": 0.9488932490348816,
+            "unknown_positive_pixel_fraction": 0.4303385615348816,
+            "unknown_response_mass_fraction": 0.9715064127910972,
+            "known_positive_count": 96,
+            "known_negative_count": 349,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.09623430962343096,
+            "known_precision": 0.0970464135021097,
+            "known_positive_recall": 0.92,
+            "known_negative_false_positive_rate": 0.2030360531309298,
+            "known_fraction": 0.002979033626616001,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.15128189325332642,
+            "unknown_response_mass_fraction": 0.9928743999794646,
+            "known_positive_count": 25,
+            "known_negative_count": 1054,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a paper",
+          "hard_training_label_seen": true
+        },
+        {
+          "episode_index": 205,
+          "modality": "image",
+          "query_region": 107,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.04225352112676056,
+            "known_precision": 0.04225352112676056,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": 0.6017699115044248,
+            "known_fraction": 0.01888020895421505,
+            "supported_fraction": 0.9249674677848816,
+            "unknown_positive_pixel_fraction": 0.2074381560087204,
+            "unknown_response_mass_fraction": 0.9659162242603754,
+            "known_positive_count": 6,
+            "known_negative_count": 226,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.02304147465437788,
+            "known_precision": 0.02304147465437788,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": 0.773017319963537,
+            "known_fraction": 0.0030839485116302967,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.10133683681488037,
+            "unknown_response_mass_fraction": 0.984475353674062,
+            "known_positive_count": 20,
+            "known_negative_count": 1097,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 206,
+          "modality": "prompt",
+          "query_region": 107,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.5,
+            "known_precision": 0.5,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": 0.02654867256637168,
+            "known_fraction": 0.01888020895421505,
+            "supported_fraction": 0.9249674677848816,
+            "unknown_positive_pixel_fraction": 0.3509928584098816,
+            "unknown_response_mass_fraction": 0.9934526636960814,
+            "known_positive_count": 6,
+            "known_negative_count": 226,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.11834319526627218,
+            "known_precision": 0.11834319526627218,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": 0.1358249772105743,
+            "known_fraction": 0.0030839485116302967,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.09498672187328339,
+            "unknown_response_mass_fraction": 0.9932427456741791,
+            "known_positive_count": 20,
+            "known_negative_count": 1097,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 207,
+          "modality": "text",
+          "query_region": 107,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.8255813953488372,
+            "known_precision": 0.8255813953488372,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": 0.06637168141592921,
+            "known_fraction": 0.024169921875,
+            "supported_fraction": 0.9249674677848816,
+            "unknown_positive_pixel_fraction": 0.299072265625,
+            "unknown_response_mass_fraction": 0.9705896228085323,
+            "known_positive_count": 71,
+            "known_negative_count": 226,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.2632398753894081,
+            "known_precision": 0.27704918032786885,
+            "known_positive_recall": 0.8407960199004975,
+            "known_negative_false_positive_rate": 0.40200546946216953,
+            "known_fraction": 0.0035836752504110336,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.1502520740032196,
+            "unknown_response_mass_fraction": 0.9876062325127705,
+            "known_positive_count": 201,
+            "known_negative_count": 1097,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a paper",
+          "hard_training_label_seen": true
+        },
+        {
+          "episode_index": 208,
+          "modality": "image",
+          "query_region": 94,
+          "target_view": 7,
+          "image": {
+            "known_iou": 0.994269340974212,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.994269340974212,
+            "known_negative_false_positive_rate": null,
+            "known_fraction": 0.02840169332921505,
+            "supported_fraction": 0.9488932490348816,
+            "unknown_positive_pixel_fraction": 0.0475260429084301,
+            "unknown_response_mass_fraction": 0.8023770582850401,
+            "known_positive_count": 349,
+            "known_negative_count": 0,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.8349146110056926,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.8349146110056926,
+            "known_negative_false_positive_rate": null,
+            "known_fraction": 0.002910010516643524,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.0324849933385849,
+            "unknown_response_mass_fraction": 0.947324045832824,
+            "known_positive_count": 1054,
+            "known_negative_count": 0,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 209,
+          "modality": "prompt",
+          "query_region": 94,
+          "target_view": 7,
+          "image": {
+            "known_iou": 1.0,
+            "known_precision": 1.0,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": null,
+            "known_fraction": 0.02840169332921505,
+            "supported_fraction": 0.9488932490348816,
+            "unknown_positive_pixel_fraction": 0.184814453125,
+            "unknown_response_mass_fraction": 0.8769422597174885,
+            "known_positive_count": 349,
+            "known_negative_count": 0,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.881404174573055,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.881404174573055,
+            "known_negative_false_positive_rate": null,
+            "known_fraction": 0.002910010516643524,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.04394833743572235,
+            "unknown_response_mass_fraction": 0.9633566118031783,
+            "known_positive_count": 1054,
+            "known_negative_count": 0,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 210,
+          "modality": "text",
+          "query_region": 94,
+          "target_view": 7,
+          "image": {
+            "known_iou": 1.0,
+            "known_precision": 1.0,
+            "known_positive_recall": 1.0,
+            "known_negative_false_positive_rate": null,
+            "known_fraction": 0.02840169332921505,
+            "supported_fraction": 0.9488932490348816,
+            "unknown_positive_pixel_fraction": 0.2693684995174408,
+            "unknown_response_mass_fraction": 0.9070102610966075,
+            "known_positive_count": 349,
+            "known_negative_count": 0,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.969639468690702,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.969639468690702,
+            "known_negative_false_positive_rate": null,
+            "known_fraction": 0.002910010516643524,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.06313673406839371,
+            "unknown_response_mass_fraction": 0.9712344123639064,
+            "known_positive_count": 1054,
+            "known_negative_count": 0,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a rock",
+          "hard_training_label_seen": true
+        },
+        {
+          "episode_index": 211,
+          "modality": "image",
+          "query_region": 109,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.9118942731277533,
+            "known_precision": 0.9951923076923077,
+            "known_positive_recall": 0.915929203539823,
+            "known_negative_false_positive_rate": 0.16666666666666666,
+            "known_fraction": 0.01888020895421505,
+            "supported_fraction": 0.9249674677848816,
+            "unknown_positive_pixel_fraction": 0.085693359375,
+            "unknown_response_mass_fraction": 0.8651506438499381,
+            "known_positive_count": 226,
+            "known_negative_count": 6,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.6102003642987249,
+            "known_precision": 0.9985096870342772,
+            "known_positive_recall": 0.6107566089334548,
+            "known_negative_false_positive_rate": 0.05,
+            "known_fraction": 0.0030839485116302967,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.03841545060276985,
+            "unknown_response_mass_fraction": 0.9624729856323209,
+            "known_positive_count": 1097,
+            "known_negative_count": 20,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 212,
+          "modality": "prompt",
+          "query_region": 109,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.8716814159292036,
+            "known_precision": 1.0,
+            "known_positive_recall": 0.8716814159292036,
+            "known_negative_false_positive_rate": 0.0,
+            "known_fraction": 0.01888020895421505,
+            "supported_fraction": 0.9249674677848816,
+            "unknown_positive_pixel_fraction": 0.060302734375,
+            "unknown_response_mass_fraction": 0.8728172131133096,
+            "known_positive_count": 226,
+            "known_negative_count": 6,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.592896174863388,
+            "known_precision": 0.9984662576687117,
+            "known_positive_recall": 0.593436645396536,
+            "known_negative_false_positive_rate": 0.05,
+            "known_fraction": 0.0030839485116302967,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.03911396488547325,
+            "unknown_response_mass_fraction": 0.9713483725753215,
+            "known_positive_count": 1097,
+            "known_negative_count": 20,
+            "unknown_is_negative": false
+          }
+        },
+        {
+          "episode_index": 213,
+          "modality": "text",
+          "query_region": 109,
+          "target_view": 6,
+          "image": {
+            "known_iou": 0.9652173913043478,
+            "known_precision": 0.9823008849557522,
+            "known_positive_recall": 0.9823008849557522,
+            "known_negative_false_positive_rate": 0.6666666666666666,
+            "known_fraction": 0.01888020895421505,
+            "supported_fraction": 0.9249674677848816,
+            "unknown_positive_pixel_fraction": 0.1726888120174408,
+            "unknown_response_mass_fraction": 0.9181658722839753,
+            "known_positive_count": 226,
+            "known_negative_count": 6,
+            "unknown_is_negative": false
+          },
+          "elements": {
+            "known_iou": 0.7823741007194245,
+            "known_precision": 0.9830508474576272,
+            "known_positive_recall": 0.7930720145852325,
+            "known_negative_false_positive_rate": 0.75,
+            "known_fraction": 0.0030839485116302967,
+            "supported_fraction": 0.7067515254020691,
+            "unknown_positive_pixel_fraction": 0.06351498514413834,
+            "unknown_response_mass_fraction": 0.9745576923299402,
+            "known_positive_count": 1097,
+            "known_negative_count": 20,
+            "unknown_is_negative": false
+          },
+          "text": "a photo of a rock",
+          "hard_training_label_seen": true
+        }
+      ]
+    }
+  }
+}

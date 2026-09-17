@@ -261,6 +261,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "source_only": True,
             "scene_label": args.scene_label,
             "source_view_count": len(cameras),
+            "projection_contract": "pixel_centres_nearest_v2",
             "maximum_splat_radius": args.maximum_splat_radius,
             "surface_band_voxels": args.surface_band_voxels,
             "maximum_contributors_per_pixel": args.maximum_contributors_per_pixel,
@@ -272,6 +273,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "source_view_count": len(cameras),
         "raster_shape": [height, width],
         "projection_configuration": {
+            "projection_contract": "pixel_centres_nearest_v2",
             "maximum_splat_radius": args.maximum_splat_radius,
             "surface_band_voxels": args.surface_band_voxels,
             "maximum_contributors_per_pixel": args.maximum_contributors_per_pixel,

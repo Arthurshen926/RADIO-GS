@@ -1,0 +1,22 @@
+{
+  "source_only": true,
+  "steps": {
+    "figurines": 2106,
+    "ramen": 3240
+  },
+  "source_region_query_tasks": true,
+  "readout": "exact cosine(Dz+b,q) with one shared deployed native decoder; no second per-element field",
+  "controls": [
+    "coupling_calibrated_control",
+    "decoder_coupled",
+    "decoder_coupled_no_radio"
+  ],
+  "strict_correspondence_filter": false,
+  "all_runs_calibrated_on_source_only": true,
+  "target_threshold": 0.5,
+  "cross_benchmark_promotion_requires": [
+    "LERF",
+    "ScanNet OVS",
+    "NVOS"
+  ]
+}

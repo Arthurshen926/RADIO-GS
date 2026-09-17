@@ -165,6 +165,7 @@ def test_visibility_conflict_uses_mutual_explicit_negative_evidence():
         torch.tensor([0, 1, 1]),
         torch.ones(2, 2, dtype=torch.bool),
         evidence_threshold=0.05,
+        negative=torch.tensor([[0., 1.], [0., 1.], [1., 0.]]),
     )
     assert conflict[0, 1] == 0
     assert conflict[0, 2] == 1
@@ -309,6 +310,8 @@ def test_cross_view_supported_fragments_seed_and_unsupported_fragment_assigns():
 
 def test_learned_affinity_replaces_hand_weighted_pair_score():
     class ConstantAffinity(nn.Module):
+        relation_contract = "explicit_negative_v2"
+
         def forward(self, features):
             return torch.full(
                 features.shape[:-1], 8.0, dtype=features.dtype,

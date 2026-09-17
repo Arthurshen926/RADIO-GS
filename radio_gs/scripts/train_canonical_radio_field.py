@@ -2821,7 +2821,7 @@ def train(args: argparse.Namespace) -> dict:
         lr=float(args.learning_rate),
         weight_decay=float(args.weight_decay),
     )
-    if bool(args.sparse_local_code_gradients):
+    if bool(getattr(args, "sparse_local_code_gradients", False)):
         if field.fusion is not None:
             raise ValueError(
                 "sparse local-code gradients require the direct D512/L512 field"
