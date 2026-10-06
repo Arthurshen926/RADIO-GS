@@ -1,0 +1,81 @@
+{
+  "kind": "query_conditioned_complete_membership",
+  "status": "complete_research_rejected_image_component_promoted",
+  "default_changed": true,
+  "design": {
+    "fit": [
+      "scene0271_00",
+      "scene0059_00",
+      "scene0226_00",
+      "scene0167_00",
+      "scene0211_00",
+      "scene0532_00",
+      "scene0611_00",
+      "scene0057_00",
+      "scene0344_00",
+      "scene0374_00",
+      "scene0483_00",
+      "scene0390_00",
+      "scene0074_00",
+      "scene0065_00",
+      "scene0117_00",
+      "scene0577_00",
+      "scene0547_00",
+      "scene0331_00",
+      "scene0168_00",
+      "scene0465_00",
+      "scene0463_00",
+      "scene0317_00"
+    ],
+    "calibration": [
+      "scene0209_00",
+      "scene0437_00",
+      "scene0024_00"
+    ],
+    "validation": [
+      "scene0540_00",
+      "scene0283_00",
+      "scene0508_00",
+      "scene0597_00"
+    ],
+    "source": "output/native_phrase_binding_20261006",
+    "conditions": [
+      "anchor_only",
+      "query_evidence"
+    ],
+    "supervision": "independent NR3D full expressions and official3D target instances, real registered observations",
+    "label_identity": "actual referred instance, not inferred-anchor instance",
+    "unknown_labels": "excluded from training; all elements scored at evaluation",
+    "native_identity": "same full-expression descriptor; no phrase parsing or encoder update",
+    "anchor": "same selected source region and geometric median as previous bridge; never forced positive",
+    "candidates": 2,
+    "training_vertex_budget_per_class_query": 1024,
+    "candidate_or_mapping_cap": null,
+    "estimator": {
+      "n_estimators": 64,
+      "max_leaf_nodes": 512,
+      "min_samples_leaf": 32,
+      "max_features": 1.0,
+      "random_state": 20261005
+    },
+    "calibration_rule": "one threshold per condition on same3 calibration rooms; no benchmark threshold choice",
+    "development_gate": "query_evidence beats anchor_only and old bridge each by2pp; at least3 of4 scenes beat old bridge; query-mean evidence inferior",
+    "source_images_at_query": false,
+    "independent_final_test": false,
+    "default_changed": false
+  },
+  "results": "output/query_conditioned_membership_20261006",
+  "anchor_free_design": "output/query_conditioned_membership_20261006/anchor_free_design.json",
+  "fits": 3,
+  "exact_calibration": "output/query_conditioned_membership_20261006/exact_calibration.json",
+  "exact_development": "output/query_conditioned_membership_20261006/exact_development.json",
+  "comparison": "output/query_conditioned_membership_20261006/comparison.json",
+  "failed_models_deployed": false,
+  "image_component_candidate": "output/query_conditioned_membership_20261006/image_convergence/recipe.json",
+  "research_heads_promoted": false,
+  "active_default": "configs/pipeline/system_v10.json",
+  "default_change_source": "prior image member component only",
+  "report": "docs/experiments/2026-10-06-query-conditioned-membership-and-system-convergence.md",
+  "completed_common_jobs": 31,
+  "promoted_component": "configs/recipes/image_membership_convergence.json"
+}

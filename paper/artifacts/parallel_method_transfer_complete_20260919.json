@@ -1,0 +1,59 @@
+{
+  "complete": true,
+  "development_only": true,
+  "independent_test": false,
+  "frozen_defaults_changed": false,
+  "uqis_paused": true,
+  "branches": {
+    "prompt": {
+      "path": "paper/artifacts/nvos_positive_spatial_transfer_eight_20260919.json",
+      "sha256": "a8d8e42837804e883eb772b178d29b3b2848c7fad7a2ce5cfc2c094881dd40a0"
+    },
+    "graph": {
+      "path": "paper/artifacts/graph_transfer_final_four_scene_20260919.json",
+      "sha256": "d6571b02bb6e0aa7846a79f6211a60d7f762864ac37197b7a73a61ec1ab4f66e"
+    },
+    "selection": {
+      "path": "output/selection_transfer_20260919/summary.json",
+      "sha256": "5a83aa6d3bea8bfdd12b549c968cf1ee0a6b04abc24aeff141e08f54a8a0f32b"
+    }
+  },
+  "nvos_macro": {
+    "baseline": {
+      "iou": 0.5050067193806171,
+      "pixel_accuracy": 0.8963376507163048,
+      "average_precision": 0.8438242644719937
+    },
+    "prompt_only": {
+      "iou": 0.5946807265281677,
+      "pixel_accuracy": 0.9143795818090439,
+      "average_precision": 0.8574080784346545
+    },
+    "prompt_sam": {
+      "iou": 0.68612240254879,
+      "pixel_accuracy": 0.9293253868818283,
+      "average_precision": 0.8699061055117596
+    }
+  },
+  "lerf_four_scene_macro": {
+    "final": {
+      "iou": 0.4417438162099023,
+      "ap": 0.6202650649405639,
+      "selected_iou": 0.2968632271043559
+    },
+    "direct_dino_calibrated": {
+      "iou": 0.44649459766929167,
+      "ap": 0.6253488307413498,
+      "selected_iou": 0.3116371304097303
+    },
+    "distilled_structure32_calibrated": {
+      "iou": 0.44546571222674625,
+      "ap": 0.6304287621598104,
+      "selected_iou": 0.3136798180442921
+    }
+  },
+  "selection_risk_transfer_promoted": false,
+  "child_bindings_verified": 89,
+  "shared_test_note": "Graph solver 19 tests are included in prompt branch adjoint+solver 23 tests; do not sum as42.",
+  "remaining": "No combined four-query model validation; leaves false positives and trex precision tradeoff remain."
+}

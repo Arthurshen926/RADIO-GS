@@ -1,0 +1,82 @@
+{
+  "positive": {
+    "counts_same": true,
+    "changed_bins": 371,
+    "histogram_l1": 926.0
+  },
+  "negative": {
+    "counts_same": true,
+    "changed_bins": 804,
+    "histogram_l1": 3728.0
+  },
+  "fits_old": {
+    "count": {
+      "scale": 34.649194419834586,
+      "bias": -31.18797870827619,
+      "score_threshold": 0.9001068922521022,
+      "score_interval": [
+        -1.0,
+        1.0
+      ],
+      "positive_recall": 0.6527926584641531,
+      "negative_rejection": 0.9887033599281767,
+      "balanced": false,
+      "loss": 0.14310602398179778,
+      "cosine_threshold": 0.9001068922521022
+    },
+    "balanced": {
+      "scale": 25.76983900938129,
+      "bias": -21.429953517277465,
+      "score_threshold": 0.8315905081702712,
+      "score_interval": [
+        -1.0,
+        1.0
+      ],
+      "positive_recall": 0.8880746543982725,
+      "negative_rejection": 0.8619575463888265,
+      "balanced": true,
+      "loss": 0.33276195579238055,
+      "cosine_threshold": 0.8315905081702712
+    }
+  },
+  "fits_new": {
+    "count": {
+      "scale": 34.64919306677273,
+      "bias": -31.187977789334205,
+      "score_threshold": 0.9001069008802487,
+      "score_interval": [
+        -1.0,
+        1.0
+      ],
+      "positive_recall": 0.6527930334762004,
+      "negative_rejection": 0.9887033414185314,
+      "balanced": false,
+      "loss": 0.1431060228428452,
+      "cosine_threshold": 0.9001069008802487
+    },
+    "balanced": {
+      "scale": 25.76983876111504,
+      "bias": -21.42995348697073,
+      "score_threshold": 0.8315905150057475,
+      "score_interval": [
+        -1.0,
+        1.0
+      ],
+      "positive_recall": 0.8880746543982725,
+      "negative_rejection": 0.8619576389370526,
+      "balanced": true,
+      "loss": 0.332761949804992,
+      "cosine_threshold": 0.8315905150057475
+    }
+  },
+  "task_counts_exact": true,
+  "full_task_count": 2808,
+  "inputs": {
+    "output/pixel_evidence_rebuild_20260917/figurines/field/pixel_evidence96_source_image_calibration.json": "373e5c2421a512c73a625cef1be51c5c1f4e5db75076e38b7c2cf3eeac87f911",
+    "output/pixel_evidence_rebuild_20260917/figurines/field/pixel_evidence96_streaming_validation_source_image_calibration.json": "a477b3c23a9d71912ae75ad3952732189ceffd824f6447482ebdad186a20c545"
+  },
+  "maximum_threshold_change": 8.628146530575975e-09,
+  "interpretation": "All source task identities and positive/negative counts exact; query GEMM batching changes boundary-bin counts at floating-point precision. Maximum fitted threshold delta below 9e-9; not a bitwise histogram claim.",
+  "balanced_deployment_tensors_exact": true,
+  "changed_tensors": []
+}

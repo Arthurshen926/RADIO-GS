@@ -1,0 +1,222 @@
+{
+  "scene": "scannet_scene0070_00",
+  "native_field": "output/scannet_native_completion/scene0070_00/native_field.pt",
+  "text_encoder": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384/snapshots/a713301b217d38485fb2204c808367d10bc3cc40",
+  "runtime_provider": "native_category_map",
+  "input_track": "provided_unlabelled_mesh",
+  "geometry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/scannet_public_next72/scene0070_00/geometry.pt",
+    "sha256": "ff1cf8775a0246942c2edb2df0a7e8c56c2eaf864c05cbadb2c298b61627f5cf"
+  },
+  "source_cameras": "output/scannet_public_next72/scene0070_00/source_cameras.json",
+  "source_frames": [
+    0,
+    20,
+    40,
+    60,
+    80,
+    100,
+    120,
+    140,
+    160,
+    180,
+    200,
+    220,
+    240,
+    260,
+    280,
+    300,
+    320,
+    340,
+    360,
+    380,
+    400,
+    420,
+    440,
+    460,
+    480,
+    500,
+    520,
+    540,
+    560,
+    580,
+    600,
+    620,
+    640,
+    660,
+    680,
+    700,
+    720,
+    740,
+    760,
+    780,
+    800,
+    820,
+    840,
+    860,
+    880,
+    900,
+    920,
+    940,
+    960,
+    980,
+    1000,
+    1020,
+    1040,
+    1060,
+    1080,
+    1100,
+    1120,
+    1140,
+    1160,
+    1180,
+    1200,
+    1220,
+    1240,
+    1260,
+    1280,
+    1300,
+    1320
+  ],
+  "source_views": 67,
+  "source_rgb_authority": "output/scannet_public_next72/scene0070_00/source_rgb.json",
+  "native_region_directories": [
+    "output/scannet_native_completion/scene0070_00/native_regions"
+  ],
+  "calibration": {
+    "kind": "explicit_source_trained_native_category_head",
+    "parameters": "output/native_category_transfer/scene0070_00/category_head.pt"
+  },
+  "map_contract": {
+    "native_dimension": 1536,
+    "geometry_trainable": false,
+    "all_nonempty_generated_masks": true,
+    "teacher_native": true,
+    "query_labels_used": false,
+    "source_trained_category_calibration": true
+  },
+  "native_category_head": "output/native_category_transfer/scene0070_00/category_head.pt",
+  "source_evidence": {
+    "provider": "SAM3 literal text with native foreground-context evidence",
+    "raster_hw": [
+      96,
+      128
+    ],
+    "views": [
+      {
+        "frame": 140,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_140.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00000.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/140.jpg"
+      },
+      {
+        "frame": 260,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_260.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00001.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/260.jpg"
+      },
+      {
+        "frame": 320,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_320.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00002.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/320.jpg"
+      },
+      {
+        "frame": 380,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_380.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00003.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/380.jpg"
+      },
+      {
+        "frame": 540,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_540.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00004.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/540.jpg"
+      },
+      {
+        "frame": 560,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_560.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00005.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/560.jpg"
+      },
+      {
+        "frame": 600,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_600.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00006.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/600.jpg"
+      },
+      {
+        "frame": 680,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_680.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00007.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/680.jpg"
+      },
+      {
+        "frame": 920,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_920.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00008.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/920.jpg"
+      },
+      {
+        "frame": 1000,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_1000.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00009.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1000.jpg"
+      },
+      {
+        "frame": 1020,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_1020.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00010.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1020.jpg"
+      },
+      {
+        "frame": 1060,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_1060.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00011.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1060.jpg"
+      },
+      {
+        "frame": 1200,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_1200.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00012.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1200.jpg"
+      },
+      {
+        "frame": 1260,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_1260.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00013.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1260.jpg"
+      },
+      {
+        "frame": 1280,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_1280.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00014.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1280.jpg"
+      },
+      {
+        "frame": 1300,
+        "identity": "output/typed_evidence_next44/scannet_scene0070_00/identity_1300.pt",
+        "contributions": "output/scannet_coverage_native_next28/scene0070_00/reconstruction_complete_next28/field/responsibility.json.views/view_00015.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0070_00/color/1300.jpg"
+      }
+    ]
+  },
+  "category_evidence_frames": [
+    140,
+    260,
+    320,
+    380,
+    540,
+    560,
+    600,
+    680,
+    920,
+    1000,
+    1020,
+    1060,
+    1200,
+    1260,
+    1280,
+    1300
+  ]
+}

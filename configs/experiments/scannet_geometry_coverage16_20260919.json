@@ -1,0 +1,70 @@
+{
+  "status": "source_only_prepared_not_trained",
+  "changes": [
+    "source camera selection only"
+  ],
+  "training_view_budget": 16,
+  "benchmark_queries_or_gt_used_to_select_frames": false,
+  "method_selection_uses_geometry_only": true,
+  "notes": "Compare against current frozen source selection after full benchmark cohort completes; retain same geometry, feature budget, losses and evaluation.",
+  "scenes": [
+    {
+      "scene": "scene0000_00",
+      "train_frames": [
+        1940,
+        820,
+        2960,
+        2120,
+        2260,
+        4300,
+        1220,
+        880,
+        4100,
+        2720,
+        2560,
+        5220,
+        4380,
+        140,
+        3060,
+        4000
+      ],
+      "validation_frames": [
+        0,
+        420
+      ],
+      "geometry_sha256": "fa47bee9ca5725cc0b7533dfeacb28ec6187db767352b727a08e11dcd673c888",
+      "source_camera_sha256": "b4444038d467c5e5552ab278794ee7ff0f58ee24b0af15653f2d807a2c307f02",
+      "decision_report": "output/source_visibility_budget_20260919/scene0000_00/report.json",
+      "decision_report_sha256": "073cfc774cf2e9ce44771eee8033a5391a2a387f09e2bbb6db3398ce1d840995"
+    },
+    {
+      "scene": "scene0062_00",
+      "train_frames": [
+        600,
+        160,
+        320,
+        20,
+        520,
+        420,
+        200,
+        660,
+        100,
+        560,
+        700,
+        220,
+        440,
+        640,
+        400,
+        180
+      ],
+      "validation_frames": [
+        0,
+        80
+      ],
+      "geometry_sha256": "0b667387374d8078280d41da03cd1a51fcf45201b836eafb140e13e3cf14915d",
+      "source_camera_sha256": "9a034c7d116e34c5a2757664a9cab02fa11735416f589d3e2eb46204248e109e",
+      "decision_report": "output/source_visibility_budget_20260919/scene0062_00/report.json",
+      "decision_report_sha256": "43860dd046bc29cf7018220fb89dc777ee372b1411c68ec445b69f6585fb50b2"
+    }
+  ]
+}

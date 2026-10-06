@@ -1,0 +1,21 @@
+{
+  "status": "complete_not_promoted",
+  "retained": "configs/recipes/next80_research.json",
+  "candidate_source": "output/content_seeds_next83/<key>/proposals.json",
+  "verifier": "Salesforce/blip-image-captioning-base",
+  "context_scale": 1.5,
+  "arms": [
+    "same-window raw likelihood",
+    "object-erasure gain with native fallback"
+  ],
+  "both_views_positive_gain": true,
+  "admission_threshold": 0,
+  "threshold_tuned_on_evaluation": false,
+  "erasure_fill": 127,
+  "scope_initialization": "source",
+  "evaluations_complete": 8,
+  "summary": "output/next84/summary.json",
+  "research_decision": "deprioritize further BLIP confidence transformations; validate a stronger content-grounding provider before further scene reconstructions",
+  "mainline_changed": false,
+  "other_benchmarks_unchanged": true
+}

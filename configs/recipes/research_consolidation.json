@@ -1,0 +1,2126 @@
+{
+  "kind": "research_result_registry_NOT_training_or_inference_recipe",
+  "as_of": "2026-10-03",
+  "single_unified_model": false,
+  "authoritative_overview": "docs/CURRENT_RESEARCH.md",
+  "result_families": {
+    "lerf_semantic_next75": {
+      "status": "semantic reference; selected field here is older extent control",
+      "protocol": "LERF four-scene development; selected silhouette is not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/native_write_next75/all/semantic_only/lerf_figurines/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/native_write_next75/all/semantic_only/lerf_ramen/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/native_write_next75/all/semantic_only/lerf_teatime/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/native_write_next75/all/semantic_only/lerf_waldo_kitchen/anchored/pipeline_calibrated/evaluation.json"
+        }
+      ]
+    },
+    "lerf_selected_next80": {
+      "status": "historical incremental rollback reference, not unified stable model",
+      "protocol": "LERF four-scene development; selected silhouette is not independent3DGT",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/region_seed_positive_next80/lerf_figurines/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/region_seed_positive_next80/lerf_ramen/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/region_seed_positive_next80/lerf_teatime/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/region_seed_positive_next80/lerf_waldo_kitchen/anchored/pipeline_calibrated/evaluation.json"
+        }
+      ]
+    },
+    "lerf_selected_next104": {
+      "status": "retained reference:4updated/63inherited queries",
+      "protocol": "LERF four-scene development; selected silhouette is not independent3DGT",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/core_scope_next104/core_update/lerf_figurines/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/core_scope_next104/core_update/lerf_ramen/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/core_scope_next104/core_update/lerf_teatime/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/core_scope_next104/core_update/lerf_waldo_kitchen/anchored/pipeline_calibrated/evaluation.json"
+        }
+      ]
+    },
+    "lerf_selected_next107": {
+      "status": "optional higher-mean:13updated/54inherited queries; spatula regression",
+      "protocol": "LERF four-scene development; selected silhouette is not independent3DGT",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/set_scope_next107/box/lerf_figurines/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/set_scope_next107/box/lerf_ramen/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/set_scope_next107/box/lerf_teatime/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/set_scope_next107/box/lerf_waldo_kitchen/anchored/pipeline_calibrated/evaluation.json"
+        }
+      ]
+    },
+    "nvos_next74": {
+      "status": "eight-query source-assisted reference; separate map/cohort",
+      "protocol": "positive-reference prompted; no target RGB;192x256source write; distinct from signed/all-view protocols",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "average_precision"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "trex",
+          "path": "output/nvos_source_resolution_next74/new/trex/report.json"
+        },
+        {
+          "unit": "flower",
+          "path": "output/nvos_source_resolution_next74/new/flower/report.json"
+        },
+        {
+          "unit": "fern",
+          "path": "output/nvos_source_resolution_next74/new/fern/report.json"
+        },
+        {
+          "unit": "horns_left",
+          "path": "output/nvos_source_resolution_next74/new/horns_left/report.json"
+        },
+        {
+          "unit": "fortress",
+          "path": "output/nvos_source_resolution_next74/new/fortress/report.json"
+        },
+        {
+          "unit": "leaves",
+          "path": "output/nvos_source_resolution_next74/new/leaves/report.json"
+        },
+        {
+          "unit": "orchids",
+          "path": "output/nvos_source_resolution_next74/new/orchids/report.json"
+        },
+        {
+          "unit": "horns_center",
+          "path": "output/nvos_source_resolution_next74/new/horns_center/report.json"
+        }
+      ]
+    },
+    "scannet_next44": {
+      "status": "eight-scene online-source reference; not public point/mesh protocol",
+      "protocol": "volume-weighted Gaussian pseudolabels,19/15/10splits; not paper10scenes",
+      "metric_paths": {
+        "miou_19": [
+          "metrics",
+          "hierarchical_pipeline",
+          "19",
+          "miou"
+        ],
+        "miou_15": [
+          "metrics",
+          "hierarchical_pipeline",
+          "15",
+          "miou"
+        ],
+        "miou_10": [
+          "metrics",
+          "hierarchical_pipeline",
+          "10",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "scene0000_00",
+          "path": "output/typed_evidence_next44/soft_identity/scannet_scene0000_00/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "scene0062_00",
+          "path": "output/typed_evidence_next44/soft_identity/scannet_scene0062_00/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "scene0070_00",
+          "path": "output/typed_evidence_next44/soft_identity/scannet_scene0070_00/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "scene0097_00",
+          "path": "output/typed_evidence_next44/soft_identity/scannet_scene0097_00/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "scene0140_00",
+          "path": "output/typed_evidence_next44/soft_identity/scannet_scene0140_00/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "scene0347_00",
+          "path": "output/typed_evidence_next44/soft_identity/scannet_scene0347_00/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "scene0400_00",
+          "path": "output/typed_evidence_next44/soft_identity/scannet_scene0400_00/anchored/pipeline_calibrated/evaluation.json"
+        },
+        {
+          "unit": "scene0590_00",
+          "path": "output/typed_evidence_next44/soft_identity/scannet_scene0590_00/anchored/pipeline_calibrated/evaluation.json"
+        }
+      ]
+    },
+    "lerf_consolidated_map": {
+      "status": "fresh complete text baseline, not promoted full-task model",
+      "protocol": "same frozen LERF development semantic and selected-projection evaluation",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/research_consolidation/map_evaluation/figurines/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/research_consolidation/map_evaluation/ramen/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/research_consolidation/map_evaluation/teatime/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/research_consolidation/map_evaluation/waldo_kitchen/evaluation.json"
+        }
+      ]
+    },
+    "lerf_consolidated_source": {
+      "status": "fresh complete text baseline, not promoted full-task model",
+      "protocol": "same frozen LERF development semantic and selected-projection evaluation",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/research_consolidation/source_run/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/research_consolidation/source_run/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/research_consolidation/source_run/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/research_consolidation/source_run/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_consolidated_regional_run": {
+      "status": "optional complete automatic control, not global promotion",
+      "protocol": "frozen LERF development semantic and selected-projection scorer",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/research_consolidation/regional_run/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/research_consolidation/regional_run/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/research_consolidation/regional_run/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/research_consolidation/regional_run/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_consolidated_calibrated_run": {
+      "status": "optional complete automatic control, not global promotion",
+      "protocol": "frozen LERF development semantic and selected-projection scorer",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/research_consolidation/calibrated_run/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/research_consolidation/calibrated_run/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/research_consolidation/calibrated_run/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/research_consolidation/calibrated_run/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "scope_evidence_fusion": {
+      "status": "completed bounded development control; no default promotion",
+      "protocol": "LERF four-scene frozen selected projection; every fifth source detection held out from fitting; frozen map uses all sources",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ],
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/scope_evidence_control/fusion/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/scope_evidence_control/fusion/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/scope_evidence_control/fusion/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/scope_evidence_control/fusion/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "scope_evidence_fit": {
+      "status": "completed bounded development control; no default promotion",
+      "protocol": "LERF four-scene frozen selected projection; every fifth source detection held out from fitting; frozen map uses all sources",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ],
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/scope_evidence_control/fit/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/scope_evidence_control/fit/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/scope_evidence_control/fit/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/scope_evidence_control/fit/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "scope_evidence_abstention": {
+      "status": "completed bounded development control; no default promotion",
+      "protocol": "LERF four-scene frozen selected projection; every fifth source detection held out from fitting; frozen map uses all sources",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ],
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/scope_evidence_control/abstention/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/scope_evidence_control/abstention/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/scope_evidence_control/abstention/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/scope_evidence_control/abstention/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "scope_evidence_identity": {
+      "status": "completed bounded development control; no default promotion",
+      "protocol": "LERF four-scene frozen selected projection; every fifth source detection held out from fitting; frozen map uses all sources",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ],
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/scope_evidence_control/identity/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/scope_evidence_control/identity/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/scope_evidence_control/identity/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/scope_evidence_control/identity/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "scope_evidence_identity_veto": {
+      "status": "completed bounded development control; no default promotion",
+      "protocol": "LERF four-scene frozen selected projection; every fifth source detection held out from fitting; frozen map uses all sources",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ],
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/scope_evidence_control/identity_veto/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/scope_evidence_control/identity_veto/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/scope_evidence_control/identity_veto/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/scope_evidence_control/identity_veto/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "conditioned_identity_conditioned": {
+      "status": "complete LERF text development control; full_source is new text-only default",
+      "protocol": "frozen LERF selected2Dprojection, not independent3DGT; no unseen scene",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ],
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/conditioned_identity/conditioned/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/conditioned_identity/conditioned/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/conditioned_identity/conditioned/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/conditioned_identity/conditioned/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "conditioned_identity_forced_split": {
+      "status": "complete LERF text development control; full_source is new text-only default",
+      "protocol": "frozen LERF selected2Dprojection, not independent3DGT; no unseen scene",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ],
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/conditioned_identity/forced_split/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/conditioned_identity/forced_split/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/conditioned_identity/forced_split/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/conditioned_identity/forced_split/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "conditioned_identity_full_source": {
+      "status": "complete LERF text development control; full_source is new text-only default",
+      "protocol": "frozen LERF selected2Dprojection, not independent3DGT; no unseen scene",
+      "metric_paths": {
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ],
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/conditioned_identity/full_source/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/conditioned_identity/full_source/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/conditioned_identity/full_source/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/conditioned_identity/full_source/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "nvos_reference_replay": {
+      "status": "explicit positive-reference development integration; no signed prompt claim",
+      "protocol": "retained normalized continuous NVOS response>=0.5; no target RGB",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "average_precision"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "orchids",
+          "path": "output/reference_integration/replay/orchids/evaluation/evaluation.json"
+        },
+        {
+          "unit": "leaves",
+          "path": "output/reference_integration/replay/leaves/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fern",
+          "path": "output/reference_integration/replay/fern/evaluation/evaluation.json"
+        },
+        {
+          "unit": "flower",
+          "path": "output/reference_integration/replay/flower/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fortress",
+          "path": "output/reference_integration/replay/fortress/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_center",
+          "path": "output/reference_integration/replay/horns_center/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_left",
+          "path": "output/reference_integration/replay/horns_left/evaluation/evaluation.json"
+        },
+        {
+          "unit": "trex",
+          "path": "output/reference_integration/replay/trex/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "nvos_reference_fresh": {
+      "status": "explicit positive-reference development integration; no signed prompt claim",
+      "protocol": "retained normalized continuous NVOS response>=0.5; no target RGB",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "average_precision"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "orchids",
+          "path": "output/reference_integration/fresh/orchids/evaluation/evaluation.json"
+        },
+        {
+          "unit": "leaves",
+          "path": "output/reference_integration/fresh/leaves/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fern",
+          "path": "output/reference_integration/fresh/fern/evaluation/evaluation.json"
+        },
+        {
+          "unit": "flower",
+          "path": "output/reference_integration/fresh/flower/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fortress",
+          "path": "output/reference_integration/fresh/fortress/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_center",
+          "path": "output/reference_integration/fresh/horns_center/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_left",
+          "path": "output/reference_integration/fresh/horns_left/evaluation/evaluation.json"
+        },
+        {
+          "unit": "trex",
+          "path": "output/reference_integration/fresh/trex/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "nvos_reference_subset": {
+      "status": "negative control: selected values misused as response",
+      "protocol": "retained normalized continuous NVOS response>=0.5; no target RGB",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "average_precision"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "orchids",
+          "path": "output/reference_integration/subset/orchids/evaluation/evaluation.json"
+        },
+        {
+          "unit": "leaves",
+          "path": "output/reference_integration/subset/leaves/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fern",
+          "path": "output/reference_integration/subset/fern/evaluation/evaluation.json"
+        },
+        {
+          "unit": "flower",
+          "path": "output/reference_integration/subset/flower/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fortress",
+          "path": "output/reference_integration/subset/fortress/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_center",
+          "path": "output/reference_integration/subset/horns_center/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_left",
+          "path": "output/reference_integration/subset/horns_left/evaluation/evaluation.json"
+        },
+        {
+          "unit": "trex",
+          "path": "output/reference_integration/subset/trex/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "nvos_reference_typed": {
+      "status": "explicit positive-reference development integration; no signed prompt claim",
+      "protocol": "retained normalized continuous NVOS response>=0.5; no target RGB",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "average_precision"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "orchids",
+          "path": "output/reference_integration/typed/orchids/evaluation/evaluation.json"
+        },
+        {
+          "unit": "leaves",
+          "path": "output/reference_integration/typed/leaves/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fern",
+          "path": "output/reference_integration/typed/fern/evaluation/evaluation.json"
+        },
+        {
+          "unit": "flower",
+          "path": "output/reference_integration/typed/flower/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fortress",
+          "path": "output/reference_integration/typed/fortress/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_center",
+          "path": "output/reference_integration/typed/horns_center/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_left",
+          "path": "output/reference_integration/typed/horns_left/evaluation/evaluation.json"
+        },
+        {
+          "unit": "trex",
+          "path": "output/reference_integration/typed/trex/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_response_native_protected": {
+      "status": "bounded response control; not default",
+      "protocol": "same frozen LERF semantic and selected-projection scorers; existing geometry/evidence, no new teachers",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/consolidated_response_control/figurines/native_protected/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/consolidated_response_control/ramen/native_protected/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/consolidated_response_control/teatime/native_protected/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/consolidated_response_control/waldo_kitchen/native_protected/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_response_source_complement": {
+      "status": "bounded response control; not default",
+      "protocol": "same frozen LERF semantic and selected-projection scorers; existing geometry/evidence, no new teachers",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/consolidated_response_control/figurines/source_complement/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/consolidated_response_control/ramen/source_complement/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/consolidated_response_control/teatime/source_complement/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/consolidated_response_control/waldo_kitchen/source_complement/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_response_fusion": {
+      "status": "current LERF text development default",
+      "protocol": "same frozen LERF semantic and selected-projection scorers; existing geometry/evidence, no new teachers",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/consolidated_response_control/figurines/fusion/native_protected/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/consolidated_response_control/ramen/fusion/native_protected/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/consolidated_response_control/teatime/fusion/native_protected/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/consolidated_response_control/waldo_kitchen/fusion/native_protected/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_response_native_floor": {
+      "status": "bounded response control; not default",
+      "protocol": "same frozen LERF semantic and selected-projection scorers; existing geometry/evidence, no new teachers",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/consolidated_response_control/figurines/native_floor/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/consolidated_response_control/ramen/native_floor/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/consolidated_response_control/teatime/native_floor/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/consolidated_response_control/waldo_kitchen/native_floor/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_containment_structural": {
+      "status": "complete bounded control; not promoted",
+      "protocol": "same frozen LERF semantic and selected-projection scorers; current source identities/native region bank, no new teachers",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/containment_scope_control/figurines/structural/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/containment_scope_control/ramen/structural/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/containment_scope_control/teatime/structural/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/containment_scope_control/waldo_kitchen/structural/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_containment_semantic": {
+      "status": "complete bounded control; not promoted",
+      "protocol": "same frozen LERF semantic and selected-projection scorers; current source identities/native region bank, no new teachers",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/containment_scope_control/figurines/semantic/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/containment_scope_control/ramen/semantic/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/containment_scope_control/teatime/semantic/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/containment_scope_control/waldo_kitchen/semantic/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_containment_assignment": {
+      "status": "complete bounded control; not promoted",
+      "protocol": "same frozen LERF semantic and selected-projection scorers; current source identities/native region bank, no new teachers",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/containment_scope_assignment/figurines/assignment/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/containment_scope_assignment/ramen/assignment/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/containment_scope_assignment/teatime/assignment/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/containment_scope_assignment/waldo_kitchen/assignment/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_crop_global": {
+      "status": "complete bounded control; not promoted",
+      "protocol": "same frozen four-scene LERF dual-output scoring; added source teacher computation disclosed",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/tiled_source_evidence/figurines/global/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/tiled_source_evidence/ramen/global/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/tiled_source_evidence/teatime/global/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/tiled_source_evidence/waldo_kitchen/global/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_crop_bounded": {
+      "status": "complete bounded control; not promoted",
+      "protocol": "same frozen four-scene LERF dual-output scoring; added source teacher computation disclosed",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/tiled_source_evidence/figurines/bounded/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/tiled_source_evidence/ramen/bounded/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/tiled_source_evidence/teatime/bounded/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/tiled_source_evidence/waldo_kitchen/bounded/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_direct_mask_identity": {
+      "status": "complete bounded control; not promoted",
+      "protocol": "same frozen four-scene LERF dual-output scoring; added source teacher computation disclosed",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/direct_source_identity/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/direct_source_identity/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/direct_source_identity/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/direct_source_identity/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "lerf_direct_context_identity": {
+      "status": "complete bounded control; not promoted",
+      "protocol": "same frozen four-scene LERF dual-output scoring; added source teacher computation disclosed",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/direct_source_context/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/direct_source_context/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/direct_source_context/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/direct_source_context/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "finite_evidence_confidence_original": {
+      "status": "complete; rejected as default; fixed-evidence development control",
+      "protocol": "unchanged LERF four-scene semantic and selected projection; no independent 3D GT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/finite_source_evidence/original/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/finite_source_evidence/original/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/finite_source_evidence/original/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/finite_source_evidence/original/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "finite_evidence_confidence_tiled": {
+      "status": "complete; rejected as default; fixed-evidence development control",
+      "protocol": "unchanged LERF four-scene semantic and selected projection; no independent 3D GT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/finite_source_evidence/tiled/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/finite_source_evidence/tiled/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/finite_source_evidence/tiled/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/finite_source_evidence/tiled/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "finite_evidence_positive_logit_original": {
+      "status": "complete; rejected as default; fixed-evidence development control",
+      "protocol": "unchanged LERF four-scene semantic and selected projection; no independent 3D GT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/finite_source_margin/original/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/finite_source_margin/original/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/finite_source_margin/original/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/finite_source_margin/original/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "finite_evidence_positive_logit_tiled": {
+      "status": "complete; rejected as default; fixed-evidence development control",
+      "protocol": "unchanged LERF four-scene semantic and selected projection; no independent 3D GT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/finite_source_margin/tiled/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/finite_source_margin/tiled/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/finite_source_margin/tiled/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/finite_source_margin/tiled/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "finite_evidence_readout_only_original": {
+      "status": "complete; rejected as default; fixed-evidence development control",
+      "protocol": "unchanged LERF four-scene semantic and selected projection; no independent 3D GT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/finite_source_margin/original/figurines/readout_only/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/finite_source_margin/original/ramen/readout_only/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/finite_source_margin/original/teatime/readout_only/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/finite_source_margin/original/waldo_kitchen/readout_only/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "finite_evidence_readout_only_tiled": {
+      "status": "complete; rejected as default; fixed-evidence development control",
+      "protocol": "unchanged LERF four-scene semantic and selected projection; no independent 3D GT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/finite_source_margin/tiled/figurines/readout_only/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/finite_source_margin/tiled/ramen/readout_only/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/finite_source_margin/tiled/teatime/readout_only/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/finite_source_margin/tiled/waldo_kitchen/readout_only/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_crop_original_veto": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_verification/veto/original/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_verification/veto/original/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_verification/veto/original/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_verification/veto/original/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_crop_original_affirmative": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_verification/affirmative/original/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_verification/affirmative/original/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_verification/affirmative/original/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_verification/affirmative/original/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_crop_tiled_veto": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_verification/veto/tiled/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_verification/veto/tiled/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_verification/veto/tiled/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_verification/veto/tiled/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_crop_tiled_affirmative": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_verification/affirmative/tiled/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_verification/affirmative/tiled/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_verification/affirmative/tiled/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_verification/affirmative/tiled/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_context_original_veto": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_context/veto/original/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_context/veto/original/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_context/veto/original/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_context/veto/original/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_context_original_affirmative": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_context/affirmative/original/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_context/affirmative/original/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_context/affirmative/original/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_context/affirmative/original/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_context_original_contradiction": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_context/contradiction/original/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_context/contradiction/original/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_context/contradiction/original/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_context/contradiction/original/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_context_tiled_veto": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_context/veto/tiled/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_context/veto/tiled/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_context/veto/tiled/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_context/veto/tiled/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_context_tiled_affirmative": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_context/affirmative/tiled/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_context/affirmative/tiled/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_context/affirmative/tiled/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_context/affirmative/tiled/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "independent_referent_context_tiled_contradiction": {
+      "status": "complete; not promoted; same cohort frozen geometry and output thresholds, added source-only Qwen3 evidence",
+      "protocol": "LERF four-scene development semantic and actual subset projection; not independent3DGT",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "hierarchical_pipeline",
+          "ap"
+        ],
+        "selected_projection_iou": [
+          "metrics",
+          "hierarchical_pipeline",
+          "selected",
+          "miou"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "figurines",
+          "path": "output/source_referent_context/contradiction/tiled/figurines/evaluation/evaluation.json"
+        },
+        {
+          "unit": "ramen",
+          "path": "output/source_referent_context/contradiction/tiled/ramen/evaluation/evaluation.json"
+        },
+        {
+          "unit": "teatime",
+          "path": "output/source_referent_context/contradiction/tiled/teatime/evaluation/evaluation.json"
+        },
+        {
+          "unit": "waldo_kitchen",
+          "path": "output/source_referent_context/contradiction/tiled/waldo_kitchen/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "reference_referent_veto": {
+      "status": "complete; no evidence change and no IoU gain",
+      "protocol": "retained positive-only NVOS development; not signed official prompt reproduction",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "average_precision"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "orchids",
+          "path": "output/reference_referent_verification/veto/orchids/evaluation/evaluation.json"
+        },
+        {
+          "unit": "leaves",
+          "path": "output/reference_referent_verification/veto/leaves/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fern",
+          "path": "output/reference_referent_verification/veto/fern/evaluation/evaluation.json"
+        },
+        {
+          "unit": "flower",
+          "path": "output/reference_referent_verification/veto/flower/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fortress",
+          "path": "output/reference_referent_verification/veto/fortress/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_center",
+          "path": "output/reference_referent_verification/veto/horns_center/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_left",
+          "path": "output/reference_referent_verification/veto/horns_left/evaluation/evaluation.json"
+        },
+        {
+          "unit": "trex",
+          "path": "output/reference_referent_verification/veto/trex/evaluation/evaluation.json"
+        }
+      ]
+    },
+    "reference_referent_affirmative": {
+      "status": "complete; no evidence change and no IoU gain",
+      "protocol": "retained positive-only NVOS development; not signed official prompt reproduction",
+      "metric_paths": {
+        "iou": [
+          "metrics",
+          "iou"
+        ],
+        "ap": [
+          "metrics",
+          "average_precision"
+        ]
+      },
+      "reports": [
+        {
+          "unit": "orchids",
+          "path": "output/reference_referent_verification/affirmative/orchids/evaluation/evaluation.json"
+        },
+        {
+          "unit": "leaves",
+          "path": "output/reference_referent_verification/affirmative/leaves/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fern",
+          "path": "output/reference_referent_verification/affirmative/fern/evaluation/evaluation.json"
+        },
+        {
+          "unit": "flower",
+          "path": "output/reference_referent_verification/affirmative/flower/evaluation/evaluation.json"
+        },
+        {
+          "unit": "fortress",
+          "path": "output/reference_referent_verification/affirmative/fortress/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_center",
+          "path": "output/reference_referent_verification/affirmative/horns_center/evaluation/evaluation.json"
+        },
+        {
+          "unit": "horns_left",
+          "path": "output/reference_referent_verification/affirmative/horns_left/evaluation/evaluation.json"
+        },
+        {
+          "unit": "trex",
+          "path": "output/reference_referent_verification/affirmative/trex/evaluation/evaluation.json"
+        }
+      ]
+    }
+  },
+  "consolidation": {
+    "shared_map_and_typed_solver": "consolidation target, not completed fresh build",
+    "query_modes": [
+      "map_plus_declared_query",
+      "map_plus_source_cache",
+      "map_plus_online_source_rgb"
+    ],
+    "target_rgb_refinement": "separate2Dcomparison only; frozen evaluators unchanged",
+    "new_query_independent_of_historical_scores": "map and source-assisted subset inference executed for one unlabelled text; accuracy unverified",
+    "compact_student_validated": false,
+    "same_new_map_four_query_validated": false,
+    "uqis": "paused by user",
+    "map_runtime": "scripts/research/query_consolidated_map.py; native semantic baseline only, not inherited next75 calibrated results",
+    "scene_query_inputs": "configs/consolidated",
+    "source_assisted_unified_runtime_complete": "text detector baseline and generic region-top1/tracker plus scalar calibration controls executed; reliable identity/complete extent remain unresolved",
+    "runtime_execution_summary": "output/research_consolidation/native_map/execution_summary.json",
+    "native_map_queries_executed": 67,
+    "new_text_probes_executed": 1,
+    "entry": "scripts/research/run_current_research.py",
+    "full_text_execution": "output/research_consolidation/full_execution.json",
+    "provider_controls": "configs/recipes/consolidated_provider_controls.json",
+    "phase": "documentation_and_text_interface_consolidation_closed",
+    "executable_recipe": "configs/recipes/current_research.json",
+    "fixed_comparator": "source"
+  },
+  "dependency_classes": {
+    "query_independent": [
+      "next66geometry",
+      "next72source RGB/cameras/SAM/native regions",
+      "next75 native feature tensor and support; two shared calibration scalars trained on old source queries"
+    ],
+    "query_dependent": [
+      "next53 per-query score distribution used by next75 confidence transport",
+      "next38exclusion reference scores",
+      "next44identity detections/query list",
+      "next63fallback tracks",
+      "next98/104retained selections",
+      "next103component judgments/next104seed decisions"
+    ]
+  }
+}

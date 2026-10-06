@@ -1,0 +1,111 @@
+{
+  "kind": "typed_identity_membership_study",
+  "status": "complete_no_promotion",
+  "default_changed": false,
+  "design": {
+    "fit": [
+      "scene0271_00",
+      "scene0059_00",
+      "scene0226_00",
+      "scene0167_00",
+      "scene0211_00",
+      "scene0532_00",
+      "scene0611_00",
+      "scene0057_00",
+      "scene0344_00",
+      "scene0374_00",
+      "scene0483_00",
+      "scene0390_00",
+      "scene0074_00",
+      "scene0065_00",
+      "scene0117_00",
+      "scene0577_00",
+      "scene0547_00",
+      "scene0331_00",
+      "scene0168_00",
+      "scene0465_00",
+      "scene0463_00",
+      "scene0317_00"
+    ],
+    "calibration": [
+      "scene0209_00",
+      "scene0437_00",
+      "scene0024_00"
+    ],
+    "validation": [
+      "scene0540_00",
+      "scene0283_00",
+      "scene0508_00",
+      "scene0597_00"
+    ],
+    "source": "output/native_phrase_binding_20261006",
+    "mechanisms": [
+      "semantic channel mixture",
+      "independent conditional relation"
+    ],
+    "fits": [
+      "semantic",
+      "frozen",
+      "joint"
+    ],
+    "epochs_per_fit": 12,
+    "seed": 20261006,
+    "supervision": "independent NR3D, ScanEnts3D roles, official3D instance/category labels",
+    "unknown_policy": "semantic normalization weighted by annotated region fraction; unknown is not negative",
+    "semantic_selection": "calibration scene-macro semantic-class accuracy",
+    "relation_selection": "calibration actual selected-set IoU; zero relation checkpoint included",
+    "gate": {
+      "minimum_iou_gain_over_previous": 0.02,
+      "minimum_iou_gain_over_semantic": 0.02,
+      "must_beat_joint": true,
+      "no_class_accuracy_drop_from_semantic": true,
+      "minimum_scene_evidence_gain": 0.005
+    },
+    "parameter_search": false,
+    "source_images_at_query": false,
+    "independent_final_test": false,
+    "membership_bridge": {
+      "identity_rules": [
+        "native",
+        "semantic",
+        "frozen",
+        "joint"
+      ],
+      "scope_rules": [
+        "same existing one-hop family",
+        "existing v9 actual-anchor membership model"
+      ],
+      "inferred_anchor": "nearest actual member to coordinate-wise median of the chosen source region",
+      "anchor_selection_uses_labels": false,
+      "images_at_query": false,
+      "threshold_changed": false,
+      "extra_fit": false,
+      "oracle_prompt": false,
+      "gate": "semantic bridge exceeds previous11.110% and same semantic family each by2pp; native bridge also improves native family",
+      "inference_uncertainty": "Automatically inferred anchor may be wrong; every query and all wrong-anchor cases retained"
+    },
+    "membership_gate": {
+      "passed": true,
+      "semantic_bridge": 0.1363629113264403,
+      "prior": 0.11109819856937975,
+      "native_bridge": 0.07008791305489684
+    },
+    "benchmark_execution": "31 common primary jobs plus9 lexical-only and9 scope-only controls, conditional on frozen development gate"
+  },
+  "results": "output/typed_referent_binding_20261006",
+  "report": "docs/experiments/2026-10-06-typed-identity-and-inferred-membership.md",
+  "result_summary": "output/typed_referent_binding_20261006/comparison.json",
+  "identity_diagnosis": "output/typed_referent_binding_20261006/identity_diagnosis.json",
+  "query_supported_anchor_result": "output/typed_referent_binding_20261006/query_supported_anchor/summary.json",
+  "conclusion": "Member decoding transfers to text/image; new lexical identity hurts UQIS; text uncertainty and inferred-anchor identity unresolved. Retain system_v9.",
+  "completed": {
+    "fits": 3,
+    "benchmark_jobs": 49,
+    "uqis_query_executions": 804,
+    "native_and_point_outputs_exact": true,
+    "relation_gate": false,
+    "primary_promotion_gate": false,
+    "anchor_repair_gate": false,
+    "default_changed": false
+  }
+}

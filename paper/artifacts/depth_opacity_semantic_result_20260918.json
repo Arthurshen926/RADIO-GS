@@ -1,0 +1,233 @@
+{
+  "schema": "depth_opacity_semantic_result.v1",
+  "independent_final_test": false,
+  "new_geometry_all_dependent_assets_rebuilt": true,
+  "original_v2_control_preserved": true,
+  "online_replay_exact": true,
+  "implementation_sha256": "bc46252392409200e44fb30538a2f412326a0e548200691bd14894dcb9d60570",
+  "results": {
+    "figurines": {
+      "text": {
+        "before": {
+          "observation_miou": 0.43811936590027317,
+          "average_precision_macro": 0.6008287837460944,
+          "positive_support_recall_macro": 0.9951160731060165
+        },
+        "after": {
+          "observation_miou": 0.4451865526051795,
+          "average_precision_macro": 0.6062959563745548,
+          "positive_support_recall_macro": 0.9953442545873779
+        },
+        "categories_before": {
+          "bag": 0.25042301184433163,
+          "green apple": 0.7320945963108315,
+          "green toy chair": 0.14167957661120978,
+          "jake": 0.013447676117101142,
+          "miffy": 0.10116560953127472,
+          "old camera": 0.7129696584641175,
+          "pikachu": 0.8317249010797398,
+          "pink ice cream": 0.41425282066503494,
+          "pirate hat": 0.03128236383317328,
+          "porcelain hand": 0.599551588817678,
+          "pumpkin": 0.6180317848410758,
+          "red apple": 0.7264510696589038,
+          "red toy chair": 0.21714421027705422,
+          "rubber duck with buoy": 0.47052723648890865,
+          "rubber duck with hat": 0.3795671563580971,
+          "rubics cube": 0.6330313343982044,
+          "spatula": 0.577218492278926,
+          "tesla door handle": 0.3794986876970915,
+          "toy cat statue": 0.510034712930481,
+          "toy elephant": 0.4437719722084097,
+          "waldo": 0.22180059384083275
+        },
+        "categories_after": {
+          "bag": 0.32551647124511446,
+          "green apple": 0.7388664815613639,
+          "green toy chair": 0.16471054971264906,
+          "jake": 0.015718226122188525,
+          "miffy": 0.1476711372230758,
+          "old camera": 0.7036785921191065,
+          "pikachu": 0.8079911437847089,
+          "pink ice cream": 0.42394856914341933,
+          "pirate hat": 0.04629861510142662,
+          "porcelain hand": 0.6302760957876704,
+          "pumpkin": 0.5809168000948823,
+          "red apple": 0.714825046991304,
+          "red toy chair": 0.1972809667673716,
+          "rubber duck with buoy": 0.6600832850285444,
+          "rubber duck with hat": 0.37929683745463977,
+          "rubics cube": 0.6287811665989196,
+          "spatula": 0.5706349575676065,
+          "tesla door handle": 0.2394028594831247,
+          "toy cat statue": 0.2643843455489258,
+          "toy elephant": 0.4229699896929926,
+          "waldo": 0.44781092236793624
+        },
+        "tasks": 56
+      },
+      "reference": {
+        "before": {
+          "text": {
+            "iou": 0.4286514216571428,
+            "average_precision": 0.5886927644935445,
+            "auroc": 0.9625706792211945
+          },
+          "image": {
+            "iou": 0.4616161995640554,
+            "average_precision": 0.6407882970745422,
+            "auroc": 0.9514626633515483
+          },
+          "prompt": {
+            "iou": 0.46560042794770057,
+            "average_precision": 0.6438973990345687,
+            "auroc": 0.9459871714889784
+          }
+        },
+        "after": {
+          "text": {
+            "iou": 0.44214763990195116,
+            "average_precision": 0.5980844575919899,
+            "auroc": 0.9646940089211808
+          },
+          "image": {
+            "iou": 0.49388028742331774,
+            "average_precision": 0.6792962701267713,
+            "auroc": 0.9590500762602809
+          },
+          "prompt": {
+            "iou": 0.4747113368565206,
+            "average_precision": 0.645468809921338,
+            "auroc": 0.9470510455254691
+          }
+        },
+        "tasks_per_modality": 35,
+        "unavailable_prompts_before": 0,
+        "unavailable_prompts_after": 0
+      },
+      "selected_only": {
+        "mean_iou": 0.2634405767023175,
+        "tasks": 56,
+        "official_gt_equivalence_verified": false
+      }
+    },
+    "ramen": {
+      "text": {
+        "before": {
+          "observation_miou": 0.33474224190349455,
+          "average_precision_macro": 0.508735011269481,
+          "positive_support_recall_macro": 0.9982530491452821
+        },
+        "after": {
+          "observation_miou": 0.35457378770191883,
+          "average_precision_macro": 0.5211662659599108,
+          "positive_support_recall_macro": 0.9980167158892457
+        },
+        "categories_before": {
+          "bowl": 0.5604381032432929,
+          "chopsticks": 0.451583514151258,
+          "corn": 0.04471872396054159,
+          "egg": 0.5399391207356092,
+          "glass of water": 0.4659185098679326,
+          "hand": 0.08470066518847007,
+          "kamaboko": 0.342006387876531,
+          "napkin": 0.25214807157121377,
+          "nori": 0.6925426523161647,
+          "onion segments": 0.0,
+          "plate": 0.6738037868184394,
+          "sake cup": 0.2686021763882664,
+          "spoon": 0.33342485875219774,
+          "wavy noodles": 0.0
+        },
+        "categories_after": {
+          "bowl": 0.57656391251536,
+          "chopsticks": 0.5393717283213243,
+          "corn": 0.042682855106230884,
+          "egg": 0.5420087046354596,
+          "glass of water": 0.5181468551279594,
+          "hand": 0.0,
+          "kamaboko": 0.33519075765292705,
+          "napkin": 0.3654385666502141,
+          "nori": 0.6667328176001303,
+          "onion segments": 0.0,
+          "plate": 0.7007392830925132,
+          "sake cup": 0.3042346173202963,
+          "spoon": 0.33512923453035104,
+          "wavy noodles": 0.0
+        },
+        "tasks": 71
+      },
+      "reference": {
+        "before": {
+          "text": {
+            "iou": 0.34047296329293986,
+            "average_precision": 0.5178190742753553,
+            "auroc": 0.9408940929605801
+          },
+          "image": {
+            "iou": 0.3206098828735777,
+            "average_precision": 0.5461417921375755,
+            "auroc": 0.9642659275952153
+          },
+          "prompt": {
+            "iou": 0.32943610073497664,
+            "average_precision": 0.4919894968755744,
+            "auroc": 0.9449512961250053
+          }
+        },
+        "after": {
+          "text": {
+            "iou": 0.3599559854321833,
+            "average_precision": 0.5343902707173127,
+            "auroc": 0.9440712224364382
+          },
+          "image": {
+            "iou": 0.3399495748912382,
+            "average_precision": 0.5735017143209565,
+            "auroc": 0.9651946056934877
+          },
+          "prompt": {
+            "iou": 0.3783983897349136,
+            "average_precision": 0.570974617634791,
+            "auroc": 0.9615071112910112
+          }
+        },
+        "tasks_per_modality": 57,
+        "unavailable_prompts_before": 0,
+        "unavailable_prompts_after": 0
+      },
+      "selected_only": {
+        "mean_iou": 0.19034482471739472,
+        "tasks": 71,
+        "official_gt_equivalence_verified": false
+      }
+    }
+  },
+  "bindings": {
+    "output/depth_opacity_pipeline_20260918/geometry_resolution_fix/receipt.json": "fc2a478bf72b66cde1226b6b17a5d7bdfdbcc49ca84012d69950b4a2b47c0794",
+    "output/v2_scope_rebuild_20260918/figurines/text_online.json": "d11444dfeb3220e32d6583bf360c1e12ae4c7957df779e60781b45add20b36cc",
+    "output/depth_opacity_pipeline_20260918/figurines/text_online.json": "7a1b2f22781cfbfc5022acbeda45a894a097ba3e7a3451c1794e28cd4c76da1f",
+    "output/depth_opacity_pipeline_20260918/figurines/text_replay.json": "7a1b2f22781cfbfc5022acbeda45a894a097ba3e7a3451c1794e28cd4c76da1f",
+    "output/v2_scope_rebuild_20260918/figurines/reference_online.json": "bbe3e47badc5ff1910caaa17cabda077586ce864adb57f3b5eb0040b9163fbb7",
+    "output/depth_opacity_pipeline_20260918/figurines/reference_online.json": "612fc0670b3903ebd8a40b0b4465ff531eeaf6ac7e97e2c7b302f470994f31b3",
+    "output/depth_opacity_pipeline_20260918/figurines/reference_replay.json": "612fc0670b3903ebd8a40b0b4465ff531eeaf6ac7e97e2c7b302f470994f31b3",
+    "output/depth_opacity_repair_20260918/figurines/geometry_report.json": "cdb200ea9afade03e1fa349605a8ed224f6f38c49b24e677a94c659b7285a8b8",
+    "output/depth_opacity_pipeline_20260918/figurines/execution.json": "a2df7e681a52d1aef128b8fc08b3a4f98cdfeb0039fedbdea2b1817c8c7aacf3",
+    "output/depth_opacity_pipeline_20260918/figurines/reconstruction/field/counterfactual_extent_benefit_admission/field.pt": "d9cca22cd7c4cab8d7e6e11fe363acc5e94804dedd5184c99b450cf35d73d475",
+    "output/depth_opacity_pipeline_20260918/figurines/reconstruction/field/counterfactual_extent_benefit_admission/report.json": "cb6b437035560c929d529606f22d2b3213268fb9dc761f8c10d23ab524a079ca",
+    "output/depth_opacity_pipeline_20260918/figurines/reconstruction/field/responsibility.json": "199e77a316d55b855bfd6417c11e34653517d3bb4d9fc60307a8021cd6ff913b",
+    "output/depth_opacity_pipeline_20260918/figurines/selected_output/report.json": "cd941f2701582583871dd415fb815b9aa7108a0d8c4d1d38c329bc0ba104707c",
+    "output/v2_scope_rebuild_20260918/ramen/text_online.json": "ed5a73a620d90d438c8f8bc14abe35ca64adcbe0c0053aa0ff6c54652d793bc4",
+    "output/depth_opacity_pipeline_20260918/ramen/text_online.json": "2a077dac2d0feb0bb32dcc14b2bf28e7ee8fb260faf97eade6e8821d8556be2f",
+    "output/depth_opacity_pipeline_20260918/ramen/text_replay.json": "2a077dac2d0feb0bb32dcc14b2bf28e7ee8fb260faf97eade6e8821d8556be2f",
+    "output/v2_scope_rebuild_20260918/ramen/reference_online.json": "77a3d136d15fdbf242b817b913b4cfad1e53a7b5469497f20bcc2b0906c32590",
+    "output/depth_opacity_pipeline_20260918/ramen/reference_online.json": "5d7bc34627dc87e7d60cb25f87664310a5e6bb76dfced20362f4d444c452ca15",
+    "output/depth_opacity_pipeline_20260918/ramen/reference_replay.json": "5d7bc34627dc87e7d60cb25f87664310a5e6bb76dfced20362f4d444c452ca15",
+    "output/depth_opacity_repair_20260918/ramen/geometry_report.json": "d8031aa45dc9b8488d37380140fc5718456e56a52b85a1c5cc43ee100453ed3a",
+    "output/depth_opacity_pipeline_20260918/ramen/execution.json": "d8ac5517fff1d2add815df3d402f0dbd5a2ad0b6ede5353525cdff7b47229617",
+    "output/depth_opacity_pipeline_20260918/ramen/reconstruction/field/counterfactual_extent_benefit_admission/field.pt": "f4ef84dfdbd96bd99f0b50081bed748d6bfb200c6587636a74609505a231cb9f",
+    "output/depth_opacity_pipeline_20260918/ramen/reconstruction/field/counterfactual_extent_benefit_admission/report.json": "ade4a8e7e5fc0ea6c4ee44263c64878c37968383cf2665725dc61513b2e26f4a",
+    "output/depth_opacity_pipeline_20260918/ramen/reconstruction/field/responsibility.json": "a55c567d0ca8b45c8dbc0fcec9147536519817e8c87347bb7093e6222d63566c",
+    "output/depth_opacity_pipeline_20260918/ramen/selected_output/report.json": "6583769c4f549e405431fb410b5eccffcf538d3c49824d375c413354c5bea3c5"
+  }
+}

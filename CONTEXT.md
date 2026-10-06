@@ -1,90 +1,738 @@
-# RADIO-GS
+# RADIO-GS — active system context
 
-The [partitioned scope supervision audit](docs/experiments/2026-09-18-partitioned-scope-supervision-validation.md) completes fourfold correspondence-isolated source validation. Full-cohort fusion IoU is38.97/51.72; strict/bridged selection and local abstention have no shared gain. Fixed group-fold oracle reaches only41.91/53.97, so current scope hypotheses remain limiting. Zero-training-support misses (8/4) are restored to the denominator. Source COLMAP tracks expose cached-label conflicts independent of MoGe/Gaussian projection, but figurines has only3 distinct positive tracks. Coarse-only native-mask dedup is fixed for new v2 caches; bounded same-weight replay removes53/8 identity substitutions, yet their minimum native IoU is98.80/99.25%, so this is not demonstrated as the main bottleneck. Existing full caches/models remain unchanged; fifteen tests pass and controls/replays finish, sealed in `paper/artifacts/partitioned_scope_controls_20260918.json`. Retained final development text IoU remains46.20/32.97; no new retrieval gain or independent-test claim.
+Updated2026-10-06. Sole development default: `configs/pipeline/system_v10.json`.
+Common entry: `python -m radio_gs.pipeline.cohort`; its default is also v10.
+v9 remains a numerically unchanged comparator, with default metadata disabled.
+Latest research and promoted-system report:
+`docs/experiments/2026-10-06-query-conditioned-membership-and-system-convergence.md`.
 
-The [scope conflict and decoder precision audit](docs/experiments/2026-09-18-scope-conflicts-and-decoder-precision.md) traces59.32/67.40 percent of source false-positive response mass to conflicting strong views, versus10.98/9.61 percent to weak-view conflicts. One-pixel core tests retain37.61/49.67 percent internal conflicts; three-pixel erosion destroys many small96x128 scopes and cannot establish boundary causality. Depth-consistent mutually visible pairs still show15.54/9.33 percent containment-pattern mismatches, not verified physical part labels. Source-selected concept bias0.2 plus freshly refit admission improves ramen text IoU32.97→34.77 but regresses figurines46.20→45.56; reject shared replacement, retain previous candidate. Native state and image/prompt observations remain exact. Fourteen focused tests, complete real evaluations and cold checks finish; evidence is sealed in `paper/artifacts/scope_conflict_repair_20260917.json`.
+Latest phase complete:3 fixed fits, exact independent calibration and31 freshly
+executed common jobs. No jobs pending. v10 converges the previously supported
+image member component; it does not deploy the failed new query-trained heads.
+UQIS actual setIoU text/image/2Dpoint/3Dpoint (%):
+16.3865/39.8980/49.7357/49.0470. Image versus v9 gains5.0218pp, paired scene95%
+CI[2.4038,7.7406],7/9 rooms improve. Image AP44.0336->59.3088%, purity60.00->57.17%,
+coverage42.89->55.27%. Four-query success remains7/67: gains scene0030 target22,
+loses scene0435 target35. No per-query fallback. All native outputs and every
+text/actual-point rank and set remain exact; image outputs exactly reproduce the
+previous image component. This is component convergence from opened development
+evidence, not a new independent gain. Image/2D/3D now share the existing real
+member model; text keeps its prior physical scope. Estimated image identity is
+still uncertain; joint identity/member uncertainty is not claimed solved.
+Fresh public replay: LERF70.400676/66.963274%; NVOS86.513417%;
+ScanNet19/15/10=61.011491/62.527589/72.486061%. Public job inputs unchanged.
+LERF selected projection differs from v9 by-0.001654pp; unassigned replay
+difference, not an improvement or exact-retention claim.
+Complete replay/comparison:
+`output/query_conditioned_membership_20261006/image_convergence/{system/summary,comparison}.json`.
 
-The [scope-stage localization and union repair](docs/experiments/2026-09-17-scope-stage-localization-and-union-repair.md) measures matched source-query loss across 2D scopes, projection, fusion and decoding. Conditional candidate IoU98.35/99.47 falls to same-view cycle85.49/93.39 and leave-view-out33.54/44.83. Pixel-union-before-lifting fixes a real noncommutativity defect in current initialization/lifted supervision; its macro effect is small. Actual contribution weighting raises uncompressed leave-view-out IoU40.26/51.93, but matched frozen-feature final-layer refits fail source acceptance and are rejected. This is teacher pseudo-mask diagnosis, not physical-identity truth or a final retrieval gain. Both repaired initializations execute,16 focused tests pass, and retained complete fields remain unchanged. Evidence: `paper/artifacts/scope_stage_repair_20260917.json`.
+Research closure:1377 independent NR3D references,2,578,504 training samples.
+Estimated anchors:263 on target,980 on other labelled objects,134 unlabelled;
+unlabelled vertices never become training negatives. Actual query target labels
+replace the assumed positive-anchor target. Same capacity, same22/3/4 rooms.
+Four reused development rooms,175 queries, exact calibration: old bridge7.0088%,
+supervision-only6.4847%, plus query evidence6.8550%, fully anchor-free6.6060%.
+Exact calibration uses every score breakpoint, eliminating the inherited0.05
+grid boundary; final cuts .095868/.137625/.064491, conclusions unchanged.
+Query-mean interventions reduce the latter two models to1.9121/2.2848%: query
+evidence matters, but does not resolve identity. On correct-anchor subsets the
+old conditional member decoder48.37% falls to29.53/21.64%; wrong-anchor subsets
+improve1.99->4.22/5.00%. Mixing uncertain identity into one local member learner
+damages existing conditional competence. These statistics concern this scalar
+evidence/tree implementation, not all possible query-conditioned learning.
+Do not resume its feature/capacity/threshold scans. Preserve conditional member
+decoding; concentrate next on independent target/attribute/relation identity
+evidence and competition among physical instance/scope hypotheses. A field of
+full-sentence cosine scores is not itself resolved reference identity.
+Research results: `output/query_conditioned_membership_20261006/comparison.json`.
+Default supervision remains the existing independent3D labels only; new NR3D
+member supervision is not deployed. SOTA, compactness, independent final testing
+and unified high four-query accuracy remain unproven.
 
-The [scope fusion controls and selection ceiling](docs/experiments/2026-09-17-scope-fusion-controls-and-selection-ceiling.md) reject caption-augmented fusion, fixed robust cross-view aggregation, a depth-two admission tree, and semantic-compatibility admission as shared replacements. The last improves source validation but changes real text IoU46.20→45.93 on figurines and leaves ramen32.97 unchanged; image/prompt and all parent tensors remain exact. Retain `counterfactual_extent_benefit_admission`. GT-only fixed-query selection between the current native and extent outputs reaches only48.67/36.69 versus retained46.20/32.97: this is a nondeployable binary-choice ceiling, not a bound on new candidates or local fusion. Prioritize correct cross-view candidate extents over further global gate tuning. Fourteen focused tests, complete real evaluations and cache-denied cold checks finish; evidence is sealed in `paper/artifacts/scope_fusion_controls_20260917.json`.
+Previous typed report: `docs/experiments/2026-10-06-typed-identity-and-inferred-membership.md`.
+Typed identity/scope follow-up completed:3 fixed12-epoch fits,49 scene jobs
+(31 common primary plus18 UQIS controls),804 UQIS query executions, and one
+175-query external-development anchor repair. No default promotion or pending jobs.
+Independent semantic and relational parameters remove the old shared-gradient
+coupling, but frozen parameters do not protect final identity decisions. Four
+development rooms: semantic9.347%, frozen relation10.704%, joint11.346%; the
+relation gate fails. A fixed-identity bridge to the existing v9 member model
+improves semantic9.347->13.636%, passing its declared development gate.
+Full UQIS factorial comparison, actual setIoU text/image (%): v9 16.3865/34.8762;
+lexical-only15.7051/34.8762; lexical+membership18.1561/39.8980;
+native+membership20.0983/39.8980. Gains come from membership, not the new text head.
+Native+membership text delta3.7118pp has sceneCI[-0.3818,8.0829]; image5.0218pp
+has[2.4038,7.7406]. All-four success7->10/67 for this attribution control.
+The nominated lexical+membership primary fails its text promotion gate; the
+native control also has uncertain text generalization and is not a new default.
+All original native and actual-point arrays/sets remain exact in all3 conditions.
+Fresh public22 replay: LERF70.400676/66.962744%; NVOS86.513417%; ScanNet unchanged.
+LERF selected projection differs from prior by-0.002183pp; cause not independently
+established, so public exact-retention check fails too. No SOTA equivalence claimed.
+UQIS diagnostics: text20/67 correct-majority seeds and24/67 correct estimated
+anchors, image42/67 and44/67. The largest text loss guesses the wrong anchor
+inside a mostly correct region; other correct-anchor losses involve missing
+extent or false additions. One query-supported anchor candidate gives only
+7.0088->7.0226% on four external development rooms, fails gate, no UQIS expansion.
+Next core issue: estimated identity is not a guaranteed positive prompt. Keep
+the query and its identity uncertainty through complete-carrier membership;
+do not replace instance referring supervision with same-class recognition,
+or resume point-selection/threshold sweeps. New lexical/relation heads remain
+research controls; public typed readers and sole default v9 remain unchanged.
+Results: `output/typed_referent_binding_20261006/comparison.json` and
+`identity_diagnosis.json`; recipe `configs/recipes/typed_referent_binding.json`.
 
-The [granularity and extent-benefit follow-up](docs/experiments/2026-09-17-granularity-and-extent-benefit-admission.md) completes two source-only admission controls and an area-stratified fusion diagnostic. Actual routed source queries contain almost no parent/part errors; adding co-observed nearest-concept counterfactual extents supplies missing incompatible-range examples. A query-level gate learned from actual rendered IoU benefit raises figurines full-text observation IoU/AP44.35/62.58→46.20/66.80; ramen remains32.97/49.75. All image/prompt observations and all parent field tensors remain exact. This is an explicit development candidate, not a default rewrite or independent test. Area-octave fusion fails source AP acceptance and is rejected. Thirteen focused tests, real queries and cache-denied cold loading pass; source phrase holdout applies to admission fitting only. Evidence: `paper/artifacts/extent_benefit_controls_20260917.json`.
+Previous native phrase report: `docs/experiments/2026-10-06-native-phrase-identity-and-relational-competition.md`.
+Native phrase follow-up completed: one role extractor and four fixed retrieval
+fits across two bounded rounds. No benchmark execution or default change.
+Query-only predicted spans are independently pooled by frozen SigLIP; native
+phrase recognition is not relearned through contextual-token projection. All
+candidate landmark positions participate in spatial relation marginalization.
+Four repeatedly opened independent-training-domain development rooms: native
+full query6.325%, predicted target phrase8.659%, prior local9.786%, new uniform
+control10.508%, native spatial witnesses11.110% actual set IoU. Gain over prior
+local1.324pp has scene interval[-2.137,4.616]pp; no stable promotion established.
+Uniform-witness intervention10.813% gives only0.297pp conditional spatial gain.
+Correct annotated roles/landmarks only reach11.406% on the same frozen head;
+this privileged intervention is neither an automatic score nor a system ceiling.
+Second matched round directly supervises relation discrimination among same-class
+instances in1113 training descriptions. Native/uniform10.305/9.359%; conditional
+spatial effect0.919pp, but total worse than round1, so this gate also fails.
+All175 development queries retained: wrong official-class seed identities fall
+111->57 using native target phrases, but same-class wrong identities21->57.
+Joint ranking recovers some referents yet raises wrong-class choices57->69;
+stronger relation supervision raises them to75. Preserve semantic identity
+decisions while learning relation-based instance reordering; do not resume loss,
+temperature or benchmark threshold scans. These text candidates are not in v9.
+Results: `output/native_phrase_binding_20261006/final_comparison.json`.
+The following records the previous v9 promotion and its five-task validation.
+Comparison: `output/real_direct_membership_20261006/comparison.json`.
+Complete valid31-task collection: `output/real_direct_membership_20261006/final_validation.json`.
+All work in this phase completed:4 fixed fits,58 executed scene jobs including18
+UQIS reruns after isolating an auxiliary-array mutation. Valid conditions are31
+real-training common jobs and9 rendered-training controls;536 retained UQIS
+queries,1072 including invalidated executions. No pending jobs.
 
-The [pixel-evidence fusion control](docs/experiments/2026-09-17-pixel-evidence-fusion-and-extent.md) now completes matched full readout rebuilding and all real query evaluations. Conditional region membership had discarded view observation mass and counted overlapping masks repeatedly. Splitting each covered source pixel's unit evidence among proposals and lifting actual contributions improves full-text observation IoU37.92/31.62→44.35/32.97 and image38.49/26.23→49.95/29.77 on figurines/ramen, with every prompt observation exact. Geometry, source views, native64 basis and structural32 remain unchanged; dependent heads are refit. Ramen image AP regresses58.47→56.69, so this is a development candidate with a tradeoff. Applying native-cutoff calibration to all accepted extents recovers figurines ranking but regresses IoU in both scenes and is rejected as a shared replacement. Reports explicitly separate observation and category aggregation. Nine focused tests pass; identities and controls are sealed in `paper/artifacts/pixel_evidence_rebuild_comparison_20260917.json` and `pixel_evidence_extent_control_seal_20260917.json`.
+The retained mechanism is direct actual-anchor complete-carrier membership.
+A single classifier consumes exact per-view nested-mask co-membership, ambiguity,
+visibility, displacement and native appearance; no seed mask is assumed pure.
+Additional official3D instance supervision comes from22 independent rooms;
+real registered observations replace12-view synthetic training. Same anchors,
+labels,1,415,632 vertex samples and learner in both domains. Global threshold.35
+selected only on3 calibration rooms. Four separate real development rooms:
+native32.399%, rendered learner37.480%, real learner41.498% actual IoU.
+No benchmark source views, geometry, teachers or evaluation contracts changed.
 
-All scheduled clean-source rebuilds and bounded controls are complete and verified in `paper/artifacts/clean_repair_round_seal_20260917.json`. This seals execution, not full research acceptance. Clean OpenCLIP replacement now runs the complete field/readout/query pipeline on both scenes, but regresses text/image and is not promoted. Clean explicit/MLP/hash/MoGe structural controls and fixed unified extent controls are rejected. Physical identity, dense geometry truth, shared open-vocabulary extent, all signed constraints and same-complete-method ScanNet/independent test remain unpassed.
+UQIS9/67targets/268queries, actual IoU text/image/2Dpoint/3Dpoint (%):
+v8 16.3865/34.8762/42.0902/41.5238;
+v9 16.3865/34.8762/49.7357/49.0470.
+Point AP52.7449/52.3589->75.7901/75.3253%.
+Point IoU deltas+7.6455/+7.5232pp, scene95% CI[3.6305,11.0551]/[3.1609,11.3009].
+Real versus same rendered learner+9.6183/+9.6180pp, both9/9 scenes improve.
+Therefore deployment-domain training evidence matters; head complexity alone
+is not the demonstrated contribution. Rendered learner degrades v8 set IoU.
+Scene0030 still loses3.181/4.332pp versus v8; no per-query fallback.
+All-four success remains the same7/67 targets. Text/image ranking and sets,
+and all four native prediction arrays, are bit-exact. Point purity falls about9pp
+while coverage rises about18pp; actual set IoU nevertheless improves.
+New shared classifier2.629MiB; native maps unchanged, still not compact students.
 
-The source-pose-coverage rebuild now completes both LERF scenes, with16 mapping-only training views and fully rebuilt fields/readouts. Under the same scoped image residual, reference image IoU/AP improves33.58/53.08→38.49/61.41 (figurines) and21.36/52.86→26.23/58.47 (ramen). Full text becomes37.92/61.47 and31.62/49.31; prompt becomes46.56/64.39 and32.94/49.20, so ramen prompt regresses and joint promotion is not established. New views help previously weak poses but can damage old-view native fusion; more inputs do not resolve evidence aggregation. Mapping split isolation is enforced; the first rejected source plans remain archived. Removing untrained structural channel-scale weighting has no shared retrieval gain in four clean controls. NVOS fortress matched corrected-query base signed improves89.10→93.86. All eight NVOS tasks now finish: fixed-branch signed IoU/AP is78.26/90.38 (base) and81.36/91.35 (image residual); most gain comes from horns_left, ordinary image regresses, and several reference signed constraints remain unmet. See the clean rebuild report for development-only boundaries.
+Other four public-task replays (%): LERF semantic70.400676,
+selected-Gaussian2D projection66.964928; NVOS retained positive-reference86.513417;
+ScanNet19/15/10=61.011491/62.527589/72.486061. Public readers unchanged.
+Valid final collection reuses this phase's22 public predictions alongside9 fully
+regenerated UQIS jobs. Every execution predicted before scoring; the collection
+is explicitly a split execution, not a new31-job simultaneous first evaluation.
+SOTA equivalence, independent3D LERF GT and independent UQIS final testing remain open.
 
-The [clean-source native capability repair](docs/experiments/2026-09-17-clean-teacher-rebuild-results.md) now completes both LERF multiscale rebuilds and bounded controls. A source-text/image-supervised global native residual, applied to **image queries only**, improves reference image IoU/AP from25.55/45.91 to33.58/53.08 percent (figurines) and12.00/37.57 to21.36/52.86 (ramen); every text/prompt observation and retained field tensor is exact. Full-text IoU/AP remains37.64/60.46 and28.48/47.21. Shared text/image correction and shared view-balanced reconstruction fail joint acceptance. Source precision calibration fixes a cold concept-gate discontinuity without changing real-query scores. The protected base field's text/image membership terms update calibration only, not element coordinates; actual image learning is explicitly in the new residual. This is a scoped development candidate with corrected SAM inputs, not independent test or complete ScanNet/NVOS acceptance. Its verified fields and evidence are sealed in `paper/artifacts/clean_lerf_native_repair_seal_20260917.json`.
+Failed text branch: explicit ScanEnts3D phrase-to-instance supervision added on
+same22 rooms (3426 eligible mention labels). Matched scene model development
+IoU6.786->8.893%, still below previous local9.786%; query-mean correction9.187%
+and uniform scene witnesses9.409% outperform the learned conditional witnesses.
+Fails declared gate: no new text benchmark run, no mixing this head into v9.
+Privileged correct-phrase diagnostic: frozen phrase recognition45.020% versus
+learned mention20.381%; projecting arbitrary contextual tokens through the
+frozen pooled-output head gives9.146%. These use annotated phrase boundaries
+for diagnosis, never deployed inputs. A token state is not a native text query.
+Source: https://scanents3d.github.io/dataset.html . New external phrase labels
+are additional independent training supervision, not automatic teacher truth.
 
-A newly confirmed [SAM3 complex-RoPE casting defect](docs/experiments/2026-09-17-sam3-complex-rope-pipeline-fix.md) invalidates treating legacy point-only SAM outputs as faithful teacher inference. `to(dtype=...)` discarded the imaginary rotary phase, including the old FP32 point-only reference-query path. Float/bfloat16-only casts now preserve complex buffers; automatic-cache contracts bind the corrected loader. Matched same-weight source inference has only 40.08% corresponding-mask IoU between corrupted and corrected phases, with exact corrected repeatability. Old scores remain recorded development evidence, not clean-teacher architecture acceptance; corrected source and query pipelines have been rebuilt; execution receipts distinguish subsequent bounded controls. Non-point-only FP32 text grounding is a separate, unaffected path.
+The earlier priority was to preserve genuine native phrase recognition while
+binding target and landmark identities. The typed follow-up above supersedes
+that plan: scope reuse helps, but estimated identity remains uncertain.
+Do not resume local loss/attention/batch/threshold sweeps, use annotated phrase
+boundaries at benchmark inference, or claim all-query/high-accuracy completion.
+UQIS2Dpoint remains pixel+camera only, no sourceRGB/depth/SAM;3Dpoint worldcoord;
+image only its own crop; text full expression; no cross-query target pairing.
+Category partitions/sets and reference instances retain distinct typed readers.
 
-The [NVOS scale admission and local geometry audit](docs/experiments/2026-09-17-nvos-independent-scale-admission.md) identifies a failing scene-wide ±20% scale assumption. Independently admitted per-view scales recover fortress (41/41 views). Fixed bounded local corrections admit fern 19/19, trex 34/54, horns 15/61, orchids 6/24, leaves 3/25 and flower 0/33; low-coverage and failed scenes remain explicit. On the same fern fusion-heldout sparse observations, coverage changes 94.84→96.18% and depth p90 23.69→5.23%; dense truth and final retrieval remain separate gates. The [complete fortress/fern rebuild](docs/experiments/2026-09-17-nvos-geometry-rebuild-and-real-retrieval.md) now finishes real query evaluation: fern base image IoU 67.67→71.03 and image residual 66.55→72.66; fortress base image/signed 80.12/85.91. Cold native encoding and support-retention checks execute; FP16 encoder batch numerics are reported separately, not claimed bit-identical. A separately bounded 2.0 local-scale control recovers flower 33/33 and orchids 24/24 views, but those candidates have no new final retrieval scores. Source-region prompt validity is now explicit: missing signed seeds cannot crash the scene or become fabricated prompts; missing positive geometry cannot become an all-negative image task. See execution receipts, not stale scores, for completion.
+Previous query-supervision phase: `docs/experiments/2026-10-05-query-specific-supervision-and-transfer.md`;
+6fits/67jobs/1340queries completed, no promotion. Original local correction was
+98.43% query-common; named eligibility gain+.816pp uncertain. Bidirectional,
+same-class and posterior-normalized variants rejected. No further scans.
 
-The [joint native supervision control](docs/experiments/2026-09-17-joint-native-supervision-and-extent-handoff.md) improves native-fallback text IoU from 33.60/8.20 to 35.32/22.72 on figurines/ramen, but the complete readout still fails joint acceptance, including after source-only recalibration. Keep the prior complete text model and image-only candidate. Actual MoGe encoder/refiner structural training with matched cosine loss also regresses registered-prompt retrieval; bounded direct-feature distillation is rejected, rather than left as an unexecuted extraction-only idea.
+Previous completed phase: real-observation grounding and identity/scope supervision.
+Report: `docs/experiments/2026-10-05-real-observation-grounding-and-identity-supervision.md`.
+Results: `output/real_referent_grounding_20261005/comparison.json`.
+All29 independent rooms rebuilt with the deployed real RGB-D observation compiler:
+2643 stride20 frames,97532 regions, no total frame/proposal cap. Same22/3/4
+fit/calibration/development split; all1592 listener-correct training descriptions
+now have positive support. Fit target-majority candidates175/246->243/246;
+finite-family label-selected diagnostic IoU34.81->56.93%, NOT automatic accuracy.
+Extra NR3D and official3D supervision remain explicitly declared.
 
-The [NVOS source-support investigation](docs/experiments/2026-09-17-nvos-native-field-and-signed-query.md) identifies source raster undersampling as a real semantic coverage loss on fern. At identical frozen geometry, rebuilding source contributions at 384×512 and measuring native source tiles on previously unsupported rows raises target foreground support from 90.96% to 98.00%, and base image IoU/AP from 67.67/83.78 to 70.58/87.85. Signed reference-image conditioning reaches 71.78 IoU (71.94 with the image residual). Existing rows and text/prompt validity domains remain unchanged; image rendering requires its own support denominator. This is a single-scene development control, not full NVOS or complete-method joint promotion.
+Three fixed12-epoch fits,49 fresh scene jobs,804 UQIS queries all complete.
+UQIS text actual IoU: v8 16.3865%, local_scope20.2121%, scene_scope17.0300%,
+scene_identity8.2291%. Local four-query success7->11/67, but four rooms decline
+and95% scene delta interval[-.3323,8.0292]pp crosses zero. No runtime promotion.
+Independent real-room IoU6.3250->9.7857/9.1587/8.7238%; still near zero in some
+rooms. Attention gives no reliable advantage; purity-only supervision rejected.
+Local seed dominant identity count stays23/67:5 corrected,5 damaged. Stable
+correct identities contribute another+2.0531pp through better range choices.
+Frozen native coordinates do not guarantee safe downstream identity decisions.
+All native semantic and image/point prediction arrays and sets remain exact.
 
-The [native image retrieval residual](docs/experiments/2026-09-17-native-image-retrieval-residual.md) is a new development candidate on the retained complete field. A bounded global native-space decoder residual trained through actual sigmoid-before-raster source image retrieval improves reference image IoU/AP from 33.12/54.52 to 39.41/57.66 in figurines and 13.81/34.21 to 19.91/47.68 in ramen. Sharing that image-supervised correction with text regresses text. The explicit image-only candidate therefore retains original text/prompt paths; cold evaluation matches their observations exactly. No per-element state, geometry or original parameter changes. Architecture selection was development-informed; this is not independent test or joint benchmark promotion. Region-mean feature fitting and recalibration controls do not achieve the same shared gain.
+Full31-job candidate is scene_identity, not the local_scope nine-room control;
+do not combine their best scores into a new unified method. Public replay:
+LERF semantic70.4007/selected-projection66.9633%, NVOS positive-reference86.5134%,
+ScanNet19/15/10 61.0115/62.5276/72.4861%. Retained development results, not SOTA
+or independent3D validation. Native maps stay high-capacity; compact student and
+independent final testing remain open. All current jobs ended successfully.
+Next: transferable instance identity and complete membership, with corrected vs
+newly damaged native decisions measured separately. No attention/purity weight
+search. Training observation repair is complete; prior two-room-only status below
+is historical. Previous phase report:
+`docs/experiments/2026-10-05-referent-learning-and-observation-domain.md`.
 
-The [system controls and structural retention report](docs/experiments/2026-09-17-system-controls-and-structural-retention.md) completes the scope-consistent full reconstruction and bounded explicit/MLP/hash/MoGe/feature-assisted-geometry controls. None supersedes the complete control jointly. An affine-depth normal transport bug is fixed with separate geometry rebuilds; it is not the main observed score deficit. Actual MoGe intermediate extraction and OpenCLIP base-field replacement run, but do not establish independent teacher superiority. See the checklist execution records for unresolved acceptance gates, rather than interpreting executed rejected controls as a completed architecture.
+Previous completed phase: isolate referent identity before changing scope.
+Report: `docs/experiments/2026-10-05-native-context-and-identity-bottleneck.md`;
+results: `output/identity_bottleneck_20261005/comparison.json`.
+All27 scene jobs/804 UQIS queries complete. No public-task replay this phase.
 
-The [bounded image extent trial](docs/experiments/2026-09-17-bounded-image-extent-and-calibration.md) connects image queries to the existing structural extent bank with a bounded native-logit correction, selected on source validation. Reference-image IoU/AP changes 33.12/54.52→35.41/55.63 in figurines and 13.81/34.21→13.56/34.45 in ramen; text/prompt observations and every parent tensor remain exact. It is an opt-in candidate with mixed outcomes, not a promoted joint baseline. A source-fitted image-query threshold regressor is rejected. All reference-query projection ceilings exceed the original cutoff, ruling out universally unattainable thresholds; nori nevertheless has only seven above-threshold elements despite high image AP. Scope selection and calibration generalization remain open. Thirty-five related tests pass; no new field training or geometry changes occurred.
+Post-prediction label intervention, NOT an automatic result: keep native seed
+order but remove non-target-majority regions. Text actual IoU16.3865->41.0613%,
+image34.8762->41.6638%, unchanged scope decoder. Best target-majority input
+region gives50.9328%; original finite one-hop family oracle52.9952%.
+Text top10 contains a target-majority region for only35/67 targets; all67 have
+one somewhere. No short top-k reranker can reach every target on these features.
 
-The [source scope and correspondence control](docs/experiments/2026-09-16-source-scope-and-correspondence-consistency.md) rejects uniform fine/coarse mask assignment as a native-retrieval replacement. Current training correspondence graphs contain 12/68 same-view nonduplicate scope pairs, including 10 disjoint pairs in ramen. An opt-in compiler control permits near-duplicate proposals but blocks inconsistent same-view scopes across merged tracks, retains 64/73 and 199/230 edges, and rebuilds both scene episode bundles. This is source-supervision consistency, not verified physical identity or a retrieval improvement. Older strict correspondence admission already existed and previously regressed; it was not enabled in the retained training lineage. New full training, episode-dependent grounding/initialization rebuild and real-query acceptance remain pending. Mainline is unchanged; 41 related tests pass.
+Two complete automatic information controls retain all1107 source frames and
+39360 masks, native coordinates and geometry. Unmasked tight-crop text identity
+IoU8.8611%; original object +1.5x context equal-rank identity14.9309%, versus
+v8's16.3865%. Image/point outputs remain bit-identical. Neither promoted;
+do not tune context expansion/fusion weights or call background masking a bug.
+Added offline channels230.627MiB, no new training or source access at query.
 
-The [local geometry repair and native-field rebuild](docs/experiments/2026-09-16-local-geometry-calibration-and-native-rebuild.md) implements bounded spatial/depth-aware source-track calibration and consistent normal warping. On ramen points excluded from every new fit and views excluded from surface fusion, depth AbsRel median/p90 improves 5.82/10.91→3.12/6.15 percent at unchanged 99.90 percent coverage. Existing calibration/reference dependence still limits independence. Figurines loses coverage. Fresh contribution authorities and native64 fusion were built for both geometries: native-path text IoU/AP changes 8.20/30.97→11.76/31.82 in ramen and 33.60/58.48→31.45/56.89 in figurines. These are diagnostic native paths, not complete-method gains. Hard/soft source-consensus cleanup and removing recovered-scale sources are rejected. Complete mainline remains unchanged; 31 related tests pass. G2/G3 remain partial; reliable scope/granularity supervision is still required.
+An evaluator-category oracle improves category-majority seeds33->45/67 but
+target-majority seeds20->19/67. Category recognition is not referring identity.
+Next: explicit natural referring-expression/scene-conditioned instance binding,
+with native semantics retained and full membership a separate supervised task.
+NR3D exists for22/3/4 of the independent fit/calibration/development rooms
+(1728/207/175 records); instance-ID alignment and grounding training NOT done.
+No new accuracy gain, independent final test, compact student or SOTA claim.
 
-The [first next-stage geometry execution](docs/experiments/2026-09-16-geometry-distribution-and-expanded-track-audit.md) expands validation beyond the sparse semantic-source track overlap. On fusion-heldout views with majority observed semantic support, Gaussian depth AbsRel median/p90 is 3.13/29.56 percent in figurines (262 observations, 239 points) and 5.73/10.35 percent in ramen (4816 observations, 4166 points). Reference tracks remain sparse and old calibration is not independently held out. Maximum-parallax filtering does not remove the tails. Discrete contribution and native-sampling controls do not explain away transport error. New source reprojection scale fitting improves over median-ratio fitting but worsens matched old-MoGe tail/mean; it is rejected. Geometry and retrieval checkpoints are unchanged; no new final retrieval scores. G1/G2 remain open.
+Previous phase: instance evidence reliability, deployment-domain
+calibration and explicit ranking/set readout. Report:
+`docs/experiments/2026-10-05-evidence-domain-and-instance-reliability.md`.
+84 fresh scene jobs: two full31-job systems and22 public ownership controls;
+24 affected subset fits refreshed after active-view budget correction. All complete.
+No unit tests, new teachers, geometry updates or benchmark protocol changes.
 
-Next-stage work is tracked in the [repair and architecture checklist](docs/experiments/2026-09-16-next-stage-repair-checklist.md), accepted for planning by the user on 2026-09-16. Priorities are geometric transport, identity/granularity-consistent supervision, and native-semantic-preserving extent readout. Functional teacher substitution, explicit/hash structural residuals, and MoGe geometry-feature distillation are bounded controls, not adopted implementations. Feature-assisted geometry has an explicit bounded ADR 0008 preprocessing exception and a completed rejected control; semantic field training remains geometry-frozen. The checklist does not promote a new checkpoint or report new scores.
+Concrete fixes: ignore unlabelled vertices only in training, not deployment-domain
+calibration; threshold remains .25 (old labelled-domain calibration IoU19.5752%,
+complete domain18.1841%). Surface readout now defaults to unary ranks plus explicit
+MAP sets. Legacy conditional-score controls are explicit; no historical score
+splicing. All268 local-condition sets exactly match the previous learned surface
+condition; AP recovers to26.5959/44.0336/62.7097/62.5198% across four modalities.
+This is a score-contract repair, not new identity information or new point IoU.
 
-RADIO-GS reconstructs a query-independent compact Gaussian scene field for reusable scene understanding. The historical canonical field reconstructs RADIO features; the current retrieval-field candidate uses optional foundation-model teachers and does not require RADIO. This glossary defines the small set of domain terms that active method and benchmark work should share.
+Completeness-discounted exclusions give UQIS actual IoU16.8277/35.1907/45.7644/
+44.6299%; text/image gain only+.2141/+.2150pp over the same surface condition,
+all-four success still7/67. Not promoted. Local/minimum-complement source weights
+degrade ScanNet19 to60.5774%, and matched mass still60.4746%. Positive ownership
+alone retains61.0328/62.5663/72.5466%, LERF70.4416/66.9347%, NVOS86.5134%:
+approximately v8, no major gain. The source readers share a new instance-reliability
+function, but confidence is not calibrated identity/purity/completeness.
+NVOS supplementary actual-set projection: v8 85.2248%, candidates85.2268%; the
+headline86.5134% remains unchanged. No independent3D or SOTA claim.
 
-The [source-track correspondence audit](docs/experiments/2026-09-16-source-track-correspondence-and-scale.md) revisits the assumption that geometric transport is settled. On 674 strict source-only ramen COLMAP points (1,684 directed pairs), Gaussian contribution-centroid reprojection median/p90 is 2.45/6.28 pixels on the 128-wide grid, versus 0.39/0.74 for a snapped-ray true-depth control. This diagnostic includes carrier/pixel mixing and is not exact distribution transport or final IoU. Native teacher masks also conflict on 261/2,760 positive shared track-concept pairs. Figurines has too few strict shared points for general conclusions. A new source-only scale fit, globally point-held-out, improves median but worsens matched MoGe p90/mean and is rejected. Mainline and geometry remain unchanged; inspect full contribution transport and depth-edge/tail failures before further semantic loss tuning.
+Study `output/evidence_convergence_20261005/comparison.json`; declaration
+`configs/recipes/evidence_convergence.json`. Latest full candidate is `partial_recipe.json`
+under that output root; default and retained-v8 validation unchanged. Stop scalar
+confidence/complement/graph searches. Next ONE mechanism: native-space query
+identity jointly with complete membership, retaining alternatives before hard
+seed selection, with actual text/image conditions and reliable correspondence
+beyond one-hop support. Point-only supervision does not establish unified training.
 
-The [partial-negative supervision controls](docs/experiments/2026-09-16-partial-negative-supervision-controls.md) test abstention on conflicting source observations in both lifted-3D and actual rendered-pixel supervision. All four candidates are rejected. Rendered abstention improves over its matched continuation by only 0.13/0.04 text IoU points, and remains below the retained figurines mainline (40.80 versus 43.52; ramen 28.61 versus 28.42). Detectable conflicting negatives are only a subset of possible teacher errors; agreement does not prove complete scope. Native/query/routing state and independent region responses remain exact. Stop tuning these abstention controls; source scope completeness and correspondence require direct evidence.
+Previous phase: local boundary evidence and shared whole-instance set
+optimization. Report: `docs/experiments/2026-10-05-surface-consistent-instance-selection.md`.
+40 fresh scene jobs (31 common tasks +9 fixed-relation UQIS controls),536 UQIS
+queries; independent calibration and eight previously opened rendered development
+rooms. No new final scenes or protocol changes. Common instance graph is compiled
+offline and used for all four map-only inputs; native/anchor/seed controls bit-exact.
+Public typed readers remain unchanged and freshly validated. No candidate promoted.
 
-The [visibility-weighting and depth-transfer audit](docs/experiments/2026-09-16-visibility-weighting-and-depth-transfer.md) finds that equal-view membership fusion gives tiny rendering contributions a full vote. Contribution weighting improves source cross-view mask IoU from 43.20/43.81 to 46.61/52.73, but matched concept-head refits remain below the retained mainline (42.02/27.88 versus 43.52/28.42 text IoU). Both refits are rejected. On the same calibrated-source-view subset, direct depth mask transfer obtains 42.42/53.57 versus weighted Gaussian 46.41/49.75, with different pixel support; it is a diagnostic using target source depth, not a deployable score or independent geometry proof. Source mask completeness, scope consistency and geometric correspondence remain unresolved.
+Actual UQIS IoU text/image/2Dpoint/3Dpoint (%):
+- v8:16.3865/34.8762/42.0902/41.5238.
+- Same-unary C parent:16.3865/34.8762/43.0747/42.7865.
+- Fixed surface relations + global binary Potts:16.5876/34.7004/45.5480/44.9747.
+- Learned relations + same solver:16.6136/34.9757/45.7644/44.6299.
+Learning edges has no consistent advantage over the fixed relation control.
+The learned solver adds2.6897/1.8434pp over the exact parent point unaries; both
+95% scene intervals exclude zero. Versus v8,3D-point interval still crosses zero,
+scene0203/0700 regress; text/image AP drops. Four-query success stays7/67. Do not
+splice parent C's62.71/62.52 AP into the new cut sets: actual cut AP56.283/55.186.
+New point purity75.54/75.53%,coverage57.74/56.54%; useful false-member removal,
+not reliable complete identity. Candidate graphs +55.76MiB, maps5760.01MiB plus
+shared models; additional24-room instance supervision, not compact or zero-shot.
 
-The [source-stage and cross-view mask audit](docs/experiments/2026-09-16-source-semantic-stages-and-cross-view-masks.md) finds severe source mask transfer loss even without semantic features: same-view cycle IoU 87.88/93.81 versus leave-view-out 43.20/43.81 (figurines/ramen), despite positive support 95.32/96.57. These are teacher pseudo-label diagnostics, not independent geometry accuracy or final test. Source region coverage, teacher scope consistency and geometric correspondence remain confounded. A render-consistent native feature inversion reduces source MSE by about 73/72 percent but worsens real native AP from 58.49/30.97 to 44.68/22.99; it is rejected. The retained complete candidate remains `exact_render_query_threshold96`, unchanged. Repair and validate source cross-view correspondence before further feature reconstruction optimization.
+Domain diagnosis: source masks cover87.75% of target vertices; point candidate
+unions72.54/72.15%, final sets57.74/56.54%. Text/image positive corresponding
+region unions only23.75/47.61%. Final target-dominant instances23/45/58/58 of67.
+Neutral-unary expansion outside the candidate domain was separately completed on
+eight development rooms: learned IoU24.5238->23.0607%, purity39.45->34.59, coverage
+45.19->49.62. Reject this expansion; unknown is not negative, but adjacency alone
+does not establish identity. No benchmark tuning or run of the rejected expansion.
+Stop graph-strength search. Next: identity-conditioned association beyond one-hop
+support, including actual text/image referents, with independently matched evidence.
 
-The [native support union and calibration audit](docs/experiments/2026-09-16-native-support-union-and-calibration-contract.md) rejects unconditional native-IoU-improving candidate unions: the proxy can improve while true object IoU collapses. Precision-preserving unions give mixed results and remain controls. It also fixes source query calibration to use the deployed sigmoid-before-raster order instead of thresholding rendered mean cosine. The correctness-repaired single-candidate checkpoint `exact_render_query_threshold96` obtains text IoU/AP 43.52/62.91 and 28.42/42.81 (figurines/ramen), effectively unchanged; image/prompt observations remain exact. This mismatch was real but small in current measurements. Reliable native support and source object correspondence, rather than more candidate unions, remain the next primary issue.
+This full common run: `output/surface_membership_study/learned_system/summary.json`.
+LERF semantic70.400676/selected projection66.963280%; NVOS86.513417%; ScanNet
+19/15/10=61.011491/62.527589/72.486061%. Public results maintained, not new gains.
+Study `output/surface_membership_study/comparison.json`; declaration
+`configs/recipes/surface_membership.json`. The latest retained-v8 replay is still
+`output/system_v8_membership_closure_20261005/summary.json`. No unit tests added.
 
-The [matched compression and completion repair](docs/experiments/2026-09-16-native-compression-and-ranked-completion.md) reconstructs the current native source fusion before projection: removing 64D compression improves mean AP by only 0.63/0.94 points (figurines/ramen), while the previous structural completion severely damaged jake/waldo ranking. The new `native_within_extent96` text candidate retains the selected membership partition and uses native ordering within each stratum: IoU/AP 43.50/62.93 and 28.42/42.81 versus preceding 43.39/59.77 and 27.76/40.23. Image/prompt observations remain exact. A source-fitted admission threshold and a globally rank-preserving native cutoff are rejected due IoU regressions. Fine-grained native weakness already present before compression and incorrect selected extents remain separate unresolved problems; this is development evidence, not joint benchmark promotion.
+Previous phase: query-conditioned observation/region/element membership.
+Report: `docs/experiments/2026-10-05-query-conditioned-membership-evidence.md`.
+Three complete UQIS candidates plus all public tasks:49 completed scene jobs,
+804 UQIS queries; eight new rendered confirmation rooms,215 instance targets.
+All candidates research-only; v8 stays default. Shared native/anchor/seed controls
+and text/image outputs are bit-exact. No benchmark queries, GT or protocols changed.
 
-The [source scope gate repair](docs/experiments/2026-09-16-source-scope-gate-and-hard-negatives.md) identifies a supervision gap: actual admitted source pairs contain almost no incompatible extents, while arbitrary pair training does not change real query decisions. Source-only nearest compatible/incompatible co-observed mask pairs train a two-feature veto without changing parent field tensors. The new text development candidate `hard_source_scope_gate96` achieves IoU/AP 43.39/59.77 and 27.76/40.23 (figurines/ramen), versus preceding 42.28/57.75 and 26.30/38.15. It rejects bag→table and chopsticks→noodles while preserving valid alias mappings; corn regresses to zero. Image/prompt observations remain exact. This is a development improvement, not independent final-test or joint benchmark promotion; weak native fine-grained ranking and harmful structural completion remain unresolved.
+Concrete method corrections: retain exact anchor co-membership and nested-mask
+ambiguity; train downstream from four-fold room-disjoint upstream predictions;
+condition regional targets on the actual clicked instance, not seed-majority
+identity, and predict seed purity instead of forcing one. In512 fit episodes,
+310 seed masks have target fraction<.8 and216<.5. The corrected regional head
+uses9645 pairs; element models use the same887126 samples on24 independent rooms.
+Additional3D labels remain a separate supervision condition; native coordinates
+and geometry remain frozen. Query permissions stay strictly map-only for UQIS.
 
-The [native identity / extent completion investigation](docs/experiments/2026-09-16-native-identity-extent-completion.md) finds that replacing all extent selection with native mean cosine or native-support overlap is not reliable. Preserving the existing source-accepted concept readout and completing only rejected queries with native-support/extent overlap yields a new development candidate: text IoU 42.28/26.30 versus 36.51/25.10 (figurines/ramen). AP is 57.75/38.15 versus 58.97/37.84, so the previous common baseline remains available and there is no unconditional promotion. All reference image/prompt observations remain identical. Remaining primary failures are false semantic gate acceptance, concept-dependent native support/calibration, and ranking damage from hard structural completion; source-accepted does not mean verified correct.
+Real UQIS point2D/3D AP and actual IoU (%):
+- v8:52.745/52.359 AP;42.090/41.524 IoU.
+- Prior exact-anchor learner:60.557/60.457;38.292/38.150 (rejected).
+- Joint-observation inputs:61.728/61.459;43.468/43.170.
+- Add cross-fitting:62.104/61.774;42.954/42.669.
+- Correct regional query target as well:62.710/62.520;43.075/42.786.
+The last candidate improves7/9 scenes but scene0203 drops~4.26pp and scene0700
+9.03/10.92pp. Its mean gains+.984/+1.263pp have95% scene intervals crossing zero.
+All candidates reduce four-query simultaneous IoU>=.5 success7->6/67. None promoted.
+C raises point coverage to57.41/56.28% but purity falls to70.62/71.97%; only~53%
+of added elements are target members. Stop this statistics-head/threshold search;
+actual added-element identity and spatial boundary evidence remain the bottleneck.
+Do not combine a new AP with an old set IoU as one successful decoder.
 
-The [cross-view selection and historical comparison](docs/experiments/2026-09-16-cross-view-selection-and-historical-comparison.md) implements source-supervised candidate ranking with candidate-origin and episode-target view exclusion. It improves the rejected independent-region text control, but neither that ranker nor the combined concept/region candidate ranker supersedes the retained residual extent candidate jointly. The combined ranker obtains text IoU 35.76/26.50 versus retained 36.51/25.10 (figurines/ramen), with unchanged image/prompt observations. Historical retained LERF3D binary predictions rescored on the current 480-wide GT grid obtain 57.17/30.61; scoring is aligned but source/calibration/rendering contracts are not. Current repair is substantially better than the recent broken version, not proven better than the historical normal performance line.
+New confirmation rooms (fixed next room hashes, rendered RGB, NOT real benchmark
+final test): first4/122 targets geometry17.492%, old head19.418, joint19.639,
+cross-fit19.358. Next4/93 targets geometry16.701, cross-fit20.010, corrected-target
+20.796. The correction beats cross-fit in only2/4 of the latter rooms; do not assign
+all gains over geometry to that correction. Real/matched observation supervision,
+complete scope, relational text identity and compact deployment remain unresolved.
 
-The [routing, extent and region-selection repair](docs/experiments/2026-09-16-routing-extent-and-region-selection.md) retains a source-render-supervised residual extent readout over the unchanged 96D field. Full-text development IoU/AP improves from 35.37/57.34 to 36.51/58.97 in figurines and 23.09/37.24 to 25.10/37.84 in ramen, with exactly unchanged reference image/prompt observations. This is a modest improvement, not a new major breakthrough. Source routing controls and higher-resolution masks do not improve both scenes. Independent region extents preserve greater diagnostic mask capacity, but actual native-similarity selection regresses; they are rejected. GT-selected unrestricted versus concept-restricted region diagnostics localize remaining failures to concept access and within-concept ranking. Those oracle results are not deployable scores, training labels, or joint benchmark evidence.
+Current study: `output/learned_instance_additions/joint_evidence_comparison.json`.
+Full31 common run: `output/learned_instance_additions/element_joint_system/summary.json`;
+other two candidates each rerun UQIS9; unchanged public methods share that current
+control.15 completed same-run predictions retained when remaining jobs moved to
+three free GPUs; no historical answers. Public LERF semantic70.400676%, selected
+projection66.962017% (-.005634pp repeat variation), NVOS86.513417%, ScanNet19/15/10
+61.011491/62.527589/72.486061%. Latest full retained-v8 replay remains
+`output/system_v8_membership_closure_20261005/summary.json` (31 jobs).
+The corrected candidate's complete executable recipe is
+`output/learned_instance_additions/element_query_recipe.json`; it does not read
+comparison outputs at inference. Extra surface arrays2851.435MiB remain research
+assets, not compactness. Previous phase report:
+`docs/experiments/2026-10-05-independent-instance-membership-learning.md`.
 
-The [source-discovered grounded transfer experiment](docs/experiments/2026-09-16-source-discovered-grounded-transfer.md) preserves every parent 96D field tensor and fits a source-only global concept-extent readout with native-query gating and exact fallback. Full-text development IoU improves from 33.63/8.59 to 35.37/23.09 percent (figurines/ramen); AP changes from 58.49/30.97 to 57.34/37.24. Image/prompt observations remain exactly unchanged. This is a scoped text candidate selected through development comparisons, not a universal open-vocabulary solution or joint benchmark promotion. Nearest-prototype semantic routing remains unreliable (e.g. chopsticks to noodles); source-discovered crop fusion alone, structure32 replacement and the MLP alternative are not retained as joint improvements.
+Larger independent whole-instance training inventory (only the stated pilot trained):
+`output/independent_instance_membership/{split,inventory}.json`, all1181 eligible
+official-training scans after excluding19 current evaluation room prefixes and
+their rescans; room-grouped fit945 scans/445 rooms, validation236/111.
+30,295/7,315 per-scan instance annotation entries. Additional3D supervision is a
+separate condition. Real-photo training observations, instance class mapping and
+part labels remain missing. Prior nine-room reliability training
+overlaps the current ScanNet cohort and must not be reused as an unseen split.
+Current v8 enables neither that head nor the new rendered-room learners.
 
-The [source evidence and query-boundary investigation](docs/experiments/2026-09-16-source-evidence-and-query-boundaries.md) rejects query-free-only, view-balanced and dense local crop anchor replacements as joint improvements. A source-only query-conditional text boundary fitted from complete source teacher masks improves full-text IoU from 33.14/4.07 to 33.63/8.59 percent (figurines/ramen), with nearly unchanged AP and exactly unchanged image/prompt responses. This is a limited membership-readout improvement, not recovered fine-grained semantic localization or joint benchmark promotion. The larger ramen gain from partial-label calibration regresses figurines and must not be cherry-picked per scene.
+All31 common-entry jobs freshly completed in `output/system_v8/summary.json`:
+LERF4 dual outputs, NVOS8, ScanNet10, UQIS9. All predictions precede scoring.
+v7 remains the frozen comparator. No historical final answers are runtime inputs.
+Read [implementation](docs/SYSTEM_IMPLEMENTATION.md), [current conclusions](docs/CURRENT_RESEARCH.md),
+[latest report](docs/experiments/2026-10-05-uqis-entity-range.md), and
+[ADR0012](docs/adr/0012-common-observation-architecture-and-query-contracts.md).
 
-The latest [registered structural query repair](docs/experiments/2026-09-16-registered-structural-query-repair.md) replaces the learned prompt adapter with direct signed structural affinity for registered points. On the same development cohort, prompt IoU/AP improves from 21.60/40.28 to 40.71/57.83 in figurines and 21.88/32.92 to 24.77/51.94 in ramen (percent). Every parent tensor and text/image response is preserved. Additional affinity training and automatic native-seed text/image extension are rejected. Complete object extent, semantic seed reliability, and joint benchmark validation remain unresolved; individual objects can regress substantially.
+Latest completed phase: scope correspondence and independent entity priors.
+Four full UQIS conditions completed (36 jobs/1072 independent query executions):
+third-view witnessed majority/union, generic SAM3 object scope, and full cached
+FC-CLIP/Mask-Adapter COCO panoptic scope. None promoted; v8 remains the default.
+Native/anchor/seed controls match v8 exactly; all text/image identity seeds stay
+fixed. Panoptic scope raises 2D-point coverage48.52→51.44% but purity80.06→64.86%,
+reducing actual IoU42.09→38.71%. Image34.88→33.30%; text16.39→16.58% is not a
+reliable gain. No new public-task runs or gains are claimed in this scope study.
+After predictions, label-selected finite candidate diagnosis: old one-hop52.995%
+IoU, third-view union52.485%, panoptic scopes45.758%, joint old/panoptic56.173%.
+24/67 targets gain candidate capacity; label choices are never method inputs.
+Stop these fixed rule/prior comparisons. Next need independent instance/part
+membership evidence and supervision of actual additions/removals, with separate
+training inputs if external 3D labels are used. No universal negative from a
+missing mask, no generic object prompt presumed to be an instance predictor.
+Report and exact methods: `docs/experiments/2026-10-05-uqis-entity-range.md`;
+complete results: `output/witnessed_scope_study/comparison.json`.
 
-The [full retraining of the preserved source inventory](docs/experiments/2026-09-16-preserved-inventory-full-training.md) is complete for both scenes and all three development query protocols. Native semantic preservation and cold-load checks pass; text ranking improves, but membership and prompt results are mixed, so the model is not promoted jointly. Raw image calibration is all-negative and requires the explicitly evaluated source-calibration stage.
+Latest promoted phase: native local appearance before region pooling.
+Three full UQIS conditions (27 jobs/804 query executions) plus the complete
+31-job common system:58 jobs total,1072 UQIS query executions on the same67
+known targets. Source frames1107, original regions39360, retained patches1782270;
+no added views, region cap, GT fitting or per-query winner selection.
+Image AP/actual-set IoU (%): v7 39.433/28.599; equal SigLIP/pooled-DINO identity
+39.791/30.739; bidirectional patches44.034/34.876; reciprocal patches41.793/31.286.
+Promote bidirectional matching as v8; stop this matching-rule search. Its IoU
+adds6.277pp vs v7,95% scene CI[2.314,9.927],8/9 scenes up; vs same-teacher pooled
+control adds4.137pp,CI[.801,7.794],7/9 scenes up. Reciprocal control not promoted.
+These are opened-development results, not independent final/SOTA evidence.
+All nine reconstructed pooled descriptor arrays exactly match the earlier
+appearance maps. Rebuilt pooled control reproduces all four earlier dual-native
+readouts exactly. Each candidate's268 native/anchor predictions match v7 exactly.
+The complete v8 run reproduces all four candidate readouts and actual sets exactly.
+Study: `output/local_appearance_study/comparison.json`; complete comparison:
+`output/system_v8/comparison_v7.json`; fixed conditions:
+`configs/recipes/uqis_local_appearance.json`. No unit tests or approval chain added.
 
-The latest [source inventory repair](docs/experiments/2026-09-16-source-inventory-preservation-and-group-diagnosis.md) fixes grounded-region augmentation that discarded original training regions, and inconsistent visibility gating of lifted labels. Both scene inventories and episodes are rebuilt; exact-common-support native fusion improves, and full retraining is reported above. Do not reuse old inventory-bound supervision artifacts unchanged.
+Common architecture: frozen geometry, separate native teacher coordinates,
+explicit observation membership/visibility, typed set readout. The shared
+`querying.observation_readout` is consumed by dense native, compiled category and
+registered mesh readers. Typed source-assisted LERF/NVOS solvers remain declared;
+UQIS is strictly map-only. One architecture is not one trained checkpoint or one
+input-access/target contract for all tasks.
 
-The current system-level investigation is [native semantic preservation versus structural learning](docs/experiments/2026-09-16-system-level-native-structural-control.md), with the experimental coordinate-ownership contract in [ADR 0009](docs/adr/0009-protect-native-semantics-during-structural-learning.md). A protected 64-coordinate semantic prefix and trainable 32-coordinate structural suffix share one element vector. Exact native retention is verified; text/image structural membership inference and joint benchmark promotion remain incomplete. SAM currently supplies mask/contour supervision, not native feature reconstruction. Do not equate four enabled teacher names with four query-accessible retained capabilities.
+UQIS v8 image identity retains DINO local patches and sparse region-area weights.
+`pipeline.local_appearance_map` compiles them from original legal source frames;
+`querying.local_appearance_match` computes bidirectional nearest-patch similarity.
+Equal SigLIP/local-appearance percentile ranks select a regional seed. Original
+SigLIP field, physical scope, text and point rules remain unchanged. Match scores
+are identity evidence, NOT membership probabilities or verified3D correspondences.
+The map reads no source RGB/depth/SAM at query time; image owns only its crop,
+2D point supplies pixel/camera only,3D point supplies its world coordinate.
+No cross-modality target pairing enters inference. Other optional failed modes
+are not enabled by v8. Base study maps remain frozen for reproducing controls.
 
-The [structural membership follow-up](docs/experiments/2026-09-16-structural-membership-and-related-work.md) is implemented and evaluated but rejected: a frozen native field can still lose final query ranking through an unrestricted learned membership readout. Native parameter preservation and retrieval preservation are separate acceptance requirements.
+UQIS dataset: `output/scannet_uqis_9_v0_3_1_candidate`,9 scenes/67 targets/268 queries.
+Original geometry/membership maps: `output/uqis_map_only_v1/maps`.
+Local maps: `output/local_appearance_study/maps`; v8 selects the chamfer map specs.
+Map arrays total2852.810MiB vs174.038MiB v7 or231.695MiB pooled-DINO. Added shared
+DINO checkpoint330.333MiB (half parameters165.139MiB), original SigLIP~7.49GB extra.
+Build186.664 summed seconds. This is a high-capacity reference, NOT a compact
+multi-teacher student. Shared-GPU cohort timing is not isolated query latency.
 
-The current source-support and three-query repair is documented in
-[the component pipeline report](docs/experiments/2026-09-15-component-pipeline-repair.md).
-Its unified source regions are a development candidate, not a promoted joint
-benchmark baseline. Independent unit-region targets can be incompatible on
-overlapping elements; native direction constraints remain experimental.
-The [reference-query contract audit](docs/experiments/2026-09-15-reference-query-contract-and-reliability.md)
-distinguishes category-union development scores from verified instance tasks.
-Source-region query coverage and cross-view correspondence admission are
-separate from auxiliary teacher coverage.
+Current full-system metrics (%):
+- LERF semantic70.400676, latest actual Gaussian-set2D projection66.967651.
+- NVOS positive-reference86.513417.
+- ScanNet19/15/10:61.011491/62.527589/72.486061.
+- UQIS text/image/2D/3D AP:26.595870/44.033566/52.744860/52.358886.
+- UQIS actual-set IoU:16.386530/34.876210/42.090214/41.523825.
+Public task accuracy is retained; projection variation+.000498pp is not a gain.
+LERF projection is not independent3D GT; NVOS full signed-protocol equivalence
+and public SOTA equivalence remain unproven. UQIS is official-mesh/RGB-D-assisted,
+not pure RGB+MoGe. All rooms are opened development; all18 difficult images remain.
+
+Remaining main bottleneck: complete instance scope and relational text identity.
+Target is unique dominant instance in45/67 image sets vs37/67 v7 (9 corrected,
+1 broken). Image IoU>=.5 improves17->23/67, but text remains11/67 and each point
+mode32/67. All four succeed only7/67 (scene-macro10.384%, previously8.995%).
+Same36 identity-correct cases cover55.20%->55.92%: range is NOT solved. Lamp
+scene0246 chooses87 seed elements supported by6 views, yet covers only10.70%
+of the target, versus81.46% v7. All DINO conditions retain this failure; no per-case
+fallback. The one-hop head preserves a partial seed's granularity; mutual nearest
+patches do not certify whole-object scope. Keep identity and whole/part membership
+separate. Prioritize independent complete-instance evidence shared by all queries,
+then reliable text target/landmark identity, rather than more coarse-region weights.
+Independent final rooms, part/signed interaction and compact retention remain open.
+
+Prior completed controls remain recorded, not defaults:
+- [Query roles/relationships](docs/experiments/2026-10-05-uqis-referent-identity.md):
+  four full cohorts all fail; full-query positive support can still promote a wrong
+  candidate. Do not resume geometric relation coefficient sweeps on partial masks.
+- [Identity/range](docs/experiments/2026-10-05-uqis-identity-and-range-evidence.md):
+  physical means and exclusive tracks fail; standalone DINO AP44.928 belongs to a
+  different candidate with IoU27.783, not the v8 result. GT-chosen finite one-hop
+  family52.995% is diagnosis only, not automatic performance or a universal ceiling.
+- [Local membership](docs/experiments/2026-10-04-local-observation-membership.md):
+  local semantic competition and member identity gates regress; do not equate a
+  purer part with a more complete instance or similarity with foreground probability.
+
+The entries below retain historical phase conclusions; old UQIS pause statements
+are superseded by the completed reconstruction and evaluation above.
+
+UQIS benchmark construction resumed at the user's request (2026-10-04), with
+the strict map-only contract unchanged. The new maintained implementation is
+`radio_gs.benchmarks.uqis`; final v0.3 development candidate is
+`output/scannet_uqis_9_v0_3_candidate/release_final` (9 scenes,67 targets,268 queries).
+All67 point queries match their target; maximum vertex distance4.485cm, minimum
+image margin19px, minimum post-exclusion coverage86.0261%, >=5 sampled mapping
+views per target. Joint reference selection fixes the window visibility conflict.
+All67 crops reviewed by the assistant,18 flagged; independent identity/uniqueness
+validation remains open. Four-modality and single-modality scoring preserve old
+metric values on identical predictions. That construction-only phase ran no model.
+Old maps contain62 observations now withheld and must be rebuilt. Official-mesh/
+RGB-D geometry track only; not a pure RGB+MoGe result or an unopened test set.
+See [phase report](docs/experiments/2026-10-04-uqis-v03-query-reconstruction.md) and
+[benchmark usage](docs/benchmarks/uqis.md). Earlier paused references below concern
+model experiments; construction repairs have now been completed as a candidate.
+
+UQIS location correction (2026-10-04): the existing benchmark was found and is
+readable. `/mnt/pool/sqy/3d_understanding/ScanNet-UQIS-10/source` holds upstream
+inputs; generated data are in `output/scannet_uqis_9_v0_1` and
+`output/scannet_uqis_9_v0_2_candidate`. The v0.1 frozen manifests contain9 scenes,
+67 targets and268 queries; all9 mesh-coordinate/instance-label arrays and67 image
+crops were loaded, and both versions'268 prediction arrays opened successfully.
+The complete builder/evaluator/standalone package is retained at local remote
+tracking ref `origin/codex/uqis-mainline` (`a0b8235`); commit `dbc8fbe` removed it
+from this mainline while separating benchmark branches. v0.2 has31 core targets
+and36 relational-text targets; these remain non-formal candidate results.
+Its2D point input provides camera geometry and a positive pixel, not captured RGB
+for SAM. UQIS experiments remain paused; this discovery did not run an evaluation
+or establish accessibility of every upstream reconstruction asset.
+
+Follow-up UQIS usability review is complete; see
+[report](docs/experiments/2026-10-04-uqis-usability-and-query-contract.md).
+The user reaffirmed the strict map-only query contract; image queries may carry
+their reference crop, but2D clicks receive no captured RGB/depth/SAM input.
+All268 historical predictions were rescored with zero Core-metric difference;
+AP matches sklearn within3.33e-16. All9 cached meshes/instance arrays match raw
+annotations, and full-sensor view exclusions recompute exactly. However25/31
+legacy Core expressions explicitly contain relations/comparisons; that split
+does not establish a relation-free task. Three prompt points are15–39cm from
+their target triangle surfaces; the constructor omits per-pixel correspondence.
+18/67 clicks are within5px of an image edge,14 exactly on it. Reference crop
+quality also needs review. Keep these as historical candidate results, repair
+query construction/versioning before claiming a validated benchmark. No frozen
+queries/labels were changed and no current-model UQIS result was generated.
+Existing assets are readable; some original2D annotation ZIPs remain inaccessible.
+
+Latest completed study: individual region identity and one-hop geometric links.
+All78 public-entry scene evaluations completed: original10 x6, another reserved3
+0670_01/0678_00/0685_02 x6. New reconstruction uses all453 source RGB,34828
+query-independent regions and5672 detected-region nodes; all18 predictions saved
+before annotation scoring. No fitting or parameter change. Final19 original10 /
+new3: v6 61.011491/59.387189; single verified60.137917/58.683289; linked verified
+60.188221/58.934898; verified union59.618051/57.878853. Individual vs union is
++0.519866/+0.804437pp; links add only+0.050304/+0.251608pp. Neither beats v6;
+new3 linked also loses15/10. Keep both as research controls; no default promotion.
+The multiplicative emitting-name gate prevents identity correction:11742/11896
+old and5611/5672 new regions have a single emitting label. Links change287/215
+native top1s, but only7/0 after that gate. New graph has1174/1897 edges with both
+endpoints >=80% instance purity; all1174 connect the same GT instance. This is
+conditional post-prediction diagnosis, not proof all edges or independent-view
+transfer is correct. Only60.58/65.26/66.81% projected regions are >=80% class pure;
+whole-region confidence cannot assign correct membership within mixed scopes.
+Do not deepen this graph or tune the multiplicative gate. Next separate identity
+alternatives/unknown from local element membership; naming a region is not dense
+semantic supervision. The new rooms are now opened. LERF/NVOS unchanged and not
+rerun this round; no public-SOTA/compact/four-query/CVPR contribution closure.
+
+Previous completed study: local element fusion and dual native teachers.
+Frozen geometry/native coordinates; nine official-training rooms,932 views for
+577/705-parameter local single/dual and705-parameter global controls. Additional
+six previously opened rooms and three reserved rooms0606_01/0629_01/0653_01 were
+fully evaluated; new cohort515 source images,36587 automatic regions. All18 new
+predictions preceded label scoring. A real auxiliary entropy-policy deployment
+mismatch was fixed; all36 development evaluations were rerun before new-room
+prediction. Superseded outputs are explicitly separate. No post-result fitting.
+Training local dual65.261522%19 versus base60.307115. New3: original55.260616,
+equal native prior57.608254, local dual58.180987, same-capacity global53.748283.
+Local beats global here but is only+0.572733pp over simple averaging; it loses to
+averaging on dev6 and on new3 15/10. Do not promote learned heads or claim their
+full+2.92pp versus base as independent contribution.0599 window omission remains.
+
+PROMOTED v6: equal SigLIP/Mask-Adapter native probability prior within existing
+source vote, no new scene-label fitting, no per-scene routing. Original10 final
+19/15/10=61.011491/62.527589/72.486061 (+1.418525/+1.658532/+1.055484pp over v5),
+9 scenes up/1 down0.066pp19. Dev6=60.812414%19 versus59.314710. New3=57.608254
+versus55.260616 (+2.347638pp),2 up/1 down0.463783pp. Regressions remain included.
+All22 full-system jobs complete: LERF semantic70.400676, selected 2D projection
+66.962427, NVOS positive-reference86.513417%; tiny replay changes are not gains.
+No improvement claimed for LERF/NVOS. Extra original10 native files1.104306GiB
+(total2.314331GiB); RGB/geometry/encoders/source caches extra. No compactness or
+annotated four-query/public-SOTA/CVPR contribution closure. UQIS remains paused.
+The individual identity/correspondence study above is now complete. Retain its
+granularity lesson, but do not promote its weaker complete readout or reuse these
+opened validation rooms as untuned evaluations.
+
+Previous completed study: [consumed-element reliability](docs/experiments/2026-10-03-consumed-element-reliability.md).
+Separate SUPERVISED branch:9 official-training rooms, all932 source views, same
+frozen map/geometry; native mask-aware region/query statistics and actual deployed
+vote differentiation with point-balanced CE/soft IoU. Linear22/30 parameters and
+fixed32-hidden546-parameter controls completed. Training19:60.8580→63.0496.
+Different reserved rooms0575_00/0591_02/0599_02:388 views/24817 automatic regions,
+1873 category-union encodings.30 public-entry evaluations completed (27 initially
+predeclared,3 post-result same-checkpoint matched-mass controls), plus3 label-using
+diagnoses kept separate. New-room final19: SigLIP62.840361, adapter vote61.839701,
+linear retrieval62.518993, MLP retrieval62.801336, same-MLP shared62.843615.
+MLP vs same-map vote+0.961635pp19, two rooms up/one down; no promotion. Both
+capacities fail to beat same-mass shared weighting on primary19. Map-only mean
+52.535175→57.254767, but0575 regresses8.589249pp: teacher replacement is not
+universally better.0599 window FP806→516 but FN2333→3940, IoU75.8538→64.9410.
+Ground-truth quality diagnosis64.806771%19 is NOT method performance/upper bound.
+Stop expanding whole-view/category scalar heads; next test local identity/extent
+at native region/visible-element granularity on training data, then other reserved
+rooms. Current validation is now opened. LERF/NVOS unchanged, UQIS still paused;
+no compact/four-query/public-SOTA/CVPR claim closure. Default remains zero-label v5.
+
+Previous completed study: [supervised scope quality on independent rooms](docs/experiments/2026-10-03-supervised-scope-quality-independent-rooms.md).
+Three earlier rooms0050_02/0231_01/0412_00:554 sources/36940 regions,15 evaluations.
+Map19 improves42.719635→50.880137 in all3, but full adapter vote55.603399 and
+supervised typed quality55.764741; same-mass shared55.739275. No promotion.
+True-quality LABEL-USING diagnosis63.999849, not performance. These rooms are
+opened development data. The earlier claim of no readable independent scenes
+was a search error: ScanNet-PFIR-Small/AGILE3D contain official validation rooms.
+They are not a pool of new training labels. UQIS remains inaccessible and paused.
+
+Previous completed study: [source likelihood, identity binding and resolution](docs/experiments/2026-10-03-source-likelihood-and-resolution.md).
+All70 full ScanNet scene evaluations completed. Same learned map: cross-view-excluded
+detector likelihoods give60.354337/60.351585%19 versus original vote60.273548;
+fewer wrong overrides but fewer useful corrections. Three identity/scope readers
+give59.730102/58.530258/59.405379%19; no promotion or coefficient sweep.
+All1158 source frames rebuilt into paired96x128/192x256 rasters from the SAME
+SAM forward, shared proposal identities, physical boundary radius preserved.
+Low replay matches all old point predictions exactly. High final19/15/10:
+60.653474/62.239107/72.525994, +0.379926/+0.408736/+0.387038pp versus low;
+9 scenes improve19,1 regresses. Versus v5: +1.060509pp19,8 improve/2 regress.
+Identity/projection storage6.958→20.563GiB; map/RGB/models extra. Keep candidate,
+not default. Finer projection is useful but does not resolve identity errors.
+Next requires independent identity/extent supervision and an untuned scene;
+self-agreement and same-scene pseudo-rate estimation did not establish reliability.
+Correction: the earlier data search missed readable ScanNet-PFIR-Small/AGILE3D
+validation scenes. They are validation, not a pool of training labels. See the
+[independent-room study](docs/experiments/2026-10-03-supervised-scope-quality-independent-rooms.md).
+LERF/NVOS unchanged; no SOTA or claim closure.
+
+Previous completed study: [task-trained region readout](docs/experiments/2026-10-03-task-trained-region-readout.md).
+All120 fresh ScanNet predictions/evaluations complete:40 context readouts,40 external learned
+region readouts,20 query-independent maps,20 matched outside-scope-negative controls.
+Same ConvNeXt backbone/masks: pretrained Mask-Adapter gives direct category58.844875 versus
+plain pooling53.140041%19. This is an external pretrained teacher improvement, not our novelty.
+All73905 automatic regions /1158 sources rebuilt, W and geometry unchanged, no query labels.
+Map-only19: v5 SigLIP50.147691; ConvNeXt plain49.601052; learned region57.737935.
+Learned map improves9/10 scenes. Final19/15/10 only60.273548/61.830371/72.138956:
++0.680583pp19 over v5,8 scenes improve,2 regress. No default promotion.
+Dropping all outside-scope negatives fails: old map final56.688070, new map59.602818%19.
+New-map-correct/old-final-wrong points59032; source fusion retains27320 and loses31712.
+Next focus: independently justified source identity/scope override, not another weight sweep.
+Do not blindly force this mutually exclusive category reader onto LERF parts or NVOS instances.
+[Earlier scope/identity study](docs/experiments/2026-10-03-scope-granularity-and-source-identity.md)
+remains a completed comparator. LERF/NVOS unchanged; external teacher ≠ compact multi-teacher student.
+
+Previous bounded experiment: [positive region grounding](docs/experiments/2026-10-03-positive-region-grounding.md).
+Two rules × all10 ScanNet scenes finished. Source-assisted regional identity improves the intermediate19-class
+score50.15→58.64, but final59.59→59.90 only;8/10 improve,2 regress, including−3.55pp.
+Same-positive-pixel direct control final59.00. Neither becomes default; no coefficient sweep.
+The intermediate improvement uses source detections already available to v5, not new offline-map capability.
+Focus now on independently verifying identity/scope corrections; repeating the same source evidence is insufficient.
+
+## Current system (v9)
+
+- Freeze the declared geometry, compile legal native teacher observations, element associations and visibility, then decode the requested set type.
+- LERF retains separate semantic and actual Gaussian-selection heads. ScanNet combines the native region dictionary and pretrained Mask-Adapter prior under its mutually exclusive category contract. NVOS retains declared positive-reference tracking.
+- All four UQIS queries read the same native high-capacity map. Image identity uses native SigLIP/local DINO; text uses native full-expression matching; both retain physical scope. Positive points use the shared real-observation-trained complete-carrier membership head.
+- Extra3D point supervision is explicit. No evaluator labels, cross-query target pairings, sourceRGB/depth/SAM enter UQIS inference. UQIS is active, not paused.
+- Unified high four-query accuracy, relation-aware text identity, compact students, independent final testing and official SOTA equivalence remain incomplete.
+
+## Current complete results
+
+|Frozen local metric|v9|
+|---|---:|
+|LERF4 semantic IoU / AP|70.400676 /87.619278%|
+|LERF4 selected Gaussian2D projection IoU|66.964928%|
+|NVOS8 positive-reference IoU|86.513417%|
+|ScanNet10 point scene-macro19/15/10|61.011491 /62.527589 /72.486061%|
+|UQIS text/image actual IoU|16.386530 /34.876210%|
+|UQIS2D/3Dpoint actual IoU|49.735675 /49.046983%|
+|UQIS2D/3Dpoint AP|75.790097 /75.325251%|
+
+Earlier findings and vocabulary below are historical references. They do not
+replace the active recipe, access contract or completion state above.
+
+## Preserved v5 mechanism conclusions
+
+Same v3 fields and teacher/source assets: information weighting gives final
+59.083685/60.298858/71.379009 versus v3 58.449245/59.652818/71.027043.
+Detector-relative confidence at matched per-query known-pixel mass then gives
+59.592965/60.869057/71.430577. Final19 improves9/10 scenes versus v3; scene0070
+regresses0.853pp. No scene-specific routing or parameter sweep. Full22 v5
+reproduces all ScanNet scene/split metrics from the control exactly.
+
+Whole-view-excluded semantic support weights fail to improve the complete result;
+leave that research switch inactive. Confidence and agreement are not truth.
+The category-information rule is for complete competing menus C>1, not arbitrary
+single open queries, overlapping whole/part concepts or reference instances.
+
+LABEL-USING representability diagnosis, NOT METHOD PERFORMANCE:
+fixed geometry/W with GT-pooled regional classes reaches80.292984%19class;
+GT fitting region logits200steps reaches81.590436%. No fitted variables saved,
+no production config reads these outputs. These are in-sample diagnostics, not
+upper bounds or independent accuracy. They show a large semantic assignment/
+selection gap under this point protocol, not proof of physically perfect geometry.
+They do not yet distinguish teacher recognition vs query matching vs mixed scope.
+
+## Earlier field construction and storage
+
+v2 ScanNet:57.921506/58.972766/70.905986. Same masked native observations and geometry,
+region response before mixing gives+0.527739/+0.680053/+0.121057pp final and+2.147149pp
+prior19class. Five scene19 results improve and five regress. No threshold sweep or
+scene-specific route. Precompilation preserves every evaluated scene/split metric
+exactly; it is operator reordering/storage, not additional accuracy or established novelty.
+
+Semantic deployment files:1.210025GiB versus4.493211GiB v2 element fields and11.029344GiB
+uncompiled regions/masks. Geometry, encoders, source cache/RGB are additional. Old
+assets remain for comparisons, not runtime dependencies. Fresh19 reworded map-only
+queries have0 argmax/support differences versus uncompiled and max probability
+error7.15e-7; no old field, mask, camera or source-evidence config is required.
+This is execution/equivalence evidence, not four-query accuracy or new-scene generalization.
+
+Natural-background input control completed all10: same bbox+3px, same model/masks,
+73905 new encodings. Prior19 falls46.503650→34.880087; final19/15/10 reaches
+58.595790/58.871840/69.404065. Mixed final effects and strong prior degradation;
+keep masked default. Do not promote or start blend/temperature sweeps.
+
+## Preserved findings
+
+- v1/v2/v3/v4 recipes and all comparators retained. Earlier same-evidence source coverage
+  and one-pass-vs-iterative comparisons: `docs/experiments/2026-10-03-complete-source-cold-system.md`.
+- Uniform-prior control, ownership confidence, partial categorical failures:
+  `docs/experiments/2026-10-03-native-prior-and-evidence-conflicts.md`.
+- Uncompiled pooling-order localization: `docs/experiments/2026-10-03-native-observation-pooling.md`.
+- Finest ownership, dual-scope fusion, extra source calibration/iterations, sparse
+  RGB conflict and scope transfer have negative evidence. Do not restore blindly.
+- Native int8 is precision storage, not low-dimensional capability distillation.
+- SAM3 `masks_logits` already contains probabilities; never sigmoid it again.
+- Root historical context remains in `CONTEXT-HISTORY-2026-10-03.md`. Historical
+  TPAMI manuscripts do not describe the current implementation.
+
+## Remaining research
+
+Prioritize source-grounded region identity supervision while preserving native
+query coordinates and unknown evidence. Existing geometry/W can express much
+better point segmentation when given correct semantic assignments. Distinguish
+teacher recognition, matching and mixed-granularity selection errors, and require untuned-scene
+benefit beyond simple baselines before claiming a new mechanism. Native teacher
+coordinates and region atoms do not guarantee correct identity or complete scope.
+Need independent3D extraction truth, annotated same-map four-query benefit, fair
+public protocols/input tracks and a useful compact learned multi-teacher field.
+Do not claim large accuracy gains or CVPR readiness from this integration.
+
+## Domain vocabulary
+
+The definitions below include earlier representations; they do not override the active implementation and evidence above.
 
 ## Representation
 
@@ -253,8 +901,8 @@ _Avoid_: field repair, strict-unseen readout, target-mask calibration
 ## Evaluation
 
 **Five-Benchmark Program**:
-The joint RADIO-GS objective covering LERF-2D, LERF-3D, ScanNet OVS, NVOS, and Available-Nine SPIn-NeRF with one method family.
-_Avoid_: six-task program, UQIS program
+The user-confirmed joint objective covers LERF-2D, LERF-3D, ScanNet OVS, NVOS, and ScanNet-UQIS with one method family. UQIS must evaluate text, image, 2D prompt, and 3D prompt queries. Available-Nine SPIn-NeRF remains supplementary and does not replace UQIS. Historical sealed experiment scopes remain unchanged.
+_Avoid_: replacing UQIS with SPIn-NeRF, claiming partial prompt tests certify all four query types
 
 **Available-Nine SPIn-NeRF Cohort**:
 The orchids, leaves, fern, room, horns, fortress, pinecone, truck, and lego scenes; the unavailable Fork scene is excluded.

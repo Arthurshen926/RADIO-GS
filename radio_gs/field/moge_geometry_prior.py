@@ -38,11 +38,25 @@ class MogeGeometryPrior:
         authority = json.loads(Path(by_role["source_authority"]["path"]).read_text())
         if set(self.records) != set(map(int, authority["frame_indices"])):
             raise ValueError("MoGe source frame authority differs")
-        from radio_gs.v4.geometry.fuse_lerf_moge3 import _read_images, _read_cameras_binary
-        self.cameras = _read_images(Path(by_role["colmap_images"]["path"]),
-                                    _read_cameras_binary(Path(by_role["colmap_cameras"]["path"])),
-                                    authority.get("camera_name_to_frame_index"))
-        self.scale = float(self.report["global_colmap_units_per_metre"])
+        if "registered_camera_table" in by_role:
+            if "colmap_images" in by_role or "colmap_cameras" in by_role:
+                raise ValueError("ambiguous registered/COLMAP camera authority")
+            from radio_gs.geometry.registered_pinhole import load_registered_camera_table
+            self.cameras = load_registered_camera_table(by_role["registered_camera_table"]["path"])
+        else:
+            from radio_gs.v4.geometry.fuse_lerf_moge3 import _read_images, _read_cameras_binary
+            self.cameras = _read_images(Path(by_role["colmap_images"]["path"]),
+                                        _read_cameras_binary(Path(by_role["colmap_cameras"]["path"])),
+                                        authority.get("camera_name_to_frame_index"))
+        if not set(self.records) <= set(self.cameras):
+            raise ValueError("MoGe records lack registered cameras")
+        world_scale = self.report.get("global_world_units_per_metre")
+        colmap_scale = self.report.get("global_colmap_units_per_metre")
+        if world_scale is not None and colmap_scale is not None and world_scale != colmap_scale:
+            raise ValueError("conflicting geometry world scales")
+        if world_scale is None and colmap_scale is None:
+            raise ValueError("missing geometry world scale")
+        self.scale = float(world_scale if world_scale is not None else colmap_scale)
         if not math.isfinite(self.scale) or self.scale <= 0:
             raise ValueError("invalid MoGe world scale")
         self.source_authority_sha256 = by_role["source_authority"]["sha256"]

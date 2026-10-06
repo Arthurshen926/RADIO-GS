@@ -1,0 +1,20 @@
+{
+  "kind": "complete_optional_provider_controls_not_global_default",
+  "entry": "scripts/research/run_consolidated_query.py",
+  "scenes": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "baseline": "configs/recipes/consolidated_text_baseline.json",
+  "controls": {
+    "regional": "--regional-fallback",
+    "calibration": "--source-calibration"
+  },
+  "regional_admission": "runtime zero detections over all authorized source frames",
+  "calibration_admission": "held-source balanced BCE strictly improves, not target GT",
+  "joint_controls_evaluated": false,
+  "status": "complete 8scene evaluations",
+  "report": "docs/experiments/2026-10-02-consolidated-provider-controls.md"
+}

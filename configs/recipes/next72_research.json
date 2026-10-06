@@ -1,0 +1,42 @@
+{
+  "status": "research_candidate_not_promoted",
+  "architecture": "frozen Gaussian carrier, shared native semantic/structural map, typed query identity and extent inference",
+  "query_tasks": ["text_union", "reference_image", "prompt_2d", "prompt_3d"],
+  "multimodal_integration_complete": false,
+  "compact_student_retrained": false,
+  "retained_lerf": {
+    "geometry": "output/joint_carrier_next66/adaptive_allrgb/{scene}/geometry.pt",
+    "readout": "output/dual_observation_next68/seeded/lerf_{scene}/typed_readout.pt",
+    "native_dimension": 1536,
+    "query_time_access": ["query", "legal source RGB", "source teachers", "historical source confidence prior"],
+    "arbitrary_new_query_prior_generation_complete": false
+  },
+  "source_expansion": {
+    "cohorts": ["old", "coverage64", "all"],
+    "default_cohort": "all",
+    "maximum_images": null,
+    "eligibility": "registered RGB and cameras minus target and reserved source-validation views",
+    "teacher_cache_intersection": false,
+    "authority": "output/source_coverage_next72/{scene}/{cohort}.json",
+    "evidence_resolution": "original source RGB dimensions",
+    "initial_semantic_fit_hw": [96, 128],
+    "initial_extent_fit_hw": [96, 128],
+    "geometry_frozen": true
+  },
+  "outputs": {
+    "lerf2d": "full-scene semantic response, frozen renderer and scorer",
+    "lerf_selected_projection": "selected Gaussian subset alpha rendering; not independent 3D-GT evaluation",
+    "nvos": "full-scene observed-support-normalized object response, threshold0.5, frozen OpenCV resize",
+    "scannet_internal": "provided-mesh Gaussian-domain category scores",
+    "scannet_point_diagnostic": "nearest-centre transfer, equal point weights, void predictions counted",
+    "scannet_lesv_transfer_diagnostic": "K64 Euclidean/opacity weighted softmax category probabilities; scene cohort still incomplete"
+  },
+  "evaluation_limits": {
+    "development_not_independent_test": true,
+    "scannet_completed_scenes": 8,
+    "scannet_public_missing_scenes": ["scene0200_00", "scene0645_00"],
+    "external_official_equivalence_verified": false,
+    "uqis": "paused: inaccessible dataset, per user instruction"
+  },
+  "promotion": "require meaningful same-protocol gain over retained mainline and typed-query preservation; no per-scene or per-query winner stitching"
+}

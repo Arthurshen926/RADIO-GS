@@ -1,0 +1,73 @@
+{
+  "name": "Real observations and separate identity supervision",
+  "root": "output/real_referent_grounding_20261005",
+  "parent_system": "configs/pipeline/system_v8.json",
+  "parent_study": "configs/recipes/referent_grounding.json",
+  "default": false,
+  "fit_rooms": 22,
+  "calibration_rooms": 3,
+  "development_rooms": 4,
+  "split": "output/real_referent_grounding_20261005/design.json",
+  "source_policy": "all finite registered poses at deployed stride20; no total frame or proposal cap",
+  "extra_supervision": "NR3D natural descriptions and official ScanNet3D instances; benchmark rooms and rescans excluded",
+  "conditions": [
+    {
+      "name": "local_scope",
+      "context": false,
+      "target": "decoded scope IoU^4"
+    },
+    {
+      "name": "scene_scope",
+      "context": true,
+      "target": "decoded scope IoU^4"
+    },
+    {
+      "name": "scene_identity",
+      "context": true,
+      "target": "requested identity fraction in region^4; no scope completeness term"
+    }
+  ],
+  "epochs": 12,
+  "logical_batch": 8,
+  "microbatch": 1,
+  "checkpoint_selection": "calibration scene-macro actual set IoU",
+  "training_eligibility": "same listener-correct descriptions with any target support in the scope family",
+  "validation_policy": "retain all calibration/development descriptions, including unavailable target support",
+  "budget": "three fixed fits; no benchmark-dependent parameter revision",
+  "native_semantic_coordinates": "unchanged",
+  "benchmark_geometry_and_observations": "unchanged",
+  "benchmark_scope_decoder": "unchanged",
+  "execution": "all31 jobs for scene_identity; nine UQIS jobs for each control",
+  "query_source_images": false,
+  "independent_final_test": false,
+  "compact_student": false,
+  "status": "completed; observation repair retained, all heads research-only",
+  "report": "docs/experiments/2026-10-05-real-observation-grounding-and-identity-supervision.md",
+  "comparison": "output/real_referent_grounding_20261005/comparison.json",
+  "completed_scene_jobs": 49,
+  "uqis_query_executions": 804,
+  "observation_compiler": {
+    "frame_stride": 20,
+    "maximum_source_frames": null,
+    "source_rgb_width": 640,
+    "depth_tolerance_m": 0.08,
+    "sam_checkpoint": "checkpoints/sam3_modelscope/sam3.pt",
+    "sam_resolution": 1008,
+    "sam_grid_size": 12,
+    "sam_minimum_quality": 0.7,
+    "sam_minimum_area_fraction": 0.0001,
+    "sam_maximum_area_fraction": 0.9,
+    "sam_maximum_masks": 0,
+    "native_encoder": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384/snapshots/a713301b217d38485fb2204c808367d10bc3cc40",
+    "encoding_batch_size": 4,
+    "query_readouts": [
+      "native_semantic",
+      "anchor_comembership"
+    ],
+    "geometry_track": "official_mesh_RGBD_assisted",
+    "source_access_at_query_time": false,
+    "compact_student": false,
+    "default_promotion": false,
+    "no_benchmark_scenes": true
+  }
+}

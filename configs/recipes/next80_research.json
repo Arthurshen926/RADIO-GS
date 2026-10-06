@@ -1,0 +1,29 @@
+{
+  "status": "retained_lerf_research_candidate_only",
+  "parent": "configs/recipes/next79_research.json",
+  "scenes": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "scope": "Only queries with no next79 seed; all other selections retained exactly",
+  "proposal": "Maximum minimum native query cosine over mutual regional equivalence pairs admitted with third-view geometry",
+  "geometry": "Frozen next66 adaptive_allrgb",
+  "semantic_scores": "Frozen next75 calibrated",
+  "source_frames": "All authorized source frames",
+  "tracking": "SAM3 full-source video propagation",
+  "scope_decoder": "Existing source-positive and exclusion policy, 240 or number-of-views updates",
+  "identity_confidence": "Nonnegative minimum pair cosine, not a calibrated correctness probability",
+  "single_scope_hypothesis": true,
+  "exhaustive_text_union": false,
+  "target_rgb_or_gt_for_construction": false,
+  "sota_claim": false,
+  "candidate_readout": "output/region_seed_positive_next80/<key>/typed_readout.pt",
+  "comparison_readout": "output/region_seed_decode_next80/<key>/typed_readout.pt",
+  "source_review_figure": "output/region_seeds_next80/source_crops.jpg",
+  "results": "output/next80/positive_summary.json",
+  "regional_positive_evidence": true,
+  "all_eight_scene_evaluations_complete": true,
+  "macro_selected_iou": 0.5692260322841747
+}

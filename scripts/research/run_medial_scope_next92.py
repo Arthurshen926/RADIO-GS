@@ -1,0 +1,8 @@
+"""Matched scope supervision: eroded interior plus medial evidence for thin masks."""
+import argparse,json,os,subprocess
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--gpu',required=True);p.add_argument('--tracks-base',default='output/grounded_tracks_next88');p.add_argument('--output-base',default='output/medial_scope_next92');p.add_argument('--retained-base',default='output/grounded_scope_next88/source');a=p.parse_args();key='lerf_'+a.scene;ids=[str(r['query_index']) for r in json.loads((Path('output/grounded_seeds_next88')/key/'proposals.json').read_text())];out=Path(a.output_base)/key;out.mkdir(parents=True,exist_ok=True);env=dict(os.environ,PYTHONPATH='.',OMP_NUM_THREADS='4',CUDA_VISIBLE_DEVICES=a.gpu);py='/root/miniconda3/envs/cybersim_agent/bin/python'
+with (out/'execution.log').open('w') as log:
+ subprocess.run([py,'scripts/research/decode_expanded_extent_next72.py','--key',key,'--semantic-base','output/native_write_next75/all/calibrated','--cohort','all','--evidence-base','output/typed_evidence_next44','--output-base',a.output_base,'--mode','seeded','--tracks-base',a.tracks_base,'--retained-selection',str(Path(a.retained_base)/key/'typed_readout.pt'),'--extra-track-frames','--regional-positive-evidence','--scope-initialization','source','--positive-core','medial','--query-indices',*ids],env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
+ subprocess.run([py,'scripts/research/evaluate_scope_dictionary.py','--key',key,'--base',a.output_base,'--readout','anchored','--pipeline','--calibrated','--element-results',str(out/'typed_readout.pt')],env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
+print(key,'complete',flush=True)

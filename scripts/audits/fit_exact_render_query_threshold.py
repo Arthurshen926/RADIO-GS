@@ -14,10 +14,11 @@ from radio_gs.models.native_query_threshold import fit_threshold_ridge
 from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
 from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
 from radio_gs.utils.immutable_artifacts import sha256_file
+from radio_gs.geometry.source_report_binding import load_source_geometry_report
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--device',required=True);p.add_argument('--root',type=Path);p.add_argument('--parent',default='native_within_extent96');p.add_argument('--output-name',default='exact_render_query_threshold96');a=p.parse_args();torch.set_num_threads(4)
+    p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--device',required=True);p.add_argument('--root',type=Path);p.add_argument('--geometry-report',type=Path);p.add_argument('--parent',default='native_within_extent96');p.add_argument('--output-name',default='exact_render_query_threshold96');a=p.parse_args();torch.set_num_threads(4)
     base=Path('/mnt/pool/sqy/results/RADIO-GS/output');root=a.root if a.root is not None else base/'preserved_source_inventory_20260916'/a.scene
     parent=root/a.parent;receipt=json.loads((parent/'report.json').read_text());assert sha256_file(parent/'field.pt')==receipt['field_sha256'];payload=torch.load(parent/'field.pt',weights_only=False)
     old=json.loads((root/'full_source_query_threshold_control/report.json').read_text())
@@ -27,7 +28,7 @@ def main():
     assert raw['benchmark_labels_used'] is False and raw['frames']==info['train_frames']
     assert data['geometry_binding']==payload['geometry_binding']
     field=ElementRetrievalField(**payload['architecture']).to(a.device);field.load_state_dict(payload['state_dict']);field.requires_grad_(False)
-    grpath=base/'geometry_only_repair_final_20260914'/a.scene/'report.json';gr=json.loads(grpath.read_text());g=gr['results']['independent_scale'];geo=FrozenGaussianGeometry.load(g['geometry'],expected_sha256=g['geometry_sha256'],device=a.device);geo.assert_binding(payload['geometry_binding']);prior=MogeGeometryPrior(gr['source_report'],gr['source_report_sha256'])
+    grpath,gr=load_source_geometry_report(root,a.scene,a.geometry_report);g=gr['results']['independent_scale'];geo=FrozenGaussianGeometry.load(g['geometry'],expected_sha256=g['geometry_sha256'],device=a.device);geo.assert_binding(payload['geometry_binding']);prior=MogeGeometryPrior(gr['source_report'],gr['source_report_sha256'])
     ids=[r['query_index'] for r in old['source_query_fits']];q=data['queries']['text'][ids].float().to(a.device);Q=len(ids);h,w=raw['probability'].shape[-2:]
     targets=[];eligible=[];cameras=[]
     for vi,frame in enumerate(raw['frames']):

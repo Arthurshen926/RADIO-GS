@@ -1,0 +1,41 @@
+{
+  "kind": "fixed_evidence_native_mixture_control",
+  "status": "complete_rejected_as_default",
+  "entry": "scripts/research/run_finite_evidence.py",
+  "summary_entry": "scripts/research/summarize_finite_evidence.py",
+  "cohorts": [
+    "original",
+    "tiled"
+  ],
+  "scenes": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "native_reference_strength": 1,
+  "source_strength": "sum of maximum admitted detector confidence per active source frame, counted once",
+  "combination": "(native + source_strength * proposal) / (1 + source_strength)",
+  "response": "same normalized backprojection proposal; finite native mixture at readout",
+  "selection": "same actual subset renderer; finite mixture INSIDE fitting, before annealed membership and final decision",
+  "iterations": "max(240, scene source count); unchanged",
+  "geometry_and_encoders": "frozen, identical within each evidence cohort",
+  "negative_permissions": "unchanged native-positive protection and rejected-instance unknown masks",
+  "new_teacher_calls": 0,
+  "input_authority": "declared source cameras and masks only; target RGB/GT evaluation only",
+  "limitations": [
+    "confidence weights are not calibrated identity odds",
+    "adjacent source frames are correlated; summed weights are not independent samples",
+    "native response is a heuristic membership prior, not geometric membership truth",
+    "four repeatedly used development scenes; no untouched-scene or SOTA claim"
+  ],
+  "variants": {
+    "confidence": "output/finite_source_evidence/summary.json",
+    "positive_logit": "output/finite_source_margin/summary.json"
+  },
+  "source_strength_revision": "sum of nonnegative detector logit per active frame; one bounded revision, no fitted weights",
+  "readout_control": "scripts/research/run_finite_readout_control.py",
+  "completed_scene_evaluations": 24,
+  "default_changed": false,
+  "decision": "protects weak false proposals but suppresses correct rare proposals; stop this prior-weight search"
+}

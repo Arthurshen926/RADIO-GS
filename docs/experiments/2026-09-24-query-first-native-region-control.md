@@ -1,0 +1,22 @@
+# Query-first native region control: full-four-scene result
+
+The current bounded caption route does not admit 76/208 LERF observations. This control tests whether keeping original 1536-dimensional SigLIP source-region descriptors until query time rescues those queries. It uses the already-built source SAM region masks, original native crop descriptors, source-region-to-frozen-Gaussian weights, the current text encoder and its source-fitted native threshold/scale. For each incoming text query, it scores each source region first, then averages calibrated responses over each Gaussian's visible source regions. A binary region-gate variant tests whether the result is merely score smoothing; a third arm changes only queries the current caption route does not admit. Source descriptors and frozen geometry are unchanged. Query text is read at inference; map evidence is source-only. Benchmark target RGB and GT are not used to construct scores or choose settings.
+
+All four scenes and 208 target observations per arm completed with the same LERF2D probability/IoU/AP and selected-element rendering contract. Baseline probability masks match the frozen result pixel-for-pixel; baseline selected-object observations match. The selected metric is a projected-element rendering measure, not volumetric 3D IoU. Results are scene-equal means:
+
+| Arm | 2D IoU % | AP % | Selected-render IoU % |
+|---|---:|---:|---:|
+| Existing final field | **49.7408** | **68.4795** | **33.5676** |
+| Query-first soft region response | 29.1576 | 62.2412 | 27.5821 |
+| Query-first binary region gate | 29.2685 | 61.9164 | 26.8159 |
+| Existing field for routed, region response for unrouted | 45.3620 | 65.7604 | 31.1414 |
+
+On the 76 unadmitted observations specifically, replacing the current field with direct region response changes mean IoU by **−14.24 percentage points** and AP by **−9.82 points**. It improves 18 observations, regresses 36, and leaves 22 equal. Nori, kamaboko and spatula account for several of the worst regressions. This is a complete negative control: do not promote the readout or claim that high-dimensional native features alone repair open-query recall.
+
+The source-only calibration audit gives a more precise reason than a rendering failure. For a region crop, the text phrase that prompted its SAM proposal exceeds the *element-trained* threshold only 56.5% / 55.9% / 46.2% / 38.0% of the time in figurines / ramen / teatime / waldo. The prompted phrase is top-1 among the scene's source phrase set in only 4.4% / 12.0% / 7.1% / 7.6% of these crops. Phrase sets contain near-synonyms and overlapping concepts, so top-1 is a strict diagnostic, not an independent true-class accuracy estimate. Even so, both calibrated AP and binary-region AP fall against the field; changing only the threshold cannot restore the lost ranking. The source crop representation, phrase pseudo-labels, region overlap and query response need to be disentangled before another such readout is attempted.
+
+The source `caption_region_evidence.pt` file occupies roughly 3–11 GiB per scene, and a naive dense FP32 conversion caused out-of-memory on the two larger scenes. The audit was corrected to accumulate FP32 numerators in chunks while keeping the source weight cache in FP16; the mathematical score definition is unchanged. Old and corrected builder code hashes remain recorded by their respective preparation receipts. The first two preparations use the original sum expression; the latter two use the chunked sum. This is an experimental diagnostic and not an acceptable compact deployed query-time cache.
+
+The original source-region cache and all 1773 frozen source files retain their hashes. This experiment does not retrain or claim new ScanNet OVS/NVOS results. UQIS remains paused. It establishes that query coverage is a genuine problem, and rejects a simple replacement for the missing concept-to-element capability. The next method needs finer source evidence and a query/element matching objective validated on source views and concepts excluded from field/group construction, with native teacher ability audited before and after transport. Any deployment candidate must improve both target ranking and actual selected elements under the frozen contract; this diagnostic provides no warrant to tune parameters using target GT.
+
+Machine-readable paired observations and artifact hashes: `output/query_region_readout_next25/summary.json`; seal: `paper/artifacts/query_region_readout_next25_complete.json`.

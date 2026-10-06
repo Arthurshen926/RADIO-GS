@@ -1,0 +1,523 @@
+{
+  "name": "RADIO-GS shared observation architecture v9",
+  "entry": "python -m radio_gs.pipeline.cohort",
+  "role": "native identity and typed scope; independently supervised actual-anchor membership on real observations",
+  "jobs": [
+    {
+      "benchmark": "uqis",
+      "name": "scene0030_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0030_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "uqis",
+      "name": "scene0203_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0203_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "uqis",
+      "name": "scene0246_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0246_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "uqis",
+      "name": "scene0249_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0249_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "uqis",
+      "name": "scene0353_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0353_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "uqis",
+      "name": "scene0435_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0435_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "uqis",
+      "name": "scene0535_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0535_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "uqis",
+      "name": "scene0700_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0700_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "uqis",
+      "name": "scene0704_00",
+      "scene": "output/real_direct_membership_20261006/real/maps/scene0704_00/map.json",
+      "queries": "output/scannet_uqis_9_v0_3_1_candidate/method",
+      "package": "output/scannet_uqis_9_v0_3_1_candidate",
+      "access": "map-only",
+      "task": "reference_instance",
+      "instance_scope": true,
+      "readouts": [
+        "native_semantic",
+        "anchor_comembership",
+        "identity_region",
+        "identity_scope"
+      ],
+      "primary_readout": "identity_scope",
+      "input_track": "official_mesh_RGBD_assisted",
+      "selection_contract": "independent boolean sets; original native identity/physical scope for text and image; actual-anchor complete-carrier classifier for points, threshold calibrated only on independent rooms"
+    },
+    {
+      "benchmark": "lerf",
+      "name": "ramen",
+      "scene": "output/system_map_rebuild/ramen/complete/scene.json",
+      "queries": "configs/consolidated/ramen.integration-queries.json",
+      "source_evidence": "output/research_consolidation/source_evidence/ramen",
+      "outputs": [
+        "semantic_2d",
+        "selected_gaussian_projection_2d"
+      ],
+      "input_track": "frozen_declared_rgb_geometry",
+      "access": "source-assisted",
+      "task": "text_union"
+    },
+    {
+      "benchmark": "lerf",
+      "name": "figurines",
+      "scene": "output/system_map_rebuild/figurines/complete/scene.json",
+      "queries": "configs/consolidated/figurines.queries.json",
+      "source_evidence": "output/research_consolidation/source_run/figurines/detections",
+      "outputs": [
+        "semantic_2d",
+        "selected_gaussian_projection_2d"
+      ],
+      "input_track": "frozen_declared_rgb_geometry",
+      "access": "source-assisted",
+      "task": "text_union"
+    },
+    {
+      "benchmark": "lerf",
+      "name": "teatime",
+      "scene": "output/system_map_rebuild/teatime/complete/scene.json",
+      "queries": "configs/consolidated/teatime.queries.json",
+      "source_evidence": "output/research_consolidation/source_run/teatime/detections",
+      "outputs": [
+        "semantic_2d",
+        "selected_gaussian_projection_2d"
+      ],
+      "input_track": "frozen_declared_rgb_geometry",
+      "access": "source-assisted",
+      "task": "text_union"
+    },
+    {
+      "benchmark": "lerf",
+      "name": "waldo_kitchen",
+      "scene": "output/system_map_rebuild/waldo_kitchen/complete/scene.json",
+      "queries": "configs/consolidated/waldo_kitchen.queries.json",
+      "source_evidence": "output/research_consolidation/source_run/waldo_kitchen/detections",
+      "outputs": [
+        "semantic_2d",
+        "selected_gaussian_projection_2d"
+      ],
+      "input_track": "frozen_declared_rgb_geometry",
+      "access": "source-assisted",
+      "task": "text_union"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "fern",
+      "scene": "configs/pipeline/nvos_all_sources/fern.scene.json",
+      "queries": "configs/consolidated/nvos/fern.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fern/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/fern.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb",
+      "access": "source-assisted",
+      "task": "reference_instance"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "flower",
+      "scene": "configs/pipeline/nvos_all_sources/flower.scene.json",
+      "queries": "configs/consolidated/nvos/flower.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/flower/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/flower.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb",
+      "access": "source-assisted",
+      "task": "reference_instance"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "fortress",
+      "scene": "configs/pipeline/nvos_all_sources/fortress.scene.json",
+      "queries": "configs/consolidated/nvos/fortress.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fortress/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/fortress.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb",
+      "access": "source-assisted",
+      "task": "reference_instance"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "horns_center",
+      "scene": "configs/pipeline/nvos_all_sources/horns_center.scene.json",
+      "queries": "configs/consolidated/nvos/horns_center.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_center/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/horns_center.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb",
+      "access": "source-assisted",
+      "task": "reference_instance"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "horns_left",
+      "scene": "configs/pipeline/nvos_all_sources/horns_left.scene.json",
+      "queries": "configs/consolidated/nvos/horns_left.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_left/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/horns_left.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb",
+      "access": "source-assisted",
+      "task": "reference_instance"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "leaves",
+      "scene": "configs/pipeline/nvos_all_sources/leaves.scene.json",
+      "queries": "configs/consolidated/nvos/leaves.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/leaves/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/leaves.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb",
+      "access": "source-assisted",
+      "task": "reference_instance"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "orchids",
+      "scene": "configs/pipeline/nvos_all_sources/orchids.scene.json",
+      "queries": "configs/consolidated/nvos/orchids.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/orchids/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/orchids.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb",
+      "access": "source-assisted",
+      "task": "reference_instance"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "trex",
+      "scene": "configs/pipeline/nvos_all_sources/trex.scene.json",
+      "queries": "configs/consolidated/nvos/trex.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/trex/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/trex.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb",
+      "access": "source-assisted",
+      "task": "reference_instance"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0000_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0000_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0000_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0000_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0062_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0062_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0062_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0062_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0070_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0070_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0070_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0070_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0097_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0097_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0097_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0097_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0140_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0140_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0140_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0140_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0200_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0200_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0200_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0200_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0347_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0347_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0347_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0347_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0400_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0400_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0400_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0400_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0590_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0590_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0590_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0590_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0645_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0645_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0645_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0645_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ],
+      "access": "source-assisted",
+      "task": "category_partition"
+    }
+  ],
+  "pending": {
+    "scannet_source_scenes": [],
+    "uqis": "Independent calibration/final scenes, instance relation reasoning, compact student and part/signed-query extensions remain open",
+    "compact_multiteacher_student": false,
+    "public_sota_equivalence": false,
+    "independent_lerf_3d_ground_truth": false
+  },
+  "excluded_candidates": [
+    "finest region writer",
+    "early mean dual native scopes",
+    "late logmeanexp dual native scopes",
+    "source-refitted category calibration",
+    "transferred scope composition",
+    "joint positive categorical solver",
+    "other-view semantic responsibility used as foreground membership",
+    "pooled-member lower-cosine identity corroboration"
+  ],
+  "prediction_replay": false,
+  "claims": {
+    "compact_learned_multiteacher": false,
+    "independent_3d_lerf_ground_truth": false,
+    "annotated_four_query_accuracy": true,
+    "official_sota_equivalence": false,
+    "observation_compilation_is_new_accuracy_gain": false,
+    "compiled_category_field_is_four_query_validation": false,
+    "learned_local_fusion_contribution": false,
+    "independent_uqis_final_test": false,
+    "uqis_mask_probabilities_calibrated": false,
+    "uqis_official_mesh_instance_ground_truth": true,
+    "additional_independent_3d_instance_supervision": true,
+    "uqis_point_membership_development_gain": true,
+    "unified_four_query_high_accuracy": false
+  },
+  "comparison": "same v8 maps, teachers and native identities; whole-carrier point membership with additional independent3D instance supervision",
+  "default": false,
+  "validation": {
+    "status": "complete five-task development validation; declared point promotion gate passed",
+    "summary": "output/real_direct_membership_20261006/final_validation.json",
+    "comparison": "output/real_direct_membership_20261006/comparison.json",
+    "selection": "fixed real/rendered training control, independent development gate then all9 UQIS scenes; no per-query fallback",
+    "independent_test": false,
+    "compact_student": false,
+    "execution": "22 fresh public jobs and9 fully regenerated corrected UQIS jobs, same method recipe"
+  },
+  "architecture": {
+    "geometry": "frozen declared carrier",
+    "identity": "paired native teacher space",
+    "observations": "regional membership and visibility",
+    "readout": "task-specific category partition, category set or single instance",
+    "query_inputs": "declared per job, UQIS strictly map-only",
+    "scores": "reported separately by task, no cross-benchmark mean",
+    "point_membership": "actual geometric anchor, per-view co-membership and ambiguity, native appearance and metric displacement; supervised complete-carrier element selection"
+  },
+  "declaration": "configs/recipes/real_direct_membership.json",
+  "parent_recipe": "configs/pipeline/system_v8.json",
+  "training": {
+    "point_membership_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/real_direct_membership_20261006/real/model.joblib",
+    "supervision": "official3D instance labels in22 disjoint ScanNet training rooms",
+    "observations": "same deployed real RGB-D compiler; no total source frame/proposal cap",
+    "calibration": "three disjoint real-observation rooms, one global0.35 threshold",
+    "training_split": "output/real_referent_grounding_20261005/design.json"
+  },
+  "retained_as": "unchanged numerical comparator for system_v10"
+}

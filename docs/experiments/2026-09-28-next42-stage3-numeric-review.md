@@ -1,0 +1,11 @@
+# Outer review: Stage3 monotonicity near saturated parent logits
+
+Pending correction, discovered by outer assistant after Stage3 source screen and before accepting its target evidence. Do not change model/thresholds; this is a readout arithmetic issue.
+
+Current ElementPosteriorRuntime.transport uses `p=parent.sigmoid().double()`. This computes the sigmoid in fp32 before casting. A parent logit17 rounds to p=1.0 instead of the fp64 value0.9999999586006244. Very weak qualified negative evidence then produces pnew=0.999999997568458, whose logit19.834739685 is HIGHER than the original17. Negative evidence must not increase the original logit. Existing tests use larger updates and miss this case.
+
+Executable outer counterexample (CPU, current actual runtime): two elements with identity sparse support, two same-view/disjoint region masks, metadata keep all/footprint weight1/group0. Parent logits [[0.],[17.]], region membership logits [[4e-7],[-.04]]. Runtime output [[1.1368684e-13],[19.834739685]], negative element logit increase+2.834739685. Original sigmoid in fp64 is [0.5,0.9999999586006244], fp32 [0.5,1.0]. No GT or performance tuning involved.
+
+Required fix: evaluate source probability transforms in high precision BEFORE saturation rounding (`parent.double().sigmoid()`, and membership-logit double sigmoid where appropriate), maintain the convex posterior in that representation, preserve EXACT original finite logits for no effective change. Validate directional output monotonicity against ORIGINAL parent logits for weak evidence near saturation and extreme +/-100 or +/-150. A minimum-change numerical abstention may only be a documented floating-resolution rule, not a fitted semantic gate. Do not solve by allowing negative evidence to raise logits or by merely widening a tolerance.
+
+Also test generic `corrected_scores`/evaluator actual output, not only a detached toy posterior. Warm/cold and query batching use the same numeric path. Stage3's previous sparse/query GEMM batch correction remains in place. Final source gate and six target evaluations must bind final corrected source; retain pre-fix artifacts, do not relabel them. No new hyperparameter/teacher/head/geometry change is authorized by this review alone.

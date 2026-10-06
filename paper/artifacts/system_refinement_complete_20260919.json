@@ -1,0 +1,158 @@
+{
+  "complete": true,
+  "development_only": true,
+  "independent_test": false,
+  "frozen_defaults_changed": false,
+  "uqis_paused": true,
+  "frozen_source_count": 1773,
+  "frozen_source_mismatches": [],
+  "verified_child_bindings": 128,
+  "branches": {
+    "scannet": {
+      "path": "output/scannet_system_refinement_20260919_v2/seal.json",
+      "sha256": "9e36f3ae51cf71f7bd5948838241c418522df22ca9e5784832bab95f036cb82d"
+    },
+    "nvos": {
+      "path": "paper/artifacts/nvos_system_refinement_eight_20260919.json",
+      "sha256": "a6134d3ebb80eb1d63ae00dfd961f40a36737c6fe6e67ea6cce4b5b1797189ee"
+    },
+    "nvos_runtime": {
+      "path": "paper/artifacts/nvos_system_refinement_runtime_20260919.json",
+      "sha256": "acf116d864843b5e936190c6c191d2c5e67d8a3cdc68a9cca9833c5204cab191"
+    },
+    "lerf": {
+      "path": "paper/artifacts/lerf_source_relation_control_20260919.json",
+      "sha256": "2cbfb5d8fea929b5cc22d4c966afa8455a3c2f6fbfe0e81b0e7981179a89e40c"
+    },
+    "native_reprojection": {
+      "path": "paper/artifacts/native_reprojection_system_20260919.json",
+      "sha256": "40626d463244faa63966ec62cb2da6d045440e4878b42e527ab7e0f760033eef"
+    }
+  },
+  "scannet_macro": {
+    "native": {
+      "19": {
+        "miou": 0.391195448037895,
+        "macc": 0.5108974921759651
+      },
+      "15": {
+        "miou": 0.39978588678849164,
+        "macc": 0.5240551989796634
+      },
+      "10": {
+        "miou": 0.5195744405463056,
+        "macc": 0.6377002956245016
+      }
+    },
+    "calibrated_native": {
+      "19": {
+        "miou": 0.39897719398625214,
+        "macc": 0.5238929806703636
+      },
+      "15": {
+        "miou": 0.40542169710820514,
+        "macc": 0.5373900467664929
+      },
+      "10": {
+        "miou": 0.5190057258285321,
+        "macc": 0.6417318135227845
+      }
+    },
+    "scope": {
+      "19": {
+        "miou": 0.4400259737676496,
+        "macc": 0.5667218412680977
+      },
+      "15": {
+        "miou": 0.45617944559077983,
+        "macc": 0.5973533409558602
+      },
+      "10": {
+        "miou": 0.5687436093591621,
+        "macc": 0.699251784985115
+      }
+    },
+    "equal_logit": {
+      "19": {
+        "miou": 0.4659941625854616,
+        "macc": 0.5824769118477339
+      },
+      "15": {
+        "miou": 0.46307961648450896,
+        "macc": 0.5965526414285762
+      },
+      "10": {
+        "miou": 0.5823848467989541,
+        "macc": 0.7081716718792017
+      }
+    },
+    "bounded_logit": {
+      "19": {
+        "miou": 0.4645113766499127,
+        "macc": 0.5829898581897441
+      },
+      "15": {
+        "miou": 0.47415626558983115,
+        "macc": 0.6032939375680375
+      },
+      "10": {
+        "miou": 0.6037977045044789,
+        "macc": 0.7181987313009079
+      }
+    }
+  },
+  "nvos_macro": {
+    "baseline": {
+      "iou": 0.68612240254879,
+      "pixel_accuracy": 0.9293253868818283,
+      "average_precision": 0.8699061056799658
+    },
+    "spatial_component": {
+      "iou": 0.7938640043139458,
+      "pixel_accuracy": 0.9608288407325745,
+      "average_precision": 0.9010968712186445
+    },
+    "structure_component": {
+      "iou": 0.780175194144249,
+      "pixel_accuracy": 0.958613395690918,
+      "average_precision": 0.8963577707193219
+    },
+    "structure_smooth_component": {
+      "iou": 0.780518651008606,
+      "pixel_accuracy": 0.9588088169693947,
+      "average_precision": 0.8883048856811165
+    }
+  },
+  "lerf_macro": {
+    "final": {
+      "iou": 0.4417438162099023,
+      "ap": 0.6202650649405639,
+      "selected_iou": 0.2968632271043559
+    },
+    "baseline_calibrated": {
+      "iou": 0.44546571222674625,
+      "ap": 0.6304287439426286,
+      "selected_iou": 0.3136798180442921
+    },
+    "boundary_soft_calibrated": {
+      "iou": 0.445395515761431,
+      "ap": 0.6304902450460346,
+      "selected_iou": 0.3137488851568484
+    },
+    "source_rerank32_calibrated": {
+      "iou": 0.4449398496984752,
+      "ap": 0.6311051986205211,
+      "selected_iou": 0.31467562407412897
+    }
+  },
+  "new_module_tests": "6 passed",
+  "scannet_runtime_real_replay": "zero difference all elements and3 splits scene0000",
+  "nvos_runtime_boundary": "spatial output exact; additional optimizer baseline replay1 scoring pixel mismatch, joint check failed closed",
+  "native_reprojection_promoted": false,
+  "lerf_new_graph_promoted": false,
+  "joint_four_query_promotion": false,
+  "report": {
+    "path": "docs/experiments/2026-09-19-system-refinement.md",
+    "sha256": "2e0f186d7938c207019a8c4073f6f38de6a6f03dd0b0d7f1a6f6279bc93167de"
+  }
+}

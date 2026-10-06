@@ -1,6 +1,14 @@
-# GaussFM / RADIO-GS LaTeX Draft
+# RADIO-GS manuscripts and current research claims
 
-Active TPAMI manuscript entry points:
+The current implementation is documented in
+[SYSTEM_IMPLEMENTATION.md](../docs/SYSTEM_IMPLEMENTATION.md), with scientific
+acceptance criteria in [CVPR_RESEARCH_PLAN.md](CVPR_RESEARCH_PLAN.md).
+The current source-assisted native field is not the compact RADIO reconstruction
+model described by the June manuscripts. Their architecture, storage tables and
+results must not be reused as claims for the new system. A submission-ready CVPR
+manuscript has not yet been established.
+
+Historical TPAMI manuscript build entry points:
 
 ```bash
 cd paper
@@ -8,7 +16,7 @@ latexmk -pdf -interaction=nonstopmode -halt-on-error radio_gs_tpami.tex
 latexmk -pdf -interaction=nonstopmode -halt-on-error radio_gs_tpami_supplement.tex
 ```
 
-The paper-facing TPAMI draft follows the June 15 storyline:
+The historical TPAMI draft follows the June 15 storyline:
 
 - Main concept: compact reconstructive RADIO Gaussian feature memory.
 - Main tables: LERF-OVS 2D/3D and VALA-aligned ScanNet-8 same-protocol reproduced

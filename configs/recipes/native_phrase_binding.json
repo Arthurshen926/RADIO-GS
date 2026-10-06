@@ -1,0 +1,50 @@
+{
+  "kind": "bounded_native_phrase_binding_study",
+  "status": "complete_no_promotion",
+  "default_changed": false,
+  "active_recipe": "configs/pipeline/system_v9.json",
+  "report": "docs/experiments/2026-10-06-native-phrase-identity-and-relational-competition.md",
+  "results": "output/native_phrase_binding_20261006/final_comparison.json",
+  "design": "output/native_phrase_binding_20261006/design.json",
+  "training_rooms": 22,
+  "calibration_rooms": 3,
+  "development_rooms": 4,
+  "role_extractor_fits": 1,
+  "retrieval_fits": 4,
+  "search_rounds": 2,
+  "benchmark_jobs": 0,
+  "additional_supervision": "NR3D, ScanEnts3D phrase roles, official3D instance and category annotations, all in independent training rooms",
+  "conditions": [
+    "native",
+    "uniform",
+    "native_instance",
+    "uniform_instance"
+  ],
+  "round1_gate": {
+    "candidate": 0.11109819856937975,
+    "control": 0.10507596598472446,
+    "previous_local": 0.09785769115061271,
+    "uniform_intervention": 0.10812528838869184,
+    "query_mean": 0.09508689413996763,
+    "reversed_witness": 0.09576538112014532,
+    "passed": false,
+    "benchmark_metrics_used": false,
+    "default": "system_v9",
+    "explanation": "One fixed search round; protect native phrase recognition and require actual conditional spatial utility."
+  },
+  "round2_gate": {
+    "candidate": 0.10305391083238646,
+    "native_round1": 0.11109819856937975,
+    "matched_uniform": 0.09358912648167461,
+    "uniform_intervention": 0.09386289527174085,
+    "query_mean": 0.09931760574909276,
+    "reversed_witness": 0.0844092620536685,
+    "passed": false,
+    "benchmark_metrics_used": false,
+    "tuning_rounds": 2,
+    "additional_search": false
+  },
+  "source_views_or_map_changed": false,
+  "query_permissions_changed": false,
+  "independent_final_test": false
+}

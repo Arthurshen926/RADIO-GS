@@ -1,0 +1,42 @@
+{
+  "name": "Query identity and scope from the same frozen physical observations",
+  "role": "bounded opened-development mechanism comparison, not a new default",
+  "base_recipe": "configs/pipeline/system_v7.json",
+  "benchmark_package": "output/scannet_uqis_9_v0_3_1_candidate",
+  "geometry": "unchanged official-mesh RGB-D-assisted track",
+  "source_observations": "all 1107 legal sampled frames and 39360 original regions",
+  "inputs_added": "none",
+  "query_time_source_access": false,
+  "source_or_candidate_count_cap_added": false,
+  "candidates": [
+    {
+      "name": "scope_hypotheses",
+      "map": "one physical scope hypothesis per original supported region",
+      "identity": "confidence-weighted mean native cosine across one matching region per view",
+      "scope": "original one-hop confidence-weighted visible majority",
+      "points": "original independent anchor co-membership",
+      "output": "output/observation_hypotheses_study",
+      "command": "python scripts/research/run_observation_hypotheses_cohort.py --gpus 4,5"
+    },
+    {
+      "name": "view_exclusive_tracks",
+      "map": "mutual physical correspondence, greedy strongest-first merging, at most one region per view per track",
+      "identity": "mean native cosine across track observations",
+      "points": "positive geometric anchor; maximum Beta(1,1) smoothed support among anchor-compatible tracks",
+      "scope": "equal-view strict majority within the selected track",
+      "output": "output/view_exclusive_tracks_study",
+      "command": "python scripts/research/run_observation_hypotheses_cohort.py --output output/view_exclusive_tracks_study --tracks --gpus 4,5"
+    }
+  ],
+  "evaluation": {
+    "cohort": "9 scenes, 67 targets, all 268 independent positive queries",
+    "primary": "four separate scene-macro AP values",
+    "consumed_output": "four separate actual selected-set IoU values",
+    "paired_secondary": "same-target all-four success and set agreement",
+    "predictions_before_scoring": true,
+    "query_or_target_specific_routing": false,
+    "public_jobs": "all original jobs retained in recipes; unchanged public readers are not rerun or credited with a new improvement",
+    "diagnostic": "GT-selected best candidate only after complete automatic predictions; separate from method scores"
+  },
+  "decision": "Do not promote a cross-view mechanism that improves consistency or ranking while worsening actual target extraction. No parameter sweep or benchmark-target routing."
+}

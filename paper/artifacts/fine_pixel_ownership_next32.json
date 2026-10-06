@@ -1,0 +1,461 @@
+{
+  "schema": "fine_pixel_ownership_next32.v1",
+  "complete": true,
+  "candidate_rejected": true,
+  "default_promoted": false,
+  "benchmark_evaluated": false,
+  "source_only": true,
+  "independent_test": false,
+  "original_heads_reused": false,
+  "summary": {
+    "complete": true,
+    "joint_gate_pass": false,
+    "benchmark_or_refit_authorized": false,
+    "pilots": {
+      "lerf_figurines": {
+        "source_admitted": false,
+        "original_gate_pass": false,
+        "plain_gate_pass": false,
+        "gate": {
+          "text": {
+            "small": {
+              "mse_ratio": 0.9202402466665454,
+              "top1_drop": 0.0
+            },
+            "retained": {
+              "mse_ratio": 1.0007056555894744,
+              "top1_drop": 0.0
+            },
+            "boundary": {
+              "mse_ratio": 1.0045117877575582,
+              "top1_drop": 0.0005812942981719971
+            }
+          },
+          "image": {
+            "small": {
+              "mse_ratio": 1.047054812923194,
+              "top1_drop": 0.0
+            },
+            "retained": {
+              "mse_ratio": 1.0151981607179965,
+              "top1_drop": 0.0
+            },
+            "boundary": {
+              "mse_ratio": 1.01291121595509,
+              "top1_drop": 0.005102366209030151
+            }
+          }
+        },
+        "plain_gate": {
+          "text": {
+            "small": {
+              "centered_delta": -1.2594566214829683e-05,
+              "top1_drop": 0.0
+            },
+            "retained": {
+              "centered_delta": -4.870234988629818e-07,
+              "top1_drop": 0.0
+            },
+            "boundary": {
+              "centered_delta": 1.0663643479347229e-07,
+              "top1_drop": 0.00038751959800720215
+            }
+          },
+          "image": {
+            "small": {
+              "centered_delta": -9.575090371072292e-05,
+              "top1_drop": 0.0
+            },
+            "retained": {
+              "centered_delta": -3.048684448003769e-06,
+              "top1_drop": 0.006944447755813599
+            },
+            "boundary": {
+              "centered_delta": 2.677086740732193e-06,
+              "top1_drop": 0.002712652087211609
+            }
+          }
+        },
+        "metrics": {
+          "baseline": {
+            "retained": {
+              "text": {
+                "mse": 0.0004394513671286404,
+                "centered_mse": 0.00018053555686492473,
+                "teacher_top1_agreement": 0.3472222089767456
+              },
+              "image": {
+                "mse": 0.010231939144432545,
+                "centered_mse": 0.0016071083955466747,
+                "teacher_top1_agreement": 0.1180555522441864
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.0005788235575892031,
+                "centered_mse": 0.0003533757699187845,
+                "teacher_top1_agreement": 0.0
+              },
+              "image": {
+                "mse": 0.007878915406763554,
+                "centered_mse": 0.003437636187300086,
+                "teacher_top1_agreement": 0.0
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.0002988894993904978,
+                "centered_mse": 0.0001518350327387452,
+                "teacher_top1_agreement": 0.2578957676887512
+              },
+              "image": {
+                "mse": 0.006576927378773689,
+                "centered_mse": 0.0011956096859648824,
+                "teacher_top1_agreement": 0.11948588490486145
+              }
+            }
+          },
+          "plain": {
+            "retained": {
+              "text": {
+                "mse": 0.00043991225538775325,
+                "centered_mse": 0.0001793563278624788,
+                "teacher_top1_agreement": 0.3472222089767456
+              },
+              "image": {
+                "mse": 0.010320158675312996,
+                "centered_mse": 0.001591914682649076,
+                "teacher_top1_agreement": 0.125
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.000554826227016747,
+                "centered_mse": 0.0003384629962965846,
+                "teacher_top1_agreement": 0.0
+              },
+              "image": {
+                "mse": 0.00809486024081707,
+                "centered_mse": 0.003213630523532629,
+                "teacher_top1_agreement": 0.0
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.00029945597634650767,
+                "centered_mse": 0.0001516556367278099,
+                "teacher_top1_agreement": 0.2577019929885864
+              },
+              "image": {
+                "mse": 0.006615246180444956,
+                "centered_mse": 0.0011960715055465698,
+                "teacher_top1_agreement": 0.11709617078304291
+              }
+            }
+          },
+          "ownership": {
+            "retained": {
+              "text": {
+                "mse": 0.0004397614684421569,
+                "centered_mse": 0.0001788693043636158,
+                "teacher_top1_agreement": 0.3472222089767456
+              },
+              "image": {
+                "mse": 0.01038744580000639,
+                "centered_mse": 0.0015888659982010722,
+                "teacher_top1_agreement": 0.1180555522441864
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.0005326567334122956,
+                "centered_mse": 0.0003258684300817549,
+                "teacher_top1_agreement": 0.0
+              },
+              "image": {
+                "mse": 0.008249656297266483,
+                "centered_mse": 0.003117879619821906,
+                "teacher_top1_agreement": 0.0
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.00030023802537471056,
+                "centered_mse": 0.00015176227316260338,
+                "teacher_top1_agreement": 0.2573144733905792
+              },
+              "image": {
+                "mse": 0.006661843508481979,
+                "centered_mse": 0.001198748592287302,
+                "teacher_top1_agreement": 0.1143835186958313
+              }
+            }
+          }
+        },
+        "observations": [
+          {
+            "frame": 88,
+            "retained_regions": 49,
+            "supported_retained": 49,
+            "small_regions": 7,
+            "supported_small": 7,
+            "unsupported_small_ids": [],
+            "boundary_pixels": 8322,
+            "support_identical": true
+          },
+          {
+            "frame": 96,
+            "retained_regions": 97,
+            "supported_retained": 95,
+            "small_regions": 17,
+            "supported_small": 15,
+            "unsupported_small_ids": [
+              235,
+              243
+            ],
+            "boundary_pixels": 7161,
+            "support_identical": true
+          }
+        ],
+        "baseline_fusion_replay_max_error": 2.980232238769531e-07,
+        "plain_restoration_replay_max_error": 2.980232238769531e-07,
+        "support_unchanged": true,
+        "basis_unchanged": true
+      },
+      "scannet_scene0000_00": {
+        "source_admitted": false,
+        "original_gate_pass": false,
+        "plain_gate_pass": true,
+        "gate": {
+          "text": {
+            "small": {
+              "mse_ratio": 0.8345906937642334,
+              "top1_drop": -0.1904762014746666
+            },
+            "retained": {
+              "mse_ratio": 0.9760179356815201,
+              "top1_drop": -0.013245046138763428
+            },
+            "boundary": {
+              "mse_ratio": 0.9940023497533679,
+              "top1_drop": 0.0
+            }
+          },
+          "image": {
+            "small": {
+              "mse_ratio": 0.9178851026997298,
+              "top1_drop": -0.0476190485060215
+            },
+            "retained": {
+              "mse_ratio": 0.9959508767168368,
+              "top1_drop": 0.0
+            },
+            "boundary": {
+              "mse_ratio": 1.012034757263137,
+              "top1_drop": 0.0006819665431976318
+            }
+          }
+        },
+        "plain_gate": {
+          "text": {
+            "small": {
+              "centered_delta": -2.7705682441592216e-06,
+              "top1_drop": 0.0
+            },
+            "retained": {
+              "centered_delta": -2.396118361502886e-07,
+              "top1_drop": 0.0
+            },
+            "boundary": {
+              "centered_delta": 3.083550836890936e-08,
+              "top1_drop": 0.0
+            }
+          },
+          "image": {
+            "small": {
+              "centered_delta": -4.597450606524944e-05,
+              "top1_drop": -0.0476190485060215
+            },
+            "retained": {
+              "centered_delta": -9.030685760080814e-06,
+              "top1_drop": 0.0
+            },
+            "boundary": {
+              "centered_delta": 9.98144969344139e-07,
+              "top1_drop": -6.198883056640625e-05
+            }
+          }
+        },
+        "metrics": {
+          "baseline": {
+            "retained": {
+              "text": {
+                "mse": 0.0003424369206186384,
+                "centered_mse": 0.00017684746126178652,
+                "teacher_top1_agreement": 0.41721853613853455
+              },
+              "image": {
+                "mse": 0.005586500279605389,
+                "centered_mse": 0.0016379696317017078,
+                "teacher_top1_agreement": 0.21192052960395813
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.0005518266698345542,
+                "centered_mse": 0.0003081713221035898,
+                "teacher_top1_agreement": 0.095238097012043
+              },
+              "image": {
+                "mse": 0.008859558030962944,
+                "centered_mse": 0.00276029366068542,
+                "teacher_top1_agreement": 0.0476190485060215
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.00022158390493132174,
+                "centered_mse": 0.00011564289889065549,
+                "teacher_top1_agreement": 0.6730316281318665
+              },
+              "image": {
+                "mse": 0.002926180139183998,
+                "centered_mse": 0.0009395687957294285,
+                "teacher_top1_agreement": 0.26057037711143494
+              }
+            }
+          },
+          "plain": {
+            "retained": {
+              "text": {
+                "mse": 0.0003349308099132031,
+                "centered_mse": 0.00017278303857892752,
+                "teacher_top1_agreement": 0.430463582277298
+              },
+              "image": {
+                "mse": 0.005561493802815676,
+                "centered_mse": 0.0015857761027291417,
+                "teacher_top1_agreement": 0.21192052960395813
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.00046509000821970403,
+                "centered_mse": 0.0002698462922126055,
+                "teacher_top1_agreement": 0.2857142984867096
+              },
+              "image": {
+                "mse": 0.008176538161933422,
+                "centered_mse": 0.002188474638387561,
+                "teacher_top1_agreement": 0.0476190485060215
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.0002207451907452196,
+                "centered_mse": 0.00011593009548960254,
+                "teacher_top1_agreement": 0.6730316281318665
+              },
+              "image": {
+                "mse": 0.00295167975127697,
+                "centered_mse": 0.0009450121433474123,
+                "teacher_top1_agreement": 0.2598264217376709
+              }
+            }
+          },
+          "ownership": {
+            "retained": {
+              "text": {
+                "mse": 0.00033422457636334,
+                "centered_mse": 0.00017254342674277723,
+                "teacher_top1_agreement": 0.430463582277298
+              },
+              "image": {
+                "mse": 0.005563879851251841,
+                "centered_mse": 0.001576745416969061,
+                "teacher_top1_agreement": 0.21192052960395813
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.0004605494032148272,
+                "centered_mse": 0.00026707572396844625,
+                "teacher_top1_agreement": 0.2857142984867096
+              },
+              "image": {
+                "mse": 0.008132056333124638,
+                "centered_mse": 0.0021425001323223114,
+                "teacher_top1_agreement": 0.095238097012043
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.00022025492216926068,
+                "centered_mse": 0.00011596093099797145,
+                "teacher_top1_agreement": 0.6730316281318665
+              },
+              "image": {
+                "mse": 0.0029613960068672895,
+                "centered_mse": 0.0009460102883167565,
+                "teacher_top1_agreement": 0.2598884105682373
+              }
+            }
+          }
+        },
+        "observations": [
+          {
+            "frame": 0,
+            "retained_regions": 74,
+            "supported_retained": 74,
+            "small_regions": 13,
+            "supported_small": 13,
+            "unsupported_small_ids": [],
+            "boundary_pixels": 7560,
+            "support_identical": true
+          },
+          {
+            "frame": 420,
+            "retained_regions": 77,
+            "supported_retained": 77,
+            "small_regions": 8,
+            "supported_small": 8,
+            "unsupported_small_ids": [],
+            "boundary_pixels": 8570,
+            "support_identical": true
+          }
+        ],
+        "baseline_fusion_replay_max_error": 2.384185791015625e-07,
+        "plain_restoration_replay_max_error": 2.980232238769531e-07,
+        "support_unchanged": true,
+        "basis_unchanged": true
+      }
+    }
+  },
+  "implementations": {
+    "/root/RADIO-GS/scripts/audits/run_fine_pixel_ownership_next32.py": "bcf2dd453db16f4f3975c3c1beecf811771b8242fe8ed9c8b3468a6c7496da81",
+    "radio_gs/training/fine_pixel_ownership.py": "e93acf0022d92660fef14e028e3219b3dd04a2e77033f3076c22863ab917092f",
+    "tests/test_fine_pixel_ownership.py": "04fa518d00d03ec051e79ddf23b2614157178ca1b2b7515dd4b3fd975c00e2cd",
+    "radio_gs/training/source_pixel_evidence.py": "b5442e1ffff974539ed599cea6ee5f52d91b867d5e2d855f2151e7e7bd532b3a",
+    "radio_gs/training/source_region_readback.py": "eb41b926a6c473fd12e12d25e0cb2e13149679c5c3b52666f83fcb7cc799372c",
+    "radio_gs/scripts/prepare_four_teacher_retrieval.py": "e0b0cfa96289c9f3e99733c8157e661fa0a996c1b67beeb386b7a6044e5e01f0"
+  },
+  "artifacts": {
+    "output/fine_pixel_ownership_next32/independent_prereg_review.json": "c5ea83e1c9f52a365a52c4692bfa769490b2120349dbacdde5365015d5501101",
+    "output/fine_pixel_ownership_next32/lerf_figurines/map.pt": "099da48fa2a825450432b1e55b30edf8ba1b545476f8fe12c9ef6ed15bc477a8",
+    "output/fine_pixel_ownership_next32/lerf_figurines/report.json": "214fa87be3f207b57303c4c5a1f60ebd0857ffbc326aaef44190f399a223160d",
+    "output/fine_pixel_ownership_next32/lerf_figurines.log": "d71b5ecbe8e5914eb97455fd20cfac3eb7d200146a8f5a98d1efe6e29e01cbd0",
+    "output/fine_pixel_ownership_next32/registration.json": "88a92cd780564168214309da9748e6a7160c41a9b03358ec48c8a401a9adcae4",
+    "output/fine_pixel_ownership_next32/scannet_scene0000_00/map.pt": "ab394e77d724638ad98808891d743fcc44951fb7269828adcd0341598ec103a8",
+    "output/fine_pixel_ownership_next32/scannet_scene0000_00/report.json": "3871f162cb8053257b7166159ea9317e381048a2034182c5fdb5b321d84e7070",
+    "output/fine_pixel_ownership_next32/scannet_scene0000_00.log": "4c00b4fb411e2c5f8329413f1c12138d91c8c83144e529e321b3ab59e7d80e63",
+    "output/fine_pixel_ownership_next32/summary.json": "7d64982d26284fb2a06757528b65869b0a83e275144c605c1694c5da822a10de"
+  },
+  "document": {
+    "docs/experiments/2026-09-26-fine-pixel-source-ownership.md": "fb0f18adfa48c751fa5e7c30215740b66804b6b32204566beda3b19e258f1c6a"
+  },
+  "tests_passed": 6,
+  "tests_command": "OMP_NUM_THREADS=4 PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python -m pytest tests/test_fine_pixel_ownership.py -q",
+  "frozen_sources_verified": 1773,
+  "frozen_sources_changed": [],
+  "review_receipt_sha256": "c5ea83e1c9f52a365a52c4692bfa769490b2120349dbacdde5365015d5501101"
+}

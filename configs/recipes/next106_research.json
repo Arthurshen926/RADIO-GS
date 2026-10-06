@@ -1,0 +1,37 @@
+{
+  "name": "next106_small_regions_and_exemplar_set",
+  "status": "completed targeted development controls; not promoted",
+  "retained": "configs/recipes/next104_research.json",
+  "report": "docs/experiments/2026-10-02-small-regions-and-exemplar-set-next106.md",
+  "summary": "output/next106/summary.json",
+  "source_only": true,
+  "query_aliases": false,
+  "geometry": "output/joint_carrier_next66/adaptive_allrgb",
+  "small_region_rule": "native SAM masks with area<0.002 and pixels>=64, same encoder and crop",
+  "source_diagnostic_queries": {
+    "ramen": [
+      9
+    ],
+    "waldo_kitchen": [
+      7
+    ]
+  },
+  "reconstruction_query": {
+    "ramen": [
+      9
+    ]
+  },
+  "controls": {
+    "old_native": "output/small_native_scope_next106/old",
+    "expanded_native": "output/small_native_scope_next106/expanded",
+    "text_only": "output/text_set_scope_next106",
+    "text_visual_exemplar": "output/exemplar_set_scope_next106"
+  },
+  "discovery": "same114core-present source views; SAM3 exact text + positive tracked-core box; preserve core and union detections; no manual exemplar",
+  "limits": [
+    "exploratory single-query result",
+    "selected silhouette projection is not independent 3D GT",
+    "no new otherbenchmark or four-query result",
+    "no per-query metric selection for mainline"
+  ]
+}

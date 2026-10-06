@@ -1,0 +1,62 @@
+{
+  "stage": "rendered_observation_pilot_trained_and_evaluated_not_promoted",
+  "parent_recipe": "configs/pipeline/system_v8.json",
+  "default_changed": false,
+  "objective": "Predict which actual elements belong to a requested whole instance, keeping native identity and frozen geometry separate",
+  "training_inventory": "output/independent_instance_membership/inventory.json",
+  "split": "output/independent_instance_membership/split.json",
+  "supervision_condition": "additional official-training ScanNet 3D instance annotations; not the zero-target-label v8 condition",
+  "split_policy": "exclude every ScanNet OVS/UQIS evaluation room prefix and all its rescans; fixed room-grouped 80/20 within remaining official training scans",
+  "fit_scans": 945,
+  "fit_rooms": 445,
+  "validation_scans": 236,
+  "validation_rooms": 111,
+  "target_semantics": {
+    "whole_instance": "all labelled members of the same instance are positive, distinct labelled instances are negative, unlabelled points are unknown",
+    "category_union": "other instances of the requested class must also be positive; an instance-negative rule cannot be reused blindly",
+    "part": "not annotated by these assets; cannot claim part supervision or force whole-object expansion"
+  },
+  "retained_constraints": [
+    "Native teacher coordinates and geometry stay frozen",
+    "UQIS queries receive no source RGB, source depth or SAM access",
+    "One task-typed architecture; no query-name routing or best-old-answer inheritance",
+    "Evaluate actual additions/removals, not only the probability map or mask confidence"
+  ],
+  "remaining_inputs": [
+    "Independent training rooms with real or demonstrably matched teacher observation distributions; rendered-RGB pilot did not transfer actual set quality",
+    "Per-instance class mapping for category-union supervision; PLY instance IDs alone are insufficient",
+    "Independent whole/part supervision if part claims are pursued"
+  ],
+  "validation_gate": {
+    "first": "Same inputs and budget on room-disjoint mechanism validation; quantify false additions and missed true members",
+    "then": "Full five-benchmark common-entry rerun before any mainline promotion",
+    "sota_or_unseen_generalization_established": false
+  },
+  "actual_pilot": {
+    "fit_rooms": 24,
+    "calibration_rooms": 4,
+    "mechanism_development_rooms": 4,
+    "confirmation_rooms": 4,
+    "rendered_cameras_per_room": 12,
+    "region_training_pairs": 57560,
+    "element_training_samples": 887126,
+    "additional_3d_instance_supervision": true,
+    "design": "output/learned_instance_additions/design.json",
+    "confirmation_design": "output/learned_instance_additions/confirmation_design.json"
+  },
+  "results": {
+    "report": "docs/experiments/2026-10-05-independent-instance-membership-learning.md",
+    "candidate_recipe": "output/learned_instance_additions/element_anchor_recipe.json",
+    "candidate_summary": "output/learned_instance_additions/element_anchor_system/summary.json",
+    "retained_summary": "output/system_v8_membership_closure_20261005/summary.json",
+    "decision": "retain v8; point ranks improve but real UQIS actual selections regress, including equal-count control"
+  },
+  "latest_followup": {
+    "report": "docs/experiments/2026-10-05-query-conditioned-membership-evidence.md",
+    "comparison": "output/learned_instance_additions/joint_evidence_comparison.json",
+    "corrected_executable_recipe": "output/learned_instance_additions/element_query_recipe.json",
+    "new_confirmation_rooms": 8,
+    "default_changed": false,
+    "decision": "retain v8; correct query conditioning but mean set gains unstable and four-query success decreases"
+  }
+}

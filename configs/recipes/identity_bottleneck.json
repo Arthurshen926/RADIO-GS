@@ -1,0 +1,43 @@
+{
+  "name": "Identity first: seed intervention and retained native visual context",
+  "date": "2026-10-05",
+  "default": false,
+  "retained_default": "configs/pipeline/system_v8.json",
+  "study_root": "output/identity_bottleneck_20261005",
+  "diagnosis": "After all baseline predictions, filter target-majority seeds using evaluator labels and retain the highest original identity score; unchanged decoder. Never an automatic result.",
+  "automatic_conditions": {
+    "baseline": "Original v8 masked object crop",
+    "unmasked": "Same tight bounding box and encoder; do not erase background inside it; replace text identity only",
+    "object_context": "Keep original masked object and separate 1.5x unmasked context native descriptors; equal candidate ranks for text identity only"
+  },
+  "fixed": {
+    "source_frames_regions_geometry_membership_visibility": true,
+    "native_semantic_field": true,
+    "scope_decoder": true,
+    "image_and_point_query_rules": true,
+    "uqis_query_source_rgb": false,
+    "query_specific_top_k": false,
+    "benchmark_labels_used_for_inference_or_fitting": false,
+    "full_cohort": "9 rooms, 67 targets, all 268 independent queries per condition"
+  },
+  "interpretation": {
+    "additional_offline_encoding_cost": true,
+    "visual_context_executes_3d_relational_language": false,
+    "new_core_mechanism_proven": false,
+    "independent_final_test": false,
+    "sota_equivalence": false
+  },
+  "result": {
+    "status": "all three complete nine-scene cohorts finished",
+    "scene_jobs": 27,
+    "query_executions": 804,
+    "promoted": false,
+    "text_iou_percent": {
+      "baseline": 16.386530164545416,
+      "unmasked": 8.861102554815066,
+      "object_context": 14.930873535961364
+    },
+    "comparison": "output/identity_bottleneck_20261005/comparison.json",
+    "next": "Independent natural referring-expression supervision with scene context; no more crop or scalar-fusion sweeps"
+  }
+}

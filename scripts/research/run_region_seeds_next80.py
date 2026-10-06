@@ -1,0 +1,9 @@
+"""Controlled missing-seed intervention, retaining next79 for other queries."""
+import argparse,json,os,subprocess
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--regional-positive-evidence',action='store_true');p.add_argument('--gpu',required=True);a=p.parse_args();key='lerf_'+a.scene
+out=Path('output/region_seed_positive_next80' if a.regional_positive_evidence else 'output/region_seed_decode_next80')/key;out.mkdir(parents=True,exist_ok=True);indices=[str(r['query_index']) for r in json.loads((Path('output/region_seeds_next80')/key/'proposals.json').read_text())];env=dict(os.environ,PYTHONPATH='.',OMP_NUM_THREADS='4',CUDA_VISIBLE_DEVICES=a.gpu);py='/root/miniconda3/envs/cybersim_agent/bin/python'
+commands=[['/root/miniconda3/envs/sam3/bin/python','scripts/research/track_full_text_sources_next79.py','--key',key,'--query-indices',*indices,'--seed-base','output/region_seeds_next80','--output-base','output/region_seed_tracks_next80'],[py,'scripts/research/decode_expanded_extent_next72.py','--key',key,'--semantic-base','output/native_write_next75/all/calibrated','--cohort','all','--evidence-base','output/typed_evidence_next44','--output-base',str(out.parent),'--mode','seeded','--tracks-base','output/region_seed_tracks_next80','--retained-selection',str(Path('output/full_text_decode_next79/complete/all')/key/'typed_readout.pt'),'--extra-track-frames','--query-indices',*indices],[py,'scripts/research/evaluate_scope_dictionary.py','--key',key,'--base',str(out.parent),'--readout','anchored','--pipeline','--calibrated','--element-results',str(out/'typed_readout.pt')]]
+if a.regional_positive_evidence:commands[1].append('--regional-positive-evidence')
+with (out/'execution.log').open('w') as log:
+ for command in commands:subprocess.run(command,env=env,stdout=log,stderr=subprocess.STDOUT,check=True)

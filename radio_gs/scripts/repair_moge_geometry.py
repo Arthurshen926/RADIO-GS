@@ -20,13 +20,16 @@ from radio_gs.v4.geometry.tsdf_fusion import DepthObservation, SparseSurfaceFusi
 from radio_gs.utils.immutable_artifacts import sha256_file
 
 
-def load_views(prior, width, device, allow_global_scale_fallback=False, *, legacy_affine_normals=False):
+def load_views(prior, width, device, allow_global_scale_fallback=False, *, legacy_affine_normals=False, verify_materialized_source_prediction=True):
     views=[]
     for frame in sorted(prior.records):
         row=prior.records[frame]
-        if sha256_file(row['prediction']) != row['prediction_sha256']:
-            raise ValueError('prediction bytes changed')
         cal=prior.calibration[frame]
+        # Materialized geometry carries its own data digest and source identity.
+        # Reconstruction can consume it without rereading unused native VFM arrays.
+        if cal.get('source_geometry_override') is None or verify_materialized_source_prediction:
+            if sha256_file(row['prediction']) != row['prediction_sha256']:
+                raise ValueError('prediction bytes changed')
         if cal.get('source_geometry_override') is not None:
             if not cal['accepted']:continue
             from radio_gs.geometry.source_geometry_override import load_source_geometry_override
@@ -120,14 +123,14 @@ def residual_summary(corr,scale):
     return {'mean':float(r.mean()),'median':float(r.median()),'p90':float(r.quantile(.9))}
 
 
-def build_geometry(views,scale,unit,voxel_metres,device,minimum_voxel_views=None):
+def build_geometry(views,scale,unit,voxel_metres,device,minimum_voxel_views=None, *, relative_depth_tolerance=.01):
     observations=[]
     for index,v in enumerate(views):
         h,w=v['depth'].shape
         camera=Camera(str(v['frame']),v['k'].cpu(),v['pose'].cpu(),h,w)
         observations.append(DepthObservation(camera,v['depth']*scale[index],v['valid'],v['valid'].float(),v['normals']))
     fused=SparseSurfaceFusion(voxel_metres*unit,minimum_views=2,device=device,
-                             consistency_mode='source_depth_v2',relative_depth_tolerance=.01,minimum_voxel_views=minimum_voxel_views).fuse(observations)
+                             consistency_mode='source_depth_v2',relative_depth_tolerance=relative_depth_tolerance,minimum_voxel_views=minimum_voxel_views).fuse(observations)
     keep=fused.normals.norm(dim=1)>.5
     return FrozenGaussianGeometry(fused.centres[keep],fused.normals[keep],
                                   tangent_sigma=voxel_metres*unit*.75,
@@ -182,7 +185,10 @@ def evaluate_geometry(model,views,unit,prior=None,sparse_points=None):
         if measured:
             total=sum(r['colmap_points_covered'] for r in measured)
             aggregate[key]=sum(r[key]*r['colmap_points_covered'] for r in measured)/total
-    return {'aggregate':aggregate,'views':rows,'reference':'heldout_source_MoGe_and_source_only_COLMAP_sparse_points'}
+    reference = ('heldout_source_MoGe_and_source_only_COLMAP_sparse_points'
+                 if any('colmap_points_available' in row for row in rows)
+                 else 'heldout_source_MoGe_only_not_independent_ground_truth')
+    return {'aggregate':aggregate,'views':rows,'reference':reference}
 
 
 def run(args):

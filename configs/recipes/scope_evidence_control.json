@@ -1,0 +1,33 @@
+{
+  "stage": "fixed-source identity and scope responsibility",
+  "baseline": "configs/recipes/current_research.json",
+  "scenes": ["figurines", "ramen", "teatime", "waldo_kitchen"],
+  "queries": "67 labeled texts plus the existing unlabeled ramen probe",
+  "source_inputs": "output/research_consolidation/source_run/<scene>/inputs.json",
+  "frozen": ["geometry", "native features", "literal query encodings", "SAM3 detector outputs", "LERF scoring"],
+  "heldout": {
+    "stride": 5,
+    "fit_and_correspondence_excluded": true,
+    "native_map_excluded": false,
+    "independent_ground_truth": false,
+    "unseen_scene": false
+  },
+  "comparators": ["confidence-weighted source fusion", "existing subset-render fit"],
+  "candidates": {
+    "conflict_abstention": "Two other positive-view footprint witnesses protect a pixel from complement exclusion; no identity verification",
+    "native_identity": "Matched region IoU >=0.5 and native text score in the upper 5% of training-source regions; rejected detector instances become unknown",
+    "native_identity_revision": "Same scores/thresholds; no region correspondence means retain original detector evidence, not identity rejection"
+  },
+  "search": {
+    "core_candidates": 2,
+    "identity_rule_revisions": 1,
+    "quantile_sweep": false,
+    "per_query_routing": false,
+    "new_vfm_calls": 0,
+    "development_labels_examined_after_runs": true
+  },
+  "run_initial": "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/run_scope_evidence_control.py --output output/scope_evidence_control_fresh",
+  "run_revision_after_initial_finishes": "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/run_scope_evidence_control.py --output output/scope_evidence_control_fresh --arms identity_veto",
+  "summary": "output/scope_evidence_control/summary.json",
+  "default_promotion": false
+}

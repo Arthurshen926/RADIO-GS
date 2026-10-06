@@ -2,6 +2,80 @@
 
 Status: Experimental implementation, not a promoted architecture.
 
+2026-09-28 next41: source model selection must exclude unknown pixels from
+supervised risk, while reporting unknown activation separately. Known-domain
+IoU cannot establish complete extent. Optional visibility-weighted priors use
+all visible contribution in the query's fitting views to constrain deviation
+from the parent; they do not label unknown support negative. This improves all
+three ScanNet splits relative to the corrected next40 control but not LERF.
+Reviewed source identity/containment alone still over-expands extents. Additional
+assistant-reviewed source enclosures help, but are an assisted diagnostic and
+not equivalent to automatic benchmark performance. No promotion. See
+[next41 report](../experiments/2026-09-28-partial-evidence-and-identity-next41.md).
+
+2026-09-28 next40: optional source-query kernels reconstruct direct source mask
+extent through frozen geometry, with missing detections unknown. Query coordinates
+remain native, but output rankings can still change. Additive odds corrections
+preserve original logits at zero residual; probability clipping alone destroys
+low-score category rankings. Corrected full12 replay improves ScanNet19/15 but
+hurts10 and does not improve LERF selection; no promotion. Reference-conditioned
+scope selection adds independent authorized spatial identity evidence and improves
+NVOS8 AP by2.064 points, IoU by0.225. Three global graph-cut controls fail to
+improve the parent. Source pseudo-label identity and whole/part composition remain
+unresolved. See [next40 results](../experiments/2026-09-28-source-extent-and-reference-identity.md).
+
+2026-09-27 next38 extension: jointly decompose query responses into nonnegative
+scope factors rather than independently averaging scopes or taking a maximum
+union. An explicit task policy distinguishes standalone category-union images
+from reference-grounded prompts. Partial-label category competition learns a
+bounded native-query logit correction using only the unchanged source vocabulary;
+unknown labels are excluded and overlapping positives remain set-valued. This
+changes cross-category decisions, not native encoder coordinates. Full19-map
+replay improves LERF extent, but ScanNet remains a tradeoff; defaults stay frozen.
+A separate192x256 source reconstruction improves4-scene scope geometry while
+retaining the old semantic field/support. It is not a full-resolution feature
+rebuild or proof that geometry and teacher capability are fully preserved.
+See the [next38 report](../experiments/2026-09-27-taskwise-scope-composition.md).
+
+2026-09-27 next37 extension: fit continuous scope memberships through frozen
+source rendering and retain unmatched proposals as explicitly local evidence.
+This changes auxiliary range state, not geometry or original native coordinates.
+The native-dictionary/text-scope composition improves LERF actual selection but
+still loses ScanNet10; it is opt-in and not a default promotion. Image/prompt
+paths remain unchanged in that composition. Separate multimodal propagation
+and direct native max-union controls expose regressions and are not mixed into
+its reported results. Original correspondence validation scores are retained as
+correspondence confidence, not relabeled as post-refit independent validation.
+See the [next37 report](../experiments/2026-09-27-rendered-scope-reconstruction.md).
+
+2026-09-27 next36 extension: source-view-validated scope hypergraphs are auxiliary
+map state over unchanged semantic/structural coordinates and geometry. They
+regularize text/image probabilities and optionally reference-conditioned NVOS
+responses; they do not replace the map with an object inventory. Fixed confident
+unaries protect only part of the final score domain, not all query rankings.
+Conflict veto and modality-specific support normalization prevent unsafe
+averaging but yield negligible full-cohort gains; no default promotion. A
+source-only IoU/ranking head over native scope relations also fails its two real
+text pilots and remains diagnostic. See the [next36 report](../experiments/2026-09-27-validated-scope-hypergraph.md).
+
+2026-09-27 research extension: `NativeScopeDictionary` retains the original
+96-coordinate field and adds three sparse native-code distributions per element.
+This explicitly increases map capacity: 48 serialized bytes per element plus a
+shared native codebook. It is not an implementation of the same-capacity single
+vector control described below, and does not replace that default. The original
+semantic state is frozen, but the new text scores include a bounded orthogonal
+native-space contribution, so final semantic rankings are not invariant. Image
+and prompt queries keep their original paths. See the
+[hierarchical native field experiment](../experiments/2026-09-27-hierarchical-native-semantic-field.md)
+for complete development results and limitations.
+
+The [next34 multiview study](../experiments/2026-09-27-multiview-scope-fusion.md)
+also explores query-conditioned mixtures of the retained native codewords.
+This preserves the original stored anchor but changes matching to a nonlinear
+distribution readout; it is not a fixed decoded vector shared by all queries.
+Full results improve some 2D/category metrics while degrading selected extent,
+so the option remains experimental and default-off.
+
 2026-09-17 experimental follow-up: [bounded image extent readout](../experiments/2026-09-17-bounded-image-extent-and-calibration.md)
 reuses the existing global extent decoder for image queries with a bounded
 native-logit residual. It adds no per-element state and leaves every parent
@@ -259,3 +333,12 @@ No new geometry or per-element feature table is introduced. Each modality's
 rendered numerator must use its matching evidence-mass denominator. Unsupported
 rows cannot become valid merely by flipping a mask or copying a nearby feature.
 This is a measured-support experiment, not verified object-identity completion.
+
+
+2026-09-27 next39 research exception: three opt-in full-native region fitting controls deliberately allow new semantic directions in an additional1536D map; they do not satisfy the protected-prefix method guarantee and are not promoted. Same native coordinates do not preserve query rankings. Both region-feature losses and source regional-retrieval distillation fail reliable replacement in two-scene real evaluation. Existing mainline remains unchanged. See [results and limits](../experiments/2026-09-27-region-native-reconstruction-and-system-gap.md).
+
+
+2026-09-28 next43 research exception: full-native dense text replacements are experimental and not protected-prefix-compatible replacements; raw spatial tokens are not pooled language vectors. Native local pooling and separately indexed surface carriers failed fixed-scene replacement and remain disabled by default. Legal-source temporal NVOS fusion is an optional additional query-budget variant, with explicit pseudo-negative and boundary-abstention semantics. No target RGB is permitted. See [method evidence](../experiments/2026-09-28-dense-surface-and-source-video-next43.md).
+
+
+2026-09-28 next44 online-source evidence exception: a query-transient element posterior may use independent source-image identity evidence and teacher mask extents while leaving native coordinates and geometry frozen. This does not assert preserved final ranking or pure field-only inference. The extra input/compute budget, two supported set types and unresolved whole/part carrier issues are explicit in [ADR0010](0010-typed-source-evidence-and-transient-set-inference.md).

@@ -1,0 +1,186 @@
+{
+  "complete": true,
+  "default_promoted": false,
+  "significant_gain_achieved": false,
+  "independent_test": false,
+  "official_four_query": false,
+  "geometry_changed": false,
+  "frozen_source_count": 1773,
+  "frozen_source_changes": [],
+  "tests": {
+    "command": "OMP_NUM_THREADS=4 PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python -m pytest -q tests/test_source_scope_uplift_control.py",
+    "passed": 5,
+    "exit_code": 0
+  },
+  "source_free_cold_replay_exact": true,
+  "original_template_control": [
+    {
+      "scene": "figurines",
+      "routed_queries": 0,
+      "observations": 56,
+      "all_arms_identical": true
+    },
+    {
+      "scene": "ramen",
+      "routed_queries": 0,
+      "observations": 71,
+      "all_arms_identical": true
+    },
+    {
+      "scene": "teatime",
+      "routed_queries": 0,
+      "observations": 59,
+      "all_arms_identical": true
+    },
+    {
+      "scene": "waldo_kitchen",
+      "routed_queries": 0,
+      "observations": 22,
+      "all_arms_identical": true
+    }
+  ],
+  "macro": {
+    "source_uplift_scope_plain_next20": {
+      "final": {
+        "iou": 0.4974079986486096,
+        "ap": 0.6847945275374473,
+        "selected_iou": 0.3356755744853146
+      },
+      "lifted_calibrated": {
+        "iou": 0.5034268979312865,
+        "ap": 0.6883129428707615,
+        "selected_iou": 0.3405569113266299
+      },
+      "local_calibrated": {
+        "iou": 0.49999978228856534,
+        "ap": 0.6859051548927737,
+        "selected_iou": 0.33713040826608043
+      }
+    },
+    "caption_adjoint_allsource_next20": {
+      "final": {
+        "iou": 0.4974079986486096,
+        "ap": 0.6847945275374473,
+        "selected_iou": 0.3356755744853146
+      },
+      "lifted_calibrated": {
+        "iou": 0.4791323656485502,
+        "ap": 0.694311848806914,
+        "selected_iou": 0.35892861936680864
+      },
+      "local_calibrated": {
+        "iou": 0.5036371157256176,
+        "ap": 0.6886256575535782,
+        "selected_iou": 0.34188665754136804
+      }
+    },
+    "caption_adjoint_graph_next20": {
+      "final": {
+        "iou": 0.4984413591450848,
+        "ap": 0.6906107525233783,
+        "selected_iou": 0.3622583907545025
+      },
+      "local_graph_calibrated": {
+        "iou": 0.504910834597852,
+        "ap": 0.6944326608520994,
+        "selected_iou": 0.36738720596431285
+      }
+    }
+  },
+  "auxiliary_scope_bytes": 6080742564,
+  "scannet_nvos_new_results": false,
+  "uqis_paused": true,
+  "artifact_sha256": {
+    "output/source_uplift_scope_plain_next20/figurines/evaluation/report.json": "8e8f35b45b8976240ab10edbf9ce6f3c7a8305d77f9f1f689b50ebf7e56e37b2",
+    "output/source_uplift_scope_plain_next20/figurines/evaluation/scores.pt": "d0807a56d42c902bb68e8555a880a50becc5396aa139b7609750e550ef2635e5",
+    "output/source_uplift_scope_plain_next20/ramen/evaluation/report.json": "880995784cd9c435f73e91cac381adbdc56b7a6f19b71ae62ef01e9d60cc2d50",
+    "output/source_uplift_scope_plain_next20/ramen/evaluation/scores.pt": "a055ddf979fb7b1f67f18ff81473a9c4e176837ea31888610ea9788b59295c55",
+    "output/source_uplift_scope_plain_next20/teatime/evaluation/report.json": "18769340b32da52f0f42ac43b37196b82de0f521d180ba6719e4d46f136e0490",
+    "output/source_uplift_scope_plain_next20/teatime/evaluation/scores.pt": "925b556a47c9ae91a7bdc5162c022d34defd68337b397baa87ea94cad740b30a",
+    "output/source_uplift_scope_plain_next20/waldo_kitchen/evaluation/report.json": "75d056240eb4b07307f9c376dfd154d7968a176b8532fd84e8c97f29689bf3d9",
+    "output/source_uplift_scope_plain_next20/waldo_kitchen/evaluation/scores.pt": "8a81f380160a600290e36b5d5a02a21906d3bc5216f0b0cf68b972eb80f9225d",
+    "output/caption_adjoint_allsource_next20/figurines/evaluation/report.json": "1ae2c6b14bba0e48375941922822412d8e8c08e091aebb2fd1f1471bb87436a9",
+    "output/caption_adjoint_allsource_next20/figurines/evaluation/scores.pt": "f424c42d905f2b7f8575f76334cee0d5b945585f118bd609eaec9d9eed358b87",
+    "output/caption_adjoint_allsource_next20/ramen/evaluation/report.json": "4bba23e50d4858c992b7c1c254985306e71af9479196a37c6f52b120a7187782",
+    "output/caption_adjoint_allsource_next20/ramen/evaluation/scores.pt": "644a272968108eebb5cf7eaa884013575f18bac3ef873884a3dd10bbdaead4d6",
+    "output/caption_adjoint_allsource_next20/teatime/evaluation/report.json": "54e0accd5c5d89b7778a199b488975843001f347e13bb0960174d38541fd70f7",
+    "output/caption_adjoint_allsource_next20/teatime/evaluation/scores.pt": "d6989c1f7bc0141c4e66a53df22827979dc5cde41d6ac3fbb614e021591d5bfd",
+    "output/caption_adjoint_allsource_next20/waldo_kitchen/evaluation/report.json": "e42c362a52fe7d3b8fcd594188aa5adb0529423702d4614d0eceed02044e05f6",
+    "output/caption_adjoint_allsource_next20/waldo_kitchen/evaluation/scores.pt": "1eb96872609af20c000ddef9300cebd4237121782441de5a975ed87754012f3c",
+    "output/caption_adjoint_graph_next20/figurines/evaluation/report.json": "bdf998250251182a3fe584fa6ac3d4eb4854127860fc8b57064b238030ea19c9",
+    "output/caption_adjoint_graph_next20/figurines/evaluation/scores.pt": "881f98389167c826e998719948a2d2f1c07d8034097ab61e03b269693fc4a456",
+    "output/caption_adjoint_graph_next20/ramen/evaluation/report.json": "3f4c11ce1aca606b512918e095e2230d6967367419a2470c455c13562ca539d3",
+    "output/caption_adjoint_graph_next20/ramen/evaluation/scores.pt": "2f5e438ca45898cbf95523ae62558f8d899b7b3d04bef88f2aaf89d04f53f288",
+    "output/caption_adjoint_graph_next20/teatime/evaluation/report.json": "2d8d6de2956eab3158aba0a4682290b3925c40f96956f876baa8160fdbf3b038",
+    "output/caption_adjoint_graph_next20/teatime/evaluation/scores.pt": "4c6ccf9eaf374dee6c4c32e23debf5c2849b048b1b5bae27254275c955eae39d",
+    "output/caption_adjoint_graph_next20/waldo_kitchen/evaluation/report.json": "5dbf0d8aa6346bf840aceda2efcceb5cf77d036a7088fd50bf14c5615a3dc8e5",
+    "output/caption_adjoint_graph_next20/waldo_kitchen/evaluation/scores.pt": "322658e8bc456b8dff644a3bfe8f7d4e4ade94cae076325144441bf09a2c18f4",
+    "output/caption_adjoint_allsource_next20/cold_runtime_module.json": "e71db0f91227e248000deb0b376bb8e327627cf5edee8872b7d207362d0d0223",
+    "output/source_selected_calibration_next20/figurines/report.json": "44357665181e75e4b82d8ddda4c361d352ae3dbb300acdd0c46765cd52572e50",
+    "output/source_selected_calibration_next20/ramen/report.json": "77e6e72f286180455e7c0f736e1894d756d267a6c63e16631553fdfa4a8890bc",
+    "output/source_selected_plain_calibration_next20/figurines/report.json": "6a5081c2ccbd8aa210adf28d59a7591be0c7ed726185ffc4a5801022d54968f1",
+    "output/source_selected_plain_calibration_next20/ramen/report.json": "bb66f802f3aee605bb163eae8cdf470d5eeb8a2652766fc971e483a8864bd502",
+    "output/source_uplift_scope_next20/figurines/report.json": "e7a658c323ceba80643124c777cfa9fcebea7de2122b489fd66da331f7a2ce91",
+    "output/source_uplift_scope_next20/figurines/uplift.pt": "a1cadbeeb7272eba35ae6256c719e05663d7587eac3da7900f960a2e15158e38",
+    "output/source_uplift_scope_next20/ramen/report.json": "93492ac3bfbed831a4a3875c4528ee06407f2cb6fecdd1f5c59cc7deaeec9329",
+    "output/source_uplift_scope_next20/ramen/uplift.pt": "e882d20b6a474572bb7083e51b2a43f392d41e0fa228a25a8e886f798ffb01f3",
+    "output/source_uplift_scope_next20/teatime/report.json": "e7870e8dc321e69f0657f48dfc7693b8e5c57197fe7c515e905f2bbaf677309b",
+    "output/source_uplift_scope_next20/teatime/uplift.pt": "862a55d0650e60ba4d8887238a1e90624d37510523e9cdb2c9de87e179b3ed3b",
+    "output/source_uplift_scope_next20/waldo_kitchen/report.json": "f71dd2eb07710cad24988e6ff731272f4c0d2ae992217ef3a1affd27225fb6e1",
+    "output/source_uplift_scope_next20/waldo_kitchen/uplift.pt": "c8f4fa06d0889af7e53b5788e3216cbe7c66b9623020536995afa90e7f332331",
+    "output/source_uplift_scope_plain_next20/figurines/report.json": "e656feafc961c21e9f85ddce5210973f2d2c49ff4260092075e6a1ac480e8b98",
+    "output/source_uplift_scope_plain_next20/figurines/uplift.pt": "9c6a9de534dbd68f16215661753c5b17d72585b1af83e88c57f0e5ad5b12529e",
+    "output/source_uplift_scope_plain_next20/ramen/report.json": "abe857d8c95315b99ab3d4d0e1ac4bf13e850b21aed668b92e67c2d770db2816",
+    "output/source_uplift_scope_plain_next20/ramen/uplift.pt": "dc2361158e1817bd0842c0222d92c9da1c1fe3375972fd869440dc7fc2a17c5b",
+    "output/source_uplift_scope_plain_next20/teatime/report.json": "610cd145b94466555fe71823bd38b1e2fd38dbb00cf060bf8a4d2df17a3f632e",
+    "output/source_uplift_scope_plain_next20/teatime/uplift.pt": "d85e9fd113a8ad1a91d353fe33fd568538ded38c794f607378ac41dd484a48a6",
+    "output/source_uplift_scope_plain_next20/waldo_kitchen/report.json": "a528bab57c612fe82cf433ea39d4662e45fec32c99ef21d8da499a435d5534e1",
+    "output/source_uplift_scope_plain_next20/waldo_kitchen/uplift.pt": "d93d9605e3725871d18817cc14492a196102a107b81d215c0ad66d1621397fc5",
+    "output/caption_adjoint_scope_next20/figurines/report.json": "aca80ed75b405091cabebfc5da1d1a142e9dbce1a02205878efdbb157132e90c",
+    "output/caption_adjoint_scope_next20/figurines/uplift.pt": "2c6a3a75342ae1264bd1cd8f1f39378127ae26b08c57f69fb6fd6d12eace99bf",
+    "output/caption_adjoint_scope_next20/ramen/report.json": "4126dd3391d3e92f2acab7fb5c5d98eec5a30d30d330ac44c30a13c04c4afaf4",
+    "output/caption_adjoint_scope_next20/ramen/uplift.pt": "45e18dbb385579aff935bfebbdf39418e9111635f654e0605b0fca735ea85925",
+    "output/caption_adjoint_allsource_next20/figurines/report.json": "ae0b77095dee890608478eee7ab999ff2be5ba548c595ee43bd69b180ac54a95",
+    "output/caption_adjoint_allsource_next20/figurines/uplift.pt": "edc3ee1e04319bb67439820ca804c4ff0f23ad40495d6251808e97c1bd76fcf2",
+    "output/caption_adjoint_allsource_next20/ramen/report.json": "9e98bbcb81919497e26355438733b3197f06442ec184d6ab89cc50fdda4f8349",
+    "output/caption_adjoint_allsource_next20/ramen/uplift.pt": "13e576b730656cb690b3a6c6395ecd79f07d3ca8a8564b5b6c2afd1b5189c45c",
+    "output/caption_adjoint_allsource_next20/teatime/report.json": "232782ac3a5716ed7c92685bf2a3ddebabbc49cba576146ece0d84f8c0fce1f8",
+    "output/caption_adjoint_allsource_next20/teatime/uplift.pt": "699250b9d55e2c8f8acd8b2a960f0e80f9bd417c57f799d9edb9a1adba71123e",
+    "output/caption_adjoint_allsource_next20/waldo_kitchen/report.json": "de564d0d607c3e1fb469d6c8a1c7fb285219f11ff13752fa4a1da5e52c0bd193",
+    "output/caption_adjoint_allsource_next20/waldo_kitchen/uplift.pt": "756a4d8d144d500569613e3676e97b99a35683663a00bbc20cf31d47bb8b21ce",
+    "output/scope_transfer_next20/summary.json": "da776566b2c283de4320966f62e142b47604d2597219957cb94021571cde6cb3",
+    "output/source_uplift_scope_next20/figurines/evaluation/report.json": "1c000043a83aac7397d7c798ca65153ea98fb829eb90e5497c9b942c961240c7",
+    "output/source_uplift_scope_next20/ramen/evaluation/report.json": "ea16a9be1de94f7e4d63038173a8f410981fdb1bb5511c6adb11f5dc33d3f1af",
+    "output/source_uplift_scope_next20/teatime/evaluation/report.json": "b8e18821b06d516be4f0f4745a345772ebf3b8f0ecdc17a80f1d20df6fa8c058",
+    "output/source_uplift_scope_next20/waldo_kitchen/evaluation/report.json": "6154d9124317516e5d10182cf4d95c82d3c50dcc196d8c228cfdc05b729d9e56",
+    "scripts/audits/verify_uplift_adjoint_next20.py": "89f54df1f3cf219459eeb02fe3abfec421ef6c6297fd6d9634be3b1c905dc58e",
+    "scripts/audits/source_selected_plain_calibration_next20.py": "7544364b4c5fa180f9927253854d377c1ff0365e30f7b5cdde2e139e1fe623af",
+    "scripts/audits/source_uplift_scope_next20.py": "8d4cc04ad514f01a192d9569c3c60f59923be5bf2d63270208942e828e386ecb",
+    "scripts/audits/summarize_scope_transfer_next20.py": "b8af610c62dfcb1ea0f7a7503a29a16d6735f2ea45ea08ee8390f6eb5a5c6ac0",
+    "scripts/audits/seal_scope_transfer_next20.py": "e10f223ce55a8e47bf6dde12e3510da08e45ad9da33c05bbccd9eb51fee6992d",
+    "scripts/audits/evaluate_uplift_scope_plain_next20.py": "8a56d1e8278d599de307d750bd4d60e8088d8771f2279e71e01670c4180c65ab",
+    "scripts/audits/evaluate_uplift_scope_next20.py": "a6eb3a2d9648f7073c691237bb7243b4182044d2dc7a6e59967540a947e9ce7a",
+    "scripts/audits/evaluate_caption_graph_next20.py": "342c3046c65b67ccd42cdda42b3b7df74ed4cc18760dd1f3f0f045a50ba9c94e",
+    "scripts/audits/source_selected_calibration_next20.py": "d18efb056a4142d6690095ac016708cbf0a9c11642d49c688d642cc961c84d2f",
+    "scripts/audits/verify_caption_scope_module_next20.py": "b980a28bf04f93a58ea2b793a9978b76f84b138ecdf03f833231a87a668f80b7",
+    "scripts/audits/caption_adjoint_allsource_next20.py": "c37a4db5b208d52c7a35eb884200d3e38187517d3fe98dee27f2d2ab4cddaf2f",
+    "scripts/audits/verify_caption_scope_runtime_next20.py": "5d2cef5ed1f79f66f0f195a8565f275af5a770b6221fd1e1e4797e4ed0851ed5",
+    "scripts/audits/source_uplift_scope_plain_next20.py": "6a361f8f9a9bdfe6c40f592c543a9ac32d589fa3b2469e835f85a225c4de83d8",
+    "scripts/audits/evaluate_caption_adjoint_scope_next20.py": "dc51ea1b57a04be0f3be7c23a27bfabffb5e43f9028b6b3a8a38597b69e56425",
+    "scripts/audits/caption_adjoint_scope_next20.py": "864cf11f2b8d5c08fb3a3a8bc2efbbe69627da95c2a4d8b98a598ff1ff9ab112",
+    "scripts/audits/evaluate_caption_adjoint_allsource_next20.py": "ca7fe4a29b41378c6f6641a294e125e627a3f422c41381f00f887593619fa642",
+    "scripts/audits/prepare_scope_plain_queries_next20.py": "051ee960379a424bbf559c2fef3d0d3bbacc9ffbc64560d60f461e050e7d48f7",
+    "radio_gs/querying/source_scope_consensus.py": "a9dd608195890613caad827fe7bf7938825cd238462af4b0ba3e93942d6b9352",
+    "tests/test_source_scope_uplift_control.py": "1fb40d220487e2bac49597c5b540e9f4bd74228235cbaff708bc556e5fb6edb8",
+    "docs/experiments/2026-09-19-renderer-weighted-scope-transfer-next20.md": "85d21747fe96ba2c5ba3f2a727f3e2e838162642c245ab978cdaacbad345e62e",
+    "output/source_uplift_scope_next20/adjoint_verification.json": "cb7395560cc1fb3c38d1a0484e1ec6eae53ea810ee6a7e86807f0697262d2911",
+    "output/scope_transfer_next20/logs/selected_next20_fig.log": "99bcf679155c2f5164f66c1cba7b7634a7bbfd7c2e8775d8a25481a78a9d402f",
+    "output/scope_transfer_next20/logs/selected_next20_ram.log": "8e75288a9293c1071d20502d4df0b965a5e62f9c237bc546f1638c86c87206fd",
+    "output/scope_transfer_next20/logs/selected_plain_fig.log": "54b9ed52567f3947bcc98a1c68886a6bc22ea401b0a694f51c14a64ee32fc112",
+    "output/scope_transfer_next20/logs/selected_plain_ram.log": "6ae07271f518072a8dde698b006a053b7e1010ca892f473f79306289328f4f7f",
+    "output/scope_transfer_next20/logs/uplift_eval_next20_fig.log": "ab00ab76b5792f1dde624cb1aeb02442eee866f1495bd9ebe27b0af313401a0a",
+    "output/scope_transfer_next20/logs/uplift_eval_next20_tea.log": "4ad8f2e131e0fadde556a5753f5e082cd01b1b136d67804c6bb4ada9e3c2e96b",
+    "output/scope_transfer_next20/logs/uplift_eval_next20_ram.log": "2e06891676ca49a4c8084de21a148b979f2dbc687ca591da6fc42998fa896a32",
+    "output/scope_transfer_next20/logs/caption_scope_module_final.log": "a317dbbb16b72f2df3591304519a6b71fd8b93f1e53bfa41113cc372a0290826"
+  }
+}

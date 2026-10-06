@@ -1,0 +1,30 @@
+{
+  "name": "Local boundary evidence and shared whole-instance set optimization",
+  "default": false,
+  "root": "output/surface_membership_study",
+  "retained_system": "configs/pipeline/system_v8.json",
+  "matched_unary_parent": "output/learned_instance_additions/element_query_recipe.json",
+  "hypothesis": "Independent vertex decisions discard local surface-boundary evidence; joint set inference can remove incoherent false completions without changing native identity or geometry.",
+  "conditions": ["fixed", "learned"],
+  "same_inputs": "original source frames, native DINO features, RGB, frozen geometry, observation membership, parent unary, surface topology",
+  "additional_training": "24 disjoint official-training ScanNet rooms; instance labels only for learned edge affinity and the shared parent head; rendered training observations",
+  "calibration": "4 separate rooms, complete-carrier selected-set IoU; strengths 0, 1, 4, 16; no benchmark threshold fitting",
+  "solver_selection": "Global binary Potts cut retained after comparison with soft Laplacian on four non-calibration development rooms; both fixed and learned conditions use the same solver",
+  "shared_across_queries": "one compiled graph and strength for text, image, 2D point and 3D point whole-instance readouts",
+  "typed_unaries": "native identity and co-visible scope for text/image; exact-point-conditioned membership for positive points",
+  "unchanged_public_readers": "category sets, category partitions, and source-assisted reference fitting keep their declared task contracts",
+  "not_assumed": ["all instances are connected", "weak pair affinity is a negative label", "point supervision trains semantic query identity", "mask absence certifies object absence"],
+  "score_interpretation": "point scores are local conditional scores at MAP, not calibrated marginals; actual sets are explicit cut labels",
+  "unknown_policy": "vertices outside the caller's evidence domain do not become negative unaries; inside-domain unaries remain fallible model estimates, including view-mask exclusions",
+  "evaluation": "fresh full31-job common run for learned condition; nine-scene four-query fixed control; compare parent and retained v8, AP and actual IoU separately",
+  "decision": "Promote only stable actual-set improvements without other-query or severe scene regressions; do not combine different conditions' best outputs",
+  "bounded_unknown_extension": {
+    "rule": "zero unary log-odds for offline-observed vertices outside query evidence; unchanged graph, strength and thresholds",
+    "evaluation": "eight previously opened, fit-disjoint rendered rooms",
+    "result": "learned condition actual IoU24.5238 to23.0607 percent; coverage gain accompanied by identity bleeding",
+    "decision": "rejected; no benchmark run or parameter expansion",
+    "summary": "output/surface_membership_study/cut_unknown_confirmation.json"
+  },
+  "independent_final_test": false,
+  "compact_student": false
+}

@@ -1,0 +1,273 @@
+{
+  "schema": "assistant_typed_multiview_scope_review.v1",
+  "source_only": true,
+  "benchmark_data_used": false,
+  "independent_human_ground_truth": false,
+  "training_use": false,
+  "tracks": [
+    {
+      "id": "red_hat_component",
+      "scene": "figurines",
+      "granularity": "visible_part",
+      "observations": [
+        {
+          "frame": 11,
+          "region": 90,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_11_0.png",
+          "sheet_sha256": "68a3a11d1b5dc4fb031fda9faa1d86b6fa1f2058f64d990aa595628cbc058c5a"
+        },
+        {
+          "frame": 21,
+          "region": 443,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_21_0.png",
+          "sheet_sha256": "1f0f2945bf6e7c8dceae7d8c5edfcef5d7094cefe269e4c45f43fdcfffc4ee8d"
+        },
+        {
+          "frame": 174,
+          "region": 2561,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_174_0.png",
+          "sheet_sha256": "23276f59769ad0997e217f43be483a51f76f85c385450b56ca5a4abb4dd988ac"
+        }
+      ],
+      "review_notes": "Same red hat on the yellow duck standing on the cube. Hat is a component, not the whole duck; precise boundary remains teacher-derived.",
+      "reviewer": "assistant_visual_review",
+      "physical_identity_correspondence_reviewed": true,
+      "pixelwise_boundary_certified": false,
+      "training_use": false,
+      "evidence_path": "output/v2_scope_rebuild_20260918/figurines/field/caption_region_evidence.pt",
+      "evidence_sha256": "6030114af4bdc1bd854de6e5109dd82714b4d5f854165bd43657f0e725bf17f3",
+      "candidate_manifest": "output/expert_plan_20260918/typed_review_v2/figurines/manifest.json",
+      "candidate_manifest_sha256": "a11ae9b52845d4ef0b5329abfdfffe5ef060f8aa92927a4770d60578aa5bc645"
+    },
+    {
+      "id": "duck_on_cube",
+      "scene": "figurines",
+      "granularity": "visible_whole_object",
+      "observations": [
+        {
+          "frame": 11,
+          "region": 171,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_11_0.png",
+          "sheet_sha256": "68a3a11d1b5dc4fb031fda9faa1d86b6fa1f2058f64d990aa595628cbc058c5a"
+        },
+        {
+          "frame": 21,
+          "region": 506,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_21_0.png",
+          "sheet_sha256": "1f0f2945bf6e7c8dceae7d8c5edfcef5d7094cefe269e4c45f43fdcfffc4ee8d"
+        },
+        {
+          "frame": 174,
+          "region": 2567,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_174_0.png",
+          "sheet_sha256": "23276f59769ad0997e217f43be483a51f76f85c385450b56ca5a4abb4dd988ac"
+        }
+      ],
+      "review_notes": "Same small yellow duck on the cube, wearing red hat. The package partially occludes it in frame174; hidden extent is unknown.",
+      "reviewer": "assistant_visual_review",
+      "physical_identity_correspondence_reviewed": true,
+      "pixelwise_boundary_certified": false,
+      "training_use": false,
+      "evidence_path": "output/v2_scope_rebuild_20260918/figurines/field/caption_region_evidence.pt",
+      "evidence_sha256": "6030114af4bdc1bd854de6e5109dd82714b4d5f854165bd43657f0e725bf17f3",
+      "candidate_manifest": "output/expert_plan_20260918/typed_review_v2/figurines/manifest.json",
+      "candidate_manifest_sha256": "a11ae9b52845d4ef0b5329abfdfffe5ef060f8aa92927a4770d60578aa5bc645"
+    },
+    {
+      "id": "duck_with_ring",
+      "scene": "figurines",
+      "granularity": "visible_whole_object",
+      "observations": [
+        {
+          "frame": 11,
+          "region": 170,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_11_0.png",
+          "sheet_sha256": "68a3a11d1b5dc4fb031fda9faa1d86b6fa1f2058f64d990aa595628cbc058c5a"
+        },
+        {
+          "frame": 21,
+          "region": 507,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_21_0.png",
+          "sheet_sha256": "1f0f2945bf6e7c8dceae7d8c5edfcef5d7094cefe269e4c45f43fdcfffc4ee8d"
+        }
+      ],
+      "review_notes": "Different yellow duck with a pink ring. Frame11 crops part of the object; only visible scope is reviewed. No reliable frame174 candidate; no absence negative.",
+      "reviewer": "assistant_visual_review",
+      "physical_identity_correspondence_reviewed": true,
+      "pixelwise_boundary_certified": false,
+      "training_use": false,
+      "evidence_path": "output/v2_scope_rebuild_20260918/figurines/field/caption_region_evidence.pt",
+      "evidence_sha256": "6030114af4bdc1bd854de6e5109dd82714b4d5f854165bd43657f0e725bf17f3",
+      "candidate_manifest": "output/expert_plan_20260918/typed_review_v2/figurines/manifest.json",
+      "candidate_manifest_sha256": "a11ae9b52845d4ef0b5329abfdfffe5ef060f8aa92927a4770d60578aa5bc645"
+    },
+    {
+      "id": "green_apple",
+      "scene": "figurines",
+      "granularity": "visible_whole_object",
+      "observations": [
+        {
+          "frame": 11,
+          "region": 1,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_11_0.png",
+          "sheet_sha256": "68a3a11d1b5dc4fb031fda9faa1d86b6fa1f2058f64d990aa595628cbc058c5a"
+        },
+        {
+          "frame": 21,
+          "region": 347,
+          "sheet": "output/expert_plan_20260918/typed_review_v2/figurines/frame_21_0.png",
+          "sheet_sha256": "1f0f2945bf6e7c8dceae7d8c5edfcef5d7094cefe269e4c45f43fdcfffc4ee8d"
+        }
+      ],
+      "review_notes": "Same green apple near the camera. Distinct from the red apple. No reliable selected third-view mask; no absence negative.",
+      "reviewer": "assistant_visual_review",
+      "physical_identity_correspondence_reviewed": true,
+      "pixelwise_boundary_certified": false,
+      "training_use": false,
+      "evidence_path": "output/v2_scope_rebuild_20260918/figurines/field/caption_region_evidence.pt",
+      "evidence_sha256": "6030114af4bdc1bd854de6e5109dd82714b4d5f854165bd43657f0e725bf17f3",
+      "candidate_manifest": "output/expert_plan_20260918/typed_review_v2/figurines/manifest.json",
+      "candidate_manifest_sha256": "a11ae9b52845d4ef0b5329abfdfffe5ef060f8aa92927a4770d60578aa5bc645"
+    },
+    {
+      "id": "yellow_vessel",
+      "scene": "ramen",
+      "granularity": "visible_container_surface",
+      "observations": [
+        {
+          "frame": 7,
+          "region": 65,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_7_0.png",
+          "sheet_sha256": "7e9bd5ac7d0744ffc61832a62cfca6b8886eb09651b9d507afa456c1e985a42d"
+        },
+        {
+          "frame": 22,
+          "region": 304,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_22_1.png",
+          "sheet_sha256": "0d7243a2a0643c3aa8580827a074ccae24a583a1d3f3ad1d3755905b3c85d8fb"
+        },
+        {
+          "frame": 76,
+          "region": 637,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_76_1.png",
+          "sheet_sha256": "ed333fd0b210ef229f6e0c1301674f1642223b7f12bca644ba94a4a793d4d58a"
+        }
+      ],
+      "review_notes": "Same yellow bowl surface, excluding the food. This is not interchangeable with the meal assembly.",
+      "reviewer": "assistant_visual_review",
+      "physical_identity_correspondence_reviewed": true,
+      "pixelwise_boundary_certified": false,
+      "training_use": false,
+      "evidence_path": "output/v2_scope_rebuild_20260918/ramen/field/caption_region_evidence.pt",
+      "evidence_sha256": "6e3d05425c083791023dab163005b938d4724b9cc2afcf8f50f04ebc3307b49f",
+      "candidate_manifest": "output/expert_plan_20260918/typed_review/ramen/manifest.json",
+      "candidate_manifest_sha256": "f9148d5f3b67f5185c6292d745b8254cfc389dc5dd206d87c385e2740190ef27"
+    },
+    {
+      "id": "meal_assembly",
+      "scene": "ramen",
+      "granularity": "visible_assembly",
+      "observations": [
+        {
+          "frame": 7,
+          "region": 9,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_7_0.png",
+          "sheet_sha256": "7e9bd5ac7d0744ffc61832a62cfca6b8886eb09651b9d507afa456c1e985a42d"
+        },
+        {
+          "frame": 22,
+          "region": 249,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_22_0.png",
+          "sheet_sha256": "c4f5a9514b1f1c00d8a81146048a151847bf7fce866c6e6655680d4889e809b9"
+        },
+        {
+          "frame": 76,
+          "region": 523,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_76_0.png",
+          "sheet_sha256": "7714991887e522612f026f1be71d271e0798ffcefa9c3078bab7232058241aac"
+        }
+      ],
+      "review_notes": "Same bowl plus food assembly. Inclusion of the seaweed varies between masks; object referent is confirmed but whole-assembly boundary completeness is not certified.",
+      "reviewer": "assistant_visual_review",
+      "physical_identity_correspondence_reviewed": true,
+      "pixelwise_boundary_certified": false,
+      "training_use": false,
+      "evidence_path": "output/v2_scope_rebuild_20260918/ramen/field/caption_region_evidence.pt",
+      "evidence_sha256": "6e3d05425c083791023dab163005b938d4724b9cc2afcf8f50f04ebc3307b49f",
+      "candidate_manifest": "output/expert_plan_20260918/typed_review/ramen/manifest.json",
+      "candidate_manifest_sha256": "f9148d5f3b67f5185c6292d745b8254cfc389dc5dd206d87c385e2740190ef27"
+    },
+    {
+      "id": "front_chopsticks",
+      "scene": "ramen",
+      "granularity": "visible_thin_object_pair",
+      "observations": [
+        {
+          "frame": 7,
+          "region": 14,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_7_0.png",
+          "sheet_sha256": "7e9bd5ac7d0744ffc61832a62cfca6b8886eb09651b9d507afa456c1e985a42d"
+        },
+        {
+          "frame": 22,
+          "region": 254,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_22_0.png",
+          "sheet_sha256": "c4f5a9514b1f1c00d8a81146048a151847bf7fce866c6e6655680d4889e809b9"
+        },
+        {
+          "frame": 76,
+          "region": 529,
+          "sheet": "output/expert_plan_20260918/typed_review/ramen/frame_76_0.png",
+          "sheet_sha256": "7714991887e522612f026f1be71d271e0798ffcefa9c3078bab7232058241aac"
+        }
+      ],
+      "review_notes": "Same front pair by the cup and folded napkin. Frame76 region528 is a separate pair on the rear white wrapper; same word must not merge these instances. Thin endpoints remain coarse teacher pixels.",
+      "reviewer": "assistant_visual_review",
+      "physical_identity_correspondence_reviewed": true,
+      "pixelwise_boundary_certified": false,
+      "training_use": false,
+      "evidence_path": "output/v2_scope_rebuild_20260918/ramen/field/caption_region_evidence.pt",
+      "evidence_sha256": "6e3d05425c083791023dab163005b938d4724b9cc2afcf8f50f04ebc3307b49f",
+      "candidate_manifest": "output/expert_plan_20260918/typed_review/ramen/manifest.json",
+      "candidate_manifest_sha256": "f9148d5f3b67f5185c6292d745b8254cfc389dc5dd206d87c385e2740190ef27"
+    }
+  ],
+  "relations": [
+    {
+      "parent": "duck_on_cube",
+      "child": "red_hat_component",
+      "relation": "whole_part_not_equivalence"
+    },
+    {
+      "parent": "meal_assembly",
+      "child": "yellow_vessel",
+      "relation": "assembly_component_not_equivalence"
+    },
+    {
+      "left": "duck_on_cube",
+      "right": "duck_with_ring",
+      "relation": "distinct_same_category_instances"
+    }
+  ],
+  "rejected_candidates": [
+    {
+      "scene": "figurines",
+      "frame": 11,
+      "region": 173,
+      "reason": "rubber duck bath toy highlights the blue elephant; incorrect teacher referent"
+    },
+    {
+      "scene": "figurines",
+      "frame": 21,
+      "region": 508,
+      "reason": "rubber duck highlights the small white cat; incorrect teacher referent"
+    },
+    {
+      "scene": "ramen",
+      "frame": 76,
+      "region": 528,
+      "reason": "Valid second chopstick pair, but not the front pair identity; keep separate rather than label globally false"
+    }
+  ],
+  "policy": "Review establishes visible referents and typed correspondence only. No pixel edits or exact-human-GT claim. Unknown/occluded/missing observations remain unknown; broad class unions are not single-instance targets."
+}

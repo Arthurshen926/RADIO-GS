@@ -1,0 +1,399 @@
+"""Allow detector positives corroborated by other source views to enter fitting.
+
+Membership can update all semantic-observed elements on the frozen carrier.
+Optional source initialization applies to the requested query columns. Source
+rasters may use interleaved higher-resolution rays without increasing the stored
+sample count per view. The default raster and negative policy are unchanged.
+No target GT is used.
+"""
+import argparse,json,time,shutil
+from pathlib import Path
+import torch
+from torch.nn import functional as F
+from gsplat import rasterization
+from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
+from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
+from radio_gs.querying.typed_evidence import visible_operator
+from radio_gs.querying.finite_evidence import combine_with_native,source_strength
+
+
+def load(p):return torch.load(p,map_location='cpu',weights_only=False)
+
+def balanced(error,pos,neg):
+    return .5*((error*pos).sum()/pos.sum().clamp_min(1)+(error*neg).sum()/neg.sum().clamp_min(1))
+
+
+def sample_operator_rows(op,pixels):
+    """Retain one interleaved pixel phase without averaging adjacent rays."""
+    op=op.coalesce();index=op.indices();mapping=torch.full((op.shape[0],),-1,device=op.device,dtype=torch.long)
+    mapping[pixels]=torch.arange(len(pixels),device=op.device);row=mapping[index[0]];keep=row>=0
+    return torch.sparse_coo_tensor(torch.stack([row[keep],index[1,keep]]),op.values()[keep],(len(pixels),op.shape[1])).coalesce()
+
+
+def sample_permission(mask,h,w,pixels):
+    return F.interpolate(mask.float()[None,None].cuda(),size=(h,w),mode='nearest')[0,0].flatten()[pixels].bool()
+
+
+def main():
+    a=argparse.ArgumentParser();a.add_argument('--finite-evidence',action='store_true');a.add_argument('--evidence-strength',choices=['confidence','positive_logit'],default='confidence');a.add_argument('--boundary-radius',type=int,default=1);a.add_argument('--heldout-stride',type=int,default=0,help='Every Nth source view is diagnostic only, excluded before fusion and fitting');a.add_argument('--conflict-abstention',action='store_true',help='Treat complement pixels supported by two other positive views as unknown');a.add_argument('--inputs',help='Explicit scene/response/evidence manifest; bypass all legacy query artifacts');a.add_argument('--key',required=True);a.add_argument('--source-fusion-only',action='store_true',help='Return confidence-weighted source backprojection without subset-render optimization');a.add_argument('--negative-likelihood',choices=['hard','contaminated','unknown','weighted'],default='hard');a.add_argument('--optimization-state-in');a.add_argument('--optimization-state-out');a.add_argument('--pixel-loss',choices=['mean','balanced'],default='mean');a.add_argument('--source-coverage-reference');a.add_argument('--support-prior',choices=['none','count','footprint'],default='none');a.add_argument('--support-prior-weight',type=float,default=.1);a.add_argument('--raster-scale',type=int,default=1);a.add_argument('--positive-witnesses',type=int,default=0);a.add_argument('--negative-admission',choices=['prior','local','complement','corroborated'],default='prior');a.add_argument('--positive-core',choices=['eroded','medial'],default='eroded');a.add_argument('--regional-positive-evidence',action='store_true');a.add_argument('--scope-initialization',choices=['semantic','source'],default='semantic');a.add_argument('--tracks-base',default='output/text_video_next63/tracks');a.add_argument('--query-indices',type=int,nargs='*');a.add_argument('--extra-track-frames',action='store_true');a.add_argument('--retained-selection');a.add_argument('--semantic-base',default='output/joint_semantic_next66/adaptive_allrgb/calibrated');a.add_argument('--cohort',choices=['old','coverage64','all'],default='all');a.add_argument('--evidence-base',default='output/expanded_extent_next72');a.add_argument('--output-base',required=True);a.add_argument('--steps',type=int,default=240);a.add_argument('--mode',choices=['admission','seeded'],required=True);args=a.parse_args();args.carrier_arm='adaptive_allrgb';args.arm='decision';args.scope_negatives=False;torch.set_num_threads(4);start=time.monotonic()
+    if args.inputs:
+        inputs=json.loads(Path(args.inputs).read_text())
+        scene=json.loads(Path(inputs['scene']).read_text())
+        response=load(inputs['response'])
+        initial=dict(texts=response['texts'],scores=response['semantic_probability'],semantic_observed=response['observed'],selection_scores=response['semantic_probability'])
+        prior=initial['selection_scores'].cuda();observed=initial['semantic_observed'].cuda();old_observed=observed
+        exclusion_reference=prior
+        binding=response['geometry'];geometry_path=Path(binding['path'])
+        geo=FrozenGaussianGeometry.load(geometry_path,expected_sha256=binding['sha256'],device='cuda');old_geo=geo
+        geometry_prior=MogeGeometryPrior(scene['camera_report'],scene['camera_report_sha256'])
+        source_frames=scene['source_frames'];info=dict(train_frames=source_frames)
+        base_h,base_w=inputs['base_raster'];h=base_h*args.raster_scale;w=base_w*args.raster_scale
+    else:
+        base=Path(args.semantic_base)/args.key;data=load(base/'field.pt');root=Path(data['root']);state=load(data['base_field'])['state_dict'];observed=state['observed'].cuda()
+        initial=load(base/'typed_readout.pt');old_observed=observed;observed=initial['semantic_observed'].cuda();prior=initial['selection_scores'].cuda();info=json.loads((root/'teachers.json').read_text());auth=json.loads((root/'responsibility.json').read_text());h,w=auth['metadata']['feature_height'],auth['metadata']['feature_width']
+        base_h,base_w=h,w;h*=args.raster_scale;w*=args.raster_scale
+        exclusion_reference=load(Path('output/taskwise_scope_composition_next38')/args.key/'anchored/pipeline_calibrated/scores.pt')['scores']['hierarchical_pipeline'].cuda()
+        gr=json.loads(Path(data['geometry_report']).read_text());g=gr['results']['independent_scale'];geo=FrozenGaussianGeometry.load(g['geometry'],expected_sha256=g['geometry_sha256'],device='cuda');geometry_prior=MogeGeometryPrior(gr['source_report'],gr['source_report_sha256'])
+        old_geo=geo
+        geometry_path=Path('output/joint_carrier_next66')/args.carrier_arm/args.key.removeprefix('lerf_')/'geometry.pt'
+        from radio_gs.utils.immutable_artifacts import sha256_file
+        geo=FrozenGaussianGeometry.load(geometry_path,expected_sha256=sha256_file(geometry_path),device='cuda')
+        from radio_gs.utils.immutable_artifacts import sha256_file
+        binding=dict(path=str(geometry_path),sha256=sha256_file(geometry_path))
+    from radio_gs.rendering.contribution_compositor import rasterize_single_view_contributions
+    from types import SimpleNamespace
+    records=[];square=torch.zeros(prior.shape[1]);count=torch.zeros_like(square)
+    negative_admission_counts=torch.zeros(len(initial['texts']),dtype=torch.long)
+    if not args.inputs:source_frames=json.loads((Path('output/source_coverage_next72')/args.key.removeprefix('lerf_')/'cohorts.json').read_text())['frames'][args.cohort]
+    for frame in source_frames:
+        if args.inputs:
+            d=load(Path(inputs['detections'])/f'identity_{frame}.pt')
+            if d['queries']!=initial['texts']:raise ValueError('Evidence query order differs from explicit response')
+        elif args.extra_track_frames and frame not in info['train_frames']:
+            # New views have temporal evidence only; no fabricated detections.
+            d=dict(queries=initial['texts'],instances=[dict(scores=torch.empty(0),foreground_margin=torch.empty(0),masks=torch.empty(0,h,w)) for _ in initial['texts']])
+        else:
+            d=load(Path(args.evidence_base)/args.key/f'identity_{frame}.pt')
+        for r in d['instances']:
+            if len(r['scores']):r['masks']=F.interpolate(r['masks'].float()[:,None],size=(h,w),mode='bilinear',align_corners=False)[:,0].half()
+        records.append((frame,d))
+        if not args.inputs:
+            for j,r in enumerate(d['instances']):square[j]+=r['foreground_margin'].square().sum();count[j]+=len(r['scores'])
+    scale=(square/count.clamp_min(1)).sqrt().clamp_min(1e-6);views=[]
+    if args.inputs:
+        tracks=[load(path) if path else dict(seed_frame=None,frames={}) for path in inputs['tracks']]
+    else:
+        tracks=[load(Path(args.tracks_base if args.query_indices is None or qi in args.query_indices else 'output/text_video_next63/tracks')/args.key/f'{qi}.pt') for qi in range(len(initial['texts']))]
+    byframe=dict(records)
+    seed_confidence=[]
+    for qi,t in enumerate(tracks):
+        if t.get('seed_evidence') is not None:
+            seed_confidence.append(t['seed_evidence']['seed_confidence']);continue
+        if args.inputs:
+            seed_confidence.append(0.);continue
+        r=byframe[t['seed_frame']]['instances'][qi] if t['seed_frame'] is not None else None
+        seed_confidence.append(float((r['scores']*(r['foreground_margin']/scale[qi]).sigmoid()).max()) if r is not None and len(r['scores']) else 0.)
+    for view_index,(frame,d) in enumerate(records):
+        phase=view_index%(args.raster_scale**2)
+        pixels=torch.arange(h*w,device='cuda').reshape(h,w)[phase//args.raster_scale::args.raster_scale,phase%args.raster_scale::args.raster_scale].flatten()
+        # Reproject old reference on every new source camera; no old-frame cache intersection.
+        camera=geometry_prior.cameras[frame];k=camera.intrinsic.cuda().clone();k[0]*=w/camera.width;k[1]*=h/camera.height
+        renderer=SimpleNamespace(scaled_intrinsics=lambda width,height:k,near_plane=.001*geometry_prior.scale,far_plane=100*geometry_prior.scale)
+        old_hit=rasterize_single_view_contributions(old_geo,renderer,camera.world_to_camera.cuda(),height=h,width=w,include_depths=False);old_hit['base_weights']=old_hit['weights'];op_old,_,old_valid=visible_operator(old_hit,old_observed,h*w,False)
+        hit=rasterize_single_view_contributions(geo,renderer,camera.world_to_camera.cuda(),height=h,width=w,include_depths=False);hit['base_weights']=hit['weights']
+        op,_,valid=visible_operator(hit,observed,h*w,False)
+        target=torch.stack([r['masks'].float().amax(0) if len(r['scores']) else torch.zeros(h,w) for r in d['instances']],-1).reshape(h*w,-1).cuda()
+        detector=target.clone()
+        present=torch.tensor([bool(t['frames'].get(frame,{}).get('present',False)) and frame!=t['seed_frame'] for t in tracks],device='cuda')
+        temporal=torch.stack([F.interpolate(t['frames'][frame]['probability'].float()[None,None],size=(h,w),mode='bilinear',align_corners=False)[0,0] if bool(present[qi]) else torch.zeros(h,w) for qi,t in enumerate(tracks)],-1).reshape(h*w,-1).cuda()
+        target=torch.maximum(target,temporal)
+        binary=(target.T.reshape(-1,1,h,w)>.5).float()
+        positive_core=-F.max_pool2d(-binary,2*args.boundary_radius+1,1,args.boundary_radius)>.5
+        if args.positive_core=='medial':
+            # Preserve centre evidence where a fixed erosion removes thin strokes.
+            # Distance ridges add positives inside the SAME teacher foreground;
+            # the complement/unknown boundary and identity admission stay fixed.
+            from scipy.ndimage import distance_transform_edt
+            indices=args.query_indices if args.query_indices is not None else list(range(len(initial['texts'])))
+            distance=torch.stack([torch.from_numpy(distance_transform_edt(binary[qi,0].cpu().numpy()).copy()).float() for qi in indices])[:,None].cuda()
+            ridge=(distance>0)&(distance>=F.max_pool2d(distance,3,1,1))
+            positive_core[indices]|=ridge
+        pos=positive_core.flatten(1).T&valid;neg=(F.max_pool2d(binary,2*args.boundary_radius+1,1,args.boundary_radius)<.5).flatten(1).T&valid
+        detector_binary=(detector.T.reshape(-1,1,h,w)>.5).float()
+        detector_pos=(-F.max_pool2d(-detector_binary,2*args.boundary_radius+1,1,args.boundary_radius)>.5).flatten(1).T&valid
+        detector_neg=(F.max_pool2d(detector_binary,2*args.boundary_radius+1,1,args.boundary_radius)<.5).flatten(1).T&valid
+        # Rejected identity hypotheses are unknown. They cannot silently become
+        # negative pixels just because admitted-instance union no longer covers them.
+        for qi,r in enumerate(d['instances']):
+            rejected=r.get('unknown_masks')
+            if rejected is not None and len(rejected):
+                unknown=F.interpolate(rejected.float().amax(0)[None,None].cuda(),size=(h,w),mode='bilinear',align_corners=False)[0,0].flatten()>.5
+                neg[:,qi]&=~unknown
+                detector_neg[:,qi]&=~unknown
+        if args.raster_scale>1:
+            op=sample_operator_rows(op,pixels);op_old=sample_operator_rows(op_old,pixels)
+            pos,neg,target,detector,detector_pos,detector_neg,valid,old_valid=[x[pixels] for x in (pos,neg,target,detector,detector_pos,detector_neg,valid,old_valid)]
+        # A contradictory retained semantic response does not certify a
+        # positive label. It makes the detector-complement exclusion unknown.
+        # Use the existing .5 retrieval decision, no benchmark calibration.
+        native_positive=torch.sparse.mm(op_old,exclusion_reference)>.5
+        if args.arm in ('agreement','decision','anneal'):
+            original_complement=neg
+            neg=neg if args.scope_negatives else neg&old_valid&~native_positive
+            if args.negative_admission!='prior':
+                # Experimental extent evidence: relax the native-positive veto
+                # only on observed source complement, optionally near its boundary.
+                region=torch.tensor([t.get('seed_evidence') is not None for t in tracks],device='cuda')
+                candidate=original_complement&old_valid&region[None]
+                if args.negative_admission=='local':
+                    candidate&=(F.max_pool2d(binary,9,1,4)>.5).flatten(1).T[pixels]
+                negative_admission_counts+=(candidate&~neg).sum(0).cpu()
+                if args.negative_admission!='corroborated':neg|=candidate
+            if args.regional_positive_evidence:
+                regional=torch.tensor([t.get('seed_evidence') is not None for t in tracks],device='cuda')
+                pos=pos&(native_positive|regional[None])
+            elif not args.inputs:pos=pos&native_positive
+        if args.inputs:
+            confidence=torch.tensor([float(r['scores'].max()) if len(r['scores']) else 0. for r in d['instances']],device='cuda')
+        else:
+            confidence=torch.tensor([float((r['scores']*(r['foreground_margin']/scale[j]).sigmoid()).max()) if len(r['scores']) else 0. for j,r in enumerate(d['instances'])],device='cuda')
+        detector_confidence=confidence.clone()
+        confidence=torch.maximum(confidence,torch.tensor(seed_confidence,device='cuda')*present)
+        for qi,t in enumerate(tracks):
+            evidence=t['frames'].get(frame,{})
+            if 'positive_allowed' in evidence:
+                pos[:,qi]&=sample_permission(evidence['positive_allowed'],h,w,pixels)
+                neg[:,qi]&=sample_permission(evidence['negative_allowed'],h,w,pixels)
+                if args.negative_admission=='corroborated':candidate[:,qi]&=sample_permission(evidence['negative_allowed'],h,w,pixels)
+                confidence[qi]*=evidence['scope_reliability']
+        camera=geometry_prior.cameras[frame];k=camera.intrinsic.cuda().clone();k[0]*=w/camera.width;k[1]*=h/camera.height
+        mass=torch.sparse.sum(op,dim=0).to_dense();views.append(dict(pixels=pixels,detector_pos=detector_pos,detector_neg=detector_neg,op=op,y=target,pos=pos,neg=neg,confidence=confidence,mass=mass,pending_negative=candidate if args.negative_admission=='corroborated' else None,detector=detector,detector_confidence=detector_confidence,valid=valid,view=camera.world_to_camera.cuda()[None],k=k[None]))
+    heldout_views=[]
+    if args.heldout_stride:
+        heldout_views=[v for i,v in enumerate(views) if i%args.heldout_stride==0]
+        keep=[i for i in range(len(views)) if i%args.heldout_stride!=0]
+        views=[views[i] for i in keep]
+        records=[records[i] for i in keep]
+    protected_negative_counts=torch.zeros(len(initial['texts']),dtype=torch.long)
+    corroborated_negative_counts=torch.zeros(len(initial['texts']),dtype=torch.long)
+    if args.negative_admission=='corroborated':
+        negative_mass=torch.zeros_like(prior);known_mass=torch.zeros_like(prior)
+        positive_witness_count=torch.zeros_like(prior)
+        for v in views:
+            active=(v['confidence']>0)&v['pos'].any(0)
+            if args.positive_witnesses:
+                # A witness must cover most of the primitive's visible footprint,
+                # not merely most of its sparsely labelled pixels. Count views,
+                # then remove this view before protecting a proposed exclusion.
+                purity=torch.sparse.mm(v['op'].T,v['pos'].float())/v['mass'][:,None].clamp_min(1e-8)
+                v['positive_witness']=(purity>.5)&active[None]&(v['mass'][:,None]>1e-8)
+                positive_witness_count+=v['positive_witness']
+            weight=v['confidence'][None]*active[None]
+            known=(v['pos']|v['pending_negative']).float()*weight
+            negative=v['pending_negative'].float()*weight
+            known_mass+=torch.sparse.mm(v['op'].T,known)
+            negative_mass+=torch.sparse.mm(v['op'].T,negative)
+        for v in views:
+            active=(v['confidence']>0)&v['pos'].any(0)
+            weight=v['confidence'][None]*active[None]
+            known=(v['pos']|v['pending_negative']).float()*weight
+            negative=v['pending_negative'].float()*weight
+            other_mass=known_mass-torch.sparse.mm(v['op'].T,known)
+            other_negative=negative_mass-torch.sparse.mm(v['op'].T,negative)
+            coverage=torch.sparse.mm(v['op'],(other_mass>1e-8).float())
+            fraction=torch.sparse.mm(v['op'],other_negative/other_mass.clamp_min(1e-8))/coverage.clamp_min(1e-8)
+            admitted=v['pending_negative']&(coverage>.5)&(fraction>.5)&active[None]
+            if args.positive_witnesses:
+                other_witnesses=positive_witness_count-v['positive_witness'].float()
+                protected=torch.sparse.mm(v['op'],(other_witnesses>=args.positive_witnesses).float())>.5
+                protected_negative_counts+=(admitted&~v['neg']&protected).sum(0).cpu()
+                admitted&=~protected
+            corroborated_negative_counts+=(admitted&~v['neg']).sum(0).cpu()
+            v['neg']|=admitted
+        del negative_mass,known_mass,other_mass,other_negative
+    previously_active=torch.stack([v['pos'].any(0)&(v['confidence']>0) for v in views]).any(0)
+    total_mass=torch.zeros_like(prior);total_positive=torch.zeros_like(prior)
+    for v in views:
+        detector_pos=v['detector_pos'];detector_neg=v['detector_neg']
+        weight=v['detector_confidence'][None]*(detector_pos|detector_neg)
+        v['detector_pos']=detector_pos
+        v['detector_weight']=weight
+        total_mass+=torch.sparse.mm(v['op'].T,weight)
+        total_positive+=torch.sparse.mm(v['op'].T,weight*detector_pos)
+    admission=[]
+    for (frame,_),v in zip(records,views):
+        m=torch.sparse.mm(v['op'].T,v['detector_weight']);n=torch.sparse.mm(v['op'].T,v['detector_weight']*v['detector_pos'])
+        other_mass=total_mass-m;other=(total_positive-n)/other_mass.clamp_min(1e-8)
+        coverage=torch.sparse.mm(v['op'],(other_mass>1e-8).float())
+        corroboration=torch.sparse.mm(v['op'],other)/coverage.clamp_min(1e-8)
+        extra=v['detector_pos']&(coverage>.5)&(corroboration>.5)&~v['pos']
+        for qi,t in enumerate(tracks):
+            evidence=t['frames'].get(frame,{})
+            if 'positive_allowed' in evidence:extra[:,qi]&=sample_permission(evidence['positive_allowed'],h,w,v['pixels'])
+        v['pos']|=extra;v['neg']&=~extra;admission.append(extra.sum(0).cpu())
+    conflict_counts=torch.zeros(len(initial['texts']),dtype=torch.long)
+    if args.conflict_abstention:
+        witnesses=torch.zeros_like(prior)
+        for v in views:
+            active=(v['confidence']>0)&v['pos'].any(0)
+            purity=torch.sparse.mm(v['op'].T,v['pos'].float())/v['mass'][:,None].clamp_min(1e-8)
+            v['positive_witness']=(purity>.5)&active[None]&(v['mass'][:,None]>1e-8)
+            witnesses+=v['positive_witness']
+        for v in views:
+            other=witnesses-v['positive_witness'].float()
+            disputed=torch.sparse.mm(v['op'],(other>=2).float())>.5
+            removed=v['neg']&disputed
+            conflict_counts+=removed.sum(0).cpu()
+            v['neg']&=~disputed
+        del witnesses,other
+    newly_active=(torch.stack([v['pos'].any(0)&(v['confidence']>0) for v in views]).any(0))&~previously_active
+    if args.mode=='seeded':
+        seed=total_positive/total_mass.clamp_min(1e-8)
+        prior[:,newly_active]=torch.maximum(prior[:,newly_active],seed[:,newly_active])
+    admission_counts=torch.stack(admission).sum(0).tolist()
+    del total_mass,total_positive,m,n
+    result=load(args.retained_selection)['selection_scores'].cuda() if args.retained_selection else prior.clone();history=[];ones=torch.ones(len(prior),1,device='cuda')
+    coverage_reference=load(args.source_coverage_reference)['selection_scores'].cuda() if args.source_coverage_reference else None
+    coverage_report=[]
+    optimization_state=load(args.optimization_state_in) if args.optimization_state_in else {}
+    exported_state={}
+    steps=max(args.steps,len(source_frames))
+    for qi,text in enumerate(initial['texts']):
+        if args.query_indices is not None and qi not in args.query_indices:continue
+        active=[v for v in views if v['confidence'][qi]>0 and v['pos'][:,qi].any()]
+        # Matched evidence intervention: replay the same view measure and
+        # complement labels, then vary only admitted positive pixels.
+        if args.optimization_state_in:
+            fixed=optimization_state[qi]
+            active=[views[i] for i in fixed['view_indices']]
+            for v,confidence,negative in zip(active,fixed['confidence'],fixed['negative']):
+                v['confidence'][qi]=confidence
+                v['neg'][:,qi]=negative.cuda()
+        if not active:
+            history.append(dict(query=text,views=0,status='no_admitted_source_positive_keep_native_prior' if args.inputs else 'no_admitted_source_positive_keep_prior'))
+            continue
+        strength=source_strength([v['confidence'][qi] for v in active],args.evidence_strength)
+        visibility=sum(v['mass'] for v in active);support=observed
+        start_membership=prior[:,qi].clone()
+        if args.scope_initialization=='source':
+            positive_mass=torch.zeros_like(start_membership);known_mass=torch.zeros_like(start_membership)
+            for v in active:
+                known=(v['pos'][:,qi]|v['neg'][:,qi]).float()*v['confidence'][qi]
+                known_mass+=torch.sparse.mm(v['op'].T,known[:,None])[:,0]
+                positive_mass+=torch.sparse.mm(v['op'].T,(known*v['y'][:,qi])[:,None])[:,0]
+            start_membership=torch.where(known_mass>1e-8,positive_mass/known_mass.clamp_min(1e-8),start_membership)
+        if args.source_fusion_only:
+            membership=combine_with_native(start_membership,prior[:,qi],strength) if args.finite_evidence else start_membership
+            result[:,qi]=torch.where(support,membership,prior[:,qi])
+            history.append(dict(query=text,views=len(active),source_fusion_only=True,final_selected=int(((result[:,qi]>.5)&support).sum())))
+            continue
+        support_cost=torch.zeros_like(start_membership)
+        if args.support_prior!='none':
+            # Full-scene transmittance hides redundant background primitives.
+            # Penalize their unoccluded footprint too, without declaring unknown
+            # pixels observed negatives. This is an explicit compactness prior.
+            from gsplat.cuda._wrapper import fully_fused_projection
+            for v in active:
+                radii,_,_,conics,_=fully_fused_projection(geo.xyz,None,geo.quaternions,geo.scales,v['view'],v['k'],w,h,near_plane=.001*geometry_prior.scale,far_plane=100*geometry_prior.scale)
+                seen=radii[0]>0
+                if args.support_prior=='count':support_cost+=seen.float()*v['confidence'][qi]
+                else:
+                    c=conics[0,seen];area=2*torch.pi/(c[:,0]*c[:,2]-c[:,1].square()).clamp_min(1e-12).sqrt()
+                    support_cost[seen]+=area*geo.opacities.flatten()[seen]*v['confidence'][qi]
+            support_cost*=support
+            support_cost/=torch.dot(support_cost,start_membership).clamp_min(1e-8)
+        if args.optimization_state_in:
+            start_membership=fixed['start_membership'].cuda()
+            support_cost=fixed['support_cost'].cuda()
+        if args.optimization_state_out:
+            exported_state[qi]=dict(view_indices=[i for i,v in enumerate(views) if any(v is a for a in active)],confidence=[float(v['confidence'][qi]) for v in active],negative=[v['neg'][:,qi].cpu() for v in active],start_membership=start_membership.cpu(),support_cost=support_cost.cpu())
+        start_selected=int(((start_membership>.5)&support).sum())
+        parameter=torch.nn.Parameter(torch.logit(start_membership.clamp(.001,.999)));optimizer=torch.optim.Adam([parameter],lr=.05)
+        for step in range(steps):
+            v=active[step%len(active)]
+            proposal=parameter.sigmoid()
+            membership=combine_with_native(proposal,prior[:,qi],strength) if args.finite_evidence else proposal
+            p=torch.where(support,membership,prior[:,qi]);response=torch.sparse.mm(v['op'],p[:,None])[:,0]
+            member=p*observed
+            if args.arm in ('decision','anneal'):
+                temperature=.5*(.1/.5)**(step/max(steps-1,1))
+                logits=torch.logit(p.clamp(1e-6,1-1e-6)) if args.finite_evidence else parameter
+                member=torch.where(support,(logits/temperature).sigmoid(),(prior[:,qi]>.5).float())*observed
+            if args.mode in ('hard','hard_exposed'):
+                member=(member>.5).float()+member-member.detach()
+            _,alpha,_=rasterization(means=geo.xyz,quats=geo.quaternions,scales=geo.scales,opacities=geo.opacities.flatten()*member,colors=ones,viewmats=v['view'],Ks=v['k'],width=w,height=h,near_plane=.001*geometry_prior.scale,far_plane=100*geometry_prior.scale,packed=False)
+            silhouette=alpha[0,...,0].flatten()[v['pixels']]
+            if args.arm=='decision':
+                # Frozen scorer rounds alpha to a byte and accepts values >10.
+                cutoff=10.5/255
+                silhouette=torch.sigmoid(torch.logit(silhouette.clamp(1e-6,1-1e-6))-torch.logit(torch.tensor(cutoff,device='cuda')))
+            known=v['pos'][:,qi]|v['neg'][:,qi];target=v['y'][:,qi]
+            bce=F.binary_cross_entropy(silhouette.clamp(1e-5,1-1e-5),target,reduction='none')
+            if args.negative_likelihood=='hard':
+                effective_known=known
+                pixel_loss=balanced(bce,v['pos'][:,qi],v['neg'][:,qi]) if args.pixel_loss=='balanced' else (bce*known).sum()/known.sum().clamp_min(1)
+            else:
+                # A source complement can be an unobserved part of the target.
+                # Marginalize a 50/50 valid-label versus uninformative component;
+                # high-conflict negatives then have bounded cost, not certain truth.
+                reliability=.5 if args.negative_likelihood=='contaminated' else 0.
+                likelihood=(1-reliability)+reliability*torch.exp(-bce)
+                negative_loss=-likelihood.log()
+                posterior=(reliability*torch.exp(-bce)/likelihood).detach()
+                if args.negative_likelihood=='weighted':
+                    negative_loss=.5*bce
+                    posterior=torch.full_like(bce,.5)
+                pos=v['pos'][:,qi];neg=v['neg'][:,qi]
+                effective_known=pos.float()+neg*posterior
+                pixel_loss=.5*((bce*pos).sum()/pos.sum().clamp_min(1)+(negative_loss*neg).sum()/neg.sum().clamp_min(1))
+            overlap=1-(2*(silhouette*target*effective_known).sum()+1)/((silhouette*effective_known).sum()+(target*effective_known).sum()+1)
+            objective=v['confidence'][qi]*(pixel_loss+overlap)
+            support_penalty=torch.dot(support_cost,p)
+            objective+=args.support_prior_weight*support_penalty
+            loss_probability=balanced((response-target).square(),v['pos'][:,qi],v['neg'][:,qi])
+            optimizer.zero_grad();objective.backward();optimizer.step()
+        proposal=parameter.sigmoid().detach()
+        membership=combine_with_native(proposal,prior[:,qi],strength) if args.finite_evidence else proposal
+        result[:,qi]=torch.where(support,membership,prior[:,qi]);history.append(dict(query=text,views=len(active),source_strength=float(strength),finite_evidence=args.finite_evidence,initial_selected=start_selected,final_selected=int(((result[:,qi]>.5)&support).sum()),final_support_cost=float(support_penalty.detach()),final_probability_loss=float(loss_probability.detach()),final_objective=float(objective.detach())))
+        if coverage_reference is not None:
+            # Post-fit source-only diagnosis; never used for checkpoint selection.
+            with torch.inference_mode():
+                comparisons={}
+                for name,scores in [('reference',coverage_reference[:,qi]),('candidate',result[:,qi])]:
+                    member=(scores>.5).float()*observed;counts=torch.zeros(4,device='cuda');view_recall=[]
+                    for v in active:
+                        _,alpha,_=rasterization(means=geo.xyz,quats=geo.quaternions,scales=geo.scales,opacities=geo.opacities.flatten()*member,colors=ones,viewmats=v['view'],Ks=v['k'],width=w,height=h,near_plane=.001*geometry_prior.scale,far_plane=100*geometry_prior.scale,packed=False)
+                        selected=alpha[0,...,0].flatten()[v['pixels']]>(10.5/255)
+                        pos=v['pos'][:,qi];neg=v['neg'][:,qi]
+                        counts+=torch.stack([(selected&pos).sum(),pos.sum(),(selected&neg).sum(),neg.sum()])
+                        view_recall.append(float((selected&pos).sum()/pos.sum().clamp_min(1)))
+                    tp,positive,fp,negative=counts.tolist()
+                    comparisons[name]=dict(positive_pixels=positive,negative_pixels=negative,positive_fraction=positive/max(1,positive+negative),positive_coverage=tp/max(1,positive),negative_false_positive_rate=fp/max(1,negative),mean_view_positive_coverage=sum(view_recall)/len(view_recall))
+                coverage_report.append(dict(query=text,views=len(active),**comparisons))
+        print(args.key,args.arm,qi,text,'done',flush=True)
+    heldout_report=[]
+    with torch.inference_mode():
+        for qi,text in enumerate(initial['texts']):
+            totals=torch.zeros(4,device='cuda');per_view=[]
+            for v in heldout_views:
+                if not bool(v['confidence'][qi]>0 and v['pos'][:,qi].any()):continue
+                member=(result[:,qi]>.5).float()*observed
+                _,alpha,_=rasterization(means=geo.xyz,quats=geo.quaternions,scales=geo.scales,opacities=geo.opacities.flatten()*member,colors=ones,viewmats=v['view'],Ks=v['k'],width=w,height=h,near_plane=.001*geometry_prior.scale,far_plane=100*geometry_prior.scale,packed=False)
+                prediction=alpha[0,...,0].flatten()[v['pixels']]>(10.5/255)
+                # Full valid complement here, NOT the native-veto training mask.
+                positive=v['detector_pos'][:,qi];negative=v['detector_neg'][:,qi]
+                tp=(prediction&positive).sum();fp=(prediction&negative).sum()
+                totals+=torch.stack([tp,positive.sum(),fp,negative.sum()])
+                per_view.append(float(tp/(positive.sum()+fp).clamp_min(1)))
+            tp,pos,fp,neg=totals.tolist()
+            heldout_report.append(dict(query=text,views=len(per_view),positive_pixels=pos,negative_pixels=neg,positive_recall=tp/max(pos,1),complement_false_positive_rate=fp/max(neg,1),known_pixel_iou=tp/max(pos+fp,1),mean_view_iou=sum(per_view)/max(len(per_view),1)))
+    if args.optimization_state_out:
+        Path(args.optimization_state_out).parent.mkdir(parents=True,exist_ok=True)
+        torch.save(exported_state,args.optimization_state_out)
+    out=Path(args.output_base)/args.key;out.mkdir(parents=True,exist_ok=True);torch.save(dict(texts=initial['texts'],scores=initial['scores'],selection_scores=result.cpu(),selection_geometry=binding,selection_observed=observed.cpu(),semantic_geometry=binding,semantic_observed=observed.cpu()),out/'elements.pt')
+    if not args.inputs:
+        shutil.copyfile(base/'field.pt',out/'field.pt');shutil.copyfile(base/'calibration.pt',out/'calibration.pt')
+    torch.save(dict(texts=initial['texts'],scores=initial['scores'],selection_scores=result.cpu(),selection_geometry=binding,selection_observed=observed.cpu(),semantic_geometry=binding,semantic_observed=observed.cpu(),readout_contract='semantic_probability_and_independent_selected_set',semantic_parent=inputs['response'] if args.inputs else str(base/'elements.pt')),out/'typed_readout.pt')
+    (out/'fit.json').write_text(json.dumps(dict(evidence_strength=args.evidence_strength,finite_evidence=args.finite_evidence,native_reference_strength=1 if args.finite_evidence else 0,boundary_radius=args.boundary_radius,heldout_stride=args.heldout_stride,heldout_source_frames=[f for i,f in enumerate(source_frames) if args.heldout_stride and i%args.heldout_stride==0],heldout_teacher_agreement=heldout_report,heldout_is_independent_ground_truth=False,conflict_abstention=args.conflict_abstention,conflict_negative_pixels_removed=conflict_counts.tolist(),explicit_inputs=args.inputs,implicit_legacy_query_artifacts_read=not bool(args.inputs),source_fusion_only=args.source_fusion_only,negative_likelihood=args.negative_likelihood,optimization_state_in=args.optimization_state_in,optimization_state_out=args.optimization_state_out,mode=args.mode,pixel_loss=args.pixel_loss,source_coverage_reference=args.source_coverage_reference,source_coverage=coverage_report,support_prior=args.support_prior,support_prior_weight=args.support_prior_weight,positive_witnesses=args.positive_witnesses,protected_negative_pixels=protected_negative_counts.tolist(),negative_admission=args.negative_admission,corroborated_negative_pixels=corroborated_negative_counts.tolist(),new_negative_pixels_before_confidence_and_track_gates=negative_admission_counts.tolist(),positive_core=args.positive_core,scope_initialization=args.scope_initialization,regional_positive_evidence=args.regional_positive_evidence,tracks_base=args.tracks_base if not args.inputs else None,explicit_tracks=inputs['tracks'] if args.inputs else None,query_indices=args.query_indices,extra_track_frames=args.extra_track_frames,retained_selection=args.retained_selection,steps=steps,source_raster=[h,w],sampled_raster=[base_h,base_w],interleaved_phases=args.raster_scale**2,seconds=time.monotonic()-start,geometry=str(geometry_path),source_evidence='explicit current-query SAM3 detections and declared tracks' if args.inputs else 'native-resolution expanded detections, resized only for explicit fit raster; original temporal evidence where available',source_frames=source_frames,minimum_requested_steps=args.steps,full_active_view_consumption=True,unknown_old_support_not_negative=True,semantic_base=args.semantic_base if not args.inputs else None,hard_forward=args.mode in ('hard','hard_exposed'),optimize_all_observed=True,admitted_source_pixels=dict(zip(initial['texts'],admission_counts)),newly_active=[t for t,b in zip(initial['texts'],newly_active.tolist()) if b],semantic_scores_unchanged=True,target_rgb_used=False,history=history),indent=2)+'\n')
+
+if __name__=='__main__':main()

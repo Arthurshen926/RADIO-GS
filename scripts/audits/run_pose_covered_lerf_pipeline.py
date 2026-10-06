@@ -11,13 +11,13 @@ from radio_gs.utils.immutable_artifacts import sha256_file
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--device',required=True);p.add_argument('--resume',action='store_true');a=p.parse_args();torch.set_num_threads(4)
-    base=Path('/mnt/pool/sqy/results/RADIO-GS/output');root=base/'lerf_pose_covered_pipeline_20260917'/a.scene
+    p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--device',required=True);p.add_argument('--resume',action='store_true');p.add_argument('--output-root',type=Path);p.add_argument('--geometry-report',type=Path);p.add_argument('--until-base',action='store_true');a=p.parse_args();torch.set_num_threads(4)
+    base=Path('/mnt/pool/sqy/results/RADIO-GS/output');root=a.output_root or base/'lerf_pose_covered_pipeline_20260917'/a.scene
     root.mkdir(parents=True,exist_ok=True);fieldroot=root/'raw_field'
     sam_execution=json.loads((root/'source_sam_execution.json').read_text());assert sam_execution['status']=='complete'
     for f,h in sam_execution['implementations'].items():assert sha256_file(root/'sam_sources'/Path(f).name)==h
     old=base/'preserved_source_inventory_20260916'/a.scene;oldinfo=json.loads((root/'source_plan.json').read_text())
-    gp=base/'geometry_only_repair_final_20260914'/a.scene/'report.json';gr=json.loads(gp.read_text());geometry=Path(gr['results']['independent_scale']['geometry'])
+    gp=a.geometry_report or base/'geometry_only_repair_final_20260914'/a.scene/'report.json';gr=json.loads(gp.read_text());geometry=Path(gr['results']['independent_scale']['geometry'])
     py=sys.executable;sam='/root/miniconda3/envs/sam3/bin/python';record=dict(scene=a.scene,source_only_reconstruction=True,source_plan_sha256=sha256_file(root/'source_plan.json'),old_geometry_report_sha256=sha256_file(gp),source_frames=oldinfo['frames'],validation_frames=oldinfo['validation_frames'],source_inventory_policy='Same corrected multiscale and grounded inventory recipe, extended to16 training views within the predeclared source32 cohort by source camera coverage. All field/readout stages rebuilt.',source_sam_execution_sha256=sha256_file(root/'source_sam_execution.json'),source_sam_manifest_sha256=sha256_file(root/'source_sam/manifest.json'),stages=[])
     marker=root/'execution.json'
     if marker.exists():
@@ -73,9 +73,12 @@ def main():
         stage(name,'scripts/audits/'+entry+'.py',['--root',fieldroot,'--scene',a.scene,'--device',a.device],[fieldroot/out],envpy=env)
     stage('direct_affinity','scripts/audits/train_bounded_structure_exploration.py',['--root',fieldroot,'--geometry',geometry,'--parent',parent,'--variant','explicit','--passes','0','--name','scale_affinity_v1','--device',a.device],[fieldroot/'scale_affinity_v1_direct_control/report.json'])
     stage('phrase_groups','scripts/audits/build_source_phrase_groups.py',['--root',fieldroot],[fieldroot/'source_phrase_groups.json'])
+    if a.until_base:
+        record['base_finished']=True;marker.write_text(json.dumps(record,indent=2)+'\n');return
     stages=[('fit_full_source_query_threshold',[],'full_source_query_threshold_control'),('fit_grounded_semantic_transfer',['--group-report','source_phrase_groups.json'],'grounded_semantic_transfer96'),('train_source_region_extents',[],'source_region_extent96'),('train_rendered_extent',['--residual-dim','128','--steps','800'],'source_extent_rendered_residual96'),('export_hierarchical_extent_candidates',[],'source_hierarchical_candidates96'),('export_native_support_overlap',['--fallback-only'],'native_overlap_fallback96'),('fit_source_scope_gate',['--hard-pairs'],'hard_source_scope_gate96'),('export_rank_preserving_completion',['--within-extent'],'native_within_extent96'),('fit_exact_render_query_threshold',[],'exact_render_query_threshold96')]
     for entry,extra,directory in stages:
         command=['--root',fieldroot,'--scene',a.scene,*extra]
+        if entry in ('fit_full_source_query_threshold','fit_exact_render_query_threshold'):command+=['--geometry-report',gp]
         if not entry.startswith('export_'):command+=['--device',a.device]
         stage(entry,'scripts/audits/'+entry+'.py',command,[fieldroot/directory/'report.json'])
     stage('precision_gate','scripts/audits/calibrate_native_gate_precision.py',['--root',fieldroot,'--device',a.device],[fieldroot/'source_precision_gate96/report.json'])

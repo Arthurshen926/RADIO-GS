@@ -1,0 +1,73 @@
+{
+  "schema": "next19_runtime_and_query_state_seal.v1",
+  "cohort_complete": true,
+  "explicit_input_runtime": true,
+  "global_query_cache": false,
+  "wrong_query_identity_rejected": true,
+  "real_a_b_a": {
+    "schema": "next19_real_query_batch_isolation.v1",
+    "sequence": [
+      "horns_center",
+      "horns_left",
+      "horns_center"
+    ],
+    "a_b_a_scores_bitwise_equal": true,
+    "input_base_scores_unchanged": true,
+    "persistent_latent_unchanged": true,
+    "target_assets_read": false,
+    "comparisons": {
+      "horns_center": {
+        "max_abs_element_score_error": 2.980232238769531e-07,
+        "selected_element_mismatches": 0
+      },
+      "horns_left": {
+        "max_abs_element_score_error": 1.1920928955078125e-07,
+        "selected_element_mismatches": 0
+      }
+    },
+    "runtime_sha256": "82b38c750fd736c6484d7096dd4b633c059edbc0dc1fed71e349cbf80743a34d",
+    "input_bindings": {
+      "output/nvos_reference_completion_next19_runtime_isolation/horns_left_prompt_sam_elements.pt.binding.json": "8457a433e97741ad0899e76fefd94cf00cab8e9d856af0f6692847afd02258bc",
+      "output/nvos_reference_completion_next19_runtime_isolation/horns_center_prompt_sam_elements.pt.binding.json": "7ec1468817daec6a8761cb0b905426db70abe340115718df0c7aa5fdf96236af"
+    }
+  },
+  "bindings": {
+    "output/nvos_reference_completion_next19/state_bindings.json": "2d9ae122dd0882b901a5cbe78621e1a75a7967b289b3a04536bf6e923acf0ca9",
+    "output/nvos_reference_completion_next19/runtime_binding_check.json": "941888201a282ce53d474ddd6dca54e6b3382e8c85de14b219d3bd77e05899c5",
+    "output/nvos_reference_completion_next19_runtime_isolation/report.json": "127f77edffca410e7c7e27409108f70d6a0bce468f2e000801aff2053ead1f55",
+    "paper/artifacts/nvos_reference_completion_next19_eight.json": "6e80e0e9ba361932b6369c2ebced1d2fe97b1e73379d3f7aa27fac66f6b419f4",
+    "scripts/audits/nvos_reference_completion_next19_runtime.py": "82b38c750fd736c6484d7096dd4b633c059edbc0dc1fed71e349cbf80743a34d",
+    "scripts/audits/nvos_reference_completion_next19_runtime_isolation.py": "72e4f37e66e707b0b1ed530036b95219ea9921e957456ae3283f7b5e082ee818",
+    "output/nvos_reference_completion_next19/flower/baseline_elements.pt.binding.json": "015ffd963b66769b8c1932a92975a14f7300bcf7bc7336d03e097c521405058e",
+    "output/nvos_reference_completion_next19/flower/reference_component_elements.pt.binding.json": "38a5098ec981770bae8f7675d407f54e00c373164947579e09529f2bdcab6ba9",
+    "output/nvos_reference_completion_next19/flower/reference_core_component_elements.pt.binding.json": "7992070f9bc7bc0c430a63ae5bc43edbe470d58392a4960a79b38bb4cb3bc629",
+    "output/nvos_reference_completion_next19/fortress/baseline_elements.pt.binding.json": "7e541d66b682b59db2607e8e0d55f7884d5811e7f71cc3cfaa246cab2d1ffd78",
+    "output/nvos_reference_completion_next19/fortress/reference_component_elements.pt.binding.json": "689723299f65fd903a4032b165282f7f0b80eda62112ed8bb3382867bc564c66",
+    "output/nvos_reference_completion_next19/fortress/reference_core_component_elements.pt.binding.json": "513ff99935ce52393d64ce8d3729fb0050877a7b45c9cd9f837d8de6d0b08172",
+    "output/nvos_reference_completion_next19/fern/baseline_elements.pt.binding.json": "373c2841428ecfb813c43ff17d1b298ba36c7438a7f664e2e3f01f4ecad025dd",
+    "output/nvos_reference_completion_next19/fern/reference_component_elements.pt.binding.json": "465c50bffdd512ab42da828070aeca3f8fd60937364c8629d7a12bea24e299f8",
+    "output/nvos_reference_completion_next19/fern/reference_core_component_elements.pt.binding.json": "694e822b11bc020f28bfc5b200fa7181c49c1138e300e1f55b6b4319de3f9870",
+    "output/nvos_reference_completion_next19/horns_center/baseline_elements.pt.binding.json": "5b32131104220925ec088df3152d22e3ab4e24752d62f1027281f9b50b95de38",
+    "output/nvos_reference_completion_next19/horns_center/reference_component_elements.pt.binding.json": "4b167e2faed4274dafaea490ad591ce59ee6233d2c8e786452a61acbce068168",
+    "output/nvos_reference_completion_next19/horns_center/reference_core_component_elements.pt.binding.json": "aafc70d2cf7f595053b14ebbaecd2058cc892d3d42876e44d710176e0f6b506e",
+    "output/nvos_reference_completion_next19/horns_left/baseline_elements.pt.binding.json": "5f585c8d97790009c0ce5c64febb2132270d975d3911169f83aab72c9e043663",
+    "output/nvos_reference_completion_next19/horns_left/reference_component_elements.pt.binding.json": "9fa859ee06f4e0070d19cdb46072258df0f13af3966f85656fed4940fe4412d7",
+    "output/nvos_reference_completion_next19/horns_left/reference_core_component_elements.pt.binding.json": "e1c9f3195ad411a6d5468ff7bb8356211defc3f3879ba373f07393f0acc52ffd",
+    "output/nvos_reference_completion_next19/leaves/baseline_elements.pt.binding.json": "489ae50fa8d9ca6b3bdc4a2e74a85e670396b7dcf534580a326621f740af0745",
+    "output/nvos_reference_completion_next19/leaves/reference_component_elements.pt.binding.json": "36c699c0604ce43c17bdc6bb1b9b44c6b6b0222c5ba75f9ea8ecee6a9ae5a891",
+    "output/nvos_reference_completion_next19/leaves/reference_core_component_elements.pt.binding.json": "529251cc5c2866503d5b0a3e77e54bf83207944b1771feb359a54314bdd4edb6",
+    "output/nvos_reference_completion_next19/orchids/baseline_elements.pt.binding.json": "ede47da36fea64a46ffbf0df75dfd47b74998f848adc9e816a7f0694b094ca8d",
+    "output/nvos_reference_completion_next19/orchids/reference_component_elements.pt.binding.json": "96d4852af106e888e5ff84a0d5a64a590fdbad6dbc333b7528572df3828ce51e",
+    "output/nvos_reference_completion_next19/orchids/reference_core_component_elements.pt.binding.json": "454e0f6345712ea99fd7e7d2bdb9738ef49890b12e57effe0555dc753e764ebb",
+    "output/nvos_reference_completion_next19/trex/baseline_elements.pt.binding.json": "89a9244d99bbcc8172a55b820dab2b25b3fbe418c39324b39b5ffa8c37f2beb3",
+    "output/nvos_reference_completion_next19/trex/reference_component_elements.pt.binding.json": "3a7cc77287f7c0d0ab8371ed98bc59d6df75aac6502f5fedee8fd82f46a753a4",
+    "output/nvos_reference_completion_next19/trex/reference_core_component_elements.pt.binding.json": "7ec4bff898f1c51b01848c4bb6c1356a09f4c6258b02b0d93d40087e2f88e0cf",
+    "output/nvos_reference_completion_next19_runtime_isolation/horns_left_prompt_sam_elements.pt.binding.json": "8457a433e97741ad0899e76fefd94cf00cab8e9d856af0f6692847afd02258bc",
+    "output/nvos_reference_completion_next19_runtime_isolation/horns_left_prompt_sam_elements.pt": "a7d6c93ffaca31b8d9e36734cd40d6810e050f640ea3c765beaffd9862be30c4",
+    "output/nvos_reference_completion_next19_runtime_isolation/horns_center_prompt_sam_elements.pt": "1b552fcbdebdf38449d5e301d8ac2e0f6ab5d124d921e8b8756fc0ee439df287",
+    "output/nvos_reference_completion_next19_runtime_isolation/horns_center_prompt_sam_elements.pt.binding.json": "7ec1468817daec6a8761cb0b905426db70abe340115718df0c7aa5fdf96236af"
+  },
+  "default_changed": false,
+  "service_end_to_end_certification": false,
+  "limitation": "Validated same-map real two-query A/B/A and wrong-query identity; not a complete service certification"
+}

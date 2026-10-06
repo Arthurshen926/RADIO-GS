@@ -1,0 +1,20 @@
+{
+  "name": "Natural referring supervision with protected native semantics",
+  "default": false,
+  "parent": "configs/pipeline/system_v8.json",
+  "root": "output/referent_grounding_20261005",
+  "data_design": "output/referent_grounding_20261005/design.json",
+  "conditions": ["local", "scene"],
+  "epochs": 12,
+  "checkpoint_selection": "independent calibration-room actual selected-set IoU",
+  "extra_supervision": "NR3D expressions and official instance labels, excluding benchmark rooms and rescans",
+  "identity_target": "soft distribution proportional to decoded-scope IoU^4",
+  "native_field": "unchanged original teacher coordinates and original scores",
+  "scope": "unchanged one-hop observation correspondence and majority selection",
+  "query_access": "UQIS map-only; source images only during map compilation",
+  "candidate_execution": "scene: all31 common jobs; local: all9 UQIS jobs",
+  "observation_diagnosis": "output/referent_grounding_20261005/real_observation_control/design.json",
+  "comparison": "output/referent_grounding_20261005/comparison.json",
+  "independent_final_test": false,
+  "compact_student": false
+}

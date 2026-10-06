@@ -1,0 +1,120 @@
+{
+  "schema": "query_scope_controls.v1",
+  "independent_test": false,
+  "promoted": false,
+  "scenes": {
+    "figurines": {
+      "query_conditioned_scope_correction": {
+        "text_iou": 0.44719940184090284,
+        "text_ap": 0.6016962787375518,
+        "image_prompt_observations_exact": true,
+        "selected_step": 200,
+        "training_steps": 600,
+        "source_validation_scope": "Four source views held out only from correction fitting. Parent field/heads saw source data; NOT independent family or benchmark validation.",
+        "inputs": {
+          "output/v2_scope_rebuild_20260918/figurines/field/query_conditioned_scope_correction/report.json": "0d507a54c7763be208728cd8439e8b317b5f1d3a75ed447e939a96d1d509d6de",
+          "output/v2_scope_rebuild_20260918/figurines/field/query_conditioned_scope_correction/field.pt": "f0386bdaba16259ffdc263d208e70bd98607d036086a617b6b840c5340fc2cca",
+          "output/v2_scope_rebuild_20260918/figurines/query_correction_evaluation/text.json": "32c36444854ba87ae30c263f66c8fe82d07c410ef2d34b4c47c9f4495512f2fc",
+          "output/v2_scope_rebuild_20260918/figurines/query_correction_evaluation/reference.json": "8b1d87973c355b2d7d984f31c55b6741e1d690b9b12ab0fbfc44d46d56f2b68f"
+        }
+      },
+      "query_scope_complete_coverage": {
+        "text_iou": 0.445926245560229,
+        "text_ap": 0.6015592107761254,
+        "image_prompt_observations_exact": true,
+        "selected_step": 883,
+        "training_steps": 1766,
+        "source_validation_scope": "Four source views held out only from correction fitting. Parent field/heads saw source data; NOT independent family or benchmark validation.",
+        "inputs": {
+          "output/v2_scope_rebuild_20260918/figurines/field/query_scope_complete_coverage/report.json": "7f0eeca382805100b83f567051c32a4a60a6ca07c97cca38646b461dd2314e7f",
+          "output/v2_scope_rebuild_20260918/figurines/field/query_scope_complete_coverage/field.pt": "c8c60d8efdea794053a84c6f4eb5d51645b64481bd0270eb7b26bf8aad7d9abb",
+          "output/v2_scope_rebuild_20260918/figurines/query_scope_coverage_evaluation/text.json": "7fc7d722795b9d389e3fea4edf2875752f0d1e9f33b05477af7e05d4e5760400",
+          "output/v2_scope_rebuild_20260918/figurines/query_scope_coverage_evaluation/reference.json": "4300974542fed98552ca12ff34dbcac104bf6a5cf4a3165a83e39f537e1d79fd"
+        }
+      },
+      "bag_gate_training": {
+        "observations": [
+          {
+            "query_index": 487,
+            "base_query_index": 487,
+            "kind": "routed",
+            "phrase": "plastic bag",
+            "view": 9,
+            "native_iou": 0.7580919861793518,
+            "extent_iou": 0.0008756567258387804,
+            "gain": -0.757216329453513,
+            "concept_accepted": true,
+            "selected_group": 104,
+            "selected_scope_relation": "disjoint",
+            "scope_iou": 0.0
+          },
+          {
+            "query_index": 98781,
+            "base_query_index": 487,
+            "kind": "counterfactual",
+            "phrase": "plastic bag",
+            "view": 9,
+            "native_iou": 0.7580919861793518,
+            "extent_iou": 0.0009718172950670123,
+            "gain": -0.7571201688842848,
+            "concept_accepted": true,
+            "selected_group": 103,
+            "selected_scope_relation": "disjoint",
+            "scope_iou": 0.0
+          },
+          {
+            "query_index": 98783,
+            "base_query_index": 487,
+            "kind": "counterfactual",
+            "phrase": "plastic bag",
+            "view": 9,
+            "native_iou": 0.7580919861793518,
+            "extent_iou": 0.0009842519648373127,
+            "gain": -0.7571077342145145,
+            "concept_accepted": true,
+            "selected_group": 105,
+            "selected_scope_relation": "disjoint",
+            "scope_iou": 0.0
+          }
+        ],
+        "heldout": false,
+        "source_report_sha256": "51e36e263ea507ef153cc51570a1e0e5216c2373abba593ec0a83610f7225faa"
+      }
+    },
+    "ramen": {
+      "query_conditioned_scope_correction": {
+        "text_iou": 0.33477591348119645,
+        "text_ap": 0.5087481023914879,
+        "image_prompt_observations_exact": true,
+        "selected_step": 500,
+        "training_steps": 600,
+        "source_validation_scope": "Four source views held out only from correction fitting. Parent field/heads saw source data; NOT independent family or benchmark validation.",
+        "inputs": {
+          "output/v2_scope_rebuild_20260918/ramen/field/query_conditioned_scope_correction/report.json": "b91dcba79791650d0e82bf1ed85e4ee825a230a9ace873e282ac04e9a9b16522",
+          "output/v2_scope_rebuild_20260918/ramen/field/query_conditioned_scope_correction/field.pt": "2fd3ccace4b55a36fa2e17c90de54ca1ffd0f3a01f3a58280db9447e12780d46",
+          "output/v2_scope_rebuild_20260918/ramen/query_correction_evaluation/text.json": "542d0111f537720bee6d47225f58b8dc96fba0e8e54eb1adcba7ba7890604400",
+          "output/v2_scope_rebuild_20260918/ramen/query_correction_evaluation/reference.json": "b9094365d9c2b1e14af167a995e661d6c6af9a90d476f123b546606316653c7d"
+        }
+      },
+      "query_scope_complete_coverage": {
+        "text_iou": 0.3348526232196542,
+        "text_ap": 0.5097251575671236,
+        "image_prompt_observations_exact": true,
+        "selected_step": 522,
+        "training_steps": 1044,
+        "source_validation_scope": "Four source views held out only from correction fitting. Parent field/heads saw source data; NOT independent family or benchmark validation.",
+        "inputs": {
+          "output/v2_scope_rebuild_20260918/ramen/field/query_scope_complete_coverage/report.json": "42d33efba204b1709af4a16c562ec47c1bfc55a23aa6ab533fb3f7ddce769742",
+          "output/v2_scope_rebuild_20260918/ramen/field/query_scope_complete_coverage/field.pt": "6cbab3a4f115129e94a4e2a5986dd8072a0d8206864371d5c7bf9137132735ca",
+          "output/v2_scope_rebuild_20260918/ramen/query_scope_coverage_evaluation/text.json": "5c9f12dfd47956a3f4a20db34e3180a79c6398c36c06f0e5689d0bc2752c2a4d",
+          "output/v2_scope_rebuild_20260918/ramen/query_scope_coverage_evaluation/reference.json": "1cca3303dcaf3699701f60b775749f5c9d35fdd192ced5bf9e81dfe620b3af84"
+        }
+      },
+      "bag_gate_training": {
+        "observations": [],
+        "heldout": false,
+        "source_report_sha256": "efbff88c431cea225b0eb3931994a075db682d82cb4c2622126a9985ef0ca825"
+      }
+    }
+  }
+}

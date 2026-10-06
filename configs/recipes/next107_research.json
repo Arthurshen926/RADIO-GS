@@ -1,0 +1,46 @@
+{
+  "name": "next107_category_set_discovery",
+  "status": "complete; Box optional higher-mean LERF development candidate, not stable default",
+  "report": "docs/experiments/2026-10-02-set-discovery-transfer-next107.md",
+  "summary": "output/next107/summary.json",
+  "readout": "output/set_scope_next107/box",
+  "source_tracks": "output/set_discovery_next107/box",
+  "anchor_tracks": "output/core_merged_next104/union",
+  "matched_baseline": "output/core_scope_next104/core",
+  "rollback": "configs/recipes/next104_research.json",
+  "stable": "configs/recipes/next80_research.json",
+  "geometry": "output/joint_carrier_next66/adaptive_allrgb",
+  "semantic_base": "output/native_write_next75/all/calibrated",
+  "discovery": {
+    "exact_text": true,
+    "source_rgb": true,
+    "visual_example": "one bbox of original tracked core",
+    "detector": "local SAM3",
+    "confidence": 0.5,
+    "preserve_core": true,
+    "recursive_examples": false,
+    "scope": "category-set queries only; not reference-instance union"
+  },
+  "evaluation": {
+    "scenes": [
+      "figurines",
+      "ramen",
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "changed_queries": 13,
+    "all_queries": 67,
+    "new_scene_controls": 24,
+    "selected_projection_macro": 0.6311348406898387,
+    "independent_3d_gt": false
+  },
+  "limitations": [
+    "figurines regresses versus retained next104",
+    "spatula severe regression",
+    "old onion identity remains wrong",
+    "no new semantic-score improvement",
+    "no new NVOS/ScanNet/UQIS or four-query result",
+    "same-evidence optimization gain includes regularization; not novelty proof",
+    "additional online source/teacher cost"
+  ]
+}

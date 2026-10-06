@@ -1,0 +1,23 @@
+{
+  "name": "Query-independent entity range as a separate evidence type",
+  "base": "configs/pipeline/system_v8.json",
+  "default": false,
+  "cohort": "all 9 opened-development scenes, all 67 targets and 268 queries",
+  "source_observations": "same 1107 original legal source frames, 640-pixel RGB and unchanged mesh/depth projection",
+  "additional_teacher_path": "original SAM3 checkpoint, concept decoder with fixed generic prompt object; not interactive point masks",
+  "confidence_threshold": 0.5,
+  "identity": "all original native scores and original text/image seed choice retained",
+  "scope": "geometrically bind identity seed to containing generic entity and use original cross-view physical scope decoder; positive points use entity co-membership",
+  "containment_fraction": 0.8,
+  "visible_fraction": 0.3,
+  "minimum_entity_views": 2,
+  "absent_entity_policy": "retain freshly computed v8 scope when no multi-view entity evidence; no saved final predictions",
+  "parameter_search": "one fixed generic prompt and one scope rule, no vocabulary or threshold sweep",
+  "query_access": "map only, no source RGB/depth/SAM and no modality pairing",
+  "candidate_cap": null,
+  "extra_information_and_build_compute": true,
+  "independent_test": false,
+  "decision": "Completed all 1107 source frames and all 268 queries. Generic object prompting has inadequate coverage and no gain; do not promote.",
+  "completed_comparison": "output/witnessed_scope_study/comparison.json",
+  "report": "docs/experiments/2026-10-05-uqis-entity-range.md"
+}

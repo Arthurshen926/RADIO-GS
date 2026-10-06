@@ -5,12 +5,13 @@ import torch
 from radio_gs.models.element_retrieval_field import ElementRetrievalField
 from radio_gs.models.extent_benefit_gate import extent_agreement_features
 from radio_gs.utils.immutable_artifacts import sha256_file
+from radio_gs.training.extent_admission_diagnostics import admission_diagnostics
 
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--device',required=True);p.add_argument('--parent',default='joint_supervised_image_residual');p.add_argument('--name',default='counterfactual_extent_benefit_admission');a=p.parse_args();torch.set_num_threads(4);torch.manual_seed(42)
- root=Path('output/pixel_evidence_rebuild_20260917')/a.scene/'field';out=root/a.name;out.mkdir(exist_ok=False);snap=out/'sources';snap.mkdir();impl={}
- for f in [Path(__file__),Path('radio_gs/models/element_retrieval_field.py'),Path('radio_gs/models/extent_benefit_gate.py'),Path('radio_gs/models/grounded_semantic_transfer.py')]:shutil.copy2(f,snap/f.name);impl[str(f)]=sha256_file(f)
+ p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--root',type=Path);p.add_argument('--device',required=True);p.add_argument('--withheld-fallback',action='store_true');p.add_argument('--parent',default='joint_supervised_image_residual');p.add_argument('--name',default='counterfactual_extent_benefit_admission');a=p.parse_args();torch.set_num_threads(4);torch.manual_seed(42)
+ root=a.root if a.root is not None else Path('output/pixel_evidence_rebuild_20260917')/a.scene/'field';out=root/a.name;out.mkdir(exist_ok=False);snap=out/'sources';snap.mkdir();impl={}
+ for f in [Path(__file__),Path('radio_gs/models/element_retrieval_field.py'),Path('radio_gs/models/extent_benefit_gate.py'),Path('radio_gs/models/grounded_semantic_transfer.py'),Path('radio_gs/training/extent_admission_diagnostics.py')]:shutil.copy2(f,snap/f.name);impl[str(f)]=sha256_file(f)
  parent=root/a.parent;pr=json.loads((parent/'report.json').read_text());assert sha256_file(parent/'field.pt')==pr['field_sha256'];payload=torch.load(parent/'field.pt',weights_only=False)
  field=ElementRetrievalField(**payload['architecture']).to(a.device);field.load_state_dict(payload['state_dict']);field.requires_grad_(False)
  info=json.loads((root/'teachers.json').read_text());auth=json.loads((root/'responsibility.json').read_text());assert sha256_file(root/'responsibility.json')==info['authority_sha256']
@@ -28,9 +29,16 @@ def main():
   views.append((vi,mat,valid,targets,group_masks))
  records=[];features={};head=field.grounded_transfer;P=len(e['text_embeddings']);G=len(groups)
  with torch.no_grad():
-  z=head.features(field.latent);raw=head.decoder(z)
-  if head.residual is not None:raw=raw+head.residual(z)
-  offset=head.identity_selection['trusted_concept_start'];group_probability=raw[:,offset:offset+G].clamp(1e-6,1-1e-6);group_logits=torch.logit(group_probability)
+  # Only concept columns are consumed below. Decoding thousands of unrelated
+  # region columns first creates two N-elements x all-proposals tensors and
+  # exhausts a 24GB device on the additional scenes.
+  assert not head.hidden_dim,'This probability decoder requires a linear concept head'
+  z=head.features(field.latent);offset=head.identity_selection['trusted_concept_start'];columns=slice(offset,offset+G)
+  raw=torch.nn.functional.linear(z,head.decoder.weight[columns],head.decoder.bias[columns])
+  if head.residual is not None:
+   hidden=head.residual[1](head.residual[0](z))
+   raw=raw+torch.nn.functional.linear(hidden,head.residual[2].weight[columns],head.residual[2].bias[columns])
+  group_probability=raw.clamp(1e-6,1-1e-6);group_logits=torch.logit(group_probability)
   group_render={vi:((torch.sparse.mm(mat,group_probability*field.observed[:,None])>.5)&valid[:,None]) for vi,mat,valid,_,_ in views}
 
  with torch.no_grad():
@@ -73,6 +81,26 @@ def main():
       inter=int((gm&targetcpu).sum());ta=int(targetcpu.sum());ga=int(gm.sum());overlap=inter/max(ta+ga-inter,1);coverage=inter/max(ta,1);precision=inter/max(ga,1)
       relation=('aligned' if overlap>=.5 else 'selected_parent' if coverage>=.8 and precision<.5 else 'selected_part' if precision>=.8 and coverage<.5 else 'disjoint' if overlap<=.1 else 'partial_overlap')
       records.append(dict(query_index=synthetic,base_query_index=qi,kind='counterfactual',phrase=e['phrases'][qi],view=vi,native_iou=ni,extent_iou=ci,gain=ci-ni,concept_accepted=True,selected_group=group,selected_scope_relation=relation,scope_iou=overlap))
+   if a.withheld_fallback:
+    # A source query must also be supervised when its lexical concept is absent.
+    acceptance=head.acceptance.clone()
+    try:
+     head.acceptance.fill_(2.)
+     fallback=field.logits(q,'text')
+     _,fallback_accepted=head(q,field.latent,native_threshold=threshold,native_support=cos>threshold,observed=field.observed)
+    finally:head.acceptance.copy_(acceptance)
+    fx=extent_agreement_features(cos,threshold,fallback,field.observed,torch.zeros(len(q),device=a.device,dtype=torch.bool))
+    for j in range(len(q)):features[P+P*G+start+j]=fx[j].cpu()
+    response=torch.cat([native,fallback.sigmoid()],1)*field.observed[:,None]
+    for vi,mat,valid,targets,group_masks in views:
+     rendered=(torch.sparse.mm(mat,response)>.5)&valid[:,None]
+     for qi,targetcpu in targets.items():
+      j=qi-start
+      if not 0<=j<len(q) or not fallback_accepted[j]:continue
+      target=targetcpu.to(a.device);values=[]
+      for k in [j,len(q)+j]:
+       pred=rendered[:,k];values.append(float((pred&target).sum()/(pred|target).sum().clamp_min(1)))
+      records.append(dict(query_index=P+P*G+qi,base_query_index=qi,kind='withheld_fallback',phrase=e['phrases'][qi],view=vi,native_iou=values[0],extent_iou=values[1],gain=values[1]-values[0],concept_accepted=False,selected_group=None,selected_scope_relation='withheld_fallback',scope_iou=None))
    print(a.scene,start,'records',len(records),flush=True)
  unique=sorted({r['query_index'] for r in records});assert len(unique)>=10
  base_ids=sorted({r['base_query_index'] for r in records});order=torch.tensor(base_ids)[torch.randperm(len(base_ids))];heldout=set(order[::5].tolist());base_of={r['query_index']:r['base_query_index'] for r in records};validation=sorted(heldout)
@@ -90,6 +118,8 @@ def main():
  for relation in sorted({r['selected_scope_relation'] for r in records}):
   rr=[r for r in records if r['selected_scope_relation']==relation and r['concept_accepted']]
   if rr:strat[relation]=dict(observations=len(rr),native_iou=sum(r['native_iou'] for r in rr)/len(rr),extent_iou=sum(r['extent_iou'] for r in rr)/len(rr),harmful=sum(r['gain']<0 for r in rr))
- report=dict(schema='counterfactual_extent_benefit_admission.v1',field_sha256=sha256_file(out/'field.pt'),parent_field_sha256=pr['field_sha256'],benchmark_data_used=False,source_only=True,all_parent_tensors_exact=True,inputs=inputs,implementations=impl,selected=candidates[best],source_routed_validation_passed=bool(admissible),counterfactual_policy='Top three nonrouted semantic neighbor concepts, only coobserved masks; actual route and mean counterfactual family equal total weight per phrase; phrase family held out together',candidates=candidates,granularity=strat,observations=records,heldout_phrases=[e['phrases'][q] for q in validation],validation_scope='Phrases excluded from gate fitting only; base field and extent heads already saw source images/masks. Teacher masks are not independent object truth.',feature_names=['native_extent_iou','extent_precision','native_recall','log_mass_ratio','inside_native_margin','outside_native_margin','native_peak_margin','concept_accepted'],selection_metric='mean per-phrase rendered source IoU; full pixel denominator')
+ selected_allow=z@coeffs[best]>0
+ diagnostics={split:admission_diagnostics(native[mask],extent[mask],selected_allow[mask]) for split,mask in [('train_routed',~is_valid&routed),('validation_routed',is_valid&routed),('validation_all',is_valid)]}
+ report=dict(withheld_fallback_supervised=a.withheld_fallback,admission_diagnostics=diagnostics,native_harm_protection_certified=False,schema='counterfactual_extent_benefit_admission.v1',field_sha256=sha256_file(out/'field.pt'),parent_field_sha256=pr['field_sha256'],benchmark_data_used=False,source_only=True,all_parent_tensors_exact=True,inputs=inputs,implementations=impl,selected=candidates[best],source_routed_validation_passed=bool(admissible),counterfactual_policy='Top three nonrouted semantic neighbor concepts, only coobserved masks; actual route and mean counterfactual family equal total weight per phrase; phrase family held out together',candidates=candidates,granularity=strat,observations=records,heldout_phrases=[e['phrases'][q] for q in validation],validation_scope='Phrases excluded from gate fitting only; base field and extent heads already saw source images/masks. Teacher masks are not independent object truth.',feature_names=['native_extent_iou','extent_precision','native_recall','log_mass_ratio','inside_native_margin','outside_native_margin','native_peak_margin','concept_accepted'],selection_metric='mean per-phrase rendered source IoU; full pixel denominator')
  (out/'report.json').write_text(json.dumps(report,indent=2)+'\n');print(a.scene,report['selected'],strat,flush=True)
 if __name__=='__main__':main()

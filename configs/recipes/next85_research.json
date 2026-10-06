@@ -1,0 +1,28 @@
+{
+  "status": "complete_higher_mean_lerf_candidate_not_global_default",
+  "stable_reference": "configs/recipes/next80_research.json",
+  "candidate_readout": "output/grounded_scope_next85/source/<key>/typed_readout.pt",
+  "candidate_source": "output/content_seeds_next83/<key>/proposals.json",
+  "verifier": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "verifier_revision": "66285546d2b821cf421d4f5eb2576359d3770cd3",
+  "provider_optional": true,
+  "candidate_pairs_per_query": 16,
+  "context_scale": 1.5,
+  "decision": "A exact referent and extent; B wrong referent or extent; C unknown; weaker-view A-max(B,C) margin > 0, otherwise native fallback",
+  "scope_initialization": "source",
+  "intervened_queries": 13,
+  "retained_queries": 54,
+  "source_frames": {
+    "figurines": 293,
+    "ramen": 122,
+    "teatime": 169,
+    "waldo_kitchen": 180
+  },
+  "evaluations_complete": 8,
+  "summary": "output/next85/summary.json",
+  "selected_projection_macro": 0.5907809451556213,
+  "metric_is_independent_3d_gt": false,
+  "mainline_changed": false,
+  "other_benchmarks_unchanged": true,
+  "research_decision": "retain higher-mean candidate with explicit regressions; next validate spatially distinct text-union hypotheses and extent purity"
+}

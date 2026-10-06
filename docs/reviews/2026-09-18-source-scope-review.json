@@ -1,0 +1,229 @@
+{
+  "schema": "assistant_source_scope_review.v1",
+  "user_authorized_reviewer": "assistant",
+  "independent_human_ground_truth": false,
+  "source_only": true,
+  "benchmark_data_used": false,
+  "cases": [
+    {
+      "scene": "figurines",
+      "case": 0,
+      "left_query": "green hearts",
+      "right_query": "green plastic spoons",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_00.png",
+      "figure_sha256": "9f7708e34024577579e00835f764f4d3dde6bc14cfc4e58d5301b686f775610c",
+      "reviewer": "assistant_visual_review",
+      "review_class": "teacher_referent_unreliable",
+      "left_granularity": "unknown",
+      "right_granularity": "unknown",
+      "reason": "左侧高亮靠近苹果叶片，右侧高亮桌边绿色器皿；图中没有足够证据将它们确认成两个所述类别。不能据此给同一对象写互斥监督。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        127
+      ]
+    },
+    {
+      "scene": "figurines",
+      "case": 1,
+      "left_query": "mountain",
+      "right_query": "sky",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_01.png",
+      "figure_sha256": "c1465c666a8bb757331bb108f995b557cea420eb04e3b97b03660bee530555d3",
+      "reviewer": "assistant_visual_review",
+      "review_class": "different_semantic_scopes",
+      "left_granularity": "landscape",
+      "right_granularity": "sky",
+      "reason": "天空与地平线/山地是不同语义范围。sky范围在图中合理；mountain只覆盖很窄的地平线，精确边界和远景几何未确认。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        262
+      ]
+    },
+    {
+      "scene": "figurines",
+      "case": 2,
+      "left_query": "pink glitter",
+      "right_query": "sunroad",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_02.png",
+      "figure_sha256": "f76357730ca5536a5d66d56fc05218856f497d1abdd2ec56cde3062f5dcdf3d8",
+      "reviewer": "assistant_visual_review",
+      "review_class": "ambiguous_description_and_empty_output",
+      "left_granularity": "unknown",
+      "right_granularity": "unknown",
+      "reason": "pink glitter缺少明确稳定指代，sunroad含义不清。源mask含小目标局部但最终均为空，不能归因于范围头把两个正确对象合并。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        11
+      ]
+    },
+    {
+      "scene": "figurines",
+      "case": 3,
+      "left_query": "plastic bag",
+      "right_query": "plastic container",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_03.png",
+      "figure_sha256": "ad53bea79304e00d7f81e0507a1de2a45238db01e2bf5b76994234eb9cda6d0f",
+      "reviewer": "assistant_visual_review",
+      "review_class": "distinct_visible_objects",
+      "left_granularity": "whole_object",
+      "right_granularity": "whole_object",
+      "reason": "左侧为桌上的直立包装袋，右侧为后方透明收纳盒/容器；空间分离，两个查询不应共享同一完整范围。边缘像素不作逐像素真值认证。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        174
+      ]
+    },
+    {
+      "scene": "figurines",
+      "case": 4,
+      "left_query": "lots of colorful plastic toys",
+      "right_query": "lots of plastic toys",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_04.png",
+      "figure_sha256": "afe459a6e3f4738927d7a575cd0ff7b1c49dd2cd5bef5a69da1eecdca228d646",
+      "reviewer": "assistant_visual_review",
+      "review_class": "teacher_collection_incompleteness",
+      "left_granularity": "collection",
+      "right_granularity": "collection",
+      "reason": "两个短语语义接近且均指玩具集合，但左侧仅选中一个蓝色人偶，右侧覆盖多个玩具。差异主要是教师集合完整性，不能强制训练成两个不同物理身份。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        11
+      ]
+    },
+    {
+      "scene": "figurines",
+      "case": 5,
+      "left_query": "green ball",
+      "right_query": "green balloon",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_05.png",
+      "figure_sha256": "d17d3f7882d7f36cf0eaf2ad68c57d9fe6a6c96415f375fff99a87ad76cd8063",
+      "reviewer": "assistant_visual_review",
+      "review_class": "teacher_referent_unreliable",
+      "left_granularity": "unknown",
+      "right_granularity": "unknown",
+      "reason": "高亮涉及包装图案/后方绿色物件；本视角不足以确认独立green ball或balloon。不能将字面差异视作可靠物理实例对。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        136
+      ]
+    },
+    {
+      "scene": "figurines",
+      "case": 6,
+      "left_query": "plastic toys",
+      "right_query": "smiley face",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_06.png",
+      "figure_sha256": "b96c4215d11d2def14df3ad3cfe60c856c34281b866dc968e6836909645894e6",
+      "reviewer": "assistant_visual_review",
+      "review_class": "collection_vs_local_scope",
+      "left_granularity": "collection",
+      "right_granularity": "part_or_single_object",
+      "reason": "plastic toys覆盖多个玩具；smiley face主要落在黄色角色头部附近。集合与局部指代不同，右侧是否精确脸部仍待边界确认。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        165
+      ]
+    },
+    {
+      "scene": "figurines",
+      "case": 7,
+      "left_query": "sign",
+      "right_query": "sign that says",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_07.png",
+      "figure_sha256": "2c51654295c5c4d0f6bf857d89888774125b4f534225aad73d9f7ab444cdb2ce",
+      "reviewer": "assistant_visual_review",
+      "review_class": "underspecified_subset_and_empty_output",
+      "left_granularity": "collection",
+      "right_granularity": "unknown",
+      "reason": "sign包含墙上两块标牌，sign that says是不完整描述并只选其中一块。最终均为空；没有给出文字内容时无法确认预期子集。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        269
+      ]
+    },
+    {
+      "scene": "figurines",
+      "case": 8,
+      "left_query": "building",
+      "right_query": "city",
+      "figure": "output/current_recipe_audit_20260918/figurines/casebook/case_08.png",
+      "figure_sha256": "4903df385b61fbd8810522b7213b11c40a92b8ea77f6586ade6dc3c13d29597c",
+      "reviewer": "assistant_visual_review",
+      "review_class": "object_collection_vs_context",
+      "left_granularity": "collection",
+      "right_granularity": "scene_region",
+      "reason": "building选若干楼体，city覆盖更广街景。范围存在包含/上下文差异，不能当同粒度同一实例。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        262
+      ]
+    },
+    {
+      "scene": "ramen",
+      "case": 0,
+      "left_query": "wooden chair",
+      "right_query": "wooden table",
+      "figure": "output/current_recipe_audit_20260918/ramen/casebook/case_00.png",
+      "figure_sha256": "4fe447e92535aa7bdee9932cb1a16180ca5e9929b217d286ec2386583fac1bd2",
+      "reviewer": "assistant_visual_review",
+      "review_class": "distinct_visible_surfaces_partial_left",
+      "left_granularity": "part_or_occluded_object",
+      "right_granularity": "whole_visible_surface",
+      "reason": "右侧清楚为桌面；左侧窄高亮位于右边缘背景木质构件，画面无法确认完整椅子身份。两范围不应合并，但不把左mask认证为完整wooden chair真值。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        15
+      ]
+    },
+    {
+      "scene": "ramen",
+      "case": 1,
+      "left_query": "close up some wooden boards",
+      "right_query": "wood",
+      "figure": "output/current_recipe_audit_20260918/ramen/casebook/case_01.png",
+      "figure_sha256": "e3717497faeedba2b5d476524fc49880c8cf0bafd92a72de6b8cfcde3fbd34e5",
+      "reviewer": "assistant_visual_review",
+      "review_class": "object_collection_vs_material",
+      "left_granularity": "collection",
+      "right_granularity": "material_region",
+      "reason": "木板短语主要覆盖后方竖木板；wood还包括桌面和更广木质区域。集合与材质范围不同，二者共享元素并不表示范围相等。",
+      "physical_instance_id": null,
+      "pixelwise_masks_certified": false,
+      "cross_view_identity_verified": false,
+      "use_for_training": false,
+      "reviewed_frames": [
+        76
+      ]
+    }
+  ]
+}

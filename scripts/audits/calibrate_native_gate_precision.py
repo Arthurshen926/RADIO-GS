@@ -31,6 +31,16 @@ def main():
         values=torch.stack([similarity(q) for q in variants]);low=values.amin(0);high=values.amax(0)
         for i,phrase in enumerate(cached_phrases):
             index=phrases.index(phrase);value=similarity(cached[i:i+1])[0];low[index]=torch.minimum(low[index],value);high[index]=torch.maximum(high[index],value)
+        # The original threshold was fitted in a different batch: exactly one
+        # photo template per group. Large mixed batches and singleton calls do
+        # not bound that FP16 execution shape. Reproduce its actual encodings;
+        # never invent a larger tolerance or remove the admission assertion.
+        construction_templates=['a photo of a '+g['phrase'] for g in groups]
+        construction_values=similarity(encoder.encode_text(construction_templates))
+        for i,phrase in enumerate(construction_templates):
+            index=phrases.index(phrase)
+            low[index]=torch.minimum(low[index],construction_values[i])
+            high[index]=torch.maximum(high[index],construction_values[i])
         # Per-prototype largest observed drift, plus FP32 dot-product roundoff.
         margin=(high-low).amax(0)+8*torch.finfo(torch.float32).eps
         original=head.acceptance.clone();head.acceptance.sub_(margin)
@@ -44,7 +54,7 @@ def main():
             if key!='grounded_transfer.acceptance':assert torch.equal(value,state[key]),key
     out=root/a.name;out.mkdir(exist_ok=False);shutil.copy2(__file__,out/'source.py')
     torch.save(dict(payload,state_dict=state),out/'field.pt')
-    result=dict(schema='source_native_gate_precision.v1',field_sha256=sha256_file(out/'field.pt'),parent_field_sha256=receipt['field_sha256'],episode_sha256=ep_receipt['sha256'],groups_sha256=sha256_file(groups_path),implementation_sha256=sha256_file(__file__),source_only=True,benchmark_data_used=False,all_other_state_exact=True,query_encoder_unchanged=True,geometry_unchanged=True,phrases=phrases,checks=checks,maximum_margin=float(margin.max()),policy='per-prototype maximum source encoding cosine range across batch/singleton FP32/FP16 and cached training queries, plus eight FP32 eps',future_query_stability_guaranteed=False)
+    result=dict(schema='source_native_gate_precision.v2',field_sha256=sha256_file(out/'field.pt'),parent_field_sha256=receipt['field_sha256'],episode_sha256=ep_receipt['sha256'],groups_sha256=sha256_file(groups_path),implementation_sha256=sha256_file(__file__),source_only=True,benchmark_data_used=False,all_other_state_exact=True,query_encoder_unchanged=True,geometry_unchanged=True,phrases=phrases,checks=checks,maximum_margin=float(margin.max()),construction_template_batch_size=len(construction_templates),policy='per-prototype maximum source encoding cosine range across mixed batch/singleton FP32/FP16, cached training queries and original construction-template batch, plus eight FP32 eps',future_query_stability_guaranteed=False)
     (out/'report.json').write_text(json.dumps(result,indent=2)+'\n');print(out,result['maximum_margin'],flush=True)
 
 if __name__=='__main__':main()

@@ -1,0 +1,14 @@
+{
+  "control_sha256": "e53036c1606bd455aa116915fc8428505e068ce2c7fa314a289eee812d08ed2e",
+  "materialized_sha256": "fa47bee9ca5725cc0b7533dfeacb28ec6187db767352b727a08e11dcd673c888",
+  "tensor_max_error": {
+    "xyz": 0.0,
+    "normals": 1.1920928955078125e-07,
+    "quaternions": 2.034730277955532e-05,
+    "scales": 0.0,
+    "opacities": 0.0
+  },
+  "exact_bitwise": false,
+  "covariance_max_error_square_metres": 2.377873897785321e-08,
+  "notes": "CPU versus GPU normal/quaternion normalization differs near antipodal normals. A strict 1e-6 all-tensor comparison failed; do not reuse geometry bindings or claim exact render equivalence. Centers/scales/opacity are exact; actual materialized render validation remains pending."
+}

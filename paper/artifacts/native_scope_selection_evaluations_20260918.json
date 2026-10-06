@@ -1,0 +1,109 @@
+{
+  "records": [
+    {
+      "scene": "figurines",
+      "task": "text",
+      "command": [
+        "/root/miniconda3/envs/cybersim_agent/bin/python",
+        "scripts/audits/audit_current_query_routes.py",
+        "--task",
+        "text",
+        "--root",
+        "output/v2_scope_rebuild_20260918/figurines/field",
+        "--scene",
+        "figurines",
+        "--geometry-report",
+        "output/geometry_only_repair_final_20260914/figurines/report.json",
+        "--runs",
+        "native_scope_selection_control",
+        "--encoding-replay",
+        "output/v2_scope_rebuild_20260918/figurines/text_online.encodings.pt",
+        "--device",
+        "cuda:0",
+        "--output",
+        "output/native_scope_selection_20260918/figurines/text.json"
+      ],
+      "path": "output/native_scope_selection_20260918/figurines/text.json",
+      "sha256": "b326ad7719b6b5854973e4902269b9b29192b4098ff64e4fe8f6d497b421e340"
+    },
+    {
+      "scene": "figurines",
+      "task": "reference",
+      "command": [
+        "/root/miniconda3/envs/cybersim_agent/bin/python",
+        "scripts/audits/audit_current_query_routes.py",
+        "--task",
+        "reference",
+        "--root",
+        "output/v2_scope_rebuild_20260918/figurines/field",
+        "--scene",
+        "figurines",
+        "--geometry-report",
+        "output/geometry_only_repair_final_20260914/figurines/report.json",
+        "--runs",
+        "native_scope_selection_control",
+        "--encoding-replay",
+        "output/v2_scope_rebuild_20260918/figurines/reference_online.encodings.pt",
+        "--device",
+        "cuda:0",
+        "--output",
+        "output/native_scope_selection_20260918/figurines/reference.json"
+      ],
+      "path": "output/native_scope_selection_20260918/figurines/reference.json",
+      "sha256": "6d72d791922472442e914390f98bd703c4f446efc299ad8ff86fa00278088f23"
+    },
+    {
+      "scene": "ramen",
+      "task": "text",
+      "command": [
+        "/root/miniconda3/envs/cybersim_agent/bin/python",
+        "scripts/audits/audit_current_query_routes.py",
+        "--task",
+        "text",
+        "--root",
+        "output/v2_scope_rebuild_20260918/ramen/field",
+        "--scene",
+        "ramen",
+        "--geometry-report",
+        "output/geometry_only_repair_final_20260914/ramen/report.json",
+        "--runs",
+        "native_scope_selection_control",
+        "--encoding-replay",
+        "output/v2_scope_rebuild_20260918/ramen/text_online.encodings.pt",
+        "--device",
+        "cuda:0",
+        "--output",
+        "output/native_scope_selection_20260918/ramen/text.json"
+      ],
+      "path": "output/native_scope_selection_20260918/ramen/text.json",
+      "sha256": "b3316cfd9344bfabad26c433246050ed7c7c2ced13f30482910de2d86804d452"
+    },
+    {
+      "scene": "ramen",
+      "task": "reference",
+      "command": [
+        "/root/miniconda3/envs/cybersim_agent/bin/python",
+        "scripts/audits/audit_current_query_routes.py",
+        "--task",
+        "reference",
+        "--root",
+        "output/v2_scope_rebuild_20260918/ramen/field",
+        "--scene",
+        "ramen",
+        "--geometry-report",
+        "output/geometry_only_repair_final_20260914/ramen/report.json",
+        "--runs",
+        "native_scope_selection_control",
+        "--encoding-replay",
+        "output/v2_scope_rebuild_20260918/ramen/reference_online.encodings.pt",
+        "--device",
+        "cuda:0",
+        "--output",
+        "output/native_scope_selection_20260918/ramen/reference.json"
+      ],
+      "path": "output/native_scope_selection_20260918/ramen/reference.json",
+      "sha256": "b2e47068f88eca7100c1fd42b12969a398f75edac3bcdbc4ee59024e73ddec5b"
+    }
+  ],
+  "independent_test": false
+}

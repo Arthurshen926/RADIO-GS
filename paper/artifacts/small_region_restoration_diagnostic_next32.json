@@ -1,0 +1,116 @@
+{
+  "schema": "small_region_restoration_diagnostic_next32.v2",
+  "complete": true,
+  "source_only": true,
+  "new_model_fit": false,
+  "gate_changed": false,
+  "benchmark_data_read": false,
+  "uses_corrected_unknown_parent_context": true,
+  "metrics": {
+    "projected_teacher": {
+      "text": {
+        "mse": 9.603599755791947e-05,
+        "centered_mse": 4.983066173736006e-05,
+        "mean_bias": 0.0021250268910080194,
+        "mean_squared_row_bias": 4.6205332182580605e-05,
+        "teacher_top1_agreement": 0.5909090638160706,
+        "average_response": 0.05334940552711487,
+        "teacher_average_response": 0.05122438445687294
+      },
+      "image": {
+        "mse": 0.0013531969161704183,
+        "centered_mse": 3.83317019441165e-05,
+        "mean_bias": 0.03508957847952843,
+        "mean_squared_row_bias": 0.0013148653088137507,
+        "teacher_top1_agreement": 0.6818181872367859,
+        "average_response": 0.7308654189109802,
+        "teacher_average_response": 0.6957758069038391
+      }
+    },
+    "baseline": {
+      "text": {
+        "mse": 0.0005788234993815422,
+        "centered_mse": 0.0003533757699187845,
+        "mean_bias": -0.0059175435453653336,
+        "mean_squared_row_bias": 0.0002254477294627577,
+        "teacher_top1_agreement": 0.0,
+        "average_response": 0.04530683904886246,
+        "teacher_average_response": 0.05122438445687294
+      },
+      "image": {
+        "mse": 0.007878915406763554,
+        "centered_mse": 0.003437634790316224,
+        "mean_bias": 0.057522352784872055,
+        "mean_squared_row_bias": 0.004441280383616686,
+        "teacher_top1_agreement": 0.0,
+        "average_response": 0.7532981634140015,
+        "teacher_average_response": 0.6957758069038391
+      }
+    },
+    "candidate": {
+      "text": {
+        "mse": 0.0005548261106014252,
+        "centered_mse": 0.0003384629380889237,
+        "mean_bias": -0.005252815317362547,
+        "mean_squared_row_bias": 0.00021636317251250148,
+        "teacher_top1_agreement": 0.0,
+        "average_response": 0.045971572399139404,
+        "teacher_average_response": 0.05122438445687294
+      },
+      "image": {
+        "mse": 0.00809485837817192,
+        "centered_mse": 0.003213629126548767,
+        "mean_bias": 0.06082559749484062,
+        "mean_squared_row_bias": 0.004881228785961866,
+        "teacher_top1_agreement": 0.0,
+        "average_response": 0.7566013336181641,
+        "teacher_average_response": 0.6957758069038391
+      }
+    },
+    "parent_teacher_mixture": {
+      "text": {
+        "mse": 0.000905855093151331,
+        "centered_mse": 0.0004244764568284154,
+        "mean_bias": -0.011462890543043613,
+        "mean_squared_row_bias": 0.0004813787236344069,
+        "teacher_top1_agreement": 0.0,
+        "average_response": 0.03259783610701561,
+        "teacher_average_response": 0.04406072199344635
+      },
+      "image": {
+        "mse": 0.008978581987321377,
+        "centered_mse": 0.0043966867960989475,
+        "mean_bias": -0.02740984968841076,
+        "mean_squared_row_bias": 0.004581895656883717,
+        "teacher_top1_agreement": 0.1428571492433548,
+        "average_response": 0.6564403176307678,
+        "teacher_average_response": 0.6838502287864685
+      }
+    }
+  },
+  "image_positive_error_increment_shares": {
+    "has_large_containing_parent": 0.6222131636444027,
+    "no_parent_mask_overlap": 0.21614739917287878,
+    "any_parent_mask_overlap": 0.7838526008271212
+  },
+  "inputs": {
+    "output/full_field_rebuild_next19/figurines/reconstruction/field/teacher_siglip.pt": "f0bba2ab6e025326939d3e99fc4095c3df0bbec6b470c5137f2c7d2df20e737e",
+    "output/full_field_rebuild_next19/figurines/reconstruction/field/episodes.pt": "700dabca249f6958425eda91af01b18114103edbb015ccaa8c4671dced3ff0c2",
+    "output/small_region_restoration_next32/lerf_figurines/small_teacher.pt": "3fe6109c67aaa299147d174b19920d188bd67941a3a260f1a2423f478c347d49",
+    "output/small_region_restoration_next32/lerf_figurines/map.pt": "7f35c48db0ab5a5e2c31c4c3596c94c9136bbf6417b8ed4b50b0d3d883a44839",
+    "output/native_residual_basis_next30_v2/lerf_figurines/map/map.pt": "910eefe0c36fd9665220501a136e940d99538c23e21258f4d34904a693de18f6",
+    "output/full_field_rebuild_next19/figurines/reconstruction/field/responsibility.json.views/view_00020.pt": "12eced05e6956fd87b39a76e0daa7c87e562622c20debe341a6d99fb6d6fa296",
+    "output/full_field_rebuild_next19/figurines/reconstruction/field/responsibility.json.views/view_00021.pt": "cdc89dce87992204182927bc186588c074118d41b9508fc250a372965df7d24f"
+  },
+  "artifacts": {
+    "scripts/audits/diagnose_small_region_restoration_next32.py": "89b22faf35d49f626e6940daf5183f427c49929e218bb8b7cbd8a2a05e4885f3",
+    "scripts/audits/diagnose_small_region_restoration_next32_v2.py": "939b41431b603101cdfdbe231a0f6543232629efdf4b142071421a445f8078cd",
+    "output/small_region_restoration_diagnostic_next32/figurines.json": "d232dcc5c325f071ef9e6704028cb8ba514ec661380a454444c0b9e512696da4",
+    "output/small_region_restoration_diagnostic_next32.log": "86d6e96edc9ff46814bc4281854957bc2064831749cbeea6f6f34d386ca29c71",
+    "output/small_region_restoration_diagnostic_next32_v2/figurines.json": "3018b743efda69f6b1ed39bcc93b0c4939fc0aabc864164b0e3e45507747eec6",
+    "output/small_region_restoration_diagnostic_next32_v2.log": "6b426952a9a059acd0b6342d63ddb478eadc23cb9e4e62a7a243feff6bba315d",
+    "docs/experiments/2026-09-26-small-region-fusion-failure-diagnosis.md": "ebd9f9d74eefef90f050eaa48d6cf5a717acfc2295b49ccac19ae3d09cc3f66f",
+    "paper/artifacts/small_region_restoration_next32.json": "874a0a1a7e947b8733f90bc930d8bd3671be371d46e85ff78c146fbe115000fa"
+  },
+  "superseded_diagnostic": "v1 parent-mixture averages included undefined zero context; retained for provenance only"
+}

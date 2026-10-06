@@ -70,3 +70,16 @@ class NativeThreeQueryEncoder:
         dense=F.interpolate(dense.half().float()[None],size=(height,width),mode='bilinear',align_corners=False)[0].flatten(1)
         coordinates=((world_xyz.to(self.device)-minimum.to(self.device))/extent.to(self.device)).flatten()
         return torch.cat([dense[:,pixels[0]],dense[:,pixels[1]],coordinates])[None]
+
+
+@torch.inference_mode()
+def encode_category_text(scene, texts, device='cuda'):
+    """Text in the coordinates of the declared category-region dictionary."""
+    from torch.nn import functional as F
+    if scene.get('category_query_encoder', {}).get('provider') == 'mask_adapter_clip':
+        from radio_gs.models.pretrained_mask_adapter import PretrainedMaskAdapter
+        encoder = PretrainedMaskAdapter(scene['category_query_encoder']['checkpoint'], device=device)
+        return F.normalize(encoder.text(texts).half().float(), dim=-1)
+    encoder, tokenizer = load_siglip_text(scene['text_encoder'], device)
+    tokens = tokenizer(texts, padding='max_length', max_length=64, truncation=True, return_tensors='pt').to(device)
+    return F.normalize(F.normalize(encoder(**tokens).pooler_output.float(), dim=-1).half().float(), dim=-1)

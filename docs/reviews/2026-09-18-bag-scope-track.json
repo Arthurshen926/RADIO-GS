@@ -1,0 +1,19 @@
+{
+  "schema": "assistant_reviewed_source_scope_track.v1",
+  "reviewer": "assistant_visual_review",
+  "source_only": true,
+  "independent_human_ground_truth": false,
+  "training_use": false,
+  "scene": "figurines",
+  "query": "plastic bag",
+  "identity": "upright_pink_yellow_snack_package_on_table",
+  "granularity": "visible_whole_object",
+  "pixel_boundary_certified": false,
+  "review_basis": "Source RGB and candidate masks visually inspected; same distinctive upright snack package is visible at frames 11, 21 and 174. Frame 31 has no selected reliable bag candidate and is excluded from this bounded three-view diagnosis, not counted as absent.",
+  "candidate_manifest": "output/expert_plan_20260918/review_candidates/manifest.json",
+  "observations": [
+    {"frame": 11, "region": 2, "teacher_phrase": "bag of candy"},
+    {"frame": 21, "region": 140, "teacher_phrase": "candy box"},
+    {"frame": 174, "region": 1012, "teacher_phrase": "plastic bag"}
+  ]
+}

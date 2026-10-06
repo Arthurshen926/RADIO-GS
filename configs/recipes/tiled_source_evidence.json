@@ -1,0 +1,80 @@
+{
+  "status": "complete_not_promoted",
+  "baseline": "identity_response",
+  "hypothesis": "Native source image scale limits small-object grounding before 3D writing; retain each viewport observation domain to prevent invented global negatives.",
+  "candidate_count": 2,
+  "controls": [
+    "additional_crop_evidence_global_complement",
+    "same_crop_evidence_bounded_complement"
+  ],
+  "fixed": {
+    "crop_scale": 0.6,
+    "crop_origins": [
+      0.0,
+      0.4
+    ],
+    "teacher_resolution": 1008,
+    "source_mask_raster": [
+      192,
+      256
+    ],
+    "confidence_threshold": 0.5,
+    "queries": "verbatim",
+    "source_sampling": "all declared source frames",
+    "geometry": "unchanged",
+    "identity": "same detector-conditioned native filter after combined evidence"
+  },
+  "new_teacher_budget": {
+    "source_images": 764,
+    "image_encoder_calls": 3056,
+    "text_grounding_calls": 54356
+  },
+  "promotion": "Require material complete-cohort benefit in both readouts without severe part/identity regression; no per-query assembly; no SOTA/novelty claim from added evidence alone.",
+  "parameter_revisions": 0,
+  "target_rgb_used": false,
+  "target_gt_used_for_inference": false,
+  "unseen_scene_validated": false,
+  "uqis": "paused",
+  "references": [
+    {
+      "title": "SAHI: Slicing Aided Hyper Inference and Fine-tuning for Small Object Detection",
+      "url": "https://arxiv.org/abs/2202.06934",
+      "relevance": "Image slicing is an existing capability, not claimed as new contribution."
+    },
+    {
+      "title": "Official SAM3 image processor",
+      "url": "https://github.com/facebookresearch/sam3/blob/main/sam3/model/sam3_image_processor.py",
+      "relevance": "Source crop masks are probabilities in masks_logits; retained local code inspected before projection."
+    }
+  ],
+  "scripts": [
+    "scripts/research/run_tiled_source_teachers.py",
+    "scripts/research/run_tiled_source_control.py",
+    "scripts/research/summarize_tiled_source_control.py"
+  ],
+  "core_candidates": [
+    "source_scale_with_viewport_control",
+    "direct_detection_mask_native_identity"
+  ],
+  "direct_identity_control": {
+    "inputs": "original full-image detections, original query encodings/native map and identity density rule",
+    "intervention": "encode actual detection mask instead of nearest cached SAM region; no added detections",
+    "score": "unchanged one-vs-two model-averaged native identity posterior",
+    "budget": "one additional SigLIP vision crop per nonempty original detection",
+    "output": "output/direct_source_identity",
+    "appearance_controls": [
+      "direct_masked_rgb",
+      "direct_unmasked_context_1.5x"
+    ],
+    "context_scope_rule": "Expanded context only affects identity encoding; never expands foreground labels or allowed extent",
+    "predicted_failure": "Masked part may lose identifying parent context; context may confuse nearby objects. Reject if full-cohort response/selection tradeoff or severe regression."
+  },
+  "default_changed": false,
+  "full_scene_evaluations": 16,
+  "summaries": [
+    "output/tiled_source_evidence/summary.json",
+    "output/direct_source_identity/summary.json"
+  ],
+  "report": "docs/experiments/2026-10-03-source-scale-and-direct-identity.md",
+  "next_mechanism": "Unknown identity and finite evidence strength before replacing native field; sparse-view posterior and selected-set regularization must be validated jointly. No more crop-size or context-scale sweeps."
+}

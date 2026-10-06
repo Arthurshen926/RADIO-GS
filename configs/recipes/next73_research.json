@@ -1,0 +1,41 @@
+{
+  "status": "research_results_not_global_promotion",
+  "parent_recipe": "configs/recipes/next72_research.json",
+  "architecture_changed": false,
+  "lerf_completed_candidate": {
+    "teacher_cohort": "coverage64",
+    "field": "output/expanded_semantic_next72/coverage64/native/lerf_{scene}/native_field.pt",
+    "readout": "output/expanded_semantic_next72/coverage64/old_extent/lerf_{scene}/typed_readout.pt",
+    "evaluation": "output/expanded_semantic_next72/coverage64/old_extent/lerf_{scene}/anchored/pipeline_calibrated/evaluation.json",
+    "scope_evidence": "retained old cohort; expanded scope not bundled",
+    "native_feature_dim": 1536,
+    "macro_iou": 0.6609755026176423,
+    "macro_ap": 0.8257781770844647,
+    "macro_selected_projection_iou": 0.5327941161589236
+  },
+  "uncapped_source_policy": {
+    "cohorts": ["old", "coverage64", "all"],
+    "full_counts": {"figurines": 293, "ramen": 122, "teatime": 169, "waldo_kitchen": 180},
+    "production_frame_cap": null,
+    "all_source_sam_complete": true,
+    "all_source_semantic_reconstruction_complete": false
+  },
+  "nvos_method_controls": {
+    "same_video": "output/nvos_transfer_next72",
+    "joint_rendered_prior": "output/nvos_evidence_next73",
+    "prior_initialized_video": "output/nvos_completion_next73",
+    "unsupported_only_completion": "output/nvos_unsupported_next73",
+    "full_source_video": "output/nvos_transfer_full_video_next72",
+    "old_indices_transferred": false,
+    "target_rgb_used": false,
+    "threshold": 0.5,
+    "retained_full_method_iou": 0.83484
+  },
+  "four_query_new_carrier_validation_complete": false,
+  "compact_student_retrained": false,
+  "uqis": "paused by user",
+  "new_scannet_model": false,
+  "independent_lerf3d_gt_evaluation_complete": false,
+  "independent_final_test": false,
+  "sota_claim": false
+}

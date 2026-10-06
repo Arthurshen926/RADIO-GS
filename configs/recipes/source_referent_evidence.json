@@ -1,0 +1,178 @@
+{
+  "kind": "independent_source_referent_evidence_control",
+  "status": "complete_not_promoted",
+  "entry": "scripts/research/run_source_referent_control.py",
+  "summary_entry": "scripts/research/summarize_source_referents.py",
+  "model": {
+    "id": "Qwen/Qwen3-VL-8B-Instruct",
+    "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "model_card": "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct",
+    "python": "/root/.cache/radio_gs/qwen3_env/bin/python",
+    "transformers": "4.57.1",
+    "torch": "2.10.0+cu128",
+    "attention": "sdpa",
+    "inference": "local, frozen bfloat16 weights; last-token A/B/C classification; no generated descriptions"
+  },
+  "cohorts": [
+    "original",
+    "tiled"
+  ],
+  "scenes": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "query_contract": "literal text; all admitted source proposals; source masks unchanged; no new query aliases or target RGB/GT",
+  "policies": {
+    "veto": "remove only if all three cyclic answer orders select different identity",
+    "affirmative": "admit only if mean canonical three-class softmax support ranks match first",
+    "contradiction": "context-only bounded policy revision: remove if mean canonical three-class support ranks different first; undetermined does not veto existing SAM3 evidence"
+  },
+  "removed_scope": "unknown, never a new negative",
+  "variants": {
+    "local_crop": "output/source_referent_verification",
+    "full_source_and_same_crop": "output/source_referent_context"
+  },
+  "visual_budget": {
+    "local_crop_images_per_region": 3,
+    "context_images_per_region": 6,
+    "max_pixels_per_image": 200704
+  },
+  "geometry_solver_thresholds": "unchanged relative to each cohort; separate full-scene semantic response and actual subset-alpha membership; no finite native-prior mixing",
+  "lerf_reproduction": [
+    "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/prepare_source_referents.py --output ROOT",
+    "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/run_source_referent_verifier.py --root ROOT [--context-image]",
+    "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/apply_source_referents.py --root ROOT",
+    "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/run_source_referent_control.py --root ROOT",
+    "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/summarize_source_referents.py --root ROOT"
+  ],
+  "nvos": {
+    "root": "output/reference_referent_verification",
+    "prepare": "scripts/research/prepare_reference_referents.py",
+    "verifier": "scripts/research/run_source_referent_verifier.py --root output/reference_referent_verification",
+    "reconstruct": "scripts/research/run_reference_referent_control.py",
+    "summarize": "scripts/research/summarize_reference_referents.py",
+    "reference": "authorized positive SAM mask; retained anchor; no signed-prompt reproduction",
+    "judgment": "reference crop versus proposed source crop; no query-name input; rejected frame unknown including complement",
+    "completed_reconstructions": 16,
+    "mean_iou": 86.48909106850624,
+    "improvement": 0,
+    "policies": [
+      "veto",
+      "affirmative"
+    ],
+    "diagnostic_reproduction": [
+      "CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/diagnose_reference_selected_projection.py --root output/reference_referent_verification/veto --field-template {scene}/runtime/typed_readout.pt",
+      "CUDA_VISIBLE_DEVICES=0 PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/diagnose_reference_selected_projection.py --root output/reference_referent_verification/affirmative --field-template {scene}/runtime/typed_readout.pt"
+    ]
+  },
+  "limitations": [
+    "new semantic teacher and compute are NOT equal-input comparison to old default",
+    "answer permutations are correlated outputs, not independent evidence",
+    "class support is not calibrated correctness probability",
+    "all four LERF scenes were previously used for development",
+    "selected projection is not independent three-dimensional GT",
+    "no new ScanNet result; UQIS paused; no four-query accuracy or compact deployment claim"
+  ],
+  "default_changed": false,
+  "decision": "No variant improves both semantic and selected metrics on the original cohort; stop region-level verifier/prompt/context sweeps; retain identity_response",
+  "completed_scene_evaluations": 56,
+  "completed_lerf_scene_evaluations": 40,
+  "report": "docs/experiments/2026-10-03-independent-referent-evidence.md",
+  "bounded_revision_reproduction": [
+    "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/apply_source_referents.py --root output/source_referent_context --policies contradiction",
+    "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/run_source_referent_control.py --root output/source_referent_context --policies contradiction",
+    "PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python scripts/research/summarize_source_referents.py --root output/source_referent_context --policies veto affirmative contradiction"
+  ],
+  "results": {
+    "local_crop": {
+      "original": {
+        "iou": 0.7037745214306163,
+        "ap": 0.8764285124454614,
+        "localization": 0.9242043168099506,
+        "selected_iou": 0.6666165186553114
+      },
+      "original_veto": {
+        "iou": 0.7039641512948626,
+        "ap": 0.8770583031210839,
+        "localization": 0.9206831900493873,
+        "selected_iou": 0.6658819025594611
+      },
+      "original_affirmative": {
+        "iou": 0.700384042616421,
+        "ap": 0.8802513376429857,
+        "localization": 0.9081983232213,
+        "selected_iou": 0.6710820011790071
+      },
+      "tiled": {
+        "iou": 0.6789347031658879,
+        "ap": 0.842637771185117,
+        "localization": 0.8846471548861737,
+        "selected_iou": 0.6298254666436045
+      },
+      "tiled_veto": {
+        "iou": 0.6790943499429707,
+        "ap": 0.8440816637790483,
+        "localization": 0.8935757263147452,
+        "selected_iou": 0.6306882462846943
+      },
+      "tiled_affirmative": {
+        "iou": 0.69425528180958,
+        "ap": 0.8649128393520478,
+        "localization": 0.9027312953220091,
+        "selected_iou": 0.6532621339593657
+      }
+    },
+    "full_source_and_same_crop": {
+      "original": {
+        "iou": 0.7037745214306163,
+        "ap": 0.8764285124454614,
+        "localization": 0.9242043168099506,
+        "selected_iou": 0.6666165186553114
+      },
+      "original_veto": {
+        "iou": 0.7030604579496339,
+        "ap": 0.8758677851325954,
+        "localization": 0.9162189043351016,
+        "selected_iou": 0.6667090890660197
+      },
+      "original_affirmative": {
+        "iou": 0.6990304162788176,
+        "ap": 0.870487568082429,
+        "localization": 0.9162189043351016,
+        "selected_iou": 0.6699829420797355
+      },
+      "original_contradiction": {
+        "iou": 0.7022677309196103,
+        "ap": 0.8757398511647231,
+        "localization": 0.9162189043351016,
+        "selected_iou": 0.6696278347333763
+      },
+      "tiled": {
+        "iou": 0.6789347031658879,
+        "ap": 0.842637771185117,
+        "localization": 0.8846471548861737,
+        "selected_iou": 0.6298254666436045
+      },
+      "tiled_veto": {
+        "iou": 0.6793872198313023,
+        "ap": 0.8434763094883334,
+        "localization": 0.888884443021767,
+        "selected_iou": 0.6341392794001075
+      },
+      "tiled_affirmative": {
+        "iou": 0.690416288131521,
+        "ap": 0.8557369523954853,
+        "localization": 0.8952350466434974,
+        "selected_iou": 0.6522775744850488
+      },
+      "tiled_contradiction": {
+        "iou": 0.6893459068202589,
+        "ap": 0.8557881900207575,
+        "localization": 0.8978130144503385,
+        "selected_iou": 0.6435859303268232
+      }
+    }
+  }
+}

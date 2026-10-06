@@ -1,0 +1,65 @@
+{
+  "status": "complete_not_promoted_over_retained_source_system",
+  "task": "semantic_category_union",
+  "method": "query_independent_native_siglip_surface_map",
+  "input_track": "provided_unlabelled_mesh_and_registered_train_rgb",
+  "scene_contract": "all 10 provided scenes, all 1158 transforms_train.json frames",
+  "teacher": {
+    "query_free_regions": "SAM3 multiscale hierarchy, full image plus 2 crop layers, all generated nonempty masks",
+    "sam_checkpoint": "checkpoints/sam3_modelscope/sam3.pt",
+    "sam_checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+    "generation_contract_digest": "8d2aa5d01d70ca8c7aeb864fa28341f2dd6a18059cfdec7157777909c20e60f0",
+    "native_encoder": "google/siglip2-giant-opt-patch16-384",
+    "native_encoder_revision": "a713301b217d38485fb2204c808367d10bc3cc40",
+    "feature_dimension": 1536,
+    "native_region_encoding": "masked RGB bbox plus 3 pixels; outside-mask gray127; resize384",
+    "post_generation_area_filter": false,
+    "source_count_cap": null
+  },
+  "map": {
+    "geometry": "surface Gaussian per nondegenerate provided mesh vertex; independent from semantic labels",
+    "raster_width": 256,
+    "write": "pixel mixture of normalized overlapping region descriptors then normalized alpha-adjoint multiview sum",
+    "stored_dtype": "float16",
+    "query_dependent_parameters": false,
+    "calibration": "none; categorical argmax uses native cosine",
+    "native_feature_write_updates_geometry": false,
+    "writer": "radio_gs.pipeline.native_reconstruction.NativeFieldAccumulator",
+    "descriptor_precision": "serialize fp16 then renormalize before pixel mixing"
+  },
+  "query": {
+    "modality": "text",
+    "intent": "category",
+    "readout": "SigLIP native text cosine; separate 19/15/10 class argmax",
+    "scope": "all instances eligible",
+    "unobserved_output": "void; retained in denominator"
+  },
+  "evaluation": {
+    "domain": "provided labelled mesh vertices",
+    "transfer": "nearest Gaussian centre without distance cutoff",
+    "weight": "equal point weight",
+    "mean": "class mean per scene over present GT classes then scene macro",
+    "official_protocol_equivalence_verified": false,
+    "input_fairness": "unlabelled ground-truth mesh geometry is an additional input relative to RGB-only Gaussian reconstruction",
+    "not_gaussian_volume_pseudolabel_metric": true
+  },
+  "entry": "scripts/research/run_scannet_native_cohort.py",
+  "gpu_allocation": "output/scannet_native_completion/gpus.json",
+  "output": "output/scannet_native_completion",
+  "legacy_comparator": {
+    "entry": "scripts/research/run_scannet_runtime_cohort.py",
+    "output": "output/scannet_runtime_integration",
+    "scenes": 8,
+    "identity": "96-coordinate four-teacher field, native512-code dictionary, scope composition, legacy source calibration; explicitly a different map recipe",
+    "old_predictions_read": false
+  },
+  "claims_not_established": [
+    "SOTA",
+    "RGB-only fairness",
+    "compact deployed feature field",
+    "same-map four-query accuracy",
+    "independent unseen scenes",
+    "new optimizer benefit"
+  ],
+  "results": "output/scannet_native_completion/summary.json"
+}

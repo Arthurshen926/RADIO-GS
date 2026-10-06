@@ -1,0 +1,52 @@
+{
+  "queries": [
+    {
+      "id": "bowl",
+      "modality": "text",
+      "intent": "category",
+      "text": "bowl"
+    },
+    {
+      "id": "probe_0_image",
+      "modality": "image",
+      "intent": "reference_instance",
+      "image": "output/same_map_queries/probes/probe_0_image.png",
+      "exclude_retrieval_frames": [
+        68
+      ]
+    },
+    {
+      "id": "probe_0_point2d",
+      "modality": "prompt_2d",
+      "intent": "reference_instance",
+      "reference_frame": 68,
+      "reference_rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/images/frame_00068.jpg",
+      "points_normalized": [
+        [
+          0.41796875,
+          0.859375
+        ]
+      ],
+      "point_labels": [
+        1
+      ],
+      "seed_origin": "maximum visible contribution pixel of nearest registered primitive",
+      "negative_prompt_used": false
+    },
+    {
+      "id": "probe_0_point3d",
+      "modality": "prompt_3d",
+      "intent": "reference_instance",
+      "world_xyz": [
+        -0.9190236330032349,
+        0.7564693689346313,
+        2.762381076812744
+      ],
+      "geometry": {
+        "path": "output/joint_carrier_next66/adaptive_allrgb/ramen/geometry.pt",
+        "sha256": "471e3cc52713333bb77982a0dfbb506878da49c0ad636b85f5b431b4b023058c"
+      }
+    }
+  ],
+  "scope": "same-map source-only interface example; no independent task annotations"
+}

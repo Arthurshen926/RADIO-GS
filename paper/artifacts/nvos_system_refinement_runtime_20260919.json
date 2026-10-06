@@ -1,0 +1,33 @@
+{
+  "schema": "nvos_opt_in_spatial_runtime_replay.v1",
+  "scene": "flower",
+  "registered_parameters_unchanged": true,
+  "spatial_runtime_masks_exact": true,
+  "spatial_runtime_iou_exact": 0.8271289467811584,
+  "joint_evaluator_exit_code": 1,
+  "joint_failure": "Additional cold baseline optimization changed one interpolation-grid threshold pixel; strict evaluator failed closed",
+  "no_threshold_or_parameter_adjustment": true,
+  "comparisons": {
+    "baseline": {
+      "max_abs_response_error": 2.384185791015625e-07,
+      "prediction_grid_binary_mismatches": 0,
+      "scoring_grid_binary_mismatches": 1,
+      "prediction_sha256": "42685756c8761b55d73f494898277d5429623843713f31638e6635d11a94a186",
+      "authority_sha256": "e6fd980182b779d00ecbd4dbd4d8089b0aa7fa8b37496af4de30bbf2a7db06de"
+    },
+    "spatial_component": {
+      "max_abs_response_error": 2.980232238769531e-07,
+      "prediction_grid_binary_mismatches": 0,
+      "scoring_grid_binary_mismatches": 0,
+      "prediction_sha256": "5ec442f74e7dcea1a3f9922895208aedd3b1f2de5d055a37eef4565cc5f111da",
+      "authority_sha256": "b86b6fa65ccf2859d0795faede20f60751ea4142276b73e14869b6f7fc377814"
+    }
+  },
+  "gt_used_for_comparison": false,
+  "scoring_shape_source": "output/nvos_system_refinement_20260919_v3/flower/report.json",
+  "source_bindings": {
+    "scripts/audits/nvos_system_refinement_20260919_runtime.py": "7b9ea2ee944bba69cf276d97d0b166545003f097757df9b2a48fe28b87658884",
+    "scripts/audits/nvos_system_refinement_20260919_runtime_replay.py": "5fce9eb7b4ac1079db0631e6ab44685daf12b75be78fdd2ad42266cf1ccb43e4",
+    "scripts/audits/nvos_system_refinement_20260919_v3_evaluate.py": "9d5d2e96d6c33c3c7125dc8b9d2287b5570517a8f7226a670e8d3393375fc692"
+  }
+}

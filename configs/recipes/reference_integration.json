@@ -1,0 +1,35 @@
+{
+  "stage": "explicit reference-instance input and dual readout integration",
+  "status": "eight-query source replay, fresh tracking, solver control and typed readout evaluation completed",
+  "entry": "scripts/research/run_current_research.py --benchmark nvos",
+  "scene_configs": "configs/consolidated/nvos/*.scene.json",
+  "query_configs": "configs/consolidated/nvos/*.query.json",
+  "evaluation_configs": "configs/consolidated/nvos/*.evaluation.json",
+  "input_contract": {
+    "modality": "reference RGB with positive-only derived 2D mask",
+    "intent": "reference_instance",
+    "seed": "existing frozen positive-only SAM mask, not target GT",
+    "raw_scribble_to_mask_rerun": false,
+    "tracking_rerun": true,
+    "target_rgb_used_for_inference": false,
+    "target_gt_used_for_inference": false,
+    "negative_prompt_used": false,
+    "inherited_query_prediction_used": false
+  },
+  "solver_contract": {
+    "response": "radio_gs.querying.typed_evidence.solve_rendered_evidence,120iterations,192x256,radius2",
+    "selected_set": "shared decode_expanded_extent_next72.py,240updates,actual subset alpha,balanced evidence and footprint prior",
+    "readout": "separate scores and selection_scores on the same frozen geometry",
+    "nvos_evaluation": "scores with observed-support-normalized render, fixed>=0.5",
+    "selected_projection": "diagnostic only, not the frozen NVOS score"
+  },
+  "results": {
+    "retained_iou": 0.8648909106850624,
+    "fresh_iou": 0.8648909106850624,
+    "typed_iou": 0.8648909106850624,
+    "wrong_readout_control_iou": 0.06818224856397137,
+    "selected_projection_diagnostic_iou": 0.8507935320093949
+  },
+  "not_completed": ["raw signed prompt protocol", "free image query", "3D point query", "same-map four-query validation", "ScanNet shared runtime", "UQIS", "compact student", "public SOTA comparison"],
+  "summary": "output/reference_integration/summary.json"
+}

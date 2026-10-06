@@ -1,0 +1,22 @@
+{
+  "name": "UQIS native observation map, first complete map-only cohort",
+  "benchmark_package": "output/scannet_uqis_9_v0_3_candidate/release_final",
+  "frame_stride": 20,
+  "maximum_source_frames": null,
+  "source_rgb_width": 640,
+  "depth_tolerance_m": 0.08,
+  "sam_checkpoint": "checkpoints/sam3_modelscope/sam3.pt",
+  "sam_resolution": 1008,
+  "sam_grid_size": 12,
+  "sam_minimum_quality": 0.7,
+  "sam_minimum_area_fraction": 0.0001,
+  "sam_maximum_area_fraction": 0.9,
+  "sam_maximum_masks": 0,
+  "native_encoder": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384/snapshots/a713301b217d38485fb2204c808367d10bc3cc40",
+  "encoding_batch_size": 4,
+  "query_readouts": ["native_semantic", "anchor_comembership"],
+  "geometry_track": "official_mesh_RGBD_assisted",
+  "source_access_at_query_time": false,
+  "compact_student": false,
+  "default_promotion": false
+}

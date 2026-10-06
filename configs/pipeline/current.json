@@ -1,0 +1,2506 @@
+{
+  "kind": "public_pipeline_contract",
+  "entry": "python -m radio_gs.pipeline",
+  "implementation": "radio_gs.pipeline.runtime",
+  "status": "unified_interfaces_with_typed_capability_limits",
+  "access_modes": {
+    "map-only": {
+      "source_rgb": false,
+      "query_image": "allowed only as image-query input",
+      "native_features": "frozen native teacher coordinates",
+      "text_response": "native score, with stored calibration only where the scene explicitly supplies it",
+      "image_and_point_response": "native identity ranking; declared registered readers provide physical instance scope or learned actual-anchor complete-carrier membership",
+      "point_source_rgb_or_depth": false
+    },
+    "source-assisted": {
+      "source_rgb": "all explicitly authorized source frames; no preset cap",
+      "target_rgb": false,
+      "text": "literal category evidence, conditioned native identity, independent response and selected-set fitting",
+      "image": "native image region retrieval, explicit reference identity, SAM source tracking",
+      "prompt_2d": "explicit reference mask or signed points, SAM source tracking",
+      "prompt_3d": "single positive registered primitive anchor resolved to maximum visible source contribution, SAM source tracking"
+    }
+  },
+  "query_intents": {
+    "text": [
+      "category",
+      "text_union"
+    ],
+    "image": [
+      "reference_instance"
+    ],
+    "prompt_2d": [
+      "reference_instance"
+    ],
+    "prompt_3d": [
+      "reference_instance"
+    ],
+    "registered_observation_map": {
+      "text": "reference_instance, relation-aware inference remains incomplete",
+      "image": "reference_instance",
+      "point_2d": "reference_instance, camera/pixel only",
+      "point_3d": "reference_instance, world point only"
+    }
+  },
+  "outputs": {
+    "source-assisted": "typed_readout.pt and result.json; separate semantic and actual subset fields",
+    "map-only": "native/response.pt and result.json; native score units explicitly declared",
+    "mixed_query_support": "per-query support retained; never merge support domains to alter rendering",
+    "evaluation": "separate frozen benchmark evaluator, never invoked by generation",
+    "registered_observation_map": "per-query official-mesh ranking and independent boolean element selection; separate AP, set IoU and joint four-query success"
+  },
+  "numeric_recipe": {
+    "text_response": "native-protected source backprojection",
+    "reference_response": "shared rendered-evidence solver, 120 steps",
+    "selection": "actual subset-alpha fitting, source initialization, balanced pixels, footprint prior, at least 240 steps and all source views",
+    "geometry": "frozen",
+    "native_coordinates": "frozen"
+  },
+  "limits": [
+    "All four positive-query inputs are evaluated on the same UQIS maps; unified high accuracy, part/signed interaction and independent final scenes remain unproven.",
+    "Image/point map-only rank does not certify object scope.",
+    "Source identity density remains fallible; uncertain evidence is not ground truth.",
+    "NVOS retained positive-mask runs do not establish the full signed official prompt protocol.",
+    "ScanNet legacy provider must remain explicitly distinguishable from the native LERF/reference path.",
+    "Source-assisted 3D prompts currently use one positive anchor; map-only signed multi-point ranking has a separate output contract."
+  ],
+  "configuration_role": "Documents the implemented CLI capabilities; explicit Scene/Query JSON and PipelineConfig are the executable inputs, not a historical stage recipe.",
+  "completed_execution": {
+    "lerf": {
+      "summary": "output/unified_system/lerf_summary.json",
+      "scene_evaluations": 4,
+      "semantic_iou_percent": 70.37745214306163,
+      "selected_projection_iou_percent": 66.66268926732377,
+      "condition": "declared source-evidence and native-query-response replay; fresh dual-head reconstruction"
+    },
+    "nvos": {
+      "summary": "output/unified_system/nvos_summary.json",
+      "query_evaluations": 8,
+      "iou_percent": 86.48909106850624,
+      "condition": "declared source-track replay; fresh dual-head reconstruction; positive-only reference protocol"
+    },
+    "same_map_four_query": {
+      "summary": "output/unified_system/four_query_fresh/summary.json",
+      "scene": "ramen",
+      "sources": 122,
+      "seconds": 434.61918153986335,
+      "all_query_providers_fresh": true,
+      "independent_ground_truth": false,
+      "accuracy_claim": false
+    },
+    "complete_region_lerf": {
+      "summary": "output/system_map_rebuild/summary.json",
+      "scenes": 4,
+      "semantic_iou_percent": 70.40067569509945,
+      "selected_projection_iou_percent": 66.96141229977685,
+      "decision": "complete-information candidate; preserve frozen comparator, not novel-mechanism success"
+    },
+    "all_source_nvos": {
+      "summary": "output/unified_system/nvos_all_sources/summary.json",
+      "queries": 8,
+      "iou_percent": 86.5134172141552,
+      "protocol": "same positive-only reference; all already-authorized registered tracks fitted"
+    },
+    "complete_map_four_query": {
+      "summary": "output/unified_system/four_query_complete_map/summary.json",
+      "source_frames": 122,
+      "seconds": 429.3470914531499,
+      "independent_accuracy": false
+    },
+    "complete_map_storage": {
+      "summary": "output/system_complete_storage/summary.json",
+      "scenes": 4,
+      "option": "int8 per-element scale; dimension unchanged; feature payload only",
+      "all_query_accuracy_validated": false
+    },
+    "scannet_ten": {
+      "summary": "output/scannet_native_completion/summary.json",
+      "scenes": 10,
+      "native_point_miou_percent": [
+        46.50364981732245,
+        47.97697613025162,
+        57.90669951424492
+      ],
+      "legacy_source_head_replaced": false,
+      "promoted": false
+    },
+    "scannet_native_calibrated": {
+      "cohort": "configs/pipeline/scannet_native_calibrated/cohort.json",
+      "summary": "output/native_category_transfer/summary.json",
+      "scenes": 8,
+      "source_views": 176,
+      "point_miou_percent": {
+        "19": 55.302891174046145,
+        "15": 55.82297371051034,
+        "10": 69.19015984783609
+      },
+      "public_entry_recomputed": true,
+      "independent_test": false,
+      "official_protocol_equivalence_verified": false,
+      "condition": "new complete native maps, explicit transferred parameter head, same source evidence; old comparators retained"
+    },
+    "system_v1": {
+      "summary": "output/system_v1/summary.json",
+      "jobs_completed": 20,
+      "metrics": {
+        "lerf": {
+          "semantic_iou": 0.7040067569509945,
+          "ap": 0.8761927804292359,
+          "selected_projection_iou": 0.6696077434542702
+        },
+        "nvos": {
+          "iou": 0.8651342466473579,
+          "ap": 0.9802224464333884
+        },
+        "scannet": {
+          "miou_19": 0.5530289117404614,
+          "miou_15": 0.5582297371051034,
+          "miou_10": 0.6919015984783607
+        }
+      },
+      "condition": "fresh20-job public-entry readouts, declared source teacher cache reuse, fixed evaluators",
+      "new_method_gain": false
+    },
+    "system_v3": {
+      "summary": "output/system_v3/summary.json",
+      "jobs_completed": 22,
+      "metrics": {
+        "lerf": {
+          "semantic_iou": 0.7040067569509945,
+          "ap": 0.8761927741771525,
+          "selected_projection_iou": 0.6696323696207871
+        },
+        "nvos": {
+          "iou": 0.865134172141552,
+          "ap": 0.980222426551357
+        },
+        "scannet": {
+          "miou_19": 0.5844924509644455,
+          "miou_15": 0.5965281834953966,
+          "miou_10": 0.7102704276499888
+        }
+      },
+      "condition": "fresh22-job public readouts; frozen evaluation; retained source teacher caches",
+      "official_sota_equivalence_verified": false
+    },
+    "system_v5": {
+      "summary": "output/system_v5/summary.json",
+      "jobs_completed": 22,
+      "metrics": {
+        "lerf": {
+          "semantic_iou": 0.7040067569509945,
+          "ap": 0.8761927744120672,
+          "selected_projection_iou": 0.6696093254477544
+        },
+        "nvos": {
+          "iou": 0.865134172141552,
+          "ap": 0.9802223859216227
+        },
+        "scannet": {
+          "miou_19": 0.5959296533562227,
+          "miou_15": 0.6086905711756715,
+          "miou_10": 0.7143057706919345
+        }
+      },
+      "condition": "fresh22-job public readouts; unchanged evaluation; fixed source teacher assets",
+      "official_sota_equivalence_verified": false
+    },
+    "system_v6": {
+      "summary": "output/system_dual_native_candidate/summary.json",
+      "jobs_completed": 22,
+      "metrics": {
+        "lerf": {
+          "semantic_iou": 0.7040067569509945,
+          "ap": 0.8761927807168126,
+          "selected_projection_iou": 0.6696242742510896
+        },
+        "nvos": {
+          "iou": 0.865134172141552,
+          "ap": 0.980222482144924
+        },
+        "scannet": {
+          "miou_19": 0.6101149054806629,
+          "miou_15": 0.6252758904159778,
+          "miou_10": 0.7248606102956524
+        }
+      },
+      "condition": "identical executable jobs to the completed dual-native candidate; source caches reused, final answers freshly recomputed",
+      "official_sota_equivalence_verified": false
+    },
+    "uqis_v031": {
+      "summary": "output/uqis_map_only_v031/phase_result.json",
+      "scenes": 9,
+      "targets": 67,
+      "queries": 268,
+      "ap_percent": {
+        "text": 19.641571429724866,
+        "image": 25.867895666654633,
+        "point_2d": 52.744860173952205,
+        "point_3d": 52.35888555570881
+      },
+      "query_access": "map-only",
+      "same_map": true,
+      "geometry_track": "official_mesh_RGBD_assisted",
+      "independent_final_test": false
+    },
+    "system_v7": {
+      "summary": "output/system_v7/summary.json",
+      "jobs_completed": 31,
+      "metrics": {
+        "lerf": {
+          "semantic_iou": 0.7040067569509944,
+          "ap": 0.876192778991945,
+          "selected_projection_iou": 0.6696442932152558
+        },
+        "scannet": {
+          "miou_19": 0.6101149054806628,
+          "miou_15": 0.6252758904159778,
+          "miou_10": 0.7248606102956524
+        },
+        "nvos": {
+          "iou": 0.865134172141552,
+          "ap": 0.9802224298889138
+        },
+        "uqis": {
+          "text_ap": 0.26595870475621114,
+          "image_ap": 0.39432624658289517,
+          "point_2d_ap": 0.527448601739522,
+          "point_3d_ap": 0.5235888555570881,
+          "text_selected_iou": 0.16386530164545415,
+          "image_selected_iou": 0.2859903953286816,
+          "point_2d_selected_iou": 0.42090214074817545,
+          "point_3d_selected_iou": 0.41523824783756774
+        }
+      },
+      "condition": "fresh31-job execution, fixed maps and declared teacher assets; all predictions before scoring; UQIS identity-scope and explicit sets",
+      "uqis_scenes": 9,
+      "uqis_targets": 67,
+      "uqis_queries": 268,
+      "uqis_access": "map-only",
+      "uqis_same_target_four_query_selection": {
+        "minimum_iou": {
+          "estimate": 0.1122160214555376,
+          "lower": 0.07880487754319997,
+          "upper": 0.1472238380724901,
+          "confidence": 0.95,
+          "bootstrap_samples": 2000,
+          "bootstrap_unit": "scene",
+          "seed": 20260813
+        },
+        "all_four_iou_at_least_025": {
+          "estimate": 0.17989417989417988,
+          "lower": 0.11574074074074073,
+          "upper": 0.2486772486772487,
+          "confidence": 0.95,
+          "bootstrap_samples": 2000,
+          "bootstrap_unit": "scene",
+          "seed": 20260813
+        },
+        "all_four_iou_at_least_050": {
+          "estimate": 0.08994708994708994,
+          "lower": 0.032407407407407406,
+          "upper": 0.1468419312169311,
+          "confidence": 0.95,
+          "bootstrap_samples": 2000,
+          "bootstrap_unit": "scene",
+          "seed": 20260813
+        },
+        "per_target": [
+          {
+            "scene_id": "scene0030_00",
+            "instance_id": 20,
+            "minimum_iou": 0.03987240829346093,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0030_00",
+            "instance_id": 22,
+            "minimum_iou": 0.28539219176456626,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0030_00",
+            "instance_id": 23,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0030_00",
+            "instance_id": 25,
+            "minimum_iou": 0.23853024766544864,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0030_00",
+            "instance_id": 26,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0030_00",
+            "instance_id": 27,
+            "minimum_iou": 0.000582977069568597,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0030_00",
+            "instance_id": 48,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0030_00",
+            "instance_id": 52,
+            "minimum_iou": 0.0006526563111865292,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0249_00",
+            "instance_id": 22,
+            "minimum_iou": 0.4477124183006536,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0249_00",
+            "instance_id": 24,
+            "minimum_iou": 0.17009533366783744,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0249_00",
+            "instance_id": 25,
+            "minimum_iou": 0.18161024702653247,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0249_00",
+            "instance_id": 26,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0249_00",
+            "instance_id": 33,
+            "minimum_iou": 0.0006100040666937779,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0249_00",
+            "instance_id": 34,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0249_00",
+            "instance_id": 35,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0249_00",
+            "instance_id": 37,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0353_00",
+            "instance_id": 4,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0353_00",
+            "instance_id": 5,
+            "minimum_iou": 0.5949526813880126,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 1.0
+          },
+          {
+            "scene_id": "scene0353_00",
+            "instance_id": 18,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0353_00",
+            "instance_id": 33,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0353_00",
+            "instance_id": 34,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0353_00",
+            "instance_id": 45,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0353_00",
+            "instance_id": 50,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0353_00",
+            "instance_id": 51,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0435_00",
+            "instance_id": 11,
+            "minimum_iou": 0.3697091851425281,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0435_00",
+            "instance_id": 12,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0435_00",
+            "instance_id": 14,
+            "minimum_iou": 0.6787287602265576,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 1.0
+          },
+          {
+            "scene_id": "scene0435_00",
+            "instance_id": 22,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0435_00",
+            "instance_id": 29,
+            "minimum_iou": 0.0076726342710997444,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0435_00",
+            "instance_id": 35,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0435_00",
+            "instance_id": 39,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0435_00",
+            "instance_id": 64,
+            "minimum_iou": 0.29851752021563344,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0700_00",
+            "instance_id": 1,
+            "minimum_iou": 0.0006983240223463687,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0700_00",
+            "instance_id": 2,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0700_00",
+            "instance_id": 5,
+            "minimum_iou": 0.18022406234778374,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0700_00",
+            "instance_id": 6,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0700_00",
+            "instance_id": 7,
+            "minimum_iou": 0.0003935458480913026,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0700_00",
+            "instance_id": 17,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0700_00",
+            "instance_id": 18,
+            "minimum_iou": 0.004160887656033287,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0700_00",
+            "instance_id": 35,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0704_00",
+            "instance_id": 1,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0704_00",
+            "instance_id": 2,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0704_00",
+            "instance_id": 6,
+            "minimum_iou": 0.010321797207043109,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0704_00",
+            "instance_id": 10,
+            "minimum_iou": 0.6054576463899943,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 1.0
+          },
+          {
+            "scene_id": "scene0704_00",
+            "instance_id": 11,
+            "minimum_iou": 0.03264137437365784,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0704_00",
+            "instance_id": 19,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0704_00",
+            "instance_id": 26,
+            "minimum_iou": 0.2622259696458685,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0246_00",
+            "instance_id": 3,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0246_00",
+            "instance_id": 5,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0246_00",
+            "instance_id": 6,
+            "minimum_iou": 0.07881773399014778,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0246_00",
+            "instance_id": 33,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0246_00",
+            "instance_id": 37,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0246_00",
+            "instance_id": 39,
+            "minimum_iou": 0.623199393479909,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 1.0
+          },
+          {
+            "scene_id": "scene0203_00",
+            "instance_id": 3,
+            "minimum_iou": 0.03901058331282304,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0203_00",
+            "instance_id": 4,
+            "minimum_iou": 0.18530734632683657,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0203_00",
+            "instance_id": 6,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0203_00",
+            "instance_id": 8,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0203_00",
+            "instance_id": 9,
+            "minimum_iou": 0.7508453461470013,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 1.0
+          },
+          {
+            "scene_id": "scene0203_00",
+            "instance_id": 17,
+            "minimum_iou": 0.7508630609896433,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 1.0
+          },
+          {
+            "scene_id": "scene0203_00",
+            "instance_id": 18,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0203_00",
+            "instance_id": 19,
+            "minimum_iou": 0.007473143390938813,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0535_00",
+            "instance_id": 9,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0535_00",
+            "instance_id": 10,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0535_00",
+            "instance_id": 11,
+            "minimum_iou": 0.0,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0535_00",
+            "instance_id": 12,
+            "minimum_iou": 0.18886239782016348,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0535_00",
+            "instance_id": 13,
+            "minimum_iou": 0.06568300809138505,
+            "all_four_iou_at_least_025": 0.0,
+            "all_four_iou_at_least_050": 0.0
+          },
+          {
+            "scene_id": "scene0535_00",
+            "instance_id": 16,
+            "minimum_iou": 0.3973365617433414,
+            "all_four_iou_at_least_025": 1.0,
+            "all_four_iou_at_least_050": 0.0
+          }
+        ]
+      },
+      "independent_uqis_final_test": false,
+      "official_sota_equivalence_verified": false
+    },
+    "system_v8": {
+      "summary": "output/system_v8/summary.json",
+      "jobs_completed": 31,
+      "metrics": {
+        "lerf": {
+          "semantic_iou": 0.7040067569509944,
+          "ap": 0.8761927776135605,
+          "selected_projection_iou": 0.6696492775390938
+        },
+        "nvos": {
+          "iou": 0.865134172141552,
+          "ap": 0.9802224840331321
+        },
+        "scannet": {
+          "miou_19": 0.6101149054806629,
+          "miou_15": 0.6252758904159778,
+          "miou_10": 0.7248606102956524
+        },
+        "uqis": {
+          "text_ap": 0.26595870475621114,
+          "image_ap": 0.4403356558125004,
+          "point_2d_ap": 0.5274486017395219,
+          "point_3d_ap": 0.523588855557088,
+          "text_selected_iou": 0.16386530164545415,
+          "image_selected_iou": 0.3487621020106409,
+          "point_2d_selected_iou": 0.42090214074817556,
+          "point_3d_selected_iou": 0.41523824783756774
+        }
+      },
+      "condition": "fresh 31-job common execution; native local image identity; same legal views and teachers as pooled control; fixed evaluators",
+      "uqis_scenes": 9,
+      "uqis_targets": 67,
+      "uqis_queries": 268,
+      "uqis_access": "map-only",
+      "uqis_same_target_four_query_selection": {
+        "minimum_iou": {
+          "estimate": 0.1300325556584221,
+          "lower": 0.08886811188618667,
+          "upper": 0.17255089031676749,
+          "confidence": 0.95,
+          "bootstrap_samples": 2000,
+          "bootstrap_unit": "scene",
+          "seed": 20260813
+        },
+        "all_four_iou_at_least_025": {
+          "estimate": 0.22156084656084657,
+          "lower": 0.1335978835978836,
+          "upper": 0.31879960317460304,
+          "confidence": 0.95,
+          "bootstrap_samples": 2000,
+          "bootstrap_unit": "scene",
+          "seed": 20260813
+        },
+        "all_four_iou_at_least_050": {
+          "estimate": 0.10383597883597884,
+          "lower": 0.041666666666666664,
+          "upper": 0.16865079365079363,
+          "confidence": 0.95,
+          "bootstrap_samples": 2000,
+          "bootstrap_unit": "scene",
+          "seed": 20260813
+        },
+        "selection_agreement": {
+          "text__image_iou": {
+            "estimate": 0.2420788408582536,
+            "lower": 0.16102460090170542,
+            "upper": 0.32144123693607035,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "text__point_2d_iou": {
+            "estimate": 0.1865677201935213,
+            "lower": 0.13072063343593807,
+            "upper": 0.23925951103616208,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "text__point_3d_iou": {
+            "estimate": 0.17980163347466485,
+            "lower": 0.12376636610143199,
+            "upper": 0.23366139838262912,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "image__point_2d_iou": {
+            "estimate": 0.4776182434429324,
+            "lower": 0.42590843069893847,
+            "upper": 0.5251836927911272,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "image__point_3d_iou": {
+            "estimate": 0.4577719850388642,
+            "lower": 0.4082498665188471,
+            "upper": 0.508762588883753,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "point_2d__point_3d_iou": {
+            "estimate": 0.890573282067582,
+            "lower": 0.8267183215283664,
+            "upper": 0.9436138518598237,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "common_true_coverage": {
+            "estimate": 0.13733858800449741,
+            "lower": 0.09288082931166163,
+            "upper": 0.18495741830052226,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "union_false_fraction": {
+            "estimate": 0.5107074578478701,
+            "lower": 0.4504086282992726,
+            "upper": 0.5690064451813329,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "per_target": [
+            {
+              "scene_id": "scene0030_00",
+              "instance_id": 20,
+              "text__image_iou": 0.04048154517793359,
+              "text__point_2d_iou": 0.042773273693038856,
+              "text__point_3d_iou": 0.042773273693038856,
+              "image__point_2d_iou": 0.8862868723260527,
+              "image__point_3d_iou": 0.8862868723260527,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.060775689724110356,
+              "common_false_elements": 2,
+              "union_false_fraction": 0.4386910237876199
+            },
+            {
+              "scene_id": "scene0030_00",
+              "instance_id": 22,
+              "text__image_iou": 0.21798941798941798,
+              "text__point_2d_iou": 0.5387431360585723,
+              "text__point_3d_iou": 0.5387431360585723,
+              "image__point_2d_iou": 0.48595936794582395,
+              "image__point_3d_iou": 0.48595936794582395,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.18345516134783385,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.006250840166689071
+            },
+            {
+              "scene_id": "scene0030_00",
+              "instance_id": 23,
+              "text__image_iou": 0.5223912808891766,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.9519818155988067
+            },
+            {
+              "scene_id": "scene0030_00",
+              "instance_id": 25,
+              "text__image_iou": 0.5063756213529285,
+              "text__point_2d_iou": 0.5725376031052887,
+              "text__point_3d_iou": 0.5566150178784267,
+              "image__point_2d_iou": 0.8662295081967213,
+              "image__point_3d_iou": 0.8804204993429697,
+              "point_2d__point_3d_iou": 0.9650570249939335,
+              "common_true_coverage": 0.7796327212020033,
+              "common_false_elements": 1393,
+              "union_false_fraction": 0.7475395806589645
+            },
+            {
+              "scene_id": "scene0030_00",
+              "instance_id": 26,
+              "text__image_iou": 0.14906552578248142,
+              "text__point_2d_iou": 0.15102230483271376,
+              "text__point_3d_iou": 0.14587332053742802,
+              "image__point_2d_iou": 0.893142320338187,
+              "image__point_3d_iou": 0.8804866412213741,
+              "point_2d__point_3d_iou": 0.9486016628873771,
+              "common_true_coverage": 0.13127413127413126,
+              "common_false_elements": 472,
+              "union_false_fraction": 0.8368872279621895
+            },
+            {
+              "scene_id": "scene0030_00",
+              "instance_id": 27,
+              "text__image_iou": 0.5141265419816952,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 0.8644673250682916,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.5156872764435361
+            },
+            {
+              "scene_id": "scene0030_00",
+              "instance_id": 48,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.8164106406893967,
+              "image__point_3d_iou": 0.8164106406893967,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.08237048080506895
+            },
+            {
+              "scene_id": "scene0030_00",
+              "instance_id": 52,
+              "text__image_iou": 0.32297628781684384,
+              "text__point_2d_iou": 0.5449498184924194,
+              "text__point_3d_iou": 0.5449498184924194,
+              "image__point_2d_iou": 0.5737524730710046,
+              "image__point_3d_iou": 0.5737524730710046,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.32386363636363635,
+              "common_false_elements": 11,
+              "union_false_fraction": 0.2684602175157413
+            },
+            {
+              "scene_id": "scene0249_00",
+              "instance_id": 22,
+              "text__image_iou": 0.8007699711260827,
+              "text__point_2d_iou": 0.9251948051948052,
+              "text__point_3d_iou": 0.9260031266284523,
+              "image__point_2d_iou": 0.7571636716852841,
+              "image__point_3d_iou": 0.771232204221895,
+              "point_2d__point_3d_iou": 0.9658778205833792,
+              "common_true_coverage": 0.3901458019105078,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.003835091083413231
+            },
+            {
+              "scene_id": "scene0249_00",
+              "instance_id": 24,
+              "text__image_iou": 0.1848883800801374,
+              "text__point_2d_iou": 0.21001300390117036,
+              "text__point_3d_iou": 0.23903508771929824,
+              "image__point_2d_iou": 0.8362014021669854,
+              "image__point_3d_iou": 0.7359335038363172,
+              "point_2d__point_3d_iou": 0.8590504451038575,
+              "common_true_coverage": 0.16159380188157166,
+              "common_false_elements": 21,
+              "union_false_fraction": 0.13857466063348417
+            },
+            {
+              "scene_id": "scene0249_00",
+              "instance_id": 25,
+              "text__image_iou": 1.0,
+              "text__point_2d_iou": 0.537205822337097,
+              "text__point_3d_iou": 0.5384615384615384,
+              "image__point_2d_iou": 0.537205822337097,
+              "image__point_3d_iou": 0.5384615384615384,
+              "point_2d__point_3d_iou": 0.9917915042068541,
+              "common_true_coverage": 0.1482047948610102,
+              "common_false_elements": 72,
+              "union_false_fraction": 0.023502241543268576
+            },
+            {
+              "scene_id": "scene0249_00",
+              "instance_id": 26,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.700938566552901,
+              "image__point_3d_iou": 0.700938566552901,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.7518505864935656
+            },
+            {
+              "scene_id": "scene0249_00",
+              "instance_id": 33,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0006554511688879179,
+              "text__point_3d_iou": 0.0006514657980456026,
+              "image__point_2d_iou": 0.0014396456256921372,
+              "image__point_3d_iou": 0.0012141280353200883,
+              "point_2d__point_3d_iou": 0.9794790844514601,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.775755402133955
+            },
+            {
+              "scene_id": "scene0249_00",
+              "instance_id": 34,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0008075913587724611,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.00010290183165260341,
+              "image__point_3d_iou": 0.0003223726627981947,
+              "point_2d__point_3d_iou": 0.10549667241804289,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.9727840432472737
+            },
+            {
+              "scene_id": "scene0249_00",
+              "instance_id": 35,
+              "text__image_iou": 0.24300052826201796,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.8577254191209787
+            },
+            {
+              "scene_id": "scene0249_00",
+              "instance_id": 37,
+              "text__image_iou": 0.0009264774005691218,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 0.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 1.0
+            },
+            {
+              "scene_id": "scene0353_00",
+              "instance_id": 4,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.8192809417753738,
+              "image__point_3d_iou": 0.8192809417753738,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.2872883633431873
+            },
+            {
+              "scene_id": "scene0353_00",
+              "instance_id": 5,
+              "text__image_iou": 0.7671399594320487,
+              "text__point_2d_iou": 0.8125802310654685,
+              "text__point_3d_iou": 0.8125802310654685,
+              "image__point_2d_iou": 0.8338658146964856,
+              "image__point_3d_iou": 0.8338658146964856,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.5670549084858569,
+              "common_false_elements": 73,
+              "union_false_fraction": 0.07302231237322515
+            },
+            {
+              "scene_id": "scene0353_00",
+              "instance_id": 18,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.7006864988558352
+            },
+            {
+              "scene_id": "scene0353_00",
+              "instance_id": 33,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.6745200698080279,
+              "image__point_3d_iou": 0.6745200698080279,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.6130831643002028
+            },
+            {
+              "scene_id": "scene0353_00",
+              "instance_id": 34,
+              "text__image_iou": 0.001375515818431912,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 0.9887218045112782,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.7678751258811681
+            },
+            {
+              "scene_id": "scene0353_00",
+              "instance_id": 45,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.8829742289818335
+            },
+            {
+              "scene_id": "scene0353_00",
+              "instance_id": 50,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.6451127819548872
+            },
+            {
+              "scene_id": "scene0353_00",
+              "instance_id": 51,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.6770280515542078,
+              "image__point_3d_iou": 0.7114391143911439,
+              "point_2d__point_3d_iou": 0.7998220640569395,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.7044366421959783
+            },
+            {
+              "scene_id": "scene0435_00",
+              "instance_id": 11,
+              "text__image_iou": 0.7290851160673646,
+              "text__point_2d_iou": 0.47319099603903003,
+              "text__point_3d_iou": 0.4738063019524454,
+              "image__point_2d_iou": 0.5531493899087612,
+              "image__point_3d_iou": 0.5530394635594152,
+              "point_2d__point_3d_iou": 0.9913693901035673,
+              "common_true_coverage": 0.35094312350943124,
+              "common_false_elements": 22,
+              "union_false_fraction": 0.17522441651705564
+            },
+            {
+              "scene_id": "scene0435_00",
+              "instance_id": 12,
+              "text__image_iou": 0.00016504373659019642,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.6156362101709222,
+              "image__point_3d_iou": 0.615392725355825,
+              "point_2d__point_3d_iou": 0.9757078986587183,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.5829037348763808
+            },
+            {
+              "scene_id": "scene0435_00",
+              "instance_id": 14,
+              "text__image_iou": 0.9695906432748538,
+              "text__point_2d_iou": 0.8541910331384016,
+              "text__point_3d_iou": 0.8541910331384016,
+              "image__point_2d_iou": 0.8809811017289908,
+              "image__point_3d_iou": 0.8809811017289908,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.6860687022900763,
+              "common_false_elements": 34,
+              "union_false_fraction": 0.04132553606237817
+            },
+            {
+              "scene_id": "scene0435_00",
+              "instance_id": 22,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 0.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.9101421963337331
+            },
+            {
+              "scene_id": "scene0435_00",
+              "instance_id": 29,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 1.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 0.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.8121019108280255
+            },
+            {
+              "scene_id": "scene0435_00",
+              "instance_id": 35,
+              "text__image_iou": 0.9030937215650592,
+              "text__point_2d_iou": 0.5043920480813685,
+              "text__point_3d_iou": 0.5043920480813685,
+              "image__point_2d_iou": 0.5400990099009901,
+              "image__point_3d_iou": 0.5400990099009901,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.7661971830985915,
+              "common_false_elements": 3,
+              "union_false_fraction": 0.41446769790718835
+            },
+            {
+              "scene_id": "scene0435_00",
+              "instance_id": 39,
+              "text__image_iou": 0.15306520890277237,
+              "text__point_2d_iou": 0.006717044500419815,
+              "text__point_3d_iou": 0.006717044500419815,
+              "image__point_2d_iou": 0.02442868400315209,
+              "image__point_3d_iou": 0.02442868400315209,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.004077471967380225,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.8596157175004328
+            },
+            {
+              "scene_id": "scene0435_00",
+              "instance_id": 64,
+              "text__image_iou": 0.31347728965003724,
+              "text__point_2d_iou": 0.2357755261106781,
+              "text__point_3d_iou": 0.23566133437378073,
+              "image__point_2d_iou": 0.7546138072453862,
+              "image__point_3d_iou": 0.7518796992481203,
+              "point_2d__point_3d_iou": 0.9963800904977376,
+              "common_true_coverage": 0.32997762863534674,
+              "common_false_elements": 14,
+              "union_false_fraction": 0.4685522887979159
+            },
+            {
+              "scene_id": "scene0700_00",
+              "instance_id": 1,
+              "text__image_iou": 0.0009366219169528567,
+              "text__point_2d_iou": 0.0007123352724682417,
+              "text__point_3d_iou": 0.000993418601763318,
+              "image__point_2d_iou": 0.3583382555621185,
+              "image__point_3d_iou": 0.37494736842105264,
+              "point_2d__point_3d_iou": 0.877443443883154,
+              "common_true_coverage": 0.00016501650165016502,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.5155614208731991
+            },
+            {
+              "scene_id": "scene0700_00",
+              "instance_id": 2,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.47057256990679097,
+              "image__point_3d_iou": 0.48360655737704916,
+              "point_2d__point_3d_iou": 0.9468005952380952,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.8041661308988042
+            },
+            {
+              "scene_id": "scene0700_00",
+              "instance_id": 5,
+              "text__image_iou": 0.2053532250987275,
+              "text__point_2d_iou": 0.20801781737193764,
+              "text__point_3d_iou": 0.20920876173446581,
+              "image__point_2d_iou": 0.9290724863600935,
+              "image__point_3d_iou": 0.9296325254104769,
+              "point_2d__point_3d_iou": 0.9877450980392157,
+              "common_true_coverage": 0.38560687432867885,
+              "common_false_elements": 102,
+              "union_false_fraction": 0.6542137271937446
+            },
+            {
+              "scene_id": "scene0700_00",
+              "instance_id": 6,
+              "text__image_iou": 0.0023029682702149436,
+              "text__point_2d_iou": 0.0028312570781426952,
+              "text__point_3d_iou": 0.0027770063871146904,
+              "image__point_2d_iou": 0.8119309262166405,
+              "image__point_3d_iou": 0.8370556778861277,
+              "point_2d__point_3d_iou": 0.927689594356261,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 2,
+              "union_false_fraction": 0.6018357727611015
+            },
+            {
+              "scene_id": "scene0700_00",
+              "instance_id": 7,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.30795698924731185,
+              "image__point_3d_iou": 0.3030954428202923,
+              "point_2d__point_3d_iou": 0.9750849377123443,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.7918871252204586
+            },
+            {
+              "scene_id": "scene0700_00",
+              "instance_id": 17,
+              "text__image_iou": 0.11524163568773234,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.045112781954887216,
+              "image__point_3d_iou": 0.034482758620689655,
+              "point_2d__point_3d_iou": 0.5161290322580645,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.6478555304740407
+            },
+            {
+              "scene_id": "scene0700_00",
+              "instance_id": 18,
+              "text__image_iou": 0.023809523809523808,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.22408026755852842,
+              "image__point_3d_iou": 0.1692573402417962,
+              "point_2d__point_3d_iou": 0.8156182212581344,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.34087481146304677
+            },
+            {
+              "scene_id": "scene0700_00",
+              "instance_id": 35,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.5733015494636472,
+              "image__point_3d_iou": 0.5733015494636472,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.8565519279066331
+            },
+            {
+              "scene_id": "scene0704_00",
+              "instance_id": 1,
+              "text__image_iou": 0.15676641357748994,
+              "text__point_2d_iou": 0.014799154334038054,
+              "text__point_3d_iou": 0.002213788741302973,
+              "image__point_2d_iou": 0.04790419161676647,
+              "image__point_3d_iou": 0.02458448753462604,
+              "point_2d__point_3d_iou": 0.5350404312668463,
+              "common_true_coverage": 0.0001188495364868077,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.11205870686235621
+            },
+            {
+              "scene_id": "scene0704_00",
+              "instance_id": 2,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.6734901277584204,
+              "image__point_3d_iou": 0.6734901277584204,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.13306559571619814
+            },
+            {
+              "scene_id": "scene0704_00",
+              "instance_id": 6,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.523756906077348,
+              "image__point_3d_iou": 0.5176795580110497,
+              "point_2d__point_3d_iou": 0.9884332281808622,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.16289825282631037
+            },
+            {
+              "scene_id": "scene0704_00",
+              "instance_id": 10,
+              "text__image_iou": 0.9977511244377811,
+              "text__point_2d_iou": 0.8881381381381381,
+              "text__point_3d_iou": 0.8881381381381381,
+              "image__point_2d_iou": 0.8874718679669917,
+              "image__point_3d_iou": 0.8874718679669917,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.6489945155393053,
+              "common_false_elements": 118,
+              "union_false_fraction": 0.12668665667166418
+            },
+            {
+              "scene_id": "scene0704_00",
+              "instance_id": 11,
+              "text__image_iou": 0.0005710206995003569,
+              "text__point_2d_iou": 0.000286368843069874,
+              "text__point_3d_iou": 0.000286368843069874,
+              "image__point_2d_iou": 0.9574074074074074,
+              "image__point_3d_iou": 0.9574074074074074,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.002688172043010753,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.8940756602426838
+            },
+            {
+              "scene_id": "scene0704_00",
+              "instance_id": 19,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.19718804920913885,
+              "image__point_3d_iou": 0.19718804920913885,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.6162888329135181
+            },
+            {
+              "scene_id": "scene0704_00",
+              "instance_id": 26,
+              "text__image_iou": 0.27631578947368424,
+              "text__point_2d_iou": 0.30735930735930733,
+              "text__point_3d_iou": 0.30735930735930733,
+              "image__point_2d_iou": 0.8347457627118644,
+              "image__point_3d_iou": 0.8347457627118644,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.20305862361937127,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.0641158221302999
+            },
+            {
+              "scene_id": "scene0246_00",
+              "instance_id": 3,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.8835235586772022,
+              "image__point_3d_iou": 0.8835235586772022,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.23841136734218496
+            },
+            {
+              "scene_id": "scene0246_00",
+              "instance_id": 5,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.6756352765321375,
+              "image__point_3d_iou": 0.6763826606875935,
+              "point_2d__point_3d_iou": 0.9968186638388123,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.3921960980490245
+            },
+            {
+              "scene_id": "scene0246_00",
+              "instance_id": 6,
+              "text__image_iou": 0.12663755458515283,
+              "text__point_2d_iou": 0.23785166240409208,
+              "text__point_3d_iou": 0.038408779149519894,
+              "image__point_2d_iou": 0.021897810218978103,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 0.09510869565217392,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.43205574912891986
+            },
+            {
+              "scene_id": "scene0246_00",
+              "instance_id": 33,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.13260530421216848,
+              "image__point_3d_iou": 0.13260530421216848,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.954310082241852
+            },
+            {
+              "scene_id": "scene0246_00",
+              "instance_id": 37,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.9953846153846154
+            },
+            {
+              "scene_id": "scene0246_00",
+              "instance_id": 39,
+              "text__image_iou": 0.7555049354593774,
+              "text__point_2d_iou": 0.7686017988552739,
+              "text__point_3d_iou": 0.7712418300653595,
+              "image__point_2d_iou": 0.8120035304501324,
+              "image__point_3d_iou": 0.824468085106383,
+              "point_2d__point_3d_iou": 0.9660144181256437,
+              "common_true_coverage": 0.8131634819532909,
+              "common_false_elements": 138,
+              "union_false_fraction": 0.32954545454545453
+            },
+            {
+              "scene_id": "scene0203_00",
+              "instance_id": 3,
+              "text__image_iou": 0.7071693690173863,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 0.9968553459119497,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.03531359205444179
+            },
+            {
+              "scene_id": "scene0203_00",
+              "instance_id": 4,
+              "text__image_iou": 0.19510645058786147,
+              "text__point_2d_iou": 0.25516693163751986,
+              "text__point_3d_iou": 0.25516693163751986,
+              "image__point_2d_iou": 0.7761146496815287,
+              "image__point_3d_iou": 0.7761146496815287,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.1724558196221816,
+              "common_false_elements": 48,
+              "union_false_fraction": 0.2862101609340486
+            },
+            {
+              "scene_id": "scene0203_00",
+              "instance_id": 6,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.0,
+              "image__point_3d_iou": 0.0,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.965786123488224
+            },
+            {
+              "scene_id": "scene0203_00",
+              "instance_id": 8,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.23337950138504154,
+              "image__point_3d_iou": 0.2303448275862069,
+              "point_2d__point_3d_iou": 0.9919883466860888,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.43314082629942247
+            },
+            {
+              "scene_id": "scene0203_00",
+              "instance_id": 9,
+              "text__image_iou": 0.8287081339712918,
+              "text__point_2d_iou": 0.9038941108766545,
+              "text__point_3d_iou": 0.9038941108766545,
+              "image__point_2d_iou": 0.9109328830730266,
+              "image__point_3d_iou": 0.9109328830730266,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.7645560407569141,
+              "common_false_elements": 114,
+              "union_false_fraction": 0.08019138755980862
+            },
+            {
+              "scene_id": "scene0203_00",
+              "instance_id": 17,
+              "text__image_iou": 0.9411366711772666,
+              "text__point_2d_iou": 0.9071428571428571,
+              "text__point_3d_iou": 0.9013581129378128,
+              "image__point_2d_iou": 0.8548278190411884,
+              "image__point_3d_iou": 0.8505747126436781,
+              "point_2d__point_3d_iou": 0.9905882352941177,
+              "common_true_coverage": 0.8331071913161465,
+              "common_false_elements": 28,
+              "union_false_fraction": 0.11816340310600945
+            },
+            {
+              "scene_id": "scene0203_00",
+              "instance_id": 18,
+              "text__image_iou": 0.05070118662351672,
+              "text__point_2d_iou": 0.051474530831099194,
+              "text__point_3d_iou": 0.051474530831099194,
+              "image__point_2d_iou": 0.9031620553359684,
+              "image__point_3d_iou": 0.9031620553359684,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.09270516717325228,
+              "common_false_elements": 25,
+              "union_false_fraction": 0.76
+            },
+            {
+              "scene_id": "scene0203_00",
+              "instance_id": 19,
+              "text__image_iou": 0.9411366711772666,
+              "text__point_2d_iou": 0.47509765625,
+              "text__point_3d_iou": 0.47509765625,
+              "image__point_2d_iou": 0.4887073522345026,
+              "image__point_3d_iou": 0.4887073522345026,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.02102496714848883,
+              "common_false_elements": 957,
+              "union_false_fraction": 0.8418024928092043
+            },
+            {
+              "scene_id": "scene0535_00",
+              "instance_id": 9,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.49477351916376305,
+              "image__point_3d_iou": 0.4945054945054945,
+              "point_2d__point_3d_iou": 0.9926650366748166,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.8721422523285352
+            },
+            {
+              "scene_id": "scene0535_00",
+              "instance_id": 10,
+              "text__image_iou": 0.0,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.8329411764705882,
+              "image__point_3d_iou": 0.8,
+              "point_2d__point_3d_iou": 0.9549295774647887,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.7798013245033113
+            },
+            {
+              "scene_id": "scene0535_00",
+              "instance_id": 11,
+              "text__image_iou": 0.010128913443830571,
+              "text__point_2d_iou": 0.0,
+              "text__point_3d_iou": 0.0,
+              "image__point_2d_iou": 0.00027693159789531985,
+              "image__point_3d_iou": 0.00027693159789531985,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.0,
+              "common_false_elements": 0,
+              "union_false_fraction": 0.5264841805901174
+            },
+            {
+              "scene_id": "scene0535_00",
+              "instance_id": 12,
+              "text__image_iou": 0.5976613252490256,
+              "text__point_2d_iou": 0.6217693836978131,
+              "text__point_3d_iou": 0.4622496147919877,
+              "image__point_2d_iou": 0.7878934624697337,
+              "image__point_3d_iou": 0.5910636231180184,
+              "point_2d__point_3d_iou": 0.6550522648083623,
+              "common_true_coverage": 0.1342817487855656,
+              "common_false_elements": 98,
+              "union_false_fraction": 0.0933852140077821
+            },
+            {
+              "scene_id": "scene0535_00",
+              "instance_id": 13,
+              "text__image_iou": 0.5436893203883495,
+              "text__point_2d_iou": 0.09411764705882353,
+              "text__point_3d_iou": 0.09411764705882353,
+              "image__point_2d_iou": 0.168141592920354,
+              "image__point_3d_iou": 0.168141592920354,
+              "point_2d__point_3d_iou": 1.0,
+              "common_true_coverage": 0.02559150169000483,
+              "common_false_elements": 3,
+              "union_false_fraction": 0.29793510324483774
+            },
+            {
+              "scene_id": "scene0535_00",
+              "instance_id": 16,
+              "text__image_iou": 0.5480274442538593,
+              "text__point_2d_iou": 0.4033584647018506,
+              "text__point_3d_iou": 0.4010970174837161,
+              "image__point_2d_iou": 0.48663594470046084,
+              "image__point_3d_iou": 0.48463429625076826,
+              "point_2d__point_3d_iou": 0.9954954954954955,
+              "common_true_coverage": 0.34584536413217837,
+              "common_false_elements": 32,
+              "union_false_fraction": 0.32547732696897375
+            }
+          ],
+          "interpretation": "secondary consistency diagnosis; agreement can be consistently wrong; empty/empty agreement is zero; accuracy metrics unchanged"
+        }
+      },
+      "independent_uqis_final_test": false,
+      "official_sota_equivalence_verified": false
+    }
+  },
+  "stage_status": "common_observation_system_with_annotated_four_query_development_results_not_sota",
+  "implementation_guide": "docs/SYSTEM_IMPLEMENTATION.md",
+  "stage_report": "docs/experiments/2026-10-05-query-specific-supervision-and-transfer.md",
+  "reconstruction": {
+    "module": "radio_gs.pipeline.build_map",
+    "teacher_module": "radio_gs.pipeline.region_teacher",
+    "shared_kernel": "radio_gs.pipeline.native_reconstruction.NativeFieldAccumulator",
+    "lerf_configs": "configs/pipeline/reconstruction",
+    "lerf_source_frames": 764,
+    "scannet_source_frames": 1158,
+    "source_frame_cap": null,
+    "post_generation_area_filter": null,
+    "geometry_trainable": false,
+    "native_semantic_provider": "SigLIP; separate frozen Mask-Adapter native category dictionary additionally used by ScanNet source-assisted readout",
+    "compact_multiteacher_student_validated": false
+  },
+  "decisions": {
+    "frozen_comparators": "retained; not overwritten",
+    "complete_information_recipes": "explicit candidates, uniformly applied within each cohort",
+    "native_scannet_replacement": "active compiled native observations; old scene heads are comparators only",
+    "int8": "optional storage precision, not default or low-dimensional student",
+    "sparse_rgb_conflict_unknown": "not promoted",
+    "uqis": "Active v0.3.1 map-only: same nine maps, four complete query modalities, native identity plus physical instance scope; independent explicit sets. Opened development only.",
+    "active_category_representation": "compiled native observations; v2 per-element field remains comparator"
+  },
+  "active_recipe": "configs/pipeline/system_v9.json",
+  "cohort_entry": "python -m radio_gs.pipeline.cohort",
+  "rejected_region_candidates": {
+    "summary": "output/native_region_ownership/summary.json",
+    "candidates": [
+      "finest",
+      "early_mean",
+      "late_logmeanexp"
+    ],
+    "reason": "LERF 2D IoU gains accompany AP/selection regression; all lose ScanNet versus retained recipe"
+  },
+  "cold_category_alternative": {
+    "recipe": "configs/pipeline/system_cold_category.json",
+    "summary": "output/cold_category/summary.json",
+    "macro": {
+      "map": {
+        "19": 0.46974302215413044,
+        "15": 0.4823403039275599,
+        "10": 0.5906615607384287
+      },
+      "source": {
+        "19": 0.5570514944008073,
+        "15": 0.565187956195013,
+        "10": 0.684375549478506
+      }
+    },
+    "default": false,
+    "historical_scene_calibration_parameters": false,
+    "reason_not_promoted": "Historical176-frame intermediate; superseded by validated all-source one-pass category system_v2"
+  },
+  "completed_system_summary": "output/real_direct_membership_20261006/final_validation.json",
+  "complete_category_track": {
+    "scenes": 10,
+    "source_frames": 1158,
+    "input_track": "provided_unlabelled_mesh",
+    "historical_scene_calibration_parameters": false,
+    "source_category_fusion": "visibility_weighted_vote",
+    "query_batch_size": 4,
+    "source_caches": "query-conditioned SAM3 masks and native foreground-context identity; included in deployment cost",
+    "results": "output/system_v7/summary.json",
+    "same_evidence_comparison": "output/scannet_source_vote/summary.json",
+    "source_budget_comparison": "output/scannet_source_budget_control/summary.json"
+  },
+  "native_prior_study": {
+    "report": "docs/experiments/2026-10-03-native-prior-and-evidence-conflicts.md",
+    "summary": "output/native_evidence_contribution/summary.json",
+    "categorical_candidate": "output/categorical_observation/summary.json",
+    "conditions_completed": 30,
+    "default_changed": false,
+    "native_prior_delta_pp": [
+      2.09072764864859,
+      2.78488012701592,
+      2.18274575630116
+    ],
+    "rejected_candidates": [
+      "spatial_proposal_identity",
+      "partial_categorical_observation"
+    ],
+    "scope": "ScanNet10 same support, geometry, source teacher and prior strength; not four-query or compact-student validation"
+  },
+  "native_observation_candidate": {
+    "configs": "configs/pipeline/native_observation",
+    "report": "docs/experiments/2026-10-03-native-observation-pooling.md",
+    "summary": "output/native_observation_public/summary.json",
+    "promoted": false,
+    "source_point_miou_percent": [
+      58.4492450964,
+      59.6528183495,
+      71.027042765
+    ],
+    "extra_region_mask_gib": 11.0293439552,
+    "complete_scenes": 10,
+    "public_reproduction_difference": 0,
+    "independent_test": false
+  },
+  "compiled_observation_field": {
+    "builder": "radio_gs.pipeline.observation_field",
+    "scene_configs": "configs/pipeline/scannet_identity_observations",
+    "semantic_files_gib": 1.2100252006,
+    "baseline_element_files_gib": 4.4932112824,
+    "query_independent": true,
+    "original_element_field_read": false,
+    "original_masks_or_cameras_read_for_prior": false,
+    "learned_compact_multiteacher": false,
+    "baseline_v3_compilation_matches_uncompiled": true
+  },
+  "natural_crop_control": {
+    "summary": "output/native_crop_context/summary.json",
+    "promoted": false,
+    "new_encodings": 73905,
+    "frames": 1158,
+    "reason": "large prior degradation and mixed final split/scene effects"
+  },
+  "native_observation_reliability": {
+    "mode": "entropy_information",
+    "full_menu_required": true,
+    "heldout_view_support_promoted": false,
+    "source_identity": "detector_matched_mass",
+    "native_identity_still_sets_total_budget": true,
+    "new_teacher_calls": 0
+  },
+  "label_representability_diagnostic": {
+    "summary": "output/observation_representability/summary.json",
+    "labels_used": true,
+    "in_sample": true,
+    "automatic_method_performance": false,
+    "learned_variables_saved": false
+  },
+  "dual_native_prior": {
+    "enabled_for": "source-assisted ScanNet category partitions",
+    "mixing": "equal native probability average within the existing visibility vote",
+    "supervised_local_head": false,
+    "source_evidence_absent_fallback": "original SigLIP",
+    "original10_semantic_files_gib": 2.3143308348953724,
+    "geometry_models_rgb_source_caches_extra": true,
+    "reserved19_delta_pp": 2.347638119264656,
+    "reserved_scenes_up": 2,
+    "reserved_scenes_down": 1,
+    "compact_student": false
+  },
+  "shared_architecture": "docs/adr/0012-common-observation-architecture-and-query-contracts.md",
+  "native_numerical_core": "radio_gs.querying.observation_readout",
+  "registered_map_builder": "radio_gs.pipeline.registered_observation_map",
+  "registered_instance_readout": {
+    "implementation": "radio_gs.querying.instance_observation_scope",
+    "seed": "native region identity",
+    "correspondence": "co-visible IoU and bilateral visible fractions >= 0.5; one matching region per view; one hop",
+    "ranking": "s + s*(1-s)*p; absent partial scope preserves native s",
+    "selection": "confidence-weighted visible observation majority > 0.5; points retain anchor co-membership",
+    "learned_parameters": false,
+    "query_time_source_rgb_or_sam": false,
+    "spatial_language_relations_implemented": false,
+    "primary_readout": "identity_scope",
+    "comparison": "output/local_appearance_study/comparison.json",
+    "image_identity": "equal native SigLIP and bidirectional DINO patch identity ranks; original SigLIP field and physical scope retained",
+    "local_appearance_implementation": "radio_gs.querying.local_appearance_match"
+  },
+  "latest_completed_method_study": {
+    "kind": "bounded_native_phrase_binding_study",
+    "status": "complete_no_promotion",
+    "default_changed": false,
+    "active_recipe": "configs/pipeline/system_v9.json",
+    "report": "docs/experiments/2026-10-06-native-phrase-identity-and-relational-competition.md",
+    "results": "output/native_phrase_binding_20261006/final_comparison.json",
+    "design": "output/native_phrase_binding_20261006/design.json",
+    "training_rooms": 22,
+    "calibration_rooms": 3,
+    "development_rooms": 4,
+    "role_extractor_fits": 1,
+    "retrieval_fits": 4,
+    "search_rounds": 2,
+    "benchmark_jobs": 0,
+    "additional_supervision": "NR3D, ScanEnts3D phrase roles, official3D instance and category annotations, all in independent training rooms",
+    "conditions": [
+      "native",
+      "uniform",
+      "native_instance",
+      "uniform_instance"
+    ],
+    "round1_gate": {
+      "candidate": 0.11109819856937975,
+      "control": 0.10507596598472446,
+      "previous_local": 0.09785769115061271,
+      "uniform_intervention": 0.10812528838869184,
+      "query_mean": 0.09508689413996763,
+      "reversed_witness": 0.09576538112014532,
+      "passed": false,
+      "benchmark_metrics_used": false,
+      "default": "system_v9",
+      "explanation": "One fixed search round; protect native phrase recognition and require actual conditional spatial utility."
+    },
+    "round2_gate": {
+      "candidate": 0.10305391083238646,
+      "native_round1": 0.11109819856937975,
+      "matched_uniform": 0.09358912648167461,
+      "uniform_intervention": 0.09386289527174085,
+      "query_mean": 0.09931760574909276,
+      "reversed_witness": 0.0844092620536685,
+      "passed": false,
+      "benchmark_metrics_used": false,
+      "tuning_rounds": 2,
+      "additional_search": false
+    },
+    "source_views_or_map_changed": false,
+    "query_permissions_changed": false,
+    "independent_final_test": false
+  },
+  "uqis_evaluation": {
+    "primary": "four separate scene-macro AP scores on unchanged 67 targets and 268 queries",
+    "explicit_sets": "four separate IoU, purity and coverage plus same-target all-four success",
+    "supplementary_agreement": "six pairwise set IoUs, common true coverage and union false fraction; agreement is not accuracy",
+    "inputs": "same map; text, image crop, single positive 2D pixel/camera, single positive 3D point",
+    "independent_final_test": false,
+    "part_or_signed_interaction_validated": false,
+    "v7_supplementary_result": "output/local_membership_study/v7_selection_agreement.json",
+    "actual_set_identity_diagnosis": "unique dominant official instance in selected vertices; background/void and ties counted; conditional extent is secondary and never replaces complete-cohort accuracy",
+    "current_supplementary_result": "output/system_v8/uqis/identity_scope/result.json",
+    "map_payload_mib": 2852.8104457855225,
+    "compact_student": false
+  },
+  "previous_completed_method_study": {
+    "name": "Query-specific supervision and transfer",
+    "status": "complete; no stable new gain, v8 retained",
+    "completed_on": "2026-10-06",
+    "report": "docs/experiments/2026-10-05-query-specific-supervision-and-transfer.md",
+    "declaration": "configs/recipes/query_specific_grounding.json",
+    "comparison": "output/query_specific_grounding_20261005/comparison.json",
+    "fresh_scene_jobs": 67,
+    "uqis_query_executions": 1340,
+    "fits_completed": 6,
+    "public_tasks_rerun": true,
+    "text_actual_iou": {
+      "native": 0.16386530164545415,
+      "all_forward": 0.20212139784935187,
+      "named_forward": 0.21027775308981303,
+      "named_bidirectional": 0.19226601536811613,
+      "named_hard_forward": 0.16629094488214863,
+      "named_hard_bidirectional": 0.1566901868872893
+    },
+    "all_four_success": {
+      "native": 7.0,
+      "all_forward": 11.0,
+      "named_forward": 12.0,
+      "named_bidirectional": 11.0,
+      "named_hard_forward": 10.0,
+      "named_hard_bidirectional": 7.0
+    },
+    "matched_comparison": "named_forward:all_forward",
+    "matched_text_gain_pp": {
+      "estimate": 0.8156355240461153,
+      "lower": -4.07089341656089,
+      "upper": 6.047099978335988,
+      "confidence": 0.95,
+      "bootstrap_samples": 2000,
+      "bootstrap_unit": "scene",
+      "seed": 20260813
+    },
+    "original_local_development_common_correction_energy_fraction": 0.9843127193810883,
+    "eligibility": {
+      "listener_correct_records": 1592,
+      "named_records": 1377,
+      "presentations_per_epoch": 1592
+    },
+    "posterior_gate": {
+      "condition": "named_posterior",
+      "calibration_iou": 0.164514322384913,
+      "development_iou": 0.08077520934889573,
+      "named_forward_development_iou": 0.08313058373247996,
+      "query_specific_gain_pp": -0.7313561625778675,
+      "minimum_query_specific_gain_pp": 0.5,
+      "passed": false,
+      "benchmark_executed": false,
+      "decision": "rejected on the declared development criteria; no benchmark run or parameter revision"
+    },
+    "extra_supervision": "independent NR3D and official3D instances; unchanged29 real observation rooms",
+    "native_and_other_modality_arrays_exact": true,
+    "default_changed": false,
+    "independent_final_test": false,
+    "compact_student": false,
+    "next": "Ground target and landmark identity/position using real scene observations, then condition complete membership on actual query evidence. Stop local score, attention and contrastive-loss sweeps; do not repeat unvalidated heuristic landmark scoring."
+  },
+  "earlier_completed_method_studies": [
+    {
+      "report": "docs/experiments/2026-10-05-uqis-identity-and-range-evidence.md",
+      "automatic_scene_jobs_completed": 36,
+      "automatic_queries_completed": 1072,
+      "additional_single_image_query_completed": 1,
+      "completed_on": "2026-10-05",
+      "default_changed": false,
+      "public_jobs_reexecuted": false,
+      "comparison": "output/observation_hypotheses_study/comparison.json",
+      "label_using_finite_candidate_diagnosis": "output/observation_hypotheses_study/label_capacity.json",
+      "label_diagnosis_is_automatic_method": false,
+      "identity_evaluation": "output/observation_hypotheses_study/identity_diagnostics/summary.json",
+      "candidate_recipe": "output/dual_native_identity_study/recipe.json",
+      "candidate_status": "opened-development candidate; independent confirmation outstanding",
+      "candidate_image_ap_percent": 39.790902421948985,
+      "candidate_image_selected_iou_percent": 30.73916103641419,
+      "candidate_image_iou_gain_pp": 2.1401215035460197,
+      "candidate_image_iou_gain_95ci_pp": [
+        -0.9606128343842901,
+        5.053653580594276
+      ],
+      "decision": "Reject physical-mean and exclusive-track replacements. Retain dual native image identity as a bounded candidate; v7 remains default. Do not combine separate candidates best AP and IoU."
+    },
+    {
+      "report": "docs/experiments/2026-10-04-local-observation-membership.md",
+      "automatic_jobs_completed": 71,
+      "completed_on": "2026-10-05",
+      "default_changed": false,
+      "local_membership_comparison": "output/local_membership_study/comparison.json",
+      "member_identity_comparison": "output/member_identity_study/comparison.json",
+      "label_using_scope_diagnosis": "output/member_identity_study/label_seed_diagnosis.json",
+      "label_diagnosis_is_automatic_method": false,
+      "decision": "Both candidates rejected; retain v7. Prioritize instance identity/granularity and evidence for complete membership, not more semantic consistency weighting."
+    },
+    {
+      "report": "docs/experiments/2026-10-05-uqis-entity-range.md",
+      "completed_on": "2026-10-05",
+      "automatic_scene_jobs_completed": 36,
+      "uqis_query_executions_completed": 1072,
+      "bounded_candidates_completed": 4,
+      "complete_system_jobs_completed": 0,
+      "public_jobs_reexecuted": false,
+      "comparison": "output/witnessed_scope_study/comparison.json",
+      "default_changed": false,
+      "retained_recipe": "configs/pipeline/system_v8.json",
+      "native_control_max_difference": 0.0,
+      "text_image_seed_changes": 0,
+      "panoptic_actual_iou_percent": {
+        "text": 16.577720448482054,
+        "image": 33.304794604365384,
+        "point_2d": 38.707317318385236,
+        "point_3d": 38.579069474162594
+      },
+      "panoptic_coverage_percent": {
+        "text": 23.897231752934005,
+        "image": 43.98236802317874,
+        "point_2d": 51.44228691395236,
+        "point_3d": 51.03488801160792
+      },
+      "diagnosis_only_joint_candidate_iou_percent": 56.17280003846321,
+      "independent_test": false,
+      "decision": "No candidate promoted. Stop these fixed scope-rule and prior comparisons; prioritize independently supervised instance/part membership and actual-set completion reliability."
+    },
+    {
+      "name": "Native context and referent identity bottleneck",
+      "status": "complete; neither context candidate promoted",
+      "report": "docs/experiments/2026-10-05-native-context-and-identity-bottleneck.md",
+      "declaration": "configs/recipes/identity_bottleneck.json",
+      "comparison": "output/identity_bottleneck_20261005/comparison.json",
+      "fresh_scene_jobs": 27,
+      "uqis_query_executions": 804,
+      "public_tasks_rerun": false,
+      "text_actual_iou": {
+        "v8": 0.16386530164545415,
+        "unmasked": 0.08861102554815065,
+        "object_context": 0.14930873535961364
+      },
+      "identity_only_oracle_diagnostic": {
+        "text_iou": 0.4106126997237277,
+        "image_iou": 0.4166377921827502,
+        "automatic_result": false
+      },
+      "default_changed": false,
+      "next": "Independent natural referring-expression-to-instance supervision with explicit scene context; preserve native coordinates and separate complete membership"
+    },
+    {
+      "name": "Natural referent learning and observation-domain repair",
+      "status": "complete; neither supervised head promoted",
+      "report": "docs/experiments/2026-10-05-referent-learning-and-observation-domain.md",
+      "declaration": "configs/recipes/referent_grounding.json",
+      "comparison": "output/referent_grounding_20261005/comparison.json",
+      "fresh_scene_jobs": 40,
+      "uqis_query_executions": 536,
+      "public_tasks_rerun": true,
+      "text_actual_iou": {
+        "native": 0.16386530164545415,
+        "local": 0.18384260703311905,
+        "scene": 0.18329606104920157
+      },
+      "additional_supervision": "independent NR3D natural expressions and official 3D instances",
+      "independent_development_iou": {
+        "local": 0.03575457925024653,
+        "scene": 0.02996001721915072
+      },
+      "real_observation_control": "output/referent_grounding_20261005/real_observation_control/comparison.json",
+      "real_training_rooms_completed": 2,
+      "remaining_real_training_rebuild_and_retraining_complete": false,
+      "default_changed": false,
+      "next": "Replace old rendered training observations with deployment-matched real RGB-D; disentangle identity from complete membership; independent confirmation before promotion"
+    }
+  ],
+  "completed_local_correspondence_study": {
+    "report": "docs/experiments/2026-10-05-uqis-local-correspondence.md",
+    "completed_on": "2026-10-05",
+    "automatic_scene_jobs_completed": 58,
+    "uqis_query_executions_completed": 1072,
+    "bounded_candidates_completed": 3,
+    "complete_system_jobs_completed": 31,
+    "comparison": "output/local_appearance_study/comparison.json",
+    "system_comparison": "output/system_v8/comparison_v7.json",
+    "fixed_conditions": "configs/recipes/uqis_local_appearance.json",
+    "default_changed": true,
+    "promoted_recipe": "configs/pipeline/system_v8.json",
+    "public_jobs_reexecuted": true,
+    "image_ap_percent": 44.033565581250045,
+    "image_selected_iou_percent": 34.8762102010641,
+    "image_iou_gain_vs_v7_pp": {
+      "estimate": 6.277170668195933,
+      "lower": 2.31443468717843,
+      "upper": 9.927419500172665,
+      "confidence": 0.95,
+      "bootstrap_samples": 2000,
+      "bootstrap_unit": "scene",
+      "seed": 20260813
+    },
+    "image_iou_gain_vs_pooled_pp": {
+      "estimate": 4.1370491646499135,
+      "lower": 0.8013968369573001,
+      "upper": 7.794086803480092,
+      "confidence": 0.95,
+      "bootstrap_samples": 2000,
+      "bootstrap_unit": "scene",
+      "seed": 20260813
+    },
+    "all_other_modality_metrics_unchanged": true,
+    "uqis_all_readout_reproduction_max_difference": 0.0,
+    "independent_test": false,
+    "compact_student": false,
+    "decision": "Promote bidirectional local appearance identity as the v8 development default after the full common execution. Retain pooled and mutual-match controls; stop this matching-rule search. Prioritize complete instance scope and relational-text identity."
+  },
+  "latest_full_validation": {
+    "recipe": "configs/pipeline/system_v9.json",
+    "summary": "output/real_direct_membership_20261006/final_validation.json",
+    "comparison": "output/real_direct_membership_20261006/comparison.json",
+    "completed": 31,
+    "all_five_tasks_reexecuted": true,
+    "default_changed": true,
+    "new_method_gain_claimed": true,
+    "macro": {
+      "lerf": {
+        "semantic_iou": 0.7040067569509944,
+        "ap": 0.8761927781025176,
+        "selected_projection_iou": 0.6696492775390938
+      },
+      "nvos": {
+        "iou": 0.865134172141552,
+        "ap": 0.9802223991943074
+      },
+      "scannet": {
+        "miou_19": 0.6101149054806629,
+        "miou_15": 0.6252758904159779,
+        "miou_10": 0.7248606102956524
+      },
+      "uqis": {
+        "text_ap": 0.26595870475621114,
+        "image_ap": 0.44033565581250045,
+        "point_2d_ap": 0.7579009711011095,
+        "point_3d_ap": 0.7532525076702995,
+        "text_selected_iou": 0.16386530164545418,
+        "image_selected_iou": 0.3487621020106409,
+        "point_2d_selected_iou": 0.49735675405728724,
+        "point_3d_selected_iou": 0.49046983356518353
+      }
+    },
+    "report": "docs/experiments/2026-10-06-scene-binding-and-real-membership.md",
+    "condition": "additional3D supervised point membership; high-capacity native fields",
+    "execution": "22 freshly recomputed public tasks plus9 fully regenerated corrected UQIS tasks; same declared recipe"
+  },
+  "next_membership_supervision": {
+    "recipe": "configs/recipes/independent_instance_membership.json",
+    "status": "Real observations complete; local score supervision insufficient for reliable scene referents",
+    "benchmark_room_overlap": false,
+    "report": "docs/experiments/2026-10-05-query-specific-supervision-and-transfer.md",
+    "candidate_summary": "output/query_specific_grounding_20261005/named_forward/system/summary.json",
+    "next": "Ground target and landmark identity/position using real scene observations, then condition complete membership on actual query evidence. Stop local score, attention and contrastive-loss sweeps; do not repeat unvalidated heuristic landmark scoring."
+  },
+  "latest_membership_mechanism_study": {
+    "declaration": "configs/recipes/real_direct_membership.json",
+    "comparison": "output/real_direct_membership_20261006/comparison.json",
+    "status": "completed; actual-anchor real-observation condition promoted to v9",
+    "matched_gain_over_rendered_pp": [
+      9.618251502022032,
+      9.61797622022377
+    ],
+    "all_four_success": 7
+  },
+  "latest_full_candidate_validation": {
+    "recipe": "configs/pipeline/system_v9.json",
+    "summary": "output/real_direct_membership_20261006/final_validation.json",
+    "comparison": "output/real_direct_membership_20261006/comparison.json",
+    "completed": 31,
+    "all_five_tasks_reexecuted": true,
+    "default_changed": true,
+    "new_method_gain_claimed": true,
+    "macro": {
+      "lerf": {
+        "semantic_iou": 0.7040067569509944,
+        "ap": 0.8761927781025176,
+        "selected_projection_iou": 0.6696492775390938
+      },
+      "nvos": {
+        "iou": 0.865134172141552,
+        "ap": 0.9802223991943074
+      },
+      "scannet": {
+        "miou_19": 0.6101149054806629,
+        "miou_15": 0.6252758904159779,
+        "miou_10": 0.7248606102956524
+      },
+      "uqis": {
+        "text_ap": 0.26595870475621114,
+        "image_ap": 0.44033565581250045,
+        "point_2d_ap": 0.7579009711011095,
+        "point_3d_ap": 0.7532525076702995,
+        "text_selected_iou": 0.16386530164545418,
+        "image_selected_iou": 0.3487621020106409,
+        "point_2d_selected_iou": 0.49735675405728724,
+        "point_3d_selected_iou": 0.49046983356518353
+      }
+    },
+    "report": "docs/experiments/2026-10-06-scene-binding-and-real-membership.md",
+    "condition": "additional3D supervised point membership; high-capacity native fields",
+    "execution": "22 freshly recomputed public tasks plus9 fully regenerated corrected UQIS tasks; same declared recipe",
+    "decision": "promoted supervised development recipe; text/image and all public reader rules retained"
+  },
+  "previous_surface_membership_study": {
+    "report": "docs/experiments/2026-10-05-surface-consistent-instance-selection.md",
+    "completed_on": "2026-10-05",
+    "comparison": "output/surface_membership_study/comparison.json",
+    "fixed_conditions": "configs/recipes/surface_membership.json",
+    "automatic_scene_jobs_completed": 40,
+    "uqis_query_executions_completed": 536,
+    "complete_system_jobs_completed": 31,
+    "public_jobs_reexecuted": true,
+    "public_readers_changed": false,
+    "additional_rendered_development_rooms": 8,
+    "additional_independent_instance_training_rooms": 24,
+    "default_changed": false,
+    "retained_recipe": "configs/pipeline/system_v8.json",
+    "learned_candidate_recipe": "output/surface_membership_study/learned_recipe.json",
+    "fixed_candidate_recipe": "output/surface_membership_study/fixed_recipe.json",
+    "full_common_summary": "output/surface_membership_study/learned_system/summary.json",
+    "actual_selected_iou_percent": {
+      "v8": {
+        "text": 16.386530164545416,
+        "image": 34.8762102010641,
+        "point_2d": 42.090214074817546,
+        "point_3d": 41.523824783756766
+      },
+      "parent": {
+        "text": 16.386530164545416,
+        "image": 34.8762102010641,
+        "point_2d": 43.07470332593176,
+        "point_3d": 42.786497778557575
+      },
+      "fixed": {
+        "text": 16.587554314218135,
+        "image": 34.70035619226073,
+        "point_2d": 45.54797148255726,
+        "point_3d": 44.97470596522647
+      },
+      "learned": {
+        "text": 16.61362655023442,
+        "image": 34.975652630205374,
+        "point_2d": 45.764433580010156,
+        "point_3d": 44.629899229530764
+      }
+    },
+    "all_four_successes": {
+      "v8": 7.0,
+      "parent": 6.0,
+      "fixed": 7.0,
+      "learned": 7.0
+    },
+    "native_anchor_seed_control_changes": 0,
+    "independent_final_test": false,
+    "unknown_completion": {
+      "status": "rejected in eight development rooms; no benchmark execution",
+      "summary": "output/surface_membership_study/cut_unknown_confirmation.json",
+      "parameters_refitted": false
+    },
+    "decision": {
+      "promoted": false,
+      "retained_recipe": "configs/pipeline/system_v8.json",
+      "useful_result": "Joint set inference improves actual point IoU over identical independent-element unaries.",
+      "learned_edge_contribution": "No consistent advantage over fixed relations across both point modalities.",
+      "remaining_limits": "Severe two-scene regressions versus v8; 3D-point interval crosses zero; image/text AP declines; all-four success unchanged.",
+      "unknown_completion": "Rejected on eight independent-training-domain development rooms; no benchmark execution or parameter sweep.",
+      "next": "Identity-aware support beyond one-hop candidates, with explicit membership/unknown evidence; do not expand graph-strength search."
+    }
+  },
+  "latest_public_attribution_control": {
+    "recipe": "output/evidence_convergence_20261005/ownership_recipe.json",
+    "summary": "output/evidence_convergence_20261005/ownership_system/summary.json",
+    "completed": 22,
+    "macro": {
+      "lerf": {
+        "semantic_iou": 0.7044156327464359,
+        "ap": 0.8773099839078178,
+        "selected_projection_iou": 0.6693474453620406
+      },
+      "nvos": {
+        "iou": 0.8651337400078773,
+        "ap": 0.980222295570217
+      },
+      "scannet": {
+        "miou_19": 0.6103275579137387,
+        "miou_15": 0.625663469876824,
+        "miou_10": 0.7254663182702388
+      }
+    },
+    "uqis_implementation_identical_to": "local condition; no additional UQIS replay claimed",
+    "decision": "approximately baseline accuracy; no SOTA or major mechanism gain"
+  },
+  "previous_full_validation": {
+    "recipe": "configs/pipeline/system_v8.json",
+    "summary": "output/system_v8_membership_closure_20261005/summary.json",
+    "comparison": "output/system_v8_membership_closure_20261005/common_comparison.json",
+    "completed": 31,
+    "all_five_tasks_reexecuted": true,
+    "default_changed": false,
+    "new_method_gain_claimed": false,
+    "macro": {
+      "lerf": {
+        "semantic_iou": 0.7040067569509945,
+        "ap": 0.8761927786179452,
+        "selected_projection_iou": 0.6696765063684671
+      },
+      "nvos": {
+        "iou": 0.865134172141552,
+        "ap": 0.9802225178033521
+      },
+      "scannet": {
+        "miou_19": 0.6101149054806628,
+        "miou_15": 0.6252758904159779,
+        "miou_10": 0.7248606102956523
+      },
+      "uqis": {
+        "text_ap": 0.26595870475621114,
+        "image_ap": 0.44033565581250045,
+        "point_2d_ap": 0.527448601739522,
+        "point_3d_ap": 0.5235888555570881,
+        "text_selected_iou": 0.16386530164545418,
+        "image_selected_iou": 0.3487621020106409,
+        "point_2d_selected_iou": 0.4209021407481755,
+        "point_3d_selected_iou": 0.4152382478375677
+      }
+    },
+    "report": "docs/experiments/2026-10-05-independent-instance-membership-learning.md",
+    "resumed_predictions_from_same_run": 19
+  },
+  "latest_native_phrase_study": {
+    "kind": "bounded_native_phrase_binding_study",
+    "status": "complete_no_promotion",
+    "default_changed": false,
+    "active_recipe": "configs/pipeline/system_v9.json",
+    "report": "docs/experiments/2026-10-06-native-phrase-identity-and-relational-competition.md",
+    "results": "output/native_phrase_binding_20261006/final_comparison.json",
+    "design": "output/native_phrase_binding_20261006/design.json",
+    "training_rooms": 22,
+    "calibration_rooms": 3,
+    "development_rooms": 4,
+    "role_extractor_fits": 1,
+    "retrieval_fits": 4,
+    "search_rounds": 2,
+    "benchmark_jobs": 0,
+    "additional_supervision": "NR3D, ScanEnts3D phrase roles, official3D instance and category annotations, all in independent training rooms",
+    "conditions": [
+      "native",
+      "uniform",
+      "native_instance",
+      "uniform_instance"
+    ],
+    "round1_gate": {
+      "candidate": 0.11109819856937975,
+      "control": 0.10507596598472446,
+      "previous_local": 0.09785769115061271,
+      "uniform_intervention": 0.10812528838869184,
+      "query_mean": 0.09508689413996763,
+      "reversed_witness": 0.09576538112014532,
+      "passed": false,
+      "benchmark_metrics_used": false,
+      "default": "system_v9",
+      "explanation": "One fixed search round; protect native phrase recognition and require actual conditional spatial utility."
+    },
+    "round2_gate": {
+      "candidate": 0.10305391083238646,
+      "native_round1": 0.11109819856937975,
+      "matched_uniform": 0.09358912648167461,
+      "uniform_intervention": 0.09386289527174085,
+      "query_mean": 0.09931760574909276,
+      "reversed_witness": 0.0844092620536685,
+      "passed": false,
+      "benchmark_metrics_used": false,
+      "tuning_rounds": 2,
+      "additional_search": false
+    },
+    "source_views_or_map_changed": false,
+    "query_permissions_changed": false,
+    "independent_final_test": false
+  }
+}

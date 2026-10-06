@@ -1,0 +1,62 @@
+{
+  "name": "typed_online_evidence_next44",
+  "status": "full_cohort_development_candidate_not_default",
+  "prior": "output/taskwise_scope_composition_next38",
+  "appearance_geometry": "frozen prior geometry",
+  "query_outputs": "transient element probabilities; not persistent semantic map training",
+  "supported_tasks": {
+    "text_union": {
+      "identity": "SAM3 runtime detections plus native foreground/context soft confidence; same-query RMS scale",
+      "extent": "union of independently detected instance masks per source view",
+      "cross_view_identity_merge": false,
+      "detector_confidence": 0.5
+    },
+    "reference_instance": {
+      "identity": "existing positive reference mask plus legal-source video tracking",
+      "extent": "same reference object video masks",
+      "negative_user_prompts_added": false
+    }
+  },
+  "carrier": {
+    "forward": "unchanged Gaussian visibility-normalized renderer",
+    "semantic_write": "full renderer responsibility; strong-contribution gate is a rejected control",
+    "stored_evidence": "separate view and query instance masks; no crop-vector painting"
+  },
+  "solver": {
+    "steps": 60,
+    "prior_weight": 0.1,
+    "residual_clip": 0.25,
+    "boundary_unknown": "3x3 erosion/dilation band",
+    "missing_detection": "unknown",
+    "negative_admission": "continuous leave-one-view-out consistency on source positive/negative evidence; no hard positive veto",
+    "negative_certification": "teacher agreement only; not verified truth",
+    "unsupported": "keep prior",
+    "identity_reliability": "detector score times sigmoid(native foreground-context margin / source RMS margin) for text; unit identity confidence for reference-seeded video"
+  },
+  "online_budget": {
+    "source_rgb_access": true,
+    "target_rgb_access": false,
+    "online_vfm_inference": true,
+    "equivalent_to_map_only_readout": false
+  },
+  "not_implemented": [
+    "explicit whole-part relation decoder",
+    "image category-union independent identity provider",
+    "3D prompt independent identity provider",
+    "independent surfel geometry and rendering",
+    "dense language evidence with demonstrated retained teacher capability"
+  ],
+  "controls": [
+    "direct",
+    "agreement",
+    "corroborated",
+    "identity",
+    "identity_consensus",
+    "consensus",
+    "bridge",
+    "full_video"
+  ],
+  "retained_text_mode": "soft_identity",
+  "reference_decision": "next44 controls do not materially improve next43 signed video; retain existing optional reference video recipe",
+  "evaluation_summary": "output/typed_evidence_next44/summary.json"
+}

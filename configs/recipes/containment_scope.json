@@ -1,0 +1,67 @@
+{
+  "status": "complete_not_promoted",
+  "baseline": "configs/recipes/current_research.json",
+  "baseline_profile": "identity_response",
+  "implementation": "scripts/research/build_containment_unknown_evidence.py",
+  "execution": "scripts/research/run_containment_scope_control.py",
+  "core_candidates": {
+    "unknown_scope": {
+      "controls": [
+        "structural",
+        "semantic"
+      ],
+      "hypothesis": "Containment ambiguity should remove unreliable exclusion without inventing foreground.",
+      "outcome": "below screening line; no promotion"
+    },
+    "query_preferred_scope_assignment": {
+      "controls": [
+        "assignment"
+      ],
+      "hypothesis": "If missing affirmative scope is limiting, same query-preferred parent can restore recall; possible part expansion must appear in full-cohort precision and selected-set results.",
+      "decision": "Reject broad promotion unless approximately 2 pp main-metric benefit without material other-head/scene regression; no querywise stitching.",
+      "outcome": "semantic69.7527/AP86.9379/selected65.1492 versus70.3775/87.6429/66.6617; rejected; no parameter search"
+    }
+  },
+  "fixed_parameters": {
+    "child_iou": 0.5,
+    "parent_containment": 0.9,
+    "parent_area_ratio": 1.25,
+    "parent_selection": "smallest eligible parent",
+    "semantic_rule": "parent native cosine >= matched child cosine",
+    "scope_match_raster": [
+      96,
+      128
+    ],
+    "assigned_positive_raster": [
+      192,
+      256
+    ],
+    "source_fit_raster": [
+      192,
+      256
+    ],
+    "minimum_selection_steps": 240,
+    "actual_selection_steps_by_scene": {
+      "figurines": 293,
+      "ramen": 240,
+      "teatime": 240,
+      "waldo_kitchen": 240
+    }
+  },
+  "new_vfm_calls": 0,
+  "geometry_changed": false,
+  "inference_uses_target_rgb_or_gt": false,
+  "diagnostic_uses_target_labels_after_inference": true,
+  "parameter_revisions": 0,
+  "additional_candidates_planned": false,
+  "full_scene_evaluations": 12,
+  "diagnostic": "scripts/research/diagnose_text_evidence_transfer.py",
+  "unseen_scene_validation": false,
+  "public_sota": false,
+  "uqis": "paused",
+  "default_changed": false,
+  "source_view_diagnostics": 4,
+  "summary": "output/containment_scope_control/summary.json",
+  "evidence_diagnostic": "output/text_evidence_transfer/summary.json",
+  "report": "docs/experiments/2026-10-02-query-scope-evidence.md"
+}

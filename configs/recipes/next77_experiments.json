@@ -1,0 +1,34 @@
+{
+  "status": "complete_not_promoted",
+  "retained_recipe": "configs/recipes/next75_research.json",
+  "report": "docs/experiments/2026-10-01-cross-view-region-correspondence-next77.md",
+  "source_policy": "all legal source images",
+  "fit_raster_hw": [
+    192,
+    256
+  ],
+  "calibration_raster_hw": [
+    96,
+    128
+  ],
+  "native_dim": 1536,
+  "association": "common Gaussian visibility symmetric soft Dice; nearest two cameras selected without masks",
+  "confirmation": "third source view excluded from pair decision; same supporting region for both pair members",
+  "unknown_visibility": "retain original weight1",
+  "fusion": "region-confidence weighted native pixel mixture then original alpha adjoint",
+  "evaluation_count": 8,
+  "macro": {
+    "iou": 0.6698685885983755,
+    "ap": 0.8408175837368601,
+    "selected_projection_iou": 0.5431846232118442
+  },
+  "baseline_macro": {
+    "iou": 0.6693008907083283,
+    "ap": 0.8414592679661799,
+    "selected_projection_iou": 0.5429238524972841
+  },
+  "verified_instance_identity": false,
+  "explicit_region_preservation_after_fusion": false,
+  "new_other_benchmark_results": false,
+  "sota_claim": false
+}

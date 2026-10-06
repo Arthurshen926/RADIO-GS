@@ -1,0 +1,142 @@
+{
+  "complete": true,
+  "promoted": false,
+  "passes": 12,
+  "scenes": {
+    "figurines": {
+      "prompt_before": {
+        "iou": 0.47376868062423655,
+        "average_precision": 0.6519728701648257,
+        "auroc": 0.9500807650026778
+      },
+      "prompt_after": {
+        "iou": 0.4310364857036599,
+        "average_precision": 0.6373115246555915,
+        "auroc": 0.952497168594808
+      },
+      "source_before_deployed": 0.23453674551440787,
+      "source_before_best": 0.23453674551440787,
+      "source_after_best": 0.21728074004631917,
+      "source_accepted": false,
+      "changed_state_keys": [
+        "affinity.cutoffs"
+      ],
+      "text_image_exact": true,
+      "train_regions": 1985,
+      "validation_regions": 131,
+      "grounded_supervision_sha256": "4e67ad3e4fa45b6772165eba224d76b411202c4dd9a2d91697dcc92fb9f046d6"
+    },
+    "ramen": {
+      "prompt_before": {
+        "iou": 0.33928884965973144,
+        "average_precision": 0.5019233536435458,
+        "auroc": 0.9500343867112447
+      },
+      "prompt_after": {
+        "iou": 0.3558189904077257,
+        "average_precision": 0.5137042051325501,
+        "auroc": 0.9441305827018822
+      },
+      "source_before_deployed": 0.2908858908038828,
+      "source_before_best": 0.2908858908038828,
+      "source_after_best": 0.277921597871983,
+      "source_accepted": false,
+      "changed_state_keys": [
+        "affinity.cutoffs"
+      ],
+      "text_image_exact": true,
+      "train_regions": 2094,
+      "validation_regions": 139,
+      "grounded_supervision_sha256": "f47c3cbbab97262812ff3dcd760af5d95425db60a467d71ec41d2f8d43a07e99"
+    },
+    "teatime": {
+      "prompt_before": {
+        "iou": 0.6882654198180428,
+        "average_precision": 0.8693430055694886,
+        "auroc": 0.9840652559023485
+      },
+      "prompt_after": {
+        "iou": 0.6418807463039373,
+        "average_precision": 0.8560479451255972,
+        "auroc": 0.9837205963725901
+      },
+      "source_before_deployed": 0.37412786371644263,
+      "source_before_best": 0.37412786371644263,
+      "source_after_best": 0.3696331382430728,
+      "source_accepted": false,
+      "changed_state_keys": [
+        "affinity.cutoffs"
+      ],
+      "text_image_exact": true,
+      "train_regions": 2102,
+      "validation_regions": 103,
+      "grounded_supervision_sha256": "0132e943cfae3e99ad79f05bb637dfdfcb5cc8b8a253b03f3cd9b6ae0f3702da"
+    },
+    "waldo_kitchen": {
+      "prompt_before": {
+        "iou": 0.21427192558150582,
+        "average_precision": 0.5353105460154004,
+        "auroc": 0.8449178294715102
+      },
+      "prompt_after": {
+        "iou": 0.20559806487433044,
+        "average_precision": 0.5658681658251181,
+        "auroc": 0.8599692947149518
+      },
+      "source_before_deployed": 0.5719502035838863,
+      "source_before_best": 0.5719502035838863,
+      "source_after_best": 0.5394263521561192,
+      "source_accepted": false,
+      "changed_state_keys": [
+        "affinity.cutoffs"
+      ],
+      "text_image_exact": true,
+      "train_regions": 1980,
+      "validation_regions": 36,
+      "grounded_supervision_sha256": "210b67bb2b21221be7e9f363784fe8e375d61726ab39b19a3ce92bdeccb9a92c"
+    }
+  },
+  "macro": {
+    "before": {
+      "iou": 0.42889871892087916,
+      "average_precision": 0.6396374438483151
+    },
+    "after": {
+      "iou": 0.40858357182241334,
+      "average_precision": 0.6432329601847142
+    }
+  },
+  "artifact_sha256": {
+    "output/prompt_metric_only_next19/figurines/registration.json": "c9fad651886817e015acb01723bca3d93f6e44887431a5908ef6811c2ea369a1",
+    "output/prompt_metric_only_next19/figurines/summary.json": "8ff0eeff8379905060d6fec31f8fe54f45f9208a4b97d4066d49661f30304b99",
+    "output/prompt_metric_only_next19/figurines/reference_replay.json": "fb77554bcba590a34d4bca412bcb3ecb6fe752226fa7cf0bf571cf2475499e5a",
+    "output/prompt_metric_only_next19/figurines/prompt_metric_only/field.pt": "0d9947471dd9fa9f510ca7ba496ee9cccbb2de0c22178cde19221a7a5f91e3c1",
+    "output/prompt_metric_only_next19/figurines/prompt_metric_only/report.json": "b96b84d3e057ed0208bd1a9fc2aa72148474c3c1c284621845f41df12b992e79",
+    "output/prompt_metric_only_next19/ramen/registration.json": "eff9df7af2da9daefff1fded354abec7ceb88ec9322739896664152cd32a1564",
+    "output/prompt_metric_only_next19/ramen/summary.json": "acfc540b160a04888d9de0174cd91d9276146a3f844facf9427966ac85ffc605",
+    "output/prompt_metric_only_next19/ramen/reference_replay.json": "511bb70c0d903c1aab54057c74e732a23cd6403629c0395d316a89167b3d3a8e",
+    "output/prompt_metric_only_next19/ramen/prompt_metric_only/field.pt": "a0f6a8f3f017fcee8193524feae711e98ba3327a33aada28ec030887658614a3",
+    "output/prompt_metric_only_next19/ramen/prompt_metric_only/report.json": "e2bc1e4ba4fcd31f9656dcac4a7600552b3c1995278e93bfba232ed37387d56a",
+    "output/prompt_metric_only_next19/teatime/registration.json": "66764894fd9c1c7ae457d8bb4eb56806d5476a1c3f35171aab0313f087000820",
+    "output/prompt_metric_only_next19/teatime/summary.json": "e24e632bce2abcbf5754294e8baa08edb45eba0c418da748c280da5bd7df2a10",
+    "output/prompt_metric_only_next19/teatime/reference_replay.json": "193efa41928bd475d6fa83558e55e73790b9aca43d95fe1806f97f92216d0a4e",
+    "output/prompt_metric_only_next19/teatime/prompt_metric_only/field.pt": "c784c0ab05e3cb354988a5cf8c2cc305e4c1a059b7aed2bb9fb298555560bd37",
+    "output/prompt_metric_only_next19/teatime/prompt_metric_only/report.json": "37d87cb64643eb06a1a74847e896977623ba31eb2a92db1a603e69129fba0192",
+    "output/prompt_metric_only_next19/waldo_kitchen/registration.json": "b8af631aa4e188dad9b6da30f9ad9104049213f080bb48244da8980c7fad6c21",
+    "output/prompt_metric_only_next19/waldo_kitchen/summary.json": "d0e3778bf3bb2c544338ecc5de018ba1d0d6723292287815dfdd3fe2d5d8a28c",
+    "output/prompt_metric_only_next19/waldo_kitchen/reference_replay.json": "af16c99e021dcbe29f94760f1eefc85d682868d89f1596389ae5c6d805840850",
+    "output/prompt_metric_only_next19/waldo_kitchen/prompt_metric_only/field.pt": "ce4e4b91fba0e05ad8d16040e174de0ab11c5cddcabfed910b44eaf5534b0dfc",
+    "output/prompt_metric_only_next19/waldo_kitchen/prompt_metric_only/report.json": "d39d79ff0ef1275a4e990c2dbd7907853c4a0933562cfb337e9bffb7d12662ba",
+    "output/prompt_metric_only_next19/teatime/three_query_score_verification.json": "c868ed3c8aa2d3ff8a081508e1378c7b4299d01d51e9fe0166190690a76a47ee"
+  },
+  "implementation_sha256": "3831934fbfa6b4767b3436a4a17a60c013de6a01fc2b54d4444f3ef262e3dadc",
+  "reason": "Fixed source-only control; no benchmark-driven selection. Source validation and deployment readout must both be checked.",
+  "history_updated_elements_means_sampled_rows_not_modified_latent": true,
+  "decision": "reject: source validation worsens in all four scenes",
+  "recovery_scripts": {
+    "scripts/audits/prompt_metric_deployscale_recover_next19.py": "8023bda025bc5cb07e3b4ca5025cbbbc1fcc63686723c1b09b1e466385e06d14",
+    "scripts/audits/prompt_metric_only_recover_next19.py": "933f36fc189685be8981fa5b94217b61d7d32a4acdea4705fefc05bca3096794"
+  },
+  "verification_script_sha256": "a88040db38ea35ccf40ee28f87844d36d6730d0301d9a50875edff70b274af2c",
+  "recovery_note": "Teatime ctime guard and GPU-memory failures retained; training unchanged. Cold validation moved to separate process, all three queries per modality checked sequentially; complete reference evaluation unchanged."
+}

@@ -1,0 +1,281 @@
+{
+  "name": "RADIO-GS native observation system v6",
+  "entry": "python -m radio_gs.pipeline.cohort",
+  "role": "preserved native teacher spaces; equal probability prior fusion on category partitions; retained set/reference readers",
+  "jobs": [
+    {
+      "benchmark": "lerf",
+      "name": "ramen",
+      "scene": "output/system_map_rebuild/ramen/complete/scene.json",
+      "queries": "configs/consolidated/ramen.integration-queries.json",
+      "source_evidence": "output/research_consolidation/source_evidence/ramen",
+      "outputs": [
+        "semantic_2d",
+        "selected_gaussian_projection_2d"
+      ],
+      "input_track": "frozen_declared_rgb_geometry"
+    },
+    {
+      "benchmark": "lerf",
+      "name": "figurines",
+      "scene": "output/system_map_rebuild/figurines/complete/scene.json",
+      "queries": "configs/consolidated/figurines.queries.json",
+      "source_evidence": "output/research_consolidation/source_run/figurines/detections",
+      "outputs": [
+        "semantic_2d",
+        "selected_gaussian_projection_2d"
+      ],
+      "input_track": "frozen_declared_rgb_geometry"
+    },
+    {
+      "benchmark": "lerf",
+      "name": "teatime",
+      "scene": "output/system_map_rebuild/teatime/complete/scene.json",
+      "queries": "configs/consolidated/teatime.queries.json",
+      "source_evidence": "output/research_consolidation/source_run/teatime/detections",
+      "outputs": [
+        "semantic_2d",
+        "selected_gaussian_projection_2d"
+      ],
+      "input_track": "frozen_declared_rgb_geometry"
+    },
+    {
+      "benchmark": "lerf",
+      "name": "waldo_kitchen",
+      "scene": "output/system_map_rebuild/waldo_kitchen/complete/scene.json",
+      "queries": "configs/consolidated/waldo_kitchen.queries.json",
+      "source_evidence": "output/research_consolidation/source_run/waldo_kitchen/detections",
+      "outputs": [
+        "semantic_2d",
+        "selected_gaussian_projection_2d"
+      ],
+      "input_track": "frozen_declared_rgb_geometry"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "fern",
+      "scene": "configs/pipeline/nvos_all_sources/fern.scene.json",
+      "queries": "configs/consolidated/nvos/fern.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fern/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/fern.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "flower",
+      "scene": "configs/pipeline/nvos_all_sources/flower.scene.json",
+      "queries": "configs/consolidated/nvos/flower.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/flower/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/flower.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "fortress",
+      "scene": "configs/pipeline/nvos_all_sources/fortress.scene.json",
+      "queries": "configs/consolidated/nvos/fortress.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fortress/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/fortress.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "horns_center",
+      "scene": "configs/pipeline/nvos_all_sources/horns_center.scene.json",
+      "queries": "configs/consolidated/nvos/horns_center.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_center/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/horns_center.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "horns_left",
+      "scene": "configs/pipeline/nvos_all_sources/horns_left.scene.json",
+      "queries": "configs/consolidated/nvos/horns_left.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_left/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/horns_left.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "leaves",
+      "scene": "configs/pipeline/nvos_all_sources/leaves.scene.json",
+      "queries": "configs/consolidated/nvos/leaves.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/leaves/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/leaves.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "orchids",
+      "scene": "configs/pipeline/nvos_all_sources/orchids.scene.json",
+      "queries": "configs/consolidated/nvos/orchids.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/orchids/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/orchids.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb"
+    },
+    {
+      "benchmark": "nvos",
+      "name": "trex",
+      "scene": "configs/pipeline/nvos_all_sources/trex.scene.json",
+      "queries": "configs/consolidated/nvos/trex.query.json",
+      "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/trex/tracks.pt",
+      "evaluation": "configs/consolidated/nvos/trex.evaluation.json",
+      "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+      "input_track": "frozen_declared_geometry_no_target_rgb"
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0000_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0000_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0000_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0000_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0062_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0062_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0062_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0062_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0070_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0070_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0070_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0070_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0097_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0097_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0097_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0097_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0140_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0140_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0140_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0140_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0200_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0200_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0200_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0200_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0347_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0347_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0347_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0347_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0400_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0400_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0400_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0400_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0590_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0590_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0590_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0590_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    },
+    {
+      "benchmark": "scannet",
+      "name": "scene0645_00",
+      "scene": "configs/pipeline/scannet_dual_native/scene0645_00.scene.json",
+      "queries": "configs/consolidated/scannet_native/scene0645_00.queries.json",
+      "evaluation": "configs/consolidated/scannet_native/scene0645_00.evaluation.json",
+      "input_track": "provided_unlabelled_mesh",
+      "outputs": [
+        "point_miou_19_15_10"
+      ]
+    }
+  ],
+  "pending": {
+    "scannet_source_scenes": [],
+    "uqis": "Separate strict map-only nine-scene four-query cohort completed; v0.3.1 replay at output/uqis_map_only_v031. Instance text/image and reliable completion remain open; not promoted as a compact v6 student.",
+    "independent_3d_ground_truth": false,
+    "compact_multiteacher_student": false,
+    "public_sota_equivalence": false
+  },
+  "excluded_candidates": [
+    "finest region writer",
+    "early mean dual native scopes",
+    "late logmeanexp dual native scopes",
+    "source-refitted category calibration",
+    "transferred scope composition",
+    "joint positive categorical solver"
+  ],
+  "prediction_replay": false,
+  "claims": {
+    "compact_learned_multiteacher": false,
+    "independent_3d_lerf_ground_truth": false,
+    "annotated_four_query_accuracy": false,
+    "official_sota_equivalence": false,
+    "observation_compilation_is_new_accuracy_gain": false,
+    "compiled_category_field_is_four_query_validation": false,
+    "learned_local_fusion_contribution": false
+  },
+  "comparison": "v5 retained; equal dual-native probability prior on all ScanNet scenes; no scene routing or fitted local head",
+  "default": false,
+  "validation": {
+    "system_summary": "output/system_dual_native_candidate/summary.json",
+    "reserved_rooms": "output/local_element_fusion/summary.json",
+    "development_rooms": "output/local_element_fusion/development/summary.json",
+    "original_ten": "output/local_element_fusion/original10/summary.json",
+    "ground_truth_training": false,
+    "new_room_regressions_included": true
+  },
+  "superseded_by": "configs/pipeline/system_v7.json"
+}

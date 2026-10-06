@@ -1,0 +1,62 @@
+{
+  "schema": "frozen_cross_benchmark_method.v1",
+  "method_id": "native96-depth-opacity-bounded-fallback-20260918",
+  "git_head": "dabcaa9b5fc6d89fa4474bcaea5db52ca7f74030",
+  "working_tree_snapshot_authoritative": true,
+  "source_manifest": "output/frozen_cross_benchmark_method_20260918/source_manifest.json",
+  "source_manifest_sha256": "11d628d0b9f93a9a23de79840443ac8cc49f3e65b1693cf1a627ba1ab794878f",
+  "assets": {
+    "output/frozen_cross_benchmark_method_20260918/checkpoints/figurines/field.pt": "d753b8b329f0a43250996c7ab6eb71e2531614f765b80a4259a930cac7686a4d",
+    "output/frozen_cross_benchmark_method_20260918/checkpoints/figurines/report.json": "9314f058441fcc459cece3d14d220d5aadd6ed393b72be5ec6c153885caa36e7",
+    "output/depth_opacity_repair_20260918/figurines/geometry_report.json": "cdb200ea9afade03e1fa349605a8ed224f6f38c49b24e677a94c659b7285a8b8",
+    "output/depth_opacity_repair_20260918/figurines/geometry.pt": "841522403f50c89bca152273aa74026edc54ea4735d6ea52718dcf5ca65166c3",
+    "output/frozen_cross_benchmark_method_20260918/checkpoints/ramen/field.pt": "61e2b296768d548fc98b7deffb6dec36393be315ecd2a1fbc3d4ff172736f1ad",
+    "output/frozen_cross_benchmark_method_20260918/checkpoints/ramen/report.json": "751167ecdb8c2ca885b3cc7b362c7b6bfff51d04d3923278d025ef049866752e",
+    "output/depth_opacity_repair_20260918/ramen/geometry_report.json": "d8031aa45dc9b8488d37380140fc5718456e56a52b85a1c5cc43ee100453ed3a",
+    "output/depth_opacity_repair_20260918/ramen/geometry.pt": "674086cdb18f34c48490f04e35a6cee98eb45ad4b0f1cc241c20830c1bb35125"
+  },
+  "evaluation_protocols": {
+    "paper/artifacts/evaluation_protocol_freeze_20260801.yaml": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916",
+    "paper/artifacts/evaluation_protocol_registry_20260731.yaml": "ed394c6a5dfd03143805de512169aa01bd684b9546561f321c53211a135da2c6",
+    "paper/artifacts/promptable_nvs_protocol_registry.yaml": "5d1a044513ce2c5d3850dbd95f4a3505c566ae2649e5d89b7e926daf4a568c54"
+  },
+  "benchmarks": [
+    "LERF2D",
+    "LERF3D",
+    "ScanNet OVS",
+    "NVOS",
+    "UQIS"
+  ],
+  "query_types": [
+    "text",
+    "image",
+    "2d_prompt",
+    "3d_prompt"
+  ],
+  "recipe": {
+    "field": "single96/native64+structure32",
+    "geometry": "source-depth calibration and source-only opacity preprocessing, then frozen",
+    "teachers": [
+      "SigLIP",
+      "DINO",
+      "RADIO",
+      "SAM"
+    ],
+    "native_readout": "shared teacher decoder/native query matching",
+    "fallback": "finite signed native logit correction, source concept-withholding grid [0,.5,1,2,4]",
+    "admission": "source-fitted with withheld-fallback counterfactuals"
+  },
+  "positive_only_control_excluded": true,
+  "adaptation_policy": "Only dataset I/O, geometry input tracks and frozen evaluator adapters; method changes require new identity. Do not stitch scene-best controls.",
+  "independent_test_claim": false,
+  "completed_checkpoint_scenes": [
+    "figurines",
+    "ramen"
+  ],
+  "other_benchmarks_completed": false,
+  "uqis_contract_status": "pending readable existing manifest and frozen evaluator; do not invent substitute",
+  "input_tracks": [
+    "provided_geometry/RGB-D where authorized by contract",
+    "RGB+MoGe with any extra calibration geometry explicitly declared"
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "status": "high_capacity_research_candidate_not_four_query_promotion",
+  "parent": "configs/recipes/next75_research.json",
+  "architecture": "frozen Gaussian carrier, typed query evidence, transient element membership reconstruction",
+  "nvos": {
+    "geometry": "output/nvos_carrier_next72/adaptive_allrgb/{scene}/geometry.pt",
+    "evidence": "output/typed_evidence_next44/full_source_tracks/{query}/tracks.pt",
+    "prediction": "output/nvos_source_resolution_next74/new/{query}/prediction.pt",
+    "report": "output/nvos_source_resolution_next74/new/{query}/report.json",
+    "source_fit_hw": [
+      192,
+      256
+    ],
+    "boundary_abstention_radius": 2,
+    "steps": 120,
+    "evaluation_threshold": 0.5,
+    "target_rgb_access": false,
+    "historical_query_prior_used": false,
+    "new_sam_proposals_used": false,
+    "query_count": 8,
+    "macro_iou": 0.8648909106850624,
+    "macro_ap": 0.9801387182606831,
+    "retained_complete_route_iou": 0.83484,
+    "same_geometry_coarse_write_iou": 0.8339495956897736,
+    "rejected_resolution4_pilot": {
+      "orchids_iou": 0.6747384071350098,
+      "leaves_iou": 0.9100995659828186
+    }
+  },
+  "rejected_pilots": [
+    "broad_anchor_transfer",
+    "dominant_anchor_resegmentation",
+    "positive_set_cover_union",
+    "reference_image_identity_union",
+    "anchor_conditioned_exclusion"
+  ],
+  "lerf": {
+    "source_policy": "All legal native-feature, temporal-tracking and extent-fit views; seed detection candidates remain from original old cohort.",
+    "teacher_counts": {
+      "figurines": 293,
+      "ramen": 122,
+      "teatime": 169,
+      "waldo_kitchen": 180
+    },
+    "all_source_semantic_recipe": "output/full_text_decode_next79/complete/all/lerf_{scene}",
+    "fit_raster_hw": [
+      192,
+      256
+    ],
+    "four_scene_coverage64_iou": 0.6609755026176423,
+    "four_scene_coverage64_selected_projection_iou": 0.5327941161589236,
+    "all_source_complete": true,
+    "macro_iou": 0.6693008907083283,
+    "macro_ap": 0.8414592679661799,
+    "macro_selected_projection_iou": 0.5550912014474211,
+    "calibration_raster_hw": [
+      96,
+      128
+    ],
+    "temporal_tracking_policy": "all legal source frames, original seed candidates and selected seeds unchanged",
+    "extent_fit_cohort": "all",
+    "stage_source_counts": {
+      "figurines": {
+        "old": 20,
+        "all": 293
+      },
+      "ramen": {
+        "old": 25,
+        "all": 122
+      },
+      "teatime": {
+        "old": 23,
+        "all": 169
+      },
+      "waldo_kitchen": {
+        "old": 22,
+        "all": 180
+      }
+    },
+    "native_feature_recipe": "output/native_write_next75/all/native/lerf_{scene}",
+    "temporal_tracks": "output/full_text_tracks_next79/lerf_{scene}/{query_index}.pt",
+    "extent_source_evidence": "old source detections plus full-source temporal masks; added views have no detector labels",
+    "scope_fit_steps": "max(240, source-view count)",
+    "processed_queries": 67,
+    "queries_with_temporal_seed": 54,
+    "queries_without_temporal_seed": 13,
+    "previous_selected_projection_iou": 0.5429238524972841,
+    "selection_frozen_in_final_candidate": false,
+    "extent_fit_raster_hw": [
+      96,
+      128
+    ],
+    "temporal_output_raster_hw": [
+      96,
+      128
+    ],
+    "full_sequence_old_fit_control": "output/full_text_decode_next79/complete/old/lerf_{scene}",
+    "historical_native_write_frozen_extent_control": "output/native_write_next75/all/semantic_only/lerf_{scene}"
+  },
+  "compact_student_rebuilt": false,
+  "same_new_map_four_query_validation_complete": false,
+  "independent_lerf3d_gt_evaluation_complete": false,
+  "new_scannet_run": false,
+  "uqis": "paused per user instruction",
+  "independent_final_test": false,
+  "sota_claim": false,
+  "iteration_jobs_complete": true,
+  "next75_rejected_pilot": "single renderer-residual correction at original source raster",
+  "report": "docs/experiments/2026-10-01-full-source-text-tracking-next79.md",
+  "rejected_this_iteration": [
+    "native descriptor propagation along mutual third-view-confirmed region equivalence edges"
+  ]
+}

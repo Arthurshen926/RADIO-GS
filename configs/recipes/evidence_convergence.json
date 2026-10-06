@@ -1,0 +1,39 @@
+{
+  "name": "Instance evidence reliability, calibration domain and explicit set convergence",
+  "date": "2026-10-05",
+  "default": false,
+  "retained_default": "configs/pipeline/system_v8.json",
+  "study_root": "output/evidence_convergence_20261005",
+  "conditions": {
+    "local": "Instance-owning pixel confidence; weakest admitted-instance complement weight; repaired point calibration; unary rankings and separate learned-graph MAP sets",
+    "partial": "Same, with original query source mass preserved and co-visible completeness applied only to UQIS mask exclusion weight",
+    "ownership": "Public-task attribution control: pixel-owning detector confidence for positives, original view confidence for complements, matched class/query evidence budget; reference confidence as local"
+  },
+  "fixed": {
+    "source_views_masks_geometry_native_spaces": true,
+    "point_training": "24 independently selected ScanNet rooms, unchanged estimator",
+    "calibration": "same 4 independent rooms, complete deployment candidate domain",
+    "surface_graph": "previous learned graph and strength 16, unchanged",
+    "scorers": "unchanged five-task headline metrics; new NVOS selected-set projection reported only as a supplement",
+    "uqis_query_source_rgb": false,
+    "benchmark_ground_truth_in_inference": false,
+    "query_or_scene_specific_winners": false
+  },
+  "interpretation": {
+    "complement_is_verified_negative": false,
+    "graph_map_scores_are_posterior_probabilities": false,
+    "new_identity_information_added": false,
+    "one_hop_association_limit_solved": false,
+    "independent_final_test": false,
+    "sota_equivalence": false
+  },
+  "commands": [
+    "PYTHONPATH=. python scripts/research/recalibrate_element_domain.py",
+    "PYTHONPATH=. python scripts/research/prepare_evidence_convergence.py --condition local",
+    "PYTHONPATH=. python -m radio_gs.pipeline.cohort --recipe output/evidence_convergence_20261005/local_recipe.json --output output/evidence_convergence_20261005/local_system --gpus 0,1,2,4,5",
+    "PYTHONPATH=. python scripts/research/prepare_evidence_convergence.py --condition partial",
+    "PYTHONPATH=. python -m radio_gs.pipeline.cohort --recipe output/evidence_convergence_20261005/partial_recipe.json --output output/evidence_convergence_20261005/partial_system --gpus 1,2,4,5",
+    "PYTHONPATH=. python scripts/research/prepare_evidence_convergence.py --condition ownership",
+    "PYTHONPATH=. python -m radio_gs.pipeline.cohort --recipe output/evidence_convergence_20261005/ownership_recipe.json --output output/evidence_convergence_20261005/ownership_system --gpus 0,1,2,4,5 --benchmarks lerf nvos scannet"
+  ]
+}

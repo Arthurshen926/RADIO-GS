@@ -1,0 +1,19 @@
+{
+  "kind": "same_map_source_diagnostic_not_benchmark",
+  "status": "eight_runs_complete",
+  "scene": "output/same_map_queries/probes/scene.json",
+  "prepare": "scripts/research/prepare_same_map_probes.py",
+  "run": "scripts/research/run_same_map_queries.py",
+  "summarize": "scripts/research/summarize_same_map_queries.py",
+  "summary": "output/same_map_queries/summary.json",
+  "conditions": [
+    "image_rgb",
+    "image_rgb_foreground_mask",
+    "prompt_3d",
+    "equivalent_prompt_2d"
+  ],
+  "independent_ground_truth": false,
+  "source_frames": 122,
+  "same_map_four_query_validated": false,
+  "report": "docs/experiments/2026-10-02-same-map-image-and-point-queries.md"
+}

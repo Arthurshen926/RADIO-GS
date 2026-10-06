@@ -1,0 +1,142 @@
+{
+  "complete": true,
+  "promoted": false,
+  "passes": 12,
+  "scenes": {
+    "figurines": {
+      "prompt_before": {
+        "iou": 0.47376868062423655,
+        "average_precision": 0.6519728701648257,
+        "auroc": 0.9500807650026778
+      },
+      "prompt_after": {
+        "iou": 0.4495732513648886,
+        "average_precision": 0.62497526043118,
+        "auroc": 0.9514458816832201
+      },
+      "source_before_deployed": 0.23453674551440787,
+      "source_before_best": 0.23453674551440787,
+      "source_after_best": 0.20618284764194875,
+      "source_accepted": false,
+      "changed_state_keys": [
+        "affinity.cutoffs"
+      ],
+      "text_image_exact": true,
+      "train_regions": 1985,
+      "validation_regions": 131,
+      "grounded_supervision_sha256": "4e67ad3e4fa45b6772165eba224d76b411202c4dd9a2d91697dcc92fb9f046d6"
+    },
+    "ramen": {
+      "prompt_before": {
+        "iou": 0.33928884965973144,
+        "average_precision": 0.5019233536435458,
+        "auroc": 0.9500343867112447
+      },
+      "prompt_after": {
+        "iou": 0.2972356897359269,
+        "average_precision": 0.4928814974275634,
+        "auroc": 0.9307265461617216
+      },
+      "source_before_deployed": 0.2908858908038828,
+      "source_before_best": 0.2908858908038828,
+      "source_after_best": 0.27265910316834885,
+      "source_accepted": false,
+      "changed_state_keys": [
+        "affinity.cutoffs"
+      ],
+      "text_image_exact": true,
+      "train_regions": 2094,
+      "validation_regions": 139,
+      "grounded_supervision_sha256": "f47c3cbbab97262812ff3dcd760af5d95425db60a467d71ec41d2f8d43a07e99"
+    },
+    "teatime": {
+      "prompt_before": {
+        "iou": 0.6882654198180428,
+        "average_precision": 0.8693430055694886,
+        "auroc": 0.9840652559023485
+      },
+      "prompt_after": {
+        "iou": 0.6306880970731258,
+        "average_precision": 0.8556807194748575,
+        "auroc": 0.9841249502116013
+      },
+      "source_before_deployed": 0.37412786371644263,
+      "source_before_best": 0.37412786371644263,
+      "source_after_best": 0.34502070280497227,
+      "source_accepted": false,
+      "changed_state_keys": [
+        "affinity.cutoffs"
+      ],
+      "text_image_exact": true,
+      "train_regions": 2102,
+      "validation_regions": 103,
+      "grounded_supervision_sha256": "0132e943cfae3e99ad79f05bb637dfdfcb5cc8b8a253b03f3cd9b6ae0f3702da"
+    },
+    "waldo_kitchen": {
+      "prompt_before": {
+        "iou": 0.21427192558150582,
+        "average_precision": 0.5353105460154004,
+        "auroc": 0.8449178294715102
+      },
+      "prompt_after": {
+        "iou": 0.20837118887686712,
+        "average_precision": 0.5072714603966731,
+        "auroc": 0.7916082914824989
+      },
+      "source_before_deployed": 0.5719502035838863,
+      "source_before_best": 0.5719502035838863,
+      "source_after_best": 0.517223727527178,
+      "source_accepted": false,
+      "changed_state_keys": [
+        "affinity.cutoffs"
+      ],
+      "text_image_exact": true,
+      "train_regions": 1980,
+      "validation_regions": 36,
+      "grounded_supervision_sha256": "210b67bb2b21221be7e9f363784fe8e375d61726ab39b19a3ce92bdeccb9a92c"
+    }
+  },
+  "macro": {
+    "before": {
+      "iou": 0.42889871892087916,
+      "average_precision": 0.6396374438483151
+    },
+    "after": {
+      "iou": 0.3964670567627021,
+      "average_precision": 0.6202022344325685
+    }
+  },
+  "artifact_sha256": {
+    "output/prompt_metric_deployscale_next19/figurines/registration.json": "a447a8788375898576245481ff5877adeb6dd80223a9b6436edd62afd3aed619",
+    "output/prompt_metric_deployscale_next19/figurines/summary.json": "77e693919123b8919bf3c3860cfdbdc1e2604e99ac982ba94adfca7faa3bc59e",
+    "output/prompt_metric_deployscale_next19/figurines/reference_replay.json": "9d5c1362493016fcef21fa9ab16d8a096b839fd1319d3c1c814be62033f4ffc5",
+    "output/prompt_metric_deployscale_next19/figurines/prompt_metric_only/field.pt": "29b9224a4bd7d162254cd2405b0f7d7ae5fa17c4eb5a9b337d2bbf391bf9beda",
+    "output/prompt_metric_deployscale_next19/figurines/prompt_metric_only/report.json": "fe653e9778358dd2984c18b8546eb286a19ebdbf6d373994871a6cf7ba459acb",
+    "output/prompt_metric_deployscale_next19/ramen/registration.json": "eae848c091b8047f0cc3cbdd0b57cd7572c89f2d2634c1580f2722b1a309a0d2",
+    "output/prompt_metric_deployscale_next19/ramen/summary.json": "70f0959fd581e1a759222f3de9e888620465cab52b56056ab8a97a07c9a4fe11",
+    "output/prompt_metric_deployscale_next19/ramen/reference_replay.json": "f70ba2c64bcac9c402f86272bbe5a1b6f8709839e293569a62d0c442b5380234",
+    "output/prompt_metric_deployscale_next19/ramen/prompt_metric_only/field.pt": "66e25cad5a27057fd04813399f4463f7631b2ab2cdcb04f7e0daa5b3f1e65407",
+    "output/prompt_metric_deployscale_next19/ramen/prompt_metric_only/report.json": "624fa79ee8680ae9ceb1c841f7073fbbfb8e33c89f0b58fe14af6b5a935bcb20",
+    "output/prompt_metric_deployscale_next19/teatime/registration.json": "3d88fb284e23dc04c9fe2556a42cb75a7a129cda124313c5eef181703ae7824d",
+    "output/prompt_metric_deployscale_next19/teatime/summary.json": "eb3201c9ea923c40368d18e9fcbfd58c41e635331e5cb2553980901c60e686e4",
+    "output/prompt_metric_deployscale_next19/teatime/reference_replay.json": "3077eb794a90335fbb064eccf22260bedb6cf96563e37e5f4d268101b703b004",
+    "output/prompt_metric_deployscale_next19/teatime/prompt_metric_only/field.pt": "a65fa60a0904c0511409bcff6286e48ecb1a6c635b4d706631fe4fd82ca036bb",
+    "output/prompt_metric_deployscale_next19/teatime/prompt_metric_only/report.json": "28c028716b1ce50529aa4ac4d076ae0ecbbddb5f65f20e1237850ce0a3f2d477",
+    "output/prompt_metric_deployscale_next19/waldo_kitchen/registration.json": "cf0493c3164ceee4125471e6a486f3a1f204ebac6c13e5849094e1817a930efd",
+    "output/prompt_metric_deployscale_next19/waldo_kitchen/summary.json": "e8a31036b3565a10aa513deddf501a3fccf476bd04237eb356d7fbf1c355ab28",
+    "output/prompt_metric_deployscale_next19/waldo_kitchen/reference_replay.json": "6ff22a8a31c91b5b41a23cd7c0a59f53ee9ca82c508c532cb483f4a39da57a08",
+    "output/prompt_metric_deployscale_next19/waldo_kitchen/prompt_metric_only/field.pt": "79581eece570dbe45fe5d63db3e1db44f0be997eac5dee436cd85c83c1b42a38",
+    "output/prompt_metric_deployscale_next19/waldo_kitchen/prompt_metric_only/report.json": "0635263acdcb34212e749179383a6306ce143830f0d64c27fa496b461b751365",
+    "output/prompt_metric_deployscale_next19/teatime/three_query_score_verification.json": "c868ed3c8aa2d3ff8a081508e1378c7b4299d01d51e9fe0166190690a76a47ee"
+  },
+  "implementation_sha256": "6f7bed7562ecd1869d52dcb93439781986a0ad897323383e993b73f29df43c3f",
+  "reason": "Fixed source-only control; no benchmark-driven selection. Source validation and deployment readout must both be checked.",
+  "history_updated_elements_means_sampled_rows_not_modified_latent": true,
+  "decision": "reject: source validation worsens in all four scenes",
+  "recovery_scripts": {
+    "scripts/audits/prompt_metric_deployscale_recover_next19.py": "8023bda025bc5cb07e3b4ca5025cbbbc1fcc63686723c1b09b1e466385e06d14",
+    "scripts/audits/prompt_metric_only_recover_next19.py": "933f36fc189685be8981fa5b94217b61d7d32a4acdea4705fefc05bca3096794"
+  },
+  "verification_script_sha256": "a88040db38ea35ccf40ee28f87844d36d6730d0301d9a50875edff70b274af2c",
+  "recovery_note": "Teatime ctime guard and GPU-memory failures retained; training unchanged. Cold validation moved to separate process, all three queries per modality checked sequentially; complete reference evaluation unchanged."
+}

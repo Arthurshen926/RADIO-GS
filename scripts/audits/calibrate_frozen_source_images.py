@@ -14,9 +14,11 @@ from radio_gs.training.frozen_score_calibration import fit_histogram_readout
 from radio_gs.utils.immutable_artifacts import sha256_file
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--run',required=True);p.add_argument('--modality',choices=['image','text'],default='image');p.add_argument('--standardize-text',action='store_true');p.add_argument('--device',default='cuda:0');a=p.parse_args();torch.set_num_threads(4)
+ implementation_at_entry=sha256_file(__file__)
+ p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--run',required=True);p.add_argument('--modality',choices=['image','text'],default='image');p.add_argument('--standardize-text',action='store_true');p.add_argument('--device',default='cuda:0');p.add_argument('--query-batch-size',type=int,default=32);p.add_argument('--output-suffix',default='');a=p.parse_args();torch.set_num_threads(4)
  if a.standardize_text and a.modality!='text':raise ValueError('standardization control is text only')
- tag='_standardized' if a.standardize_text else ''
+ if a.query_batch_size<1:raise ValueError('query batch size must be positive')
+ tag=('_standardized' if a.standardize_text else '')+a.output_suffix
  root=a.root;info=json.loads((root/'teachers.json').read_text());receipt=json.loads((root/'episodes.json').read_text());assert sha256_file(root/'episodes.pt')==receipt['sha256'];data=torch.load(root/'episodes.pt',weights_only=False);assert sha256_file(root/'teachers.json')==data['teacher_manifest_sha256']
  report=json.loads((root/a.run/'report.json').read_text());assert sha256_file(root/a.run/'field.pt')==report['field_sha256'];payload=torch.load(root/a.run/'field.pt',weights_only=False);assert payload['geometry_binding']==data['geometry_binding'];assert payload['query_encoder']==json.loads((root/'native_query_encoder.json').read_text())
  field=ElementRetrievalField(**payload['architecture']);field.load_state_dict(payload['state_dict']);field.to(a.device).eval().requires_grad_(False)
@@ -24,24 +26,41 @@ def main():
  train=[(i,e) for i,e in enumerate(data['episodes']) if e['split']=='train' and e['modality']!='text'];train,_=source_region_query_tasks(train,data,[info['frames'].index(f) for f in info['train_frames']]);tasks=[e for _,e in train if e['modality']=='image'];grounded=None
  if a.modality=='text':
   path=root/'grounded_text_supervision.pt';assert sha256_file(path)==report['grounded_text_supervision_sha256'];grounded=torch.load(path,weights_only=False);assert grounded['episode_sha256']==receipt['sha256'] and grounded['geometry_binding']==data['geometry_binding'] and grounded['train_frames']==info['train_frames'];tasks=grounded['tasks']
- rp=data['region_probability'].float().to(a.device);conflicts=training_query_conflicts(tasks,rp);query=data['queries'][a.modality].float().to(a.device);bins=4096;hist={k:torch.zeros(bins,device=a.device,dtype=torch.float64) for k in ('positive','negative')};rows=[]
+ print('calibration: source conflicts',flush=True)
+ rp=data['region_probability'].float();conflicts=training_query_conflicts(tasks,rp);query=data['queries'][a.modality].float().to(a.device);bins=4096;hist={k:torch.zeros(bins,device=a.device,dtype=torch.float64) for k in ('positive','negative')};rows=[]
  with torch.no_grad():
-  scores=field.native_cosine(query,modality=a.modality)
-  if a.standardize_text:scores=standardize_observed_scores(scores,field.observed)
-  score_min=float(scores.min()) if a.standardize_text else -1.;score_max=float(scores.max()) if a.standardize_text else 1.
-  for e in tasks:
-   assert info['frames'][e['target_view']] in info['train_frames']
-   if a.modality=='image':assert info['frames'][int(data['proposal_views'][e['query_region']])] in info['train_frames']
-   qi=e.get('text_index',e['query_region']);pos=rp[e.get('positive_regions',[e['target_region']])].amax(0)>.7;neg=rp[e['negative_regions']].amax(0)>.7 if e['negative_regions'] else torch.zeros_like(pos);known=(pos^neg)&field.observed;ambiguous=conflicts.get(('image',qi));known=known if ambiguous is None else known&~ambiguous
-   if grounded is not None:
-    pos=grounded['positive_elements'][qi].to(a.device);neg=grounded['negative_elements'][qi].to(a.device);known=(pos^neg)&field.observed&data['seen'][e['target_view']].to(a.device)
-   x=scores[:,qi];row={'query_region':qi,'target_view':e['target_view'],'same_view':int(data['proposal_views'][qi])==e['target_view'] if a.modality=='image' else None}
-   for label,mask in [('positive',known&pos),('negative',known&neg)]:
-    v=x[mask];hist[label]+=torch.bincount(((v-score_min)*bins/(score_max-score_min)).long().clamp_max(bins-1),minlength=bins);row[label+'_count']=len(v);row[label+'_mean_cosine']=float(v.mean()) if len(v) else None
-   rows.append(row)
+  observed_cpu=field.observed.cpu()
+  score_min,score_max=-1.,1.
+  if a.standardize_text:
+   # The historical interval included all query columns, even those without tasks.
+   score_min,score_max=float('inf'),-float('inf')
+   for start in range(0,len(query),a.query_batch_size):
+    scores=standardize_observed_scores(field.native_cosine(query[start:start+a.query_batch_size],modality=a.modality),field.observed)
+    score_min=min(score_min,float(scores.min()));score_max=max(score_max,float(scores.max()))
+   del scores
+  grouped={}
+  for index,e in enumerate(tasks):grouped.setdefault(e.get('text_index',e['query_region']),[]).append((index,e))
+  query_ids=sorted(grouped);indexed_rows=[]
+  for start in range(0,len(query_ids),a.query_batch_size):
+   if start%(16*a.query_batch_size)==0:print('calibration queries',start,'/',len(query_ids),flush=True)
+   ids=query_ids[start:start+a.query_batch_size];scores=field.native_cosine(query[ids],modality=a.modality)
+   if a.standardize_text:scores=standardize_observed_scores(scores,field.observed)
+   for column,qi in enumerate(ids):
+    for index,e in grouped[qi]:
+     assert info['frames'][e['target_view']] in info['train_frames']
+     if a.modality=='image':assert info['frames'][int(data['proposal_views'][e['query_region']])] in info['train_frames']
+     pos=rp[e.get('positive_regions',[e['target_region']])].amax(0)>.7;neg=rp[e['negative_regions']].amax(0)>.7 if e['negative_regions'] else torch.zeros_like(pos)
+     known=(pos^neg)&observed_cpu;ambiguous=conflicts.get((a.modality,qi));known=known if ambiguous is None else known&~ambiguous
+     if grounded is not None:
+      pos=grounded['positive_elements'][qi];neg=grounded['negative_elements'][qi];known=(pos^neg)&observed_cpu&data['seen'][e['target_view']]
+     x=scores[:,column];row={'query_region':qi,'target_view':e['target_view'],'same_view':int(data['proposal_views'][qi])==e['target_view'] if a.modality=='image' else None}
+     for label,mask in [('positive',known&pos),('negative',known&neg)]:
+      v=x[mask.to(a.device)];hist[label]+=torch.bincount(((v-score_min)*bins/(score_max-score_min)).long().clamp_max(bins-1),minlength=bins);row[label+'_count']=len(v);row[label+'_mean_cosine']=float(v.mean()) if len(v) else None
+     indexed_rows.append((index,row))
+  rows=[row for _,row in sorted(indexed_rows)]
  # Report both weights on exactly the same frozen scores and source labels.
  fits={name:fit_histogram_readout(hist['positive'],hist['negative'],balanced=balanced,score_min=score_min,score_max=score_max) for name,balanced in [('count',False),('balanced',True)]}
- audit={'schema':'frozen_source_image_calibration.v1','parent_field_sha256':report['field_sha256'],'episode_sha256':receipt['sha256'],'implementation_sha256':sha256_file(__file__),'fit_implementation_sha256':sha256_file(Path(__file__).parents[2]/'radio_gs/training/frozen_score_calibration.py'),'standardized_text':a.standardize_text,'score_interval':[score_min,score_max],'modality':a.modality,'grounded_text_sha256':report.get('grounded_text_supervision_sha256') if a.modality=='text' else None,'source_only':True,'benchmark_data_used':False,'fit_contract':'pooled source 3D known memberships, histogram BCE; joint 2D/Dice objective not reproduced','histogram_bins':bins,'histograms':{k:v.cpu().tolist() for k,v in hist.items()},'tasks':rows,'fits':fits}
+ audit={'schema':'frozen_source_image_calibration.v1','parent_field_sha256':report['field_sha256'],'episode_sha256':receipt['sha256'],'implementation_sha256':implementation_at_entry,'fit_implementation_sha256':sha256_file(Path(__file__).parents[2]/'radio_gs/training/frozen_score_calibration.py'),'standardized_text':a.standardize_text,'score_interval':[score_min,score_max],'modality':a.modality,'grounded_text_sha256':report.get('grounded_text_supervision_sha256') if a.modality=='text' else None,'source_only':True,'benchmark_data_used':False,'fit_contract':'pooled source 3D known memberships, histogram BCE; joint 2D/Dice objective not reproduced','histogram_bins':bins,'query_batch_size':a.query_batch_size,'probability_storage':'CPU; one query batch on device','histograms':{k:v.cpu().tolist() for k,v in hist.items()},'tasks':rows,'fits':fits}
  for name,fit in fits.items():
   out=root/(a.run+tag+'_'+a.modality+'cal_'+name);out.mkdir();state={k:v.clone() for k,v in payload['state_dict'].items()};state['readout_log_scale.'+a.modality].fill_(math.log(fit['scale']));state['readout_bias.'+a.modality].fill_(fit['bias']);new=dict(payload,state_dict=state)
   if a.standardize_text:new['architecture']=dict(payload['architecture'],standardize_native_text=True)

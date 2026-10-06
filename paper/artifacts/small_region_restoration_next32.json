@@ -1,0 +1,329 @@
+{
+  "schema": "small_region_restoration_next32.v1",
+  "complete": true,
+  "joint_gate_pass": false,
+  "default_promoted": false,
+  "source_only": true,
+  "benchmark_evaluated": false,
+  "original_heads_reused": false,
+  "summary": {
+    "complete": true,
+    "joint_gate_pass": false,
+    "full_refit_or_benchmark_authorized": false,
+    "pilots": {
+      "lerf_figurines": {
+        "source_admitted": false,
+        "gate": {
+          "text": {
+            "small": {
+              "mse_ratio": 0.9585411991999688,
+              "top1_drop": 0.0
+            },
+            "retained": {
+              "mse_ratio": 1.0010487810337791,
+              "top1_drop": 0.0
+            },
+            "boundary": {
+              "mse_ratio": 1.0018952721897727,
+              "top1_drop": 0.00019377470016479492
+            }
+          },
+          "image": {
+            "small": {
+              "mse_ratio": 1.027407820947737,
+              "top1_drop": 0.0
+            },
+            "retained": {
+              "mse_ratio": 1.0086218839149492,
+              "top1_drop": -0.006944447755813599
+            },
+            "boundary": {
+              "mse_ratio": 1.0058263175379167,
+              "top1_drop": 0.0023897141218185425
+            }
+          }
+        },
+        "metrics": {
+          "baseline": {
+            "retained": {
+              "text": {
+                "mse": 0.0004394513671286404,
+                "centered_mse": 0.00018053555686492473,
+                "teacher_top1_agreement": 0.3472222089767456
+              },
+              "image": {
+                "mse": 0.01023194007575512,
+                "centered_mse": 0.0016071083955466747,
+                "teacher_top1_agreement": 0.1180555522441864
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.0005788235575892031,
+                "centered_mse": 0.0003533757699187845,
+                "teacher_top1_agreement": 0.0
+              },
+              "image": {
+                "mse": 0.007878915406763554,
+                "centered_mse": 0.0034376359544694424,
+                "teacher_top1_agreement": 0.0
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.0002988894993904978,
+                "centered_mse": 0.0001518350327387452,
+                "teacher_top1_agreement": 0.2578957676887512
+              },
+              "image": {
+                "mse": 0.006576927378773689,
+                "centered_mse": 0.0011956095695495605,
+                "teacher_top1_agreement": 0.11948588490486145
+              }
+            }
+          },
+          "candidate": {
+            "retained": {
+              "text": {
+                "mse": 0.00043991225538775325,
+                "centered_mse": 0.00017935634241439402,
+                "teacher_top1_agreement": 0.3472222089767456
+              },
+              "image": {
+                "mse": 0.010320158675312996,
+                "centered_mse": 0.001591914682649076,
+                "teacher_top1_agreement": 0.125
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.000554826227016747,
+                "centered_mse": 0.0003384629962965846,
+                "teacher_top1_agreement": 0.0
+              },
+              "image": {
+                "mse": 0.008094859309494495,
+                "centered_mse": 0.0032136300578713417,
+                "teacher_top1_agreement": 0.0
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.00029945597634650767,
+                "centered_mse": 0.0001516556367278099,
+                "teacher_top1_agreement": 0.2577019929885864
+              },
+              "image": {
+                "mse": 0.006615246646106243,
+                "centered_mse": 0.0011960715055465698,
+                "teacher_top1_agreement": 0.11709617078304291
+              }
+            }
+          }
+        },
+        "observations": [
+          {
+            "frame": 88,
+            "retained_regions": 49,
+            "supported_retained": 49,
+            "small_regions": 7,
+            "supported_small": 7,
+            "unsupported_small_ids": [],
+            "boundary_pixels": 8322,
+            "support_identical": true
+          },
+          {
+            "frame": 96,
+            "retained_regions": 97,
+            "supported_retained": 95,
+            "small_regions": 17,
+            "supported_small": 15,
+            "unsupported_small_ids": [
+              235,
+              243
+            ],
+            "boundary_pixels": 7161,
+            "support_identical": true
+          }
+        ],
+        "training_small_regions": 228,
+        "validation_small_regions": 24,
+        "baseline_fusion_replay_max_error": 2.980232238769531e-07,
+        "support_unchanged": true,
+        "basis_unchanged": true
+      },
+      "scannet_scene0000_00": {
+        "source_admitted": true,
+        "gate": {
+          "text": {
+            "small": {
+              "mse_ratio": 0.842819011192672,
+              "top1_drop": -0.1904762014746666
+            },
+            "retained": {
+              "mse_ratio": 0.9780803112822212,
+              "top1_drop": -0.013245046138763428
+            },
+            "boundary": {
+              "mse_ratio": 0.9962149137756097,
+              "top1_drop": 0.0
+            }
+          },
+          "image": {
+            "small": {
+              "mse_ratio": 0.9229058755930645,
+              "top1_drop": 0.0
+            },
+            "retained": {
+              "mse_ratio": 0.9955236840392104,
+              "top1_drop": 0.0
+            },
+            "boundary": {
+              "mse_ratio": 1.0087143001729493,
+              "top1_drop": 0.0007439553737640381
+            }
+          }
+        },
+        "metrics": {
+          "baseline": {
+            "retained": {
+              "text": {
+                "mse": 0.0003424369206186384,
+                "centered_mse": 0.00017684746126178652,
+                "teacher_top1_agreement": 0.41721853613853455
+              },
+              "image": {
+                "mse": 0.005586500745266676,
+                "centered_mse": 0.0016379696317017078,
+                "teacher_top1_agreement": 0.21192052960395813
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.0005518266698345542,
+                "centered_mse": 0.0003081713221035898,
+                "teacher_top1_agreement": 0.095238097012043
+              },
+              "image": {
+                "mse": 0.008859558030962944,
+                "centered_mse": 0.00276029366068542,
+                "teacher_top1_agreement": 0.0476190485060215
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.00022158390493132174,
+                "centered_mse": 0.00011564289889065549,
+                "teacher_top1_agreement": 0.6730316281318665
+              },
+              "image": {
+                "mse": 0.002926180139183998,
+                "centered_mse": 0.0009395687957294285,
+                "teacher_top1_agreement": 0.26057037711143494
+              }
+            }
+          },
+          "candidate": {
+            "retained": {
+              "text": {
+                "mse": 0.0003349308099132031,
+                "centered_mse": 0.00017278303857892752,
+                "teacher_top1_agreement": 0.430463582277298
+              },
+              "image": {
+                "mse": 0.005561493802815676,
+                "centered_mse": 0.0015857761027291417,
+                "teacher_top1_agreement": 0.21192052960395813
+              }
+            },
+            "small": {
+              "text": {
+                "mse": 0.00046509000821970403,
+                "centered_mse": 0.000269846263108775,
+                "teacher_top1_agreement": 0.2857142984867096
+              },
+              "image": {
+                "mse": 0.008176538161933422,
+                "centered_mse": 0.002188474638387561,
+                "teacher_top1_agreement": 0.0476190485060215
+              }
+            },
+            "boundary": {
+              "text": {
+                "mse": 0.0002207451907452196,
+                "centered_mse": 0.00011593009548960254,
+                "teacher_top1_agreement": 0.6730316281318665
+              },
+              "image": {
+                "mse": 0.00295167975127697,
+                "centered_mse": 0.0009450121433474123,
+                "teacher_top1_agreement": 0.2598264217376709
+              }
+            }
+          }
+        },
+        "observations": [
+          {
+            "frame": 0,
+            "retained_regions": 74,
+            "supported_retained": 74,
+            "small_regions": 13,
+            "supported_small": 13,
+            "unsupported_small_ids": [],
+            "boundary_pixels": 7560,
+            "support_identical": true
+          },
+          {
+            "frame": 420,
+            "retained_regions": 77,
+            "supported_retained": 77,
+            "small_regions": 8,
+            "supported_small": 8,
+            "unsupported_small_ids": [],
+            "boundary_pixels": 8570,
+            "support_identical": true
+          }
+        ],
+        "training_small_regions": 283,
+        "validation_small_regions": 21,
+        "baseline_fusion_replay_max_error": 2.980232238769531e-07,
+        "support_unchanged": true,
+        "basis_unchanged": true
+      }
+    }
+  },
+  "implementations": {
+    "/root/RADIO-GS/scripts/audits/run_small_region_restoration_next32.py": "dde8f1df4e08074d0d45448ed5bc2e2db45427cd62b49d2907f7b3d7b000bbc2",
+    "radio_gs/training/small_region_inventory.py": "ab6202202de5ba8a99f8b0dfa0efad9ecea7796d886f38b557e232bb3392e250",
+    "tests/test_small_region_inventory.py": "a0658c6ecea8084c146f7458ee282882070e107c74e0053f2694d5b8e77b6277",
+    "radio_gs/training/source_sam_evidence.py": "41c6c842ed6e598a68834196f88e9f751f37b2c7905e725ce96ddb5531688e57",
+    "radio_gs/training/source_pixel_evidence.py": "b5442e1ffff974539ed599cea6ee5f52d91b867d5e2d855f2151e7e7bd532b3a",
+    "radio_gs/training/source_region_readback.py": "eb41b926a6c473fd12e12d25e0cb2e13149679c5c3b52666f83fcb7cc799372c",
+    "radio_gs/utils/mask_resampling.py": "de06a14b6664fa5780279321d736ecfb75b7764995ece579716ad9464b33b110",
+    "radio_gs/scripts/build_multiscale_sam_mask_aligned_crop_summary_teacher.py": "63c69e7e3d1eb0b2870dd0a762b45f647b98af59d1d58790515ab664042db5c1",
+    "radio_gs/scripts/prepare_four_teacher_retrieval.py": "e0b0cfa96289c9f3e99733c8157e661fa0a996c1b67beeb386b7a6044e5e01f0",
+    "radio_gs/scripts/build_sam3_automatic_mask_cache.py": "f056a8817db4bb99c4515dc365836a1182f9c9299fbe551028b4a9d1b2315e96"
+  },
+  "artifacts": {
+    "output/small_region_restoration_next32/coarse_mask_duplicate_diagnostic.json": "0ef83dc9c86060bc4d81dc7f46dd7bd8ad86c8eb1d7a769edddd5547855b6c11",
+    "output/small_region_restoration_next32/lerf_figurines/map.pt": "7f35c48db0ab5a5e2c31c4c3596c94c9136bbf6417b8ed4b50b0d3d883a44839",
+    "output/small_region_restoration_next32/lerf_figurines/report.json": "a758c87dc2a012f4793c6722ed35fce76ab0d313f222a3a672f60b6d7b5c6e5f",
+    "output/small_region_restoration_next32/lerf_figurines/small_inventory.json": "e4ef5a3b89031dc38e548781274248dcd43314a70598a45e7874ae5f9e106765",
+    "output/small_region_restoration_next32/lerf_figurines/small_teacher.pt": "3fe6109c67aaa299147d174b19920d188bd67941a3a260f1a2423f478c347d49",
+    "output/small_region_restoration_next32/lerf_figurines.log": "366169b929e4a7350a582d2d6cfb252a8d2aa23c7889bb5d5467b4058623775a",
+    "output/small_region_restoration_next32/registration.json": "310eb3d72b4552bb00ad40d0f2e740d8ae51987f7cc44e089693a8000162f724",
+    "output/small_region_restoration_next32/scannet_scene0000_00/map.pt": "6d0f50d4f038807c00ab9ba3df840c7d3416d753f09291831a0787e51f9fef76",
+    "output/small_region_restoration_next32/scannet_scene0000_00/report.json": "81c18dab9f46880b1f8f52fbe2695e71f40a70259b901bca8dc061068d4ee2e7",
+    "output/small_region_restoration_next32/scannet_scene0000_00/small_inventory.json": "2387c50f8e224e407270d0e7d0894bd3195a6158c9d3af9d90626b202ecb8c70",
+    "output/small_region_restoration_next32/scannet_scene0000_00/small_teacher.pt": "f0caf67c222bedb33074a61a5e91d627ccc12642e9dab78d55beb9afa424fac0",
+    "output/small_region_restoration_next32/scannet_scene0000_00.log": "dcd1c9d678f5ba006c759c1039e74130d4669a14dc9a4b14f5a2b4c8ab0bac19",
+    "output/small_region_restoration_next32/summary.json": "1582ea4e22ee7f245b8977c6c34a0574965f59f8251cb1aec7d02c4011189597"
+  },
+  "document": {
+    "docs/experiments/2026-09-26-small-source-region-restoration.md": "8449e7456dd2a6d383abc0c75ade7e3536d97f70f72a8cebda904db6c78aac1e"
+  },
+  "tests_passed": 3,
+  "frozen_sources_verified": 1773,
+  "frozen_sources_changed": [],
+  "review": "Independent read-only review found no blocker; pseudo-response and old-boundary-target limitations retained"
+}

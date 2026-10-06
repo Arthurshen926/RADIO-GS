@@ -1,0 +1,25 @@
+{
+  "status": "complete_not_promoted",
+  "parent": "configs/recipes/next98_research.json",
+  "retained_readout": "output/category_identity_scope_next98/high_footprint/<key>/typed_readout.pt",
+  "experiment_readouts": "output/uncertain_scope_next99/{all,geometry}/<key>/typed_readout.pt",
+  "arms": ["all", "geometry"],
+  "geometry_recovery": {
+    "other_accepted_source_views": 2,
+    "positive_purity_threshold": 0.5,
+    "component_mean_support_threshold": 0.5,
+    "self_view_excluded": true,
+    "recursive_recovery": false,
+    "unknown_components": 655,
+    "recovered_components": 583
+  },
+  "scene_evaluations_complete": 8,
+  "selected_projection_macro": {
+    "parent": 0.6242955393234976,
+    "all": 0.6213631128037566,
+    "geometry": 0.6224766441940556
+  },
+  "summary": "output/next99/summary.json",
+  "mainline_changed": false,
+  "other_benchmarks_unchanged": true
+}

@@ -1,0 +1,31 @@
+{
+  "status": "completed_rejected_pilot_readouts",
+  "retained_recipe": "configs/recipes/next75_research.json",
+  "report": "docs/experiments/2026-10-01-late-region-retrieval-next78.md",
+  "scenes": [
+    "figurines",
+    "ramen"
+  ],
+  "bank": "output/region_bank_next78/{scene}/manifest.json",
+  "source_policy": "all legal source views and all cached native regions; no new cap",
+  "native_dim": 1536,
+  "region_support_dtype": "float32",
+  "fit_hw": [
+    192,
+    256
+  ],
+  "query_independent_bank": true,
+  "readouts": [
+    "mean",
+    "logmeanexp",
+    "scope_max"
+  ],
+  "logmeanexp_inverse_temperature": 20,
+  "completed_evaluations": 8,
+  "full_four_scene_evaluation": false,
+  "query_compatibility_scope_solver_complete": false,
+  "new_other_benchmark_results": false,
+  "promotion": false,
+  "sota_claim": false,
+  "results": "output/next78/summary.json"
+}

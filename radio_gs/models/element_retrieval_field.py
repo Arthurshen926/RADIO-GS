@@ -10,7 +10,7 @@ class NativePrefixDecoder(nn.Linear):
         return F.linear(latent[..., :self.in_features],self.weight,self.bias)
 
 class ElementRetrievalField(nn.Module):
-    def __init__(self, num_elements: int, latent_dim: int, query_dims: Mapping[str,int], shared_query_groups=None, calibrated_readout=False, native_siglip_readout=False, standardize_native_text=False, native_semantic_dim=None, structural_membership=None, scale_affinity=None, native_query_thresholds=None, source_membership_code=None, grounded_transfer=None, bounded_extent=None, native_semantic_residual=None, image_support_extension=False, extent_benefit_admission=False):
+    def __init__(self, num_elements: int, latent_dim: int, query_dims: Mapping[str,int], shared_query_groups=None, calibrated_readout=False, native_siglip_readout=False, standardize_native_text=False, native_semantic_dim=None, structural_membership=None, scale_affinity=None, native_query_thresholds=None, source_membership_code=None, grounded_transfer=None, bounded_extent=None, native_semantic_residual=None, image_support_extension=False, extent_benefit_admission=False, query_scope_correction=False):
         super().__init__()
         if standardize_native_text and not native_siglip_readout:
             raise ValueError('text score standardization requires native readout')
@@ -122,6 +122,18 @@ class ElementRetrievalField(nn.Module):
                 raise ValueError('grounded transfer requires an unchanged plain native/structural field')
             from radio_gs.models.grounded_semantic_transfer import GroundedSemanticTransfer
             self.grounded_transfer=GroundedSemanticTransfer(latent_dim,native_semantic_dim,query_dims['text'],**grounded_transfer)
+        self.query_scope_correction = None
+        if query_scope_correction:
+            if not grounded_transfer or not native_siglip_readout or bounded_extent is not None:
+                raise ValueError('Query scope correction requires the ordinary native/extent path')
+            from radio_gs.models.query_scope_correction import QueryScopeCorrection
+            if query_scope_correction is True:
+                mode = 'clamped_v1'
+            elif query_scope_correction == {'kind': 'sigmoid_v1'}:
+                mode = 'sigmoid_v1'
+            else:
+                raise ValueError('Unknown query scope correction configuration')
+            self.query_scope_correction = QueryScopeCorrection(query_dims['text'], latent_dim, mode=mode)
 
     def native_cosine(self, query, rows=None, *, modality="text"):
         z = self.latent if rows is None else self.latent[rows]
@@ -167,7 +179,7 @@ class ElementRetrievalField(nn.Module):
                                   if modality in self.readout_log_scale else .5)
             selection=self.grounded_transfer.identity_selection
             support=(full_cosine>native_threshold if selection is not None and selection.get('metric')=='support_iou' else None)
-            preserve=selection is not None and selection.get('completion_mode') in ('native_threshold','native_within_extent')
+            preserve=selection is not None and selection.get('completion_mode') in ('native_threshold','native_within_extent','native_bounded_extent')
             global_readout=preserve or self.extent_benefit_admission is not None
             proposed,accepted=self.grounded_transfer(query,self.latent,None if global_readout else rows,native_threshold=native_threshold,
                                                      native_support=support,observed=self.observed)
@@ -178,7 +190,11 @@ class ElementRetrievalField(nn.Module):
                         else accepted&~concept_accepted)
                 if refine.any():
                     native_scale=self.readout_log_scale[modality].clamp(-4.,6.).exp() if modality in self.readout_log_scale else 10.
-                    if selection.get('completion_mode')=='native_within_extent':
+                    if selection.get('completion_mode')=='native_bounded_extent':
+                        from radio_gs.models.bounded_scope_evidence import bounded_scope_logits
+                        native_logits=native_scale*(full_cosine-native_threshold)
+                        proposed[:,refine]=bounded_scope_logits(native_logits[:,refine],proposed[:,refine]>0,selection['scope_logit_bound'],suppress_outside=not selection.get('preserve_native_positive',False))
+                    elif selection.get('completion_mode')=='native_within_extent':
                         probability=torch.sigmoid(native_scale*(full_cosine-native_threshold))[:,refine]
                         probability=.5*((proposed[:,refine]>0).to(probability)+probability)
                         proposed[:,refine]=torch.logit(probability.clamp(1e-6,1-1e-6))
@@ -191,7 +207,11 @@ class ElementRetrievalField(nn.Module):
                     full_cosine,native_threshold,proposed,self.observed,concept_accepted,
                     query=query,head=self.grounded_transfer)
             if global_readout and rows is not None:proposed=proposed[rows]
-            return torch.where(accepted[None],proposed,original)
+            parent = torch.where(accepted[None],proposed,original)
+            if self.query_scope_correction is not None:
+                return self.query_scope_correction(parent, original,
+                    self.latent if rows is None else self.latent[rows], query, accepted)
+            return parent
         if self.affinity is not None and self.affinity.native_seed_queries and modality in ('text','image'):
             return self.affinity.native_logits(self.native_cosine(query,modality=modality),self.latent[:,self.native_semantic_dim:],self.observed,rows)
         if self.affinity is not None and modality=='prompt':

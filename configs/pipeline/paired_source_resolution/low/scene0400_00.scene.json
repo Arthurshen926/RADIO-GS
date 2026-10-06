@@ -1,0 +1,544 @@
+{
+  "scene": "scannet_scene0400_00",
+  "text_encoder": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384/snapshots/a713301b217d38485fb2204c808367d10bc3cc40",
+  "runtime_provider": "native_category_map",
+  "input_track": "provided_unlabelled_mesh",
+  "geometry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/scannet_public_next72/scene0400_00/geometry.pt",
+    "sha256": "a4ae91a05641f4c342d764a9fc80b708deeadcc5d7c05c6100ddec42579adb2c"
+  },
+  "source_frames": [
+    0,
+    20,
+    40,
+    100,
+    120,
+    140,
+    160,
+    180,
+    200,
+    220,
+    240,
+    260,
+    280,
+    300,
+    320,
+    340,
+    360,
+    380,
+    400,
+    420,
+    440,
+    460,
+    480,
+    500,
+    520,
+    540,
+    560,
+    580,
+    600,
+    620,
+    640,
+    660,
+    680,
+    700,
+    720,
+    740,
+    760,
+    780,
+    800,
+    820,
+    840,
+    860,
+    880,
+    900,
+    920,
+    940,
+    960,
+    980,
+    1000,
+    1020,
+    1040,
+    1060,
+    1080,
+    1100,
+    1120,
+    1140,
+    1160,
+    1180,
+    1200,
+    1220,
+    1240
+  ],
+  "source_views": 61,
+  "source_rgb_authority": "output/scannet_public_next72/scene0400_00/source_rgb.json",
+  "calibration": {
+    "kind": "native_categorical_prior_not_empirically_calibrated"
+  },
+  "map_contract": {
+    "native_dimension": 768,
+    "geometry_trainable": false,
+    "all_nonempty_generated_masks": true,
+    "teacher_native": true,
+    "query_labels_used": false,
+    "representation": "native_region_dictionary_with_sparse_element_weights",
+    "region_encoder": "mask_adapter",
+    "native_space": "open_clip_convnext_large_d_320",
+    "external_pretrained_teacher": true,
+    "region_to_element_transfer_unchanged": true
+  },
+  "native_category_prior": {
+    "kind": "compiled_region_response_mixture",
+    "temperature": 100.0,
+    "vocabulary": "complete declared ScanNet category query list",
+    "historical_scene_parameters": false
+  },
+  "source_evidence": {
+    "provider": "SAM3 literal text with native foreground-context evidence",
+    "raster_hw": [
+      96,
+      128
+    ],
+    "views": [
+      {
+        "frame": 0,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_0.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_0.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/0.jpg"
+      },
+      {
+        "frame": 20,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_20.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_20.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/20.jpg"
+      },
+      {
+        "frame": 40,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_40.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_40.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/40.jpg"
+      },
+      {
+        "frame": 100,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_100.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_100.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/100.jpg"
+      },
+      {
+        "frame": 120,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_120.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_120.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/120.jpg"
+      },
+      {
+        "frame": 140,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_140.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_140.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/140.jpg"
+      },
+      {
+        "frame": 160,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_160.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_160.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/160.jpg"
+      },
+      {
+        "frame": 180,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_180.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_180.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/180.jpg"
+      },
+      {
+        "frame": 200,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_200.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_200.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/200.jpg"
+      },
+      {
+        "frame": 220,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_220.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_220.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/220.jpg"
+      },
+      {
+        "frame": 240,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_240.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_240.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/240.jpg"
+      },
+      {
+        "frame": 260,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_260.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_260.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/260.jpg"
+      },
+      {
+        "frame": 280,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_280.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_280.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/280.jpg"
+      },
+      {
+        "frame": 300,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_300.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_300.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/300.jpg"
+      },
+      {
+        "frame": 320,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_320.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_320.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/320.jpg"
+      },
+      {
+        "frame": 340,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_340.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_340.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/340.jpg"
+      },
+      {
+        "frame": 360,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_360.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_360.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/360.jpg"
+      },
+      {
+        "frame": 380,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_380.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_380.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/380.jpg"
+      },
+      {
+        "frame": 400,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_400.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_400.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/400.jpg"
+      },
+      {
+        "frame": 420,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_420.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_420.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/420.jpg"
+      },
+      {
+        "frame": 440,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_440.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_440.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/440.jpg"
+      },
+      {
+        "frame": 460,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_460.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_460.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/460.jpg"
+      },
+      {
+        "frame": 480,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_480.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_480.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/480.jpg"
+      },
+      {
+        "frame": 500,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_500.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_500.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/500.jpg"
+      },
+      {
+        "frame": 520,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_520.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_520.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/520.jpg"
+      },
+      {
+        "frame": 540,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_540.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_540.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/540.jpg"
+      },
+      {
+        "frame": 560,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_560.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_560.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/560.jpg"
+      },
+      {
+        "frame": 580,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_580.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_580.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/580.jpg"
+      },
+      {
+        "frame": 600,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_600.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_600.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/600.jpg"
+      },
+      {
+        "frame": 620,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_620.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_620.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/620.jpg"
+      },
+      {
+        "frame": 640,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_640.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_640.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/640.jpg"
+      },
+      {
+        "frame": 660,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_660.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_660.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/660.jpg"
+      },
+      {
+        "frame": 680,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_680.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_680.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/680.jpg"
+      },
+      {
+        "frame": 700,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_700.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_700.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/700.jpg"
+      },
+      {
+        "frame": 720,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_720.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_720.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/720.jpg"
+      },
+      {
+        "frame": 740,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_740.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_740.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/740.jpg"
+      },
+      {
+        "frame": 760,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_760.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_760.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/760.jpg"
+      },
+      {
+        "frame": 780,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_780.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_780.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/780.jpg"
+      },
+      {
+        "frame": 800,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_800.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_800.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/800.jpg"
+      },
+      {
+        "frame": 820,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_820.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_820.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/820.jpg"
+      },
+      {
+        "frame": 840,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_840.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_840.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/840.jpg"
+      },
+      {
+        "frame": 860,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_860.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_860.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/860.jpg"
+      },
+      {
+        "frame": 880,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_880.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_880.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/880.jpg"
+      },
+      {
+        "frame": 900,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_900.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_900.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/900.jpg"
+      },
+      {
+        "frame": 920,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_920.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_920.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/920.jpg"
+      },
+      {
+        "frame": 940,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_940.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_940.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/940.jpg"
+      },
+      {
+        "frame": 960,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_960.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_960.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/960.jpg"
+      },
+      {
+        "frame": 980,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_980.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_980.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/980.jpg"
+      },
+      {
+        "frame": 1000,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1000.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1000.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1000.jpg"
+      },
+      {
+        "frame": 1020,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1020.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1020.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1020.jpg"
+      },
+      {
+        "frame": 1040,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1040.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1040.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1040.jpg"
+      },
+      {
+        "frame": 1060,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1060.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1060.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1060.jpg"
+      },
+      {
+        "frame": 1080,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1080.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1080.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1080.jpg"
+      },
+      {
+        "frame": 1100,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1100.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1100.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1100.jpg"
+      },
+      {
+        "frame": 1120,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1120.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1120.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1120.jpg"
+      },
+      {
+        "frame": 1140,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1140.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1140.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1140.jpg"
+      },
+      {
+        "frame": 1160,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1160.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1160.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1160.jpg"
+      },
+      {
+        "frame": 1180,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1180.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1180.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1180.jpg"
+      },
+      {
+        "frame": 1200,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1200.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1200.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1200.jpg"
+      },
+      {
+        "frame": 1220,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1220.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1220.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1220.jpg"
+      },
+      {
+        "frame": 1240,
+        "identity": "output/paired_source_resolution/evidence/scene0400_00/low/identity_1240.pt",
+        "contributions": "output/paired_source_resolution/evidence/scene0400_00/low/contributions_1240.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0400_00/color/1240.jpg"
+      }
+    ]
+  },
+  "category_evidence_frames": [
+    0,
+    20,
+    40,
+    100,
+    120,
+    140,
+    160,
+    180,
+    200,
+    220,
+    240,
+    260,
+    280,
+    300,
+    320,
+    340,
+    360,
+    380,
+    400,
+    420,
+    440,
+    460,
+    480,
+    500,
+    520,
+    540,
+    560,
+    580,
+    600,
+    620,
+    640,
+    660,
+    680,
+    700,
+    720,
+    740,
+    760,
+    780,
+    800,
+    820,
+    840,
+    860,
+    880,
+    900,
+    920,
+    940,
+    960,
+    980,
+    1000,
+    1020,
+    1040,
+    1060,
+    1080,
+    1100,
+    1120,
+    1140,
+    1160,
+    1180,
+    1200,
+    1220,
+    1240
+  ],
+  "source_query_batch_size": 4,
+  "source_category_fusion": "visibility_weighted_vote",
+  "native_observation_field": "output/adapter_observation_control/scene0400_00/mask_adapter/observation_field.pt",
+  "native_observation_reliability": "entropy_information",
+  "source_identity_control": "detector_matched_mass",
+  "category_query_encoder": {
+    "provider": "mask_adapter_clip",
+    "checkpoint": "/root/.cache/huggingface/hub/models--owl10--Mask-Adapter/snapshots/99662f6a64430bdb458f56f8285bd13e2bd1ac06/fcclip_convnext_large_maskadapter.pth"
+  },
+  "source_streaming": true
+}

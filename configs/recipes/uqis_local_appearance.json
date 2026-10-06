@@ -1,0 +1,27 @@
+{
+  "name": "Native local correspondence before region pooling",
+  "default": false,
+  "base": "configs/pipeline/system_v7.json",
+  "cohort": "9 opened-development scenes, 67 targets, 268 independent queries",
+  "controls": [
+    "equal SigLIP/pooled-DINO identity ranks",
+    "equal SigLIP/bidirectional-patch identity ranks",
+    "equal SigLIP/reciprocal-patch identity ranks"
+  ],
+  "geometry_and_scope": "original v7, unchanged",
+  "source_observations": "all original 1107 legal frames and all original masks; no extra caps",
+  "teachers": "existing native SigLIP and DINOv2-base; no language-role parser",
+  "patch_storage": "all raw patch descriptors and sparse region-to-patch area weights; declared high-capacity control, not compact",
+  "bidirectional_match": "mean query-to-region and area-weighted region-to-query nearest cosine",
+  "reciprocal_match": "mutual nearest-neighbor pairs; sum sqrt(query mass * region mass) times shifted cosine",
+  "identity_only": true,
+  "scope_scores_are_not_correspondence_probabilities": true,
+  "query_access": "map only; image query owns its crop; points have no RGB/depth/SAM",
+  "candidate_limit": null,
+  "parameter_search": "fixed two local matching alternatives, no fitted thresholds or coefficient sweep",
+  "public_benchmarks": "same complete common recipe and original contracts, no gains claimed without execution",
+  "independent_test": false,
+  "completed_comparison": "output/local_appearance_study/comparison.json",
+  "complete_system_result": "output/system_v8/summary.json",
+  "decision": "Bidirectional local matching promoted in system_v8 after all 31 common jobs; pooled and reciprocal remain controls."
+}

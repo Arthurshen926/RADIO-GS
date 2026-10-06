@@ -1,0 +1,20 @@
+{
+  "name": "Independent panoptic range with retained native multimodal identity",
+  "base": "configs/pipeline/system_v8.json",
+  "default": false,
+  "cohort": "all 9 opened-development scenes, all 67 targets and 268 queries",
+  "source_observations": "same 1107 legal source frames, original 640-pixel RGB and mesh/depth projection",
+  "teacher": "cached upstream FC-CLIP plus Mask-Adapter full model, fixed upstream COCO inference vocabulary",
+  "teacher_path": "whole-image panoptic proposals, additional to original interactive SAM masks",
+  "teacher_parameters": "upstream config: overlap 0.8, object score threshold 0.0, 250 learned model queries; no added output cap",
+  "same_scope_rule_as": "configs/recipes/uqis_entity_scope.json",
+  "identity": "original native coordinates, all original region candidates and original text/image seed retained",
+  "scope": "bind identity seed to geometrically containing entity; two-view physical scope else freshly computed v8; points use entity co-membership",
+  "query_access": "map only, no source RGB/depth/SAM and no modality pairing",
+  "parameter_search": "one fixed pretrained panoptic configuration, no benchmark-specific category list or tuning",
+  "added_information_and_build_compute": true,
+  "independent_test": false,
+  "decision": "Completed all 1107 source frames and all 268 queries. Added scope increases coverage and false membership; no net improvement, do not promote.",
+  "completed_comparison": "output/witnessed_scope_study/comparison.json",
+  "report": "docs/experiments/2026-10-05-uqis-entity-range.md"
+}

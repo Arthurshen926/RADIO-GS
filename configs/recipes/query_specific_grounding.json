@@ -1,0 +1,71 @@
+{
+  "name": "Query-specific supervision with matched observation and compute budgets",
+  "root": "output/query_specific_grounding_20261005",
+  "data": "output/real_referent_grounding_20261005",
+  "parent_system": "configs/pipeline/system_v8.json",
+  "default": false,
+  "conditions": [
+    "all_forward",
+    "named_forward",
+    "named_bidirectional",
+    "named_hard_forward",
+    "named_hard_bidirectional"
+  ],
+  "mechanisms": [
+    "Source training eligibility: listener-correct and mentions_target_class, following the official full-scene NR3D rule",
+    "Quality-mass-weighted bidirectional query/region supervision, preserving multiple positives and original scope targets"
+  ],
+  "observations": "same29 real RGB-D rooms,2643 frames,97532 regions; no added source views or proposals",
+  "supervision": "additional independent NR3D and official3D instance labels; no benchmark targets",
+  "training_eligibility_control": "1592 listener-correct records",
+  "training_eligibility_named": "1377 listener-correct and mentions_target_class records",
+  "training_budget": "1592 query presentations per epoch in every arm; named arms repeat eligible examples within each original room",
+  "fit_calibration_development_rooms": [
+    22,
+    3,
+    4
+  ],
+  "model": "unchanged local ReferentGrounder,560897 declared parameters; frozen teachers/native coordinates",
+  "epochs": 12,
+  "seed": 20261005,
+  "logical_batch": 8,
+  "microbatch": 1,
+  "optimizer": "AdamW lr0.0003 weight_decay0.01",
+  "checkpoint_selection": "same complete207-query calibration scene-macro actual set IoU; include zero-correction native checkpoint",
+  "development_queries": "retain all175; no denominator change",
+  "benchmark_queries": "all original queries and evaluation rules unchanged",
+  "bidirectional_loss": "T=row_normalize(scope_IoU^4); -(T*(logsoftmax(S,regions)+logsoftmax(S,queries))).sum/(2*batch)",
+  "reverse_weighting": "same target mass as forward loss, not independent normalization of tiny-quality columns",
+  "query_dependence_diagnostic": "correct native term retained; only learned correction replaced by scene-query mean or different-target query; diagnosis only",
+  "execution": "named_bidirectional31 common jobs; each of four controls9 UQIS jobs;67 total,1340 UQIS query executions",
+  "parameter_revisions_after_benchmark": 0,
+  "source_query_images": false,
+  "independent_final_test": false,
+  "compact_student": false,
+  "references": [
+    "https://referit3d.github.io/benchmarks.html",
+    "https://proceedings.mlr.press/v139/radford21a.html"
+  ],
+  "bounded_rounds": 2,
+  "second_round_reason": "Independent-room intervention remains insensitive to query; training pair diagnosis raises same-class different-instance fraction from31.55% to81.64%. Declared before examining this study benchmark metrics.",
+  "second_round": "Same-class query packing versus random packing; forward and bidirectional matched pair, all examples and optimizer budgets retained. Class/instance IDs used only for training sampling.",
+  "native_contrast_diagnosis": "output/query_specific_grounding_20261005/contrast_diagnosis.json; random reverse loss2.734 vs packed3.390; not proof that native teacher solves random pair discrimination",
+  "algebraic_correction": {
+    "condition": "named_posterior",
+    "reason": "Residual decomposition found22-28 percent query-only offsets in raw bidirectional heads. Those offsets change reverse loss but cannot change a single-query regional ranking.",
+    "objective": "reverse logsoftmax over query-normalized regional log probabilities; no new coefficient",
+    "schedule": "one fixed12-epoch local fit; same named data and random batches as named_bidirectional",
+    "gate": "Use selected calibration checkpoint. Before any new benchmark run require development actual IoU >= named_forward and original correction IoU at least0.5pp above query-mean intervention.",
+    "parameter_search": false,
+    "declared_after_first_round_benchmark": true,
+    "benchmark_numbers_used_to_tune": false
+  },
+  "status": "complete; no runtime promotion",
+  "completed_on": "2026-10-06",
+  "report": "docs/experiments/2026-10-05-query-specific-supervision-and-transfer.md",
+  "comparison": "output/query_specific_grounding_20261005/comparison.json",
+  "fits_completed": 6,
+  "scene_jobs_completed": 67,
+  "uqis_query_executions": 1340,
+  "posterior_development_gate": "output/query_specific_grounding_20261005/posterior_gate.json"
+}

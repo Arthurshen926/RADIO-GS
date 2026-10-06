@@ -1,0 +1,29 @@
+{
+  "kind": "image_member_component_convergence",
+  "status": "promoted_development_v10",
+  "parent": "configs/pipeline/system_v9.json",
+  "active": "configs/pipeline/system_v10.json",
+  "new_models_or_map_arrays": false,
+  "training": {
+    "point_membership_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/real_direct_membership_20261006/real/model.joblib",
+    "supervision": "official3D instance labels in22 disjoint ScanNet training rooms",
+    "observations": "same deployed real RGB-D compiler; no total source frame/proposal cap",
+    "calibration": "three disjoint real-observation rooms, one global0.35 threshold",
+    "training_split": "output/real_referent_grounding_20261005/design.json"
+  },
+  "reused_component": "DirectAnchorMembership for image-estimated anchors; exact positive points keep their original inputs",
+  "text_rule": "unchanged v9 native identity and physical observation scope",
+  "image_identity": "unchanged native SigLIP plus local DINO correspondence ranks",
+  "image_anchor": "nearest actual member to3D coordinate-wise median of chosen region; not guaranteed positive",
+  "additional_language_supervision_in_active_system": false,
+  "new_gain_this_round": false,
+  "selection_basis": "output/query_conditioned_membership_20261006/image_convergence/design.json",
+  "validation": "output/query_conditioned_membership_20261006/image_convergence/comparison.json",
+  "limitations": [
+    "image identity still uncertain",
+    "two UQIS image scenes regress",
+    "four-query joint success remains7/67 with one gained and one lost target",
+    "no compact student or independent final-test/SOTA claim"
+  ],
+  "report": "docs/experiments/2026-10-06-query-conditioned-membership-and-system-convergence.md"
+}

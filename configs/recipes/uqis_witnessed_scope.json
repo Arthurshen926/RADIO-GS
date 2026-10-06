@@ -1,0 +1,31 @@
+{
+  "name": "Third-view scope evidence with unchanged native identity",
+  "base": "configs/pipeline/system_v8.json",
+  "default": false,
+  "cohort": "all 9 opened-development scenes, all 67 targets and 268 queries",
+  "reference": "https://arxiv.org/html/2401.07745v2",
+  "not_a_full_reproduction": "SAM overlapping proposals, no CropFormer panoptic predictor or iterative clustering",
+  "fixed_conditions": "same geometry, 1107 legal source frames, native descriptors and local image identity",
+  "mechanism": "third-view containment witnesses; one vote per frame, both generating views excluded; no transitive merge",
+  "parameters": {
+    "visible_fraction": 0.3,
+    "containment_fraction": 0.8,
+    "witness_retention_fraction": 0.8,
+    "consensus_fraction": 0.9,
+    "minimum_independent_views": 2
+  },
+  "text_image_identity": "exact same native seed as v8",
+  "point_identity": "anchor-containing seed with greatest view-balanced witnessed anchor votes",
+  "decoders": [
+    "visible per-view strict majority",
+    "union of positively witnessed members"
+  ],
+  "parameter_search": "two fixed decoders, no threshold sweep or per-query winner",
+  "map_only": true,
+  "source_rgb_at_query": false,
+  "target_pairing_at_query": false,
+  "independent_test": false,
+  "decision": "Completed both full 9-scene cohorts. Neither decoder beats v8. Retain disabled; stop this rule search.",
+  "completed_comparison": "output/witnessed_scope_study/comparison.json",
+  "report": "docs/experiments/2026-10-05-uqis-entity-range.md"
+}

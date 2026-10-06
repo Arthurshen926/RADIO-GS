@@ -1,4 +1,9 @@
-# RADIO-GS Project Mainline
+# RADIO-GS Historical Project Mainline
+
+**Current navigation (2026-10-06): [CURRENT_RESEARCH.md](CURRENT_RESEARCH.md).**
+This file preserves the2026-05historical compact-field route. It is not the current
+online-source method, its metrics are not current unified results, and its
+submission/mainline wording must not be used as present completion status.
 
 Status: 2026-05-25 submission mainline with calibrated rendered grounding,
 VPR/direct-field readouts, adaptor diagnostics, and a unified multi-head

@@ -1,0 +1,28 @@
+{
+  "role": "independent native instance appearance, two fixed teacher controls",
+  "base_recipe": "configs/pipeline/system_v7.json",
+  "package": "output/scannet_uqis_9_v0_3_1_candidate",
+  "map_builder": "radio_gs.pipeline.region_appearance",
+  "source": "all original 1107 legal frames and 39360 masks; no new views",
+  "new_teacher": "official frozen DINOv2 ViT-B/14; full-image dense patch pooling within each original mask",
+  "queries": "own reference crop only; native patch pooling in the same DINO coordinates; no source RGB or SAM",
+  "controls": [
+    {
+      "name": "native_local_appearance",
+      "image_response": "DINO native identity, original element transfer and physical scope",
+      "output": "output/region_appearance_study",
+      "command": "python scripts/research/run_region_appearance_cohort.py --gpus 4,5"
+    },
+    {
+      "name": "dual_native_identity",
+      "image_response": "SigLIP semantic response retained; identity selected by equal average candidate ranks in independent SigLIP and DINO spaces",
+      "output": "output/dual_native_identity_study",
+      "command": "python scripts/research/run_region_appearance_cohort.py --output output/dual_native_identity_study --appearance-maps output/region_appearance_study/maps --fusion --gpus 4,5"
+    }
+  ],
+  "text_and_point_rules": "original v7, no modality pairing supplied to the method",
+  "evaluation": "complete nine scenes and all four positive-query inputs; AP and actual selected-set IoU separate; predictions precede scoring",
+  "label_use": "only evaluator and explicitly separated post-prediction diagnosis",
+  "claim_boundary": "extra pretrained teacher information is not an equal-teacher algorithm gain; no compact student or independent-test claim",
+  "selection": "fixed equal rank rule, no fitted fusion coefficient or query-specific routing"
+}

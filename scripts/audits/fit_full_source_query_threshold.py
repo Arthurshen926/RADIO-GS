@@ -14,11 +14,12 @@ from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
 from radio_gs.models.element_retrieval_field import load_element_retrieval_field, ElementRetrievalField
 from radio_gs.models.native_query_threshold import fit_threshold_ridge
 from radio_gs.utils.immutable_artifacts import sha256_file
+from radio_gs.geometry.source_report_binding import load_source_geometry_report
 
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--device',required=True)
-    p.add_argument('--root',type=Path);a=p.parse_args();torch.set_num_threads(4)
+    p.add_argument('--root',type=Path);p.add_argument('--geometry-report',type=Path);a=p.parse_args();torch.set_num_threads(4)
     base=Path('/mnt/pool/sqy/results/RADIO-GS/output');root=a.root if a.root is not None else base/'preserved_source_inventory_20260916'/a.scene
     parent=root/'scale_affinity_v1_direct_control';out=root/'full_source_query_threshold_control';out.mkdir(exist_ok=False)
     report=json.loads((parent/'report.json').read_text());info=json.loads((root/'teachers.json').read_text())
@@ -31,7 +32,7 @@ def main():
     assert sha256_file(rawpath)==compiled['grounding_sha256']
     assert raw['teacher_manifest_sha256']==data['teacher_manifest_sha256']
     assert raw['frames']==info['train_frames'] and raw['queries']==compiled['queries'] and raw['benchmark_labels_used'] is False
-    gr=json.loads((base/'geometry_only_repair_final_20260914'/a.scene/'report.json').read_text());g=gr['results']['independent_scale']
+    _,gr=load_source_geometry_report(root,a.scene,a.geometry_report);g=gr['results']['independent_scale']
     geo=FrozenGaussianGeometry.load(g['geometry'],expected_sha256=g['geometry_sha256'],device=a.device);geo.assert_binding(data['geometry_binding'])
     prior=MogeGeometryPrior(gr['source_report'],gr['source_report_sha256'])
     field,payload=load_element_retrieval_field(parent/'field.pt',expected_sha256=report['field_sha256'],geometry=geo,expected_query_encoder=json.loads((root/'native_query_encoder.json').read_text()),device=a.device)

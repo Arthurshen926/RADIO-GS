@@ -1,0 +1,397 @@
+{
+  "independent_test": false,
+  "unified_complete_method_across_all_benchmarks": false,
+  "benchmarks": {
+    "LERF2D": {
+      "complete": true,
+      "missing": [],
+      "scenes": {
+        "figurines": {
+          "miou": 0.46690310990171774,
+          "localization_accuracy": 0.75,
+          "observation_count": 56,
+          "field_sha256": "d753b8b329f0a43250996c7ab6eb71e2531614f765b80a4259a930cac7686a4d"
+        },
+        "ramen": {
+          "miou": 0.35017353587482175,
+          "localization_accuracy": 0.5774647887323944,
+          "observation_count": 71,
+          "field_sha256": "61e2b296768d548fc98b7deffb6dec36393be315ecd2a1fbc3d4ff172736f1ad"
+        },
+        "teatime": {
+          "miou": 0.6095824941235074,
+          "localization_accuracy": 0.8813559322033898,
+          "observation_count": 59,
+          "field_sha256": "ce93bb8c4e66ee6535c26d8642686abad1edf666c3745507493d6ca41b39d931"
+        },
+        "waldo_kitchen": {
+          "miou": 0.3403161216357892,
+          "localization_accuracy": 0.6363636363636364,
+          "observation_count": 22,
+          "field_sha256": "793ec8f410a2891325bbc8c5afb7bb0f22a4310ba9a12974f80f4a2d6a518621"
+        }
+      },
+      "macro": {
+        "miou": 0.44174381538395907,
+        "localization_accuracy": 0.7112960893248551
+      }
+    },
+    "LERF3D": {
+      "complete": true,
+      "missing": [],
+      "scenes": {
+        "figurines": {
+          "miou": 0.2719576016628603,
+          "acc025": 0.5535714285714286,
+          "acc05": 0.125,
+          "count": 56,
+          "missing": 0
+        },
+        "ramen": {
+          "miou": 0.19555842421963007,
+          "acc025": 0.4225352112676056,
+          "acc05": 0.028169014084507043,
+          "count": 71,
+          "missing": 0
+        },
+        "teatime": {
+          "miou": 0.46157600774085716,
+          "acc025": 0.8135593220338984,
+          "acc05": 0.423728813559322,
+          "count": 59,
+          "missing": 0
+        },
+        "waldo_kitchen": {
+          "miou": 0.25836087479407616,
+          "acc025": 0.4090909090909091,
+          "acc05": 0.22727272727272727,
+          "count": 22,
+          "missing": 0
+        }
+      },
+      "macro": {
+        "miou": 0.2968632271043559,
+        "acc025": 0.5496892177409605,
+        "acc05": 0.20104263872913908
+      }
+    },
+    "ScanNet_OVS": {
+      "complete": true,
+      "missing": [],
+      "scenes": {
+        "scene0000_00": {
+          "metrics": {
+            "19": {
+              "miou": 0.28862274779055824,
+              "macc": 0.39410845564516245
+            },
+            "15": {
+              "miou": 0.27488373762877305,
+              "macc": 0.39222805595811266
+            },
+            "10": {
+              "miou": 0.4275870916995769,
+              "macc": 0.5684617647851947
+            }
+          },
+          "scope_control": {
+            "19": {
+              "miou": 0.29122672405079747,
+              "macc": 0.3992855247943897
+            },
+            "15": {
+              "miou": 0.25562661706714,
+              "macc": 0.42517729039775765
+            },
+            "10": {
+              "miou": 0.39029316951269055,
+              "macc": 0.5722260152489058
+            }
+          },
+          "source_acceptance": true,
+          "field_sha256": "4f06c193b38f5474c118ea293c6aec5bd431e97f5adf4c11efe09c8d620d6e92"
+        },
+        "scene0062_00": {
+          "metrics": {
+            "19": {
+              "miou": 0.5826043341301698,
+              "macc": 0.7922707023398751
+            },
+            "15": {
+              "miou": 0.5817281740963084,
+              "macc": 0.792811432019492
+            },
+            "10": {
+              "miou": 0.598832464633444,
+              "macc": 0.7812787538985335
+            }
+          },
+          "scope_control": {
+            "19": {
+              "miou": 0.6366051263135283,
+              "macc": 0.8320218738442482
+            },
+            "15": {
+              "miou": 0.6293291586108154,
+              "macc": 0.834133264341209
+            },
+            "10": {
+              "miou": 0.8124579174799206,
+              "macc": 0.8536652595915306
+            }
+          },
+          "source_acceptance": true,
+          "field_sha256": "80e07a60f7d3ee6802020ac80cbd58df057098b766b93bbc8bee678ece68a4a9"
+        },
+        "scene0070_00": {
+          "metrics": {
+            "19": {
+              "miou": 0.24304280903013206,
+              "macc": 0.33756067955926783
+            },
+            "15": {
+              "miou": 0.27477216992814874,
+              "macc": 0.37851754632095114
+            },
+            "10": {
+              "miou": 0.3906955466197908,
+              "macc": 0.5003571315675501
+            }
+          },
+          "scope_control": {
+            "19": {
+              "miou": 0.3270303152371637,
+              "macc": 0.4662558886636664
+            },
+            "15": {
+              "miou": 0.36715924156227164,
+              "macc": 0.5209824201549005
+            },
+            "10": {
+              "miou": 0.441564935346185,
+              "macc": 0.7155945656518806
+            }
+          },
+          "source_acceptance": false,
+          "field_sha256": "4e3cc48002b87b4b9c860d53a093278fd01c1a35b6b2e85524b818a19be8afe9"
+        },
+        "scene0097_00": {
+          "metrics": {
+            "19": {
+              "miou": 0.4358978103011029,
+              "macc": 0.5807619654086954
+            },
+            "15": {
+              "miou": 0.3930934834122364,
+              "macc": 0.5589954043231095
+            },
+            "10": {
+              "miou": 0.5341112214336079,
+              "macc": 0.6639649133312907
+            }
+          },
+          "scope_control": {
+            "19": {
+              "miou": 0.47594768988705516,
+              "macc": 0.6020228107416548
+            },
+            "15": {
+              "miou": 0.535151903764718,
+              "macc": 0.6686523613216218
+            },
+            "10": {
+              "miou": 0.5729232814287919,
+              "macc": 0.7182726770226702
+            }
+          },
+          "source_acceptance": true,
+          "field_sha256": "e8ddae54cc1828e9f91aa80609e96106c3bfddf68bb82c859135d1a43dff1be4"
+        },
+        "scene0140_00": {
+          "metrics": {
+            "19": {
+              "miou": 0.3006408593240318,
+              "macc": 0.385230588679238
+            },
+            "15": {
+              "miou": 0.3273026360823542,
+              "macc": 0.40697107558639384
+            },
+            "10": {
+              "miou": 0.459179012653065,
+              "macc": 0.5471504068685947
+            }
+          },
+          "scope_control": {
+            "19": {
+              "miou": 0.4986811594895337,
+              "macc": 0.6063417502145221
+            },
+            "15": {
+              "miou": 0.5283695363607945,
+              "macc": 0.6345552110513698
+            },
+            "10": {
+              "miou": 0.5906032618668503,
+              "macc": 0.7369130496890591
+            }
+          },
+          "source_acceptance": false,
+          "field_sha256": "10b19ad8f2e4387abaf3bdebab92d29a8a0e53c7a5fb72ad523abef7d2fb8e2f"
+        },
+        "scene0347_00": {
+          "metrics": {
+            "19": {
+              "miou": 0.5053448316777395,
+              "macc": 0.6517204113532044
+            },
+            "15": {
+              "miou": 0.5140053558564976,
+              "macc": 0.6484546924805078
+            },
+            "10": {
+              "miou": 0.634138344809421,
+              "macc": 0.7201858965371528
+            }
+          },
+          "scope_control": {
+            "19": {
+              "miou": 0.5051065532942135,
+              "macc": 0.6307033443613629
+            },
+            "15": {
+              "miou": 0.4919409826751077,
+              "macc": 0.6284032689178767
+            },
+            "10": {
+              "miou": 0.6590037606665781,
+              "macc": 0.7247181661177192
+            }
+          },
+          "source_acceptance": true,
+          "field_sha256": "97df506765ab7449a29e6878846d226de481cb26a62aeeff35cb63a0ae251d40"
+        },
+        "scene0400_00": {
+          "metrics": {
+            "19": {
+              "miou": 0.42136971869920803,
+              "macc": 0.5377197427360524
+            },
+            "15": {
+              "miou": 0.42021074662641783,
+              "macc": 0.5378592848733695
+            },
+            "10": {
+              "miou": 0.5330367783756141,
+              "macc": 0.652376819634835
+            }
+          },
+          "scope_control": {
+            "19": {
+              "miou": 0.3618960105011984,
+              "macc": 0.4545469562780489
+            },
+            "15": {
+              "miou": 0.36302310953700717,
+              "macc": 0.4585922506585454
+            },
+            "10": {
+              "miou": 0.44685613669280305,
+              "macc": 0.5378054856483924
+            }
+          },
+          "source_acceptance": true,
+          "field_sha256": "1a0fa490e8c1cb3ef14c8c25deb2debf8dc54936dad10c8e5bf3d9b4e9fb4a11"
+        },
+        "scene0590_00": {
+          "metrics": {
+            "19": {
+              "miou": 0.35204047335021793,
+              "macc": 0.4078073916862259
+            },
+            "15": {
+              "miou": 0.41229079067719687,
+              "macc": 0.47660410027537
+            },
+            "10": {
+              "miou": 0.5790150641459257,
+              "macc": 0.6678266783728615
+            }
+          },
+          "scope_control": {
+            "19": {
+              "miou": 0.4237142113677068,
+              "macc": 0.5425965812468889
+            },
+            "15": {
+              "miou": 0.478835015148384,
+              "macc": 0.6083306608036013
+            },
+            "10": {
+              "miou": 0.6362464118794773,
+              "macc": 0.7348190609107613
+            }
+          },
+          "source_acceptance": true,
+          "field_sha256": "6ad32cce6b53b8196b81b1337235c235795342e7b709e12b5ffa839e51e0cded"
+        }
+      },
+      "macro": {
+        "19": {
+          "miou": 0.391195448037895,
+          "macc": 0.5108974921759651
+        },
+        "15": {
+          "miou": 0.39978588678849164,
+          "macc": 0.5240551989796634
+        },
+        "10": {
+          "miou": 0.5195744405463056,
+          "macc": 0.6377002956245016
+        }
+      },
+      "source_rejected_scenes": [
+        "scene0070_00",
+        "scene0140_00"
+      ]
+    },
+    "NVOS": {
+      "complete": true,
+      "tasks": 8,
+      "macro": {
+        "iou": 0.5050067193806171,
+        "pixel_accuracy": 0.8963376507163048,
+        "average_precision": 0.8438242644719937
+      },
+      "full_lerf_caption_method": false,
+      "method": "shared frozen positive-only image branch"
+    }
+  },
+  "all_requested_cohorts_evaluated": true,
+  "bindings": {
+    "output/frozen_method_lerf2d_20260918/figurines/report.json": "5f55b0f5c12ef62bd4283c4584418ba36d481954dc558ee2b7e5210a03a72343",
+    "output/frozen_method_lerf2d_20260918/ramen/report.json": "44d79ef88427d17258d9d0858778192f24d72a4bb0ae1c5e02cf9553e72c6167",
+    "output/frozen_method_lerf2d_20260918/teatime/report.json": "0404d6150707a3b13e93fc80a951949925421bdcb9c2d78a643b3b43b7165de7",
+    "output/frozen_method_lerf2d_20260918/waldo_kitchen/report.json": "12605385f74f321ee6a7fc18d2d607ce600de717835d7601d0f854b9e6332e43",
+    "paper/artifacts/frozen_method_lerf3d_partial_20260918.json": "78472c644269345887d6ee9fb1721ecc93346bcbe30931f3651843e2e34153f2",
+    "output/bounded_fallback_repair_20260918/teatime/frozen_jpeg_evaluation.json": "58ff1ad43d9ba4257b3a14da9bb8265f036d3b3146737e2e1191428f2fb4c9a6",
+    "output/bounded_fallback_repair_20260918/waldo_kitchen/frozen_jpeg_evaluation.json": "c05316933f0f418867ebef71b0cbb61b41a55c2be23c8ec93e013d0a0d55b1a3",
+    "output/scannet_frozen_field_20260918/scene0000_00/official_protocol_evaluation/report.json": "99a8336be3e924e15419e1767c096de460dc342bc05c253a04785098797663ea",
+    "output/scannet_frozen_field_20260918/scene0000_00/reconstruction/field/bounded_fallback_withheld/report.json": "8033592c1bb6578ba607e0e2e4e8b7b6de92aaf2ffd4765becfbd9ede3f11227",
+    "output/scannet_frozen_field_20260918/scene0062_00/official_protocol_evaluation/report.json": "8a6956ef6e05da545a80e077cfe3430a85990ce690b6dc87cb9312cd35f58347",
+    "output/scannet_frozen_field_20260918/scene0062_00/reconstruction/field/bounded_fallback_withheld/report.json": "8c412056663d9f83e5f75f24e33ba5ac289b8073562890024554685f0466f041",
+    "output/scannet_frozen_field_20260918/scene0070_00/official_protocol_evaluation/report.json": "904c3e4309352c5aa14feedecb90359761ac91516cb1c9ef3030fc938b6b6c5e",
+    "output/scannet_frozen_field_20260918/scene0070_00/reconstruction/field/bounded_fallback_withheld/report.json": "0d75f4c2c40f9b5c93336cca06b51529f4774b7e0cf0c356d7e508bd94c9f93e",
+    "output/scannet_frozen_field_20260918/scene0097_00/official_protocol_evaluation/report.json": "f02bf22a5f188a7d03bb66697e7c221544d79dfea16e43bfd52409757996a841",
+    "output/scannet_frozen_field_20260918/scene0097_00/reconstruction/field/bounded_fallback_withheld/report.json": "059a9a3a6866bdf86fbf347a8192c9ed66df1952f24bca7d1ce935ea3131f82b",
+    "output/scannet_frozen_field_20260918/scene0140_00/official_protocol_evaluation/report.json": "00f34ae6f326cac7a9c3c350e47176ff80df6038036193d5da77640d6e0d0b5c",
+    "output/scannet_frozen_field_20260918/scene0140_00/reconstruction/field/bounded_fallback_withheld/report.json": "38ac1636dd121ff85075c584a4e4aa5d38cf9681e29032493d7fdb1deed16faa",
+    "output/scannet_frozen_field_20260918/scene0347_00/official_protocol_evaluation/report.json": "2a5fa814dfa15fb90457f127f8b404a768f487bcb41d437002111a9f017d790b",
+    "output/scannet_frozen_field_20260918/scene0347_00/reconstruction/field/bounded_fallback_withheld/report.json": "60025e0ee54145437ed5bb37c41ba26c58b53563124a8e54724b4914c0d352b7",
+    "output/scannet_frozen_field_20260918/scene0400_00/official_protocol_evaluation/report.json": "736f7845a8004712149c17f5a35e687bdc1c7e5d8800c703cb05870f890d6b02",
+    "output/scannet_frozen_field_20260918/scene0400_00/reconstruction/field/bounded_fallback_withheld/report.json": "6a08b3783fa49ff80e7ff10c00c6db2b853d4bbb68e5cfb1b5065b98b2db4967",
+    "output/scannet_frozen_field_20260918/scene0590_00/official_protocol_evaluation/report.json": "2b6fd6796545f64d332baa7024888638213f6856bbb7b58078c85f02882c65f6",
+    "output/scannet_frozen_field_20260918/scene0590_00/reconstruction/field/bounded_fallback_withheld/report.json": "ac03bd093824110f753cf89232342aa8b726078f886202df00077977e57af06e",
+    "paper/artifacts/nvos_positive_field_eight_task_20260918.json": "68680dcb292adccf2e7b296a0ad1448d1c68362e0b58a3dcbcc6acdfb8bdfb5e"
+  }
+}

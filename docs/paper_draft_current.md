@@ -1,3 +1,9 @@
+> Historical draft notice,2026-10-02: this document describes an older compact-field
+> method and its historical numbers. It is not the current research manuscript.
+> See [CURRENT_RESEARCH.md](CURRENT_RESEARCH.md) and
+> [CVPR_RESEARCH_PLAN.md](../paper/CVPR_RESEARCH_PLAN.md). Do not insert current
+> online-source results while retaining the historical deployment claims.
+
 # RADIO-GS Current Paper Draft
 
 Status: 2026-05-14 submission draft plus calibrated rendered grounding,

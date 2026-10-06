@@ -1,0 +1,150 @@
+{
+  "kind": "current_executable_research_recipe",
+  "status": "integrated_LERF_text_development_mainline_not_submission_model",
+  "python": "/root/miniconda3/envs/cybersim_agent/bin/python",
+  "default_profile": "identity_response",
+  "generation_entry": "scripts/research/run_consolidated_query.py",
+  "evaluation_entry": "scripts/research/evaluate_consolidated_query.py",
+  "checkpoint": "checkpoints/sam3_modelscope/sam3.pt",
+  "scenes": {
+    "figurines": {
+      "scene": "configs/consolidated/figurines.scene.json",
+      "queries": "configs/consolidated/figurines.queries.json"
+    },
+    "ramen": {
+      "scene": "configs/consolidated/ramen.scene.json",
+      "queries": "configs/consolidated/ramen.integration-queries.json"
+    },
+    "teatime": {
+      "scene": "configs/consolidated/teatime.scene.json",
+      "queries": "configs/consolidated/teatime.queries.json"
+    },
+    "waldo_kitchen": {
+      "scene": "configs/consolidated/waldo_kitchen.scene.json",
+      "queries": "configs/consolidated/waldo_kitchen.queries.json"
+    }
+  },
+  "profiles": {
+    "map": {
+      "mode": "map",
+      "flags": [],
+      "readout": "map/response.pt",
+      "evaluation_flags": [
+        "--direct-map"
+      ],
+      "status": "native map comparator"
+    },
+    "source": {
+      "mode": "source",
+      "flags": [],
+      "readout": "sets/lerf_{scene}/typed_readout.pt",
+      "evaluation_flags": [],
+      "status": "fixed current research reference"
+    },
+    "regional": {
+      "mode": "source",
+      "flags": [
+        "--regional-fallback"
+      ],
+      "readout": "sets/lerf_{scene}/typed_readout.pt",
+      "evaluation_flags": [],
+      "status": "optional higher mean, severe identity regressions"
+    },
+    "calibration": {
+      "mode": "source",
+      "flags": [
+        "--source-calibration"
+      ],
+      "readout": "calibrated/typed_readout.pt",
+      "evaluation_flags": [],
+      "status": "optional IoU/AP tradeoff"
+    },
+    "identity": {
+      "mode": "source",
+      "flags": [
+        "--native-identity"
+      ],
+      "readout": "sets/lerf_{scene}/typed_readout.pt",
+      "evaluation_flags": [],
+      "status": "retained fixed comparator: semantic50.5885/AP86.0472/selected66.6617"
+    },
+    "identity_response": {
+      "mode": "source",
+      "flags": [
+        "--native-identity",
+        "--source-response",
+        "--response-solver",
+        "backprojection"
+      ],
+      "readout": "reconstructed_response/native_protected/typed_readout.pt",
+      "evaluation_flags": [],
+      "status": "LERF text development default: semantic70.3775/AP87.6429/selected66.6617; full four-scene source-evidence reconstruction; no unseen-scene/SOTA claim"
+    }
+  },
+  "scope": {
+    "supported": "LERF text and NVOS positive-reference instance; explicit same-map image/2D/3D point runtime with eight source-only diagnostic runs",
+    "fresh_map_reconstruction": false,
+    "training_calibration": "two old-source-vocabulary fitted shared scalars remain in native maps",
+    "source_access": "declared source frames, no inference-time target RGB or GT",
+    "query_count": "67 labelled plus1unlabelled probe",
+    "joint_regional_calibration_validated": false,
+    "uqis": "paused",
+    "joint_native_identity_regional_validated": false,
+    "same_map_four_query_validated": false,
+    "same_map_query_diagnostic": "configs/recipes/same_map_queries.json"
+  },
+  "result_registry": "configs/recipes/research_consolidation.json",
+  "benchmarks": {
+    "nvos": {
+      "default_profile": "reference",
+      "generation_entry": "scripts/research/run_reference_query.py",
+      "evaluation_entry": "scripts/research/evaluate_reference_instance.py",
+      "protocol": "retained positive-only reference mask, legal source tracking, continuous response; not signed prompt protocol",
+      "scenes": {
+        "orchids": {
+          "scene": "configs/consolidated/nvos/orchids.scene.json",
+          "query": "configs/consolidated/nvos/orchids.query.json",
+          "evaluation": "configs/consolidated/nvos/orchids.evaluation.json"
+        },
+        "leaves": {
+          "scene": "configs/consolidated/nvos/leaves.scene.json",
+          "query": "configs/consolidated/nvos/leaves.query.json",
+          "evaluation": "configs/consolidated/nvos/leaves.evaluation.json"
+        },
+        "fern": {
+          "scene": "configs/consolidated/nvos/fern.scene.json",
+          "query": "configs/consolidated/nvos/fern.query.json",
+          "evaluation": "configs/consolidated/nvos/fern.evaluation.json"
+        },
+        "flower": {
+          "scene": "configs/consolidated/nvos/flower.scene.json",
+          "query": "configs/consolidated/nvos/flower.query.json",
+          "evaluation": "configs/consolidated/nvos/flower.evaluation.json"
+        },
+        "fortress": {
+          "scene": "configs/consolidated/nvos/fortress.scene.json",
+          "query": "configs/consolidated/nvos/fortress.query.json",
+          "evaluation": "configs/consolidated/nvos/fortress.evaluation.json"
+        },
+        "horns_center": {
+          "scene": "configs/consolidated/nvos/horns_center.scene.json",
+          "query": "configs/consolidated/nvos/horns_center.query.json",
+          "evaluation": "configs/consolidated/nvos/horns_center.evaluation.json"
+        },
+        "horns_left": {
+          "scene": "configs/consolidated/nvos/horns_left.scene.json",
+          "query": "configs/consolidated/nvos/horns_left.query.json",
+          "evaluation": "configs/consolidated/nvos/horns_left.evaluation.json"
+        },
+        "trex": {
+          "scene": "configs/consolidated/nvos/trex.scene.json",
+          "query": "configs/consolidated/nvos/trex.query.json",
+          "evaluation": "configs/consolidated/nvos/trex.evaluation.json"
+        }
+      },
+      "readout": "typed_readout.pt",
+      "seed_mask_recomputed": false,
+      "status": "complete eight-query fresh tracking and dual readout reconstruction,86.4891%IoU; positive-only development"
+    }
+  }
+}

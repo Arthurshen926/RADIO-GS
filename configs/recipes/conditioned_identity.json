@@ -1,0 +1,37 @@
+{
+  "stage": "detector-conditioned identity with no-veto hypothesis",
+  "status": "complete12scene evaluations; promoted only as LERF text development default",
+  "core": "radio_gs/querying/source_identity.py",
+  "entry": "scripts/research/run_current_research.py --profile identity",
+  "recipe": "configs/recipes/current_research.json",
+  "frozen": ["geometry", "native descriptors", "query embeddings", "SAM3 masks", "subset solver", "evaluation"],
+  "mechanism": {
+    "distribution": "native text cosine among same-query matched detector instances, not all scene proposals",
+    "models": "one Gaussian (no relative veto) versus two Gaussians (higher-score group supported)",
+    "averaging": "BIC model evidence weights",
+    "decision": "posterior support below0.5 becomes unknown; unmatched/insufficient separation retain original detector evidence",
+    "is_calibrated_identity_probability": false,
+    "competing_query_vocabulary_used": false,
+    "query_specific_routes": false,
+    "new_vfm_calls": 0
+  },
+  "controls": {
+    "heldout": "every fifth source view excluded from density fitting and set fitting; map still uses all sources",
+    "baseline": "output/scope_evidence_control/fit",
+    "candidate": "output/conditioned_identity/conditioned",
+    "forced_split_ablation": "output/conditioned_identity/forced_split",
+    "full_source_baseline": "output/research_consolidation/source_run",
+    "full_source_integrated": "output/conditioned_identity/full_source"
+  },
+  "evaluation": {
+    "queries": "all67 labeled texts plus1unlabelled probe excluded from metrics",
+    "scenes": ["figurines", "ramen", "teatime", "waldo_kitchen"],
+    "heldout_selected": [0.6393519588558367, 0.6629674404040427],
+    "full_source_selected": [0.6412052138709766, 0.6666165186553114],
+    "semantic_unchanged": true,
+    "unseen_scene": false,
+    "public_sota_claim": false
+  },
+  "known_failure": "figurines bag12.31% to0%; high relative native score does not establish benchmark referent identity",
+  "summary": "output/conditioned_identity/summary.json"
+}

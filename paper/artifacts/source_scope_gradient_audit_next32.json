@@ -1,0 +1,15 @@
+{
+  "schema": "source_scope_gradient_audit.next32.seal.v1",
+  "complete": true,
+  "source_only": true,
+  "benchmark_data_read": false,
+  "training_performed": false,
+  "default_promoted": false,
+  "files": {
+    "scripts/audits/audit_scope_gradient_next32.py": "1b58fc6633e6ad1208e7d0e394a71517a95d734bf97a7ab7ca3c62ef46052d23",
+    "docs/experiments/2026-09-26-source-scope-gradient-audit-next32.md": "2d47fe3ef2484ec417122d4748c40d76a1072a9a2013d19988b2f794a28f809a",
+    "output/source_scope_gradient_next32/lerf_figurines/report.json": "2dbf3ab8dd8031b2163eb76bc693192d5ff80515d5eaf821fd005cd40d9ca65c",
+    "output/source_scope_gradient_next32/scannet_scene0000_00/report.json": "76bedb40289fbe23cda51098ea33c5099e93bb0555b237b147a6384552f4a532"
+  },
+  "finding": "Wrong clamped source evidence exists but is not demonstrated dominant; direct zero gradient does not imply shared decoder cannot move elements."
+}

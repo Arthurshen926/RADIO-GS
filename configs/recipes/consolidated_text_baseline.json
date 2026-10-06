@@ -1,0 +1,30 @@
+{
+  "kind": "executable_text_baseline_not_promoted_high_score_method",
+  "entry": "scripts/research/run_consolidated_query.py",
+  "scenes": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "source_policy": "all explicit authorized scene source frames",
+  "query_policy": "all benchmark text queries plus one ramen new query",
+  "semantic": "stored native feature dot fresh native query; two retained shared source-trained calibration scalars",
+  "identity": "exact text SAM3 on source RGB; detector confidence only; no native crop verification or temporal anchors",
+  "positives": "eroded detector union, independent of native positivity",
+  "negatives": "eroded observed detector complement excluding native-positive pixels; partial-mask complement remains fallible",
+  "selection": "source initialization; frozen actual subset alpha;240 updates minimum;balanced BCE+overlap+0.1 footprint prior;192x256 interleaved rays",
+  "missing_evidence": "explicit native prior fallback; never inherit a previous query selection",
+  "outputs": [
+    "native semantic response",
+    "independent selected set"
+  ],
+  "evaluation": "shared frozen LERF scorer; direct map >0.5 subset comparator; GT accessed only by evaluator",
+  "legacy_query_predictions": false,
+  "legacy_query_distribution_transport": false,
+  "unified_four_query": false,
+  "uqis": "paused",
+  "status": "complete four scenes:67 benchmark texts plus1unlabelled probe, both map/source evaluations",
+  "report": "docs/experiments/2026-10-02-consolidated-text-runtime.md",
+  "result": "output/research_consolidation/full_execution.json"
+}

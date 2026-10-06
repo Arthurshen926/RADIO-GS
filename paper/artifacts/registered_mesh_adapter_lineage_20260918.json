@@ -1,0 +1,27 @@
+{
+  "adapters": [
+    {
+      "parent": "radio_gs/scripts/build_frozen_geometry_authority.py",
+      "parent_sha256": "e364e4c5a2d4f97fbffc04529a60ef92ed3aa72bc357f17f9284bcb3c193a94b",
+      "adapter": "scripts/audits/build_registered_mesh_authority.py",
+      "adapter_sha256": "476a86a37842ca130c16442ce615220ea831cc0adf28826aaa22f6ae2d0f7dcc",
+      "only_camera_prior_import_changed": false
+    },
+    {
+      "parent": "scripts/audits/fit_full_source_query_threshold.py",
+      "parent_sha256": "d7a9b0ce8854c350fbc1dcab7796dc0c518a00dcecdb1dfcc41eb9b613bbe647",
+      "adapter": "scripts/audits/fit_full_source_query_threshold_registered.py",
+      "adapter_sha256": "f76b6f77ad5dc56c5d25598e82147f0d03051e1a589661b0fbce0ce520006548",
+      "only_camera_prior_import_changed": true
+    },
+    {
+      "parent": "scripts/audits/fit_exact_render_query_threshold.py",
+      "parent_sha256": "e918aa160de1e5ebdece6c82e5eab8d9d1463e06990af3e98ec8901b7e860e18",
+      "adapter": "scripts/audits/fit_exact_render_query_threshold_registered.py",
+      "adapter_sha256": "9c834554018013183d4ebf59578318f6ac8dfe4d2f3aa38de09e3c72a0dd00f3",
+      "only_camera_prior_import_changed": true
+    }
+  ],
+  "method_numerics_modified": false,
+  "evaluation_complete": false
+}

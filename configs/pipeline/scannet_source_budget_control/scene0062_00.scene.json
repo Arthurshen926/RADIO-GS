@@ -1,0 +1,196 @@
+{
+  "scene": "scannet_scene0062_00",
+  "native_field": "output/scannet_native_completion/scene0062_00/native_field.pt",
+  "text_encoder": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384/snapshots/a713301b217d38485fb2204c808367d10bc3cc40",
+  "runtime_provider": "native_category_map",
+  "input_track": "provided_unlabelled_mesh",
+  "geometry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/scannet_public_next72/scene0062_00/geometry.pt",
+    "sha256": "0b667387374d8078280d41da03cd1a51fcf45201b836eafb140e13e3cf14915d"
+  },
+  "source_cameras": "output/scannet_public_next72/scene0062_00/source_cameras.json",
+  "source_frames": [
+    0,
+    20,
+    40,
+    60,
+    80,
+    100,
+    120,
+    140,
+    160,
+    180,
+    200,
+    220,
+    240,
+    260,
+    280,
+    300,
+    320,
+    340,
+    360,
+    380,
+    400,
+    420,
+    440,
+    460,
+    480,
+    500,
+    520,
+    540,
+    560,
+    580,
+    600,
+    620,
+    640,
+    660,
+    680,
+    700,
+    720
+  ],
+  "source_views": 37,
+  "source_rgb_authority": "output/scannet_public_next72/scene0062_00/source_rgb.json",
+  "native_region_directories": [
+    "output/scannet_native_completion/scene0062_00/native_regions"
+  ],
+  "calibration": {
+    "kind": "native_categorical_prior_not_empirically_calibrated"
+  },
+  "map_contract": {
+    "native_dimension": 1536,
+    "geometry_trainable": false,
+    "all_nonempty_generated_masks": true,
+    "teacher_native": true,
+    "query_labels_used": false
+  },
+  "native_category_prior": {
+    "kind": "mutually_exclusive_native_log_odds",
+    "temperature": 100.0,
+    "vocabulary": "complete declared ScanNet category query list",
+    "historical_scene_parameters": false
+  },
+  "source_evidence": {
+    "provider": "SAM3 literal text with native foreground-context evidence",
+    "raster_hw": [
+      96,
+      128
+    ],
+    "views": [
+      {
+        "frame": 20,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_20.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_20.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/20.jpg"
+      },
+      {
+        "frame": 100,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_100.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_100.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/100.jpg"
+      },
+      {
+        "frame": 160,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_160.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_160.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/160.jpg"
+      },
+      {
+        "frame": 180,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_180.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_180.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/180.jpg"
+      },
+      {
+        "frame": 200,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_200.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_200.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/200.jpg"
+      },
+      {
+        "frame": 220,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_220.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_220.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/220.jpg"
+      },
+      {
+        "frame": 320,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_320.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_320.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/320.jpg"
+      },
+      {
+        "frame": 400,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_400.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_400.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/400.jpg"
+      },
+      {
+        "frame": 420,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_420.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_420.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/420.jpg"
+      },
+      {
+        "frame": 440,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_440.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_440.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/440.jpg"
+      },
+      {
+        "frame": 520,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_520.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_520.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/520.jpg"
+      },
+      {
+        "frame": 560,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_560.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_560.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/560.jpg"
+      },
+      {
+        "frame": 600,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_600.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_600.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/600.jpg"
+      },
+      {
+        "frame": 640,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_640.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_640.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/640.jpg"
+      },
+      {
+        "frame": 660,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_660.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_660.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/660.jpg"
+      },
+      {
+        "frame": 700,
+        "identity": "output/scannet_cold_completion/scene0062_00/identity_700.pt",
+        "contributions": "output/scannet_cold_completion/scene0062_00/contributions_700.pt",
+        "source_rgb": "/mnt/pool/sqy/3d_understanding/scannet_og/scene0062_00/color/700.jpg"
+      }
+    ]
+  },
+  "category_evidence_frames": [
+    20,
+    100,
+    160,
+    180,
+    200,
+    220,
+    320,
+    400,
+    420,
+    440,
+    520,
+    560,
+    600,
+    640,
+    660,
+    700
+  ],
+  "source_query_batch_size": 4
+}

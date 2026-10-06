@@ -1,0 +1,26 @@
+{
+  "status": "complete_optional_higher_mean_source_gated_lerf_candidate",
+  "parent": "configs/recipes/next98_research.json",
+  "candidate_readout": "output/core_scope_next104/core_update/<key>/typed_readout.pt",
+  "source_policy": "if nonempty accepted A mass is at least uncertain C mass, use A seed; update only if source mask changes; otherwise retain parent category pipeline",
+  "source_judgments": "output/reference_component_seeds_next103/<key>/<qi>.json",
+  "source_reports": "output/core_seeds_next104/<key>/report.json",
+  "updated_queries": [
+    "tesla door handle",
+    "sake cup",
+    "dall-e brand",
+    "plastic ladle"
+  ],
+  "retained_queries": 63,
+  "scene_evaluations_complete": 12,
+  "new_full_source_tracking_runs": 1,
+  "selected_projection_macro": {
+    "core": 0.6223648418882332,
+    "pending": 0.6226311209980353,
+    "core_update": 0.6259859003434166
+  },
+  "parent_macro": 0.6242955393234976,
+  "mainline_defaults_changed": false,
+  "other_benchmarks_unchanged": true,
+  "summary": "output/core_scope_next104/summary.json"
+}
