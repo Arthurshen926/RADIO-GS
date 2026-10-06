@@ -1,0 +1,25 @@
+{
+  "schema": "radio_gs.query_field_pilot.v1",
+  "scene": "output/system_map_rebuild/figurines/complete/scene.json",
+  "train_frames": [11, 49, 127, 174, 222, 269],
+  "development_frames": [69, 232],
+  "raster_hw": [96, 128],
+  "dino_width": 448,
+  "training": {
+    "seed": 20261007,
+    "group_dim": 32,
+    "steps": 2000,
+    "learning_rate": 0.01,
+    "threshold": 0.5,
+    "candidate_count": 8,
+    "candidate_radius_m": 0.05,
+    "render_objective": "subset_alpha"
+  },
+  "purpose": "Matched objective control: replace full-scene normalized membership loss with differentiable selected-subset alpha loss; same shared member architecture and 2000-step budget",
+  "selection": "Declared after the pilot, budget control and historical next67/68 review; development experiment only. No new masks, teacher, inputs, query-conditioned source optimization or threshold change.",
+  "teacher_families": ["siglip", "dino", "sam"],
+  "additional_3d_supervision": false,
+  "source_access_at_query": false,
+  "compression_default": false,
+  "construction_observations": "output/query_field_20261007/figurines_pilot_v1/observations"
+}

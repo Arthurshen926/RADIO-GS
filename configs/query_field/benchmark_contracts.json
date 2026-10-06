@@ -1,0 +1,65 @@
+{
+  "schema": "radio_gs.query_field_benchmark_contracts.v1",
+  "status": "acceptance specification; new candidate benchmark execution pending",
+  "baseline_a": "output/query_field_20261007/frozen_v10/baseline_a.json",
+  "candidate_b": {
+    "construction_teachers": ["native_siglip", "native_dino", "query_free_sam"],
+    "scene_specific": true,
+    "deployment_carrier": "frozen_gaussians",
+    "additional_3d_labels": false,
+    "standard_runtime_source_access": false,
+    "shared_member_core": true,
+    "query_families": ["text", "image", "point_2d", "point_3d"]
+  },
+  "comparisons": [
+    "A saved implementation versus high-capacity B, explicitly listing input/supervision/carrier changes",
+    "B and compact B with identical observations, geometry, supervision, encoders and readout",
+    "Geometry changes and source-assisted extensions in separately labelled conditions"
+  ],
+  "tasks": [
+    {
+      "name": "lerf2d",
+      "cohort": "4 existing development scenes",
+      "target_type": "text_union",
+      "metric": "semantic 2D IoU and AP under the retained query roster",
+      "must_report": ["native scores", "member-conditioned output", "source access", "query and view denominator"]
+    },
+    {
+      "name": "lerf3d_local_projection",
+      "cohort": "same 4 LERF development scenes",
+      "target_type": "text_union",
+      "metric": "actual selected-Gaussian subset projection 2D IoU",
+      "limitation": "Existing local lerf3d result is not independent 3D labelled-ground-truth accuracy",
+      "must_report": ["unchanged Gaussian geometry", "selected row count", "subset transmittance recomputed"]
+    },
+    {
+      "name": "scannet_ovs",
+      "cohort": "10 existing development rooms",
+      "target_type": "category_partition",
+      "metric": "complete-menu point mIoU 19/15/10",
+      "pending": ["Gaussian-to-mesh evaluation transport", "native semantic control", "affinity-conditioned categorical competition"],
+      "limitation": "A uses provided mesh and dual native priors including MaskAdapter; do not label this an equal-teacher equal-carrier comparison"
+    },
+    {
+      "name": "nvos",
+      "cohort": "8 existing development cases",
+      "target_type": "reference_instance",
+      "conditions": ["registered signed-prompt standard field", "explicitly source-assisted reference extension comparable to retained A"],
+      "metric": "complete retained-case IoU/AP, signed official and retained positive-derived contracts separately",
+      "forbidden": ["target RGB at runtime", "undeclared source tracks", "hidden source-mask solver replacing the member core"]
+    },
+    {
+      "name": "uqis",
+      "cohort": "9 already-opened development rooms; final rooms must be separately locked",
+      "target_type": "reference_instance",
+      "metric": "actual selected-set IoU/AP for text, image, 2D point, 3D point; same-target all-four success",
+      "pending": ["scene Gaussian construction under declared input track", "registered camera prompts", "identity and scale inference"],
+      "forbidden": ["implicit 22-room labelled member model reuse", "mesh output reported as Gaussian deployment", "dropping unsupported queries"]
+    }
+  ],
+  "resource_accounting": ["per-scene semantic increment", "geometry bytes", "serialized payload", "shared encoder and decoder bytes", "source cache and training storage", "load time", "encoder time", "registration time", "field readout time", "peak memory"],
+  "promotion": false,
+  "independent_final_protocol_locked": false,
+  "quality_retention_target": "Planning target around one percentage point absolute loss per comparable primary task, subject to a locked comparable B and per-scene uncertainty; never average away a failed task",
+  "compression_target": "Planning target at least fourfold semantic-increment reduction relative to the same high-capacity B; pending matched evidence"
+}

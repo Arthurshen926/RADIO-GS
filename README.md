@@ -1,8 +1,21 @@
 # RADIO-GS
 
-## Executable system — 2026-10-06
+## Active research branch — 2026-10-07
 
-The sole development default is [system_v10.json](configs/pipeline/system_v10.json).
+This branch develops the [query-preserving Gaussian field](docs/method/query-preserving-gaussian-field.md):
+native DINO/SAM/SigLIP supervision, protected Gaussian capability subspaces,
+and a shared conditional member decoder. Start with `python -m radio_gs.query_field`.
+The architectural decision and resource boundaries are in
+[ADR0013](docs/adr/0013-query-preserving-scene-specific-gaussian-field.md).
+This is a research candidate; five-benchmark replacement accuracy is not established.
+
+The baseline source snapshot is `0f40545c2b93fa390e37038af8315c24b5bc57b5`.
+The older executable and results below remain baseline A; their defaults do
+not select the new candidate.
+
+## Preserved baseline A — 2026-10-06
+
+The legacy executable default is [system_v10.json](configs/pipeline/system_v10.json).
 `python -m radio_gs.pipeline.cohort` uses it by default; v9 remains a numeric
 comparator. The same31-job architecture covers LERF4 with two outputs, NVOS8,
 ScanNet10 and UQIS9. UQIS stays strictly map-only.

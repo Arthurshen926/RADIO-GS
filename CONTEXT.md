@@ -1,5 +1,22 @@
 # RADIO-GS — active system context
 
+Updated 2026-10-07 on `codex/query-preserving-gaussian-field`: the user authorized
+the scene-specific, three-teacher, query-preserving compact Gaussian research
+direction. New entry: `python -m radio_gs.query_field`. Read
+`docs/adr/0013-query-preserving-scene-specific-gaussian-field.md` and
+`docs/method/query-preserving-gaussian-field.md` before developing this branch.
+The v10 state below is baseline A, not the new architecture or a promoted student.
+Source snapshot: `0f40545c2b93fa390e37038af8315c24b5bc57b5`. Original dirty working
+tree and index are preserved in `/root/RADIO-GS`; development is isolated in
+`/root/RADIO-GS-query-field`. No new accuracy gain or five-task promotion yet.
+
+**Query-Preserving Gaussian Field Candidate**: one scene-specific Gaussian
+capability field with protected semantic/local subspaces and a shared
+scale-conditioned membership operator. Typed inputs carry uncertain identity
+evidence or authorized spatial support; native matching remains paired with
+its decoder. This refines the Canonical Capability Feature vocabulary without
+requiring RADIO reconstruction or an identical scalar output across tasks.
+
 Updated2026-10-06. Sole development default: `configs/pipeline/system_v10.json`.
 Common entry: `python -m radio_gs.pipeline.cohort`; its default is also v10.
 v9 remains a numerically unchanged comparator, with default metadata disabled.

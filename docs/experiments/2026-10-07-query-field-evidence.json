@@ -1,0 +1,858 @@
+{
+  "schema": "radio_gs.query_field_evidence_index.v1",
+  "date": "2026-10-07",
+  "branch": "codex/query-preserving-gaussian-field",
+  "source_snapshot_commit": "0f40545c2b93fa390e37038af8315c24b5bc57b5",
+  "benchmark_replacement": false,
+  "independent_final_test": false,
+  "compact_student": false,
+  "runs": {
+    "figurines_pilot_v1": {
+      "config": {
+        "path": "configs/query_field/figurines_pilot.json",
+        "sha256": "16299d7c00abfd7f942c3f17a47db10a59e3545bba6c08f31145605d17687f9f",
+        "bytes": 858
+      },
+      "artifacts": {
+        "observations/observations.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/observations/observations.json",
+          "sha256": "020f69c8b79f7e6100d2e561e193f3354b6b1d55a2ec15c00a28a5048a2ac8a4",
+          "bytes": 12929
+        },
+        "models/training.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/models/training.json",
+          "sha256": "12fb5b3d05fdc7782b48144b700c73db315b69f0b4e3d4d28414e282a889df79",
+          "bytes": 1609
+        },
+        "models/untrained/manifest.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/models/untrained/manifest.json",
+          "sha256": "8cf2424381e90413c0fc5cc61865ebb2d70cd8c8554a91cf6500dae292532835",
+          "bytes": 909
+        },
+        "models/trained/manifest.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/models/trained/manifest.json",
+          "sha256": "355af421419bd4557c8f9fa162e3cc9984e3bf8dcbf83383324dc8449f641ae4",
+          "bytes": 1029
+        },
+        "development.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/development.json",
+          "sha256": "9328e96eae6c5a8b72f457a7eb504e75a981b37e25ef53cc97df87ac6484fd86",
+          "bytes": 5544
+        },
+        "development_untrained.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/development_untrained.json",
+          "sha256": "613e693a883cb65b283f3a6f94029d07bd9231a3a7fd6e025d0a1bc0886d88ca",
+          "bytes": 726099
+        },
+        "development_trained.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/development_trained.json",
+          "sha256": "a00877d803d7dcf534563e5bb9378152c8f8dd6d2ff4098e84828b18891c26a7",
+          "bytes": 725922
+        },
+        "runtime_smoke.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/runtime_smoke.json",
+          "sha256": "027df1960caf8163291aedba7721465a21315ae729db305da262cdc3d91baff5",
+          "bytes": 6227
+        },
+        "projection_diagnostic.json": {
+          "path": "output/query_field_20261007/figurines_pilot_v1/projection_diagnostic.json",
+          "sha256": "aac442acfe8e1bc7e35aa76f50c51bf2585d87988a4892d582f13c537347087e",
+          "bytes": 40355
+        }
+      },
+      "summary": {
+        "development": {
+          "schema": "radio_gs.query_field_development.v1",
+          "benchmark_result": false,
+          "independent_final_test": false,
+          "feature_training_frames": [
+            11,
+            49,
+            127,
+            174,
+            222,
+            269
+          ],
+          "development_frames": [
+            69,
+            232
+          ],
+          "geometry_condition": "same frozen v10 carrier; feature-view holdout only",
+          "observations_sha256": "020f69c8b79f7e6100d2e561e193f3354b6b1d55a2ec15c00a28a5048a2ac8a4",
+          "query_contract": "All development SAM regions, centroid-interior pixel fixed without model scores; failures retained at zero IoU.",
+          "image_contract": "Teacher-region diagnostic: native masked-crop SigLIP plus up to 16 uniformly sampled interior DINO pixels, not external reference-image evaluation.",
+          "point_3d_contract": "Dominant Gaussian at the registered 2D prompt, not human annotated 3D instance identity.",
+          "scale_conditions": {
+            "default": "Training-mask median physical scale, no development scope access.",
+            "teacher_scope": "Privileged development mask physical extent, diagnostic only."
+          },
+          "metrics": {
+            "projected_membership_iou": "Threshold normalized full-scene alpha-weighted member scores at 0.5 against a complete source SAM mask.",
+            "actual_subset_iou": "Select Gaussian rows at fixed 0.5, re-rasterize only this subset, threshold accumulated alpha at 0.5. Default-scale cases only.",
+            "partial_loss": "Teacher interior versus disjoint comparable-scale masks; unknown areas omitted. Not verified whole-instance truth."
+          },
+          "text_benchmark_evaluated": false,
+          "source_rgb_opened_by_query": false,
+          "stages": {
+            "untrained": {
+              "summary": {
+                "point_2d/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.19643999483800056,
+                  "mean_actual_subset_iou": 0.10883562249743198,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.42962857648818453
+                },
+                "point_2d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.18395054381968973,
+                  "mean_partial_loss_on_supported_cases": 0.4833413174475086
+                },
+                "point_3d/default": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.18493283440265254,
+                  "mean_actual_subset_iou": 0.10918613271677546,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.4139200957852506
+                },
+                "point_3d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.17200363204489358,
+                  "mean_partial_loss_on_supported_cases": 0.4731820247346355
+                },
+                "region_image/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.12378406932215157,
+                  "mean_actual_subset_iou": 0.0874994495476647,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.8932113647460938
+                },
+                "region_image/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.10138935462940903,
+                  "mean_partial_loss_on_supported_cases": 0.9938917281326546
+                }
+              },
+              "seconds": 52.34209545329213,
+              "field_sha256": "7cb00dbfca881596e2362f3b0ba7ef5fccb6cefa967102c228eabe225ccc402e",
+              "deployment_bytes": 2657563621,
+              "peak_cuda_allocated_bytes": 2860669952
+            },
+            "trained": {
+              "summary": {
+                "point_2d/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.28473302761276015,
+                  "mean_actual_subset_iou": 0.12169854728261852,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.310437078328704
+                },
+                "point_2d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.259687369543654,
+                  "mean_partial_loss_on_supported_cases": 0.32819084027374285
+                },
+                "point_3d/default": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.2778190146572337,
+                  "mean_actual_subset_iou": 0.12210517409450468,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.29082953895051633
+                },
+                "point_3d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.2529317828855538,
+                  "mean_partial_loss_on_supported_cases": 0.3067769820351274
+                },
+                "region_image/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.20060025793210928,
+                  "mean_actual_subset_iou": 0.11234803571980226,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.8383774496725148
+                },
+                "region_image/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.17512946877836597,
+                  "mean_partial_loss_on_supported_cases": 0.9158668009310784
+                }
+              },
+              "seconds": 42.66079361923039,
+              "field_sha256": "b290ed3309235f147e723041072fb6816f6b6c320bbb040aef959c976faaef4b",
+              "deployment_bytes": 2657563621,
+              "peak_cuda_allocated_bytes": 2860790784
+            }
+          },
+          "promotion": false,
+          "next_gate": "Diagnose conditional grouping and identity separately; this pilot is not comparable to saved v10 benchmark accuracy."
+        },
+        "training": {
+          "config": {
+            "seed": 20261007,
+            "group_dim": 32,
+            "steps": 200,
+            "learning_rate": 0.01,
+            "threshold": 0.5,
+            "candidate_count": 8,
+            "candidate_radius_m": 0.05
+          },
+          "train_frames": [
+            11,
+            49,
+            127,
+            174,
+            222,
+            269
+          ],
+          "training_episodes": 489,
+          "development_frames": [
+            69,
+            232
+          ],
+          "default_scale_m": 0.33826568722724915,
+          "geometry_unchanged": true,
+          "native_coordinates_unchanged": true,
+          "seconds": 48.41534035280347,
+          "untrained_deployment_bytes": 2657563621,
+          "trained_deployment_bytes": 2657563621,
+          "benchmark_performance_established": false,
+          "compact_student": false
+        },
+        "runtime_smoke": {
+          "field_sha256": "b290ed3309235f147e723041072fb6816f6b6c320bbb040aef959c976faaef4b",
+          "copied_export": true,
+          "fresh_process": true,
+          "exact_replay": {
+            "text": true,
+            "image": true,
+            "point_2d": true,
+            "point_3d": true
+          },
+          "forbidden_open_attempts": [],
+          "enforcement": "Python file-open audit; not an OS security sandbox"
+        }
+      }
+    },
+    "figurines_fit_budget_v1": {
+      "config": {
+        "path": "configs/query_field/figurines_fit_budget.json",
+        "sha256": "932ae913c8ae59527275bc92ccdbd9857543fbb71ffd285107e00589219f3730",
+        "bytes": 1021
+      },
+      "artifacts": {
+        "observations/observations.json": {
+          "path": "output/query_field_20261007/figurines_fit_budget_v1/observations/observations.json",
+          "sha256": "020f69c8b79f7e6100d2e561e193f3354b6b1d55a2ec15c00a28a5048a2ac8a4",
+          "bytes": 12929
+        },
+        "models/training.json": {
+          "path": "output/query_field_20261007/figurines_fit_budget_v1/models/training.json",
+          "sha256": "a700b1f72d690870349b26354d169ccce5b2e507058418c7a09aeae3da6c6b8d",
+          "bytes": 9442
+        },
+        "models/untrained/manifest.json": {
+          "path": "output/query_field_20261007/figurines_fit_budget_v1/models/untrained/manifest.json",
+          "sha256": "8cf2424381e90413c0fc5cc61865ebb2d70cd8c8554a91cf6500dae292532835",
+          "bytes": 909
+        },
+        "models/trained/manifest.json": {
+          "path": "output/query_field_20261007/figurines_fit_budget_v1/models/trained/manifest.json",
+          "sha256": "856dbc224c3f552fc7829476f5458cde1e58212db766d8f7343e9b4dc8b969a9",
+          "bytes": 1029
+        },
+        "development.json": {
+          "path": "output/query_field_20261007/figurines_fit_budget_v1/development.json",
+          "sha256": "31564973c2fbd783bef9a4de03c6b22549f12e609474ec2862afb6ab15eb0b50",
+          "bytes": 5546
+        },
+        "development_untrained.json": {
+          "path": "output/query_field_20261007/figurines_fit_budget_v1/development_untrained.json",
+          "sha256": "7e5b674d2fcab42e522d35c7c336af401898c9a7fbbd690e680556fc71f209d4",
+          "bytes": 726100
+        },
+        "development_trained.json": {
+          "path": "output/query_field_20261007/figurines_fit_budget_v1/development_trained.json",
+          "sha256": "eac238b134c09a852998097661c569061d788c096be195054025fa4b28b8667d",
+          "bytes": 725793
+        }
+      },
+      "summary": {
+        "development": {
+          "schema": "radio_gs.query_field_development.v1",
+          "benchmark_result": false,
+          "independent_final_test": false,
+          "feature_training_frames": [
+            11,
+            49,
+            127,
+            174,
+            222,
+            269
+          ],
+          "development_frames": [
+            69,
+            232
+          ],
+          "geometry_condition": "same frozen v10 carrier; feature-view holdout only",
+          "observations_sha256": "020f69c8b79f7e6100d2e561e193f3354b6b1d55a2ec15c00a28a5048a2ac8a4",
+          "query_contract": "All development SAM regions, centroid-interior pixel fixed without model scores; failures retained at zero IoU.",
+          "image_contract": "Teacher-region diagnostic: native masked-crop SigLIP plus up to 16 uniformly sampled interior DINO pixels, not external reference-image evaluation.",
+          "point_3d_contract": "Dominant Gaussian at the registered 2D prompt, not human annotated 3D instance identity.",
+          "scale_conditions": {
+            "default": "Training-mask median physical scale, no development scope access.",
+            "teacher_scope": "Privileged development mask physical extent, diagnostic only."
+          },
+          "metrics": {
+            "projected_membership_iou": "Threshold normalized full-scene alpha-weighted member scores at 0.5 against a complete source SAM mask.",
+            "actual_subset_iou": "Select Gaussian rows at fixed 0.5, re-rasterize only this subset, threshold accumulated alpha at 0.5. Default-scale cases only.",
+            "partial_loss": "Teacher interior versus disjoint comparable-scale masks; unknown areas omitted. Not verified whole-instance truth."
+          },
+          "text_benchmark_evaluated": false,
+          "source_rgb_opened_by_query": false,
+          "stages": {
+            "untrained": {
+              "summary": {
+                "point_2d/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.19643999483800056,
+                  "mean_actual_subset_iou": 0.10883562249743198,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.42962857648818453
+                },
+                "point_2d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.18395054381968973,
+                  "mean_partial_loss_on_supported_cases": 0.4833413174475086
+                },
+                "point_3d/default": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.18493283440265254,
+                  "mean_actual_subset_iou": 0.10918613271677546,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.4139200957852506
+                },
+                "point_3d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.17200363204489358,
+                  "mean_partial_loss_on_supported_cases": 0.4731820247346355
+                },
+                "region_image/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.12378406932215157,
+                  "mean_actual_subset_iou": 0.0874994495476647,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.8932113647460938
+                },
+                "region_image/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.10138935462940903,
+                  "mean_partial_loss_on_supported_cases": 0.9938917281326546
+                }
+              },
+              "seconds": 40.720686212182045,
+              "field_sha256": "7cb00dbfca881596e2362f3b0ba7ef5fccb6cefa967102c228eabe225ccc402e",
+              "deployment_bytes": 2657563621,
+              "peak_cuda_allocated_bytes": 2860669952
+            },
+            "trained": {
+              "summary": {
+                "point_2d/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.2669158568326797,
+                  "mean_actual_subset_iou": 0.11015471712873488,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.32982160722852005
+                },
+                "point_2d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.2664332553109198,
+                  "mean_partial_loss_on_supported_cases": 0.33930942624223215
+                },
+                "point_3d/default": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.25857201249465434,
+                  "mean_actual_subset_iou": 0.10540431151965622,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.3651585561996927
+                },
+                "point_3d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.2541299738684261,
+                  "mean_partial_loss_on_supported_cases": 0.3648929967858543
+                },
+                "region_image/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.2033943719693498,
+                  "mean_actual_subset_iou": 0.10406180699672771,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 1.2955606012603753
+                },
+                "region_image/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.1905226841219012,
+                  "mean_partial_loss_on_supported_cases": 1.3246757958729107
+                }
+              },
+              "seconds": 19.657637927681208,
+              "field_sha256": "f6597fc43f9e7b847757d994999e523c94fed23e9fbff8e121754be8949acace",
+              "deployment_bytes": 2657563621,
+              "peak_cuda_allocated_bytes": 2860790784
+            }
+          },
+          "promotion": false,
+          "next_gate": "Diagnose conditional grouping and identity separately; this pilot is not comparable to saved v10 benchmark accuracy."
+        },
+        "training": {
+          "config": {
+            "seed": 20261007,
+            "group_dim": 32,
+            "steps": 2000,
+            "learning_rate": 0.01,
+            "threshold": 0.5,
+            "candidate_count": 8,
+            "candidate_radius_m": 0.05
+          },
+          "train_frames": [
+            11,
+            49,
+            127,
+            174,
+            222,
+            269
+          ],
+          "training_episodes": 489,
+          "development_frames": [
+            69,
+            232
+          ],
+          "default_scale_m": 0.33826568722724915,
+          "geometry_unchanged": true,
+          "native_coordinates_unchanged": true,
+          "unique_training_episodes_sampled": 485,
+          "fixed_training_partial_loss_before": 0.33223078873937906,
+          "fixed_training_partial_loss_after": 0.08280805419384712,
+          "seconds": 59.80114152096212,
+          "untrained_deployment_bytes": 2657563621,
+          "trained_deployment_bytes": 2657563621,
+          "benchmark_performance_established": false,
+          "compact_student": false
+        }
+      }
+    },
+    "figurines_subset_v1": {
+      "config": {
+        "path": "configs/query_field/figurines_subset_objective.json",
+        "sha256": "14b64338bf57e0c417aaf2cd48883c2114614e931458d7975998db23312ea5b2",
+        "bytes": 1126
+      },
+      "artifacts": {
+        "observations/observations.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/observations/observations.json",
+          "sha256": "020f69c8b79f7e6100d2e561e193f3354b6b1d55a2ec15c00a28a5048a2ac8a4",
+          "bytes": 12929
+        },
+        "models/training.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/models/training.json",
+          "sha256": "7db29249a286e43313594e8b7e9baa4262a6e597289d5276bac7b73ae2a32036",
+          "bytes": 9623
+        },
+        "models/untrained/manifest.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/models/untrained/manifest.json",
+          "sha256": "8cf2424381e90413c0fc5cc61865ebb2d70cd8c8554a91cf6500dae292532835",
+          "bytes": 909
+        },
+        "models/trained/manifest.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/models/trained/manifest.json",
+          "sha256": "67568badc2b10dde6b966b783951ccf704173c98ac2b6aaa476b73df10ab5d64",
+          "bytes": 1069
+        },
+        "development.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/development.json",
+          "sha256": "f8a1838cf6ecbd3f98ac6f63d49db6419265c34aeff35abc785036a60181b940",
+          "bytes": 5543
+        },
+        "development_untrained.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/development_untrained.json",
+          "sha256": "918cc0f2eb6a966bf491ad7fb45553aa2f04904dd5b623043c38733b23153ac8",
+          "bytes": 726099
+        },
+        "development_trained.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/development_trained.json",
+          "sha256": "66afe7ff47c82dc9df5b6013207ec373c69e3717f35cc53e5e0dae750246c56e",
+          "bytes": 720388
+        },
+        "runtime_smoke.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/runtime_smoke.json",
+          "sha256": "7ee993edd735379aa4254083dbf600df79d39481741ffb6a703f82dd7182b561",
+          "bytes": 6225
+        }
+      },
+      "summary": {
+        "development": {
+          "schema": "radio_gs.query_field_development.v1",
+          "benchmark_result": false,
+          "independent_final_test": false,
+          "feature_training_frames": [
+            11,
+            49,
+            127,
+            174,
+            222,
+            269
+          ],
+          "development_frames": [
+            69,
+            232
+          ],
+          "geometry_condition": "same frozen v10 carrier; feature-view holdout only",
+          "observations_sha256": "020f69c8b79f7e6100d2e561e193f3354b6b1d55a2ec15c00a28a5048a2ac8a4",
+          "query_contract": "All development SAM regions, centroid-interior pixel fixed without model scores; failures retained at zero IoU.",
+          "image_contract": "Teacher-region diagnostic: native masked-crop SigLIP plus up to 16 uniformly sampled interior DINO pixels, not external reference-image evaluation.",
+          "point_3d_contract": "Dominant Gaussian at the registered 2D prompt, not human annotated 3D instance identity.",
+          "scale_conditions": {
+            "default": "Training-mask median physical scale, no development scope access.",
+            "teacher_scope": "Privileged development mask physical extent, diagnostic only."
+          },
+          "metrics": {
+            "projected_membership_iou": "Threshold normalized full-scene alpha-weighted member scores at 0.5 against a complete source SAM mask.",
+            "actual_subset_iou": "Select Gaussian rows at fixed 0.5, re-rasterize only this subset, threshold accumulated alpha at 0.5. Default-scale cases only.",
+            "partial_loss": "Teacher interior versus disjoint comparable-scale masks; unknown areas omitted. Not verified whole-instance truth."
+          },
+          "text_benchmark_evaluated": false,
+          "source_rgb_opened_by_query": false,
+          "stages": {
+            "untrained": {
+              "summary": {
+                "point_2d/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.19643999483800056,
+                  "mean_actual_subset_iou": 0.10883562249743198,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.42962857648818453
+                },
+                "point_2d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.18395054381968973,
+                  "mean_partial_loss_on_supported_cases": 0.4833413174475086
+                },
+                "point_3d/default": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.18493283440265254,
+                  "mean_actual_subset_iou": 0.10918613271677546,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.4139200957852506
+                },
+                "point_3d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.17200363204489358,
+                  "mean_partial_loss_on_supported_cases": 0.4731820247346355
+                },
+                "region_image/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.12378406932215157,
+                  "mean_actual_subset_iou": 0.0874994495476647,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.8932113647460938
+                },
+                "region_image/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.10138935462940903,
+                  "mean_partial_loss_on_supported_cases": 0.9938917281326546
+                }
+              },
+              "seconds": 26.63862288556993,
+              "field_sha256": "7cb00dbfca881596e2362f3b0ba7ef5fccb6cefa967102c228eabe225ccc402e",
+              "deployment_bytes": 2657563621,
+              "peak_cuda_allocated_bytes": 2860669952
+            },
+            "trained": {
+              "summary": {
+                "point_2d/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.2579453891107383,
+                  "mean_actual_subset_iou": 0.26456803847627836,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 0.8135635878729907
+                },
+                "point_2d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.258679925299459,
+                  "mean_partial_loss_on_supported_cases": 0.8069761923208458
+                },
+                "point_3d/default": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.16424495632727162,
+                  "mean_actual_subset_iou": 0.25243048403913587,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 1.2022698648379093
+                },
+                "point_3d/teacher_scope": {
+                  "cases": 169,
+                  "failed": 14,
+                  "mean_projected_membership_iou": 0.17315101856159146,
+                  "mean_partial_loss_on_supported_cases": 1.190884211693605
+                },
+                "region_image/default": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.10218783201561613,
+                  "mean_actual_subset_iou": 0.19557267979211754,
+                  "actual_subset_cases": 169,
+                  "mean_partial_loss_on_supported_cases": 2.344220977309973
+                },
+                "region_image/teacher_scope": {
+                  "cases": 169,
+                  "failed": 0,
+                  "mean_projected_membership_iou": 0.10466514447064706,
+                  "mean_partial_loss_on_supported_cases": 2.3506792925519333
+                }
+              },
+              "seconds": 17.674547623842955,
+              "field_sha256": "674d5556b21b37eafc5aa28dd66cc6386ba2c8fdb3be5c4454e2f6707754ae93",
+              "deployment_bytes": 2657563621,
+              "peak_cuda_allocated_bytes": 2860790784
+            }
+          },
+          "promotion": false,
+          "next_gate": "Diagnose conditional grouping and identity separately; this pilot is not comparable to saved v10 benchmark accuracy."
+        },
+        "training": {
+          "config": {
+            "seed": 20261007,
+            "group_dim": 32,
+            "steps": 2000,
+            "learning_rate": 0.01,
+            "threshold": 0.5,
+            "candidate_count": 8,
+            "candidate_radius_m": 0.05,
+            "render_objective": "subset_alpha"
+          },
+          "train_frames": [
+            11,
+            49,
+            127,
+            174,
+            222,
+            269
+          ],
+          "training_episodes": 489,
+          "render_objective": "subset_alpha",
+          "fixed_training_diagnostic_domain": "full-scene normalized membership; identical diagnostic across objectives",
+          "development_frames": [
+            69,
+            232
+          ],
+          "default_scale_m": 0.33826568722724915,
+          "geometry_unchanged": true,
+          "native_coordinates_unchanged": true,
+          "unique_training_episodes_sampled": 485,
+          "fixed_training_partial_loss_before": 0.33223078873937906,
+          "fixed_training_partial_loss_after": 0.5193591479712941,
+          "seconds": 63.056431369856,
+          "untrained_deployment_bytes": 2657563621,
+          "trained_deployment_bytes": 2657563621,
+          "benchmark_performance_established": false,
+          "compact_student": false
+        },
+        "runtime_smoke": {
+          "field_sha256": "674d5556b21b37eafc5aa28dd66cc6386ba2c8fdb3be5c4454e2f6707754ae93",
+          "copied_export": true,
+          "fresh_process": true,
+          "exact_replay": {
+            "text": true,
+            "image": true,
+            "point_2d": true,
+            "point_3d": true
+          },
+          "forbidden_open_attempts": [],
+          "enforcement": "Python file-open audit; not an OS security sandbox"
+        }
+      }
+    }
+  },
+  "baseline_a": {
+    "receipt": {
+      "path": "output/query_field_20261007/frozen_v10/baseline_a.json",
+      "sha256": "fe31649a71c749e65b1af7295a7208b5877947a12cffc1afd46f2ab15199705f",
+      "bytes": 137634
+    },
+    "macro": {
+      "lerf": {
+        "semantic_iou": 0.7040067569509945,
+        "ap": 0.8761927775455381,
+        "selected_projection_iou": 0.6696327365836882
+      },
+      "nvos": {
+        "iou": 0.865134172141552,
+        "ap": 0.9802224516003604
+      },
+      "scannet": {
+        "miou_19": 0.6101149054806628,
+        "miou_15": 0.6252758904159778,
+        "miou_10": 0.7248606102956524
+      },
+      "uqis": {
+        "text_ap": 0.2659587047562112,
+        "image_ap": 0.5930878179400586,
+        "point_2d_ap": 0.7579009711011095,
+        "point_3d_ap": 0.7532525076702995,
+        "text_selected_iou": 0.16386530164545418,
+        "image_selected_iou": 0.39897960281086925,
+        "point_2d_selected_iou": 0.49735675405728724,
+        "point_3d_selected_iou": 0.4904698335651834
+      }
+    },
+    "jobs": 31,
+    "hashed_files": 222,
+    "unfrozen_directory_dependencies": 10,
+    "missing_dependencies": [],
+    "full_external_dependency_archive": false
+  },
+  "code": [
+    {
+      "path": "radio_gs/query_field/__init__.py",
+      "sha256": "bc7064c5ae34dfa06d45b841bd23e51f8262e0e0a9f0a08788c526b60a21b6fc",
+      "bytes": 401
+    },
+    {
+      "path": "radio_gs/query_field/__main__.py",
+      "sha256": "310aa302fa8583eb779d7397f006643015a0337c2f82183ca06d5ca3cbfe461b",
+      "bytes": 1720
+    },
+    {
+      "path": "radio_gs/query_field/adapters.py",
+      "sha256": "d5f5594d79f41b47559a108894ca7579b7f7ec68072deab81b01a776149a1a2d",
+      "bytes": 5308
+    },
+    {
+      "path": "radio_gs/query_field/baseline.py",
+      "sha256": "3e598682d64413da88f2ba48b1016b6708120720ea8ffacf9f3515b7c4a665af",
+      "bytes": 4590
+    },
+    {
+      "path": "radio_gs/query_field/cold_check.py",
+      "sha256": "97d1c5bd69b498a9d9e992ea6ebc752c145b4f76e368b3b5fc10a4de468b14c4",
+      "bytes": 2618
+    },
+    {
+      "path": "radio_gs/query_field/contracts.py",
+      "sha256": "c0bce2455709a80b095ef7f09f038ef5411fbe580b9384add8e0f0aa0c2d7ee2",
+      "bytes": 4056
+    },
+    {
+      "path": "radio_gs/query_field/diagnose.py",
+      "sha256": "06074fcfd3379820a43ca898b70d87c303dc99505f08ecdca5adfbb030f3b4b4",
+      "bytes": 3819
+    },
+    {
+      "path": "radio_gs/query_field/evaluate.py",
+      "sha256": "4cd5ba2812d618ef3b995b5cb8a5bf286e75966ec4fe48014a062f5ad7e543c3",
+      "bytes": 9697
+    },
+    {
+      "path": "radio_gs/query_field/field.py",
+      "sha256": "6f3fb588339e85488db1b4d444c61fa866902c1a19cd38bb3dfd172c8c89b7a2",
+      "bytes": 10159
+    },
+    {
+      "path": "radio_gs/query_field/geometry.py",
+      "sha256": "7749dfa0657cc29a31397eb41a7b4fb0e25d7b556a0999104812e19a8e0e1db0",
+      "bytes": 3726
+    },
+    {
+      "path": "radio_gs/query_field/observations.py",
+      "sha256": "3117b621cc32d00461bd5d259917d7bc9469a87a60885f7f1f690f5ef2aabbc2",
+      "bytes": 9568
+    },
+    {
+      "path": "radio_gs/query_field/smoke.py",
+      "sha256": "9485fbb6100f062308164555421a24e70da524f1d4839046f1698f69404f5dd4",
+      "bytes": 5571
+    },
+    {
+      "path": "radio_gs/query_field/storage.py",
+      "sha256": "5785d1c9084c422b2073181a44e9823a72332833150ac5fbfd1722c2d5b71f18",
+      "bytes": 3274
+    },
+    {
+      "path": "radio_gs/query_field/train.py",
+      "sha256": "657dc0725018f6ce7c5fd0003b4b99f1ca656b91031ddb5337fff3e38ba35ef7",
+      "bytes": 8143
+    }
+  ],
+  "reused_numerics": [
+    {
+      "path": "radio_gs/models/native_decoder_readout.py",
+      "sha256": "d0b26408f9228b74b8adf2bc958954e97ef74d09703a766b9393a9fd7b00cc01",
+      "bytes": 1804
+    },
+    {
+      "path": "radio_gs/models/native_query_encoders.py",
+      "sha256": "9fcbe09550d0a90b1ff94048c079325d05479e4337f3eb767dd0ab9e73166572",
+      "bytes": 5130
+    },
+    {
+      "path": "radio_gs/models/native_region_appearance.py",
+      "sha256": "413e28cb31da835d77bfa9c398b67918ffdfa92de565538db49d31d1f4a3eb67",
+      "bytes": 2435
+    },
+    {
+      "path": "radio_gs/rendering/contribution_compositor.py",
+      "sha256": "6feb27e2bf667092eae292a8168dbcde43deca3c1b7d8a218443998297a3d58d",
+      "bytes": 32400
+    },
+    {
+      "path": "radio_gs/geometry/frozen_gaussian.py",
+      "sha256": "ea3568f4bf9a751545f0303a75d693dccf941b33e8b87e6cf908a5fcdd7ef63b",
+      "bytes": 3766
+    }
+  ],
+  "validation": {
+    "tests_passed": 17,
+    "includes_actual_gsplat_cuda": true,
+    "test_files": [
+      "tests/test_query_preserving_field.py",
+      "tests/test_native_decoder_readout.py",
+      "tests/test_query_field_subset_cuda.py"
+    ]
+  },
+  "original_workspace_preserved": {
+    "status": true,
+    "staged_diff": true,
+    "unstaged_diff": true,
+    "index": true
+  }
+}
