@@ -29,6 +29,7 @@ its label-trained member tree is silently called by the new package.
 | `support_audit`, `support_control` | Train-only inferred-support compilation, matched packaging, and three-scene validation |
 | `metric_study` | Fixed physical-scale member-energy controls with frozen native query vectors |
 | `exclusion_audit`, `local_metric_bound` | Source-only exclusion coverage and separate post-evaluation locality/scope bounds |
+| `source_regions`, `public_nvos` | Query-free native crop construction; registered signed raster inputs, source-denied replay and separate real-prompt scoring |
 
 ```mermaid
 flowchart LR
@@ -50,6 +51,25 @@ does not prove that the source teacher's query capability survived initial
 multi-view fusion. Native query ranking and local matching preservation remain
 separate required experiments. Likewise, a shared affinity decoder with a scale
 gate is an implementation starting point, not a novelty claim by itself.
+
+Registered multi-pixel evidence now uses `adapters.raster_support`: normalize
+each camera ray, then pool pixel evidence into the same weighted Gaussian Support.
+Area resampling retains fractional thin strokes; missing projection mass is
+reported instead of relocated. Deterministic CPU float64 reduction avoids CUDA
+atomic-order differences in large support sets. Positive and negative rays may
+share contributors and remain uncertain, so this does not introduce hard 2D
+element constraints. The existing signed member rule is unchanged.
+
+An explicit `raster_extent_scale` experiment uses positive ray-centre dispersion
+to supply the existing physical scale input. The source scope convention is
+twice spatial standard deviation; its maximum with the default is used. Single
+pixels retain the default, and within-ray depth ambiguity is excluded from the
+extent statistic. This is an input-scope estimate, not a new mask decoder or an
+established recovery of complete object size. Keep both fixed scope controls in
+the [real-prompt protocol](../experiments/2026-10-07-native-signed-prompt-protocol.md).
+`public_nvos` keeps actual selected-subset alpha and the retained full-scene
+normalized member response separate, and scores only after all fixed predictions
+and copied-field source-denied replays are finalized.
 
 An optional protected `anchor_eligible` mask now aligns inferred text/image
 supports with the source-interior domain used by member training. It does not

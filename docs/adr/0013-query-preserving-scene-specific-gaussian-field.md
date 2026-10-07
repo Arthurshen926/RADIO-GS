@@ -181,3 +181,20 @@ of the declared local LERF cohort, not completion of ScanNet OVS, NVOS, UQIS,
 independent final testing or the desired accuracy target. Preserve these cohort
 and contract boundaries in future claims and compare every new common method
 without selecting different variants per scene or input.
+
+## Real signed raster prompts
+
+The [fern development probe](../experiments/2026-10-07-native-signed-prompt-results.md)
+uses raw positive/negative scribbles as transient registered ray evidence for the
+existing common member energy. Permit normalized multi-pixel support pooling,
+explicit missing-evidence accounting and a separate positive-extent scale
+estimate. No source tracker, query mask generator, extra 3D labels or hard 2D
+element clamp enters deployment. Numerical pooling must replay deterministically.
+
+Eight fixed arms pass copied-field source-denied replay. Source fitting improves
+the retained response IoU but regresses actual selected-set IoU and AP on this
+one availability-selected case. The extent estimate stays at the default and
+provides no gain. Keep the common physical candidate; do not choose an untrained
+model for fern or promote a new scale policy from this evidence. Further changes
+must address signed support learning and false additions through the shared core,
+with complete per-input/readout gates and honest full-cohort denominators.

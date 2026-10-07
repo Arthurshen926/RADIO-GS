@@ -60,6 +60,23 @@ def _file_receipt(path):
     return dict(path=str(path), sha256=sha256(path), bytes=path.stat().st_size)
 
 
+def source_sam_metadata(metadata):
+    """Normalize two recorded query-free cache schemas without weakening checks."""
+    if "generation_contract" in metadata:
+        contract = metadata["generation_contract"]
+        source_hash = metadata["source_image"]["sha256"]
+        checkpoint = metadata["checkpoint"]
+    elif metadata.get("schema_version") == 2 and metadata.get("source") == "official_sam3_interactive_grid_multimask_hierarchy":
+        contract = metadata
+        source_hash = metadata["source_image_sha256"]
+        checkpoint = dict(sha256=metadata["checkpoint_sha256"])
+    else:
+        raise ValueError("unrecognized source SAM provenance schema")
+    if contract.get("query_free") is not True:
+        raise ValueError("query-conditioned source masks are not construction supervision")
+    return source_hash, checkpoint
+
+
 @torch.no_grad()
 def compile_observations(config_path, output, device="cuda"):
     config_path = Path(config_path)
@@ -107,10 +124,9 @@ def compile_observations(config_path, output, device="cuda"):
         sam_path = Path(region["sam_path"])
         sam = torch.load(sam_path, map_location="cpu", weights_only=False)
         source = _file_receipt(images[frame])
-        if sam["metadata"]["source_image"]["sha256"] != source["sha256"]:
+        source_hash, sam_checkpoint = source_sam_metadata(sam["metadata"])
+        if source_hash != source["sha256"]:
             raise ValueError("SAM cache does not match source image")
-        if sam["metadata"]["generation_contract"]["query_free"] is not True:
-            raise ValueError("query-conditioned source masks are not construction supervision")
         raw_masks = unpack_masks(sam["packed_masks"], sam["mask_shape"][1])
         indices = region["native_proposal_indices"].long()
         raw_masks = torch.from_numpy(raw_masks.copy())[indices]
@@ -158,7 +174,7 @@ def compile_observations(config_path, output, device="cuda"):
         torch.save(payload, target)
         receipt["frames"].append(dict(frame=frame, split="train" if frame in splits["train_frames"] else "development",
                        rgb=source, region_cache=_file_receipt(region_path), sam_cache=_file_receipt(sam_path),
-                       sam_checkpoint=sam["metadata"]["checkpoint"], compiled=_file_receipt(target),
+                       sam_checkpoint=sam_checkpoint, compiled=_file_receipt(target),
                        masks=len(masks), visible_pixels=int((mass > 0).sum()), nnz=operator._nnz()))
         print("compiled", scene["scene"], frame, "regions", len(masks), flush=True)
     semantic = F.normalize(semantic_sum/semantic_mass.clamp_min(1e-8), dim=-1).half()

@@ -19,6 +19,28 @@ its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
 Latest candidate evidence (2026-10-07):
+`docs/experiments/2026-10-07-native-signed-prompt-results.md`.
+The unchanged common physical member field now accepts real registered signed
+NVOS scribbles through normalized uncertain rays. A deterministic raster adapter
+and optional positive ray-centre extent estimate add input evidence, not another
+mask decoder. Fern has 12 training/2 teacher-development views, 329,038 Gaussians,
+183 source episodes, 2000 steps and a 1.577GB self-contained export.
+All 8 fixed untrained/trained x positive/signed x default/extent arms and copied
+source-denied replays complete before scoring. The extent floor is inactive as
+an intervention: all scales remain 2.6988m and outputs unchanged.
+Fitted signed retained-response IoU is 76.7399% versus saved v10 fern 82.1851%
+(5.4453pp gap), with different raw-prompt/source-access/source-budget contracts.
+Fitting improves response IoU 74.8546 -> 76.7399%, but AP falls 93.5841 -> 92.0952%
+and actual subset IoU falls 77.8284 -> 76.1453%. Do not select the untrained arm
+for fern or claim across-readout improvement. All eight cold replays are bit-exact
+after correcting CUDA raster-pooling reduction order; 36 distinct tests pass.
+This is 1/8 historically opened cases, not full NVOS or a new promotion.
+LERF four-scene actual subset32.3130% is unchanged; ScanNet/UQIS remain pending.
+Next: common signed multi-support learning and false-addition control under
+source-only supervision, with fixed text/image/point and actual-subset gates.
+Evidence: `docs/experiments/2026-10-07-native-signed-prompt-evidence.json`.
+
+Previous candidate evidence (2026-10-07):
 `docs/experiments/2026-10-07-native-local-member-results.md`.
 Keep the fitted physical metric as the common research candidate. A protected
 native DINO cosine distance is now an opt-in shared member-energy control, with

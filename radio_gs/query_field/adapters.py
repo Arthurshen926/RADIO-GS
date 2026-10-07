@@ -35,6 +35,83 @@ def pixel_support(operator, pixel):
     return support
 
 
+def raster_support(operator, evidence):
+    """Pool registered pixel evidence without choosing a dominant Gaussian.
+
+    Each nonempty row of ``operator`` is a normalized uncertain camera ray.
+    Evidence may contain fractional area after resampling thin scribbles.
+    Unsupported evidence is reported, never replaced by a nearby pixel.
+    """
+    operator = operator.coalesce()
+    evidence = torch.as_tensor(evidence, device=operator.device).float().flatten()
+    if evidence.shape != (operator.shape[0],) or not torch.isfinite(evidence).all() or (evidence < 0).any():
+        raise ValueError("raster evidence must be aligned finite nonnegative weights")
+    if not bool(evidence.sum() > 0):
+        raise ValueError("raster evidence is empty")
+    pixels, rows = operator.indices().cpu()
+    values = operator.values().double().cpu()
+    if not torch.isfinite(values).all() or (values < 0).any():
+        raise ValueError("invalid camera contribution weights")
+    # Ordered CPU float64 accumulation avoids CUDA atomic-order differences in
+    # large scribbles. This is transient registration, not a new member decoder.
+    mass = torch.bincount(pixels, weights=values, minlength=operator.shape[0])
+    evidence_cpu = evidence.double().cpu()
+    # Normalize here as well, so callers may supply either raw or normalized rays.
+    pooled = torch.bincount(rows, weights=values / mass[pixels].clamp_min(1e-12) * evidence_cpu[pixels],
+                            minlength=operator.shape[1])
+    indices = torch.where(pooled > 0)[0]
+    support = Support(indices.to(operator.device), pooled[indices].float().to(operator.device))
+    support.validate(operator.shape[1])
+    return support, float(evidence_cpu[mass > 0].sum() / evidence_cpu.sum())
+
+
+def scribble_packet(operator, positive, negative=None, *, scale=None):
+    """Registered raster evidence uses the same point packet and member core.
+
+    Positive/negative rays can share contributors. They are uncertain supports,
+    not exact element constraints. Native-raster sign overlap must be checked
+    before resampling, where two disjoint strokes can share a coarse pixel.
+    """
+    support, positive_coverage = raster_support(operator, positive)
+    exclusion, negative_coverage = (None, None) if negative is None else raster_support(operator, negative)
+    packet = QueryPacket("point_2d", positive=support, negative=exclusion, scale=scale)
+    return packet, dict(positive_projected_mass_fraction=positive_coverage,
+                       negative_projected_mass_fraction=negative_coverage,
+                       positive_gaussians=len(support.indices),
+                       negative_gaussians=0 if exclusion is None else len(exclusion.indices),
+                       exact_element_constraints=False)
+
+
+def raster_extent_scale(operator, positive, xyz, world_units_per_metre, default_scale):
+    """Infer a physical scope floor from distinct positive ray centres.
+
+    The convention 2 * spatial standard deviation matches source mask scopes.
+    Within-ray depth uncertainty is not counted as object extent. One pixel
+    carries no extent information and retains the scene's default scale.
+    """
+    import math
+    if any(not math.isfinite(float(v)) or v <= 0 for v in [world_units_per_metre, default_scale]):
+        raise ValueError("extent inference requires positive physical units and default scope")
+    operator = operator.coalesce()
+    raster_support(operator, positive)  # Same alignment/coverage validation.
+    # The small geometric scope statistic also has a deterministic CPU path.
+    operator = operator.cpu().double()
+    weights = torch.as_tensor(positive).double().cpu().flatten()
+    mass = torch.sparse.sum(operator, dim=1).to_dense()
+    active = (weights > 0) & (mass > 0)
+    if int(active.sum()) <= 1:
+        return float(default_scale)
+    if xyz.shape != (operator.shape[1], 3) or not torch.isfinite(xyz).all():
+        raise ValueError("ray centres require finite aligned Gaussian coordinates")
+    centres = (torch.sparse.mm(operator, xyz.double().cpu()) /
+               mass.clamp_min(1e-12)[:, None])[active]
+    weights = weights[active] / weights[active].sum()
+    centre = (centres * weights[:, None]).sum(0)
+    variance = ((centres-centre).square().sum(1) * weights).sum()
+    inferred = 2*float(variance.sqrt()) / world_units_per_metre
+    return max(float(default_scale), inferred)
+
+
 def point_2d(field, pixel_xy, intrinsic, world_to_camera, image_hw, *,
              scale=None, negative_xy=None, world_units_per_metre=1.):
     """Camera and pixels only: no RGB, depth, teacher, or source cache access."""
