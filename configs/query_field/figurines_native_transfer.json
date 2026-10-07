@@ -1,0 +1,12 @@
+{
+  "schema": "radio_gs.query_field_native_transfer.v1",
+  "earlier_field": "output/query_field_20261007/figurines_subset_v1/models/trained",
+  "later_field": "output/query_field_20261007/figurines_18views_v1/models/trained",
+  "earlier_observations": "output/query_field_20261007/figurines_pilot_v1/observations",
+  "later_observations": "output/query_field_20261007/figurines_18views_v1/observations",
+  "split": "development",
+  "native_conditions": ["six_view", "eighteen_view"],
+  "fixed": "18-view member codes/decoder/scale and the intersection of the two observation domains",
+  "changed": "Only protected native SigLIP and DINO coordinates; no fitting or query-specific choice",
+  "purpose": "Paired diagnostic after observing image regression under source expansion. Separate native identity fusion from changed membership and coverage. No deployable mixed-source model promotion."
+}

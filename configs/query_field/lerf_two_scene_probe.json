@@ -1,0 +1,20 @@
+{
+  "schema": "radio_gs.query_field_public_lerf_probe.v1",
+  "shared_encoder": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384/snapshots/a713301b217d38485fb2204c808367d10bc3cc40",
+  "generic_negative_texts": ["object", "things", "stuff", "texture"],
+  "native_temperature": 10.0,
+  "native_readout": "sigmoid(10 * (native query cosine - maximum generic-negative cosine)); no fitted response calibration",
+  "member_readout": "existing shared member core, explicit union task, original fixed eight candidates and 0.02 identity margin",
+  "semantic_controls": ["native_generic_relevance", "shared_membership"],
+  "selection": "Same hard Gaussian subset for both semantic controls; unchanged existing LERF scorer and alpha-byte threshold 10",
+  "status": "First two-scene actual benchmark probe, fixed before scoring; all four prediction packages must precede scoring",
+  "runtime_source_access": false,
+  "legacy_source_query_calibration_reused": false,
+  "independent_final_test": false,
+  "jobs": [
+    {"name": "figurines_6", "scene": "figurines", "field": "output/query_field_20261007/figurines_subset_v1/models/trained", "queries": "configs/consolidated/figurines.queries.json", "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"},
+    {"name": "figurines_18", "scene": "figurines", "field": "output/query_field_20261007/figurines_18views_v1/models/trained", "queries": "configs/consolidated/figurines.queries.json", "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"},
+    {"name": "ramen_6", "scene": "ramen", "field": "output/query_field_20261007/ramen_6views_v1/models/trained", "queries": "configs/consolidated/ramen.integration-queries.json", "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"},
+    {"name": "ramen_18", "scene": "ramen", "field": "output/query_field_20261007/ramen_18views_v1/models/trained", "queries": "configs/consolidated/ramen.integration-queries.json", "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"}
+  ]
+}

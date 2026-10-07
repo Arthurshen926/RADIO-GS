@@ -1,0 +1,963 @@
+{
+  "schema": "radio_gs.query_field_two_scene_evidence.v1",
+  "date": "2026-10-07",
+  "branch": "codex/query-preserving-gaussian-field",
+  "parent_implementation_commit": "1a40218",
+  "completed": true,
+  "benchmark_replacement": false,
+  "compact_student": false,
+  "independent_final_test": false,
+  "source_files": {
+    "radio_gs/query_field/__init__.py": {
+      "path": "radio_gs/query_field/__init__.py",
+      "sha256": "bc7064c5ae34dfa06d45b841bd23e51f8262e0e0a9f0a08788c526b60a21b6fc",
+      "bytes": 401
+    },
+    "radio_gs/query_field/__main__.py": {
+      "path": "radio_gs/query_field/__main__.py",
+      "sha256": "310aa302fa8583eb779d7397f006643015a0337c2f82183ca06d5ca3cbfe461b",
+      "bytes": 1720
+    },
+    "radio_gs/query_field/adapters.py": {
+      "path": "radio_gs/query_field/adapters.py",
+      "sha256": "d5f5594d79f41b47559a108894ca7579b7f7ec68072deab81b01a776149a1a2d",
+      "bytes": 5308
+    },
+    "radio_gs/query_field/baseline.py": {
+      "path": "radio_gs/query_field/baseline.py",
+      "sha256": "3e598682d64413da88f2ba48b1016b6708120720ea8ffacf9f3515b7c4a665af",
+      "bytes": 4590
+    },
+    "radio_gs/query_field/cold_check.py": {
+      "path": "radio_gs/query_field/cold_check.py",
+      "sha256": "97d1c5bd69b498a9d9e992ea6ebc752c145b4f76e368b3b5fc10a4de468b14c4",
+      "bytes": 2618
+    },
+    "radio_gs/query_field/contracts.py": {
+      "path": "radio_gs/query_field/contracts.py",
+      "sha256": "c0bce2455709a80b095ef7f09f038ef5411fbe580b9384add8e0f0aa0c2d7ee2",
+      "bytes": 4056
+    },
+    "radio_gs/query_field/diagnose.py": {
+      "path": "radio_gs/query_field/diagnose.py",
+      "sha256": "06074fcfd3379820a43ca898b70d87c303dc99505f08ecdca5adfbb030f3b4b4",
+      "bytes": 3819
+    },
+    "radio_gs/query_field/evaluate.py": {
+      "path": "radio_gs/query_field/evaluate.py",
+      "sha256": "4cd5ba2812d618ef3b995b5cb8a5bf286e75966ec4fe48014a062f5ad7e543c3",
+      "bytes": 9697
+    },
+    "radio_gs/query_field/field.py": {
+      "path": "radio_gs/query_field/field.py",
+      "sha256": "6f3fb588339e85488db1b4d444c61fa866902c1a19cd38bb3dfd172c8c89b7a2",
+      "bytes": 10159
+    },
+    "radio_gs/query_field/geometry.py": {
+      "path": "radio_gs/query_field/geometry.py",
+      "sha256": "7749dfa0657cc29a31397eb41a7b4fb0e25d7b556a0999104812e19a8e0e1db0",
+      "bytes": 3726
+    },
+    "radio_gs/query_field/hypotheses.py": {
+      "path": "radio_gs/query_field/hypotheses.py",
+      "sha256": "e80320195844089d4ffe696b4008d7da81c1075f14ee9a4321677ea3e17f6941",
+      "bytes": 5813
+    },
+    "radio_gs/query_field/hypothesis_study.py": {
+      "path": "radio_gs/query_field/hypothesis_study.py",
+      "sha256": "0ce39edff9b07e6077bf03800490e0d058a451bb9255573dccb72e3039ef1db7",
+      "bytes": 6961
+    },
+    "radio_gs/query_field/native_transfer.py": {
+      "path": "radio_gs/query_field/native_transfer.py",
+      "sha256": "dd08379042e2129f7bf71a3800f0a235211c7fa97bba0e8b15788700f628185d",
+      "bytes": 4838
+    },
+    "radio_gs/query_field/observations.py": {
+      "path": "radio_gs/query_field/observations.py",
+      "sha256": "3117b621cc32d00461bd5d259917d7bc9469a87a60885f7f1f690f5ef2aabbc2",
+      "bytes": 9568
+    },
+    "radio_gs/query_field/public_lerf.py": {
+      "path": "radio_gs/query_field/public_lerf.py",
+      "sha256": "8c9629f78f4ac2f9861d2f7e1b410f37f67219cd48571723e6dad087eddc6218",
+      "bytes": 7062
+    },
+    "radio_gs/query_field/readout_study.py": {
+      "path": "radio_gs/query_field/readout_study.py",
+      "sha256": "66ae30e7aa70f252b50927f12f256dad9110248a140ce6b15c1a64904bdb067d",
+      "bytes": 4720
+    },
+    "radio_gs/query_field/smoke.py": {
+      "path": "radio_gs/query_field/smoke.py",
+      "sha256": "9485fbb6100f062308164555421a24e70da524f1d4839046f1698f69404f5dd4",
+      "bytes": 5571
+    },
+    "radio_gs/query_field/storage.py": {
+      "path": "radio_gs/query_field/storage.py",
+      "sha256": "5785d1c9084c422b2073181a44e9823a72332833150ac5fbfd1722c2d5b71f18",
+      "bytes": 3274
+    },
+    "radio_gs/query_field/subset_errors.py": {
+      "path": "radio_gs/query_field/subset_errors.py",
+      "sha256": "3a2621eed33e262073775020876733cbede4e8799c917e09e329082f32e51abd",
+      "bytes": 2598
+    },
+    "radio_gs/query_field/train.py": {
+      "path": "radio_gs/query_field/train.py",
+      "sha256": "657dc0725018f6ce7c5fd0003b4b99f1ca656b91031ddb5337fff3e38ba35ef7",
+      "bytes": 8143
+    },
+    "radio_gs/evaluation/lerf_readouts.py": {
+      "path": "radio_gs/evaluation/lerf_readouts.py",
+      "sha256": "2aa28e108e438c4817a4508b227872eb4b153e89a375b27ad0f9664d96ddd1e3",
+      "bytes": 4402
+    },
+    "radio_gs/scripts/eval_opengaussian_lerf_baseline.py": {
+      "path": "radio_gs/scripts/eval_opengaussian_lerf_baseline.py",
+      "sha256": "dfa544a9e425e8b870bf6b00513235b3d56e8b8ab7d7a19f78ab56a8e6825289",
+      "bytes": 9665
+    },
+    "radio_gs/scripts/eval_prerendered_lerf_features.py": {
+      "path": "radio_gs/scripts/eval_prerendered_lerf_features.py",
+      "sha256": "f363cc08daffea7708189f713108a4dfb429070765df78b2133e8320eb5f10d6",
+      "bytes": 22148
+    },
+    "scripts/research/summarize_query_field_two_scene.py": {
+      "path": "scripts/research/summarize_query_field_two_scene.py",
+      "sha256": "1655a0e1b482f734b6754bf07d732972eb255547178b86bacad21ec8a5954ae1",
+      "bytes": 7432
+    }
+  },
+  "configuration_files": {
+    "configs/query_field/benchmark_contracts.json": {
+      "path": "configs/query_field/benchmark_contracts.json",
+      "sha256": "e8e6dd8bcb7e1e33d4524f2175a521799f7be9b74160b27d2c217f688bf7157e",
+      "bytes": 3882
+    },
+    "configs/query_field/figurines_18views.json": {
+      "path": "configs/query_field/figurines_18views.json",
+      "sha256": "c3820178a7590fcde32d38b9dcee96c264d3933944bbce524dc5441a54abeda1",
+      "bytes": 1299
+    },
+    "configs/query_field/figurines_fit_budget.json": {
+      "path": "configs/query_field/figurines_fit_budget.json",
+      "sha256": "932ae913c8ae59527275bc92ccdbd9857543fbb71ffd285107e00589219f3730",
+      "bytes": 1021
+    },
+    "configs/query_field/figurines_hypotheses.json": {
+      "path": "configs/query_field/figurines_hypotheses.json",
+      "sha256": "3f65e68de68b7a9a613870c5411323df4556d9d4bf19e1109f9327a87434c639",
+      "bytes": 689
+    },
+    "configs/query_field/figurines_native_transfer.json": {
+      "path": "configs/query_field/figurines_native_transfer.json",
+      "sha256": "9068da04817b311e4e317b81f713edf529aada07296b0cf2edf6edaf205b0541",
+      "bytes": 894
+    },
+    "configs/query_field/figurines_pilot.json": {
+      "path": "configs/query_field/figurines_pilot.json",
+      "sha256": "16299d7c00abfd7f942c3f17a47db10a59e3545bba6c08f31145605d17687f9f",
+      "bytes": 858
+    },
+    "configs/query_field/figurines_subset_objective.json": {
+      "path": "configs/query_field/figurines_subset_objective.json",
+      "sha256": "14b64338bf57e0c417aaf2cd48883c2114614e931458d7975998db23312ea5b2",
+      "bytes": 1126
+    },
+    "configs/query_field/lerf_readout_study.json": {
+      "path": "configs/query_field/lerf_readout_study.json",
+      "sha256": "56eb7e45b45287b28eb21fd3ac91fdfa4bf6e4801144529db265b3114e6a1905",
+      "bytes": 1657
+    },
+    "configs/query_field/lerf_two_scene_probe.json": {
+      "path": "configs/query_field/lerf_two_scene_probe.json",
+      "sha256": "862289697644af1a9502445ff3f25c3a7b9ddad655b2a52190638af12ad41be0",
+      "bytes": 2072
+    },
+    "configs/query_field/ramen_18views.json": {
+      "path": "configs/query_field/ramen_18views.json",
+      "sha256": "8b83862c897382bb0acbaa525b29e36278b3c3c757704759e56a30ff77824695",
+      "bytes": 1286
+    },
+    "configs/query_field/ramen_6views.json": {
+      "path": "configs/query_field/ramen_6views.json",
+      "sha256": "e5cb0d026b9bb8f4c64127c4b881a4942495f173e7533abc5e0151b4d7fccb54",
+      "bytes": 1187
+    }
+  },
+  "runs": {
+    "figurines_subset_v1": {
+      "artifacts": {
+        "observations/observations.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/observations/observations.json",
+          "sha256": "020f69c8b79f7e6100d2e561e193f3354b6b1d55a2ec15c00a28a5048a2ac8a4",
+          "bytes": 12929
+        },
+        "models/training.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/models/training.json",
+          "sha256": "7db29249a286e43313594e8b7e9baa4262a6e597289d5276bac7b73ae2a32036",
+          "bytes": 9623
+        },
+        "models/trained/manifest.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/models/trained/manifest.json",
+          "sha256": "67568badc2b10dde6b966b783951ccf704173c98ac2b6aaa476b73df10ab5d64",
+          "bytes": 1069
+        },
+        "development.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/development.json",
+          "sha256": "f8a1838cf6ecbd3f98ac6f63d49db6419265c34aeff35abc785036a60181b940",
+          "bytes": 5543
+        },
+        "development_trained.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/development_trained.json",
+          "sha256": "66afe7ff47c82dc9df5b6013207ec373c69e3717f35cc53e5e0dae750246c56e",
+          "bytes": 720388
+        },
+        "development_untrained.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/development_untrained.json",
+          "sha256": "918cc0f2eb6a966bf491ad7fb45553aa2f04904dd5b623043c38733b23153ac8",
+          "bytes": 726099
+        },
+        "runtime_smoke.json": {
+          "path": "output/query_field_20261007/figurines_subset_v1/runtime_smoke.json",
+          "sha256": "7ee993edd735379aa4254083dbf600df79d39481741ffb6a703f82dd7182b561",
+          "bytes": 6225
+        }
+      },
+      "model_payload": {
+        "sha256": "674d5556b21b37eafc5aa28dd66cc6386ba2c8fdb3be5c4454e2f6707754ae93",
+        "bytes": 2657563621
+      },
+      "train_frames": [
+        11,
+        49,
+        127,
+        174,
+        222,
+        269
+      ],
+      "development_frames": [
+        69,
+        232
+      ],
+      "observed": 242262,
+      "elements": 554467,
+      "training_episodes": 489,
+      "unique_visited": 485,
+      "training_seconds": 63.056431369856,
+      "semantic_increment_bytes": 2626510315,
+      "summary": {
+        "point_2d/default": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.2579453891107383,
+          "mean_actual_subset_iou": 0.26456803847627836,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 0.8135635878729907
+        },
+        "point_2d/teacher_scope": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.258679925299459,
+          "mean_partial_loss_on_supported_cases": 0.8069761923208458
+        },
+        "point_3d/default": {
+          "cases": 169,
+          "failed": 14,
+          "mean_projected_membership_iou": 0.16424495632727162,
+          "mean_actual_subset_iou": 0.25243048403913587,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 1.2022698648379093
+        },
+        "point_3d/teacher_scope": {
+          "cases": 169,
+          "failed": 14,
+          "mean_projected_membership_iou": 0.17315101856159146,
+          "mean_partial_loss_on_supported_cases": 1.190884211693605
+        },
+        "region_image/default": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.10218783201561613,
+          "mean_actual_subset_iou": 0.19557267979211754,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 2.344220977309973
+        },
+        "region_image/teacher_scope": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.10466514447064706,
+          "mean_partial_loss_on_supported_cases": 2.3506792925519333
+        }
+      },
+      "observations_configuration": {
+        "path": "/root/RADIO-GS-query-field/configs/query_field/figurines_pilot.json",
+        "sha256": "16299d7c00abfd7f942c3f17a47db10a59e3545bba6c08f31145605d17687f9f",
+        "bytes": 858
+      }
+    },
+    "figurines_18views_v1": {
+      "artifacts": {
+        "observations/observations.json": {
+          "path": "output/query_field_20261007/figurines_18views_v1/observations/observations.json",
+          "sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+          "bytes": 28913
+        },
+        "models/training.json": {
+          "path": "output/query_field_20261007/figurines_18views_v1/models/training.json",
+          "sha256": "517c746492ee5ad898d4a1f92c2484979aa04fa517e81b890a04721b1fee4676",
+          "bytes": 9704
+        },
+        "models/trained/manifest.json": {
+          "path": "output/query_field_20261007/figurines_18views_v1/models/trained/manifest.json",
+          "sha256": "8441c803c79d8f13ed54b4a57a475be116c01da5221c0c2996c652b57e7cd533",
+          "bytes": 1068
+        },
+        "development.json": {
+          "path": "output/query_field_20261007/figurines_18views_v1/development.json",
+          "sha256": "b7b5240f4702153f41991aa5fa8c163e111cf6233239028ab365dca7f4326c48",
+          "bytes": 5639
+        },
+        "development_trained.json": {
+          "path": "output/query_field_20261007/figurines_18views_v1/development_trained.json",
+          "sha256": "ba9f31e5dcbd1f10e0137105f43832fa8e9dce8b387b385e2f0c54d373d6fa93",
+          "bytes": 728548
+        },
+        "development_untrained.json": {
+          "path": "output/query_field_20261007/figurines_18views_v1/development_untrained.json",
+          "sha256": "9c0adbc2053d8c1b5b51d8476a772c3fc1a35570ec1386d6807280683900a13d",
+          "bytes": 736212
+        }
+      },
+      "model_payload": {
+        "sha256": "e926257bb3ee3c924246c779a0f640f98e8b4d7a8ddb77289036469cb54dbe8f",
+        "bytes": 2657563621
+      },
+      "train_frames": [
+        11,
+        13,
+        37,
+        49,
+        63,
+        89,
+        114,
+        127,
+        139,
+        164,
+        174,
+        189,
+        213,
+        222,
+        239,
+        263,
+        269,
+        288
+      ],
+      "development_frames": [
+        69,
+        232
+      ],
+      "observed": 380715,
+      "elements": 554467,
+      "training_episodes": 1455,
+      "unique_visited": 1093,
+      "training_seconds": 79.62846774049103,
+      "semantic_increment_bytes": 2626510315,
+      "summary": {
+        "point_2d/default": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.2508241536960932,
+          "mean_actual_subset_iou": 0.3162769271424536,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 0.6898947216741901
+        },
+        "point_2d/teacher_scope": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.2543783256089723,
+          "mean_partial_loss_on_supported_cases": 0.6878524283184835
+        },
+        "point_3d/default": {
+          "cases": 169,
+          "failed": 1,
+          "mean_projected_membership_iou": 0.1668469948789171,
+          "mean_actual_subset_iou": 0.2745993627957206,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 1.0997563561967192
+        },
+        "point_3d/teacher_scope": {
+          "cases": 169,
+          "failed": 1,
+          "mean_projected_membership_iou": 0.17604327222095395,
+          "mean_partial_loss_on_supported_cases": 1.0917545678281126
+        },
+        "region_image/default": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.05734289590250039,
+          "mean_actual_subset_iou": 0.17045017049273134,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 1.935075129665429
+        },
+        "region_image/teacher_scope": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.06119151551899164,
+          "mean_partial_loss_on_supported_cases": 1.9470119905639467
+        }
+      },
+      "observations_configuration": {
+        "path": "/root/RADIO-GS-query-field/configs/query_field/figurines_18views.json",
+        "sha256": "c3820178a7590fcde32d38b9dcee96c264d3933944bbce524dc5441a54abeda1",
+        "bytes": 1299
+      }
+    },
+    "ramen_6views_v1": {
+      "artifacts": {
+        "observations/observations.json": {
+          "path": "output/query_field_20261007/ramen_6views_v1/observations/observations.json",
+          "sha256": "96714a780646a0e782f59e21a50369be05b0673997ea958ae59d6486147203dc",
+          "bytes": 12777
+        },
+        "models/training.json": {
+          "path": "output/query_field_20261007/ramen_6views_v1/models/training.json",
+          "sha256": "446177175750f1251440cd564c3fcad35b3372f35a83e08c359a89cfd7443bf8",
+          "bytes": 9589
+        },
+        "models/trained/manifest.json": {
+          "path": "output/query_field_20261007/ramen_6views_v1/models/trained/manifest.json",
+          "sha256": "4f0c267f007f7195dd41ff4e5f1401dfc5bf20af32ce3fb8a2f18be446c96bb5",
+          "bytes": 1066
+        },
+        "development.json": {
+          "path": "output/query_field_20261007/ramen_6views_v1/development.json",
+          "sha256": "213d51ad2a2d21476b1ef4d5c79aa31e82e2697d86db1ccaee5a5d02b1c7ed7f",
+          "bytes": 5535
+        },
+        "development_trained.json": {
+          "path": "output/query_field_20261007/ramen_6views_v1/development_trained.json",
+          "sha256": "b3c23a3f1745714e5a8037d57f5724343dc2b16614fc185c09f5222bf43b30b0",
+          "bytes": 639491
+        },
+        "development_untrained.json": {
+          "path": "output/query_field_20261007/ramen_6views_v1/development_untrained.json",
+          "sha256": "107d48c095263666b7c426e150a34688545da048a9c0c3e85ea93d9a4a4cf179",
+          "bytes": 644876
+        }
+      },
+      "model_payload": {
+        "sha256": "e0b6cb497188b03dc3866c495ee6c069695c989d673b7f847025743d664b3451",
+        "bytes": 2840857509
+      },
+      "train_frames": [
+        12,
+        36,
+        56,
+        78,
+        100,
+        121
+      ],
+      "development_frames": [
+        34,
+        99
+      ],
+      "observed": 319623,
+      "elements": 592709,
+      "training_episodes": 405,
+      "unique_visited": 400,
+      "training_seconds": 86.34647504240274,
+      "semantic_increment_bytes": 2807662669,
+      "summary": {
+        "point_2d/default": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.34460375865924503,
+          "mean_actual_subset_iou": 0.30309202679082903,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 0.9966857206020129
+        },
+        "point_2d/teacher_scope": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.3424493953423112,
+          "mean_partial_loss_on_supported_cases": 1.0030828351830758
+        },
+        "point_3d/default": {
+          "cases": 149,
+          "failed": 8,
+          "mean_projected_membership_iou": 0.2485837510860394,
+          "mean_actual_subset_iou": 0.2715046795150703,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 1.2059133317856554
+        },
+        "point_3d/teacher_scope": {
+          "cases": 149,
+          "failed": 8,
+          "mean_projected_membership_iou": 0.24209495490079358,
+          "mean_partial_loss_on_supported_cases": 1.2026185324718575
+        },
+        "region_image/default": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.15509462187882364,
+          "mean_actual_subset_iou": 0.226422133635192,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 2.2960500359408647
+        },
+        "region_image/teacher_scope": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.15990265190988878,
+          "mean_partial_loss_on_supported_cases": 2.3137883522239946
+        }
+      },
+      "observations_configuration": {
+        "path": "/root/RADIO-GS-query-field/configs/query_field/ramen_6views.json",
+        "sha256": "e5cb0d026b9bb8f4c64127c4b881a4942495f173e7533abc5e0151b4d7fccb54",
+        "bytes": 1187
+      }
+    },
+    "ramen_18views_v1": {
+      "artifacts": {
+        "observations/observations.json": {
+          "path": "output/query_field_20261007/ramen_18views_v1/observations/observations.json",
+          "sha256": "56ce7d8dfd170171ab22c4b86b0b7475162751d04b004f8f5f169e945d484821",
+          "bytes": 28548
+        },
+        "models/training.json": {
+          "path": "output/query_field_20261007/ramen_18views_v1/models/training.json",
+          "sha256": "a867854a9c49b768b337d2a4044fb1b1f1397b099a92f53ca679d5a915ee24f2",
+          "bytes": 9634
+        },
+        "models/trained/manifest.json": {
+          "path": "output/query_field_20261007/ramen_18views_v1/models/trained/manifest.json",
+          "sha256": "5b05d0889bce01b1fe54085581d7b573ab8d8f39103f42758a0744c7594aef1e",
+          "bytes": 1067
+        },
+        "development.json": {
+          "path": "output/query_field_20261007/ramen_18views_v1/development.json",
+          "sha256": "8060e77248942ecd4412ac47272264bf6ed4773f82d3a274ef50e05b95e247d2",
+          "bytes": 5641
+        },
+        "development_trained.json": {
+          "path": "output/query_field_20261007/ramen_18views_v1/development_trained.json",
+          "sha256": "09af6c60afc5e550f465a834e259d9445ac5d743f9d5353d2fd2b4510d87cc86",
+          "bytes": 645997
+        },
+        "development_untrained.json": {
+          "path": "output/query_field_20261007/ramen_18views_v1/development_untrained.json",
+          "sha256": "294058da3e51e9d3419be0f7e405d809a6b7c2cd6b55b372298fa8fb4a575b1e",
+          "bytes": 650321
+        },
+        "runtime_smoke.json": {
+          "path": "output/query_field_20261007/ramen_18views_v1/runtime_smoke.json",
+          "sha256": "82ae102d052da7338305c6c871f32c2b026a23b0025a4a24d1fceff7793319b0",
+          "bytes": 6209
+        }
+      },
+      "model_payload": {
+        "sha256": "753160770e8f2081c186ae25ed0142b1d5be835db9dc082b0b4e4f02450385b9",
+        "bytes": 2840857509
+      },
+      "train_frames": [
+        4,
+        12,
+        18,
+        26,
+        36,
+        42,
+        49,
+        56,
+        63,
+        71,
+        78,
+        85,
+        92,
+        100,
+        106,
+        113,
+        121,
+        127
+      ],
+      "development_frames": [
+        34,
+        99
+      ],
+      "observed": 452765,
+      "elements": 592709,
+      "training_episodes": 1320,
+      "unique_visited": 1032,
+      "training_seconds": 99.08652800135314,
+      "semantic_increment_bytes": 2807662669,
+      "summary": {
+        "point_2d/default": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.41429355328640083,
+          "mean_actual_subset_iou": 0.3171730503821183,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 0.47408167663149087
+        },
+        "point_2d/teacher_scope": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.4204803831600303,
+          "mean_partial_loss_on_supported_cases": 0.46791302514475014
+        },
+        "point_3d/default": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.2981671731033825,
+          "mean_actual_subset_iou": 0.29568738355645097,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 0.7029118880351393
+        },
+        "point_3d/teacher_scope": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.30719734174660374,
+          "mean_partial_loss_on_supported_cases": 0.7002316343335547
+        },
+        "region_image/default": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.12799154615811784,
+          "mean_actual_subset_iou": 0.24138457863200957,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 1.4454656339081742
+        },
+        "region_image/teacher_scope": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.12867226221929962,
+          "mean_partial_loss_on_supported_cases": 1.4419487334737842
+        }
+      },
+      "observations_configuration": {
+        "path": "/root/RADIO-GS-query-field/configs/query_field/ramen_18views.json",
+        "sha256": "8b83862c897382bb0acbaa525b29e36278b3c3c757704759e56a30ff77824695",
+        "bytes": 1286
+      }
+    }
+  },
+  "public_probe": {
+    "figurines_18": {
+      "prediction": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_18/prediction.json",
+        "sha256": "88ab83f2d4301b8360e6cc2146bc43cb19bcb7ce77d4d3ad7575e3000f4b5172",
+        "bytes": 12009
+      },
+      "evaluation": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_18/evaluation/evaluation.json",
+        "sha256": "26c242b226af6c37bb2669ebb63d1ad6d3e14645f69ac6626796216d7d704d5b",
+        "bytes": 52743
+      },
+      "prediction_payload": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_18/predictions.pt",
+        "sha256": "a714f5906264af3a65927ae3e88440c475d6bd5277b089d25aa6a6e54dd5d9a5",
+        "bytes": 136556088
+      },
+      "metrics": {
+        "native_generic_relevance": {
+          "ap": 0.78848703361583,
+          "semantic_iou": 0.47287673359720167,
+          "selected_iou": 0.11596452006640923,
+          "cases": 56,
+          "missing": 0
+        },
+        "shared_membership": {
+          "ap": 0.6091213693724217,
+          "semantic_iou": 0.30306101019752013,
+          "selected_iou": 0.11596452006640923,
+          "cases": 56,
+          "missing": 0
+        }
+      }
+    },
+    "figurines_6": {
+      "prediction": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_6/prediction.json",
+        "sha256": "228e49aa029ed780d95e1326da13db9830d280a8edac4faca4ea319a94b13c6e",
+        "bytes": 12008
+      },
+      "evaluation": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_6/evaluation/evaluation.json",
+        "sha256": "4607dc956f994f1a93df1f06c14f2e0db17011b5d4a1526c13a8f1bb9e275f7e",
+        "bytes": 52684
+      },
+      "prediction_payload": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_6/predictions.pt",
+        "sha256": "83709f8073f21649165ed331d3f7b3ea00ed8c326ac8715467852493bbfeb7cd",
+        "bytes": 136556088
+      },
+      "metrics": {
+        "native_generic_relevance": {
+          "ap": 0.6956525724667383,
+          "semantic_iou": 0.4253010326127488,
+          "selected_iou": 0.0667383752919667,
+          "cases": 56,
+          "missing": 0
+        },
+        "shared_membership": {
+          "ap": 0.5013239565568062,
+          "semantic_iou": 0.2806066553603159,
+          "selected_iou": 0.0667383752919667,
+          "cases": 56,
+          "missing": 0
+        }
+      }
+    },
+    "ramen_18": {
+      "prediction": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_18/prediction.json",
+        "sha256": "027dd5c50d31ce8959ce2cfc30d3333dcd693df12be87cbe943fdc42f78f8a4a",
+        "bytes": 9474
+      },
+      "evaluation": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_18/evaluation/evaluation.json",
+        "sha256": "c61a5aa21e2eb9501cac480d6ae4240910b86031c8fe5e598981fd81590a553c",
+        "bytes": 63719
+      },
+      "prediction_payload": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_18/predictions.pt",
+        "sha256": "55038f4b6f43cdc2defe88b104188dbc421f2f4d937bdb0bc460e92cef2df956",
+        "bytes": 113920440
+      },
+      "metrics": {
+        "native_generic_relevance": {
+          "ap": 0.6872013600168552,
+          "semantic_iou": 0.35140388819854707,
+          "selected_iou": 0.06742432456905052,
+          "cases": 71,
+          "missing": 0
+        },
+        "shared_membership": {
+          "ap": 0.4068446550029329,
+          "semantic_iou": 0.18643960956456204,
+          "selected_iou": 0.06742432456905052,
+          "cases": 71,
+          "missing": 0
+        }
+      }
+    },
+    "ramen_6": {
+      "prediction": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_6/prediction.json",
+        "sha256": "566b7f96a93d2d7c9889926240fb1244e133e84930fb2b08641bac02240f1e36",
+        "bytes": 9464
+      },
+      "evaluation": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_6/evaluation/evaluation.json",
+        "sha256": "de7939af2869562691a09893886eb2c843f3d25981aec722782d86efc6213376",
+        "bytes": 63471
+      },
+      "prediction_payload": {
+        "path": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_6/predictions.pt",
+        "sha256": "916b57c8e97a50675c5949f17e0d613022e7ff8e2c6897997596f1bee59063ba",
+        "bytes": 113920440
+      },
+      "metrics": {
+        "native_generic_relevance": {
+          "ap": 0.5583045779594227,
+          "semantic_iou": 0.2563378627327579,
+          "selected_iou": 0.10523250176371411,
+          "cases": 71,
+          "missing": 0
+        },
+        "shared_membership": {
+          "ap": 0.4421824403434848,
+          "semantic_iou": 0.2562258251685269,
+          "selected_iou": 0.10523250176371411,
+          "cases": 71,
+          "missing": 0
+        }
+      }
+    }
+  },
+  "readout_controls": {
+    "figurines_18": {
+      "prediction": {
+        "path": "output/query_field_20261007/lerf_readout_study_v1/figurines_18/prediction.json",
+        "sha256": "d83069bd347cde6a2c444866be37a2bfb3ff7db4b0765dc87e88d0bef4db54c4",
+        "bytes": 4932
+      },
+      "evaluation": {
+        "path": "output/query_field_20261007/lerf_readout_study_v1/figurines_18/evaluation/evaluation.json",
+        "sha256": "704ea18da7fdad36c8ddc6a12f42bc6b6d700c0c0d90404ee5c94d813e334410",
+        "bytes": 77382
+      },
+      "prediction_payload": {
+        "path": "output/query_field_20261007/lerf_readout_study_v1/figurines_18/predictions.pt",
+        "sha256": "948f485cf544607c00d2c8bbd1bf512a110b60d785637e0db9c8e22319d0fa0c",
+        "bytes": 206265401
+      },
+      "metrics": {
+        "union_member": {
+          "ap": 0.6091213693724217,
+          "semantic_iou": 0.30306101019752013,
+          "selected_iou": 0.11596452006640923,
+          "cases": 56,
+          "missing": 0
+        },
+        "single_anchor_member": {
+          "ap": 0.4376679337636108,
+          "semantic_iou": 0.050134974270024814,
+          "selected_iou": 0.20392921842375475,
+          "cases": 56,
+          "missing": 0
+        },
+        "native_only": {
+          "ap": 0.78848703361583,
+          "semantic_iou": 0.47287673359720167,
+          "selected_iou": 0.46453532813244686,
+          "cases": 56,
+          "missing": 0
+        }
+      }
+    },
+    "ramen_18": {
+      "prediction": {
+        "path": "output/query_field_20261007/lerf_readout_study_v1/ramen_18/prediction.json",
+        "sha256": "10e6fb956b7698d19468a312dda24ddeceb028958e6139dadbccef6f68fec48c",
+        "bytes": 4317
+      },
+      "evaluation": {
+        "path": "output/query_field_20261007/lerf_readout_study_v1/ramen_18/evaluation/evaluation.json",
+        "sha256": "6c353a769f525a3f8efeaee456d0e0ab040c2655f9ccb4694d49fd6182bbb820",
+        "bytes": 93142
+      },
+      "prediction_payload": {
+        "path": "output/query_field_20261007/lerf_readout_study_v1/ramen_18/predictions.pt",
+        "sha256": "05135d46c44777aa0a7fec19724d1ed42bfc2984775ea9154f41f51c964d8812",
+        "bytes": 167147641
+      },
+      "metrics": {
+        "union_member": {
+          "ap": 0.4068446550029329,
+          "semantic_iou": 0.18643960956456204,
+          "selected_iou": 0.06742432456905052,
+          "cases": 71,
+          "missing": 0
+        },
+        "single_anchor_member": {
+          "ap": 0.277651674851065,
+          "semantic_iou": 0.05079746267171724,
+          "selected_iou": 0.09813074668310094,
+          "cases": 71,
+          "missing": 0
+        },
+        "native_only": {
+          "ap": 0.6872013600168552,
+          "semantic_iou": 0.35140388819854707,
+          "selected_iou": 0.2542410333498565,
+          "cases": 71,
+          "missing": 0
+        }
+      }
+    }
+  },
+  "public_target_frames_excluded_from_feature_training": true,
+  "geometry_trained_on_larger_mapping_set": true,
+  "figurines_hypotheses_v1": {
+    "report": {
+      "path": "output/query_field_20261007/figurines_hypotheses_v1/report.json",
+      "sha256": "d43716888bf54ff479a81ac4c363ebc66eabb2a680220fda3bddb84fc6c3b2ff",
+      "bytes": 1999951
+    },
+    "cases": 169,
+    "summary": {
+      "anchor_iou": 0.19557267979211754,
+      "native_bidirectional_iou": 0.2160006044377413,
+      "oracle_identity_iou": 0.2733351011559389,
+      "oracle_scale_at_anchor_iou": 0.2060089543428735,
+      "oracle_identity_scale_iou": 0.28742662613754044,
+      "point_default_iou": 0.25243048403913587,
+      "point_oracle_scale_iou": 0.26518846547765623
+    }
+  },
+  "figurines_native_transfer_v1": {
+    "report": {
+      "path": "output/query_field_20261007/figurines_native_transfer_v1/report.json",
+      "sha256": "eeaadc319df924dad2d248ea404e3f34312dbae9a464ed732e5ef6ae6dff9034",
+      "bytes": 27175
+    },
+    "cases": 169,
+    "summary": {
+      "six_view": 0.17623798585322564,
+      "eighteen_view": 0.17553453869944075
+    }
+  },
+  "subset_diagnostics": [
+    {
+      "path": "output/query_field_20261007/lerf_two_scene_probe_v1/subset_error_diagnostic_v2.json",
+      "sha256": "e021d84b1b07dfeeb5140e0950f630ea892025953efedca11fe34c1a021b8914",
+      "bytes": 172713
+    },
+    {
+      "path": "output/query_field_20261007/lerf_readout_study_v1/subset_errors.json",
+      "sha256": "072ccf2e34152719731455a4b5de9b26565957e3834872165311a51238983e09",
+      "bytes": 129367
+    }
+  ],
+  "superseded_diagnostic": {
+    "path": "output/query_field_20261007/lerf_two_scene_probe_v1/subset_error_diagnostic.json",
+    "reason": "Initial supplemental script used GT threshold 128; v2 uses the retained threshold 10 and asserts every IoU. Values happened to agree on these masks. Main benchmark scoring was correct throughout."
+  },
+  "baseline_a": {
+    "summary": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/system/summary.json",
+      "sha256": "e7566b45060b853e10602c6c28864002d5215d71d0b7dac681cd7fd599bc4c1c",
+      "bytes": 69350
+    },
+    "rerun": false,
+    "source_assisted": true,
+    "metrics": {
+      "figurines": {
+        "semantic_iou": 0.76725420009877,
+        "ap": 0.9230640992298842,
+        "selected_projection_iou": 0.7111387791162728
+      },
+      "ramen": {
+        "semantic_iou": 0.5940802355139503,
+        "ap": 0.8122121183970293,
+        "selected_projection_iou": 0.5830740992910433
+      }
+    }
+  },
+  "tests": {
+    "passed": 19,
+    "failed": 0,
+    "command": "CUDA_VISIBLE_DEVICES=2 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=4 PYTHONPATH=. /root/miniconda3/envs/cybersim_agent/bin/python -m pytest -q tests/test_query_preserving_field.py tests/test_query_field_subset_cuda.py tests/test_query_field_hypotheses.py tests/test_query_field_public_lerf.py",
+    "includes_actual_gsplat_cuda": true,
+    "source": "Executed command output, 19 passed in 9.62 s; existing native-decoder unit suite was not rerun in this round.",
+    "files": [
+      {
+        "path": "tests/test_query_preserving_field.py",
+        "sha256": "e8caab3d1693cc488b8fcae4e19d6ad073c81152901bd6d3fe2bc1196d3abd35",
+        "bytes": 7818
+      },
+      {
+        "path": "tests/test_query_field_subset_cuda.py",
+        "sha256": "ac01105d377ee744f962320d17927ab397d155119514d25dab9c2952194a1433",
+        "bytes": 2193
+      },
+      {
+        "path": "tests/test_query_field_hypotheses.py",
+        "sha256": "de2ca06caa5b1eb7e5adfe2f43fefebb20bbfa0fd1fd5d4209a8b5eb8e8944d1",
+        "bytes": 2813
+      },
+      {
+        "path": "tests/test_query_field_public_lerf.py",
+        "sha256": "3d4472c5f632a0982eb9dceb15a5fcb53e497a0fe56d6dbdbe3826524806a509",
+        "bytes": 4057
+      }
+    ]
+  },
+  "original_worktree_verification": {
+    "path": "output/query_field_20261007/two_scene_original_worktree_check.json",
+    "sha256": "d001c71c7d9f3b1c4c13f96b309728b6ceee3ac4132cb9b56d0f442dcab501ad",
+    "bytes": 208
+  }
+}

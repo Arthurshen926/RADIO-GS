@@ -1,0 +1,11 @@
+{
+  "schema": "radio_gs.query_field_hypotheses.v1",
+  "field": "output/query_field_20261007/figurines_subset_v1/models/trained",
+  "observations": "output/query_field_20261007/figurines_pilot_v1/observations",
+  "scale_factors": [1.0, 0.5, 2.0],
+  "split": "development",
+  "candidate_count": 8,
+  "automatic_controls": ["anchor", "native_bidirectional"],
+  "purpose": "Fixed candidate recall and identity/scale diagnosis on the unchanged first shared member model. The native bidirectional control has no fitted weights.",
+  "selection": "All development SAM regions retained; no benchmark labels or per-query hyperparameters. Privileged best-candidate statistics are evaluation only."
+}

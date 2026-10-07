@@ -106,3 +106,21 @@ over the matched visible-membership objective; normalized membership-image
 metrics can regress. Keep both output types explicit. This is one-scene
 development evidence with SAM region targets, not a five-task promotion.
 See the [complete experiment ledger](../experiments/2026-10-07-query-preserving-gaussian-field-bootstrap.md).
+
+## Two-scene evidence and retained boundary
+
+The [next ledger](../experiments/2026-10-07-query-field-two-scene-and-readout.md)
+adds fixed source-budget controls and actual LERF scoring. The current shared
+member decoder fails to retain the exported field's native text selection
+capability on both scenes. A native-only bypass is retained as a diagnostic;
+it does not meet the shared-member decision above and is not a new default.
+Likewise, single-anchor selection is not an equivalent solution to genuine
+category unions. No additional teacher, source-query fallback or label-trained
+member component is introduced to disguise this gap.
+
+Keep geometry and native coordinates protected. The next bounded mechanism
+study should compare reliable registered and inferred native support under the
+same source budget and operator, measuring both identity and actual extent.
+Compression awaits a stronger matched high-capacity reference. This is a
+refinement of the implementation priorities, not a relaxation of the accepted
+architecture or a claim that the full research direction has failed.

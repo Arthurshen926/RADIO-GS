@@ -1,0 +1,32 @@
+{
+  "schema": "radio_gs.query_field_readout_study.v1",
+  "jobs": [
+    {
+      "name": "figurines_18",
+      "scene": "figurines",
+      "field": "output/query_field_20261007/figurines_18views_v1/models/trained",
+      "queries": "configs/consolidated/figurines.queries.json",
+      "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json",
+      "reference_prediction": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_18"
+    },
+    {
+      "name": "ramen_18",
+      "scene": "ramen",
+      "field": "output/query_field_20261007/ramen_18views_v1/models/trained",
+      "queries": "configs/consolidated/ramen.integration-queries.json",
+      "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json",
+      "reference_prediction": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_18"
+    }
+  ],
+  "controls": [
+    "union_member",
+    "single_anchor_member",
+    "native_only"
+  ],
+  "fixed": "Same frozen field, observed domain, exact current native text vectors, default scale, selection threshold 0.5, unchanged retained scorer.",
+  "changed": "Selection only: union of near-best anchors; original top anchor; direct unchanged native relevance. No retraining, tuning or per-query choice.",
+  "selection_contract": "Single-anchor undercounts genuine category unions; native-only bypasses the member core. Both are causal controls, not proposed benchmark defaults.",
+  "status": "Adaptive development diagnostic motivated by the first two-scene public results; fixed before this round of predictions, all predictions precede scoring.",
+  "independent_final_test": false,
+  "promotion": false
+}

@@ -22,6 +22,10 @@ its label-trained member tree is silently called by the new package.
 | `baseline` | Saved v10 metric and resource inventory |
 | `smoke`, `cold_check` | Native encoders and four-input replay from a copied export with source-file access denied |
 | `diagnose` | Explicitly privileged projection controls, never model predictions |
+| `hypotheses`, `hypothesis_study` | Query-only native ranking and separately scored identity/scale capacity controls |
+| `native_transfer` | Paired native-coordinate intervention with fixed members and observation support |
+| `public_lerf` | Source-free text prediction, then unchanged historical benchmark scoring |
+| `readout_study`, `subset_errors` | Exact baseline replay, explicit selection controls, and checked error decomposition |
 
 ```mermaid
 flowchart LR
@@ -92,15 +96,23 @@ registration tolerance is in the supplied world's coordinate units. The local
 
 ## Required next evidence
 
-- Expand the completed one-scene Gaussian compile, protected-native and cold-load checks to other scenes.
-- Improve actual grouping beyond the completed untrained / visible-objective / subset-objective controls.
-- Evaluate real text and reference-image target identity beyond the completed four-adapter smoke check.
-- Identity/candidate recall, conditional members, and scale choice diagnosed separately.
+The [two-scene follow-up](../experiments/2026-10-07-query-field-two-scene-and-readout.md)
+now completes figurines/ramen 6/18-view fits, real text LERF probes, fixed native
+identity/scale controls, readout interventions and a second-scene cold replay.
+The shared member path is much weaker than native-only selection on both
+18-view scenes. This is a failed quality gate, not evidence against all possible
+scene-specific member architectures. It narrows the next implementation work.
+
+- Diagnose and repair the loss from native inferred identity to member extent,
+  including the mismatch between reliable training anchors and inferred runtime support.
+- Preserve registered-point competence while testing native-conditioned member learning;
+  no public benchmark queries or answers enter scene fitting.
+- Evaluate actual reference-image target identity beyond teacher-region diagnostics.
 - Local DINO query retention before compression; no substitution by pooled-only claims.
 - High-capacity B vs compact B using identical geometry, inputs, split and readout.
 - Full five-task protocol and resource ledger; newly held-out final rooms.
 
-The first commit does not implement general compositional language grounding,
+The current implementation does not implement general compositional language grounding,
 multi-turn signed interaction, learned category affinity, codebook compression,
 or full source-SAM extensions. They remain explicit work, not hidden fallbacks.
 

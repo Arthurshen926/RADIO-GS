@@ -1,0 +1,42 @@
+{
+  "schema": "radio_gs.query_field_pilot.v1",
+  "scene": "output/system_map_rebuild/ramen/complete/scene.json",
+  "train_frames": [
+    12,
+    36,
+    56,
+    78,
+    100,
+    121
+  ],
+  "development_frames": [
+    34,
+    99
+  ],
+  "raster_hw": [
+    96,
+    128
+  ],
+  "dino_width": 448,
+  "training": {
+    "seed": 20261007,
+    "group_dim": 32,
+    "steps": 2000,
+    "learning_rate": 0.01,
+    "threshold": 0.5,
+    "candidate_count": 8,
+    "candidate_radius_m": 0.05,
+    "render_objective": "subset_alpha"
+  },
+  "purpose": "Two-scene source-observation control; same shared subset member model and fixed 2000-step budget",
+  "selection": "Frames fixed by uniformly spaced positions in the authorized source roster before results. Figurines retains the prior six training and two development frames; ramen six are a subset of its eighteen. No performance-based scene/query selection.",
+  "teacher_families": [
+    "siglip",
+    "dino",
+    "sam"
+  ],
+  "additional_3d_supervision": false,
+  "source_access_at_query": false,
+  "compression_default": false,
+  "input_budget_condition": "6 feature-training source views; teacher-view development only; frozen existing geometry"
+}

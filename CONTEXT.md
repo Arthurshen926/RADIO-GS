@@ -17,6 +17,24 @@ evidence or authorized spatial support; native matching remains paired with
 its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
+Latest candidate evidence (2026-10-07):
+`docs/experiments/2026-10-07-query-field-two-scene-and-readout.md`.
+Three more source-only fits completed; figurines/ramen both have fixed 6/18-view
+controls and real LERF prediction-before-scoring runs. More observations improve
+point diagnostics but do not consistently improve real text subsets. On the
+18-view fields, actual LERF subset IoU (%), figurines/ramen: shared union
+11.5965/6.7424; single-anchor member control 20.3929/9.8131; native-only control
+46.4535/25.4241. Native-only bypasses the member core and is not promoted.
+The current identity-to-member conversion loses substantial available native
+capability; neither scale selection nor cancelling union resolves it. Do not
+compress this candidate as an established high-quality teacher or substitute
+its source-SAM diagnostic scores for benchmark results. Next mechanism work
+must test native inferred support versus reliable registered support while
+preserving the common member operator and both identity/extent outputs.
+19 targeted tests and a second-scene four-input source-denied cold reload pass.
+All jobs complete; no five-task replacement, independent final test or compact
+student. Full evidence: `docs/experiments/2026-10-07-query-field-two-scene-evidence.json`.
+
 Updated2026-10-06. Sole development default: `configs/pipeline/system_v10.json`.
 Common entry: `python -m radio_gs.pipeline.cohort`; its default is also v10.
 v9 remains a numerically unchanged comparator, with default metadata disabled.
