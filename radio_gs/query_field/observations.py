@@ -66,7 +66,7 @@ def source_sam_metadata(metadata):
         contract = metadata["generation_contract"]
         source_hash = metadata["source_image"]["sha256"]
         checkpoint = metadata["checkpoint"]
-    elif metadata.get("schema_version") == 2 and metadata.get("source") == "official_sam3_interactive_grid_multimask_hierarchy":
+    elif metadata.get("schema_version") in {2, 3} and metadata.get("source") == "official_sam3_interactive_grid_multimask_hierarchy":
         contract = metadata
         source_hash = metadata["source_image_sha256"]
         checkpoint = dict(sha256=metadata["checkpoint_sha256"])
@@ -95,7 +95,19 @@ def compile_observations(config_path, output, device="cuda"):
     output.mkdir(parents=True, exist_ok=False)
     geometry = FrozenGaussianGeometry.load(scene["geometry"]["path"],
                     expected_sha256=scene["geometry"]["sha256"], device=device)
-    cameras = MogeGeometryPrior(scene["camera_report"], scene["camera_report_sha256"])
+    if "registered_cameras" in scene:
+        from types import SimpleNamespace
+        from radio_gs.geometry.registered_pinhole import load_registered_camera_table
+        camera_path = scene["registered_cameras"]
+        if sha256(camera_path) != scene["registered_cameras_sha256"]:
+            raise ValueError("registered camera table digest differs")
+        world_scale = float(scene["world_units_per_metre"])
+        if not math.isfinite(world_scale) or world_scale <= 0:
+            raise ValueError("registered camera world scale must be positive")
+        cameras = SimpleNamespace(cameras=load_registered_camera_table(camera_path), scale=world_scale)
+    else:
+        camera_path = scene["camera_report"]
+        cameras = MogeGeometryPrior(camera_path, scene["camera_report_sha256"])
     authority = json.loads(Path(scene["source_rgb_authority"]).read_text())
     images = {int(r["image_id"].split("_")[-1]): r["path"] for r in authority["images"]}
     height, width = config["raster_hw"]
@@ -108,14 +120,14 @@ def compile_observations(config_path, output, device="cuda"):
     receipt = dict(schema="radio_gs.query_field_observations.v1", scene=scene["scene"],
                    configuration=_file_receipt(config_path), scene_configuration=_file_receipt(scene_path),
                    geometry=_file_receipt(scene["geometry"]["path"]),
-                   camera_report=_file_receipt(scene["camera_report"]),
+                   camera_report=_file_receipt(camera_path),
                    source_authority=_file_receipt(scene["source_rgb_authority"]),
                    dino_checkpoint=_file_receipt(CHECKPOINT), frames=[], splits=splits,
                    native_semantic_space=scene["text_encoder"], world_units_per_metre=cameras.scale,
                    raster_hw=[height, width], semantic_labels_used=False,
                    benchmark_queries_used=False, feature_development_excluded=True,
                    geometry_development_excluded=False,
-                   geometry_condition="same frozen v10 carrier; feature-view holdout only")
+                   geometry_condition=scene.get("geometry_condition", "same frozen v10 carrier; feature-view holdout only"))
     for frame in frames:
         region_path = Path(scene["native_region_directories"][0]) / f"frame_{frame:05d}.pt"
         region = torch.load(region_path, map_location="cpu", weights_only=False)

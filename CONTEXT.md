@@ -1,6 +1,6 @@
 # RADIO-GS — active system context
 
-Updated 2026-10-07 on `codex/query-preserving-gaussian-field`: the user authorized
+Updated 2026-10-08 on `codex/query-preserving-gaussian-field`: the user authorized
 the scene-specific, three-teacher, query-preserving compact Gaussian research
 direction. New entry: `python -m radio_gs.query_field`. Read
 `docs/adr/0013-query-preserving-scene-specific-gaussian-field.md` and
@@ -18,7 +18,47 @@ evidence or authorized spatial support; native matching remains paired with
 its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
-Latest candidate evidence (2026-10-07):
+Current priority (2026-10-08, explicit user steering): complete one frozen
+architecture baseline on all five benchmarks BEFORE further local optimization
+or staged gap diagnosis. Earlier local experimental promotion gates must not
+delay full-cohort integration. No new mixture/negative-rule/compression/speed
+study is authorized as a substitute for this coverage. The common physical
+field at fb3c768 is fixed for this run. Full cohort: four LERF scenes (two
+retained readouts), eight NVOS tasks, ten ScanNet rooms, nine UQIS rooms with
+all67 targets/268 four-modal queries. Existing LERF and fern fields are reused;
+All 25 missing fields are now built, with horns left/centre sharing one field.
+New fields use18 uniformly selected legal training views and2 development views,
+same2000-step physical recipe. Source budget and geometry differences from v10
+remain explicit. ScanNet/UQIS use declared unlabelled-mesh surface Gaussians,
+not the old labelled member model. First categorical member baseline is common
+text-union membership followed by complete-menu argmax, with native argmax as
+a separate control. All UQIS inputs call the same instance member core.
+Protocol: `docs/experiments/2026-10-08-five-benchmark-architecture-protocol.md`.
+Configuration: `configs/query_field/five_benchmark_v1/cohort.json`.
+Run root: `output/query_field_20261007/five_benchmark_v1`. Status: all five
+cohorts predicted, hash-verified and scored; all new predictions preceded new
+scoring. Results: `docs/experiments/2026-10-08-five-benchmark-results.md` and
+its JSON evidence. Candidate/v10 (%): LERF2D IoU49.4130/70.4007; local LERF3D
+actual subset32.3130/66.9633; ScanNet19/15/10 member mIoU22.2853/23.3694/26.5462
+versus61.0115/62.5276/72.4861; NVOS signed response IoU57.6865/86.5134,
+AP94.8988/98.0222 and separately actual subset70.5360. UQIS text/image/2D/3D
+AP21.3937/24.7530/47.9527/46.7809, actual set IoU12.0755/15.9861/28.3732/27.6913;
+all-four IoU>=0.5 scene-macro success6.9444%. All268 queries remain scored,
+including6 unsupported2D and8 unsupported3D prompts. No accuracy promotion.
+ScanNet native19 control36.9452% exceeds the member result in every room;
+this localizes a measurable additional loss to the member/category readout
+path, without explaining the native-to-v10 loss. NVOS flower/orchids response
+IoU7.7530/9.2527% despite AP91.5207/93.0105% requires separating ranked evidence,
+member extent and readout calibration. Do not react by fitting target thresholds.
+Next: quantify source/target observation coverage before native fusion, query
+identity, member extent and final transport/readout interventions, one stage
+at a time with this complete baseline retained. No compression/speed work yet.
+The only post-freeze integration correction accepts exact replicated RGB
+scribble channels in official trex; failed logs and correction hashes are saved.
+22 initial integration tests and8 post-fix signed-raster tests pass; fern's four
+prediction tensors replay exactly. Original worktree/head/index remain unchanged.
+
+Historical local study (2026-10-07; superseded work order, unchanged results):
 `docs/experiments/2026-10-07-competitive-evidence-results.md`.
 The frozen relative signed-evidence study is complete: 6 exports, 351 teacher
 regions x3 rules, 6 real fern prompt predictions/scores, 6 four-input cold
@@ -28,8 +68,9 @@ Ray-mixture signed competition gives fern response IoU/AP/actual subset
 76.7569/92.1666/76.4433% versus parent76.7399/92.0952/76.1453%. Both competitive
 rules preserve99.9396% positive prompt coverage, but ray competition loses0.0242pp
 figurines signed-teacher actual subset; pooled also loses ramen, fern AP/subset.
-Neither passes the fixed gate, so keep the physical parent/product default and
-do not launch a second NVOS scene or tune strengths/thresholds. These small
+Neither passes the fixed gate, so keep the physical parent/product default.
+The historical block on a second NVOS scene is superseded by the completed
+full-cohort run; it still does not justify tuning strengths/thresholds. These small
 differences are not statistical significance claims. Current accepted LERF
 four-scene32.3130% and fern signed76.7399% remain unchanged.
 Post-study source-only audit exactly replays all original image/2D/3D IoUs.

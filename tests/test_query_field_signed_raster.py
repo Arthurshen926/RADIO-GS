@@ -98,6 +98,25 @@ def test_area_pooling_retains_thin_disjoint_strokes_even_in_same_coarse_pixel(tm
         load_strokes(*paths, (2, 2))
 
 
+def test_official_replicated_rgb_strokes_preserve_scalar_evidence(tmp_path):
+    masks = np.zeros((2, 8, 8), dtype=np.uint8)
+    masks[0, 0, 0] = 255
+    masks[1, 1, 1] = 255
+    paths = [tmp_path/'positive.png', tmp_path/'negative.png']
+    for path, mask in zip(paths, masks):
+        Image.fromarray(mask).save(path)
+    expected, receipt = load_strokes(*paths, (2, 2))
+    for path, mask in zip(paths, masks):
+        Image.fromarray(np.repeat(mask[..., None], 3, axis=2)).save(path)
+    actual, rgb_receipt = load_strokes(*paths, (2, 2))
+    assert torch.equal(expected, actual) and receipt == rgb_receipt
+    coloured = np.repeat(masks[0, ..., None], 3, axis=2)
+    coloured[0, 0, 1] = 0
+    Image.fromarray(coloured).save(paths[0])
+    with pytest.raises(ValueError, match='scalar masks'):
+        load_strokes(*paths, (2, 2))
+
+
 def test_scorer_requires_every_frozen_prediction_and_preserves_float_threshold(tmp_path):
     config = dict(jobs=[dict(name='positive'), dict(name='signed')], output_hw=[2, 2], alpha_threshold=.5)
     path = tmp_path/'config.json'

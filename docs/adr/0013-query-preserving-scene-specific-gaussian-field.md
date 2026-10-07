@@ -28,8 +28,9 @@ ADR0012 remains the description of baseline A (v10). Sharing observation utility
 functions is no longer sufficient for the new candidate's unification gate:
 text, image and registered prompts must consume a common member operator.
 Category competition and the final rendering operator can remain typed. The
-first category reader is a native semantic control; affinity-aware categorical
-benefit is pending and must not be claimed from this interface.
+full-cohort category reader compares common text-union member scores over the
+complete menu; native semantic argmax remains a separate control. Categorical
+benefit must be measured and must not be claimed from this interface alone.
 
 ## Data and deployment boundaries
 
@@ -81,8 +82,16 @@ unknown. These are teacher grouping targets, not verified whole-instance truth.
 2. Verify the Gaussian compiler, exact query algebra, and protected native field.
 3. Establish conditional grouping/member competence on fixed development views.
 4. Align the four query adapters and identity/scale inference; compare high-capacity B.
-5. Compress under the same inputs, supervision and readout; validate isolated loading.
-6. Expand across all five tasks and lock independent final evaluation.
+5. Complete all five development cohorts, then isolate the measured v10 gaps.
+6. Compress under matched inputs, supervision and readout after method quality is
+   understood; lock independent final evaluation separately.
+
+The user's 2026-10-08 steering puts full-cohort execution before further local
+method or engineering optimization. This supersedes the former ordering of
+compression before expansion and any historical local gate that would prevent
+running another benchmark. Earlier rejected variants remain rejected; expansion
+uses the same accepted physical field. It does not select a different model per
+scene or input. See the [full-cohort protocol](../experiments/2026-10-08-five-benchmark-architecture-protocol.md).
 
 Each transition needs measured evidence. A failed bounded pilot remains a
 diagnostic, not a promoted replacement or a reason for unrestricted parameter
@@ -270,3 +279,29 @@ work should test identity-conditioned scope and source-view consistency, keeping
 protected native evidence, one member operator and the full per-input/readout
 gates. A stronger negative combiner alone is not a supported solution to the
 remaining v10 gap. These are research hypotheses, not new validated capabilities.
+
+## Complete development cohort, 2026-10-08
+
+The [full results](../experiments/2026-10-08-five-benchmark-results.md) now cover
+all five families: four LERF scenes with two readouts, eight NVOS cases, ten
+ScanNet rooms, and nine UQIS rooms with 67 targets and 268 independent inputs.
+Twenty-five new source-only fields join the four retained LERF fields and fern;
+horns left/centre share a field. The common physical architecture is unchanged.
+All new predictions precede new scoring, including unsupported empty outputs.
+
+Explicit metric camera compilation and the two new benchmark adapters are
+integration changes. They introduce neither labels into scene fitting nor a
+new member decoder. Official trex scribbles require lossless collapse of three
+identical RGB channels; the failed attempt and correction receipt are retained.
+ScanNet/UQIS native/source caches and geometry are declared construction inputs,
+not runtime source dependencies or old fitted member-model reuse.
+
+Full execution is complete; quality remains substantially behind saved v10.
+The ScanNet member/category result is below the native control in every room,
+NVOS reveals large differences between ranking and thresholded response, and
+UQIS exposes unsupported spatial prompts alongside supported-query errors.
+First measure observation coverage, then separate native fusion, query identity,
+member extent and typed readout losses. Do not compress, add per-benchmark
+fallbacks or resume local sweeps before that diagnosis. This system comparison
+has unequal source budgets and teachers; it is not an isolated architectural
+effect, an independent final test or evidence against the research direction.

@@ -1,0 +1,3309 @@
+{
+  "schema": "radio_gs.query_field_five_benchmark_results.v1",
+  "architecture_parent": "fb3c768",
+  "complete": true,
+  "primary_method": "same fitted physical member field on every task",
+  "cohort_sha256": "39323b351d0fadfdb61c9fb0105de63d2237f1d81dac564866c33396ef3716f8",
+  "baseline_sha256": "fe31649a71c749e65b1af7295a7208b5877947a12cffc1afd46f2ab15199705f",
+  "comparison": [
+    {
+      "task": "lerf2d",
+      "metric": "member response IoU",
+      "candidate": 0.4941304379057988,
+      "v10": 0.7040067569509945,
+      "delta_pp": -20.987631904519567,
+      "denominator": "4 scenes"
+    },
+    {
+      "task": "lerf2d",
+      "metric": "member response AP",
+      "candidate": 0.7173264898404148,
+      "v10": 0.8761927775455381,
+      "delta_pp": -15.886628770512335,
+      "denominator": "4 scenes"
+    },
+    {
+      "task": "lerf3d_local_projection",
+      "metric": "actual subset projection IoU",
+      "candidate": 0.3231297063698939,
+      "v10": 0.6696327365836882,
+      "delta_pp": -34.65030302137942,
+      "denominator": "4 scenes"
+    },
+    {
+      "task": "scannet_ovs",
+      "metric": "member mIoU 19",
+      "candidate": 0.22285303734633724,
+      "v10": 0.6101149054806628,
+      "delta_pp": -38.72618681343256,
+      "denominator": "10 rooms"
+    },
+    {
+      "task": "scannet_ovs",
+      "metric": "member mIoU 15",
+      "candidate": 0.23369364724393477,
+      "v10": 0.6252758904159778,
+      "delta_pp": -39.1582243172043,
+      "denominator": "10 rooms"
+    },
+    {
+      "task": "scannet_ovs",
+      "metric": "member mIoU 10",
+      "candidate": 0.26546159908271616,
+      "v10": 0.7248606102956524,
+      "delta_pp": -45.93990112129362,
+      "denominator": "10 rooms"
+    },
+    {
+      "task": "nvos",
+      "metric": "signed response IoU",
+      "candidate": 0.5768645863582337,
+      "v10": 0.865134172141552,
+      "delta_pp": -28.82695857833183,
+      "denominator": "8 cases"
+    },
+    {
+      "task": "nvos",
+      "metric": "signed response AP",
+      "candidate": 0.9489883291546826,
+      "v10": 0.9802224516003604,
+      "delta_pp": -3.1234122445677803,
+      "denominator": "8 cases"
+    },
+    {
+      "task": "uqis/text",
+      "metric": "AP",
+      "candidate": 0.21393697989936844,
+      "v10": 0.2659587047562112,
+      "delta_pp": -5.202172485684276,
+      "denominator": "9 rooms,67 targets"
+    },
+    {
+      "task": "uqis/text",
+      "metric": "actual subset IoU",
+      "candidate": 0.12075455715566535,
+      "v10": 0.16386530164545418,
+      "delta_pp": -4.311074448978883,
+      "denominator": "9 rooms,67 targets"
+    },
+    {
+      "task": "uqis/image",
+      "metric": "AP",
+      "candidate": 0.24752952785433557,
+      "v10": 0.5930878179400586,
+      "delta_pp": -34.5558290085723,
+      "denominator": "9 rooms,67 targets"
+    },
+    {
+      "task": "uqis/image",
+      "metric": "actual subset IoU",
+      "candidate": 0.15986098757685518,
+      "v10": 0.39897960281086925,
+      "delta_pp": -23.911861523401406,
+      "denominator": "9 rooms,67 targets"
+    },
+    {
+      "task": "uqis/point_2d",
+      "metric": "AP",
+      "candidate": 0.47952669373604706,
+      "v10": 0.7579009711011095,
+      "delta_pp": -27.83742773650625,
+      "denominator": "9 rooms,67 targets"
+    },
+    {
+      "task": "uqis/point_2d",
+      "metric": "actual subset IoU",
+      "candidate": 0.28373218415322987,
+      "v10": 0.49735675405728724,
+      "delta_pp": -21.362456990405736,
+      "denominator": "9 rooms,67 targets"
+    },
+    {
+      "task": "uqis/point_3d",
+      "metric": "AP",
+      "candidate": 0.4678093371437719,
+      "v10": 0.7532525076702995,
+      "delta_pp": -28.54431705265276,
+      "denominator": "9 rooms,67 targets"
+    },
+    {
+      "task": "uqis/point_3d",
+      "metric": "actual subset IoU",
+      "candidate": 0.27691263469022975,
+      "v10": 0.4904698335651834,
+      "delta_pp": -21.35571988749537,
+      "denominator": "9 rooms,67 targets"
+    }
+  ],
+  "macro": {
+    "lerf": {
+      "native_iou": 0.4389426272475049,
+      "native_ap": 0.746331983135695,
+      "member_iou": 0.4941304379057988,
+      "member_ap": 0.7173264898404148,
+      "subset_iou": 0.3231297063698939
+    },
+    "nvos": {
+      "response_iou": 0.5768645863582337,
+      "ap": 0.9489883291546826,
+      "subset_iou": 0.7053595732215252
+    },
+    "scannet": {
+      "native": {
+        "19": 0.36945195042257717,
+        "15": 0.377524039875153,
+        "10": 0.4419944270960567
+      },
+      "member": {
+        "19": 0.22285303734633724,
+        "15": 0.23369364724393477,
+        "10": 0.26546159908271616
+      }
+    },
+    "uqis": {
+      "text": {
+        "ap": 0.21393697989936844,
+        "subset_iou": 0.12075455715566535,
+        "empty_selections": 0
+      },
+      "image": {
+        "ap": 0.24752952785433557,
+        "subset_iou": 0.15986098757685518,
+        "empty_selections": 0
+      },
+      "point_2d": {
+        "ap": 0.47952669373604706,
+        "subset_iou": 0.28373218415322987,
+        "empty_selections": 6
+      },
+      "point_3d": {
+        "ap": 0.4678093371437719,
+        "subset_iou": 0.27691263469022975,
+        "empty_selections": 8
+      }
+    }
+  },
+  "per_scene": {
+    "lerf": [
+      {
+        "scene": "figurines",
+        "native_iou": 0.47287673359720167,
+        "native_ap": 0.78848703361583,
+        "member_iou": 0.4919879505011652,
+        "member_ap": 0.7927761495020949,
+        "subset_iou": 0.4178841518132404,
+        "query_views": 56,
+        "missing": 0
+      },
+      {
+        "scene": "ramen",
+        "native_iou": 0.35140388819854707,
+        "native_ap": 0.6872013600168552,
+        "member_iou": 0.4282333791505178,
+        "member_ap": 0.5857152519692052,
+        "subset_iou": 0.19464220658255887,
+        "query_views": 71,
+        "missing": 0
+      },
+      {
+        "scene": "teatime",
+        "native_iou": 0.4868908683943041,
+        "native_ap": 0.8326093770150433,
+        "member_iou": 0.6352087077960941,
+        "member_ap": 0.8367972826179918,
+        "subset_iou": 0.32800553882331485,
+        "query_views": 59,
+        "missing": 0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "native_iou": 0.44459901879996655,
+        "native_ap": 0.6770301618950518,
+        "member_iou": 0.421091714175418,
+        "member_ap": 0.6540172752723673,
+        "subset_iou": 0.35198692826046163,
+        "query_views": 22,
+        "missing": 0
+      }
+    ],
+    "nvos": [
+      {
+        "scene": "fern",
+        "response_iou": 0.7673985652435725,
+        "ap": 0.9209521267286402,
+        "subset_iou": 0.7614530704590733,
+        "selected": 121865
+      },
+      {
+        "scene": "flower",
+        "response_iou": 0.07752964671525879,
+        "ap": 0.9152071387964907,
+        "subset_iou": 0.3483898180887603,
+        "selected": 3820
+      },
+      {
+        "scene": "fortress",
+        "response_iou": 0.6173952191108946,
+        "ap": 0.974474779859807,
+        "subset_iou": 0.8802507726373178,
+        "selected": 31961
+      },
+      {
+        "scene": "horns_center",
+        "response_iou": 0.6460563863901342,
+        "ap": 0.9924739069743596,
+        "subset_iou": 0.9153032646527995,
+        "selected": 18998
+      },
+      {
+        "scene": "horns_left",
+        "response_iou": 0.855273448316384,
+        "ap": 0.9475651324879022,
+        "subset_iou": 0.7861536013180805,
+        "selected": 12903
+      },
+      {
+        "scene": "leaves",
+        "response_iou": 0.9251539969440002,
+        "ap": 0.9943368916850804,
+        "subset_iou": 0.9682621667357605,
+        "selected": 5857
+      },
+      {
+        "scene": "orchids",
+        "response_iou": 0.09252699594053092,
+        "ap": 0.9301052241501484,
+        "subset_iou": 0.2313919246156811,
+        "selected": 4247
+      },
+      {
+        "scene": "trex",
+        "response_iou": 0.6335824322050942,
+        "ap": 0.9167914325550317,
+        "subset_iou": 0.7516719672647292,
+        "selected": 42079
+      }
+    ],
+    "scannet": [
+      {
+        "scene": "scene0070_00",
+        "observed_vertex_fraction": 0.9446882428231852,
+        "member": {
+          "19": 0.2288199498281941,
+          "15": 0.25677169753313533,
+          "10": 0.21960408950313645
+        },
+        "native": {
+          "19": 0.2611401339689253,
+          "15": 0.29803492627429734,
+          "10": 0.3585362678474085
+        }
+      },
+      {
+        "scene": "scene0097_00",
+        "observed_vertex_fraction": 0.893635341008513,
+        "member": {
+          "19": 0.20277203392885731,
+          "15": 0.1408226893620894,
+          "10": 0.21033813406650817
+        },
+        "native": {
+          "19": 0.45781576085026293,
+          "15": 0.4033046786307104,
+          "10": 0.5266376648806658
+        }
+      },
+      {
+        "scene": "scene0062_00",
+        "observed_vertex_fraction": 0.8951559775237357,
+        "member": {
+          "19": 0.24794464356046955,
+          "15": 0.2568815415110152,
+          "10": 0.34067416909813064
+        },
+        "native": {
+          "19": 0.3936651496159116,
+          "15": 0.3942104823531407,
+          "10": 0.42126301310358105
+        }
+      },
+      {
+        "scene": "scene0400_00",
+        "observed_vertex_fraction": 0.7738251720003334,
+        "member": {
+          "19": 0.27985016704102833,
+          "15": 0.2762394338097943,
+          "10": 0.2883760706172141
+        },
+        "native": {
+          "19": 0.4799847538317132,
+          "15": 0.4793908654356317,
+          "10": 0.45837077168723095
+        }
+      },
+      {
+        "scene": "scene0590_00",
+        "observed_vertex_fraction": 0.8652251330974134,
+        "member": {
+          "19": 0.19860249789415793,
+          "15": 0.2392687799012112,
+          "10": 0.33362128789862716
+        },
+        "native": {
+          "19": 0.3469202521245389,
+          "15": 0.4074466502094989,
+          "10": 0.533485411282592
+        }
+      },
+      {
+        "scene": "scene0000_00",
+        "observed_vertex_fraction": 0.81287713994273,
+        "member": {
+          "19": 0.20448237985220924,
+          "15": 0.1938109315715907,
+          "10": 0.20479984949357538
+        },
+        "native": {
+          "19": 0.318240857125585,
+          "15": 0.29982195374169057,
+          "10": 0.3891899328394105
+        }
+      },
+      {
+        "scene": "scene0347_00",
+        "observed_vertex_fraction": 0.831180866086138,
+        "member": {
+          "19": 0.2691502238036691,
+          "15": 0.3164434987823192,
+          "10": 0.2778479062424817
+        },
+        "native": {
+          "19": 0.49904747393089527,
+          "15": 0.5059969398001971,
+          "10": 0.5918862700461761
+        }
+      },
+      {
+        "scene": "scene0140_00",
+        "observed_vertex_fraction": 0.8415164865219967,
+        "member": {
+          "19": 0.1612725207548705,
+          "15": 0.17153677434377737,
+          "10": 0.20737653118981006
+        },
+        "native": {
+          "19": 0.28560447302028613,
+          "15": 0.32709293236590503,
+          "10": 0.3731982815466384
+        }
+      },
+      {
+        "scene": "scene0200_00",
+        "observed_vertex_fraction": 0.8907204860068915,
+        "member": {
+          "19": 0.26909799335054563,
+          "15": 0.2872014197711447,
+          "10": 0.35668879829335837
+        },
+        "native": {
+          "19": 0.3704150684659547,
+          "15": 0.37039137064169253,
+          "10": 0.3904667151928152
+        }
+      },
+      {
+        "scene": "scene0645_00",
+        "observed_vertex_fraction": 0.6258536017952945,
+        "member": {
+          "19": 0.16653796344937066,
+          "15": 0.19795970585327033,
+          "10": 0.21528915442431978
+        },
+        "native": {
+          "19": 0.28168558129169885,
+          "15": 0.2895495992987654,
+          "10": 0.37690994253404886
+        }
+      }
+    ]
+  },
+  "uqis_unsupported": {
+    "text": 0,
+    "image": 0,
+    "point_2d": 6,
+    "point_3d": 8
+  },
+  "uqis_actual_set_joint_success": {
+    "minimum_iou": {
+      "estimate": 0.07294117999335233,
+      "lower": 0.04233589165792065,
+      "upper": 0.10428016308877779,
+      "confidence": 0.95,
+      "bootstrap_samples": 2000,
+      "bootstrap_unit": "scene",
+      "seed": 20260813
+    },
+    "all_four_iou_at_least_025": {
+      "estimate": 0.11574074074074073,
+      "lower": 0.041666666666666664,
+      "upper": 0.19907407407407407,
+      "confidence": 0.95,
+      "bootstrap_samples": 2000,
+      "bootstrap_unit": "scene",
+      "seed": 20260813
+    },
+    "all_four_iou_at_least_050": {
+      "estimate": 0.06944444444444445,
+      "lower": 0.013888888888888888,
+      "upper": 0.125,
+      "confidence": 0.95,
+      "bootstrap_samples": 2000,
+      "bootstrap_unit": "scene",
+      "seed": 20260813
+    },
+    "per_target": [
+      {
+        "scene_id": "scene0030_00",
+        "instance_id": 20,
+        "minimum_iou": 0.6182701652089407,
+        "all_four_iou_at_least_025": 1.0,
+        "all_four_iou_at_least_050": 1.0
+      },
+      {
+        "scene_id": "scene0030_00",
+        "instance_id": 22,
+        "minimum_iou": 0.6455968802747221,
+        "all_four_iou_at_least_025": 1.0,
+        "all_four_iou_at_least_050": 1.0
+      },
+      {
+        "scene_id": "scene0030_00",
+        "instance_id": 23,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0030_00",
+        "instance_id": 25,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0030_00",
+        "instance_id": 26,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0030_00",
+        "instance_id": 27,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0030_00",
+        "instance_id": 48,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0030_00",
+        "instance_id": 52,
+        "minimum_iou": 0.003136491455764655,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0249_00",
+        "instance_id": 22,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0249_00",
+        "instance_id": 24,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0249_00",
+        "instance_id": 25,
+        "minimum_iou": 0.00035602392480774705,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0249_00",
+        "instance_id": 26,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0249_00",
+        "instance_id": 33,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0249_00",
+        "instance_id": 34,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0249_00",
+        "instance_id": 35,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0249_00",
+        "instance_id": 37,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0353_00",
+        "instance_id": 4,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0353_00",
+        "instance_id": 5,
+        "minimum_iou": 0.5121602288984263,
+        "all_four_iou_at_least_025": 1.0,
+        "all_four_iou_at_least_050": 1.0
+      },
+      {
+        "scene_id": "scene0353_00",
+        "instance_id": 18,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0353_00",
+        "instance_id": 33,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0353_00",
+        "instance_id": 34,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0353_00",
+        "instance_id": 45,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0353_00",
+        "instance_id": 50,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0353_00",
+        "instance_id": 51,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0435_00",
+        "instance_id": 11,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0435_00",
+        "instance_id": 12,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0435_00",
+        "instance_id": 14,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0435_00",
+        "instance_id": 22,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0435_00",
+        "instance_id": 29,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0435_00",
+        "instance_id": 35,
+        "minimum_iou": 0.23556581986143188,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0435_00",
+        "instance_id": 39,
+        "minimum_iou": 0.03709829867674858,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0435_00",
+        "instance_id": 64,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0700_00",
+        "instance_id": 1,
+        "minimum_iou": 0.25176470588235295,
+        "all_four_iou_at_least_025": 1.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0700_00",
+        "instance_id": 2,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0700_00",
+        "instance_id": 5,
+        "minimum_iou": 0.5380359612724758,
+        "all_four_iou_at_least_025": 1.0,
+        "all_four_iou_at_least_050": 1.0
+      },
+      {
+        "scene_id": "scene0700_00",
+        "instance_id": 6,
+        "minimum_iou": 0.2766902119071645,
+        "all_four_iou_at_least_025": 1.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0700_00",
+        "instance_id": 7,
+        "minimum_iou": 0.0008521516829995739,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0700_00",
+        "instance_id": 17,
+        "minimum_iou": 0.0018726591760299626,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0700_00",
+        "instance_id": 18,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0700_00",
+        "instance_id": 35,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0704_00",
+        "instance_id": 1,
+        "minimum_iou": 0.05191193511008111,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0704_00",
+        "instance_id": 2,
+        "minimum_iou": 7.748934521503293e-05,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0704_00",
+        "instance_id": 6,
+        "minimum_iou": 0.11693002257336343,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0704_00",
+        "instance_id": 10,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0704_00",
+        "instance_id": 11,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0704_00",
+        "instance_id": 19,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0704_00",
+        "instance_id": 26,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0246_00",
+        "instance_id": 3,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0246_00",
+        "instance_id": 5,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0246_00",
+        "instance_id": 6,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0246_00",
+        "instance_id": 33,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0246_00",
+        "instance_id": 37,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0246_00",
+        "instance_id": 39,
+        "minimum_iou": 0.4483967935871743,
+        "all_four_iou_at_least_025": 1.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0203_00",
+        "instance_id": 3,
+        "minimum_iou": 0.11835187675754982,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0203_00",
+        "instance_id": 4,
+        "minimum_iou": 0.13057961359093936,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0203_00",
+        "instance_id": 6,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0203_00",
+        "instance_id": 8,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0203_00",
+        "instance_id": 9,
+        "minimum_iou": 0.5228607009428927,
+        "all_four_iou_at_least_025": 1.0,
+        "all_four_iou_at_least_050": 1.0
+      },
+      {
+        "scene_id": "scene0203_00",
+        "instance_id": 17,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0203_00",
+        "instance_id": 18,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0203_00",
+        "instance_id": 19,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0535_00",
+        "instance_id": 9,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0535_00",
+        "instance_id": 10,
+        "minimum_iou": 0.0,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0535_00",
+        "instance_id": 11,
+        "minimum_iou": 0.0027447392497712718,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0535_00",
+        "instance_id": 12,
+        "minimum_iou": 0.2083076923076923,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0535_00",
+        "instance_id": 13,
+        "minimum_iou": 0.06474480151228733,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      },
+      {
+        "scene_id": "scene0535_00",
+        "instance_id": 16,
+        "minimum_iou": 0.14994775339602925,
+        "all_four_iou_at_least_025": 0.0,
+        "all_four_iou_at_least_050": 0.0
+      }
+    ],
+    "selection_agreement": {
+      "text__image_iou": {
+        "estimate": 0.20367328874984245,
+        "lower": 0.13296907633353602,
+        "upper": 0.27236194371013484,
+        "confidence": 0.95,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene",
+        "seed": 20260813
+      },
+      "text__point_2d_iou": {
+        "estimate": 0.20849731349592762,
+        "lower": 0.12481244809801256,
+        "upper": 0.30083704999119293,
+        "confidence": 0.95,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene",
+        "seed": 20260813
+      },
+      "text__point_3d_iou": {
+        "estimate": 0.21359657781723543,
+        "lower": 0.12417373379567868,
+        "upper": 0.31302966657996234,
+        "confidence": 0.95,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene",
+        "seed": 20260813
+      },
+      "image__point_2d_iou": {
+        "estimate": 0.2684361060018056,
+        "lower": 0.18082757894556586,
+        "upper": 0.37186575340637995,
+        "confidence": 0.95,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene",
+        "seed": 20260813
+      },
+      "image__point_3d_iou": {
+        "estimate": 0.26540675590161106,
+        "lower": 0.17650961226903505,
+        "upper": 0.36687361658166284,
+        "confidence": 0.95,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene",
+        "seed": 20260813
+      },
+      "point_2d__point_3d_iou": {
+        "estimate": 0.7572925758659685,
+        "lower": 0.6673726058394461,
+        "upper": 0.8437983909327379,
+        "confidence": 0.95,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene",
+        "seed": 20260813
+      },
+      "common_true_coverage": {
+        "estimate": 0.0893174138377335,
+        "lower": 0.04785246230164885,
+        "upper": 0.1368136405508803,
+        "confidence": 0.95,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene",
+        "seed": 20260813
+      },
+      "union_false_fraction": {
+        "estimate": 0.6996458053212857,
+        "lower": 0.6365605608507439,
+        "upper": 0.7679876072475673,
+        "confidence": 0.95,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene",
+        "seed": 20260813
+      },
+      "per_target": [
+        {
+          "scene_id": "scene0030_00",
+          "instance_id": 20,
+          "text__image_iou": 0.7306780464675201,
+          "text__point_2d_iou": 0.9024332624616112,
+          "text__point_3d_iou": 0.8933113518605746,
+          "image__point_2d_iou": 0.7356941838649156,
+          "image__point_3d_iou": 0.7328172648369693,
+          "point_2d__point_3d_iou": 0.9858502073676506,
+          "common_true_coverage": 0.5775689724110356,
+          "common_false_elements": 132,
+          "union_false_fraction": 0.13189066059225513
+        },
+        {
+          "scene_id": "scene0030_00",
+          "instance_id": 22,
+          "text__image_iou": 0.9255310809751509,
+          "text__point_2d_iou": 0.7222542519458057,
+          "text__point_3d_iou": 0.7297626729762673,
+          "image__point_2d_iou": 0.679235868557987,
+          "image__point_3d_iou": 0.6865205984542296,
+          "point_2d__point_3d_iou": 0.9766586867305062,
+          "common_true_coverage": 0.5568431687169431,
+          "common_false_elements": 139,
+          "union_false_fraction": 0.033952998947737636
+        },
+        {
+          "scene_id": "scene0030_00",
+          "instance_id": 23,
+          "text__image_iou": 0.5633283006207013,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.0,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9986579432981043
+        },
+        {
+          "scene_id": "scene0030_00",
+          "instance_id": 25,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.897532491994726,
+          "image__point_3d_iou": 0.9004542013626041,
+          "point_2d__point_3d_iou": 0.9884836852207294,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.957623215108245
+        },
+        {
+          "scene_id": "scene0030_00",
+          "instance_id": 26,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.9531311539976368,
+          "image__point_3d_iou": 0.9556125468534228,
+          "point_2d__point_3d_iou": 0.9867641248518372,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9689639242366973
+        },
+        {
+          "scene_id": "scene0030_00",
+          "instance_id": 27,
+          "text__image_iou": 0.009080902586681342,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9659468438538206,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.7543061871296679
+        },
+        {
+          "scene_id": "scene0030_00",
+          "instance_id": 48,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.022656378263011,
+          "image__point_3d_iou": 0.039238604107530474,
+          "point_2d__point_3d_iou": 0.8394335511982571,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.7750737463126843
+        },
+        {
+          "scene_id": "scene0030_00",
+          "instance_id": 52,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.011632200886262925,
+          "text__point_3d_iou": 0.02716325959115094,
+          "image__point_2d_iou": 0.002062195826115648,
+          "image__point_3d_iou": 0.001807426881367072,
+          "point_2d__point_3d_iou": 0.8073969041710978,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.7814648168978877
+        },
+        {
+          "scene_id": "scene0249_00",
+          "instance_id": 22,
+          "text__image_iou": 0.6621212121212121,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9746772591857001,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.40731853629274145
+        },
+        {
+          "scene_id": "scene0249_00",
+          "instance_id": 24,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.8562925170068028,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8219557195571956
+        },
+        {
+          "scene_id": "scene0249_00",
+          "instance_id": 25,
+          "text__image_iou": 0.001865381625990984,
+          "text__point_2d_iou": 0.041741472172351884,
+          "text__point_3d_iou": 0.0427715996578272,
+          "image__point_2d_iou": 0.44536686607251863,
+          "image__point_3d_iou": 0.5083662086790913,
+          "point_2d__point_3d_iou": 0.8087012987012987,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 12,
+          "union_false_fraction": 0.7942008486562943
+        },
+        {
+          "scene_id": "scene0249_00",
+          "instance_id": 26,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.7439490445859872,
+          "image__point_3d_iou": 0.7611548556430446,
+          "point_2d__point_3d_iou": 0.9416983523447402,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.761783843834312
+        },
+        {
+          "scene_id": "scene0249_00",
+          "instance_id": 33,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9603918228279387,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.6296682299808928
+        },
+        {
+          "scene_id": "scene0249_00",
+          "instance_id": 34,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9801488833746899,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.7848303393213573
+        },
+        {
+          "scene_id": "scene0249_00",
+          "instance_id": 35,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.3720508166969147,
+          "text__point_3d_iou": 0.21961398017736045,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.5793838862559242,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8935118434603502
+        },
+        {
+          "scene_id": "scene0249_00",
+          "instance_id": 37,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.7367788461538461,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9196846062161914
+        },
+        {
+          "scene_id": "scene0353_00",
+          "instance_id": 4,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.0,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9933116103584291
+        },
+        {
+          "scene_id": "scene0353_00",
+          "instance_id": 5,
+          "text__image_iou": 0.6998939554612937,
+          "text__point_2d_iou": 0.7353337828725557,
+          "text__point_3d_iou": 0.7352941176470589,
+          "image__point_2d_iou": 0.8814504881450488,
+          "image__point_3d_iou": 0.8851138353765324,
+          "point_2d__point_3d_iou": 0.9944211994421199,
+          "common_true_coverage": 0.5371048252911813,
+          "common_false_elements": 364,
+          "union_false_fraction": 0.21536905965621841
+        },
+        {
+          "scene_id": "scene0353_00",
+          "instance_id": 18,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9416267942583733,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9123679303915475
+        },
+        {
+          "scene_id": "scene0353_00",
+          "instance_id": 33,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9804618117229129,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.893687707641196
+        },
+        {
+          "scene_id": "scene0353_00",
+          "instance_id": 34,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.7659873506676037,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.844946025515211
+        },
+        {
+          "scene_id": "scene0353_00",
+          "instance_id": 45,
+          "text__image_iou": 0.0010522162304353545,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.8922413793103449,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9480660320520544
+        },
+        {
+          "scene_id": "scene0353_00",
+          "instance_id": 50,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.630098452883263,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9244280442804428
+        },
+        {
+          "scene_id": "scene0353_00",
+          "instance_id": 51,
+          "text__image_iou": 0.9046646237657474,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9430434782608695,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8248997517662784
+        },
+        {
+          "scene_id": "scene0435_00",
+          "instance_id": 11,
+          "text__image_iou": 0.6649492583918813,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.0,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.3550351288056206
+        },
+        {
+          "scene_id": "scene0435_00",
+          "instance_id": 12,
+          "text__image_iou": 0.5238327639498943,
+          "text__point_2d_iou": 0.0006603037397202714,
+          "text__point_3d_iou": 0.000715222314936226,
+          "image__point_2d_iou": 5.981576743629621e-05,
+          "image__point_3d_iou": 0.00011878600700837441,
+          "point_2d__point_3d_iou": 0.9773937259398804,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 1,
+          "union_false_fraction": 0.511284343654601
+        },
+        {
+          "scene_id": "scene0435_00",
+          "instance_id": 14,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.9470967741935484,
+          "image__point_3d_iou": 0.944969905417025,
+          "point_2d__point_3d_iou": 0.9978098992553658,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.3617021276595745
+        },
+        {
+          "scene_id": "scene0435_00",
+          "instance_id": 22,
+          "text__image_iou": 0.0136986301369863,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.0,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.999661418655832
+        },
+        {
+          "scene_id": "scene0435_00",
+          "instance_id": 29,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.0,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 1.0
+        },
+        {
+          "scene_id": "scene0435_00",
+          "instance_id": 35,
+          "text__image_iou": 0.7816901408450704,
+          "text__point_2d_iou": 0.6820702402957486,
+          "text__point_3d_iou": 0.6445108289768484,
+          "image__point_2d_iou": 0.7112338858195212,
+          "image__point_3d_iou": 0.6489556614144375,
+          "point_2d__point_3d_iou": 0.8632407791131371,
+          "common_true_coverage": 0.48732394366197185,
+          "common_false_elements": 994,
+          "union_false_fraction": 0.7051539491298527
+        },
+        {
+          "scene_id": "scene0435_00",
+          "instance_id": 39,
+          "text__image_iou": 0.6694825765575502,
+          "text__point_2d_iou": 0.47679934007011754,
+          "text__point_3d_iou": 0.5857671740024681,
+          "image__point_2d_iou": 0.34544648792377575,
+          "image__point_3d_iou": 0.46288113124171454,
+          "point_2d__point_3d_iou": 0.8268573204849239,
+          "common_true_coverage": 0.12538226299694188,
+          "common_false_elements": 1436,
+          "union_false_fraction": 0.8088610076455597
+        },
+        {
+          "scene_id": "scene0435_00",
+          "instance_id": 64,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.812562646174407,
+          "text__point_3d_iou": 0.8477039973571192,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9298597194388778,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8274530002575329
+        },
+        {
+          "scene_id": "scene0700_00",
+          "instance_id": 1,
+          "text__image_iou": 0.6159047005795235,
+          "text__point_2d_iou": 0.5452884364395719,
+          "text__point_3d_iou": 0.593710292249047,
+          "image__point_2d_iou": 0.4072727272727273,
+          "image__point_3d_iou": 0.44516509433962265,
+          "point_2d__point_3d_iou": 0.7133156185414822,
+          "common_true_coverage": 0.18366336633663366,
+          "common_false_elements": 340,
+          "union_false_fraction": 0.3556905819116616
+        },
+        {
+          "scene_id": "scene0700_00",
+          "instance_id": 2,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.8854041013268998,
+          "image__point_3d_iou": 0.8634036453000205,
+          "point_2d__point_3d_iou": 0.9119458128078818,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.6626848691695109
+        },
+        {
+          "scene_id": "scene0700_00",
+          "instance_id": 5,
+          "text__image_iou": 0.9500372856077554,
+          "text__point_2d_iou": 0.9503759398496241,
+          "text__point_3d_iou": 0.9593067068575735,
+          "image__point_2d_iou": 0.958924570575056,
+          "image__point_3d_iou": 0.9619402985074627,
+          "point_2d__point_3d_iou": 0.963855421686747,
+          "common_true_coverage": 0.8270676691729323,
+          "common_false_elements": 482,
+          "union_false_fraction": 0.4089904200442152
+        },
+        {
+          "scene_id": "scene0700_00",
+          "instance_id": 6,
+          "text__image_iou": 0.904281098546042,
+          "text__point_2d_iou": 0.9110313185717136,
+          "text__point_3d_iou": 0.9307692307692308,
+          "image__point_2d_iou": 0.8444315769156534,
+          "image__point_3d_iou": 0.8701796890773269,
+          "point_2d__point_3d_iou": 0.9108810393828665,
+          "common_true_coverage": 0.8379544054220579,
+          "common_false_elements": 2878,
+          "union_false_fraction": 0.6976432266717763
+        },
+        {
+          "scene_id": "scene0700_00",
+          "instance_id": 7,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.00017911517105498835,
+          "text__point_3d_iou": 0.0014194464158978,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9264844486333648,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9164283444550365
+        },
+        {
+          "scene_id": "scene0700_00",
+          "instance_id": 17,
+          "text__image_iou": 0.0031091011871113624,
+          "text__point_2d_iou": 0.002122498483929654,
+          "text__point_3d_iou": 0.0032305433186490457,
+          "image__point_2d_iou": 0.7755102040816326,
+          "image__point_3d_iou": 0.6611721611721612,
+          "point_2d__point_3d_iou": 0.7975326560232221,
+          "common_true_coverage": 0.0018083182640144665,
+          "common_false_elements": 5,
+          "union_false_fraction": 0.8576370409792443
+        },
+        {
+          "scene_id": "scene0700_00",
+          "instance_id": 18,
+          "text__image_iou": 0.0031091011871113624,
+          "text__point_2d_iou": 0.6989172196996157,
+          "text__point_3d_iou": 0.7153075822603719,
+          "image__point_2d_iou": 0.0007201152184349496,
+          "image__point_3d_iou": 0.0007320644216691069,
+          "point_2d__point_3d_iou": 0.9680232558139535,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 3,
+          "union_false_fraction": 0.8453103126458236
+        },
+        {
+          "scene_id": "scene0700_00",
+          "instance_id": 35,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.9393090569561158,
+          "image__point_3d_iou": 0.7973199329983249,
+          "point_2d__point_3d_iou": 0.8372093023255814,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.808793686583991
+        },
+        {
+          "scene_id": "scene0704_00",
+          "instance_id": 1,
+          "text__image_iou": 0.012148559527941687,
+          "text__point_2d_iou": 0.009626274065685165,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.7659574468085106,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.207277628032345
+        },
+        {
+          "scene_id": "scene0704_00",
+          "instance_id": 2,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9377729257641921,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.6401189172273509
+        },
+        {
+          "scene_id": "scene0704_00",
+          "instance_id": 6,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9567099567099567,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.1387900355871886
+        },
+        {
+          "scene_id": "scene0704_00",
+          "instance_id": 10,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.7465857359635811,
+          "text__point_3d_iou": 0.7621621621621621,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9740470397404704,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.5002589331952356
+        },
+        {
+          "scene_id": "scene0704_00",
+          "instance_id": 11,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.0,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9315460697553357
+        },
+        {
+          "scene_id": "scene0704_00",
+          "instance_id": 19,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.6390315480557593,
+          "image__point_3d_iou": 0.43106562311860325,
+          "point_2d__point_3d_iou": 0.5365714285714286,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.5880524861878453
+        },
+        {
+          "scene_id": "scene0704_00",
+          "instance_id": 26,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.0,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 1.0
+        },
+        {
+          "scene_id": "scene0246_00",
+          "instance_id": 3,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.0,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 1.0
+        },
+        {
+          "scene_id": "scene0246_00",
+          "instance_id": 5,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.7936127744510978,
+          "image__point_3d_iou": 0.8354430379746836,
+          "point_2d__point_3d_iou": 0.9315512353179425,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8682546374367622
+        },
+        {
+          "scene_id": "scene0246_00",
+          "instance_id": 6,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.07294117647058823,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9681205260529382
+        },
+        {
+          "scene_id": "scene0246_00",
+          "instance_id": 33,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.036237897648686034,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.4936029715229055,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9552263787764667
+        },
+        {
+          "scene_id": "scene0246_00",
+          "instance_id": 37,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9684587813620071,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9642961023851077
+        },
+        {
+          "scene_id": "scene0246_00",
+          "instance_id": 39,
+          "text__image_iou": 0.8313397129186603,
+          "text__point_2d_iou": 0.6973125884016973,
+          "text__point_3d_iou": 0.763267429760666,
+          "image__point_2d_iou": 0.6551724137931034,
+          "image__point_3d_iou": 0.7226477024070022,
+          "point_2d__point_3d_iou": 0.8574307304785894,
+          "common_true_coverage": 0.9246284501061571,
+          "common_false_elements": 433,
+          "union_false_fraction": 0.577922077922078
+        },
+        {
+          "scene_id": "scene0203_00",
+          "instance_id": 3,
+          "text__image_iou": 0.2823992133726647,
+          "text__point_2d_iou": 0.12287503728004771,
+          "text__point_3d_iou": 0.14407276995305165,
+          "image__point_2d_iou": 0.12734962406015038,
+          "image__point_3d_iou": 0.15341440598690365,
+          "point_2d__point_3d_iou": 0.825503355704698,
+          "common_true_coverage": 0.032242185577159736,
+          "common_false_elements": 6,
+          "union_false_fraction": 0.10370778267254038
+        },
+        {
+          "scene_id": "scene0203_00",
+          "instance_id": 4,
+          "text__image_iou": 0.6856606136505948,
+          "text__point_2d_iou": 0.8448199199644286,
+          "text__point_3d_iou": 0.8060904612628751,
+          "image__point_2d_iou": 0.6035950804162725,
+          "image__point_3d_iou": 0.5670135603910438,
+          "point_2d__point_3d_iou": 0.9397402597402598,
+          "common_true_coverage": 0.17580743449116393,
+          "common_false_elements": 1215,
+          "union_false_fraction": 0.5858617453862996
+        },
+        {
+          "scene_id": "scene0203_00",
+          "instance_id": 6,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.4075,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8826955910414783
+        },
+        {
+          "scene_id": "scene0203_00",
+          "instance_id": 8,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9812545061283345,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8631719861903755
+        },
+        {
+          "scene_id": "scene0203_00",
+          "instance_id": 9,
+          "text__image_iou": 0.5760964912280702,
+          "text__point_2d_iou": 0.6191455334704136,
+          "text__point_3d_iou": 0.6142120075046904,
+          "image__point_2d_iou": 0.9046060322656068,
+          "image__point_3d_iou": 0.8855650522317189,
+          "point_2d__point_3d_iou": 0.9420505200594353,
+          "common_true_coverage": 0.4539665211062591,
+          "common_false_elements": 53,
+          "union_false_fraction": 0.03548106225511537
+        },
+        {
+          "scene_id": "scene0203_00",
+          "instance_id": 17,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.855281207133059,
+          "text__point_3d_iou": 0.8483493810178817,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9810444874274662,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8506669558616202
+        },
+        {
+          "scene_id": "scene0203_00",
+          "instance_id": 18,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.5513026696687038,
+          "text__point_3d_iou": 0.7946908602150538,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.6797938903202061,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9362303664921466
+        },
+        {
+          "scene_id": "scene0203_00",
+          "instance_id": 19,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.9239242685025818,
+          "text__point_3d_iou": 0.9186767746381805,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.991660623640319,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.9511347594744272
+        },
+        {
+          "scene_id": "scene0535_00",
+          "instance_id": 9,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.9022881880024737,
+          "image__point_3d_iou": 0.8853779429987608,
+          "point_2d__point_3d_iou": 0.9363177805800756,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.659365221278498
+        },
+        {
+          "scene_id": "scene0535_00",
+          "instance_id": 10,
+          "text__image_iou": 0.0,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.9592130518234165,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.8983936520224501
+        },
+        {
+          "scene_id": "scene0535_00",
+          "instance_id": 11,
+          "text__image_iou": 0.5645051194539249,
+          "text__point_2d_iou": 0.0,
+          "text__point_3d_iou": 0.0,
+          "image__point_2d_iou": 0.0,
+          "image__point_3d_iou": 0.0,
+          "point_2d__point_3d_iou": 0.8566084788029925,
+          "common_true_coverage": 0.0,
+          "common_false_elements": 0,
+          "union_false_fraction": 0.772508038585209
+        },
+        {
+          "scene_id": "scene0535_00",
+          "instance_id": 12,
+          "text__image_iou": 0.45352400408580185,
+          "text__point_2d_iou": 0.7075664621676891,
+          "text__point_3d_iou": 0.7027888446215139,
+          "image__point_2d_iou": 0.4276729559748428,
+          "image__point_3d_iou": 0.4506065857885615,
+          "point_2d__point_3d_iou": 0.9315391879131256,
+          "common_true_coverage": 0.18043025676613464,
+          "common_false_elements": 123,
+          "union_false_fraction": 0.2942659105229994
+        },
+        {
+          "scene_id": "scene0535_00",
+          "instance_id": 13,
+          "text__image_iou": 0.5371835443037974,
+          "text__point_2d_iou": 0.07720144752714113,
+          "text__point_3d_iou": 0.07710843373493977,
+          "image__point_2d_iou": 0.029154518950437316,
+          "image__point_3d_iou": 0.029133284777858703,
+          "point_2d__point_3d_iou": 0.9206349206349206,
+          "common_true_coverage": 0.01883148237566393,
+          "common_false_elements": 1,
+          "union_false_fraction": 0.16702663786897048
+        },
+        {
+          "scene_id": "scene0535_00",
+          "instance_id": 16,
+          "text__image_iou": 0.22204213938411668,
+          "text__point_2d_iou": 0.2914915966386555,
+          "text__point_3d_iou": 0.29543094496365524,
+          "image__point_2d_iou": 0.744640605296343,
+          "image__point_3d_iou": 0.738833746898263,
+          "point_2d__point_3d_iou": 0.95822454308094,
+          "common_true_coverage": 0.1017003529034328,
+          "common_false_elements": 89,
+          "union_false_fraction": 0.4943097476496784
+        }
+      ],
+      "interpretation": "secondary consistency diagnosis; agreement can be consistently wrong; empty/empty agreement is zero; accuracy metrics unchanged"
+    }
+  },
+  "construction": [
+    {
+      "family": "nvos",
+      "scene": "flower",
+      "gpu": 1,
+      "seconds": 387.0028857588768,
+      "field_sha256": "47b06bf876adaf20eeedd4f89dd0a1d92716a82d0ddac426b3429eb85b551419",
+      "elements": 329244,
+      "observed": 282804,
+      "deployment_bytes": 1578399264,
+      "configuration_sha256": "3618425ccba7eb79fdbb8e397657dd8821a8906d150a98e3de66ec932cb2b869",
+      "observations_sha256": "fdd0762ba59122d8607636e8af14b304e438cdffc0c66612a99fb6ab62d8392d",
+      "train_frames": [
+        1,
+        3,
+        4,
+        6,
+        8,
+        11,
+        13,
+        14,
+        16,
+        18,
+        20,
+        21,
+        23,
+        25,
+        28,
+        30,
+        31,
+        33
+      ],
+      "development_frames": [
+        9,
+        26
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "same frozen v10 NVOS carrier; source RGB resized to longest side1008"
+    },
+    {
+      "family": "nvos",
+      "scene": "fortress",
+      "gpu": 2,
+      "seconds": 319.57957412675023,
+      "field_sha256": "5db3a179c8864e7c1079e5fc6297719d1f599a5fc71b013aad8cfa1c3e1088aa",
+      "elements": 444915,
+      "observed": 352043,
+      "deployment_bytes": 2132925984,
+      "configuration_sha256": "bb29a6f366e39df5deef5ee6ded16a977eeb94870394d709cdce42b557637003",
+      "observations_sha256": "351d948be24d06a651bfc81aa57ccaa1a2ec14bb8d219c3f7e7f890b43261b35",
+      "train_frames": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        35,
+        37,
+        39,
+        41
+      ],
+      "development_frames": [
+        12,
+        33
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "same frozen v10 NVOS carrier; source RGB resized to longest side1008"
+    },
+    {
+      "family": "nvos",
+      "scene": "horns_center",
+      "gpu": 3,
+      "seconds": 400.6709104925394,
+      "field_sha256": "d5f058f241e3cb28435adfac311584d5c8e0127d2a6cf5e4c7c94399280de8ef",
+      "elements": 387695,
+      "observed": 355970,
+      "deployment_bytes": 1858613216,
+      "configuration_sha256": "1e7cfb5a946e0ba94de5b3e53569efc7589b9c6d3201649dc9ee999af471c157",
+      "observations_sha256": "161ca045119a51ce2f67a9ff0e2b31c6dbd23eee79315d7dca59b85b0a7c9d77",
+      "train_frames": [
+        0,
+        3,
+        6,
+        10,
+        14,
+        20,
+        23,
+        26,
+        29,
+        33,
+        36,
+        39,
+        42,
+        45,
+        52,
+        55,
+        58,
+        61
+      ],
+      "development_frames": [
+        17,
+        48
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "same frozen v10 NVOS carrier; source RGB resized to longest side1008"
+    },
+    {
+      "family": "nvos",
+      "scene": "leaves",
+      "gpu": 4,
+      "seconds": 403.21319766901433,
+      "field_sha256": "70cf4610403902b124dff19d8403b66958d19723c01f2ef4455db4554fca948e",
+      "elements": 278479,
+      "observed": 234892,
+      "deployment_bytes": 1335031776,
+      "configuration_sha256": "000004bdf27e3376467f5cc3334ef5e7d2c2d1194d894875b3e7ba0331ffe6e3",
+      "observations_sha256": "60f1ab1cdf91f23a07a63c63d031b772db18aea76929cfca5afbd1bf53c134d4",
+      "train_frames": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        9,
+        10,
+        11,
+        12,
+        14,
+        15,
+        16,
+        17,
+        19,
+        21,
+        22,
+        24,
+        25
+      ],
+      "development_frames": [
+        7,
+        20
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "same frozen v10 NVOS carrier; source RGB resized to longest side1008"
+    },
+    {
+      "family": "nvos",
+      "scene": "orchids",
+      "gpu": 5,
+      "seconds": 440.053146565333,
+      "field_sha256": "607796e83a0aad97a52ae3a89203d464d65082289a54b82e7fdde11f0c8db0bd",
+      "elements": 337848,
+      "observed": 285475,
+      "deployment_bytes": 1619646752,
+      "configuration_sha256": "d080ea9770fa2660d74de0d807c5077ddbe4f2983ada72ac126ec50372f4ca26",
+      "observations_sha256": "b4c9fb5e922ae3281260ffe893dc9d8d152ffe12eef4a2dc87bdc6eb1a8afc80",
+      "train_frames": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        7,
+        8,
+        10,
+        11,
+        12,
+        14,
+        16,
+        17,
+        18,
+        20,
+        22,
+        23,
+        24
+      ],
+      "development_frames": [
+        6,
+        19
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "same frozen v10 NVOS carrier; source RGB resized to longest side1008"
+    },
+    {
+      "family": "nvos",
+      "scene": "trex",
+      "gpu": 5,
+      "seconds": 336.66759344004095,
+      "field_sha256": "3cb4713733f0acf79aa12f8725292c9c955d3585a4617e077a803b49077a59c5",
+      "elements": 447910,
+      "observed": 387836,
+      "deployment_bytes": 2147284128,
+      "configuration_sha256": "1d3491226262044bf0a75c9df3c00199f60a60bc2fef7fe429603ccd68cf82b2",
+      "observations_sha256": "5e1817dc2f4d0c3f64d893f2308c3c05c502e68bd11f17fe53a3cc2848496990",
+      "train_frames": [
+        0,
+        3,
+        6,
+        8,
+        11,
+        17,
+        20,
+        22,
+        25,
+        28,
+        32,
+        34,
+        37,
+        40,
+        46,
+        48,
+        51,
+        54
+      ],
+      "development_frames": [
+        14,
+        43
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "same frozen v10 NVOS carrier; source RGB resized to longest side1008"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0070_00",
+      "gpu": 4,
+      "seconds": 124.44482433237135,
+      "field_sha256": "59f750abeb92f30b956e4b6189ad3a816c8808d1a9eb4465823eb51f6a347127",
+      "elements": 109380,
+      "observed": 103330,
+      "deployment_bytes": 524371232,
+      "configuration_sha256": "ab605ee2a8bfbd3495ed9ab740630b271280d647c0147d9024ba18b5c8c1a0c1",
+      "observations_sha256": "fff8ea9551cada7b1ab608ab0b7223d8cc9219eaedbc992638fc9d5128a1f23d",
+      "train_frames": [
+        0,
+        60,
+        140,
+        200,
+        280,
+        420,
+        480,
+        560,
+        620,
+        700,
+        760,
+        840,
+        900,
+        980,
+        1120,
+        1180,
+        1260,
+        1320
+      ],
+      "development_frames": [
+        340,
+        1040
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0097_00",
+      "gpu": 5,
+      "seconds": 103.56452242098749,
+      "field_sha256": "9494690d84423c6d9ed4b08f7f1e299a42f8d06f6547d7f9732a80e36b6777be",
+      "elements": 72007,
+      "observed": 64348,
+      "deployment_bytes": 345205152,
+      "configuration_sha256": "cd93572e2d0c9a5329487878797b878c43c09ecaf0aefea7f31fcda66cf464b5",
+      "observations_sha256": "59a528786e22a1e76401846dbfa6fceae735fde914fd0b3ad2f08a70898d5a44",
+      "train_frames": [
+        0,
+        40,
+        80,
+        120,
+        160,
+        240,
+        280,
+        320,
+        360,
+        380,
+        420,
+        460,
+        500,
+        540,
+        620,
+        660,
+        700,
+        740
+      ],
+      "development_frames": [
+        200,
+        580
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0062_00",
+      "gpu": 3,
+      "seconds": 86.23898783326149,
+      "field_sha256": "b302eca51a259c150dd2cad8e8413d07a72a320ff20cdb53ee4d5bd534821abc",
+      "elements": 51610,
+      "observed": 46199,
+      "deployment_bytes": 247421792,
+      "configuration_sha256": "1a4c33ba6cb12f13dcaf188fad2c739a101a2c7a708097979d7c3c6e226d2e21",
+      "observations_sha256": "ac0ad116f4522bf61bab63c09b1af6e47fd7b2b87bbe0de1e061defe610c371d",
+      "train_frames": [
+        0,
+        40,
+        80,
+        120,
+        160,
+        220,
+        260,
+        300,
+        340,
+        380,
+        420,
+        460,
+        500,
+        540,
+        600,
+        640,
+        680,
+        720
+      ],
+      "development_frames": [
+        180,
+        560
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0400_00",
+      "gpu": 3,
+      "seconds": 111.55219835601747,
+      "field_sha256": "303cbd072b00f44a5a1ce140d4faf5ebef17476a7421b3c9daf97d4eee1252ed",
+      "elements": 155959,
+      "observed": 120685,
+      "deployment_bytes": 747670944,
+      "configuration_sha256": "3d89e3b8826ade0d7a0c5ac3a1bea59d75ac34edf686808f0a93a85690a9b3ca",
+      "observations_sha256": "6ce1d4cab1b2e5c1a03c5b15f2bf87cb3e4e4a7f852b1c29262f883d15381262",
+      "train_frames": [
+        0,
+        100,
+        160,
+        220,
+        300,
+        420,
+        480,
+        540,
+        600,
+        680,
+        740,
+        800,
+        860,
+        920,
+        1060,
+        1120,
+        1180,
+        1240
+      ],
+      "development_frames": [
+        360,
+        980
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0590_00",
+      "gpu": 1,
+      "seconds": 141.59204957447946,
+      "field_sha256": "81ae66035d6b58b76b781ff24049ac6c42645e1c93f09c2e43423ec390a63204",
+      "elements": 222957,
+      "observed": 192908,
+      "deployment_bytes": 1068859360,
+      "configuration_sha256": "a6ccdc14f3940a3813e7763fbdae849f403c6e0bd39094b9efc306d06f3e310a",
+      "observations_sha256": "49a5b52fc89dec2e2cc8925c95391df90fcef37c21645aff3c7b78c41129a1cd",
+      "train_frames": [
+        0,
+        140,
+        280,
+        420,
+        560,
+        840,
+        980,
+        1120,
+        1260,
+        1420,
+        1560,
+        1700,
+        1840,
+        1980,
+        2260,
+        2400,
+        2540,
+        2680
+      ],
+      "development_frames": [
+        700,
+        2120
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0000_00",
+      "gpu": 1,
+      "seconds": 112.74200639873743,
+      "field_sha256": "0b60cddcd82f7ab119f2ac61a3eda86e7d3e9e8e504dfaf67c99551769b9ec30",
+      "elements": 81369,
+      "observed": 66143,
+      "deployment_bytes": 390086496,
+      "configuration_sha256": "0f110bb9cfd82da2c462faef5c6852bc54131a1cfef8c377e917b3c0b6c3564a",
+      "observations_sha256": "c89cc2e55370fd9254b4c4c5579614868efabbf90e4350cd461eea9bdaf8dc38",
+      "train_frames": [
+        0,
+        300,
+        580,
+        880,
+        1180,
+        1760,
+        2040,
+        2340,
+        2640,
+        2920,
+        3220,
+        3520,
+        3800,
+        4100,
+        4680,
+        4980,
+        5260,
+        5560
+      ],
+      "development_frames": [
+        1460,
+        4380
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0347_00",
+      "gpu": 1,
+      "seconds": 106.64907366409898,
+      "field_sha256": "e31be78c84b3b5dff307a82789362f2400adcf706b15ae03f1ebf770eba9fc2d",
+      "elements": 67984,
+      "observed": 56507,
+      "deployment_bytes": 325918688,
+      "configuration_sha256": "a1bf4773aa2ce7525c2fba03d95eda4ed8e5b86c23e2e0d44fdabd7e4fd291aa",
+      "observations_sha256": "270d8551f5ec50dcb8e00c78c8187c2d17741a14cbb36bb88981a6e5d81d8fc0",
+      "train_frames": [
+        0,
+        60,
+        120,
+        160,
+        220,
+        340,
+        400,
+        440,
+        500,
+        560,
+        620,
+        660,
+        720,
+        780,
+        900,
+        940,
+        1000,
+        1060
+      ],
+      "development_frames": [
+        280,
+        840
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0140_00",
+      "gpu": 1,
+      "seconds": 185.73668562062085,
+      "field_sha256": "8c45958f9222c89f4d7d09471866e468bfd87baa74e5299a333fa94b92a44138",
+      "elements": 372941,
+      "observed": 313836,
+      "deployment_bytes": 1787882720,
+      "configuration_sha256": "6f97b4f98153e2a1682df150d51a3aa96026c3ed9cc6c09814cfc84ede8c28af",
+      "observations_sha256": "6094277860fcd1fb949f3b5f8dcc744ea019473b4c52309eec1d3e2b49bbd2d6",
+      "train_frames": [
+        0,
+        220,
+        460,
+        680,
+        900,
+        1360,
+        1580,
+        1800,
+        2020,
+        2260,
+        2480,
+        2700,
+        2920,
+        3160,
+        3600,
+        3820,
+        4060,
+        4280
+      ],
+      "development_frames": [
+        1120,
+        3380
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0200_00",
+      "gpu": 2,
+      "seconds": 86.6679101344198,
+      "field_sha256": "cf54c583bb761fa9108a4a1e6508b9c117619242134efcb5861970a70dcb0fec",
+      "elements": 83291,
+      "observed": 74189,
+      "deployment_bytes": 399300640,
+      "configuration_sha256": "a67c28c2119176dcb57d0c293ad80200a498a6fac8df895835f390c894ba3bd1",
+      "observations_sha256": "424bece5fb65f380aec57b099a8c6c8d5b8a0744f975c999349480bcd63996ae",
+      "train_frames": [
+        0,
+        40,
+        100,
+        140,
+        180,
+        280,
+        340,
+        380,
+        420,
+        480,
+        520,
+        560,
+        620,
+        660,
+        960,
+        1000,
+        1060,
+        1100
+      ],
+      "development_frames": [
+        240,
+        720
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0645_00",
+      "gpu": 2,
+      "seconds": 169.17260089330375,
+      "field_sha256": "59eeceb32c850f40f2afc1361fe9089ecc58d300483deb50df1639fe35fd2c96",
+      "elements": 352477,
+      "observed": 220599,
+      "deployment_bytes": 1689778272,
+      "configuration_sha256": "bd77d5a2911c15efff9504455ea28b95fb497f0da0ff24daad218379f46a81ff",
+      "observations_sha256": "383bae9db0b38abc5a3837776c7b874bb3e03a0ccf40563e17dfc80b6b6b0ad8",
+      "train_frames": [
+        0,
+        240,
+        480,
+        720,
+        940,
+        1420,
+        1660,
+        1900,
+        2140,
+        2360,
+        2600,
+        2840,
+        3080,
+        3320,
+        3780,
+        4020,
+        4260,
+        4500
+      ],
+      "development_frames": [
+        1180,
+        3560
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0030_00",
+      "gpu": 2,
+      "seconds": 246.7860398478806,
+      "field_sha256": "81c513f191e87c6a073825a4866301190134d0df710252c9178566a58d41b71b",
+      "elements": 293811,
+      "observed": 245145,
+      "deployment_bytes": 1408533408,
+      "configuration_sha256": "d29811280398591c800b1043e1924e06b52cb3e5ac595a6157b028068e3d6433",
+      "observations_sha256": "48dacc7ed67cd79948557ff9af4ea7cbce4fbf96149b4637808d1ebad83aab2a",
+      "train_frames": [
+        0,
+        120,
+        240,
+        380,
+        520,
+        780,
+        900,
+        1040,
+        1160,
+        1280,
+        1440,
+        1580,
+        1700,
+        1820,
+        2080,
+        2220,
+        2340,
+        2480
+      ],
+      "development_frames": [
+        660,
+        1960
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0249_00",
+      "gpu": 5,
+      "seconds": 277.0084200184792,
+      "field_sha256": "c45da77f6d700fffd7baa8d37aaf31d0e3b233c457e6683a918f928553fb4ea6",
+      "elements": 331031,
+      "observed": 312411,
+      "deployment_bytes": 1586966176,
+      "configuration_sha256": "cc0ca76a1dbe3eaa2b0a238748f923382feff77b6b924c1547bc064a0c888e84",
+      "observations_sha256": "1528ec70acfefc2984b98a0f581129a13a1943b4223e640a3988fe7047f50974",
+      "train_frames": [
+        0,
+        160,
+        280,
+        440,
+        580,
+        880,
+        1020,
+        1140,
+        1300,
+        1440,
+        1620,
+        1740,
+        1880,
+        2020,
+        2300,
+        2440,
+        2580,
+        2720
+      ],
+      "development_frames": [
+        740,
+        2160
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0353_00",
+      "gpu": 2,
+      "seconds": 224.85704486817122,
+      "field_sha256": "d8e0fc772d3e7332bc7ba959fecb95d400442f45152a1d70dba45de6357c1673",
+      "elements": 208782,
+      "observed": 143512,
+      "deployment_bytes": 1000904416,
+      "configuration_sha256": "4197d1351b4ddd7326e2188fa4cae34900532b2374cbe07837a5b7181a9ddfee",
+      "observations_sha256": "7401a449ff17d862dc7f6abe9e34a770470f421ca8e0d69a2e5cf84824805145",
+      "train_frames": [
+        0,
+        140,
+        300,
+        440,
+        580,
+        880,
+        1040,
+        1180,
+        1320,
+        1480,
+        1620,
+        1760,
+        1940,
+        2120,
+        2460,
+        2660,
+        2820,
+        2960
+      ],
+      "development_frames": [
+        740,
+        2300
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0435_00",
+      "gpu": 4,
+      "seconds": 360.85666136443615,
+      "field_sha256": "18f300e96c365d00360ce49dcad9f1d51bbcce596a7b001a92d2ab475b86060d",
+      "elements": 254995,
+      "observed": 196170,
+      "deployment_bytes": 1222449568,
+      "configuration_sha256": "e98bf53d63cf2c8ec18ab1f2eec90e849d3a3771d83829f83de62c636fac48ce",
+      "observations_sha256": "9579098645781297025819bd750cda51d078d51ac5fa24945ebf0863dca1d51d",
+      "train_frames": [
+        0,
+        160,
+        320,
+        480,
+        640,
+        980,
+        1180,
+        1360,
+        1520,
+        1680,
+        1840,
+        2000,
+        2180,
+        2380,
+        2740,
+        2900,
+        3080,
+        3260
+      ],
+      "development_frames": [
+        820,
+        2580
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0700_00",
+      "gpu": 3,
+      "seconds": 234.8009456023574,
+      "field_sha256": "890bf4a5b2ef4e64bcbff68ba2dbd0b8a780c36a1e1302202af8663daf433d7b",
+      "elements": 167755,
+      "observed": 122231,
+      "deployment_bytes": 804221088,
+      "configuration_sha256": "c30c2ad2be151bbd3c651e0ee01f58eaa7f521b50f1ed4ebc91691721ddc77ae",
+      "observations_sha256": "540727568e28626ae6cbec9f21af9bb43913fb05869a6cbf864a34e106f05e11",
+      "train_frames": [
+        0,
+        220,
+        460,
+        680,
+        920,
+        1380,
+        1620,
+        1840,
+        2060,
+        2300,
+        2580,
+        2800,
+        3040,
+        3280,
+        3840,
+        4060,
+        4340,
+        4580
+      ],
+      "development_frames": [
+        1160,
+        3600
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0704_00",
+      "gpu": 4,
+      "seconds": 239.38722644373775,
+      "field_sha256": "6f4cde56637a8aa82bbe91ef2dedcc095ce0b31948577d399bb34f8d4652d2bc",
+      "elements": 183029,
+      "observed": 151770,
+      "deployment_bytes": 877444448,
+      "configuration_sha256": "e6b3beb599ca0ef5e7bc40139a9c904537992019a91919946ab5d6aa50b91c25",
+      "observations_sha256": "4175f39bd0b9ec51c14c094523758d1d9f75076ca2dc3fe0e6185b076f94103f",
+      "train_frames": [
+        0,
+        120,
+        240,
+        360,
+        520,
+        780,
+        920,
+        1020,
+        1140,
+        1260,
+        1400,
+        1500,
+        1620,
+        1740,
+        2000,
+        2160,
+        2280,
+        2400
+      ],
+      "development_frames": [
+        660,
+        1860
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0246_00",
+      "gpu": 4,
+      "seconds": 245.54368812590837,
+      "field_sha256": "0e7c0943bc610fac0a305b13dbb14a2aaa7b7f888c119ad5f7294f681bb70e47",
+      "elements": 201059,
+      "observed": 163794,
+      "deployment_bytes": 963880352,
+      "configuration_sha256": "9b864de639eb75a3e22090cd24d3e66cbcfe3de48f19f93cef5ed8bf93501777",
+      "observations_sha256": "d4f5187d14e38b6a3776951a5cdc54895bda0453c2c0384e4df34955e5bd5359",
+      "train_frames": [
+        0,
+        160,
+        340,
+        480,
+        620,
+        940,
+        1100,
+        1260,
+        1400,
+        1540,
+        1680,
+        1840,
+        1980,
+        2120,
+        2440,
+        2640,
+        2800,
+        2940
+      ],
+      "development_frames": [
+        780,
+        2280
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0203_00",
+      "gpu": 3,
+      "seconds": 217.06952146813273,
+      "field_sha256": "f6215f087b2225d72ea3a740ef2400ba4afc3c603d2ee8a0dc82637f1254a0b8",
+      "elements": 205756,
+      "observed": 166961,
+      "deployment_bytes": 986397728,
+      "configuration_sha256": "d616478b86525da73807bd8406f95e1f5c9576e6a9f2448d71e8abd386516f96",
+      "observations_sha256": "0072d4df10e485a36f8f2a26f9217a7b9829fcce9efd15e9487801156a7ef1ff",
+      "train_frames": [
+        0,
+        60,
+        160,
+        240,
+        340,
+        480,
+        540,
+        600,
+        680,
+        740,
+        820,
+        920,
+        980,
+        1060,
+        1220,
+        1280,
+        1360,
+        1420
+      ],
+      "development_frames": [
+        400,
+        1120
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0535_00",
+      "gpu": 5,
+      "seconds": 270.4621980600059,
+      "field_sha256": "845d137e8b0b957f0c29e193397dded3c27cc8b951a9b9381dfa6dd58ef4d1c4",
+      "elements": 90268,
+      "observed": 83905,
+      "deployment_bytes": 432748320,
+      "configuration_sha256": "7f53b44e5c6b6deb77c6fcef746a6030cf91dbf4df6860ecbb336519a37381a1",
+      "observations_sha256": "1f9ed8fbc84513a06e3324d4e757507740e3014ae80f17e2a61b0de73110c1be",
+      "train_frames": [
+        0,
+        40,
+        60,
+        100,
+        120,
+        220,
+        260,
+        280,
+        320,
+        340,
+        380,
+        420,
+        460,
+        480,
+        560,
+        600,
+        620,
+        680
+      ],
+      "development_frames": [
+        160,
+        540
+      ],
+      "benchmark_labels_opened": false,
+      "geometry_condition": "provided unlabelled mesh converted to frozen surface Gaussians"
+    }
+  ],
+  "independent_final_test": false,
+  "compact_model": false,
+  "accuracy_promotion": false,
+  "contrasts": {
+    "source_budget": "New fields18 training/2 development source views; retained LERF18 and fern12; v10 generally more observations.",
+    "teachers": "SigLIP/DINO/query-free SAM only; v10 ScanNet includes MaskAdapter and v10 UQIS adds labelled3D member training.",
+    "deployment": "One scene Gaussian field; no query-time source images, masks or tracks.",
+    "geometry": "LERF/NVOS saved geometry; ScanNet saved unlabelled-mesh Gaussians; UQIS same official unlabelled mesh converted to Gaussians.",
+    "readout": "Same member core; typed category competition and fixed mesh transport. LERF3D is retained subset projection, not independent3D truth.",
+    "nvos": "Raw signed scribbles versus v10 positive-derived SAM reference/source tracks."
+  },
+  "evidence": [
+    {
+      "path": "configs/query_field/five_benchmark_v1/cohort.json",
+      "sha256": "39323b351d0fadfdb61c9fb0105de63d2237f1d81dac564866c33396ef3716f8"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/implementation.json",
+      "sha256": "a94bfa521b4dc935cc0a5799d2a8e66384f775d81f61df498ded778c799041eb"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/integration_correction.json",
+      "sha256": "422e5ffd81b97704ea15d76a0a22d27efe86f0fb0d7d9b6a3330d4f4b0a5c7dd"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/construction_complete.json",
+      "sha256": "1ef28ebe9f88d857412e35780769f5ce5d76a7f2ce5be3c8f27e600c541934be"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions_complete.json",
+      "sha256": "e429feac0391c0bde6c9011e2a8fcc3c4286bf813e314740795f1af1fe5973e0"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scoring_complete.json",
+      "sha256": "414153748af13cd293097164393354c33c0a4eaab1a706d88f52be747f3bd206"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/integration_tests.log",
+      "sha256": "f7f0bf6e6a7d4326485e101067669b3b51d6a8a07c4bd025d6b3669c58d2c286"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/rgb_stroke_regression.log",
+      "sha256": "f006248e34272bebef5077347ee8666c191a02e33346c8aed4feb3325cc35f29"
+    },
+    {
+      "path": "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric/evaluation/evaluation.json",
+      "sha256": "861077218945f17e24a8dbec5cfc7d20499af58441d7262ba665f0073f3108b4"
+    },
+    {
+      "path": "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric/evaluation/evaluation.json",
+      "sha256": "245dabf52b18da6a2fea907ab85778c35bf941d35473d19b5bdb766c33c0e94a"
+    },
+    {
+      "path": "output/query_field_20261007/spatial_metric_teatime_lerf_v1/teatime_fitted_metric/evaluation/evaluation.json",
+      "sha256": "54238fb9864ca1c05537d98e1189e67c6c48e30cf98b9f85d01498cc7310ade1"
+    },
+    {
+      "path": "output/query_field_20261007/waldo_kitchen_physical_lerf_v1/waldo_kitchen/evaluation/evaluation.json",
+      "sha256": "80eb3efdde97098ad1ead89cd02d0f8649cee4e66d1893786b7c514e8fee3c2a"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/nvos/fern/evaluation.json",
+      "sha256": "f9a3ce3ebfc650525abc5e8bdf769a80d420d30a8e172d919476a87d6d3c819b"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/nvos/flower/evaluation.json",
+      "sha256": "55b5ca5dc805653bf957691747dabeaf2d2fd427a8298e33d4eca6fc61a1cce3"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/nvos/fortress/evaluation.json",
+      "sha256": "a799e16f8641e0296aea6698c0d1b674e282764b2455d7ce7a3733fe87e85a46"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/nvos/horns_center/evaluation.json",
+      "sha256": "31bb9a2bfd73b555de7428a4792f12756661ec83f1629865718d2b539aa11fb3"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/nvos/horns_left/evaluation.json",
+      "sha256": "ff5615150e3432994420ffaf1451c46c7b642226dacbbf9fc4f26a7daf4f7765"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/nvos/leaves/evaluation.json",
+      "sha256": "1e6eda29004294ee84b5b1b2f269c5f76525794830a99898338fce8b50a5745b"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/nvos/orchids/evaluation.json",
+      "sha256": "f0b7e56be2d3442919048d489c93d722952bc28671feaea02c3f885d682f17c5"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/nvos/trex/evaluation.json",
+      "sha256": "2817ae8fed981414b212174d2544ab8018aec9418b4fb161a772db8f9469913b"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0070_00/evaluation.json",
+      "sha256": "1f75e12b60dee1e58354f7ccaca37c661cf73df15716395ee0ed89962c7400cb"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0097_00/evaluation.json",
+      "sha256": "90a5e304a03cd366823ae32e848fab4668de68d6a7833cd457e1731a6affe41c"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0062_00/evaluation.json",
+      "sha256": "74e26346df6cc2a4ed314d8922680bdb3181af0f68c2e0b09383d8993d9ecdf7"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0400_00/evaluation.json",
+      "sha256": "9b1081b47f4a7a3503e38cc87da372dd249c6307b374efffc5223c470829fc7a"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0590_00/evaluation.json",
+      "sha256": "4516e2aa6c25a6ef6adbe41857236839ba5c655feb03bdab815ab84a3c586cc5"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0000_00/evaluation.json",
+      "sha256": "1244c7cd0be2199b360ce09bf5fc5e543f5343dbf499b1541cd6a589f9f080cc"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0347_00/evaluation.json",
+      "sha256": "a5c8a6fc52e38b5e36a7a1f61818cfe1afc9b9d015a54babd2ac1ad15bc9f1d5"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0140_00/evaluation.json",
+      "sha256": "2fa2bd001a34b18d253fcd0eff83ec602ea8ed412427b2584d3269b7ca3977e7"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0200_00/evaluation.json",
+      "sha256": "14f789b9bc8d77bd71e359148ccde2ec2962ebacdb195e2219dec97aa40f9e72"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/scannet/scene0645_00/evaluation.json",
+      "sha256": "6200c8d9c994e029615918a45767802dcca0e123074e179d26795ee6ec54fea0"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/evaluation.json",
+      "sha256": "ef29b4aaf1565255f93cdf59301d0b87f3e8aaa07365c50494c06e21457f9ef3"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/flower/build_complete.json",
+      "sha256": "c5211ec39e1e4d94a43216c1950d0e68cde3d73203ab0c86ce42884998c5f37b"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/flower/models/trained/manifest.json",
+      "sha256": "9efb851b0ed0d7fa788c8bdc0896ac149dffbb6b18259aa2eee00ec01099323d"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/flower/observations/observations.json",
+      "sha256": "fdd0762ba59122d8607636e8af14b304e438cdffc0c66612a99fb6ab62d8392d"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/fortress/build_complete.json",
+      "sha256": "4f82ad22573d02bff9949ba2110fb058e0b8e71d291984207bf1c8c75aa5df48"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/fortress/models/trained/manifest.json",
+      "sha256": "08e4178fc436d5bd508396d39ce86ec1b58ca9a5c44c72b0ff2e85fdc1bd515e"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/fortress/observations/observations.json",
+      "sha256": "351d948be24d06a651bfc81aa57ccaa1a2ec14bb8d219c3f7e7f890b43261b35"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/horns_center/build_complete.json",
+      "sha256": "85cb2bc307863af7a4d271bff5624775d3a09805a8d0fa3e0ccfe54fef962ad9"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/horns_center/models/trained/manifest.json",
+      "sha256": "36903763e14ec95752d59ec802f1d72c754019953329c431f50c6f4061dbebf0"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/horns_center/observations/observations.json",
+      "sha256": "161ca045119a51ce2f67a9ff0e2b31c6dbd23eee79315d7dca59b85b0a7c9d77"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/leaves/build_complete.json",
+      "sha256": "9d6710804b4355b39c63d93c237e180392f4ddeaeeeb4b6c11f504aef1647d51"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/leaves/models/trained/manifest.json",
+      "sha256": "250a97574b152db4705f7f0d6c7927aacd37c156daf1203fc35e0632fb5e10df"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/leaves/observations/observations.json",
+      "sha256": "60f1ab1cdf91f23a07a63c63d031b772db18aea76929cfca5afbd1bf53c134d4"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/orchids/build_complete.json",
+      "sha256": "204ed6e024cd4b808ac57dde91158ffb946e2590022a4bf6de8ec85b04ae7675"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/orchids/models/trained/manifest.json",
+      "sha256": "348acbe5db15a4a2a71a8dd0a9b8259b8a415b8247e4ca8aca841c860140721b"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/orchids/observations/observations.json",
+      "sha256": "b4c9fb5e922ae3281260ffe893dc9d8d152ffe12eef4a2dc87bdc6eb1a8afc80"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/trex/build_complete.json",
+      "sha256": "a4bafb1e2d6a36c2823ace53ed00f772389c47677b8d7d14330b59623b3ee711"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/trex/models/trained/manifest.json",
+      "sha256": "d6b965db10615994fb2f80d1ce57c5159b9a2253d8fc39ac1cdf5cde091f5121"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/nvos/trex/observations/observations.json",
+      "sha256": "5e1817dc2f4d0c3f64d893f2308c3c05c502e68bd11f17fe53a3cc2848496990"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0070_00/build_complete.json",
+      "sha256": "fc8e76e53e8cb3a2ace0032c2663aed21aeac35ea5051c2436f16af1730b8c48"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0070_00/models/trained/manifest.json",
+      "sha256": "95d0f4df0ba2b42cbf93ec82d768bc75f2658b7e712c2ec4bab07e79dca01d1c"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0070_00/observations/observations.json",
+      "sha256": "fff8ea9551cada7b1ab608ab0b7223d8cc9219eaedbc992638fc9d5128a1f23d"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0097_00/build_complete.json",
+      "sha256": "7145738393a50f3209f047151cade7b9f8fd93a823a67ea1656b93b6890757d0"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0097_00/models/trained/manifest.json",
+      "sha256": "4401b63b48104cc3125a8890323875a36f170263ae7804607903b64fcdb7ad4a"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0097_00/observations/observations.json",
+      "sha256": "59a528786e22a1e76401846dbfa6fceae735fde914fd0b3ad2f08a70898d5a44"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0062_00/build_complete.json",
+      "sha256": "f17d537766dfb3ae56af785afd0abda0032b327a43d660062dfcea155e516319"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0062_00/models/trained/manifest.json",
+      "sha256": "ae34a1472ece3514769aaa22c6c4d1d1f608bd543772a4c66ecb1afa06b160c5"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0062_00/observations/observations.json",
+      "sha256": "ac0ad116f4522bf61bab63c09b1af6e47fd7b2b87bbe0de1e061defe610c371d"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0400_00/build_complete.json",
+      "sha256": "68c546304137dc5b1f3f351b3d0b65034af90433b405d578ee9d950769f50fb4"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0400_00/models/trained/manifest.json",
+      "sha256": "fc77a62ef65080e664610fcdfa819d32f3b350746bb0205ffc95e32fb8b77cd5"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0400_00/observations/observations.json",
+      "sha256": "6ce1d4cab1b2e5c1a03c5b15f2bf87cb3e4e4a7f852b1c29262f883d15381262"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0590_00/build_complete.json",
+      "sha256": "125dd080fc5947388f48c0fa7d471d21ca05a43950e8659cf98201b88af6cffe"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0590_00/models/trained/manifest.json",
+      "sha256": "352446ec80cb7ac1f33fb7599fab3063a061a793fd318ad935821d37d90315e2"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0590_00/observations/observations.json",
+      "sha256": "49a5b52fc89dec2e2cc8925c95391df90fcef37c21645aff3c7b78c41129a1cd"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0000_00/build_complete.json",
+      "sha256": "75a7dae97faad4c5e87e4ed0ed7e396eaabbd8e0b09229ab794aeb71a285ab15"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0000_00/models/trained/manifest.json",
+      "sha256": "fe5aa4e68f49af3362af2c5928891e213808bbbc61a015bb85775682e60b324c"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0000_00/observations/observations.json",
+      "sha256": "c89cc2e55370fd9254b4c4c5579614868efabbf90e4350cd461eea9bdaf8dc38"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0347_00/build_complete.json",
+      "sha256": "ed203a10dc6c9271887838188d01051cca7ba2a4ac963a17199ea67dcc559b13"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0347_00/models/trained/manifest.json",
+      "sha256": "72381d1a79efdc5c2c350c401de6f43322fb8f5f0c1f3f6c1c74fd8abfccc483"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0347_00/observations/observations.json",
+      "sha256": "270d8551f5ec50dcb8e00c78c8187c2d17741a14cbb36bb88981a6e5d81d8fc0"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0140_00/build_complete.json",
+      "sha256": "93e9be63bed54e39b396ddb4fbbe3b4b63eed5d17e589444af0d968d795b4bc3"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0140_00/models/trained/manifest.json",
+      "sha256": "4be3ebf0b5e0457ccde134b4b28fdec43c8a68ca4c4433f0adeff35614a5f24d"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0140_00/observations/observations.json",
+      "sha256": "6094277860fcd1fb949f3b5f8dcc744ea019473b4c52309eec1d3e2b49bbd2d6"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0200_00/build_complete.json",
+      "sha256": "ba6142abc644e7ce3bf0089ac9ce1e5ac691b1357e162034fcdbd1dff902666f"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0200_00/models/trained/manifest.json",
+      "sha256": "38e36313a4c22198d03e3eb5d079216b087919918fd2d319400f7d2c02f27cbd"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0200_00/observations/observations.json",
+      "sha256": "424bece5fb65f380aec57b099a8c6c8d5b8a0744f975c999349480bcd63996ae"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0645_00/build_complete.json",
+      "sha256": "76eab1d9fca1dee896ea06db0716d1fd277eaf9efac0fa66c8270a3580a4d69a"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0645_00/models/trained/manifest.json",
+      "sha256": "d55b1f22a0276ad61c0e3461747a177fbc3c9b749e4215e55399271523d532f5"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/scannet/scene0645_00/observations/observations.json",
+      "sha256": "383bae9db0b38abc5a3837776c7b874bb3e03a0ccf40563e17dfc80b6b6b0ad8"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0030_00/build_complete.json",
+      "sha256": "03c109c41e36f7a8d302457df1eb8070271a5f5d4b76f655b767fce8921406ea"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0030_00/models/trained/manifest.json",
+      "sha256": "b4efcf8a3a0e6668d922dbf02f4db6e56bb9249946cbb8a8fe8df518fd986019"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0030_00/observations/observations.json",
+      "sha256": "48dacc7ed67cd79948557ff9af4ea7cbce4fbf96149b4637808d1ebad83aab2a"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0249_00/build_complete.json",
+      "sha256": "1f6e38ed8c0cca07a7433a457aca2e0f315d51001cdb42fd5709df10d7be7b01"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0249_00/models/trained/manifest.json",
+      "sha256": "e4ff26a1bf858706b2475b90969fec603b1cb9c0041f249b611a358d810b6c96"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0249_00/observations/observations.json",
+      "sha256": "1528ec70acfefc2984b98a0f581129a13a1943b4223e640a3988fe7047f50974"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0353_00/build_complete.json",
+      "sha256": "9a5694652fb9db21ac17457dd7d02ba92f68ec23c001a5e520ae337926a62015"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0353_00/models/trained/manifest.json",
+      "sha256": "cc873fb7916cc9275d4365f2c8d183182829b64f0e7390573da967e64a64a41e"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0353_00/observations/observations.json",
+      "sha256": "7401a449ff17d862dc7f6abe9e34a770470f421ca8e0d69a2e5cf84824805145"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0435_00/build_complete.json",
+      "sha256": "1c832f61199fde90c61f0d72a757e40e7406b5c07bdbf19fea623bea71a1ed8a"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0435_00/models/trained/manifest.json",
+      "sha256": "fe16b74bd2ea8c773eb0531d217be113f3d80abc2e9e63674e284f25a6f4adb3"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0435_00/observations/observations.json",
+      "sha256": "9579098645781297025819bd750cda51d078d51ac5fa24945ebf0863dca1d51d"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0700_00/build_complete.json",
+      "sha256": "81542cc2097d020fd55393e235acd4c6e2d473f8a7761a964899541aa550cb87"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0700_00/models/trained/manifest.json",
+      "sha256": "ece50c22daf3e3e8ac1ff80c99c4f30ccdb11a5a86b463340ef61a870f758f42"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0700_00/observations/observations.json",
+      "sha256": "540727568e28626ae6cbec9f21af9bb43913fb05869a6cbf864a34e106f05e11"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0704_00/build_complete.json",
+      "sha256": "a84310ef540781cae224782522d46c0d08ee473a0141fbad1b1de1e020b28679"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0704_00/models/trained/manifest.json",
+      "sha256": "87c46491fe2ae7debbeaee9bac63c2169dba854faf6754e7b9cdd0f1d11953ce"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0704_00/observations/observations.json",
+      "sha256": "4175f39bd0b9ec51c14c094523758d1d9f75076ca2dc3fe0e6185b076f94103f"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0246_00/build_complete.json",
+      "sha256": "c8ef26bdc24b4eb8b2da4c7e0be07cf168531447b84f9e8cd7a26c46a5ec55a0"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0246_00/models/trained/manifest.json",
+      "sha256": "8748f9b71d038abff50f07cb2326539d75b09f9803e2ec5e6d75ba09def35263"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0246_00/observations/observations.json",
+      "sha256": "d4f5187d14e38b6a3776951a5cdc54895bda0453c2c0384e4df34955e5bd5359"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0203_00/build_complete.json",
+      "sha256": "24837b6335070017ab411a4896ff5ae9c6d07c7f677764191b08838cc345448f"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0203_00/models/trained/manifest.json",
+      "sha256": "4d0f649391c6ade8cafa67e7d8837d6d235fa7f400bba2a31053b8d078c10078"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0203_00/observations/observations.json",
+      "sha256": "0072d4df10e485a36f8f2a26f9217a7b9829fcce9efd15e9487801156a7ef1ff"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0535_00/build_complete.json",
+      "sha256": "bcf151a3eb9fc483100f6cd10bd16176b74094489f087172249629645b25f3ac"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0535_00/models/trained/manifest.json",
+      "sha256": "eefec3facaa8b8136c8b1e62db48a35944ca001442d69d19b8eb75528c262396"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/uqis/scene0535_00/observations/observations.json",
+      "sha256": "1f9ed8fbc84513a06e3324d4e757507740e3014ae80f17e2a61b0de73110c1be"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0249_00.json",
+      "sha256": "fcf4b1b327ecc728d7cd47aac9276e03404fed0c31af049846e3dace0aade955"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0203_00.json",
+      "sha256": "3e94f44ad5057cc9bfe0c3e95ba750c46616ae5a6caf714e5b6736da3bcbdbd4"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0535_00.json",
+      "sha256": "2a8ae3dcdbbf83dfbfbe5fed7afa535dab7aae9cb052dca310cd4a4979456c45"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0435_00.json",
+      "sha256": "e1a5d4cec972e6fada2e6f66b324f7392ff3be62b844c27ff16211fc05a1dd71"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0030_00.json",
+      "sha256": "96759fb8333ecd8e38b5e84ae1fcebee348a6f6e55ddb9129411937fb9d43b06"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0704_00.json",
+      "sha256": "030b0473cb1788a4288cd03d7b5f102c3e8b0d782469a9679e1cc57e80728ac9"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0700_00.json",
+      "sha256": "440ab5151a0b955e96046b24655ce1f8826ab49a6d2097310e0b0d203e778a38"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0353_00.json",
+      "sha256": "4df24e4a0804cc4f9c8bfff0825471ca26a49160112ec246ddbdc1b4b2cae293"
+    },
+    {
+      "path": "output/query_field_20261007/five_benchmark_v1/predictions/uqis/receipts/scene0246_00.json",
+      "sha256": "389db3dbdbce05dabd7ea13ce52bfa04eeb5e7654e948b5d02c5f603b6ff89e4"
+    }
+  ]
+}

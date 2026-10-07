@@ -30,6 +30,8 @@ its label-trained member tree is silently called by the new package.
 | `metric_study` | Fixed physical-scale member-energy controls with frozen native query vectors |
 | `exclusion_audit`, `local_metric_bound` | Source-only exclusion coverage and separate post-evaluation locality/scope bounds |
 | `source_regions`, `public_nvos` | Query-free native crop construction; registered signed raster inputs, source-denied replay and separate real-prompt scoring |
+| `public_scannet` | Common text-union member scores, complete-menu category competition and fixed Gaussian-to-mesh scoring |
+| `public_uqis` | Independent public text/image/2D/3D inputs, one instance member core, persisted Gaussian and mesh sets |
 | `support_training`, `support_concentration` | Matched source support-form experiments and post-study support-disagreement audit |
 | `support_energy`, `support_jensen_audit` | Expected singleton-energy control, separate negative rays, and source-only comparison with response averaging |
 
@@ -43,6 +45,7 @@ flowchart LR
   A --> M[Shared member energy: group affinity and physical distance]
   F --> M
   M --> R[Explicit subset selection and Gaussian re-render]
+  M --> P[Complete-menu category competition / fixed mesh transport]
   F --> S[Native semantic and complete-category controls]
 ```
 
@@ -228,6 +231,43 @@ registration tolerance is in the supplied world's coordinate units. The local
 0.5 development diagnostic; their numbers are not directly comparable.
 
 ## Required next evidence
+
+The 2026-10-08 work order is to complete the same architecture on all five
+development cohorts before further local method changes, compression or speed
+work. Historical local gates below do not delay that full-cohort baseline.
+Use the [fixed protocol](../experiments/2026-10-08-five-benchmark-architecture-protocol.md)
+and `configs/query_field/five_benchmark_v1/cohort.json`. New scenes share the
+18-training/2-development-view source budget and 2,000-step physical member fit;
+the accepted LERF fields and 12-training-view fern field are retained.
+
+The compiler accepts explicitly registered metric cameras as well as the saved
+MoGe calibration route. ScanNet and UQIS use declared unlabelled-mesh surface
+Gaussians. ScanNet runs the same text-union query for every category and compares
+member scores within each full 19/15/10 menu. UQIS uses instance scope for all
+four independent public inputs, with no target pairing or source access during
+prediction. Their fixed nearest-centre mesh correspondence transports both
+scores and actual sets; unobserved points and unsupported queries remain scored.
+These input/carrier/readout differences and the smaller observation budget must
+remain visible in comparisons with v10.
+
+The [completed five-task table](../experiments/2026-10-08-five-benchmark-results.md)
+now provides that baseline. Its full configuration, construction receipts,
+prediction barrier and scoring evidence are saved under
+`output/query_field_20261007/five_benchmark_v1`. No per-scene or per-input winner
+is selected. Next measure the stages below against those fixed outputs before
+implementing another method variant:
+
+| Stage | Diagnostic question |
+|---|---|
+| Geometry and source coverage | Which target elements and prompt supports have no trained observation? |
+| Native observation fusion | Which native text/local distinctions are lost when authorized views become Gaussian features? |
+| Query identity | Does the inferred or registered support refer to the requested target? |
+| Member extent and scale | Given target-associated support, which target elements are missed and which others are added? |
+| Typed readout | How much is lost in category competition, thresholded response, actual subset rendering or mesh transport? |
+
+Privileged target-based diagnoses must stay in evaluation and never become
+undeclared training/query inputs. Fixing one stage should retain complete-cohort
+reporting rather than substituting a locally improved score.
 
 The [two-scene follow-up](../experiments/2026-10-07-query-field-two-scene-and-readout.md)
 now completes figurines/ramen 6/18-view fits, real text LERF probes, fixed native

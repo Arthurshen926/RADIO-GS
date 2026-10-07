@@ -18,8 +18,15 @@ from .storage import load_field, sha256
 
 
 def load_strokes(positive_path, negative_path, output_hw):
-    positive = np.asarray(Image.open(positive_path))
-    negative = np.asarray(Image.open(negative_path))
+    def scalar_mask(path):
+        array = np.asarray(Image.open(path))
+        # Official trex strokes store the same scalar mask in all RGB channels.
+        # Collapse only exact replicas; coloured annotations need an explicit contract.
+        if array.ndim == 3 and array.shape[2] == 3 and np.all(array == array[..., :1]):
+            array = array[..., 0]
+        return array
+    positive = scalar_mask(positive_path)
+    negative = scalar_mask(negative_path)
     if positive.ndim != 2 or negative.shape != positive.shape:
         raise ValueError("scribbles must be aligned scalar masks")
     positive, negative = positive != 0, negative != 0

@@ -1,0 +1,59 @@
+{
+  "schema": "radio_gs.query_field_pilot.v1",
+  "scene": "output/query_field_20261007/five_benchmark_v1/scannet/scene0070_00/scene.json",
+  "train_frames": [
+    0,
+    60,
+    140,
+    200,
+    280,
+    420,
+    480,
+    560,
+    620,
+    700,
+    760,
+    840,
+    900,
+    980,
+    1120,
+    1180,
+    1260,
+    1320
+  ],
+  "development_frames": [
+    340,
+    1040
+  ],
+  "raster_hw": [
+    96,
+    128
+  ],
+  "dino_width": 448,
+  "training": {
+    "seed": 20261007,
+    "group_dim": 32,
+    "steps": 2000,
+    "learning_rate": 0.01,
+    "threshold": 0.5,
+    "candidate_count": 8,
+    "candidate_radius_m": 0.05,
+    "render_objective": "subset_alpha",
+    "inferred_anchor_domain": "training_eligible",
+    "spatial_metric": "scale_normalized"
+  },
+  "purpose": "Full five-benchmark architecture baseline, no local mechanism sweep",
+  "selection": "Uniform sorted legal mapping frames; two fixed quartile views excluded from feature fitting",
+  "teacher_families": [
+    "siglip",
+    "dino",
+    "sam"
+  ],
+  "additional_3d_supervision": false,
+  "source_access_at_query": false,
+  "compression_default": false,
+  "input_budget_condition": "18 training and 2 teacher-development views; saved geometry track",
+  "evaluation_stages": [
+    "trained"
+  ]
+}

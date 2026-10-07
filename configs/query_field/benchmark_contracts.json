@@ -1,15 +1,24 @@
 {
   "schema": "radio_gs.query_field_benchmark_contracts.v1",
-  "status": "Four-scene LERF development complete for the common physical metric; other three families and independent final protocol pending",
+  "status": "Complete fixed architecture baseline on all five existing development cohorts; substantial v10 gaps remain; independent final protocol pending",
   "baseline_a": "output/query_field_20261007/frozen_v10/baseline_a.json",
   "candidate_b": {
-    "construction_teachers": ["native_siglip", "native_dino", "query_free_sam"],
+    "construction_teachers": [
+      "native_siglip",
+      "native_dino",
+      "query_free_sam"
+    ],
     "scene_specific": true,
     "deployment_carrier": "frozen_gaussians",
     "additional_3d_labels": false,
     "standard_runtime_source_access": false,
     "shared_member_core": true,
-    "query_families": ["text", "image", "point_2d", "point_3d"]
+    "query_families": [
+      "text",
+      "image",
+      "point_2d",
+      "point_3d"
+    ]
   },
   "comparisons": [
     "A saved implementation versus high-capacity B, explicitly listing input/supervision/carrier changes",
@@ -23,13 +32,24 @@
       "target_type": "text_union",
       "metric": "semantic 2D IoU and AP under the retained query roster",
       "candidate_execution": {
-        "status": "complete_on_declared_four_development_scenes",
-        "common_method": "Training-supported inputs and fitted physical member metric; local_metric=none",
-        "evidence": "docs/experiments/2026-10-07-native-local-evidence.json",
+        "status": "complete_on_declared_development_cohort",
+        "evidence": "docs/experiments/2026-10-08-five-benchmark-results.json",
         "independent_final_test": false,
-        "native_semantic_miou": 0.4389426272475049, "member_semantic_miou": 0.4941304379057988
+        "common_method": "same fitted physical member field; group32, single support, physical metric, product negatives, default source scale",
+        "scenes": 4,
+        "query_view_pairs": 208,
+        "missing": 0,
+        "native_semantic_miou": 0.4389426272475049,
+        "member_semantic_miou": 0.4941304379057988,
+        "member_ap": 0.7173264898404148,
+        "reused_hash_bound_predictions": true
       },
-      "must_report": ["native scores", "member-conditioned output", "source access", "query and view denominator"]
+      "must_report": [
+        "native scores",
+        "member-conditioned output",
+        "source access",
+        "query and view denominator"
+      ]
     },
     {
       "name": "lerf3d_local_projection",
@@ -37,55 +57,155 @@
       "target_type": "text_union",
       "metric": "actual selected-Gaussian subset projection 2D IoU",
       "candidate_execution": {
-        "status": "complete_on_declared_four_development_scenes",
-        "common_method": "Training-supported inputs and fitted physical member metric; local_metric=none",
-        "evidence": "docs/experiments/2026-10-07-native-local-evidence.json",
+        "status": "complete_on_declared_development_cohort",
+        "evidence": "docs/experiments/2026-10-08-five-benchmark-results.json",
         "independent_final_test": false,
-        "actual_subset_projection_miou": 0.3231297063698939
+        "common_method": "same fitted physical member field; group32, single support, physical metric, product negatives, default source scale",
+        "scenes": 4,
+        "query_view_pairs": 208,
+        "missing": 0,
+        "actual_subset_projection_miou": 0.3231297063698939,
+        "reused_hash_bound_predictions": true
       },
       "limitation": "Existing local lerf3d result is not independent 3D labelled-ground-truth accuracy",
-      "must_report": ["unchanged Gaussian geometry", "selected row count", "subset transmittance recomputed"]
+      "must_report": [
+        "unchanged Gaussian geometry",
+        "selected row count",
+        "subset transmittance recomputed"
+      ]
     },
     {
       "name": "scannet_ovs",
       "cohort": "10 existing development rooms",
       "target_type": "category_partition",
       "metric": "complete-menu point mIoU 19/15/10",
-      "pending": ["Gaussian-to-mesh evaluation transport", "native semantic control", "affinity-conditioned categorical competition"],
-      "limitation": "A uses provided mesh and dual native priors including MaskAdapter; do not label this an equal-teacher equal-carrier comparison"
+      "limitation": "A uses provided mesh and dual native priors including MaskAdapter; do not label this an equal-teacher equal-carrier comparison",
+      "candidate_execution": {
+        "status": "complete_on_declared_development_cohort",
+        "evidence": "docs/experiments/2026-10-08-five-benchmark-results.json",
+        "independent_final_test": false,
+        "common_method": "same fitted physical member field; group32, single support, physical metric, product negatives, default source scale",
+        "scenes": 10,
+        "member_miou": {
+          "19": 0.22285303734633724,
+          "15": 0.23369364724393477,
+          "10": 0.26546159908271616
+        },
+        "native_control_miou": {
+          "19": 0.36945195042257717,
+          "15": 0.377524039875153,
+          "10": 0.4419944270960567
+        },
+        "readout": "same text-union member kernel per category; complete-menu argmax for each 19/15/10 split; fixed nearest Gaussian centre to mesh; unobserved void stays scored"
+      }
     },
     {
       "name": "nvos",
       "cohort": "8 existing development cases",
       "target_type": "reference_instance",
-      "conditions": ["registered signed-prompt standard field", "explicitly source-assisted reference extension comparable to retained A"],
+      "conditions": [
+        "registered signed-prompt standard field",
+        "explicitly source-assisted reference extension comparable to retained A"
+      ],
       "metric": "complete retained-case IoU/AP, signed official and retained positive-derived contracts separately",
       "candidate_execution": {
-        "status": "partial_one_of_eight_development_cases",
-        "cases": ["fern"],
-        "common_method": "unchanged fitted physical member field; official raw signed raster evidence",
-        "evidence": "docs/experiments/2026-10-07-native-signed-prompt-evidence.json",
-        "retained_response_iou": 0.7673985652435725,
-        "retained_response_ap": 0.9209521267286402,
-        "actual_subset_alpha_threshold": 0.5,
-        "comparison_to_v10": "same retained response operator; different prompt, source access and feature source budget",
+        "status": "complete_on_declared_development_cohort",
+        "evidence": "docs/experiments/2026-10-08-five-benchmark-results.json",
         "independent_final_test": false,
-        "extent_control_promoted": false
+        "common_method": "same fitted physical member field; group32, single support, physical metric, product negatives, default source scale",
+        "cases": [
+          "fern",
+          "flower",
+          "fortress",
+          "horns_center",
+          "horns_left",
+          "leaves",
+          "orchids",
+          "trex"
+        ],
+        "retained_response_iou": 0.5768645863582337,
+        "retained_response_ap": 0.9489883291546826,
+        "actual_subset_projection_iou": 0.7053595732215252,
+        "actual_subset_alpha_threshold": 0.5,
+        "comparison_to_v10": "same retained response operator; raw signed prompts versus positive-derived source-assisted SAM reference; different source budgets",
+        "extent_control_promoted": false,
+        "source_assisted_extension_executed": false
       },
-      "forbidden": ["target RGB at runtime", "undeclared source tracks", "hidden source-mask solver replacing the member core"]
+      "forbidden": [
+        "target RGB at runtime",
+        "undeclared source tracks",
+        "hidden source-mask solver replacing the member core"
+      ]
     },
     {
       "name": "uqis",
       "cohort": "9 already-opened development rooms; final rooms must be separately locked",
       "target_type": "reference_instance",
       "metric": "actual selected-set IoU/AP for text, image, 2D point, 3D point; same-target all-four success",
-      "pending": ["scene Gaussian construction under declared input track", "registered camera prompts", "identity and scale inference"],
-      "forbidden": ["implicit 22-room labelled member model reuse", "mesh output reported as Gaussian deployment", "dropping unsupported queries"]
+      "forbidden": [
+        "implicit 22-room labelled member model reuse",
+        "mesh output reported as Gaussian deployment",
+        "dropping unsupported queries"
+      ],
+      "candidate_execution": {
+        "status": "complete_on_declared_development_cohort",
+        "evidence": "docs/experiments/2026-10-08-five-benchmark-results.json",
+        "independent_final_test": false,
+        "common_method": "same fitted physical member field; group32, single support, physical metric, product negatives, default source scale",
+        "scenes": 9,
+        "targets": 67,
+        "queries": 268,
+        "modalities": {
+          "text": {
+            "ap": 0.21393697989936844,
+            "subset_iou": 0.12075455715566535,
+            "empty_selections": 0
+          },
+          "image": {
+            "ap": 0.24752952785433557,
+            "subset_iou": 0.15986098757685518,
+            "empty_selections": 0
+          },
+          "point_2d": {
+            "ap": 0.47952669373604706,
+            "subset_iou": 0.28373218415322987,
+            "empty_selections": 6
+          },
+          "point_3d": {
+            "ap": 0.4678093371437719,
+            "subset_iou": 0.27691263469022975,
+            "empty_selections": 8
+          }
+        },
+        "unsupported": {
+          "text": 0,
+          "image": 0,
+          "point_2d": 6,
+          "point_3d": 8
+        },
+        "all_four_iou_at_least_050_scene_macro": 0.06944444444444445,
+        "readout": "all four independent public inputs use same instance member core; fixed mesh transport; actual sets and ranking scores preserved",
+        "geometry_track": "official unlabelled mesh converted to surface Gaussians",
+        "additional_labelled_3d_training": false
+      }
     }
   ],
-  "resource_accounting": ["per-scene semantic increment", "geometry bytes", "serialized payload", "shared encoder and decoder bytes", "source cache and training storage", "load time", "encoder time", "registration time", "field readout time", "peak memory"],
+  "resource_accounting": [
+    "per-scene semantic increment",
+    "geometry bytes",
+    "serialized payload",
+    "shared encoder and decoder bytes",
+    "source cache and training storage",
+    "load time",
+    "encoder time",
+    "registration time",
+    "field readout time",
+    "peak memory"
+  ],
   "promotion": false,
   "independent_final_protocol_locked": false,
   "quality_retention_target": "Planning target around one percentage point absolute loss per comparable primary task, subject to a locked comparable B and per-scene uncertainty; never average away a failed task",
-  "compression_target": "Planning target at least fourfold semantic-increment reduction relative to the same high-capacity B; pending matched evidence"
+  "compression_target": "Planning target at least fourfold semantic-increment reduction relative to the same high-capacity B; pending matched evidence",
+  "current_results": "docs/experiments/2026-10-08-five-benchmark-results.json",
+  "current_priority": "Attribute coverage, native fusion, query identity, member extent and readout losses before compression or speed optimization"
 }

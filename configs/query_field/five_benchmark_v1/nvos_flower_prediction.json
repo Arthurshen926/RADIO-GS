@@ -1,0 +1,32 @@
+{
+  "schema": "radio_gs.query_field_nvos.v1",
+  "scene": "flower",
+  "jobs": [
+    {
+      "name": "flower",
+      "field": "output/query_field_20261007/five_benchmark_v1/nvos/flower/models/trained",
+      "mode": "signed",
+      "scope": "default",
+      "positive": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/flower/pos_0_flower.png",
+      "negative": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/flower/neg_0_flower.png",
+      "camera_fixture": "output/query_field_20261007/five_benchmark_v1/nvos/flower/query_cameras.pt"
+    }
+  ],
+  "projection_hw": [
+    192,
+    256
+  ],
+  "output_hw": [
+    756,
+    1008
+  ],
+  "alpha_threshold": 0.5,
+  "prompt_resize": "area evidence pooling; no pixel label threshold",
+  "prediction_policy": "one fitted physical member field; signed raw prompts, default scale",
+  "evaluation_status": "complete fixed eight-case development cohort",
+  "comparison": "v10 positive-only source-assisted SAM-derived reference uses a different contract",
+  "readouts": {
+    "actual_subset": "192x256 selected alpha -> bilinear 756x1008 -> >0.5",
+    "retained_response": "full-scene observed-support-normalized response at 756x1008 -> >=0.5 and AP"
+  }
+}

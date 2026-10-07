@@ -1,0 +1,78 @@
+"""Complete-menu category competition on the same Gaussian member field."""
+import argparse
+import json
+from pathlib import Path
+
+import numpy as np
+import torch
+
+from .adapters import NativeQueryEncoder
+from .storage import load_field, sha256
+
+
+@torch.no_grad()
+def predict(field_path, query_path, output, encoder_path, device='cuda'):
+    root=Path(output);root.mkdir(parents=True,exist_ok=False)
+    queries=json.loads(Path(query_path).read_text())['queries']
+    field,manifest=load_field(field_path,device)
+    encoder=NativeQueryEncoder(encoder_path,device)
+    native,members,receipts=[],[],[]
+    for query in queries:
+        packet=encoder.text(query['text'],task='union')
+        result=field.query(packet)
+        native.append(result.semantic_scores.cpu());members.append(result.membership_scores.cpu())
+        receipts.append(dict(class_id=query['class_id'],text=query['text'],selected=int(result.selected.sum()),
+                             candidates=result.candidate_indices.cpu().tolist(),scale_m=result.scale))
+    torch.save(dict(xyz=field.xyz.cpu(),observed=field.observed.cpu(),queries=queries,
+                    native=torch.stack(native,1),member=torch.stack(members,1)),root/'predictions.pt')
+    report=dict(field_sha256=manifest['files']['field.pt']['sha256'],query_sha256=sha256(query_path),
+                predictions_sha256=sha256(root/'predictions.pt'),queries=receipts,
+                primary='shared member union per category followed by complete-menu argmax',
+                native_control='plain native class-name cosine argmax',
+                source_access=False,benchmark_labels_opened=False,field_spec=manifest['spec'],encoder=encoder_path)
+    (root/'prediction.json').write_text(json.dumps(report,indent=2)+'\n')
+    return report
+
+
+def score(predictions,evaluation,output):
+    from plyfile import PlyData
+    from scipy.spatial import cKDTree
+    from radio_gs.scannet_constants import compute_split_metrics
+    root=Path(predictions);record=json.loads((root/'prediction.json').read_text())
+    if sha256(root/'predictions.pt')!=record['predictions_sha256']:raise ValueError('prediction payload changed')
+    data=torch.load(root/'predictions.pt',map_location='cpu',weights_only=True)
+    spec=json.loads(Path(evaluation).read_text())
+    sets={}
+    for arm in ['native','member']:
+        sets[arm]={}
+        for split,ids in spec['splits'].items():
+            columns=[next(i for i,q in enumerate(data['queries']) if q['class_id']==c) for c in ids]
+            labels=np.asarray(ids)[data[arm][:,columns].argmax(1).numpy()]
+            labels[~data['observed'].numpy()]=0
+            sets[arm][split]=labels
+    # Fixed element predictions are complete before the target labels are read.
+    vertices=PlyData.read(spec['ground_truth'])['vertex'].data
+    xyz=np.stack([vertices[k] for k in ['x','y','z']],1)
+    distance,indices=cKDTree(data['xyz'].numpy()).query(xyz,workers=4)
+    truth=np.asarray(vertices['label'])
+    metrics={arm:{split:compute_split_metrics(labels[indices],truth,spec['splits'][split])
+                  for split,labels in predictions.items()} for arm,predictions in sets.items()}
+    report=dict(scene=spec['scene'],metrics=metrics,points=len(xyz),
+                observed_vertex_fraction=float(data['observed'].numpy()[indices].mean()),
+                mapping='fixed unrestricted nearest Gaussian centre; unobserved predicts void and stays in denominator',
+                distance_quantiles_m=np.quantile(distance,[.5,.9,.99,1]).tolist(),
+                predictions_sha256=record['predictions_sha256'],ground_truth_sha256=sha256(spec['ground_truth']),
+                official_protocol_equivalence_verified=False,independent_final_test=False)
+    with Path(output).open('x') as handle:json.dump(report,handle,indent=2)
+    return report
+
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('stage',choices=['predict','score'])
+    parser.add_argument('--field');parser.add_argument('--queries');parser.add_argument('--evaluation');parser.add_argument('--encoder')
+    parser.add_argument('--predictions');parser.add_argument('--output',required=True)
+    args=parser.parse_args();torch.set_num_threads(4)
+    result=(predict(args.field,args.queries,args.output,args.encoder) if args.stage=='predict'
+            else score(args.predictions,args.evaluation,args.output))
+    print(json.dumps(result,indent=2))
