@@ -30,6 +30,7 @@ its label-trained member tree is silently called by the new package.
 | `metric_study` | Fixed physical-scale member-energy controls with frozen native query vectors |
 | `exclusion_audit`, `local_metric_bound` | Source-only exclusion coverage and separate post-evaluation locality/scope bounds |
 | `source_regions`, `public_nvos` | Query-free native crop construction; registered signed raster inputs, source-denied replay and separate real-prompt scoring |
+| `support_training`, `support_concentration` | Matched source support-form experiments and post-study support-disagreement audit |
 
 ```mermaid
 flowchart LR
@@ -70,6 +71,18 @@ the [real-prompt protocol](../experiments/2026-10-07-native-signed-prompt-protoc
 `public_nvos` keeps actual selected-subset alpha and the retained full-scene
 normalized member response separate, and scores only after all fixed predictions
 and copied-field source-denied replays are finalized.
+
+`CapabilityField.support_membership` and `exclude_membership` now expose the
+existing observed-support filtering and signed rule as differentiable common
+operations for fitting and deployment. `training.support_policy` defaults to
+`single`. The explicit `mixed_unsigned`/`mixed_signed` research policies use
+source interiors/exclusions and deterministic gathered rays with independent
+sampling RNG. The [completed comparison](../experiments/2026-10-07-support-training-results.md)
+fails its common-input/public-subset gate; keep both as controls, not new defaults.
+It preserves inference specification and tensor cost while changing training
+support distribution (and adding 25% member evaluations in the signed arm).
+Representing support disagreement and the difference between uncertain
+alternatives and separate signed constraints remains an open method requirement.
 
 An optional protected `anchor_eligible` mask now aligns inferred text/image
 supports with the source-interior domain used by member training. It does not

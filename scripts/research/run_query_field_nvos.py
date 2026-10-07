@@ -20,16 +20,18 @@ def run_prediction(config_path, job, output, log, deny=()):
         subprocess.run(command, check=True, stdout=handle, stderr=subprocess.STDOUT)
 
 
-def main():
-    root = Path("output/query_field_20261007/nvos_fern_v1")
-    config_path = Path("configs/query_field/nvos_fern_prediction.json")
+def replay(config_path, predictions, root):
+    """Replay a completed fixed cohort; reusable across source-training studies."""
+    config_path, predictions, root = map(Path, [config_path, predictions, root])
+    if (root/"cold_replay.json").exists():
+        raise FileExistsError("preserve completed cold replay")
     config = json.loads(config_path.read_text())
-    predictions = root / "public"
-    predictions.mkdir(exist_ok=False)
-    # All arms are fixed before any target labels are opened.
     for job in config["jobs"]:
-        run_prediction(config_path, job["name"], predictions, root/f"predict_{job['name']}.log")
-        print("predicted", job["name"], flush=True)
+        record = json.loads((predictions/job["name"]/"prediction.json").read_text())
+        if record['configuration'] != config:
+            raise ValueError("cold replay configuration differs from prediction")
+        if sha256(predictions/job["name"]/"predictions.pt") != record['predictions_sha256']:
+            raise ValueError("cold replay prediction payload changed")
     temporary = Path(tempfile.mkdtemp(prefix="query_field_nvos_cold_"))
     copied = {}
     cold = json.loads(json.dumps(config))
@@ -71,6 +73,19 @@ def main():
                   isolation="fresh process plus Python open audit; not OS sandbox",
                   configuration_sha256=sha256(config_path))
     (root/"cold_replay.json").write_text(json.dumps(report, indent=2)+"\n")
+    return report
+
+
+def main():
+    root = Path("output/query_field_20261007/nvos_fern_v1")
+    config_path = Path("configs/query_field/nvos_fern_prediction.json")
+    config = json.loads(config_path.read_text())
+    predictions = root / "public"
+    predictions.mkdir(exist_ok=False)
+    for job in config["jobs"]:
+        run_prediction(config_path, job["name"], predictions, root/f"predict_{job['name']}.log")
+        print("predicted", job["name"], flush=True)
+    replay(config_path, predictions, root)
     command = [sys.executable, "-m", "radio_gs.query_field.public_nvos", "score",
                "--config", "configs/query_field/nvos_fern_scoring.json", "--output", str(predictions)]
     with (root/"score.log").open("w") as handle:

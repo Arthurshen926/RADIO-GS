@@ -153,6 +153,29 @@ class CapabilityField(nn.Module):
             order = order[distance >= self.candidate_radius]
         return torch.stack(chosen) if chosen else torch.empty(0, dtype=torch.long, device=score.device)
 
+    def exclude_membership(self, membership, negative, scale):
+        """Shared differentiable signed rule for deployed queries and source fit."""
+        if negative is not None:
+            negative.validate(len(self.xyz))
+            ids = negative.indices.to(self.xyz.device)
+            weights = negative.weights.to(self.xyz.device).float()
+            supported = self.observed[ids] & (weights > 0)
+            if bool(supported.any()):
+                exclusion = self.member_logits(Support(ids[supported], weights[supported]), scale).sigmoid()
+                membership = membership * (1 - exclusion)
+        return membership
+
+    def support_membership(self, positive, scale, negative=None):
+        """Uncertain registered supports; exact constraints remain query-only."""
+        positive.validate(len(self.xyz))
+        ids = positive.indices.to(self.xyz.device)
+        weights = positive.weights.to(self.xyz.device).float()
+        supported = self.observed[ids]
+        if not bool(weights[supported].sum() > 0):
+            raise ValueError("positive support lacks trained observation support")
+        member = self.member_logits(Support(ids[supported], weights[supported]), scale).sigmoid()
+        return self.exclude_membership(member, negative, scale)
+
     @torch.no_grad()
     def query(self, packet: QueryPacket):
         packet.validate(len(self.xyz), self.semantic.native_dim, self.local.native_dim)
@@ -177,7 +200,7 @@ class CapabilityField(nn.Module):
                 raise ValueError("positive support lacks trained observation support")
             candidates = ids
             candidate_weights = weights / weights.sum()
-            membership = self.member_logits(Support(ids[supported], weights[supported]), scale).sigmoid()
+            membership = self.support_membership(Support(ids[supported], weights[supported]), scale)
         else:
             positive_coverage = None
             candidates = self._candidates(identity)
@@ -197,13 +220,7 @@ class CapabilityField(nn.Module):
                 # Global policy; not a query/benchmark-selected threshold.
                 admitted = identity[candidates] >= identity[candidates].max() - 0.02
                 membership = alternatives[:, admitted].max(dim=1).values
-        if packet.negative is not None:
-            ids = packet.negative.indices.to(self.xyz.device)
-            weights = packet.negative.weights.to(self.xyz.device).float()
-            supported = self.observed[ids] & (weights > 0)
-            if bool(supported.any()):
-                exclusion = self.member_logits(Support(ids[supported], weights[supported]), scale).sigmoid()
-                membership = membership * (1 - exclusion)
+        membership = self.exclude_membership(membership, packet.negative, scale)
         membership = membership.masked_fill(~self.observed, 0)
         if packet.exact_positive:
             ids = packet.positive.indices[packet.positive.weights > 0].to(membership.device)

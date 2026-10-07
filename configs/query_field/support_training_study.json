@@ -1,0 +1,88 @@
+{
+  "parent_commit": "b831d03",
+  "fits": [
+    {
+      "name": "figurines_mixed_unsigned",
+      "scene": "figurines",
+      "policy": "mixed_unsigned",
+      "config": "configs/query_field/figurines_mixed_unsigned.json",
+      "output": "output/query_field_20261007/support_training_v1/figurines_mixed_unsigned"
+    },
+    {
+      "name": "figurines_mixed_signed",
+      "scene": "figurines",
+      "policy": "mixed_signed",
+      "config": "configs/query_field/figurines_mixed_signed.json",
+      "output": "output/query_field_20261007/support_training_v1/figurines_mixed_signed"
+    },
+    {
+      "name": "ramen_mixed_unsigned",
+      "scene": "ramen",
+      "policy": "mixed_unsigned",
+      "config": "configs/query_field/ramen_mixed_unsigned.json",
+      "output": "output/query_field_20261007/support_training_v1/ramen_mixed_unsigned"
+    },
+    {
+      "name": "ramen_mixed_signed",
+      "scene": "ramen",
+      "policy": "mixed_signed",
+      "config": "configs/query_field/ramen_mixed_signed.json",
+      "output": "output/query_field_20261007/support_training_v1/ramen_mixed_signed"
+    },
+    {
+      "name": "fern_mixed_unsigned",
+      "scene": "fern",
+      "policy": "mixed_unsigned",
+      "config": "configs/query_field/fern_mixed_unsigned.json",
+      "output": "output/query_field_20261007/support_training_v1/fern_mixed_unsigned"
+    },
+    {
+      "name": "fern_mixed_signed",
+      "scene": "fern",
+      "policy": "mixed_signed",
+      "config": "configs/query_field/fern_mixed_signed.json",
+      "output": "output/query_field_20261007/support_training_v1/fern_mixed_signed"
+    }
+  ],
+  "jobs": [
+    {
+      "name": "figurines_mixed_unsigned",
+      "scene": "figurines",
+      "arm": "mixed_unsigned",
+      "field": "output/query_field_20261007/support_training_v1/figurines_mixed_unsigned/models/trained",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric",
+      "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"
+    },
+    {
+      "name": "figurines_mixed_signed",
+      "scene": "figurines",
+      "arm": "mixed_signed",
+      "field": "output/query_field_20261007/support_training_v1/figurines_mixed_signed/models/trained",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric",
+      "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"
+    },
+    {
+      "name": "ramen_mixed_unsigned",
+      "scene": "ramen",
+      "arm": "mixed_unsigned",
+      "field": "output/query_field_20261007/support_training_v1/ramen_mixed_unsigned/models/trained",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric",
+      "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"
+    },
+    {
+      "name": "ramen_mixed_signed",
+      "scene": "ramen",
+      "arm": "mixed_signed",
+      "field": "output/query_field_20261007/support_training_v1/ramen_mixed_signed/models/trained",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric",
+      "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"
+    }
+  ],
+  "member_intervention": {
+    "local_metric": "none"
+  },
+  "protocol": "docs/experiments/2026-10-07-support-training-protocol.md",
+  "source_query_labels_used": false,
+  "parameter_search": false,
+  "independent_final_test": false
+}

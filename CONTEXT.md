@@ -19,6 +19,33 @@ its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
 Latest candidate evidence (2026-10-07):
+`docs/experiments/2026-10-07-support-training-results.md`.
+Two fixed source-support training controls are complete on figurines/ramen/fern.
+They share deployed observed-support filtering and signed member multiplication;
+inference energy, field tensors, source data and 2000 update budgets stay fixed.
+Mixed unsigned/signed actual LERF subset IoU: figurines33.5579/34.3990% versus
+parent41.7884%; ramen22.1834/20.7247% versus19.4642%. Real fern signed response
+IoU76.2658/76.2887%, AP91.0246/91.3218%, actual subset75.2162/75.2016% all regress
+from the parent. Neither passes; no teatime/waldo extension, per-scene mixture
+or support-count/weight sweep. Default remains the single-support physical fit;
+accepted LERF four-scene actual32.3130% and fern response76.7399% are unchanged.
+Four real NVOS source-denied replays and four four-input LERF model replays pass;
+40 tests pass. The full episode/first-pixel sequence matches across new arms;
+unsigned/signed fits use2000/2500 member evaluations with equal2000 optimizer
+updates and no deployment tensor growth. All models and scores are complete.
+Exact-old-code fern repeats expose non-bitwise training; inference remains exact.
+Current repeat teacher means differ by <0.005pp, versus up to~0.19pp drift from
+the earlier saved fit. This is not a significance interval or cross-scene bound.
+A source-only post-study audit finds pre-normalization support norm around0.73
+for four positive rays and0.47–0.48 for mixed negatives in figurines/ramen; the
+decoder renormalizes all to1. This loses disagreement but is not causal proof.
+Next: distinguish within-ray uncertainty, co-target positives and independent
+negative constraints in evidence aggregation over the same member kernel;
+preserve singleton competence and repeat consequential fits. Do not infer a
+successful architecture or promote a variant from source-prompt diagnostics alone.
+Evidence: `docs/experiments/2026-10-07-support-training-evidence.json`.
+
+Previous candidate evidence (2026-10-07):
 `docs/experiments/2026-10-07-native-signed-prompt-results.md`.
 The unchanged common physical member field now accepts real registered signed
 NVOS scribbles through normalized uncertain rays. A deterministic raster adapter

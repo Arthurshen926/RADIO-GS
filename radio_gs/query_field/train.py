@@ -12,6 +12,7 @@ from .field import CapabilityField
 from .observations import training_episode
 from .storage import save_field, sha256
 from .geometry import relaxed_subset_alpha
+from .support_training import TrainingRays, episode_support
 
 
 def partial_membership_loss(predicted, positive, negative):
@@ -31,6 +32,9 @@ def fit(observations, output, config, device="cuda"):
     root = Path(observations)
     manifest = json.loads((root / "observations.json").read_text())
     objective = config.get("render_objective", "visible_membership")
+    support_policy = config.get("support_policy", "single")
+    if support_policy not in {"single", "mixed_unsigned", "mixed_signed"}:
+        raise ValueError("unknown source support policy")
     if objective not in {"visible_membership", "subset_alpha"}:
         raise ValueError("unknown member rendering objective")
     anchor_domain = config.get('inferred_anchor_domain', 'all_observed')
@@ -46,6 +50,7 @@ def fit(observations, output, config, device="cuda"):
     train_frames = manifest["splits"]["train_frames"]
     views = []
     examples = []
+    negative_pixels = []
     anchor_eligible = torch.zeros(len(initial['observed']), dtype=torch.bool)
     for frame in train_frames:
         entry = next(r for r in manifest["frames"] if r["frame"] == frame)
@@ -53,6 +58,8 @@ def fit(observations, output, config, device="cuda"):
         if sha256(path) != entry["compiled"]["sha256"]:
             raise ValueError("source observation changed")
         view = torch.load(path, map_location="cpu", weights_only=True)
+        if support_policy != "single":
+            view["training_rays"] = TrainingRays(view["operator"])
         view["operator"] = view["operator"].to(device)
         view["camera"] = SimpleNamespace(intrinsic=view["intrinsic"],world_to_camera=view["world_to_camera"],
             height=view["original_hw"][0],width=view["original_hw"][1])
@@ -63,6 +70,9 @@ def fit(observations, output, config, device="cuda"):
                 pos, neg, candidate_pixels = episode
                 anchor_eligible[view['best_element'][candidate_pixels]] = True
                 examples.append((len(views)-1, index, pos.to(device), neg.to(device), candidate_pixels))
+                eligible_negative = torch.where(neg & (view['best_element'] >= 0))[0]
+                eligible_negative = eligible_negative[initial['observed'][view['best_element'][eligible_negative]]]
+                negative_pixels.append(eligible_negative)
     if not examples:
         raise ValueError("no reliable positive/negative training episodes")
     physical_scale = float(torch.cat([v["scales_m"] for v in views]).median())
@@ -92,6 +102,9 @@ def fit(observations, output, config, device="cuda"):
     initial_training_loss = fixed_training_diagnostic()
     optimizer = torch.optim.Adam(field.parameters(), lr=config["learning_rate"])
     history = []
+    support_generator = torch.Generator().manual_seed(config["seed"]+1)
+    support_counts = {}
+    support_trace = []
     visits = torch.zeros(len(examples), dtype=torch.long)
     for step in range(config["steps"]):
         position = int(torch.randint(len(examples), (1,)))
@@ -99,9 +112,13 @@ def fit(observations, output, config, device="cuda"):
         view_index, mask_index, positive, negative, pixels = examples[position]
         view = views[view_index]
         pixel = pixels[int(torch.randint(len(pixels), (1,)))]
-        anchor = view["best_element"][pixel].to(device)
-        support = Support(anchor.reshape(1), torch.ones(1, device=device))
-        member = field.member_logits(support, float(view["scales_m"][mask_index])).sigmoid()
+        support, exclusion, support_kind = episode_support(support_policy, step, view, pixels, pixel,
+            negative_pixels[position], support_generator, device)
+        member = field.support_membership(support, float(view["scales_m"][mask_index]), exclusion)
+        support_counts[support_kind] = support_counts.get(support_kind, 0)+1
+        support_trace.append(dict(frame=train_frames[view_index], region=mask_index, first_pixel=int(pixel),
+                                 kind=support_kind, positive_rows=len(support.indices),
+                                 negative_rows=0 if exclusion is None else len(exclusion.indices)))
         if objective == "subset_alpha":
             height,width = manifest["raster_hw"]
             rendered = relaxed_subset_alpha(field, member, view["camera"],height,width,manifest["world_units_per_metre"])
@@ -128,6 +145,8 @@ def fit(observations, output, config, device="cuda"):
             extra_3d_labels=False, final_benchmark_queries_used=False, relation_language_training=False))
     report = dict(config=config, train_frames=train_frames, training_episodes=len(examples),
                   render_objective=objective,
+                  support_policy=support_policy, support_counts=support_counts, support_trace=support_trace,
+                  member_forward_evaluations=sum(1+(r['negative_rows']>0) for r in support_trace),
                   inferred_anchor_domain=anchor_domain,eligible_input_anchors=int(anchor_eligible.sum()),
                   fixed_training_diagnostic_domain="full-scene normalized membership; identical diagnostic across objectives",
                   development_frames=manifest["splits"]["development_frames"],

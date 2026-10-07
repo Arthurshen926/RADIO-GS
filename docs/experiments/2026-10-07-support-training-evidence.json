@@ -1,0 +1,1051 @@
+{
+  "schema": "radio_gs.query_field_support_training_evidence.v1",
+  "parent_commit": "b831d03",
+  "training": {
+    "figurines_mixed_unsigned": {
+      "support_counts": {
+        "anchor": 500,
+        "ray": 500,
+        "pooled": 1000
+      },
+      "member_forward_evaluations": 2000,
+      "training_episodes": 1455,
+      "eligible_input_anchors": 22671,
+      "seconds": 158.573426425457,
+      "trained_deployment_bytes": 2658118304,
+      "native_coordinates_unchanged": true,
+      "geometry_unchanged": true
+    },
+    "figurines_mixed_signed": {
+      "support_counts": {
+        "anchor": 500,
+        "ray": 500,
+        "pooled": 500,
+        "signed_pooled": 500
+      },
+      "member_forward_evaluations": 2500,
+      "training_episodes": 1455,
+      "eligible_input_anchors": 22671,
+      "seconds": 93.67995904013515,
+      "trained_deployment_bytes": 2658118304,
+      "native_coordinates_unchanged": true,
+      "geometry_unchanged": true
+    },
+    "ramen_mixed_unsigned": {
+      "support_counts": {
+        "anchor": 500,
+        "ray": 500,
+        "pooled": 1000
+      },
+      "member_forward_evaluations": 2000,
+      "training_episodes": 1320,
+      "eligible_input_anchors": 28261,
+      "seconds": 224.8740992229432,
+      "trained_deployment_bytes": 2841450464,
+      "native_coordinates_unchanged": true,
+      "geometry_unchanged": true
+    },
+    "ramen_mixed_signed": {
+      "support_counts": {
+        "anchor": 500,
+        "ray": 500,
+        "pooled": 500,
+        "signed_pooled": 500
+      },
+      "member_forward_evaluations": 2500,
+      "training_episodes": 1320,
+      "eligible_input_anchors": 28261,
+      "seconds": 142.70927972905338,
+      "trained_deployment_bytes": 2841450464,
+      "native_coordinates_unchanged": true,
+      "geometry_unchanged": true
+    },
+    "fern_mixed_unsigned": {
+      "support_counts": {
+        "anchor": 500,
+        "ray": 500,
+        "pooled": 1000
+      },
+      "member_forward_evaluations": 2000,
+      "training_episodes": 183,
+      "eligible_input_anchors": 15801,
+      "seconds": 85.04724996723235,
+      "trained_deployment_bytes": 1577411680,
+      "native_coordinates_unchanged": true,
+      "geometry_unchanged": true
+    },
+    "fern_mixed_signed": {
+      "support_counts": {
+        "anchor": 500,
+        "ray": 500,
+        "pooled": 500,
+        "signed_pooled": 500
+      },
+      "member_forward_evaluations": 2500,
+      "training_episodes": 183,
+      "eligible_input_anchors": 15801,
+      "seconds": 82.26172317564487,
+      "trained_deployment_bytes": 1577411680,
+      "native_coordinates_unchanged": true,
+      "geometry_unchanged": true
+    }
+  },
+  "development": {
+    "figurines_mixed_unsigned": {
+      "point_2d/default": {
+        "cases": 169,
+        "failed": 0,
+        "actual_iou": 0.3894477988422446,
+        "parent_actual_iou": 0.374462697489639,
+        "change_pp": 1.4985101352605612
+      },
+      "point_3d/default": {
+        "cases": 169,
+        "failed": 1,
+        "actual_iou": 0.32695813329074774,
+        "parent_actual_iou": 0.3222845888034628,
+        "change_pp": 0.4673544487284964
+      },
+      "region_image/default": {
+        "cases": 169,
+        "failed": 0,
+        "actual_iou": 0.23553715746563214,
+        "parent_actual_iou": 0.23686793318690633,
+        "change_pp": -0.13307757212741855
+      }
+    },
+    "figurines_mixed_signed": {
+      "point_2d/default": {
+        "cases": 169,
+        "failed": 0,
+        "actual_iou": 0.3919417245930733,
+        "parent_actual_iou": 0.374462697489639,
+        "change_pp": 1.7479027103434297
+      },
+      "point_3d/default": {
+        "cases": 169,
+        "failed": 1,
+        "actual_iou": 0.33134035493065356,
+        "parent_actual_iou": 0.3222845888034628,
+        "change_pp": 0.9055766127190779
+      },
+      "region_image/default": {
+        "cases": 169,
+        "failed": 0,
+        "actual_iou": 0.24170602728563123,
+        "parent_actual_iou": 0.23686793318690633,
+        "change_pp": 0.48380940987249044
+      }
+    },
+    "ramen_mixed_unsigned": {
+      "point_2d/default": {
+        "cases": 149,
+        "failed": 0,
+        "actual_iou": 0.4081664071918384,
+        "parent_actual_iou": 0.40304152664397186,
+        "change_pp": 0.5124880547866528
+      },
+      "point_3d/default": {
+        "cases": 149,
+        "failed": 0,
+        "actual_iou": 0.39585716507378843,
+        "parent_actual_iou": 0.38845373275095985,
+        "change_pp": 0.7403432322828585
+      },
+      "region_image/default": {
+        "cases": 149,
+        "failed": 0,
+        "actual_iou": 0.3222059206724567,
+        "parent_actual_iou": 0.31742766346851203,
+        "change_pp": 0.4778257203944647
+      }
+    },
+    "ramen_mixed_signed": {
+      "point_2d/default": {
+        "cases": 149,
+        "failed": 0,
+        "actual_iou": 0.41014171802695065,
+        "parent_actual_iou": 0.40304152664397186,
+        "change_pp": 0.7100191382978793
+      },
+      "point_3d/default": {
+        "cases": 149,
+        "failed": 0,
+        "actual_iou": 0.386463303809623,
+        "parent_actual_iou": 0.38845373275095985,
+        "change_pp": -0.19904289413368303
+      },
+      "region_image/default": {
+        "cases": 149,
+        "failed": 0,
+        "actual_iou": 0.3343441817946982,
+        "parent_actual_iou": 0.31742766346851203,
+        "change_pp": 1.691651832618618
+      }
+    },
+    "fern_mixed_unsigned": {
+      "point_2d/default": {
+        "cases": 33,
+        "failed": 0,
+        "actual_iou": 0.4273574229499156,
+        "parent_actual_iou": 0.4457479665112315,
+        "change_pp": -1.839054356131592
+      },
+      "point_3d/default": {
+        "cases": 33,
+        "failed": 0,
+        "actual_iou": 0.4208532835102894,
+        "parent_actual_iou": 0.4411970251663165,
+        "change_pp": -2.034374165602709
+      },
+      "region_image/default": {
+        "cases": 33,
+        "failed": 0,
+        "actual_iou": 0.43803547068753024,
+        "parent_actual_iou": 0.43436806231285585,
+        "change_pp": 0.3667408374674386
+      }
+    },
+    "fern_mixed_signed": {
+      "point_2d/default": {
+        "cases": 33,
+        "failed": 0,
+        "actual_iou": 0.42408352641558106,
+        "parent_actual_iou": 0.4457479665112315,
+        "change_pp": -2.166444009565044
+      },
+      "point_3d/default": {
+        "cases": 33,
+        "failed": 0,
+        "actual_iou": 0.4236212397050677,
+        "parent_actual_iou": 0.4411970251663165,
+        "change_pp": -1.7575785461248772
+      },
+      "region_image/default": {
+        "cases": 33,
+        "failed": 0,
+        "actual_iou": 0.44421479094660643,
+        "parent_actual_iou": 0.43436806231285585,
+        "change_pp": 0.9846728633750579
+      }
+    }
+  },
+  "lerf": {
+    "figurines_mixed_unsigned": {
+      "native_semantic_iou": 0.47287673359720167,
+      "member_semantic_iou": 0.439758411009929,
+      "actual_iou": 0.3355788888115369,
+      "parent_actual_iou": 0.4178841518132404,
+      "cases": 56,
+      "missing": 0
+    },
+    "figurines_mixed_signed": {
+      "native_semantic_iou": 0.47287673359720167,
+      "member_semantic_iou": 0.40177410510243916,
+      "actual_iou": 0.3439901227641983,
+      "parent_actual_iou": 0.4178841518132404,
+      "cases": 56,
+      "missing": 0
+    },
+    "ramen_mixed_unsigned": {
+      "native_semantic_iou": 0.35140388819854707,
+      "member_semantic_iou": 0.38634090648937813,
+      "actual_iou": 0.2218335366994006,
+      "parent_actual_iou": 0.19464220658255887,
+      "cases": 71,
+      "missing": 0
+    },
+    "ramen_mixed_signed": {
+      "native_semantic_iou": 0.35140388819854707,
+      "member_semantic_iou": 0.3753234215068851,
+      "actual_iou": 0.20724660762234023,
+      "parent_actual_iou": 0.19464220658255887,
+      "cases": 71,
+      "missing": 0
+    }
+  },
+  "nvos": {
+    "fern_mixed_unsigned_positive": {
+      "actual_iou": 0.7521589624796607,
+      "response_iou": 0.7626683072681558,
+      "response_ap": 0.909634108296958,
+      "parent_actual_iou": 0.7610657422882185,
+      "parent_response_iou": 0.767394879809848,
+      "parent_response_ap": 0.9209124504569456
+    },
+    "fern_mixed_unsigned_signed": {
+      "actual_iou": 0.7521620235583093,
+      "response_iou": 0.7626584728974236,
+      "response_ap": 0.9102458897052571,
+      "parent_actual_iou": 0.7614530704590733,
+      "parent_response_iou": 0.7673985652435725,
+      "parent_response_ap": 0.9209521267286402
+    },
+    "fern_mixed_signed_positive": {
+      "actual_iou": 0.7519688225193247,
+      "response_iou": 0.7628878485618773,
+      "response_ap": 0.9130961994839762,
+      "parent_actual_iou": 0.7610657422882185,
+      "parent_response_iou": 0.767394879809848,
+      "parent_response_ap": 0.9209124504569456
+    },
+    "fern_mixed_signed_signed": {
+      "actual_iou": 0.7520164802480724,
+      "response_iou": 0.7628869574989803,
+      "response_ap": 0.9132178125213025,
+      "parent_actual_iou": 0.7614530704590733,
+      "parent_response_iou": 0.7673985652435725,
+      "parent_response_ap": 0.9209521267286402
+    }
+  },
+  "gates": {
+    "mixed_unsigned": {
+      "passed": false,
+      "failures": [
+        "figurines text actual subset did not improve",
+        "figurines region_image/default actual subset regressed",
+        "fern point_2d/default actual subset regressed",
+        "fern point_3d/default actual subset regressed",
+        "fern positive actual_iou regressed",
+        "fern positive response_iou regressed",
+        "fern positive response_ap regressed",
+        "fern signed actual_iou regressed",
+        "fern signed response_iou regressed",
+        "fern signed response_ap regressed"
+      ]
+    },
+    "mixed_signed": {
+      "passed": false,
+      "failures": [
+        "figurines text actual subset did not improve",
+        "ramen point_3d/default actual subset regressed",
+        "fern point_2d/default actual subset regressed",
+        "fern point_3d/default actual subset regressed",
+        "fern positive actual_iou regressed",
+        "fern positive response_iou regressed",
+        "fern positive response_ap regressed",
+        "fern signed actual_iou regressed",
+        "fern signed response_iou regressed",
+        "fern signed response_ap regressed"
+      ]
+    }
+  },
+  "original_code_replays": {
+    "fern_single_replay": {
+      "initialization_all_tensors_exact": true,
+      "development": {
+        "point_2d/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.49454211231998424,
+          "mean_actual_subset_iou": 0.4442044665867632,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.12522345800376075
+        },
+        "point_2d/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5231366496194493,
+          "mean_partial_loss_on_supported_cases": 0.07447395332961936
+        },
+        "point_3d/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5011236072997703,
+          "mean_actual_subset_iou": 0.43925770998678426,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.1454276125525322
+        },
+        "point_3d/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5283877366419995,
+          "mean_partial_loss_on_supported_cases": 0.09691419216070438
+        },
+        "region_image/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.4921999932055108,
+          "mean_actual_subset_iou": 0.43296480557006417,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.15848866804982675
+        },
+        "region_image/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.536704245136317,
+          "mean_partial_loss_on_supported_cases": 0.10395307466387749
+        }
+      }
+    },
+    "fern_original_replay_1": {
+      "initialization_all_tensors_exact": true,
+      "development": {
+        "point_2d/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.49454211231998424,
+          "mean_actual_subset_iou": 0.444203644990921,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.12522357993646327
+        },
+        "point_2d/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5231474990194495,
+          "mean_partial_loss_on_supported_cases": 0.07447421038170543
+        },
+        "point_3d/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5011236072997703,
+          "mean_actual_subset_iou": 0.4392621135056922,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.14542772265320475
+        },
+        "point_3d/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5283877366419995,
+          "mean_partial_loss_on_supported_cases": 0.09691498309345634
+        },
+        "region_image/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.4921999932055108,
+          "mean_actual_subset_iou": 0.4329631721995997,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.15848902714523402
+        },
+        "region_image/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.536704245136317,
+          "mean_partial_loss_on_supported_cases": 0.10395451805159224
+        }
+      }
+    },
+    "fern_original_replay_2": {
+      "initialization_all_tensors_exact": true,
+      "development": {
+        "point_2d/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.4945506856804996,
+          "mean_actual_subset_iou": 0.44422035630453716,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.12521508394627634
+        },
+        "point_2d/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.52317053598888,
+          "mean_partial_loss_on_supported_cases": 0.07448045361899969
+        },
+        "point_3d/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5011718087744984,
+          "mean_actual_subset_iou": 0.4392949223631259,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.14543734727935356
+        },
+        "point_3d/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5284560530474691,
+          "mean_partial_loss_on_supported_cases": 0.09693387963555077
+        },
+        "region_image/default": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.4922320613792787,
+          "mean_actual_subset_iou": 0.4330073351774252,
+          "actual_subset_cases": 33,
+          "mean_partial_loss_on_supported_cases": 0.15847425903616982
+        },
+        "region_image/teacher_scope": {
+          "cases": 33,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.5367224618058765,
+          "mean_partial_loss_on_supported_cases": 0.10396803708069703
+        }
+      }
+    }
+  },
+  "original_worktree": {
+    "branch": "codex/surface-object-memory-v4",
+    "head": "dabcaa9b5fc6d89fa4474bcaea5db52ca7f74030",
+    "index_sha256": "917366f03337f78208f976ee26f4c58f198d2ce78ff64b29f9d7c94c06ad621c",
+    "index_matches_frozen": true
+  },
+  "exact_episode_and_first_pixel_sequence_between_arms": true,
+  "unchanged_inference_spec_and_tensor_storage": true,
+  "all_public_predictions_before_new_target_scoring": true,
+  "source_denied_replays": "4 real NVOS cases plus 4 four-input LERF models",
+  "concentration": {
+    "figurines": {
+      "ray": {
+        "cases": 32,
+        "mean_resultant_norm": 0.768442640081048,
+        "fraction_below_point_nine": 0.84375
+      },
+      "pooled_positive": {
+        "cases": 32,
+        "mean_resultant_norm": 0.727999908849597,
+        "fraction_below_point_nine": 0.96875
+      },
+      "pooled_negative": {
+        "cases": 32,
+        "mean_resultant_norm": 0.4797670990228653,
+        "fraction_below_point_nine": 1.0
+      }
+    },
+    "ramen": {
+      "ray": {
+        "cases": 32,
+        "mean_resultant_norm": 0.8347955197095871,
+        "fraction_below_point_nine": 0.78125
+      },
+      "pooled_positive": {
+        "cases": 32,
+        "mean_resultant_norm": 0.7278599180281162,
+        "fraction_below_point_nine": 0.9375
+      },
+      "pooled_negative": {
+        "cases": 32,
+        "mean_resultant_norm": 0.47394665516912937,
+        "fraction_below_point_nine": 1.0
+      }
+    },
+    "fern": {
+      "ray": {
+        "cases": 32,
+        "mean_resultant_norm": 0.915922075510025,
+        "fraction_below_point_nine": 0.21875
+      },
+      "pooled_positive": {
+        "cases": 32,
+        "mean_resultant_norm": 0.8709140792489052,
+        "fraction_below_point_nine": 0.625
+      },
+      "pooled_negative": {
+        "cases": 32,
+        "mean_resultant_norm": 0.7787949126213789,
+        "fraction_below_point_nine": 0.6875
+      }
+    }
+  },
+  "promotion": false,
+  "independent_final_test": false,
+  "limitations": [
+    "2 of 4 LERF scenes and 1 of 8 NVOS cases; failed confirmation gate",
+    "training is not bitwise repeatable, unlike tested inference; small deltas not significance claims",
+    "support concentration is a post-study source-only diagnostic, not causal proof",
+    "no new ScanNet/UQIS or compactness evidence"
+  ],
+  "code": [
+    {
+      "path": "configs/query_field/fern_mixed_signed.json",
+      "sha256": "f58b23b30a20c9d8dd890eebe1c15585c9f2358c6fe6585ff8721522028c893e",
+      "bytes": 1239
+    },
+    {
+      "path": "configs/query_field/fern_mixed_unsigned.json",
+      "sha256": "f95749f856da35e2552c6a915f1364fb144f25d95c084463d97e83c22a265726",
+      "bytes": 1241
+    },
+    {
+      "path": "configs/query_field/figurines_mixed_signed.json",
+      "sha256": "a81a67aeb13d3aebc2b17cc1f0b6bea151bec30f685c03a38eec76b40716ba21",
+      "bytes": 1449
+    },
+    {
+      "path": "configs/query_field/figurines_mixed_unsigned.json",
+      "sha256": "944c475012837ebc3f9e6c4deea8ad496843adf6e54a0536defa7e15acd4a52a",
+      "bytes": 1451
+    },
+    {
+      "path": "configs/query_field/ramen_mixed_signed.json",
+      "sha256": "9c51e88f6a9146ae7bfae1794890644c77ed7deb529355994a77c570f5e6404b",
+      "bytes": 1436
+    },
+    {
+      "path": "configs/query_field/ramen_mixed_unsigned.json",
+      "sha256": "4511d7533d78c55247eca44a6574ef66e2b1b8fb3f3387abc8dfdc3b83a4a1c1",
+      "bytes": 1438
+    },
+    {
+      "path": "configs/query_field/support_training_nvos.json",
+      "sha256": "98b240738c3430eef90b1ef57fe3bd90992e9ca7cdb38bd0dfebd683b294a2b4",
+      "bytes": 2983
+    },
+    {
+      "path": "configs/query_field/support_training_nvos_scoring.json",
+      "sha256": "b6d6054d726c812143ccc48d9929deb340b7af32f63aae5d5a79f5f0a2de34b5",
+      "bytes": 226
+    },
+    {
+      "path": "configs/query_field/support_training_study.json",
+      "sha256": "1ad4483f7d0952daf76b9c4b4d491545b4fba456184c30268617b98af0b31684",
+      "bytes": 3461
+    },
+    {
+      "path": "radio_gs/query_field/__init__.py",
+      "sha256": "bc7064c5ae34dfa06d45b841bd23e51f8262e0e0a9f0a08788c526b60a21b6fc",
+      "bytes": 401
+    },
+    {
+      "path": "radio_gs/query_field/__main__.py",
+      "sha256": "f94df7eff956ffe0ebcbc91dcc09cded489dfa8f2402b23b3549b881691cd2bb",
+      "bytes": 1776
+    },
+    {
+      "path": "radio_gs/query_field/adapters.py",
+      "sha256": "6947e5039a2e0173910727e7042f5bf885173be02d63a79e42a67f8c92a64120",
+      "bytes": 9707
+    },
+    {
+      "path": "radio_gs/query_field/baseline.py",
+      "sha256": "3e598682d64413da88f2ba48b1016b6708120720ea8ffacf9f3515b7c4a665af",
+      "bytes": 4590
+    },
+    {
+      "path": "radio_gs/query_field/cold_check.py",
+      "sha256": "97d1c5bd69b498a9d9e992ea6ebc752c145b4f76e368b3b5fc10a4de468b14c4",
+      "bytes": 2618
+    },
+    {
+      "path": "radio_gs/query_field/contracts.py",
+      "sha256": "c0bce2455709a80b095ef7f09f038ef5411fbe580b9384add8e0f0aa0c2d7ee2",
+      "bytes": 4056
+    },
+    {
+      "path": "radio_gs/query_field/diagnose.py",
+      "sha256": "06074fcfd3379820a43ca898b70d87c303dc99505f08ecdca5adfbb030f3b4b4",
+      "bytes": 3819
+    },
+    {
+      "path": "radio_gs/query_field/evaluate.py",
+      "sha256": "49c12d46df309e5919cbf4eafefc87375dd2d4d5a6ea4bb255e900334910839c",
+      "bytes": 9849
+    },
+    {
+      "path": "radio_gs/query_field/exclusion_audit.py",
+      "sha256": "4274ec6b1368b605b534e7bb9ad009bc771dc366c526b1014b4250f9fd53f4d9",
+      "bytes": 5243
+    },
+    {
+      "path": "radio_gs/query_field/field.py",
+      "sha256": "d1fe3329e3b64b610e08385def2988e546f66a816d23bc433509d7d2f71cc4fd",
+      "bytes": 14510
+    },
+    {
+      "path": "radio_gs/query_field/geometry.py",
+      "sha256": "7749dfa0657cc29a31397eb41a7b4fb0e25d7b556a0999104812e19a8e0e1db0",
+      "bytes": 3726
+    },
+    {
+      "path": "radio_gs/query_field/hypotheses.py",
+      "sha256": "e80320195844089d4ffe696b4008d7da81c1075f14ee9a4321677ea3e17f6941",
+      "bytes": 5813
+    },
+    {
+      "path": "radio_gs/query_field/hypothesis_study.py",
+      "sha256": "0ce39edff9b07e6077bf03800490e0d058a451bb9255573dccb72e3039ef1db7",
+      "bytes": 6961
+    },
+    {
+      "path": "radio_gs/query_field/local_metric_bound.py",
+      "sha256": "630b8950d9a565a60f632b1d61b652c7ee5e0826cf280ccb72576381a9f32082",
+      "bytes": 4400
+    },
+    {
+      "path": "radio_gs/query_field/metric_study.py",
+      "sha256": "984807f5659a88fe33a9e955a6b63f15cae9ee1996b627938c8773c73527906d",
+      "bytes": 5647
+    },
+    {
+      "path": "radio_gs/query_field/native_transfer.py",
+      "sha256": "dd08379042e2129f7bf71a3800f0a235211c7fa97bba0e8b15788700f628185d",
+      "bytes": 4838
+    },
+    {
+      "path": "radio_gs/query_field/observations.py",
+      "sha256": "d8edc148807b79b657a381d3809b8c17e98aa5ea00593f42fecc5be9232ffd33",
+      "bytes": 10877
+    },
+    {
+      "path": "radio_gs/query_field/public_lerf.py",
+      "sha256": "8c9629f78f4ac2f9861d2f7e1b410f37f67219cd48571723e6dad087eddc6218",
+      "bytes": 7062
+    },
+    {
+      "path": "radio_gs/query_field/public_nvos.py",
+      "sha256": "df3b1129de1aa2e5aa9f3befd161b9f8f91439170a8ad61cbc4700a368c9eb07",
+      "bytes": 12282
+    },
+    {
+      "path": "radio_gs/query_field/readout_study.py",
+      "sha256": "66ae30e7aa70f252b50927f12f256dad9110248a140ce6b15c1a64904bdb067d",
+      "bytes": 4720
+    },
+    {
+      "path": "radio_gs/query_field/smoke.py",
+      "sha256": "9485fbb6100f062308164555421a24e70da524f1d4839046f1698f69404f5dd4",
+      "bytes": 5571
+    },
+    {
+      "path": "radio_gs/query_field/source_regions.py",
+      "sha256": "df98a089403f38afbdee0579b3de7b7163d0508457c97d470247686fb491f7fc",
+      "bytes": 3898
+    },
+    {
+      "path": "radio_gs/query_field/storage.py",
+      "sha256": "7d957f93ba75892e2bed18341cd5b05384391f175e771d6d7032626d41e9c1a3",
+      "bytes": 3551
+    },
+    {
+      "path": "radio_gs/query_field/subset_errors.py",
+      "sha256": "3a2621eed33e262073775020876733cbede4e8799c917e09e329082f32e51abd",
+      "bytes": 2598
+    },
+    {
+      "path": "radio_gs/query_field/support_audit.py",
+      "sha256": "c21588ee04c0d8e4febdb5912d3338e26baeded29194a5a77cab2882dcf7045c",
+      "bytes": 4081
+    },
+    {
+      "path": "radio_gs/query_field/support_concentration.py",
+      "sha256": "d9ee559a75dc9b1c53f4fe551cdb501ce709487aa79f1873a5f7e422758f0e57",
+      "bytes": 4668
+    },
+    {
+      "path": "radio_gs/query_field/support_control.py",
+      "sha256": "1eac14b80aa68a5d6009b203168093133785cce1e44fe714fc4f136c13f50590",
+      "bytes": 5953
+    },
+    {
+      "path": "radio_gs/query_field/support_training.py",
+      "sha256": "6d29a852d5f79f0592c67a6d760cf866f2f542ab99f71a4569d6aed83309fdf5",
+      "bytes": 3299
+    },
+    {
+      "path": "radio_gs/query_field/train.py",
+      "sha256": "0b30bf3b4b2408ebd6be39477b6a3eee24b7e0c9e0263f9dc47ecd8a0674ef26",
+      "bytes": 9873
+    },
+    {
+      "path": "scripts/research/audit_support_training_replay.py",
+      "sha256": "b51b7b16a07c1be95b9fc0d186063b3bbdd9f739e48a241ad76603f38c29515f",
+      "bytes": 1612
+    },
+    {
+      "path": "scripts/research/prepare_support_training.py",
+      "sha256": "a42bd01bd04891efddce95b00d9a3ffd92b636aa86ed2aaadbfc6567a5e1467e",
+      "bytes": 3327
+    },
+    {
+      "path": "scripts/research/run_query_field_nvos.py",
+      "sha256": "aa7eb9a4adb663b6a144d90f5e3712148bb24a3784f95769d850da3d65c6ad1e",
+      "bytes": 4975
+    },
+    {
+      "path": "scripts/research/run_support_training_readouts.py",
+      "sha256": "d92bb43b4795e1b3bf4d8f3227977c3bf1e0f8f3d3962c9fd223c094fa276a59",
+      "bytes": 3126
+    },
+    {
+      "path": "scripts/research/run_support_training_scene.py",
+      "sha256": "f7c94399f4be6522dc18042f18152c0ca8fa8467f52d39c25f13103093293f70",
+      "bytes": 1033
+    },
+    {
+      "path": "scripts/research/summarize_support_training.py",
+      "sha256": "b095cc3b446354ef6944e2ebe6ea5e1980f39650559a0091def09005bce9376b",
+      "bytes": 9840
+    },
+    {
+      "path": "tests/test_query_field_support_training.py",
+      "sha256": "c6b48d160b7c79e7bbaddff1411e54adcb277c4aba83aca3bbd7e4866a9bd24b",
+      "bytes": 3667
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "output/query_field_20261007/support_training_v1/cold_replay.json",
+      "sha256": "7d6f01072ff866de2fe2c12a33199ed861fe0d246589fcc6b21993f0eca44311",
+      "bytes": 1195
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_concentration.json",
+      "sha256": "1bc39ec57628af8c9778c89c8313ef20a417bb8465af73ec56bddcda6985bc56",
+      "bytes": 22920
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_mixed_signed/development_trained.json",
+      "sha256": "5ea8eae0c23ada88cdd681ef1a761fa9939ead1ff3622976f0c8a367e0bd729c",
+      "bytes": 175543
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_mixed_signed/models/trained/manifest.json",
+      "sha256": "817e4753e48326cc269cff56bfd81a59c9d799ac29aa3cb6ad7f759adcf6f3b9",
+      "bytes": 1264
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_mixed_signed/models/training.json",
+      "sha256": "c125af46323ebd3a0d8faa8c83ff2d3155ff0b74d19bdc34e424a0e8ba4f35d6",
+      "bytes": 321899
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_mixed_unsigned/development_trained.json",
+      "sha256": "df9118f0fd4a2f8e19544711975a63a1cfaa785d8f4c333d00f34c73a166a7d7",
+      "bytes": 175500
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_mixed_unsigned/models/trained/manifest.json",
+      "sha256": "a16b59b02234bc39ed517a68b9aaf2f0394d5a004a840d1ae7fa4a8b3c40df42",
+      "bytes": 1264
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_mixed_unsigned/models/training.json",
+      "sha256": "aac50c75b4e548458c3fa19b2c4bba02f7aa1ab68d56622611a6094e8726fc50",
+      "bytes": 317381
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_original_replay_1/development_trained.json",
+      "sha256": "d8d41c0dac3c8b53407f211b0905e45a58cb3b4efef0ea5b5b83cef993d0f2b2",
+      "bytes": 175510
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_original_replay_1/models/trained/manifest.json",
+      "sha256": "5dbcfab0532e9869f2119afc06c7ce72714a9c8a106100309a4cf011c457b3b5",
+      "bytes": 1264
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_original_replay_1/models/training.json",
+      "sha256": "7576c8f449a91a5aec773c5d091071a8b809f1624173d5e6df819abff132c871",
+      "bytes": 9840
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_original_replay_2/development_trained.json",
+      "sha256": "9b5504ba30030cc322c1988c3eaf22286307e5280b0662f4e6266f6355098e2a",
+      "bytes": 175517
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_original_replay_2/models/trained/manifest.json",
+      "sha256": "00d5d3eea4cf5de5efbe805513224dd10288a26a2c30a9f2d3f655de0f088fa4",
+      "bytes": 1264
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_original_replay_2/models/training.json",
+      "sha256": "f77c5a174a25edec71cd99330c1c91498207292729afa2898e23efa188c9cd83",
+      "bytes": 9843
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_single_replay/development_trained.json",
+      "sha256": "89ced09acfd5b662506ec8ad4f80ca7186e96293d53bcebf547ebf73d111d074",
+      "bytes": 175489
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_single_replay/models/trained/manifest.json",
+      "sha256": "63c19f1c7ee05c95da1751b9d82a4458e2fb78459596d34d565589b480b70f1b",
+      "bytes": 1264
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/fern_single_replay/models/training.json",
+      "sha256": "5555c047366a10a251d5f65ae739b28db4af13dd229cc30b02dd03b0caef887f",
+      "bytes": 316140
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_concentration.json",
+      "sha256": "f87c1db28e7fd9df0d3f608a2f9b039697db8b785a47526b93113c6fad5416de",
+      "bytes": 22924
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_mixed_signed/development_trained.json",
+      "sha256": "47fac365b7ca99ee85c429020a6cafe14dda52d52262c6b0bdd9900c9d508ffd",
+      "bytes": 884512
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_mixed_signed/models/trained/manifest.json",
+      "sha256": "8109212cfdb620f250e4f83061dc9e40bd0d4126e58571f10ab56217a07eeff6",
+      "bytes": 1264
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_mixed_signed/models/training.json",
+      "sha256": "0415eda18ebfd0391d559a5a9372823ec406cc971ba19c73471074b421cd37a2",
+      "bytes": 324991
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_mixed_signed/runtime_smoke.json",
+      "sha256": "547814a0dc46a3a8a7712575cbb576928f54c80cc2cdabc1b99648b1d45283f7",
+      "bytes": 6825
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_mixed_unsigned/development_trained.json",
+      "sha256": "877c9f73a3dc97563f1f271f7168c798467830e423a40735dcf1a383fc395c66",
+      "bytes": 884472
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_mixed_unsigned/models/trained/manifest.json",
+      "sha256": "33d95406ade1d9b60f9e8553c24350fb0c1246a590c00628991fa57570448751",
+      "bytes": 1264
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_mixed_unsigned/models/training.json",
+      "sha256": "be31954283ae08f9a5778f02faf06b1b6af3adf3960667dc2fcfe0a25123bdf6",
+      "bytes": 320473
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/figurines_mixed_unsigned/runtime_smoke.json",
+      "sha256": "372efe010d4cf3c18b936a27eeb5faac9b6c2983606e5a50ac3ca7a7d98803eb",
+      "bytes": 6825
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/launch.json",
+      "sha256": "f5341e0b9c3619e845298f5d05c8e468b4611bc07ba0f8be4d87a405d42a550a",
+      "bytes": 1405
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/lerf/figurines_mixed_signed/evaluation/evaluation.json",
+      "sha256": "212003e91972c53d927b0aab3d57e2a546cfce4d52c65b8621dbf750f779c552",
+      "bytes": 54050
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/lerf/figurines_mixed_signed/prediction.json",
+      "sha256": "c05844c6ce41fd986f1b010f93b34ff522f984dbc9f0122002f1d44ec760cbc0",
+      "bytes": 16478
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/lerf/figurines_mixed_unsigned/evaluation/evaluation.json",
+      "sha256": "46b7399888647ac721b62ab46b0b92f507700b603d536af33adab199d2185a76",
+      "bytes": 54232
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/lerf/figurines_mixed_unsigned/prediction.json",
+      "sha256": "65b394a88284a841fd084b2ab4b22616faf2a17addbaeb0911f19c522d5d5065",
+      "bytes": 16483
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/lerf/ramen_mixed_signed/evaluation/evaluation.json",
+      "sha256": "66b3c63b5ed91e1d9309b8fd5a2a166e842d338fb22833b4599f9b66687a36fa",
+      "bytes": 65124
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/lerf/ramen_mixed_signed/prediction.json",
+      "sha256": "a4da29e638bf2d55a3751408149d8686a40c1ac66c9bebe3a458f5a7f415a8f3",
+      "bytes": 13036
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/lerf/ramen_mixed_unsigned/evaluation/evaluation.json",
+      "sha256": "1f519c6ff86c1359ba72903472baddf0c96023397ef0cfa9387673fbbf49517d",
+      "bytes": 65378
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/lerf/ramen_mixed_unsigned/prediction.json",
+      "sha256": "6770a917e6c683e6ad15477331f1324cd856995951cbf6a5c7e2b1872bd10af9",
+      "bytes": 13042
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/nvos/evaluation.json",
+      "sha256": "89f3e798e2d45bc09f0f50d71c048c41c5757ee30e0d0ae68d07c7310dc3cd7f",
+      "bytes": 3106
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/nvos/fern_mixed_signed_positive/prediction.json",
+      "sha256": "9b93940fb581626d0d731079597faf8c32f38e94ce953b62e0f92d398a63bbf7",
+      "bytes": 6165
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/nvos/fern_mixed_signed_signed/prediction.json",
+      "sha256": "64250a56221fe7d01806e3f08adec6e02ea47b1681b83cd006c946aab0297831",
+      "bytes": 6178
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/nvos/fern_mixed_unsigned_positive/prediction.json",
+      "sha256": "e3029452929daaa59925413971bfe24102717d043a6712e1e19dc3a01f3891b9",
+      "bytes": 6168
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/nvos/fern_mixed_unsigned_signed/prediction.json",
+      "sha256": "6cd00a51cafedbe71d54f7403e33bd9e0f217b82fb61ac6286004e09cc5b58b1",
+      "bytes": 6181
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/original_replay_sources.json",
+      "sha256": "16b1c0cc24867283127d1d6aad196845ee9990b0ac6a582f9d931e77108f0a80",
+      "bytes": 399
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/protocol_at_launch.md",
+      "sha256": "3591adb9e5dc4b37410e9a5e6dddcc02e4ecdaeb31e1538392f07412508e62dc",
+      "bytes": 2887
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_concentration.json",
+      "sha256": "4d79aac7e7f646c3946b239e0f64cac57c71099e6f12eeb58928519703a22203",
+      "bytes": 22955
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_mixed_signed/development_trained.json",
+      "sha256": "046c7bc960bd5c96b938ccf3d34bb5ec8646c8b9de7d40a19af6198bc2ced7cc",
+      "bytes": 783888
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_mixed_signed/models/trained/manifest.json",
+      "sha256": "548d1279852335cd82500a171e25aff5d4284d976bf23043a15de8991940b87c",
+      "bytes": 1263
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_mixed_signed/models/training.json",
+      "sha256": "c4d683e7774813633d659200e1d3f0c355c1c3f335c95e6a5401f01e86fcfae3",
+      "bytes": 323986
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_mixed_signed/runtime_smoke.json",
+      "sha256": "6633382939782379c8441337d8b6ea67bff1550ccc80201b1f7d0303dbc0e5af",
+      "bytes": 6820
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_mixed_unsigned/development_trained.json",
+      "sha256": "1168614734cbace45b15ba4af20ec2dd02aa8b53490a338151719024ba5f2bd9",
+      "bytes": 783810
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_mixed_unsigned/models/trained/manifest.json",
+      "sha256": "84346614cc1c5191a4a9bd7fe0558a40be9e861dcf2e556bfca189d563daae09",
+      "bytes": 1263
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_mixed_unsigned/models/training.json",
+      "sha256": "ff4504bad2850bc151d51bccced00c887d5ef90818c33d4be4e2e48d4137417e",
+      "bytes": 319472
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/ramen_mixed_unsigned/runtime_smoke.json",
+      "sha256": "39599ee9ab1fe5d1ce550d40ad68cf07823547a43c15eb81fc5cbf4d441534b8",
+      "bytes": 6823
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/single_replay.json",
+      "sha256": "04a45e2c8515dfcccde6e47dfd6831a134231a874f377f2e192128cd41f87ae5",
+      "bytes": 398
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/subset_errors.json",
+      "sha256": "0249e46a29ff465944522772c6e4b55b1851e4f76c618b505d6c4bb70a7f3b96",
+      "bytes": 171171
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/tests.log",
+      "sha256": "06f486138bdea0927a452920a45156597170a1e0e5ccc5243c52bf57549a12fb",
+      "bytes": 788
+    },
+    {
+      "path": "output/query_field_20261007/support_training_v1/training_repeatability.json",
+      "sha256": "0e639974dab97e7160b493670dff83e60314d3bde6a2b580b28f3b38ff15476c",
+      "bytes": 2831
+    }
+  ]
+}

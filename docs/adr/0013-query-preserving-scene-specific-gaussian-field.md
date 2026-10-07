@@ -198,3 +198,25 @@ provides no gain. Keep the common physical candidate; do not choose an untrained
 model for fern or promote a new scale policy from this evidence. Further changes
 must address signed support learning and false additions through the shared core,
 with complete per-input/readout gates and honest full-cohort denominators.
+
+## Shared support training and retained aggregation question
+
+The [matched support study](../experiments/2026-10-07-support-training-results.md)
+tests unsigned and signed ray mixtures in source fitting. Factor observed-support
+filtering and signed exclusion into differentiable common helpers used by both
+deployment and fitting. New support policies remain opt-in source experiments;
+default single-support fitting and the physical member energy stay unchanged.
+Neither mixed policy passes the common gate, so neither replaces the candidate.
+
+The negative result does not authorize per-scene checkpoint selection or more
+support-mixture tuning. Distinguish uncertainty over Gaussian associations within
+one ray from multiple co-target observations and independent negative constraints.
+Their current unit-normalized pooled prototype drops directional disagreement;
+source-only concentration measurements establish that information loss, not a
+causal accuracy explanation or a successful replacement. Any new aggregation
+must remain over the same conditional member kernel with declared typed inputs.
+
+Exact deployed-query replay does not imply bitwise training reproducibility:
+two repeated executions of the original fitter differ in learned tensors.
+Report numerical repeatability separately and do not treat small one-run metric
+differences as statistically established architectural gains.
