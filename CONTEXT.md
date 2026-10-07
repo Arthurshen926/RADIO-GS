@@ -19,6 +19,33 @@ its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
 Latest candidate evidence (2026-10-07):
+`docs/experiments/2026-10-07-native-local-member-results.md`.
+Keep the fitted physical metric as the common research candidate. A protected
+native DINO cosine distance is now an opt-in shared member-energy control, with
+no new parameters/tensors/teachers and paired affine/native scoring. Source-only
+exclusion and updated readout audits precede the intervention; source labels,
+sampling episodes, candidate unions and all thresholds remain fixed.
+Native-metric refitting improves actual text subsets (%), figurines 41.7884 ->
+47.6108 and ramen 19.4642 -> 26.9443; image diagnostics improve on both. However,
+ramen 3D-point teacher diagnostics fall 38.8454 -> 38.3229, failing the declared
+common-input gate. Frozen insertion scores 59.4702/41.5179 text but hurts image
+and points substantially. Neither is promoted; no per-input mixture, third-scene
+native fit or strength sweep. Constant native locality is not proven to preserve
+complete objects; post-evaluation scope bounds are diagnostic, not causal proof.
+Waldo kitchen independently completes the physical method's four-scene LERF
+development cohort: native/member semantic IoU 44.4599/42.1092%, actual subset
+35.1987%. Equal-scene four-scene means are native semantic43.8943%, member
+semantic49.4130%, actual subset32.3130%; saved v10 subset66.9633% under different
+source-access/resources. Do not mix native-intervention scenes into that macro.
+Waldo has 1,496,561 Gaussians, 18 training views, 2000 steps, 7.17GB export;
+158 teacher-region diagnostics. All four input adapters replay from copied
+exports; 29 tests pass. All jobs are complete. Evidence:
+`docs/experiments/2026-10-07-native-local-evidence.json`.
+Next: real signed/registered point evidence and scope-dependent appearance
+variation, then remaining ScanNet OVS/NVOS/UQIS integration. Full five-task
+performance, compactness and independent final testing remain unestablished.
+
+Previous candidate evidence (2026-10-07):
 `docs/experiments/2026-10-07-physical-scale-member-results.md`.
 The shared member energy now optionally subtracts physical-scale-normalized
 squared distance to the weighted support centre. Explicit geometry world units

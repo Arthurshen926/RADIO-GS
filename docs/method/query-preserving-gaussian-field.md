@@ -28,6 +28,7 @@ its label-trained member tree is silently called by the new package.
 | `readout_study`, `subset_errors` | Exact baseline replay, explicit selection controls, and checked error decomposition |
 | `support_audit`, `support_control` | Train-only inferred-support compilation, matched packaging, and three-scene validation |
 | `metric_study` | Fixed physical-scale member-energy controls with frozen native query vectors |
+| `exclusion_audit`, `local_metric_bound` | Source-only exclusion coverage and separate post-evaluation locality/scope bounds |
 
 ```mermaid
 flowchart LR
@@ -78,6 +79,21 @@ image gate on figurines. Current opt-in fitting recipes are
 `configs/query_field/{figurines,ramen,teatime}_spatial_metric.json`, which combine
 `training_eligible` inferred supports and `scale_normalized` membership. Legacy
 constructor and first-pilot defaults stay unchanged for exact reproduction.
+
+The physical recipe now also covers `waldo_kitchen_spatial_metric.json`, completing
+the four declared LERF development scenes. The [full-cohort ledger and next
+intervention](../experiments/2026-10-07-native-local-member-results.md) keep those
+four physical fields separate from native-local experiments.
+
+`training.local_metric: native_cosine` is a research-only option adding protected
+DINO cosine distance to the common group energy, including signed supports.
+The coefficient is fixed inside the existing temperature and support directions
+are decoded and normalized before averaging. It adds no stored tensors. The
+refitted version improves text/image evidence but fails one 3D-point diagnostic
+gate; its default remains `none`. Do not insert it only for text, combine the
+best per-input outputs, or call it a promoted replacement. Native directional
+comparison incurs additional query computation, and heterogeneous object parts
+remain a scope problem rather than verified negative evidence.
 
 ## Reproduce the first pilot
 

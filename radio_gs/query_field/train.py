@@ -72,6 +72,7 @@ def fit(observations, output, config, device="cuda"):
               candidate_radius=config["candidate_radius_m"]*manifest["world_units_per_metre"],
               anchor_eligible=anchor_eligible if anchor_domain=='training_eligible' else None,
               spatial_metric=config.get('spatial_metric', 'none'),
+              local_metric=config.get('local_metric', 'none'),
               world_units_per_metre=manifest['world_units_per_metre']).to(device)
     baseline_path = Path(output) / "untrained"
     trained_path = Path(output) / "trained"

@@ -1,0 +1,53 @@
+{
+  "schema": "radio_gs.query_field_native_local_metric_study.v1",
+  "member_intervention": {
+    "local_metric": "native_cosine"
+  },
+  "jobs": [
+    {
+      "name": "figurines_native_frozen_metric",
+      "scene": "figurines",
+      "arm": "frozen_metric",
+      "field": "output/query_field_20261007/figurines_native_frozen_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained",
+      "observations": "output/query_field_20261007/figurines_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric",
+      "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"
+    },
+    {
+      "name": "figurines_native_fitted_metric",
+      "scene": "figurines",
+      "arm": "fitted_metric",
+      "field": "output/query_field_20261007/figurines_native_fitted_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained",
+      "observations": "output/query_field_20261007/figurines_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric",
+      "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"
+    },
+    {
+      "name": "ramen_native_frozen_metric",
+      "scene": "ramen",
+      "arm": "frozen_metric",
+      "field": "output/query_field_20261007/ramen_native_frozen_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained",
+      "observations": "output/query_field_20261007/ramen_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric",
+      "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"
+    },
+    {
+      "name": "ramen_native_fitted_metric",
+      "scene": "ramen",
+      "arm": "fitted_metric",
+      "field": "output/query_field_20261007/ramen_native_fitted_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained",
+      "observations": "output/query_field_20261007/ramen_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric",
+      "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"
+    }
+  ],
+  "protocol": "docs/experiments/2026-10-07-native-local-member-protocol.md",
+  "parent_commit": "b3b934b",
+  "parameter_search": false,
+  "additional_3d_labels": false,
+  "independent_final_test": false
+}

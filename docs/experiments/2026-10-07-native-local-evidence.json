@@ -1,0 +1,999 @@
+{
+  "schema": "radio_gs.native_local_evidence.v1",
+  "parent_commit": "b3b934b",
+  "independent_final_test": false,
+  "v10_contract_equivalent": false,
+  "compact_student": false,
+  "candidate_scenes": {
+    "figurines": {
+      "arms": {
+        "frozen_metric": {
+          "text_subset_before": 0.4178841518132404,
+          "text_subset_after": 0.594701637598698,
+          "v10_gap_after_pp": 11.643714151757479,
+          "member_semantic_iou": 0.25655740462700904,
+          "private": {
+            "region_image": {
+              "before": 0.23686793318690633,
+              "after": 0.14872304742987758
+            },
+            "point_2d": {
+              "before": 0.374462697489639,
+              "after": 0.3134541086047976
+            },
+            "point_3d": {
+              "before": 0.3222845888034628,
+              "after": 0.25340714355236327
+            }
+          },
+          "gate": {
+            "text_subset_improves": true,
+            "region_image_nonregression": false,
+            "point_2d_nonregression": false,
+            "point_3d_nonregression": false
+          },
+          "local_gate_passed": false,
+          "errors": {
+            "cases": 56,
+            "mean_precision": 0.6998699042964244,
+            "mean_recall": 0.829835399299693,
+            "mean_iou": 0.594701637598698
+          }
+        },
+        "fitted_metric": {
+          "text_subset_before": 0.4178841518132404,
+          "text_subset_after": 0.4761084230819434,
+          "v10_gap_after_pp": 23.503035603432938,
+          "member_semantic_iou": 0.5959391861480461,
+          "private": {
+            "region_image": {
+              "before": 0.23686793318690633,
+              "after": 0.2464898312684788
+            },
+            "point_2d": {
+              "before": 0.374462697489639,
+              "after": 0.41044697775533034
+            },
+            "point_3d": {
+              "before": 0.3222845888034628,
+              "after": 0.3719727421653341
+            }
+          },
+          "gate": {
+            "text_subset_improves": true,
+            "region_image_nonregression": true,
+            "point_2d_nonregression": true,
+            "point_3d_nonregression": true
+          },
+          "local_gate_passed": true,
+          "errors": {
+            "cases": 56,
+            "mean_precision": 0.48787690467357425,
+            "mean_recall": 0.9696745927851974,
+            "mean_iou": 0.4761084230819434
+          },
+          "single_fixture_readout_seconds": {
+            "text": 0.3091701492667198,
+            "image": 0.12188727594912052,
+            "point_2d": 0.19213461130857468,
+            "point_3d": 0.015271687880158424
+          }
+        }
+      },
+      "source_exclusion_audit": {
+        "eligible_episodes": 1455,
+        "rendered_episodes": 32,
+        "mean_comparable_negative_pixels": 2702.5725085910653,
+        "mean_added_negative_pixels": 4295.839862542955,
+        "mean_added_false_fraction": 0.09543090810314318
+      },
+      "scope_bound": {
+        "all": {
+          "cases": 169,
+          "supported_cases": 168,
+          "mean_native_bound_excluded_fraction": 0.1351826499587679,
+          "mean_previous_bound_excluded_fraction": 0.050399128695495336
+        },
+        "improved": {
+          "cases": 103,
+          "supported_cases": 103,
+          "mean_native_bound_excluded_fraction": 0.13138736350895855,
+          "mean_previous_bound_excluded_fraction": 0.04624901442264107
+        },
+        "regressed": {
+          "cases": 61,
+          "supported_cases": 61,
+          "mean_native_bound_excluded_fraction": 0.14098375322694173,
+          "mean_previous_bound_excluded_fraction": 0.06071155959526535
+        }
+      },
+      "readout_controls": {
+        "union_member": 0.4178841518132404,
+        "single_anchor_member": 0.5013982291126934,
+        "native_only": 0.46453532813244686
+      }
+    },
+    "ramen": {
+      "arms": {
+        "frozen_metric": {
+          "text_subset_before": 0.19464220658255887,
+          "text_subset_after": 0.4151794327901604,
+          "v10_gap_after_pp": 16.789466650088286,
+          "member_semantic_iou": 0.3455276593933223,
+          "private": {
+            "region_image": {
+              "before": 0.31742766346851203,
+              "after": 0.23522420074390685
+            },
+            "point_2d": {
+              "before": 0.40304152664397186,
+              "after": 0.3896844102969806
+            },
+            "point_3d": {
+              "before": 0.38845373275095985,
+              "after": 0.36661300016879633
+            }
+          },
+          "gate": {
+            "text_subset_improves": true,
+            "region_image_nonregression": false,
+            "point_2d_nonregression": false,
+            "point_3d_nonregression": false
+          },
+          "local_gate_passed": false,
+          "errors": {
+            "cases": 71,
+            "mean_precision": 0.4449478219548161,
+            "mean_recall": 0.7994485710360085,
+            "mean_iou": 0.4151794327901604
+          }
+        },
+        "fitted_metric": {
+          "text_subset_before": 0.19464220658255887,
+          "text_subset_after": 0.2694428267013303,
+          "v10_gap_after_pp": 31.363127258971296,
+          "member_semantic_iou": 0.5139005946677545,
+          "private": {
+            "region_image": {
+              "before": 0.31742766346851203,
+              "after": 0.33772246570532655
+            },
+            "point_2d": {
+              "before": 0.40304152664397186,
+              "after": 0.40751403287028104
+            },
+            "point_3d": {
+              "before": 0.38845373275095985,
+              "after": 0.3832286700587595
+            }
+          },
+          "gate": {
+            "text_subset_improves": true,
+            "region_image_nonregression": true,
+            "point_2d_nonregression": true,
+            "point_3d_nonregression": false
+          },
+          "local_gate_passed": false,
+          "errors": {
+            "cases": 71,
+            "mean_precision": 0.2834853985043694,
+            "mean_recall": 0.8424509793679663,
+            "mean_iou": 0.2694428267013303
+          },
+          "single_fixture_readout_seconds": {
+            "text": 0.27312167547643185,
+            "image": 0.19013353250920773,
+            "point_2d": 0.015416787937283516,
+            "point_3d": 0.013506781309843063
+          }
+        }
+      },
+      "source_exclusion_audit": {
+        "eligible_episodes": 1320,
+        "rendered_episodes": 32,
+        "mean_comparable_negative_pixels": 4459.016666666666,
+        "mean_added_negative_pixels": 3598.5704545454546,
+        "mean_added_false_fraction": 0.09346196716348448
+      },
+      "scope_bound": {
+        "all": {
+          "cases": 149,
+          "supported_cases": 149,
+          "mean_native_bound_excluded_fraction": 0.10446768315804297,
+          "mean_previous_bound_excluded_fraction": 0.045324717122505125
+        },
+        "improved": {
+          "cases": 75,
+          "supported_cases": 75,
+          "mean_native_bound_excluded_fraction": 0.09653006575458373,
+          "mean_previous_bound_excluded_fraction": 0.03721213567225883
+        },
+        "regressed": {
+          "cases": 69,
+          "supported_cases": 69,
+          "mean_native_bound_excluded_fraction": 0.10396378030123161,
+          "mean_previous_bound_excluded_fraction": 0.044778918854190386
+        }
+      },
+      "readout_controls": {
+        "union_member": 0.19464220658255887,
+        "single_anchor_member": 0.2208294229352141,
+        "native_only": 0.2542410333498565
+      }
+    }
+  },
+  "physical_lerf_four_scene": {
+    "figurines": {
+      "actual_subset_iou": 0.4178841518132404,
+      "native_semantic_iou": 0.47287673359720167,
+      "member_semantic_iou": 0.4919879505011652,
+      "query_view_cases": 56,
+      "v10": {
+        "semantic_iou": 0.76725420009877,
+        "ap": 0.9230640992298842,
+        "selected_projection_iou": 0.7111387791162728
+      },
+      "bytes": 2658118304,
+      "elements": 554467,
+      "observed": 380715,
+      "eligible_anchors": 22671,
+      "private": {
+        "point_2d/default": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.25162338994074196,
+          "mean_actual_subset_iou": 0.374462697489639,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 0.6737179745130496
+        },
+        "point_2d/teacher_scope": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.27952729580826097,
+          "mean_partial_loss_on_supported_cases": 0.5810881933789999
+        },
+        "point_3d/default": {
+          "cases": 169,
+          "failed": 1,
+          "mean_projected_membership_iou": 0.1790874368830938,
+          "mean_actual_subset_iou": 0.3222845888034628,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 0.8610917666370975
+        },
+        "point_3d/teacher_scope": {
+          "cases": 169,
+          "failed": 1,
+          "mean_projected_membership_iou": 0.19444935002266747,
+          "mean_partial_loss_on_supported_cases": 0.7665484510605086
+        },
+        "region_image/default": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.10554308560332448,
+          "mean_actual_subset_iou": 0.23686793318690633,
+          "actual_subset_cases": 169,
+          "mean_partial_loss_on_supported_cases": 1.927066693807951
+        },
+        "region_image/teacher_scope": {
+          "cases": 169,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.13103797228644554,
+          "mean_partial_loss_on_supported_cases": 1.607002353415346
+        }
+      },
+      "single_fixture_readout_seconds": {
+        "text": 0.576205525547266,
+        "image": 0.07280110754072666,
+        "point_2d": 0.007155764847993851,
+        "point_3d": 0.006332863122224808
+      }
+    },
+    "ramen": {
+      "actual_subset_iou": 0.19464220658255887,
+      "native_semantic_iou": 0.35140388819854707,
+      "member_semantic_iou": 0.4282333791505178,
+      "query_view_cases": 71,
+      "v10": {
+        "semantic_iou": 0.5940802355139503,
+        "ap": 0.8122121183970293,
+        "selected_projection_iou": 0.5830740992910433
+      },
+      "bytes": 2841450464,
+      "elements": 592709,
+      "observed": 452765,
+      "eligible_anchors": 28261,
+      "private": {
+        "point_2d/default": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.3890637971395189,
+          "mean_actual_subset_iou": 0.40304152664397186,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 0.470449186003831
+        },
+        "point_2d/teacher_scope": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.41797990729757306,
+          "mean_partial_loss_on_supported_cases": 0.42433105250832237
+        },
+        "point_3d/default": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.32798870336326874,
+          "mean_actual_subset_iou": 0.38845373275095985,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 0.582237278692379
+        },
+        "point_3d/teacher_scope": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.3462568435180407,
+          "mean_partial_loss_on_supported_cases": 0.5423749786268001
+        },
+        "region_image/default": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.18766698486487313,
+          "mean_actual_subset_iou": 0.31742766346851203,
+          "actual_subset_cases": 149,
+          "mean_partial_loss_on_supported_cases": 1.3507767381556153
+        },
+        "region_image/teacher_scope": {
+          "cases": 149,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.20407092575477623,
+          "mean_partial_loss_on_supported_cases": 1.3079902716242013
+        }
+      },
+      "single_fixture_readout_seconds": {
+        "text": 0.5971599165350199,
+        "image": 0.06335926055908203,
+        "point_2d": 0.005888881161808968,
+        "point_3d": 0.005336089059710503
+      }
+    },
+    "teatime": {
+      "actual_subset_iou": 0.32800553882331485,
+      "native_semantic_iou": 0.4868908683943041,
+      "member_semantic_iou": 0.6352087077960941,
+      "query_view_cases": 59,
+      "v10": {
+        "semantic_iou": 0.7619751593319036,
+        "ap": 0.8901337368688932,
+        "selected_projection_iou": 0.7504962484621791
+      },
+      "bytes": 8771178420,
+      "elements": 1829615,
+      "observed": 999142,
+      "eligible_anchors": 32855,
+      "private": {
+        "point_2d/default": {
+          "cases": 127,
+          "failed": 2,
+          "mean_projected_membership_iou": 0.3688917124724588,
+          "mean_actual_subset_iou": 0.36332457464401,
+          "actual_subset_cases": 127,
+          "mean_partial_loss_on_supported_cases": 0.6279311870795584
+        },
+        "point_2d/teacher_scope": {
+          "cases": 127,
+          "failed": 2,
+          "mean_projected_membership_iou": 0.3971594081362929,
+          "mean_partial_loss_on_supported_cases": 0.5654701025749358
+        },
+        "point_3d/default": {
+          "cases": 127,
+          "failed": 9,
+          "mean_projected_membership_iou": 0.2819993644870275,
+          "mean_actual_subset_iou": 0.3424852583704032,
+          "actual_subset_cases": 127,
+          "mean_partial_loss_on_supported_cases": 0.6273559168554269
+        },
+        "point_3d/teacher_scope": {
+          "cases": 127,
+          "failed": 9,
+          "mean_projected_membership_iou": 0.30655212877281596,
+          "mean_partial_loss_on_supported_cases": 0.5608309498610485
+        },
+        "region_image/default": {
+          "cases": 127,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.2698431822341155,
+          "mean_actual_subset_iou": 0.32802072931062726,
+          "actual_subset_cases": 127,
+          "mean_partial_loss_on_supported_cases": 1.403347553075051
+        },
+        "region_image/teacher_scope": {
+          "cases": 127,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.2773834507021866,
+          "mean_partial_loss_on_supported_cases": 1.2924767409853597
+        }
+      },
+      "single_fixture_readout_seconds": {
+        "text": 0.27903315983712673,
+        "image": 0.1777600683271885,
+        "point_2d": 0.016708005219697952,
+        "point_3d": 0.013176601380109787
+      }
+    },
+    "waldo_kitchen": {
+      "actual_subset_iou": 0.35198692826046163,
+      "native_semantic_iou": 0.44459901879996655,
+      "member_semantic_iou": 0.421091714175418,
+      "query_view_cases": 22,
+      "v10": {
+        "semantic_iou": 0.6927174328593537,
+        "ap": 0.8793611556863458,
+        "selected_projection_iou": 0.6338218194652575
+      },
+      "bytes": 7174517428,
+      "elements": 1496561,
+      "observed": 1112269,
+      "eligible_anchors": 46579,
+      "private": {
+        "point_2d/default": {
+          "cases": 158,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.40720354834029193,
+          "mean_actual_subset_iou": 0.4064215287872696,
+          "actual_subset_cases": 158,
+          "mean_partial_loss_on_supported_cases": 0.4580009805435218
+        },
+        "point_2d/teacher_scope": {
+          "cases": 158,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.4691739871484947,
+          "mean_partial_loss_on_supported_cases": 0.31353271262479865
+        },
+        "point_3d/default": {
+          "cases": 158,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.3205636698683382,
+          "mean_actual_subset_iou": 0.38141879046783794,
+          "actual_subset_cases": 158,
+          "mean_partial_loss_on_supported_cases": 0.5845772215639944
+        },
+        "point_3d/teacher_scope": {
+          "cases": 158,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.3663937585602243,
+          "mean_partial_loss_on_supported_cases": 0.43483439817845665
+        },
+        "region_image/default": {
+          "cases": 158,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.2510331251431563,
+          "mean_actual_subset_iou": 0.33191934277456775,
+          "actual_subset_cases": 158,
+          "mean_partial_loss_on_supported_cases": 1.0014429281513437
+        },
+        "region_image/teacher_scope": {
+          "cases": 158,
+          "failed": 0,
+          "mean_projected_membership_iou": 0.2968090660752186,
+          "mean_partial_loss_on_supported_cases": 0.6468446502942092
+        }
+      },
+      "single_fixture_readout_seconds": {
+        "text": 0.5484224557876587,
+        "image": 0.3069934919476509,
+        "point_2d": 0.012930938974022865,
+        "point_3d": 0.01057601161301136
+      }
+    }
+  },
+  "artifacts": {
+    "output/query_field_20261007/figurines_native_frozen_metric_v1/development_trained.json": {
+      "path": "output/query_field_20261007/figurines_native_frozen_metric_v1/development_trained.json",
+      "sha256": "439de1bbf97f4d13f59af03c851ea3341742770bd649d7e0202daccb3f7cedd1",
+      "bytes": 890876
+    },
+    "output/query_field_20261007/figurines_native_frozen_metric_v1/models/trained/manifest.json": {
+      "path": "output/query_field_20261007/figurines_native_frozen_metric_v1/models/trained/manifest.json",
+      "sha256": "bdda29b0a8f4a5015b1754bdc72159deabf42e92f58b562ef1a14785673a8c79",
+      "bytes": 1345
+    },
+    "output/query_field_20261007/native_local_lerf_v1/figurines_native_frozen_metric/prediction.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/figurines_native_frozen_metric/prediction.json",
+      "sha256": "fb2e598134f4a10c122fd87c29f8d716448077bd43a19e2894818ce00bfda54c",
+      "bytes": 15951
+    },
+    "output/query_field_20261007/native_local_lerf_v1/figurines_native_frozen_metric/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/figurines_native_frozen_metric/evaluation/evaluation.json",
+      "sha256": "bbea1489ae89159bec802784ac1de7eea472bf5c1cbbdd24e5b756aeb73f3678",
+      "bytes": 54614
+    },
+    "output/query_field_20261007/figurines_native_fitted_metric_v1/runtime_smoke.json": {
+      "path": "output/query_field_20261007/figurines_native_fitted_metric_v1/runtime_smoke.json",
+      "sha256": "ae124909bc7d87c2efe4b15d647de604204c462c80602bd2305d1afccc98c352",
+      "bytes": 6861
+    },
+    "output/query_field_20261007/figurines_native_fitted_metric_v1/models/training.json": {
+      "path": "output/query_field_20261007/figurines_native_fitted_metric_v1/models/training.json",
+      "sha256": "3966eaa7a2f7ea4772e0d9ee1b12c338ef2aa1aa9bb8b9a4c81c3a5ac1493ac9",
+      "bytes": 9965
+    },
+    "output/query_field_20261007/figurines_native_fitted_metric_v1/development_trained.json": {
+      "path": "output/query_field_20261007/figurines_native_fitted_metric_v1/development_trained.json",
+      "sha256": "13d6f5f73bf863f7801e93c1ea08ad3467a9acb633c70ca1400e7ceddbeac23a",
+      "bytes": 894748
+    },
+    "output/query_field_20261007/figurines_native_fitted_metric_v1/models/trained/manifest.json": {
+      "path": "output/query_field_20261007/figurines_native_fitted_metric_v1/models/trained/manifest.json",
+      "sha256": "ffac7ac66ca335a25a73a691c069cbcb0b996a6c7af282dbc1fdc3ac0eeefd2f",
+      "bytes": 1273
+    },
+    "output/query_field_20261007/native_local_lerf_v1/figurines_native_fitted_metric/prediction.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/figurines_native_fitted_metric/prediction.json",
+      "sha256": "6dd23218c325aff3bca6b6296079d8b97e2071676a187bb6b3e4a8884ce6d38d",
+      "bytes": 15967
+    },
+    "output/query_field_20261007/native_local_lerf_v1/figurines_native_fitted_metric/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/figurines_native_fitted_metric/evaluation/evaluation.json",
+      "sha256": "2e2701b57a95d750e2e9b3023f4ac35ad5d7a9198b4d7999db9856d19d3089c4",
+      "bytes": 54642
+    },
+    "output/query_field_20261007/figurines_exclusion_audit_v1.json": {
+      "path": "output/query_field_20261007/figurines_exclusion_audit_v1.json",
+      "sha256": "245cd6b5be270d52b839f449d6cbd8db8922cedc1d415468c279a27c2d4e85c8",
+      "bytes": 241536
+    },
+    "output/query_field_20261007/figurines_native_point_deltas.json": {
+      "path": "output/query_field_20261007/figurines_native_point_deltas.json",
+      "sha256": "4c465fa80cde1700d75dcb34953f4ed5885fb9d9e3764670a686daf08b0e56c7",
+      "bytes": 31799
+    },
+    "output/query_field_20261007/figurines_native_scope_bound.json": {
+      "path": "output/query_field_20261007/figurines_native_scope_bound.json",
+      "sha256": "0970fcd16bcfe2dbcd716d7b699fc4d42c08ce9dc5bc6808f94b0a504cac9d9e",
+      "bytes": 86616
+    },
+    "output/query_field_20261007/physical_readout_study_v1/figurines/prediction.json": {
+      "path": "output/query_field_20261007/physical_readout_study_v1/figurines/prediction.json",
+      "sha256": "beceeeb59b3a859823e3d6a7715f4eae02339e2921e3aac264e8c29bae4326a9",
+      "bytes": 4972
+    },
+    "output/query_field_20261007/physical_readout_study_v1/figurines/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/physical_readout_study_v1/figurines/evaluation/evaluation.json",
+      "sha256": "84632aa71ac89ba7a9ec186dba3b225e7da09d023879e0c4544ac10909489385",
+      "bytes": 77466
+    },
+    "output/query_field_20261007/ramen_native_frozen_metric_v1/development_trained.json": {
+      "path": "output/query_field_20261007/ramen_native_frozen_metric_v1/development_trained.json",
+      "sha256": "442fb358ba044bfbe221f9470616b419a65338e6b71ffc53b5f30d589d811c6b",
+      "bytes": 790343
+    },
+    "output/query_field_20261007/ramen_native_frozen_metric_v1/models/trained/manifest.json": {
+      "path": "output/query_field_20261007/ramen_native_frozen_metric_v1/models/trained/manifest.json",
+      "sha256": "a485466dfe8172c1d82092d208dc038bd148807d531334d11a41f2e823d54e7b",
+      "bytes": 1344
+    },
+    "output/query_field_20261007/native_local_lerf_v1/ramen_native_frozen_metric/prediction.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/ramen_native_frozen_metric/prediction.json",
+      "sha256": "e98620d906801d62157a24227944341b064e12aec0948c951e5d55f5617e9515",
+      "bytes": 12457
+    },
+    "output/query_field_20261007/native_local_lerf_v1/ramen_native_frozen_metric/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/ramen_native_frozen_metric/evaluation/evaluation.json",
+      "sha256": "2f5f44bb88f33f00a6b89734dff7368e9e5f9debcb9b38300abcd92b2bc81b4c",
+      "bytes": 65767
+    },
+    "output/query_field_20261007/ramen_native_fitted_metric_v1/runtime_smoke.json": {
+      "path": "output/query_field_20261007/ramen_native_fitted_metric_v1/runtime_smoke.json",
+      "sha256": "75c43dbb07253a5ff68238f7be1d9438a4ba9d2c91c9178f02abc86ce040a7df",
+      "bytes": 6860
+    },
+    "output/query_field_20261007/ramen_native_fitted_metric_v1/models/training.json": {
+      "path": "output/query_field_20261007/ramen_native_fitted_metric_v1/models/training.json",
+      "sha256": "b3d2c9cd405b1637f4ce3b0ea37c61fb7b66827b4297567c8a9b3b520677f70a",
+      "bytes": 9894
+    },
+    "output/query_field_20261007/ramen_native_fitted_metric_v1/development_trained.json": {
+      "path": "output/query_field_20261007/ramen_native_fitted_metric_v1/development_trained.json",
+      "sha256": "ecf1888bf59db96899eb2315a110a9678467c9ba1e64ae7e6ea4861826578562",
+      "bytes": 792083
+    },
+    "output/query_field_20261007/ramen_native_fitted_metric_v1/models/trained/manifest.json": {
+      "path": "output/query_field_20261007/ramen_native_fitted_metric_v1/models/trained/manifest.json",
+      "sha256": "640e34e102bce08938a239fb61ca214732e080ece23e21ddaf176d9988034502",
+      "bytes": 1272
+    },
+    "output/query_field_20261007/native_local_lerf_v1/ramen_native_fitted_metric/prediction.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/ramen_native_fitted_metric/prediction.json",
+      "sha256": "6bd5184be09abcd6826a954795d21f76ffdfa32e0168bb6bf6dc97291d29247a",
+      "bytes": 12461
+    },
+    "output/query_field_20261007/native_local_lerf_v1/ramen_native_fitted_metric/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/ramen_native_fitted_metric/evaluation/evaluation.json",
+      "sha256": "30bd7f7b8f67f9d8fd057f91eb3fc2b20d42fa2ef30dc3a0cca7dabee5e9ec49",
+      "bytes": 65807
+    },
+    "output/query_field_20261007/ramen_exclusion_audit_v1.json": {
+      "path": "output/query_field_20261007/ramen_exclusion_audit_v1.json",
+      "sha256": "6aa00840cbe161cce7864e6939d2e0ed3de58c43a298de7021833fcab3deedc0",
+      "bytes": 219729
+    },
+    "output/query_field_20261007/ramen_native_point_deltas.json": {
+      "path": "output/query_field_20261007/ramen_native_point_deltas.json",
+      "sha256": "be0aac5920c18966d4dcefca1b03e24cd8957b4f776d99d6c5b23461a232e0c3",
+      "bytes": 28210
+    },
+    "output/query_field_20261007/ramen_native_scope_bound.json": {
+      "path": "output/query_field_20261007/ramen_native_scope_bound.json",
+      "sha256": "543c6eda46c2dcdfca1addce2fc342b49407b272e703dcd17b6d9871afe500e3",
+      "bytes": 77297
+    },
+    "output/query_field_20261007/physical_readout_study_v1/ramen/prediction.json": {
+      "path": "output/query_field_20261007/physical_readout_study_v1/ramen/prediction.json",
+      "sha256": "b18cb30e5204f6806d93321cb18a086aba1264244ade85b7aa78f240e4e404cd",
+      "bytes": 4341
+    },
+    "output/query_field_20261007/physical_readout_study_v1/ramen/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/physical_readout_study_v1/ramen/evaluation/evaluation.json",
+      "sha256": "314743ef275f0d36499b72df9e98c18a8458582b76b2c3e667d472249b4abb1e",
+      "bytes": 92852
+    },
+    "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric/prediction.json": {
+      "path": "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric/prediction.json",
+      "sha256": "00ef823e459296520299b0d0d90e37f867babb8dfc473d830e87448ab60dd21f",
+      "bytes": 14847
+    },
+    "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric/evaluation/evaluation.json",
+      "sha256": "861077218945f17e24a8dbec5cfc7d20499af58441d7262ba665f0073f3108b4",
+      "bytes": 54076
+    },
+    "output/query_field_20261007/figurines_fitted_metric_v1/models/trained/manifest.json": {
+      "path": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained/manifest.json",
+      "sha256": "8d9a672ba66acbf3253dbb19fa94fb23861d6d19af6394422f2ffa193b250642",
+      "bytes": 1236
+    },
+    "output/query_field_20261007/figurines_fitted_metric_v1/models/training.json": {
+      "path": "output/query_field_20261007/figurines_fitted_metric_v1/models/training.json",
+      "sha256": "9d00ed9d4bcbfc60b6a496d657ad37c35e37cca086c074666485c2a5d29f29f9",
+      "bytes": 9911
+    },
+    "output/query_field_20261007/figurines_fitted_metric_v1/runtime_smoke.json": {
+      "path": "output/query_field_20261007/figurines_fitted_metric_v1/runtime_smoke.json",
+      "sha256": "1b6ae74fe7b621da5ef12ee7e442af9f49b7a14c3efd93bece127a4204cc78d9",
+      "bytes": 6638
+    },
+    "output/query_field_20261007/figurines_fitted_metric_v1/development_trained.json": {
+      "path": "output/query_field_20261007/figurines_fitted_metric_v1/development_trained.json",
+      "sha256": "e64e66566f5f21910140fef79b23e09609c75e5c6cfbe2dc653ee41d5cfbe085",
+      "bytes": 837959
+    },
+    "output/query_field_20261007/figurines_fitted_metric_v1/observations/observations.json": {
+      "path": "output/query_field_20261007/figurines_fitted_metric_v1/observations/observations.json",
+      "sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+      "bytes": 28913
+    },
+    "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric/prediction.json": {
+      "path": "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric/prediction.json",
+      "sha256": "fdfdcb7c83068e3669e345adeab7d81374437965cb136b5c358dbff0f9e6edd0",
+      "bytes": 11658
+    },
+    "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric/evaluation/evaluation.json",
+      "sha256": "245dabf52b18da6a2fea907ab85778c35bf941d35473d19b5bdb766c33c0e94a",
+      "bytes": 65096
+    },
+    "output/query_field_20261007/ramen_fitted_metric_v1/models/trained/manifest.json": {
+      "path": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained/manifest.json",
+      "sha256": "b8a902253a54c75715221641b667e37dfd366274610bfbd8558c70db7e9a0a36",
+      "bytes": 1235
+    },
+    "output/query_field_20261007/ramen_fitted_metric_v1/models/training.json": {
+      "path": "output/query_field_20261007/ramen_fitted_metric_v1/models/training.json",
+      "sha256": "b533099aad1604973ff0df63f0b45f039b898d6be9d90af9ff788a80d88735f5",
+      "bytes": 9852
+    },
+    "output/query_field_20261007/ramen_fitted_metric_v1/runtime_smoke.json": {
+      "path": "output/query_field_20261007/ramen_fitted_metric_v1/runtime_smoke.json",
+      "sha256": "edd98c2ac7c649f179eea3f24aafb1d44a07196d2b79c1f4247799da699c84ba",
+      "bytes": 6638
+    },
+    "output/query_field_20261007/ramen_fitted_metric_v1/development_trained.json": {
+      "path": "output/query_field_20261007/ramen_fitted_metric_v1/development_trained.json",
+      "sha256": "619b2e79ff76fe30bfdbd49cb8381a221ad3d3263a369d069c6ade3976615519",
+      "bytes": 742516
+    },
+    "output/query_field_20261007/ramen_fitted_metric_v1/observations/observations.json": {
+      "path": "output/query_field_20261007/ramen_fitted_metric_v1/observations/observations.json",
+      "sha256": "56ce7d8dfd170171ab22c4b86b0b7475162751d04b004f8f5f169e945d484821",
+      "bytes": 28548
+    },
+    "output/query_field_20261007/spatial_metric_teatime_lerf_v1/teatime_fitted_metric/prediction.json": {
+      "path": "output/query_field_20261007/spatial_metric_teatime_lerf_v1/teatime_fitted_metric/prediction.json",
+      "sha256": "04e3ca413d89525959d3f7a1b6d4ec7ca3051cb7be82688246707ca48ea70fea",
+      "bytes": 9632
+    },
+    "output/query_field_20261007/spatial_metric_teatime_lerf_v1/teatime_fitted_metric/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/spatial_metric_teatime_lerf_v1/teatime_fitted_metric/evaluation/evaluation.json",
+      "sha256": "54238fb9864ca1c05537d98e1189e67c6c48e30cf98b9f85d01498cc7310ade1",
+      "bytes": 56781
+    },
+    "output/query_field_20261007/teatime_fitted_metric_v1/models/trained/manifest.json": {
+      "path": "output/query_field_20261007/teatime_fitted_metric_v1/models/trained/manifest.json",
+      "sha256": "8b6f304cfba5c1967c892c79fe9a9965ee9991b31198d3ea2ab7b7aaac8aa781",
+      "bytes": 1238
+    },
+    "output/query_field_20261007/teatime_fitted_metric_v1/models/training.json": {
+      "path": "output/query_field_20261007/teatime_fitted_metric_v1/models/training.json",
+      "sha256": "85751c2a031a42cbb4668c238f2712720c813c160e69df75e5d2c7441606f946",
+      "bytes": 9904
+    },
+    "output/query_field_20261007/teatime_fitted_metric_v1/runtime_smoke.json": {
+      "path": "output/query_field_20261007/teatime_fitted_metric_v1/runtime_smoke.json",
+      "sha256": "eb805ed3c996c2c0c946273067d4d036ef07cd48ee68507e8858788894c35447",
+      "bytes": 6642
+    },
+    "output/query_field_20261007/teatime_fitted_metric_v1/development_trained.json": {
+      "path": "output/query_field_20261007/teatime_fitted_metric_v1/development_trained.json",
+      "sha256": "7853df1fd6161f351398d2dce353436453586b800ba25bf88d3b4e7193fb434c",
+      "bytes": 622680
+    },
+    "output/query_field_20261007/teatime_fitted_metric_v1/observations/observations.json": {
+      "path": "output/query_field_20261007/teatime_fitted_metric_v1/observations/observations.json",
+      "sha256": "e5247b53c640fa1af47730eed4986d49641439a84f6bc458afa00881c4d8112d",
+      "bytes": 28728
+    },
+    "output/query_field_20261007/waldo_kitchen_physical_lerf_v1/waldo_kitchen/prediction.json": {
+      "path": "output/query_field_20261007/waldo_kitchen_physical_lerf_v1/waldo_kitchen/prediction.json",
+      "sha256": "9ab0807cac42e340a4a9c4707a0b3bdde3e83f9d998b221e34b76155ce838840",
+      "bytes": 12516
+    },
+    "output/query_field_20261007/waldo_kitchen_physical_lerf_v1/waldo_kitchen/evaluation/evaluation.json": {
+      "path": "output/query_field_20261007/waldo_kitchen_physical_lerf_v1/waldo_kitchen/evaluation/evaluation.json",
+      "sha256": "80eb3efdde97098ad1ead89cd02d0f8649cee4e66d1893786b7c514e8fee3c2a",
+      "bytes": 21685
+    },
+    "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/models/trained/manifest.json": {
+      "path": "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/models/trained/manifest.json",
+      "sha256": "9703b88ff89ab0cd96d624aae9f21fa628056b367f19be7184f998db003c55d3",
+      "bytes": 1239
+    },
+    "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/models/training.json": {
+      "path": "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/models/training.json",
+      "sha256": "506fff88b0aa682524bc4952a12e7a5b56e19691e0f376b9affdf2d728356b5c",
+      "bytes": 9903
+    },
+    "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/runtime_smoke.json": {
+      "path": "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/runtime_smoke.json",
+      "sha256": "f86f804f97f0af4eda6c4ed308f03e57b8a3b8ced98acfbd7b2b443939a876aa",
+      "bytes": 6829
+    },
+    "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/development_trained.json": {
+      "path": "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/development_trained.json",
+      "sha256": "f80127525aaeb36912742a600dd09533c8dd44e8fff4775006f8b18c82022d9a",
+      "bytes": 831906
+    },
+    "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/observations/observations.json": {
+      "path": "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/observations/observations.json",
+      "sha256": "78f75064354afd7c8a395610e2778b9883b1b7680adca95ba914fc4c60fe9f66",
+      "bytes": 29389
+    },
+    "output/query_field_20261007/native_local_metric_tests.log": {
+      "path": "output/query_field_20261007/native_local_metric_tests.log",
+      "sha256": "1c402a1e33abbae7715028c6e89f626d0978f88bdf6910e4ae119e1e4e9f77a7",
+      "bytes": 788
+    },
+    "output/query_field_20261007/native_local_package.json": {
+      "path": "output/query_field_20261007/native_local_package.json",
+      "sha256": "532450f24ddce80ac2c5dc42c9729d1748d45b6daf9c2c9683fd8e4c11e39625",
+      "bytes": 1092
+    },
+    "output/query_field_20261007/native_local_integrity.json": {
+      "path": "output/query_field_20261007/native_local_integrity.json",
+      "sha256": "40dae2f088e205ccd99d5610ecf29f56379c8fc9fd792804a4d23b75b26d98e5",
+      "bytes": 2816
+    },
+    "output/query_field_20261007/native_local_original_worktree_check.json": {
+      "path": "output/query_field_20261007/native_local_original_worktree_check.json",
+      "sha256": "ad86b7e88e471cf3b982bc27c1848c80cf03a1f5f3075ca187265b75cb7154ad",
+      "bytes": 490
+    },
+    "output/query_field_20261007/native_local_lerf_v1/subset_errors.json": {
+      "path": "output/query_field_20261007/native_local_lerf_v1/subset_errors.json",
+      "sha256": "05a22191525f3c1bb9d1a91be15ed3fe9bd017800be877dff723d1f7ebf2dec3",
+      "bytes": 171777
+    },
+    "output/query_field_20261007/waldo_kitchen_physical_lerf_v1/subset_errors.json": {
+      "path": "output/query_field_20261007/waldo_kitchen_physical_lerf_v1/subset_errors.json",
+      "sha256": "ca150cd80629b0720975bf1e0bf584b10da572ab073adee8896964a6c6b46fe3",
+      "bytes": 15122
+    },
+    "docs/experiments/2026-10-07-native-local-member-protocol.md": {
+      "path": "docs/experiments/2026-10-07-native-local-member-protocol.md",
+      "sha256": "03f103ba2173146855987ff88d6aa5755c606fad72ac811566f2deae4dad55ba",
+      "bytes": 3177
+    },
+    "configs/query_field/figurines_exclusion_audit.json": {
+      "path": "configs/query_field/figurines_exclusion_audit.json",
+      "sha256": "dddadc192a6ed6eb88fa34a0218b1c0d363eb865c0cca7b104c3a3aa9eea6381",
+      "bytes": 348
+    },
+    "configs/query_field/native_local_metric_study.json": {
+      "path": "configs/query_field/native_local_metric_study.json",
+      "sha256": "4325c3848a4c8c677fd53b16e2aa7a8ed81df3505932b1ec5ec65943a38bd74c",
+      "bytes": 2652
+    },
+    "configs/query_field/physical_readout_study.json": {
+      "path": "configs/query_field/physical_readout_study.json",
+      "sha256": "2f1551655d3acc7d0b526d205bc004c88ea48b03d6a9cd6ee9a5533697265dbc",
+      "bytes": 1679
+    },
+    "configs/query_field/ramen_native_local_metric.json": {
+      "path": "configs/query_field/ramen_native_local_metric.json",
+      "sha256": "df0b17c5afe98f1fe10a36a0065dcfb514180cfd15e7d877a7c0cef8ae062f31",
+      "bytes": 1477
+    },
+    "configs/query_field/figurines_native_local_metric.json": {
+      "path": "configs/query_field/figurines_native_local_metric.json",
+      "sha256": "2bda443954795a02172b521a7281f9ea7f1e9916403d1aba819d3125693734fe",
+      "bytes": 1490
+    },
+    "configs/query_field/waldo_kitchen_spatial_metric.json": {
+      "path": "configs/query_field/waldo_kitchen_spatial_metric.json",
+      "sha256": "8c204ea07811ab684e10d7347d7b7e5fb6891aa9f4d0bd9497f4d6e2766a8e58",
+      "bytes": 1400
+    },
+    "configs/query_field/waldo_kitchen_public.json": {
+      "path": "configs/query_field/waldo_kitchen_public.json",
+      "sha256": "c822b6e72bf883d5cdf7ead1e6d6bb35acb17ac274abe9d8bf3ea0bf43a43d88",
+      "bytes": 1405
+    },
+    "configs/query_field/ramen_exclusion_audit.json": {
+      "path": "configs/query_field/ramen_exclusion_audit.json",
+      "sha256": "c1c1ce75ae8c6bd12e0f3b94dd233ea5eb022997d7136fd35b070f469eeb36e3",
+      "bytes": 340
+    }
+  },
+  "code": {
+    "radio_gs/query_field/public_lerf.py": {
+      "path": "radio_gs/query_field/public_lerf.py",
+      "sha256": "8c9629f78f4ac2f9861d2f7e1b410f37f67219cd48571723e6dad087eddc6218",
+      "bytes": 7062
+    },
+    "radio_gs/query_field/cold_check.py": {
+      "path": "radio_gs/query_field/cold_check.py",
+      "sha256": "97d1c5bd69b498a9d9e992ea6ebc752c145b4f76e368b3b5fc10a4de468b14c4",
+      "bytes": 2618
+    },
+    "radio_gs/query_field/evaluate.py": {
+      "path": "radio_gs/query_field/evaluate.py",
+      "sha256": "49c12d46df309e5919cbf4eafefc87375dd2d4d5a6ea4bb255e900334910839c",
+      "bytes": 9849
+    },
+    "radio_gs/query_field/train.py": {
+      "path": "radio_gs/query_field/train.py",
+      "sha256": "17d52c02e823f55c2df16d770a1b8c688e95290b0f5a86d11a68a04a16b9340e",
+      "bytes": 8485
+    },
+    "radio_gs/query_field/observations.py": {
+      "path": "radio_gs/query_field/observations.py",
+      "sha256": "2a476b89823482c7736b224470b97219c27931c832daa5ee9e7603cc407157ae",
+      "bytes": 10176
+    },
+    "radio_gs/query_field/field.py": {
+      "path": "radio_gs/query_field/field.py",
+      "sha256": "0ea0557060520e669b2731477f408c003899cd409856b07d94913e5b2f0f9a2b",
+      "bytes": 13596
+    },
+    "radio_gs/query_field/local_metric_bound.py": {
+      "path": "radio_gs/query_field/local_metric_bound.py",
+      "sha256": "630b8950d9a565a60f632b1d61b652c7ee5e0826cf280ccb72576381a9f32082",
+      "bytes": 4400
+    },
+    "radio_gs/query_field/support_control.py": {
+      "path": "radio_gs/query_field/support_control.py",
+      "sha256": "1eac14b80aa68a5d6009b203168093133785cce1e44fe714fc4f136c13f50590",
+      "bytes": 5953
+    },
+    "radio_gs/query_field/exclusion_audit.py": {
+      "path": "radio_gs/query_field/exclusion_audit.py",
+      "sha256": "4274ec6b1368b605b534e7bb9ad009bc771dc366c526b1014b4250f9fd53f4d9",
+      "bytes": 5243
+    },
+    "radio_gs/query_field/contracts.py": {
+      "path": "radio_gs/query_field/contracts.py",
+      "sha256": "c0bce2455709a80b095ef7f09f038ef5411fbe580b9384add8e0f0aa0c2d7ee2",
+      "bytes": 4056
+    },
+    "radio_gs/query_field/geometry.py": {
+      "path": "radio_gs/query_field/geometry.py",
+      "sha256": "7749dfa0657cc29a31397eb41a7b4fb0e25d7b556a0999104812e19a8e0e1db0",
+      "bytes": 3726
+    },
+    "radio_gs/query_field/adapters.py": {
+      "path": "radio_gs/query_field/adapters.py",
+      "sha256": "d5f5594d79f41b47559a108894ca7579b7f7ec68072deab81b01a776149a1a2d",
+      "bytes": 5308
+    },
+    "radio_gs/query_field/metric_study.py": {
+      "path": "radio_gs/query_field/metric_study.py",
+      "sha256": "984807f5659a88fe33a9e955a6b63f15cae9ee1996b627938c8773c73527906d",
+      "bytes": 5647
+    },
+    "radio_gs/query_field/storage.py": {
+      "path": "radio_gs/query_field/storage.py",
+      "sha256": "7d957f93ba75892e2bed18341cd5b05384391f175e771d6d7032626d41e9c1a3",
+      "bytes": 3551
+    },
+    "radio_gs/query_field/readout_study.py": {
+      "path": "radio_gs/query_field/readout_study.py",
+      "sha256": "66ae30e7aa70f252b50927f12f256dad9110248a140ce6b15c1a64904bdb067d",
+      "bytes": 4720
+    },
+    "radio_gs/query_field/subset_errors.py": {
+      "path": "radio_gs/query_field/subset_errors.py",
+      "sha256": "3a2621eed33e262073775020876733cbede4e8799c917e09e329082f32e51abd",
+      "bytes": 2598
+    },
+    "radio_gs/query_field/native_transfer.py": {
+      "path": "radio_gs/query_field/native_transfer.py",
+      "sha256": "dd08379042e2129f7bf71a3800f0a235211c7fa97bba0e8b15788700f628185d",
+      "bytes": 4838
+    },
+    "radio_gs/query_field/hypotheses.py": {
+      "path": "radio_gs/query_field/hypotheses.py",
+      "sha256": "e80320195844089d4ffe696b4008d7da81c1075f14ee9a4321677ea3e17f6941",
+      "bytes": 5813
+    },
+    "radio_gs/query_field/hypothesis_study.py": {
+      "path": "radio_gs/query_field/hypothesis_study.py",
+      "sha256": "0ce39edff9b07e6077bf03800490e0d058a451bb9255573dccb72e3039ef1db7",
+      "bytes": 6961
+    },
+    "radio_gs/query_field/__init__.py": {
+      "path": "radio_gs/query_field/__init__.py",
+      "sha256": "bc7064c5ae34dfa06d45b841bd23e51f8262e0e0a9f0a08788c526b60a21b6fc",
+      "bytes": 401
+    },
+    "radio_gs/query_field/support_audit.py": {
+      "path": "radio_gs/query_field/support_audit.py",
+      "sha256": "c21588ee04c0d8e4febdb5912d3338e26baeded29194a5a77cab2882dcf7045c",
+      "bytes": 4081
+    },
+    "radio_gs/query_field/diagnose.py": {
+      "path": "radio_gs/query_field/diagnose.py",
+      "sha256": "06074fcfd3379820a43ca898b70d87c303dc99505f08ecdca5adfbb030f3b4b4",
+      "bytes": 3819
+    },
+    "radio_gs/query_field/__main__.py": {
+      "path": "radio_gs/query_field/__main__.py",
+      "sha256": "f94df7eff956ffe0ebcbc91dcc09cded489dfa8f2402b23b3549b881691cd2bb",
+      "bytes": 1776
+    },
+    "radio_gs/query_field/smoke.py": {
+      "path": "radio_gs/query_field/smoke.py",
+      "sha256": "9485fbb6100f062308164555421a24e70da524f1d4839046f1698f69404f5dd4",
+      "bytes": 5571
+    },
+    "radio_gs/query_field/baseline.py": {
+      "path": "radio_gs/query_field/baseline.py",
+      "sha256": "3e598682d64413da88f2ba48b1016b6708120720ea8ffacf9f3515b7c4a665af",
+      "bytes": 4590
+    },
+    "scripts/research/summarize_native_local.py": {
+      "path": "scripts/research/summarize_native_local.py",
+      "sha256": "8601af81474544b1bba066e60d2ce725ebe69ff543f15b41f4fa1227d4c3a664",
+      "bytes": 8984
+    },
+    "tests/test_query_field_local_metric.py": {
+      "path": "tests/test_query_field_local_metric.py",
+      "sha256": "b4bf8f92dcb8de46a8c36e68eb4b5afeba3dc3d2c2eed0d609f887b02aa5f4f4",
+      "bytes": 3413
+    }
+  },
+  "passing_arms": [],
+  "promoted_local_metric": false,
+  "physical_four_scene_macro": {
+    "actual_subset_iou": 0.3231297063698939,
+    "native_semantic_iou": 0.4389426272475049,
+    "member_semantic_iou": 0.4941304379057988
+  },
+  "four_scene_v10_subset_gap_pp": 34.650303021379436
+}

@@ -1,4 +1,4 @@
-"""Fixed spatial-member study: frozen-query prediction precedes label scoring."""
+"""Declared member-metric interventions; frozen queries precede label scoring."""
 import argparse
 import json
 from pathlib import Path
@@ -20,12 +20,19 @@ def package(config, job, output, device='cuda'):
     observation_hash = sha256(observations)
     if parent['provenance']['observations_sha256'] != observation_hash:
         raise ValueError('physical units must belong to the field construction')
-    field.spatial_metric = 'scale_normalized'
+    intervention = config.get('member_intervention', {'spatial_metric': 'scale_normalized'})
+    if not intervention or not set(intervention) <= {'spatial_metric', 'local_metric'}:
+        raise ValueError('undeclared member intervention')
+    for key, value in intervention.items():
+        allowed = {'spatial_metric': {'scale_normalized'}, 'local_metric': {'native_cosine'}}
+        if value not in allowed[key]:
+            raise ValueError('unsupported member intervention')
+        setattr(field, key, value)
     field.world_units_per_metre = json.loads(observations.read_text())['world_units_per_metre']
     manifest = save_field(field, job['field'], dict(
         parent_field_sha256=parent['files']['field.pt']['sha256'],
         observations_sha256=observation_hash,
-        operation='Only add physical-scale spatial energy; all parent tensors retained.',
+        operation='Apply declared member metric; all parent tensors retained.', member_intervention=intervention,
         extra_3d_labels=False, benchmark_queries_used=False))
     return dict(field_sha256=manifest['files']['field.pt']['sha256'], spec=manifest['spec'])
 
@@ -40,6 +47,9 @@ def predict(config, job, output, device='cuda'):
     field, manifest = load_field(job['field'], device)
     if manifest['spec']['spatial_metric'] != 'scale_normalized':
         raise ValueError('study requires the declared spatial member metric')
+    for key, value in config.get('member_intervention', {}).items():
+        if manifest['spec'].get(key) != value:
+            raise ValueError('export differs from declared member intervention')
     for key, value in data['geometry'].items():
         if not torch.equal(getattr(field, key).cpu(), value):
             raise ValueError('reference geometry differs')

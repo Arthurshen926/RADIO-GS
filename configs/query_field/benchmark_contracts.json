@@ -1,6 +1,6 @@
 {
   "schema": "radio_gs.query_field_benchmark_contracts.v1",
-  "status": "acceptance specification; new candidate benchmark execution pending",
+  "status": "Four-scene LERF development complete for the common physical metric; other three families and independent final protocol pending",
   "baseline_a": "output/query_field_20261007/frozen_v10/baseline_a.json",
   "candidate_b": {
     "construction_teachers": ["native_siglip", "native_dino", "query_free_sam"],
@@ -22,6 +22,13 @@
       "cohort": "4 existing development scenes",
       "target_type": "text_union",
       "metric": "semantic 2D IoU and AP under the retained query roster",
+      "candidate_execution": {
+        "status": "complete_on_declared_four_development_scenes",
+        "common_method": "Training-supported inputs and fitted physical member metric; local_metric=none",
+        "evidence": "docs/experiments/2026-10-07-native-local-evidence.json",
+        "independent_final_test": false,
+        "native_semantic_miou": 0.4389426272475049, "member_semantic_miou": 0.4941304379057988
+      },
       "must_report": ["native scores", "member-conditioned output", "source access", "query and view denominator"]
     },
     {
@@ -29,6 +36,13 @@
       "cohort": "same 4 LERF development scenes",
       "target_type": "text_union",
       "metric": "actual selected-Gaussian subset projection 2D IoU",
+      "candidate_execution": {
+        "status": "complete_on_declared_four_development_scenes",
+        "common_method": "Training-supported inputs and fitted physical member metric; local_metric=none",
+        "evidence": "docs/experiments/2026-10-07-native-local-evidence.json",
+        "independent_final_test": false,
+        "actual_subset_projection_miou": 0.3231297063698939
+      },
       "limitation": "Existing local lerf3d result is not independent 3D labelled-ground-truth accuracy",
       "must_report": ["unchanged Gaussian geometry", "selected row count", "subset transmittance recomputed"]
     },

@@ -1,0 +1,31 @@
+{
+  "schema": "radio_gs.query_field_public_lerf_probe.v1",
+  "shared_encoder": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384/snapshots/a713301b217d38485fb2204c808367d10bc3cc40",
+  "generic_negative_texts": [
+    "object",
+    "things",
+    "stuff",
+    "texture"
+  ],
+  "native_temperature": 10.0,
+  "native_readout": "sigmoid(10 * (native query cosine - maximum generic-negative cosine)); no fitted response calibration",
+  "member_readout": "existing shared member core, explicit union task, original fixed eight candidates and 0.02 identity margin",
+  "semantic_controls": [
+    "native_generic_relevance",
+    "shared_membership"
+  ],
+  "selection": "Same hard Gaussian subset for both semantic controls; unchanged existing LERF scorer and alpha-byte threshold 10",
+  "status": "Fourth-scene coverage of the fixed b3b934b physical metric; no new mechanism chosen from waldo outcomes. Predict before scoring.",
+  "runtime_source_access": false,
+  "legacy_source_query_calibration_reused": false,
+  "independent_final_test": false,
+  "jobs": [
+    {
+      "name": "waldo_kitchen",
+      "scene": "waldo_kitchen",
+      "field": "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/models/trained",
+      "queries": "configs/consolidated/waldo_kitchen.queries.json",
+      "evaluation_scene": "output/system_map_rebuild/waldo_kitchen/complete/scene.json"
+    }
+  ]
+}

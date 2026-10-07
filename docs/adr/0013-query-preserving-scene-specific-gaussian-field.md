@@ -160,3 +160,24 @@ and v10 defaults. This demonstrates useful locality and training consistency;
 it is not calibrated identity, object completeness, a novel prior by itself,
 or proof of five-task/v10 equivalence. Native and actual member readouts must
 still be reported separately, including observed semantic regressions.
+
+## Protected native locality and full LERF development coverage
+
+The [next fixed study](../experiments/2026-10-07-native-local-member-results.md)
+tests native DINO distance inside the same member energy, using the already
+stored native coordinates and unchanged source supervision. Both frozen and
+refitted controls improve text subsets, but neither passes the declared common
+input gate. In particular, the refitted ramen 3D teacher-region mean regresses
+by 0.5225 points despite image/2D gains. Keep this metric as an explicit research
+option; the physical metric remains the common candidate. Native coordinates
+being immutable does not guarantee native object completeness after readout.
+No per-modality mixture or stronger-looking text-only promotion is authorized
+by this evidence.
+
+The independent fixed physical run on waldo_kitchen completes the four historical
+LERF development scenes. Its equal-scene actual subset mean is 32.3130%, versus
+saved v10 66.9633% under different source-access/resources. This is full coverage
+of the declared local LERF cohort, not completion of ScanNet OVS, NVOS, UQIS,
+independent final testing or the desired accuracy target. Preserve these cohort
+and contract boundaries in future claims and compare every new common method
+without selecting different variants per scene or input.

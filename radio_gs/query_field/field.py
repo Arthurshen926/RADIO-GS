@@ -55,7 +55,8 @@ class CapabilityField(nn.Module):
     def __init__(self, geometry, semantic, local, group, observed, *,
                  semantic_codec=None, local_codec=None, default_scale=0.5,
                  threshold=0.5, candidate_count=8, candidate_radius=0.05,
-                 anchor_eligible=None, spatial_metric="none", world_units_per_metre=None):
+                 anchor_eligible=None, spatial_metric="none", world_units_per_metre=None,
+                 local_metric="none"):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -66,6 +67,8 @@ class CapabilityField(nn.Module):
             raise ValueError("invalid readout policy")
         if spatial_metric not in {"none", "scale_normalized"}:
             raise ValueError("unknown spatial member metric")
+        if local_metric not in {"none", "native_cosine"}:
+            raise ValueError("unknown native local member metric")
         if world_units_per_metre is not None and (
                 not math.isfinite(world_units_per_metre) or world_units_per_metre <= 0):
             raise ValueError("invalid geometry world units per metre")
@@ -99,6 +102,7 @@ class CapabilityField(nn.Module):
         self.candidate_radius = float(candidate_radius)
         self.spatial_metric = spatial_metric
         self.world_units_per_metre = world_units_per_metre
+        self.local_metric = local_metric
 
     def grouping_features(self, scale):
         if not math.isfinite(float(scale)) or float(scale) <= 0:
@@ -113,7 +117,19 @@ class CapabilityField(nn.Module):
         weights = support.weights.to(features).reshape(-1, 1)
         prototype = F.normalize((features[ids] * weights).sum(0), dim=0)
         selected = features if rows is None else features[rows]
-        logits = self.log_temperature.exp().clamp(1, 50) * (selected @ prototype - self.affinity_bias)
+        affinity = selected @ prototype - self.affinity_bias
+        if self.local_metric == "native_cosine":
+            # Protected native directions contribute a common local metric,
+            # including for registered rays and negative supports. Decoding and
+            # scoring remain paired for full-native and affine-codec exports.
+            native_support = F.normalize(self.local.decode(ids), dim=-1)
+            native_prototype = (native_support * weights).sum(0)
+            if rows is None:
+                cosine = self.local.score(native_prototype).flatten()
+            else:
+                cosine = F.normalize(self.local.decode(rows), dim=-1) @ F.normalize(native_prototype, dim=0)
+            affinity = affinity - (1 - cosine.clamp(-1, 1))
+        logits = self.log_temperature.exp().clamp(1, 50) * affinity
         if self.spatial_metric == "scale_normalized":
             # A physical-scale log prior on the same conditional member energy.
             # A ray keeps its weighted support; no contributor is hard selected.
@@ -201,6 +217,7 @@ class CapabilityField(nn.Module):
                                identity_rule="native evidence with spatially separated hypotheses",
                                inferred_anchor_domain="all_observed" if self.anchor_eligible is None else "training_eligible",
                                spatial_member_metric=self.spatial_metric,
+                               native_local_member_metric=self.local_metric,
                                uncertainty_resolved=False, semantic_scores_calibrated=False,
                                membership_scores_calibrated=False,
                                observed_positive_mass_fraction=positive_coverage,
@@ -217,4 +234,5 @@ class CapabilityField(nn.Module):
     def export_spec(self):
         return dict(default_scale=self.default_scale, threshold=self.threshold,
                     candidate_count=self.candidate_count, candidate_radius=self.candidate_radius,
-                    spatial_metric=self.spatial_metric, world_units_per_metre=self.world_units_per_metre)
+                    spatial_metric=self.spatial_metric, world_units_per_metre=self.world_units_per_metre,
+                    local_metric=self.local_metric)

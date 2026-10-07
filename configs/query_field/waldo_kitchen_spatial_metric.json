@@ -1,0 +1,59 @@
+{
+  "schema": "radio_gs.query_field_pilot.v1",
+  "scene": "output/system_map_rebuild/waldo_kitchen/complete/scene.json",
+  "train_frames": [
+    5,
+    15,
+    25,
+    35,
+    45,
+    57,
+    70,
+    80,
+    91,
+    100,
+    110,
+    120,
+    130,
+    141,
+    152,
+    166,
+    176,
+    186
+  ],
+  "development_frames": [
+    46,
+    142
+  ],
+  "raster_hw": [
+    96,
+    128
+  ],
+  "dino_width": 448,
+  "training": {
+    "seed": 20261007,
+    "group_dim": 32,
+    "steps": 2000,
+    "learning_rate": 0.01,
+    "threshold": 0.5,
+    "candidate_count": 8,
+    "candidate_radius_m": 0.05,
+    "render_objective": "subset_alpha",
+    "inferred_anchor_domain": "training_eligible",
+    "spatial_metric": "scale_normalized"
+  },
+  "purpose": "Complete four-scene LERF coverage using the already fixed b3b934b physical metric; not a candidate selected on this scene.",
+  "selection": "Two development frames at source-roster quartiles; eighteen training frames at equal-width bin centres in the remaining authorized roster. Fixed before compiling or opening scene results.",
+  "teacher_families": [
+    "siglip",
+    "dino",
+    "sam"
+  ],
+  "additional_3d_supervision": false,
+  "source_access_at_query": false,
+  "compression_default": false,
+  "input_budget_condition": "18 authorized source frames, same original geometry and 2000-step subset-alpha fit.",
+  "evaluation_stages": [
+    "trained"
+  ]
+}
