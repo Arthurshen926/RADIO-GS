@@ -70,7 +70,9 @@ def fit(observations, output, config, device="cuda"):
               initial["observed"], default_scale=physical_scale, threshold=config["threshold"],
               candidate_count=config["candidate_count"],
               candidate_radius=config["candidate_radius_m"]*manifest["world_units_per_metre"],
-              anchor_eligible=anchor_eligible if anchor_domain=='training_eligible' else None).to(device)
+              anchor_eligible=anchor_eligible if anchor_domain=='training_eligible' else None,
+              spatial_metric=config.get('spatial_metric', 'none'),
+              world_units_per_metre=manifest['world_units_per_metre']).to(device)
     baseline_path = Path(output) / "untrained"
     trained_path = Path(output) / "trained"
     baseline_manifest = save_field(field, baseline_path, dict(observations_sha256=sha256(root / "observations.json"),

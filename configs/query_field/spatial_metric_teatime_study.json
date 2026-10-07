@@ -1,0 +1,22 @@
+{
+  "schema": "radio_gs.query_field_spatial_metric_study.v1",
+  "jobs": [
+    {
+      "name": "teatime_fitted_metric",
+      "scene": "teatime",
+      "arm": "fitted_metric",
+      "field": "output/query_field_20261007/teatime_fitted_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/teatime_supported_anchor_v1/models/trained",
+      "observations": "output/query_field_20261007/teatime_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/supported_anchor_teatime_lerf_v1/teatime_original",
+      "evaluation_scene": "output/system_map_rebuild/teatime/complete/scene.json"
+    }
+  ],
+  "protocol": "docs/experiments/2026-10-07-physical-scale-member-protocol.md",
+  "spatial_energy": "negative squared support-centroid distance divided by twice squared physical scale",
+  "coefficient": 0.5,
+  "parameter_search": false,
+  "source_budget": "same eighteen cached training views, frozen geometry/native channels, no extra labels",
+  "independent_final_test": false,
+  "selection": "Same fitted arm nominated by the predeclared two-scene text/image/point gate, without parameter changes. Historically opened development scene."
+}

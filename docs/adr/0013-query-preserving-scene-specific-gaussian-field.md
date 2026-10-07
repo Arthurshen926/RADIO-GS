@@ -140,3 +140,23 @@ field without changing native, group or geometry tensors. The third scene is
 historically opened development evidence, not independent final testing. Keep
 this as an opt-in supported-input policy. It does not establish full identity
 correctness, complete member extent, compactness or five-benchmark replacement.
+
+## Physical scale in the common member energy
+
+The [fixed spatial-energy comparison](../experiments/2026-10-07-physical-scale-member-results.md)
+finds that scale-gating feature coordinates alone leaves membership indifferent
+to distance between equal group codes. Permit an opt-in Gaussian log prior on
+distance to the weighted input support centre, normalized by physical query
+scale. Construction world units must be explicit in the export. This modifies
+the common member energy for all four inputs and negative supports; it does not
+add another query branch, another teacher, source access or label supervision.
+
+The coefficient and thresholds were fixed before results. A frozen post-fit
+prior fails the image gate in one scene. Fitting the same member energy through
+the existing source subset-alpha objective passes the text/image/point mean
+gates in both initial scenes and unchanged third-scene confirmation. Use that
+refitted arm as the current opt-in research candidate, preserving old exports
+and v10 defaults. This demonstrates useful locality and training consistency;
+it is not calibrated identity, object completeness, a novel prior by itself,
+or proof of five-task/v10 equivalence. Native and actual member readouts must
+still be reported separately, including observed semantic regressions.

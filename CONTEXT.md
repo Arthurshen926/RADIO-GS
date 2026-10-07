@@ -8,7 +8,8 @@ direction. New entry: `python -m radio_gs.query_field`. Read
 The v10 state below is baseline A, not the new architecture or a promoted student.
 Source snapshot: `0f40545c2b93fa390e37038af8315c24b5bc57b5`. Original dirty working
 tree and index are preserved in `/root/RADIO-GS`; development is isolated in
-`/root/RADIO-GS-query-field`. No new accuracy gain or five-task promotion yet.
+`/root/RADIO-GS-query-field`. Local candidate gains are measured below; no
+five-task promotion or v10 replacement is established.
 
 **Query-Preserving Gaussian Field Candidate**: one scene-specific Gaussian
 capability field with protected semantic/local subspaces and a shared
@@ -18,6 +19,30 @@ its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
 Latest candidate evidence (2026-10-07):
+`docs/experiments/2026-10-07-physical-scale-member-results.md`.
+The shared member energy now optionally subtracts physical-scale-normalized
+squared distance to the weighted support centre. Explicit geometry world units
+are stored in the export; no new parameters, teachers, source views or labels.
+Two fixed arms separate a frozen inference restriction from source-only refitting.
+The frozen arm fails the figurines image gate; the refitted arm passes text,
+image, 2D and 3D mean gates in both initial scenes and unchanged teatime replay.
+Actual LERF selected projection IoU (%), previous supported -> refitted metric:
+figurines 14.6841 -> 41.7884, ramen 9.6614 -> 19.4642, teatime 21.9424 -> 32.8006.
+Same-scene v10 gaps remain 29.3255 / 38.8432 / 42.2491 percentage points under
+different source-access/resource contracts. Native responses remain exact;
+ramen's member-response semantic IoU regresses 44.2349 -> 42.8233 despite better
+actual subsets. Keep these outputs separate. Current opt-in fitting recipes:
+`configs/query_field/{figurines,ramen,teatime}_spatial_metric.json`.
+No tensor-storage growth beyond the previous supported-anchor exports; their
+2.66 / 2.84 / 8.77 GB scene packages remain high-capacity, not compact students.
+Next: nearby false additions and query identity/extent binding, real reference
+image/official point checks, then full five-task expansion. Do not resume
+benchmark-specific threshold/prior-strength sweeps or hide native-only bypasses.
+Three source-denied four-input cold replays and 26 distinct regression checks
+pass. All fixed jobs are complete. Sealed evidence:
+`docs/experiments/2026-10-07-spatial-metric-evidence.json`.
+
+Previous candidate evidence (2026-10-07):
 `docs/experiments/2026-10-07-training-supported-identity.md`.
 Native top-1 text anchors in figurines/ramen were 0/36 eligible source-interior
 training supports and 0/36 source-view dominant contributors. An optional

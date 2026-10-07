@@ -1,0 +1,51 @@
+{
+  "schema": "radio_gs.query_field_spatial_metric_study.v1",
+  "jobs": [
+    {
+      "name": "figurines_frozen_metric",
+      "scene": "figurines",
+      "arm": "frozen_metric",
+      "field": "output/query_field_20261007/figurines_frozen_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/figurines_supported_anchor_v1/models/trained",
+      "observations": "output/query_field_20261007/figurines_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_18",
+      "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"
+    },
+    {
+      "name": "figurines_fitted_metric",
+      "scene": "figurines",
+      "arm": "fitted_metric",
+      "field": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/figurines_supported_anchor_v1/models/trained",
+      "observations": "output/query_field_20261007/figurines_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_18",
+      "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"
+    },
+    {
+      "name": "ramen_frozen_metric",
+      "scene": "ramen",
+      "arm": "frozen_metric",
+      "field": "output/query_field_20261007/ramen_frozen_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/ramen_supported_anchor_v1/models/trained",
+      "observations": "output/query_field_20261007/ramen_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_18",
+      "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"
+    },
+    {
+      "name": "ramen_fitted_metric",
+      "scene": "ramen",
+      "arm": "fitted_metric",
+      "field": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained",
+      "parent_field": "output/query_field_20261007/ramen_supported_anchor_v1/models/trained",
+      "observations": "output/query_field_20261007/ramen_18views_v1/observations",
+      "reference_prediction": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_18",
+      "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"
+    }
+  ],
+  "protocol": "docs/experiments/2026-10-07-physical-scale-member-protocol.md",
+  "spatial_energy": "negative squared support-centroid distance divided by twice squared physical scale",
+  "coefficient": 0.5,
+  "parameter_search": false,
+  "source_budget": "same eighteen cached training views, frozen geometry/native channels, no extra labels",
+  "independent_final_test": false
+}

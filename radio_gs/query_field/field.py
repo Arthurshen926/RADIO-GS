@@ -55,7 +55,7 @@ class CapabilityField(nn.Module):
     def __init__(self, geometry, semantic, local, group, observed, *,
                  semantic_codec=None, local_codec=None, default_scale=0.5,
                  threshold=0.5, candidate_count=8, candidate_radius=0.05,
-                 anchor_eligible=None):
+                 anchor_eligible=None, spatial_metric="none", world_units_per_metre=None):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -64,6 +64,13 @@ class CapabilityField(nn.Module):
             raise ValueError("invalid default physical scale")
         if not 0 < threshold < 1 or candidate_count < 1 or candidate_radius <= 0:
             raise ValueError("invalid readout policy")
+        if spatial_metric not in {"none", "scale_normalized"}:
+            raise ValueError("unknown spatial member metric")
+        if world_units_per_metre is not None and (
+                not math.isfinite(world_units_per_metre) or world_units_per_metre <= 0):
+            raise ValueError("invalid geometry world units per metre")
+        if spatial_metric != "none" and world_units_per_metre is None:
+            raise ValueError("spatial membership requires explicit world units per metre")
         for key in ["xyz", "normals", "quaternions", "scales", "opacities"]:
             value = geometry[key].detach().float()
             if len(value) != count or not bool(torch.isfinite(value).all()):
@@ -90,6 +97,8 @@ class CapabilityField(nn.Module):
         self.threshold = float(threshold)
         self.candidate_count = int(candidate_count)
         self.candidate_radius = float(candidate_radius)
+        self.spatial_metric = spatial_metric
+        self.world_units_per_metre = world_units_per_metre
 
     def grouping_features(self, scale):
         if not math.isfinite(float(scale)) or float(scale) <= 0:
@@ -104,7 +113,15 @@ class CapabilityField(nn.Module):
         weights = support.weights.to(features).reshape(-1, 1)
         prototype = F.normalize((features[ids] * weights).sum(0), dim=0)
         selected = features if rows is None else features[rows]
-        return self.log_temperature.exp().clamp(1, 50) * (selected @ prototype - self.affinity_bias)
+        logits = self.log_temperature.exp().clamp(1, 50) * (selected @ prototype - self.affinity_bias)
+        if self.spatial_metric == "scale_normalized":
+            # A physical-scale log prior on the same conditional member energy.
+            # A ray keeps its weighted support; no contributor is hard selected.
+            centre = (self.xyz[ids] * weights).sum(0) / weights.sum()
+            xyz = self.xyz if rows is None else self.xyz[rows]
+            distance = (xyz - centre) / (float(scale) * self.world_units_per_metre)
+            logits = logits - 0.5 * distance.square().sum(-1)
+        return logits
 
     def _candidates(self, score):
         eligible = self.observed if self.anchor_eligible is None else self.anchor_eligible
@@ -183,6 +200,7 @@ class CapabilityField(nn.Module):
                                shared_member_core=True, source_access=False,
                                identity_rule="native evidence with spatially separated hypotheses",
                                inferred_anchor_domain="all_observed" if self.anchor_eligible is None else "training_eligible",
+                               spatial_member_metric=self.spatial_metric,
                                uncertainty_resolved=False, semantic_scores_calibrated=False,
                                membership_scores_calibrated=False,
                                observed_positive_mass_fraction=positive_coverage,
@@ -198,4 +216,5 @@ class CapabilityField(nn.Module):
 
     def export_spec(self):
         return dict(default_scale=self.default_scale, threshold=self.threshold,
-                    candidate_count=self.candidate_count, candidate_radius=self.candidate_radius)
+                    candidate_count=self.candidate_count, candidate_radius=self.candidate_radius,
+                    spatial_metric=self.spatial_metric, world_units_per_metre=self.world_units_per_metre)

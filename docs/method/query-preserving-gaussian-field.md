@@ -27,6 +27,7 @@ its label-trained member tree is silently called by the new package.
 | `public_lerf` | Source-free text prediction, then unchanged historical benchmark scoring |
 | `readout_study`, `subset_errors` | Exact baseline replay, explicit selection controls, and checked error decomposition |
 | `support_audit`, `support_control` | Train-only inferred-support compilation, matched packaging, and three-scene validation |
+| `metric_study` | Fixed physical-scale member-energy controls with frozen native query vectors |
 
 ```mermaid
 flowchart LR
@@ -35,7 +36,7 @@ flowchart LR
   C --> F[One Gaussian field: semantic / local / group coordinates]
   Q[Current text / image / registered point] --> A[Typed query evidence and uncertain identity hypotheses]
   F --> A
-  A --> M[Shared scale-conditioned member decoder]
+  A --> M[Shared member energy: group affinity and physical distance]
   F --> M
   M --> R[Explicit subset selection and Gaussian re-render]
   F --> S[Native semantic and complete-category controls]
@@ -60,6 +61,23 @@ See the [three-scene result](../experiments/2026-10-07-training-supported-identi
 and `configs/query_field/supported_anchor_control.json` for policy-only packaging
 of existing fields. The added mask belongs to the deployment size, not a hidden
 training-cache dependency.
+
+`training.spatial_metric: scale_normalized` is an opt-in physical metric in the
+same member kernel. It subtracts squared distance to the weighted support centre
+divided by twice squared query scale from the learned group logits. Explicit
+`world_units_per_metre` converts physical metres to reconstruction coordinates
+and is exported with the model. It has no new trainable parameters or runtime
+source dependencies. The original `none` mode preserves old exports' behavior.
+Spatial scale now affects geometric extent as well as the group feature gate;
+the uncertainty and limitations of a Euclidean support-centre prior remain
+separate from the source-supervised group representation. Evaluation follows
+the [fixed two-arm protocol](../experiments/2026-10-07-physical-scale-member-protocol.md).
+The [completed three-scene comparison](../experiments/2026-10-07-physical-scale-member-results.md)
+selects the **refitted** physical metric: the frozen post-fit control fails the
+image gate on figurines. Current opt-in fitting recipes are
+`configs/query_field/{figurines,ramen,teatime}_spatial_metric.json`, which combine
+`training_eligible` inferred supports and `scale_normalized` membership. Legacy
+constructor and first-pilot defaults stay unchanged for exact reproduction.
 
 ## Reproduce the first pilot
 
