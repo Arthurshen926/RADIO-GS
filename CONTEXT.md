@@ -19,6 +19,38 @@ its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
 Latest candidate evidence (2026-10-07):
+`docs/experiments/2026-10-07-expected-support-results.md`.
+The expected singleton-energy / independent-negative-ray study is complete:
+6 paired fits, 3 frozen controls, 9 teacher evaluations, 6 LERF and 6 NVOS scores.
+Neither fitted arm passes; keep the physical parent and single-support defaults.
+Actual LERF subset IoU (%), paired legacy / expected: figurines38.4655/25.3824
+versus parent41.7884; ramen24.5118/19.1874 versus19.4642. Expected figurines
+member-response IoU rises49.1988->56.4633 while actual set precision collapses.
+Expected 2D teacher means regress on figurines/ramen; some image/3D means improve.
+Fern expected positive response IoU77.4965 improves but AP91.4135 falls; signed
+response IoU0.2478 and actual subset6.4326 collapse. Signed positive-prompt
+coverage falls99.9478->8.8609% under independent negative maxima. Never select
+the positive-only arm to hide this failure. All original thresholds/data remain.
+Both fits retain2000 singleton presentations with4000 rendered losses, versus
+2000 in the parent, at half loss weight each. Matched old/new full traces and
+initializations agree. Expected conditions cost6660/6662/6664 versus4666 legacy;
+no new scene tensors or learned parameters. No teatime/waldo follow-up is triggered.
+46 tests and9 four-input copied-field replays pass. All6 NVOS cases replay exactly
+on the original GPU. A cross-GPU actual-alpha comparison differs at22 pixels by
+<=5.9605e-8; members, selected rows, retained response and thresholded mask agree.
+The failed replay is retained; no universal cross-device bitwise claim.
+Source-only32-episode audits show sigmoid(mean energy) differs from mean sigmoid;
+the latter also fails to restore original source-interior response in all3 scenes.
+Discarded support norm was not a calibrated confidence estimate. Neither an
+energy average nor independent negative vetoes is a validated uncertainty model.
+Next: compatible positive/negative association evidence and prompt consistency,
+with evidence-density/resampling checks before target scoring. Do not repeat
+unsupported threshold/mixture or hard-forward sweeps; historical next49/67
+already bound those shortcuts. Current four-scene LERF32.3130% and fern signed
+76.7399% remain unchanged; full five-task accuracy and compactness remain open.
+Evidence: `docs/experiments/2026-10-07-expected-support-evidence.json`.
+
+Previous candidate evidence (2026-10-07):
 `docs/experiments/2026-10-07-support-training-results.md`.
 Two fixed source-support training controls are complete on figurines/ramen/fern.
 They share deployed observed-support filtering and signed member multiplication;

@@ -56,7 +56,7 @@ class CapabilityField(nn.Module):
                  semantic_codec=None, local_codec=None, default_scale=0.5,
                  threshold=0.5, candidate_count=8, candidate_radius=0.05,
                  anchor_eligible=None, spatial_metric="none", world_units_per_metre=None,
-                 local_metric="none"):
+                 local_metric="none", support_aggregation="normalized_prototype"):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -69,6 +69,8 @@ class CapabilityField(nn.Module):
             raise ValueError("unknown spatial member metric")
         if local_metric not in {"none", "native_cosine"}:
             raise ValueError("unknown native local member metric")
+        if support_aggregation not in {"normalized_prototype", "expected_energy"}:
+            raise ValueError("unknown support aggregation")
         if world_units_per_metre is not None and (
                 not math.isfinite(world_units_per_metre) or world_units_per_metre <= 0):
             raise ValueError("invalid geometry world units per metre")
@@ -103,6 +105,7 @@ class CapabilityField(nn.Module):
         self.spatial_metric = spatial_metric
         self.world_units_per_metre = world_units_per_metre
         self.local_metric = local_metric
+        self.support_aggregation = support_aggregation
 
     def grouping_features(self, scale):
         if not math.isfinite(float(scale)) or float(scale) <= 0:
@@ -112,6 +115,9 @@ class CapabilityField(nn.Module):
 
     def member_logits(self, support: Support, scale, rows=None):
         support.validate(len(self.xyz))
+        if self.support_aggregation == "expected_energy" and len(support.indices) > 1:
+            from .support_energy import expected_logits
+            return expected_logits(self, support, scale, rows)
         features = self.grouping_features(scale)
         ids = support.indices.to(features.device)
         weights = support.weights.to(features).reshape(-1, 1)
@@ -161,7 +167,13 @@ class CapabilityField(nn.Module):
             weights = negative.weights.to(self.xyz.device).float()
             supported = self.observed[ids] & (weights > 0)
             if bool(supported.any()):
-                exclusion = self.member_logits(Support(ids[supported], weights[supported]), scale).sigmoid()
+                components = None if negative.components is None else negative.components.to(ids.device)[supported]
+                support = Support(ids[supported], weights[supported], components)
+                if self.support_aggregation == "expected_energy" and components is not None:
+                    from .support_energy import independent_exclusion
+                    exclusion = independent_exclusion(self, support, scale)
+                else:
+                    exclusion = self.member_logits(support, scale).sigmoid()
                 membership = membership * (1 - exclusion)
         return membership
 
@@ -235,6 +247,7 @@ class CapabilityField(nn.Module):
                                inferred_anchor_domain="all_observed" if self.anchor_eligible is None else "training_eligible",
                                spatial_member_metric=self.spatial_metric,
                                native_local_member_metric=self.local_metric,
+                               support_aggregation=self.support_aggregation,
                                uncertainty_resolved=False, semantic_scores_calibrated=False,
                                membership_scores_calibrated=False,
                                observed_positive_mass_fraction=positive_coverage,
@@ -252,4 +265,4 @@ class CapabilityField(nn.Module):
         return dict(default_scale=self.default_scale, threshold=self.threshold,
                     candidate_count=self.candidate_count, candidate_radius=self.candidate_radius,
                     spatial_metric=self.spatial_metric, world_units_per_metre=self.world_units_per_metre,
-                    local_metric=self.local_metric)
+                    local_metric=self.local_metric, support_aggregation=self.support_aggregation)

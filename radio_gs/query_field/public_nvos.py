@@ -91,7 +91,7 @@ def predict(config, job, output, device="cuda"):
     scale = None if scope_policy == "default" else raster_extent_scale(
         operator, masks[0], field.xyz, world_scale, field.default_scale)
     packet, registration = scribble_packet(operator, masks[0], masks[1] if job["mode"] == "signed" else None,
-                                           scale=scale)
+                                           scale=scale, preserve_rays=field.support_aggregation == 'expected_energy')
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
     registered = time.monotonic()

@@ -1,0 +1,55 @@
+{
+  "schema": "radio_gs.query_field_pilot.v1",
+  "scene": "output/query_field_20261007/nvos_fern_v1/scene.json",
+  "train_frames": [
+    2,
+    3,
+    4,
+    7,
+    8,
+    9,
+    10,
+    12,
+    13,
+    15,
+    17,
+    19
+  ],
+  "development_frames": [
+    5,
+    14
+  ],
+  "raster_hw": [
+    96,
+    128
+  ],
+  "dino_width": 448,
+  "training": {
+    "seed": 20261007,
+    "group_dim": 32,
+    "steps": 2000,
+    "learning_rate": 0.01,
+    "threshold": 0.5,
+    "candidate_count": 8,
+    "candidate_radius_m": 0.05,
+    "render_objective": "subset_alpha",
+    "inferred_anchor_domain": "training_eligible",
+    "spatial_metric": "scale_normalized",
+    "support_policy": "paired_signed",
+    "support_aggregation": "expected_energy"
+  },
+  "purpose": "Fixed expected-energy aggregation and matched paired source training",
+  "selection": "All 14 cached authorized query-free frames; sorted roster quartiles held out; availability selection before scoring",
+  "teacher_families": [
+    "siglip",
+    "dino",
+    "sam"
+  ],
+  "additional_3d_supervision": false,
+  "source_access_at_query": false,
+  "compression_default": false,
+  "input_budget_condition": "12 native training views, 2 teacher development views; existing frozen geometry",
+  "evaluation_stages": [
+    "trained"
+  ]
+}

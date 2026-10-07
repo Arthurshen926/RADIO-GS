@@ -33,7 +33,7 @@ def fit(observations, output, config, device="cuda"):
     manifest = json.loads((root / "observations.json").read_text())
     objective = config.get("render_objective", "visible_membership")
     support_policy = config.get("support_policy", "single")
-    if support_policy not in {"single", "mixed_unsigned", "mixed_signed"}:
+    if support_policy not in {"single", "mixed_unsigned", "mixed_signed", "paired_signed"}:
         raise ValueError("unknown source support policy")
     if objective not in {"visible_membership", "subset_alpha"}:
         raise ValueError("unknown member rendering objective")
@@ -83,6 +83,7 @@ def fit(observations, output, config, device="cuda"):
               anchor_eligible=anchor_eligible if anchor_domain=='training_eligible' else None,
               spatial_metric=config.get('spatial_metric', 'none'),
               local_metric=config.get('local_metric', 'none'),
+              support_aggregation=config.get('support_aggregation', 'normalized_prototype'),
               world_units_per_metre=manifest['world_units_per_metre']).to(device)
     baseline_path = Path(output) / "untrained"
     trained_path = Path(output) / "trained"
@@ -105,6 +106,7 @@ def fit(observations, output, config, device="cuda"):
     support_generator = torch.Generator().manual_seed(config["seed"]+1)
     support_counts = {}
     support_trace = []
+    condition_evaluations = 0
     visits = torch.zeros(len(examples), dtype=torch.long)
     for step in range(config["steps"]):
         position = int(torch.randint(len(examples), (1,)))
@@ -112,6 +114,24 @@ def fit(observations, output, config, device="cuda"):
         view_index, mask_index, positive, negative, pixels = examples[position]
         view = views[view_index]
         pixel = pixels[int(torch.randint(len(pixels), (1,)))]
+        def rendered_loss(member):
+            if objective == "subset_alpha":
+                height, width = manifest["raster_hw"]
+                rendered = relaxed_subset_alpha(field, member, view["camera"], height, width, manifest["world_units_per_metre"])
+            else:
+                rendered = torch.sparse.mm(view["operator"], member[:, None])[:, 0]
+            return partial_membership_loss(rendered, positive, negative)
+        optimizer.zero_grad(set_to_none=True)
+        anchor_loss = None
+        if support_policy == 'paired_signed':
+            anchor = view['best_element'][pixel].to(device)
+            anchor_member = field.support_membership(Support(anchor.reshape(1), torch.ones(1, device=device)),
+                                                     float(view['scales_m'][mask_index]))
+            anchor_loss = rendered_loss(anchor_member)
+            (anchor_loss * .5).backward()
+            anchor_loss = anchor_loss.detach()
+            del anchor_member
+            condition_evaluations += 1
         support, exclusion, support_kind = episode_support(support_policy, step, view, pixels, pixel,
             negative_pixels[position], support_generator, device)
         member = field.support_membership(support, float(view["scales_m"][mask_index]), exclusion)
@@ -119,14 +139,16 @@ def fit(observations, output, config, device="cuda"):
         support_trace.append(dict(frame=train_frames[view_index], region=mask_index, first_pixel=int(pixel),
                                  kind=support_kind, positive_rows=len(support.indices),
                                  negative_rows=0 if exclusion is None else len(exclusion.indices)))
-        if objective == "subset_alpha":
-            height,width = manifest["raster_hw"]
-            rendered = relaxed_subset_alpha(field, member, view["camera"],height,width,manifest["world_units_per_metre"])
+        condition_evaluations += 1
+        if exclusion is not None:
+            condition_evaluations += (len(exclusion.components.unique())
+                if field.support_aggregation == 'expected_energy' and exclusion.components is not None else 1)
+        loss = rendered_loss(member)
+        if anchor_loss is None:
+            loss.backward()
         else:
-            rendered = torch.sparse.mm(view["operator"], member[:, None])[:, 0]
-        loss = partial_membership_loss(rendered, positive, negative)
-        optimizer.zero_grad(set_to_none=True)
-        loss.backward()
+            (loss * .5).backward()
+            loss = .5 * (loss.detach() + anchor_loss)
         torch.nn.utils.clip_grad_norm_(field.parameters(), 1.)
         optimizer.step()
         if step % 25 == 0 or step == config["steps"]-1:
@@ -146,7 +168,9 @@ def fit(observations, output, config, device="cuda"):
     report = dict(config=config, train_frames=train_frames, training_episodes=len(examples),
                   render_objective=objective,
                   support_policy=support_policy, support_counts=support_counts, support_trace=support_trace,
-                  member_forward_evaluations=sum(1+(r['negative_rows']>0) for r in support_trace),
+                  member_forward_evaluations=condition_evaluations,
+                  rendered_losses=config['steps']*(2 if support_policy == 'paired_signed' else 1),
+                  paired_anchor_episodes=config['steps'] if support_policy == 'paired_signed' else 0,
                   inferred_anchor_domain=anchor_domain,eligible_input_anchors=int(anchor_eligible.sum()),
                   fixed_training_diagnostic_domain="full-scene normalized membership; identical diagnostic across objectives",
                   development_frames=manifest["splits"]["development_frames"],

@@ -220,3 +220,29 @@ Exact deployed-query replay does not imply bitwise training reproducibility:
 two repeated executions of the original fitter differ in learned tensors.
 Report numerical repeatability separately and do not treat small one-run metric
 differences as statistically established architectural gains.
+
+## Expected energy is not a resolved uncertainty model
+
+The [next completed controls](../experiments/2026-10-07-expected-support-results.md)
+retain uncertain support moments and separate negative-ray identities in one
+shared member operator. The energy expectation is algebraically exact, without
+new field tensors. Paired source training preserves singleton presentation count
+while doubling rendered losses, with a matched legacy-aggregation control.
+Neither fitted arm passes the common gate; both remain explicit experiments.
+
+The loss of resultant length in the old prototype did not establish that its
+length measures confidence about complete object membership. Expected energy
+reduces 2D capability, and independent negative maxima erase most authorized
+positive scribble coverage. Their monotonicity/idempotence does not make them a
+valid signed-evidence model. Do not promote positive-only gains, higher soft
+semantic scores with worse actual sets, or a response-mixture substitute based
+on uncalibrated source statistics.
+
+Further aggregation changes must distinguish association uncertainty from
+object-member variation, preserve positive/negative compatibility and check
+evidence-density/resampling effects using authorized prompts. The current
+physical field remains the common candidate. No query-time source solver,
+per-modality fallback, new teacher or 3D annotation is authorized by this result.
+Cross-GPU hard-subset rendering has an observed <=5.9605e-8 numerical difference
+despite exact memberships/selections; report that separately from exact
+same-device replay and previously observed non-bitwise training.

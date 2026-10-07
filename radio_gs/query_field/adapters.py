@@ -35,7 +35,7 @@ def pixel_support(operator, pixel):
     return support
 
 
-def raster_support(operator, evidence):
+def raster_support(operator, evidence, *, preserve_rays=False):
     """Pool registered pixel evidence without choosing a dominant Gaussian.
 
     Each nonempty row of ``operator`` is a normalized uncertain camera ray.
@@ -56,6 +56,14 @@ def raster_support(operator, evidence):
     # large scribbles. This is transient registration, not a new member decoder.
     mass = torch.bincount(pixels, weights=values, minlength=operator.shape[0])
     evidence_cpu = evidence.double().cpu()
+    if preserve_rays:
+        # Retain every ray and contributor in deterministic pixel/row order.
+        active = (evidence_cpu[pixels] > 0) & (values > 0)
+        ray_weights = values[active] / mass[pixels[active]].clamp_min(1e-12) * evidence_cpu[pixels[active]]
+        support = Support(rows[active].to(operator.device), ray_weights.float().to(operator.device),
+                          pixels[active].to(operator.device))
+        support.validate(operator.shape[1])
+        return support, float(evidence_cpu[mass > 0].sum() / evidence_cpu.sum())
     # Normalize here as well, so callers may supply either raw or normalized rays.
     pooled = torch.bincount(rows, weights=values / mass[pixels].clamp_min(1e-12) * evidence_cpu[pixels],
                             minlength=operator.shape[1])
@@ -65,20 +73,21 @@ def raster_support(operator, evidence):
     return support, float(evidence_cpu[mass > 0].sum() / evidence_cpu.sum())
 
 
-def scribble_packet(operator, positive, negative=None, *, scale=None):
+def scribble_packet(operator, positive, negative=None, *, scale=None, preserve_rays=False):
     """Registered raster evidence uses the same point packet and member core.
 
     Positive/negative rays can share contributors. They are uncertain supports,
     not exact element constraints. Native-raster sign overlap must be checked
     before resampling, where two disjoint strokes can share a coarse pixel.
     """
-    support, positive_coverage = raster_support(operator, positive)
-    exclusion, negative_coverage = (None, None) if negative is None else raster_support(operator, negative)
+    support, positive_coverage = raster_support(operator, positive, preserve_rays=preserve_rays)
+    exclusion, negative_coverage = (None, None) if negative is None else raster_support(operator, negative, preserve_rays=preserve_rays)
     packet = QueryPacket("point_2d", positive=support, negative=exclusion, scale=scale)
     return packet, dict(positive_projected_mass_fraction=positive_coverage,
                        negative_projected_mass_fraction=negative_coverage,
-                       positive_gaussians=len(support.indices),
-                       negative_gaussians=0 if exclusion is None else len(exclusion.indices),
+                       positive_gaussians=len(support.indices.unique()),
+                       negative_gaussians=0 if exclusion is None else len(exclusion.indices.unique()),
+                       separate_ray_constraints=preserve_rays,
                        exact_element_constraints=False)
 
 

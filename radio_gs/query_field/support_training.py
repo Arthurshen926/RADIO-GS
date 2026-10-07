@@ -13,7 +13,7 @@ class TrainingRays:
         self.values = operator.values()
         self.count = operator.shape[1]
 
-    def support(self, pixels, device):
+    def support(self, pixels, device, *, preserve_rays=False):
         pixels = torch.as_tensor(pixels).long().cpu().unique(sorted=True)
         bounds = torch.searchsorted(self.pixels, torch.stack([pixels, pixels+1]))
         rows, values, local_pixels = [], [], []
@@ -23,8 +23,9 @@ class TrainingRays:
             local_pixels.append(torch.full((end-start,), index, dtype=torch.long))
         operator = torch.sparse_coo_tensor(torch.stack([torch.cat(local_pixels), torch.cat(rows)]),
                                            torch.cat(values), (len(pixels), self.count)).coalesce()
-        support, _ = raster_support(operator, torch.ones(len(pixels)))
-        return Support(support.indices.to(device), support.weights.to(device))
+        support, _ = raster_support(operator, torch.ones(len(pixels)), preserve_rays=preserve_rays)
+        return Support(support.indices.to(device), support.weights.to(device),
+                       None if support.components is None else support.components.to(device))
 
 
 def sample_pixels(candidates, first, generator, count=4):
@@ -42,24 +43,25 @@ def episode_support(policy, step, view, candidate_pixels, first_pixel, negative_
     are explicitly known source exclusions with observed dominant contributors.
     Missing reliable negatives retain the unsigned pooled support and are counted.
     """
-    if policy not in {"single", "mixed_unsigned", "mixed_signed"}:
+    if policy not in {"single", "mixed_unsigned", "mixed_signed", "paired_signed"}:
         raise ValueError("unknown source support policy")
-    slot = 0 if policy == "single" else step % 4
+    slot = 0 if policy == "single" else step % 3 + 1 if policy == "paired_signed" else step % 4
+    preserve = policy == "paired_signed"
     if slot == 0:
         anchor = view["best_element"][first_pixel].to(device)
         return Support(anchor.reshape(1), torch.ones(1, device=device)), None, "anchor"
     if slot == 1:
-        return view["training_rays"].support([int(first_pixel)], device), None, "ray"
+        return view["training_rays"].support([int(first_pixel)], device, preserve_rays=preserve), None, "ray"
     pixels = sample_pixels(candidate_pixels, first_pixel, generator)
-    positive = view["training_rays"].support(pixels, device)
+    positive = view["training_rays"].support(pixels, device, preserve_rays=preserve)
     # Draw the same negative pool in both arms to preserve future support draws.
     if len(negative_pixels):
         first = negative_pixels[int(torch.randint(len(negative_pixels), (1,), generator=generator))]
         negative = sample_pixels(negative_pixels, first, generator)
     else:
         negative = None
-    if slot == 3 and policy == "mixed_signed":
+    if slot == 3 and policy in {"mixed_signed", "paired_signed"}:
         if negative is None:
             return positive, None, "pooled_missing_negative"
-        return positive, view["training_rays"].support(negative, device), "signed_pooled"
+        return positive, view["training_rays"].support(negative, device, preserve_rays=preserve), "signed_pooled"
     return positive, None, "pooled"

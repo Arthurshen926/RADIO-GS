@@ -31,6 +31,7 @@ its label-trained member tree is silently called by the new package.
 | `exclusion_audit`, `local_metric_bound` | Source-only exclusion coverage and separate post-evaluation locality/scope bounds |
 | `source_regions`, `public_nvos` | Query-free native crop construction; registered signed raster inputs, source-denied replay and separate real-prompt scoring |
 | `support_training`, `support_concentration` | Matched source support-form experiments and post-study support-disagreement audit |
+| `support_energy`, `support_jensen_audit` | Expected singleton-energy control, separate negative rays, and source-only comparison with response averaging |
 
 ```mermaid
 flowchart LR
@@ -83,6 +84,38 @@ It preserves inference specification and tensor cost while changing training
 support distribution (and adding 25% member evaluations in the signed arm).
 Representing support disagreement and the difference between uncertain
 alternatives and separate signed constraints remains an open method requirement.
+
+The next opt-in `support_aggregation: expected_energy` control computes the
+weighted expectation of the existing singleton member logit. Its sufficient
+statistics are the mean group vector **without renormalization**, support centre
+and spatial variance. For the physical metric,
+`E[||x-X||²] = ||x-E[X]||² + E[||X-E[X]||²]`. This identity introduces no
+learned parameters or new scene tensors. One-element supports retain the exact
+old path, including inferred text/image hypotheses and exact 3D prompts.
+
+An optional transient `Support.components` preserves negative ray identities.
+Each ray averages its uncertain association energies; the largest per-ray
+sigmoid response supplies the exclusion term. Every supported ray is retained,
+with chunks of 32 controlling memory. This maximum makes independent exclusions
+monotone and duplicate whole constraints idempotent; it can also amplify noisy
+or weak fractional negative observations. Positive observations use their
+evidence-mass-weighted mean energy, not independent hard constraints.
+
+`paired_signed` source training averages an original anchor-render loss and an
+auxiliary ray-render loss at each of 2000 updates. Auxiliary forms cycle one
+ray, four positives and four positives plus four negatives. It doubles rendered
+losses to 4000 while retaining 2000 singleton presentations; singleton gradient
+weight is halved, so unchanged competence is a measured gate, not an assumption.
+The [fixed study](../experiments/2026-10-07-expected-support-protocol.md) includes
+both frozen insertion and matched paired training with the old aggregation.
+Expected logit, average sigmoid response and a calibrated latent-association
+posterior are distinct. The sufficient moments for energy do not establish
+that they suffice for nonlinear query capability.
+The [completed results](../experiments/2026-10-07-expected-support-results.md)
+reject both fitted arms: 2D support losses and severe signed over-exclusion
+prevent promotion despite some image/3D or positive-only gains. The protected
+native field and accepted physical candidate remain the reference. The source
+nonlinearity audit does not validate response averaging as a replacement either.
 
 An optional protected `anchor_eligible` mask now aligns inferred text/image
 supports with the source-interior domain used by member training. It does not

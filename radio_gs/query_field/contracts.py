@@ -10,6 +10,9 @@ import torch
 class Support:
     indices: torch.Tensor
     weights: torch.Tensor
+    # Optional ray identity. Contributors within a ray are alternatives;
+    # different negative rays are separate constraints. Never stored in a field.
+    components: torch.Tensor | None = None
 
     def validate(self, count: int) -> None:
         if self.indices.ndim != 1 or self.weights.shape != self.indices.shape:
@@ -22,6 +25,11 @@ class Support:
             raise ValueError("support weights must be finite and nonnegative")
         if not bool(self.weights.sum() > 0):
             raise ValueError("support must have positive mass")
+        if self.components is not None:
+            if self.components.shape != self.indices.shape or self.components.dtype != torch.long:
+                raise ValueError("support components must be aligned integer ray identifiers")
+            if bool((self.components < 0).any()):
+                raise ValueError("support components must be nonnegative")
 
 
 @dataclass(frozen=True)
