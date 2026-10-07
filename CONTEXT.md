@@ -19,6 +19,32 @@ its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
 Latest candidate evidence (2026-10-07):
+`docs/experiments/2026-10-07-competitive-evidence-results.md`.
+The frozen relative signed-evidence study is complete: 6 exports, 351 teacher
+regions x3 rules, 6 real fern prompt predictions/scores, 6 four-input cold
+replays, 6 same-GPU NVOS cold replays and 68 LERF queries x3 exact unsigned audits.
+63 tests pass. No fitting, scene-tensor growth or parameter search occurred.
+Ray-mixture signed competition gives fern response IoU/AP/actual subset
+76.7569/92.1666/76.4433% versus parent76.7399/92.0952/76.1453%. Both competitive
+rules preserve99.9396% positive prompt coverage, but ray competition loses0.0242pp
+figurines signed-teacher actual subset; pooled also loses ramen, fern AP/subset.
+Neither passes the fixed gate, so keep the physical parent/product default and
+do not launch a second NVOS scene or tune strengths/thresholds. These small
+differences are not statistical significance claims. Current accepted LERF
+four-scene32.3130% and fern signed76.7399% remain unchanged.
+Post-study source-only audit exactly replays all original image/2D/3D IoUs.
+Image anchors have majority visible target mass in77/169 figurines,102/149 ramen,
+31/33 fern cases;53/26/2 are not visible and cannot be called incorrect identity.
+Even target-supported image anchors yield only42.6501/39.8360/44.2962% actual IoU.
+Only11.74/16.15/1.83% of all image false-added pixels overlap current known
+source exclusions; unknown pixels must not become automatic negatives.
+Next: retain native identity evidence beyond anchor selection while learning
+scope in the same member operator; test source-view scope consistency. This is
+a hypothesis, not an accepted replacement. Do not continue aggregation-only
+sweeps or add query-time source memory, per-input decoders or extra labels.
+Evidence: `docs/experiments/2026-10-07-competitive-evidence-results.json`.
+
+Previous candidate evidence (2026-10-07):
 `docs/experiments/2026-10-07-expected-support-results.md`.
 The expected singleton-energy / independent-negative-ray study is complete:
 6 paired fits, 3 frozen controls, 9 teacher evaluations, 6 LERF and 6 NVOS scores.

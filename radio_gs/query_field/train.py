@@ -84,6 +84,7 @@ def fit(observations, output, config, device="cuda"):
               spatial_metric=config.get('spatial_metric', 'none'),
               local_metric=config.get('local_metric', 'none'),
               support_aggregation=config.get('support_aggregation', 'normalized_prototype'),
+              negative_rule=config.get('negative_rule', 'product'),
               world_units_per_metre=manifest['world_units_per_metre']).to(device)
     baseline_path = Path(output) / "untrained"
     trained_path = Path(output) / "trained"

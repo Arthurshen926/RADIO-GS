@@ -73,7 +73,7 @@ def raster_support(operator, evidence, *, preserve_rays=False):
     return support, float(evidence_cpu[mass > 0].sum() / evidence_cpu.sum())
 
 
-def scribble_packet(operator, positive, negative=None, *, scale=None, preserve_rays=False):
+def scribble_packet(operator, positive, negative=None, *, scale=None, preserve_rays=False, negative_rays=False):
     """Registered raster evidence uses the same point packet and member core.
 
     Positive/negative rays can share contributors. They are uncertain supports,
@@ -81,13 +81,15 @@ def scribble_packet(operator, positive, negative=None, *, scale=None, preserve_r
     before resampling, where two disjoint strokes can share a coarse pixel.
     """
     support, positive_coverage = raster_support(operator, positive, preserve_rays=preserve_rays)
-    exclusion, negative_coverage = (None, None) if negative is None else raster_support(operator, negative, preserve_rays=preserve_rays)
+    exclusion, negative_coverage = (None, None) if negative is None else raster_support(
+        operator, negative, preserve_rays=preserve_rays or negative_rays)
     packet = QueryPacket("point_2d", positive=support, negative=exclusion, scale=scale)
     return packet, dict(positive_projected_mass_fraction=positive_coverage,
                        negative_projected_mass_fraction=negative_coverage,
                        positive_gaussians=len(support.indices.unique()),
                        negative_gaussians=0 if exclusion is None else len(exclusion.indices.unique()),
                        separate_ray_constraints=preserve_rays,
+                       negative_ray_mixture=negative_rays,
                        exact_element_constraints=False)
 
 

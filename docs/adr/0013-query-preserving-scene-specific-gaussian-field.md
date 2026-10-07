@@ -246,3 +246,27 @@ per-modality fallback, new teacher or 3D annotation is authorized by this result
 Cross-GPU hard-subset rendering has an observed <=5.9605e-8 numerical difference
 despite exact memberships/selections; report that separately from exact
 same-device replay and previously observed non-bitwise training.
+
+## Relative signed evidence and remaining identity/extent separation
+
+The [frozen competition study](../experiments/2026-10-07-competitive-evidence-results.md)
+compares positive, negative and null evidence through the unchanged common
+member logits. All negative rays can contribute by observed-mass-normalized
+log mixtures, retaining the accepted per-ray prototype. No field tensor or
+inference source right changes. Old exports and defaults keep product exclusion.
+
+The ray control preserves prompt coverage and improves all three fern public
+readouts slightly, but misses one fixed teacher-subset gate. The pooled control
+also lowers fern AP/subset. Neither becomes the common candidate; no second
+NVOS task or post-result coefficient sweep follows. Exact unsigned four-scene
+LERF and six four-input copied-field replays do not substitute for accuracy.
+
+The source-only post-study audit separates visible target-associated anchors,
+visible off-target anchors and unknown invisible anchors. Both association
+errors and member-extent errors remain. Most false additions are outside known
+partial exclusions, including cases with target-associated anchors. This does
+not authorize labelling unknown pixels as background. Further common-method
+work should test identity-conditioned scope and source-view consistency, keeping
+protected native evidence, one member operator and the full per-input/readout
+gates. A stronger negative combiner alone is not a supported solution to the
+remaining v10 gap. These are research hypotheses, not new validated capabilities.

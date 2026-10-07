@@ -91,7 +91,8 @@ def predict(config, job, output, device="cuda"):
     scale = None if scope_policy == "default" else raster_extent_scale(
         operator, masks[0], field.xyz, world_scale, field.default_scale)
     packet, registration = scribble_packet(operator, masks[0], masks[1] if job["mode"] == "signed" else None,
-                                           scale=scale, preserve_rays=field.support_aggregation == 'expected_energy')
+                                           scale=scale, preserve_rays=field.support_aggregation == 'expected_energy',
+                                           negative_rays=field.negative_rule == 'competitive_rays')
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
     registered = time.monotonic()
@@ -133,7 +134,7 @@ def predict(config, job, output, device="cuda"):
                                       shared_decode=decoded-registered, target_projection=projected-decoded),
                   timing_condition="one run, shared GPU, excludes serialization and prompt-agreement audit",
                   peak_cuda_allocated_bytes=None if not str(device).startswith("cuda") else torch.cuda.max_memory_allocated(),
-                  prompt_policy="official raw scribbles, pooled uncertain registered rays")
+                  prompt_policy="official raw scribbles; uncertain registered rays; signed policy declared in field spec")
     (out / "prediction.json").write_text(json.dumps(report, indent=2)+"\n")
     return dict(job=job["name"], selected=report["selected"], scale_m=result.scale,
                 registration=registration)

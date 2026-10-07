@@ -56,7 +56,7 @@ class CapabilityField(nn.Module):
                  semantic_codec=None, local_codec=None, default_scale=0.5,
                  threshold=0.5, candidate_count=8, candidate_radius=0.05,
                  anchor_eligible=None, spatial_metric="none", world_units_per_metre=None,
-                 local_metric="none", support_aggregation="normalized_prototype"):
+                 local_metric="none", support_aggregation="normalized_prototype", negative_rule="product"):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -71,6 +71,10 @@ class CapabilityField(nn.Module):
             raise ValueError("unknown native local member metric")
         if support_aggregation not in {"normalized_prototype", "expected_energy"}:
             raise ValueError("unknown support aggregation")
+        if negative_rule not in {"product", "competitive_pooled", "competitive_rays"}:
+            raise ValueError("unknown signed evidence rule")
+        if negative_rule != "product" and support_aggregation != "normalized_prototype":
+            raise ValueError("competitive evidence requires the accepted prototype kernel")
         if world_units_per_metre is not None and (
                 not math.isfinite(world_units_per_metre) or world_units_per_metre <= 0):
             raise ValueError("invalid geometry world units per metre")
@@ -106,6 +110,7 @@ class CapabilityField(nn.Module):
         self.world_units_per_metre = world_units_per_metre
         self.local_metric = local_metric
         self.support_aggregation = support_aggregation
+        self.negative_rule = negative_rule
 
     def grouping_features(self, scale):
         if not math.isfinite(float(scale)) or float(scale) <= 0:
@@ -159,7 +164,7 @@ class CapabilityField(nn.Module):
             order = order[distance >= self.candidate_radius]
         return torch.stack(chosen) if chosen else torch.empty(0, dtype=torch.long, device=score.device)
 
-    def exclude_membership(self, membership, negative, scale):
+    def exclude_membership(self, membership, negative, scale, positive_logits=None):
         """Shared differentiable signed rule for deployed queries and source fit."""
         if negative is not None:
             negative.validate(len(self.xyz))
@@ -169,6 +174,13 @@ class CapabilityField(nn.Module):
             if bool(supported.any()):
                 components = None if negative.components is None else negative.components.to(ids.device)[supported]
                 support = Support(ids[supported], weights[supported], components)
+                if self.negative_rule != "product":
+                    from .negative_evidence import competitive_membership, ray_log_mixture
+                    if positive_logits is None:
+                        raise ValueError("competition requires the original unsaturated positive logits")
+                    logits = (ray_log_mixture(self, support, scale) if self.negative_rule == "competitive_rays"
+                              else self.member_logits(support, scale))
+                    return competitive_membership(positive_logits, logits)
                 if self.support_aggregation == "expected_energy" and components is not None:
                     from .support_energy import independent_exclusion
                     exclusion = independent_exclusion(self, support, scale)
@@ -177,16 +189,20 @@ class CapabilityField(nn.Module):
                 membership = membership * (1 - exclusion)
         return membership
 
-    def support_membership(self, positive, scale, negative=None):
-        """Uncertain registered supports; exact constraints remain query-only."""
+    def support_logits(self, positive, scale):
+        """Common observed-support filtering before any signed conditioning."""
         positive.validate(len(self.xyz))
         ids = positive.indices.to(self.xyz.device)
         weights = positive.weights.to(self.xyz.device).float()
         supported = self.observed[ids]
         if not bool(weights[supported].sum() > 0):
             raise ValueError("positive support lacks trained observation support")
-        member = self.member_logits(Support(ids[supported], weights[supported]), scale).sigmoid()
-        return self.exclude_membership(member, negative, scale)
+        return self.member_logits(Support(ids[supported], weights[supported]), scale)
+
+    def support_membership(self, positive, scale, negative=None):
+        """Uncertain registered supports; exact constraints remain query-only."""
+        logits = self.support_logits(positive, scale)
+        return self.exclude_membership(logits.sigmoid(), negative, scale, logits)
 
     @torch.no_grad()
     def query(self, packet: QueryPacket):
@@ -212,7 +228,8 @@ class CapabilityField(nn.Module):
                 raise ValueError("positive support lacks trained observation support")
             candidates = ids
             candidate_weights = weights / weights.sum()
-            membership = self.support_membership(Support(ids[supported], weights[supported]), scale)
+            positive_logits = self.support_logits(Support(ids[supported], weights[supported]), scale)
+            membership = positive_logits.sigmoid()
         else:
             positive_coverage = None
             candidates = self._candidates(identity)
@@ -220,19 +237,27 @@ class CapabilityField(nn.Module):
                 raise ValueError("field has no observed identity candidates")
             # These weights expose uncertainty; they are not calibrated identity.
             candidate_weights = torch.softmax(10 * identity[candidates], dim=0)
-            alternatives = torch.stack([self.member_logits(
-                Support(i.reshape(1), torch.ones(1, device=self.xyz.device)), scale).sigmoid()
-                for i in candidates], dim=1)
+            competing = packet.negative is not None and self.negative_rule != "product"
+            values = [self.member_logits(Support(i.reshape(1), torch.ones(1, device=self.xyz.device)), scale)
+                      if competing else self.member_logits(
+                          Support(i.reshape(1), torch.ones(1, device=self.xyz.device)), scale).sigmoid()
+                      for i in candidates]
+            alternatives = torch.stack([value.sigmoid() for value in values] if competing else values, dim=1)
+            positive_logits = None
             if packet.task == "instance":
                 # Return one coherent hypothesis. Preserve all alternatives in
                 # the receipt; do not average incompatible physical instances.
                 membership = alternatives[:, candidate_weights.argmax()]
+                if competing:
+                    positive_logits = values[int(candidate_weights.argmax())]
             else:
                 # Union includes hypotheses supported near the best identity.
                 # Global policy; not a query/benchmark-selected threshold.
                 admitted = identity[candidates] >= identity[candidates].max() - 0.02
                 membership = alternatives[:, admitted].max(dim=1).values
-        membership = self.exclude_membership(membership, packet.negative, scale)
+                if competing:
+                    positive_logits = torch.stack(values, dim=1)[:, admitted].max(dim=1).values
+        membership = self.exclude_membership(membership, packet.negative, scale, positive_logits)
         membership = membership.masked_fill(~self.observed, 0)
         if packet.exact_positive:
             ids = packet.positive.indices[packet.positive.weights > 0].to(membership.device)
@@ -248,6 +273,7 @@ class CapabilityField(nn.Module):
                                spatial_member_metric=self.spatial_metric,
                                native_local_member_metric=self.local_metric,
                                support_aggregation=self.support_aggregation,
+                               negative_rule=self.negative_rule,
                                uncertainty_resolved=False, semantic_scores_calibrated=False,
                                membership_scores_calibrated=False,
                                observed_positive_mass_fraction=positive_coverage,
@@ -265,4 +291,5 @@ class CapabilityField(nn.Module):
         return dict(default_scale=self.default_scale, threshold=self.threshold,
                     candidate_count=self.candidate_count, candidate_radius=self.candidate_radius,
                     spatial_metric=self.spatial_metric, world_units_per_metre=self.world_units_per_metre,
-                    local_metric=self.local_metric, support_aggregation=self.support_aggregation)
+                    local_metric=self.local_metric, support_aggregation=self.support_aggregation,
+                    negative_rule=self.negative_rule)

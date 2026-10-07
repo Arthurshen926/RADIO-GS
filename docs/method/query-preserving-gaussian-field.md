@@ -161,6 +161,26 @@ best per-input outputs, or call it a promoted replacement. Native directional
 comparison incurs additional query computation, and heterogeneous object parts
 remain a scope problem rather than verified negative evidence.
 
+## Relative signed-evidence controls
+
+`negative_rule: competitive_pooled` and `competitive_rays` are explicit frozen
+research controls. Both use `sigmoid(l+ - softplus(l-))`, retaining unsaturated
+positive logits from the same member kernel. The ray version aggregates every
+negative ray's normalized-prototype score by observed evidence mass; it adds no
+field tensors and does not alter positive pooling. No-negative outputs remain
+exact. The rule requires normalized-prototype support aggregation and cannot be
+stacked with the failed expected-energy option. These scores are not calibrated
+probabilities or a complete uncertainty model.
+
+The [completed comparison](../experiments/2026-10-07-competitive-evidence-results.md)
+finds small fern signed gains for ray competition but a failed figurines
+teacher-subset gate. Keep `product` as the common default. No per-scene selection
+or negative-strength tuning follows. Source-only association/extent diagnostics
+now show both visible anchor mismatch and incomplete extent control even with
+target-supported anchors. The next hypothesis is to retain identity evidence
+beyond anchor selection while learning scope through the same member operator;
+it has not yet been implemented or validated as a replacement.
+
 ## Reproduce the first pilot
 
 Run from `/root/RADIO-GS-query-field`, with the existing cybersim_agent Python

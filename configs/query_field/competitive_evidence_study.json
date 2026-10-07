@@ -1,0 +1,97 @@
+{
+  "parent_commit": "a1a3b8e",
+  "models": [
+    {
+      "name": "figurines_competitive_pooled",
+      "scene": "figurines",
+      "negative_rule": "competitive_pooled",
+      "output": "output/query_field_20261007/competitive_evidence_v1/figurines_competitive_pooled",
+      "field": "output/query_field_20261007/competitive_evidence_v1/figurines_competitive_pooled/models/trained",
+      "parent_field": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained"
+    },
+    {
+      "name": "figurines_competitive_rays",
+      "scene": "figurines",
+      "negative_rule": "competitive_rays",
+      "output": "output/query_field_20261007/competitive_evidence_v1/figurines_competitive_rays",
+      "field": "output/query_field_20261007/competitive_evidence_v1/figurines_competitive_rays/models/trained",
+      "parent_field": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained"
+    },
+    {
+      "name": "ramen_competitive_pooled",
+      "scene": "ramen",
+      "negative_rule": "competitive_pooled",
+      "output": "output/query_field_20261007/competitive_evidence_v1/ramen_competitive_pooled",
+      "field": "output/query_field_20261007/competitive_evidence_v1/ramen_competitive_pooled/models/trained",
+      "parent_field": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained"
+    },
+    {
+      "name": "ramen_competitive_rays",
+      "scene": "ramen",
+      "negative_rule": "competitive_rays",
+      "output": "output/query_field_20261007/competitive_evidence_v1/ramen_competitive_rays",
+      "field": "output/query_field_20261007/competitive_evidence_v1/ramen_competitive_rays/models/trained",
+      "parent_field": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained"
+    },
+    {
+      "name": "fern_competitive_pooled",
+      "scene": "fern",
+      "negative_rule": "competitive_pooled",
+      "output": "output/query_field_20261007/competitive_evidence_v1/fern_competitive_pooled",
+      "field": "output/query_field_20261007/competitive_evidence_v1/fern_competitive_pooled/models/trained",
+      "parent_field": "output/query_field_20261007/nvos_fern_v1/models/trained"
+    },
+    {
+      "name": "fern_competitive_rays",
+      "scene": "fern",
+      "negative_rule": "competitive_rays",
+      "output": "output/query_field_20261007/competitive_evidence_v1/fern_competitive_rays",
+      "field": "output/query_field_20261007/competitive_evidence_v1/fern_competitive_rays/models/trained",
+      "parent_field": "output/query_field_20261007/nvos_fern_v1/models/trained"
+    }
+  ],
+  "diagnostics": [
+    {
+      "scene": "figurines",
+      "parent_field": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained",
+      "observations": "output/query_field_20261007/figurines_18views_v1/observations"
+    },
+    {
+      "scene": "ramen",
+      "parent_field": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained",
+      "observations": "output/query_field_20261007/ramen_18views_v1/observations"
+    },
+    {
+      "scene": "fern",
+      "parent_field": "output/query_field_20261007/nvos_fern_v1/models/trained",
+      "observations": "output/query_field_20261007/nvos_fern_v1/observations"
+    }
+  ],
+  "unsigned_lerf": [
+    {
+      "scene": "figurines",
+      "field": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/figurines_fitted_metric"
+    },
+    {
+      "scene": "ramen",
+      "field": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_lerf_v1/ramen_fitted_metric"
+    },
+    {
+      "scene": "teatime",
+      "field": "output/query_field_20261007/teatime_fitted_metric_v1/models/trained",
+      "reference_prediction": "output/query_field_20261007/spatial_metric_teatime_lerf_v1/teatime_fitted_metric"
+    },
+    {
+      "scene": "waldo_kitchen",
+      "field": "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/models/trained",
+      "reference_prediction": "output/query_field_20261007/waldo_kitchen_physical_lerf_v1/waldo_kitchen"
+    }
+  ],
+  "protocol": "docs/experiments/2026-10-07-competitive-evidence-protocol.md",
+  "fits": [],
+  "parameter_search": false,
+  "independent_final_test": false,
+  "negative_pixels_per_teacher_region": 4
+}
