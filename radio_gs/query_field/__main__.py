@@ -26,7 +26,7 @@ def main():
         print(json.dumps(report,indent=2))
     elif args.stage=="evaluate":
         from .evaluate import evaluate
-        print(json.dumps(evaluate(args.output,args.device),indent=2))
+        print(json.dumps(evaluate(args.output,args.device,config.get('evaluation_stages',('untrained','trained'))),indent=2))
     elif args.stage=="smoke":
         from .smoke import smoke
         print(json.dumps(smoke(args.output,args.device),indent=2))

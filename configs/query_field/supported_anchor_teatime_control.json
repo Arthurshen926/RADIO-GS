@@ -1,0 +1,34 @@
+{
+  "schema": "radio_gs.supported_anchor_third_scene.v1",
+  "shared_encoder": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384/snapshots/a713301b217d38485fb2204c808367d10bc3cc40",
+  "generic_negative_texts": [
+    "object",
+    "things",
+    "stuff",
+    "texture"
+  ],
+  "native_temperature": 10.0,
+  "jobs": [
+    {
+      "scene": "teatime",
+      "queries": "configs/consolidated/teatime.queries.json",
+      "evaluation_scene": "output/system_map_rebuild/teatime/complete/scene.json",
+      "name": "teatime_original",
+      "field": "output/query_field_20261007/teatime_18views_v1/models/trained"
+    },
+    {
+      "scene": "teatime",
+      "queries": "configs/consolidated/teatime.queries.json",
+      "evaluation_scene": "output/system_map_rebuild/teatime/complete/scene.json",
+      "name": "teatime_supported",
+      "field": "output/query_field_20261007/teatime_supported_anchor_v1/models/trained",
+      "parent_field": "output/query_field_20261007/teatime_18views_v1/models/trained",
+      "support_audit": "output/query_field_20261007/teatime_support_audit_v1",
+      "reference_prediction": "output/query_field_20261007/supported_anchor_teatime_lerf_v1/teatime_original"
+    }
+  ],
+  "fixed_policy": "Same training-eligible input supports and complete observed member domain as the completed two-scene control; no new thresholds, losses, weights or fitting schedule.",
+  "evaluation": "Both predictions before scoring; original source query vectors reused exactly by candidate.",
+  "independent_final_test": false,
+  "acceptance": "Same local gate: actual text subset improves, region image does not regress, native responses and registered points exact. A failed third scene precludes broad promotion."
+}

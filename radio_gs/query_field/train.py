@@ -9,7 +9,7 @@ from torch.nn import functional as F
 
 from .contracts import Support
 from .field import CapabilityField
-from .observations import partial_mask_target
+from .observations import training_episode
 from .storage import save_field, sha256
 from .geometry import relaxed_subset_alpha
 
@@ -33,6 +33,9 @@ def fit(observations, output, config, device="cuda"):
     objective = config.get("render_objective", "visible_membership")
     if objective not in {"visible_membership", "subset_alpha"}:
         raise ValueError("unknown member rendering objective")
+    anchor_domain = config.get('inferred_anchor_domain', 'all_observed')
+    if anchor_domain not in {'all_observed', 'training_eligible'}:
+        raise ValueError('unknown inferred anchor domain')
     if sha256(root / "initial.pt") != manifest["initial"]["sha256"]:
         raise ValueError("initial native field changed")
     initial = torch.load(root / "initial.pt", map_location="cpu", weights_only=True)
@@ -43,6 +46,7 @@ def fit(observations, output, config, device="cuda"):
     train_frames = manifest["splits"]["train_frames"]
     views = []
     examples = []
+    anchor_eligible = torch.zeros(len(initial['observed']), dtype=torch.bool)
     for frame in train_frames:
         entry = next(r for r in manifest["frames"] if r["frame"] == frame)
         path = root / f"view_{frame:05d}.pt"
@@ -54,24 +58,19 @@ def fit(observations, output, config, device="cuda"):
             height=view["original_hw"][0],width=view["original_hw"][1])
         views.append(view)
         for index in range(len(view["masks"])):
-            pos, neg = partial_mask_target(view["masks"], index, view["scales_m"])
-            visible = view["raw_mass"].reshape(pos.shape) > 0
-            pos &= visible
-            neg &= visible
-            candidate_pixels = torch.where(pos.flatten() & (view["best_element"] >= 0))[0]
-            if len(candidate_pixels):
-                rows = view["best_element"][candidate_pixels]
-                good = initial["observed"][rows]
-                candidate_pixels = candidate_pixels[good]
-            if len(candidate_pixels) and bool(neg.any()):
-                examples.append((len(views)-1, index, pos.flatten().to(device), neg.flatten().to(device), candidate_pixels))
+            episode = training_episode(view, index, initial['observed'])
+            if episode is not None:
+                pos, neg, candidate_pixels = episode
+                anchor_eligible[view['best_element'][candidate_pixels]] = True
+                examples.append((len(views)-1, index, pos.to(device), neg.to(device), candidate_pixels))
     if not examples:
         raise ValueError("no reliable positive/negative training episodes")
     physical_scale = float(torch.cat([v["scales_m"] for v in views]).median())
     field = CapabilityField(initial["geometry"], initial["semantic"], initial["local"], group,
               initial["observed"], default_scale=physical_scale, threshold=config["threshold"],
               candidate_count=config["candidate_count"],
-              candidate_radius=config["candidate_radius_m"]*manifest["world_units_per_metre"]).to(device)
+              candidate_radius=config["candidate_radius_m"]*manifest["world_units_per_metre"],
+              anchor_eligible=anchor_eligible if anchor_domain=='training_eligible' else None).to(device)
     baseline_path = Path(output) / "untrained"
     trained_path = Path(output) / "trained"
     baseline_manifest = save_field(field, baseline_path, dict(observations_sha256=sha256(root / "observations.json"),
@@ -126,6 +125,7 @@ def fit(observations, output, config, device="cuda"):
             extra_3d_labels=False, final_benchmark_queries_used=False, relation_language_training=False))
     report = dict(config=config, train_frames=train_frames, training_episodes=len(examples),
                   render_objective=objective,
+                  inferred_anchor_domain=anchor_domain,eligible_input_anchors=int(anchor_eligible.sum()),
                   fixed_training_diagnostic_domain="full-scene normalized membership; identical diagnostic across objectives",
                   development_frames=manifest["splits"]["development_frames"],
                   default_scale_m=physical_scale, geometry_unchanged=geometry_unchanged,

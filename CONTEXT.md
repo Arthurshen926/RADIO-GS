@@ -18,6 +18,27 @@ its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
 Latest candidate evidence (2026-10-07):
+`docs/experiments/2026-10-07-training-supported-identity.md`.
+Native top-1 text anchors in figurines/ramen were 0/36 eligible source-interior
+training supports and 0/36 source-view dominant contributors. An optional
+train-only `anchor_eligible` buffer now restricts inferred text/image inputs,
+while retaining the complete observed member carrier and all registered prompts.
+No learned/native/geometry tensor changes; one Boolean byte per Gaussian added.
+The compiler and fitter share `training_episode` to prevent rule drift.
+Paired actual LERF subset IoU (%), original -> supported: figurines
+11.5965 -> 14.6841, ramen 6.7424 -> 9.6614, newly constructed teatime
+16.8013 -> 21.9424. Teacher-region image diagnostics improve on all three.
+All registered-point diagnostic metrics and native text responses remain exact.
+This passes the fixed local mechanism gate; real subset quality is still far
+below the desired reference. Keep it opt-in, preserve the native-only diagnostic,
+and investigate remaining member extent before compression or five-task claims.
+Teatime adds a matched 18-view/2000-step fit on 1,829,615 Gaussians; no hyperparameter
+change or extra teacher/label. Three source-denied four-input cold replays pass.
+22 targeted tests pass; 14 affected tests rerun after the training-rule refactor.
+All jobs complete. The original worktree has new parallel paper changes; its
+branch, HEAD and index remain unchanged, and those paper changes are preserved.
+
+Previous candidate evidence (2026-10-07):
 `docs/experiments/2026-10-07-query-field-two-scene-and-readout.md`.
 Three more source-only fits completed; figurines/ramen both have fixed 6/18-view
 controls and real LERF prediction-before-scoring runs. More observations improve

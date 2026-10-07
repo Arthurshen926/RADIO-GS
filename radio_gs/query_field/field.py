@@ -54,7 +54,8 @@ class CapabilityField(nn.Module):
 
     def __init__(self, geometry, semantic, local, group, observed, *,
                  semantic_codec=None, local_codec=None, default_scale=0.5,
-                 threshold=0.5, candidate_count=8, candidate_radius=0.05):
+                 threshold=0.5, candidate_count=8, candidate_radius=0.05,
+                 anchor_eligible=None):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -69,6 +70,15 @@ class CapabilityField(nn.Module):
                 raise ValueError("invalid frozen Gaussian geometry")
             self.register_buffer(key, value)
         self.register_buffer("observed", observed.detach().bool())
+        if anchor_eligible is not None:
+            if anchor_eligible.shape != (count,) or anchor_eligible.dtype != torch.bool:
+                raise ValueError("anchor eligibility must be a Boolean Gaussian-row mask")
+            if not bool(anchor_eligible.any()) or bool((anchor_eligible & ~observed.bool()).any()):
+                raise ValueError("inferred anchors require nonempty observed training support")
+            anchor_eligible = anchor_eligible.detach().clone()
+        # Optional, source-only exposure summary. This limits inferred input
+        # anchors, never the decoded members or explicitly registered prompts.
+        self.register_buffer("anchor_eligible", anchor_eligible)
         self.semantic = NativeCoordinates(semantic, **(semantic_codec or {}))
         self.local = NativeCoordinates(local, **(local_codec or {}))
         self.group = nn.Parameter(group.detach().float())
@@ -97,9 +107,11 @@ class CapabilityField(nn.Module):
         return self.log_temperature.exp().clamp(1, 50) * (selected @ prototype - self.affinity_bias)
 
     def _candidates(self, score):
-        # Examine the full observed carrier; no fixed top-k proposal truncation.
-        order = torch.argsort(score.masked_fill(~self.observed, -torch.inf), descending=True, stable=True)
-        order = order[self.observed[order]]
+        eligible = self.observed if self.anchor_eligible is None else self.anchor_eligible
+        # Examine the complete declared support domain before spatial NMS.
+        # Membership output always retains the full observed Gaussian carrier.
+        order = torch.argsort(score.masked_fill(~eligible, -torch.inf), descending=True, stable=True)
+        order = order[eligible[order]]
         chosen = []
         while len(order) and len(chosen) < self.candidate_count:
             index = order[0]
@@ -170,6 +182,7 @@ class CapabilityField(nn.Module):
                            candidates, candidate_weights, float(scale), dict(
                                shared_member_core=True, source_access=False,
                                identity_rule="native evidence with spatially separated hypotheses",
+                               inferred_anchor_domain="all_observed" if self.anchor_eligible is None else "training_eligible",
                                uncertainty_resolved=False, semantic_scores_calibrated=False,
                                membership_scores_calibrated=False,
                                observed_positive_mass_fraction=positive_coverage,

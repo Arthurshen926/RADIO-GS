@@ -26,6 +26,7 @@ its label-trained member tree is silently called by the new package.
 | `native_transfer` | Paired native-coordinate intervention with fixed members and observation support |
 | `public_lerf` | Source-free text prediction, then unchanged historical benchmark scoring |
 | `readout_study`, `subset_errors` | Exact baseline replay, explicit selection controls, and checked error decomposition |
+| `support_audit`, `support_control` | Train-only inferred-support compilation, matched packaging, and three-scene validation |
 
 ```mermaid
 flowchart LR
@@ -47,6 +48,18 @@ does not prove that the source teacher's query capability survived initial
 multi-view fusion. Native query ranking and local matching preservation remain
 separate required experiments. Likewise, a shared affinity decoder with a scale
 gate is an implementation starting point, not a novelty claim by itself.
+
+An optional protected `anchor_eligible` mask now aligns inferred text/image
+supports with the source-interior domain used by member training. It does not
+restrict decoded members, relocate registered prompts or turn inferred anchors
+into certain positives. `observations.training_episode` is the shared rule for
+fitting and support compilation. Old exports without the mask retain their old
+behavior. New fits may set `training.inferred_anchor_domain` to
+`training_eligible`; the default remains `all_observed` for matched controls.
+See the [three-scene result](../experiments/2026-10-07-training-supported-identity.md)
+and `configs/query_field/supported_anchor_control.json` for policy-only packaging
+of existing fields. The added mask belongs to the deployment size, not a hidden
+training-cache dependency.
 
 ## Reproduce the first pilot
 
@@ -104,7 +117,8 @@ The shared member path is much weaker than native-only selection on both
 scene-specific member architectures. It narrows the next implementation work.
 
 - Diagnose and repair the loss from native inferred identity to member extent,
-  including the mismatch between reliable training anchors and inferred runtime support.
+  after the completed training-supported input correction; actual subset extent
+  remains weak despite better semantic response maps.
 - Preserve registered-point competence while testing native-conditioned member learning;
   no public benchmark queries or answers enter scene fitting.
 - Evaluate actual reference-image target identity beyond teacher-region diagnostics.

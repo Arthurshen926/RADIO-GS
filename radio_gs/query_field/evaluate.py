@@ -54,7 +54,7 @@ def _summarize(rows):
 
 
 @torch.no_grad()
-def evaluate(output, device="cuda"):
+def evaluate(output, device="cuda", stages=("untrained", "trained")):
     root = Path(output)
     target = root / "development.json"
     if target.exists():
@@ -83,7 +83,9 @@ def evaluate(output, device="cuda"):
                  "actual_subset_iou": "Select Gaussian rows at fixed 0.5, re-rasterize only this subset, threshold accumulated alpha at 0.5. Default-scale cases only.",
                  "partial_loss": "Teacher interior versus disjoint comparable-scale masks; unknown areas omitted. Not verified whole-instance truth."},
         text_benchmark_evaluated=False, source_rgb_opened_by_query=False, stages={})
-    for stage in ["untrained", "trained"]:
+    if not stages or any(stage not in {'untrained','trained'} for stage in stages):
+        raise ValueError('unknown evaluation stage')
+    for stage in stages:
         started = time.monotonic()
         field, export = load_field(root / "models" / stage, device)
         if str(device).startswith("cuda"):

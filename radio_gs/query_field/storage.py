@@ -24,6 +24,8 @@ def save_field(field, directory, provenance):
                     files={"field.pt": dict(sha256=sha256(root / "field.pt"),
                                             bytes=(root / "field.pt").stat().st_size)},
                     elements=len(field.xyz), observed=int(field.observed.sum()),
+                    inferred_anchor_domain="all_observed" if field.anchor_eligible is None else "training_eligible",
+                    eligible_anchors=None if field.anchor_eligible is None else int(field.anchor_eligible.sum()),
                     semantic_native_dim=field.semantic.native_dim,
                     local_native_dim=field.local.native_dim,
                     semantic_code_dim=field.semantic.codes.shape[1],
@@ -56,6 +58,6 @@ def load_field(directory, device="cpu"):
               for name in ["semantic", "local"]}
     field = CapabilityField(geometry, state["semantic.codes"], state["local.codes"], state["group"],
                             state["observed"], semantic_codec=codecs["semantic"],
-                            local_codec=codecs["local"], **manifest["spec"])
+                            local_codec=codecs["local"], anchor_eligible=state.get("anchor_eligible"), **manifest["spec"])
     field.load_state_dict(state, strict=True)
     return field.to(device).eval(), manifest

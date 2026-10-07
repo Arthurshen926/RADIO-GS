@@ -1,0 +1,57 @@
+{
+  "schema": "radio_gs.query_field_pilot.v1",
+  "scene": "output/system_map_rebuild/teatime/complete/scene.json",
+  "train_frames": [
+    7,
+    16,
+    26,
+    35,
+    47,
+    56,
+    66,
+    75,
+    84,
+    94,
+    103,
+    113,
+    123,
+    133,
+    145,
+    157,
+    166,
+    175
+  ],
+  "development_frames": [
+    46,
+    134
+  ],
+  "raster_hw": [
+    96,
+    128
+  ],
+  "dino_width": 448,
+  "training": {
+    "seed": 20261007,
+    "group_dim": 32,
+    "steps": 2000,
+    "learning_rate": 0.01,
+    "threshold": 0.5,
+    "candidate_count": 8,
+    "candidate_radius_m": 0.05,
+    "render_objective": "subset_alpha"
+  },
+  "purpose": "Third-scene confirmation of the fixed training-eligible inferred-support change; paired original field and policy-only package.",
+  "selection": "Alphabetically first remaining LERF scene after figurines/ramen; new run in this branch, historically opened benchmark. Uniform source-roster positions, no score-based query/frame selection.",
+  "teacher_families": [
+    "siglip",
+    "dino",
+    "sam"
+  ],
+  "additional_3d_supervision": false,
+  "source_access_at_query": false,
+  "compression_default": false,
+  "input_budget_condition": "18 authorized source frames, same original geometry and 2000-step subset-alpha fit.",
+  "evaluation_stages": [
+    "trained"
+  ]
+}

@@ -41,6 +41,20 @@ def partial_mask_target(masks, index, scales):
     return positive, negative
 
 
+def training_episode(view, index, observed):
+    """One shared definition of known pixels and reliable input supports."""
+    positive, negative = partial_mask_target(view['masks'], index, view['scales_m'])
+    visible = view['raw_mass'].reshape(positive.shape) > 0
+    positive &= visible
+    negative &= visible
+    pixels = torch.where(positive.flatten() & (view['best_element'] >= 0))[0]
+    if len(pixels):
+        pixels = pixels[observed[view['best_element'][pixels]]]
+    if not len(pixels) or not bool(negative.any()):
+        return None
+    return positive.flatten(), negative.flatten(), pixels
+
+
 def _file_receipt(path):
     path = Path(path).resolve(strict=True)
     return dict(path=str(path), sha256=sha256(path), bytes=path.stat().st_size)

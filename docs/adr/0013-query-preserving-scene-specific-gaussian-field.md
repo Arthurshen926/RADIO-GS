@@ -124,3 +124,19 @@ same source budget and operator, measuring both identity and actual extent.
 Compression awaits a stronger matched high-capacity reference. This is a
 refinement of the implementation priorities, not a relaxation of the accepted
 architecture or a claim that the full research direction has failed.
+
+## Training-supported inferred inputs
+
+The [three-scene support control](../experiments/2026-10-07-training-supported-identity.md)
+identifies a concrete input-domain mismatch: original native peaks frequently
+have negligible training exposure and are not eligible member-training supports.
+Allow a frozen train-only eligibility mask for inferred anchors. This condition
+is derived from the original reliable SAM interiors/exclusions, never benchmark
+queries or development masks. The observed output carrier remains complete;
+explicit registered inputs remain unchanged, including inputs outside this mask.
+
+The fixed local gate passes on figurines, ramen and a newly constructed teatime
+field without changing native, group or geometry tensors. The third scene is
+historically opened development evidence, not independent final testing. Keep
+this as an opt-in supported-input policy. It does not establish full identity
+correctness, complete member extent, compactness or five-benchmark replacement.

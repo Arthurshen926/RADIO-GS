@@ -1,0 +1,29 @@
+{
+  "schema": "radio_gs.query_field_support_control.v1",
+  "jobs": [
+    {
+      "name": "figurines",
+      "scene": "figurines",
+      "parent_field": "output/query_field_20261007/figurines_18views_v1/models/trained",
+      "field": "output/query_field_20261007/figurines_supported_anchor_v1/models/trained",
+      "support_audit": "output/query_field_20261007/figurines_support_audit_v1",
+      "reference_prediction": "output/query_field_20261007/lerf_two_scene_probe_v1/figurines_18",
+      "evaluation_scene": "output/system_map_rebuild/figurines/complete/scene.json"
+    },
+    {
+      "name": "ramen",
+      "scene": "ramen",
+      "parent_field": "output/query_field_20261007/ramen_18views_v1/models/trained",
+      "field": "output/query_field_20261007/ramen_supported_anchor_v1/models/trained",
+      "support_audit": "output/query_field_20261007/ramen_support_audit_v1",
+      "reference_prediction": "output/query_field_20261007/lerf_two_scene_probe_v1/ramen_18",
+      "evaluation_scene": "output/system_map_rebuild/ramen/complete/scene.json"
+    }
+  ],
+  "fixed": "Geometry, native channels, group/member parameters, observed output domain, scale, eight candidates, 0.02 union margin and 0.5 threshold.",
+  "changed": "Only inferred-anchor eligibility: positive interior source-mask supports with reliable exclusions under the original training sampler.",
+  "acceptance": "Actual LERF subset improves in both scenes; region-image diagnostics do not regress in either; registered point outputs and native text responses replay exactly. This is a local mechanism gate, not v10 equivalence.",
+  "additional_3d_supervision": false,
+  "independent_final_test": false,
+  "selection_time": "Fixed before packaging, predictions and new scores; motivated by training-exposure audit."
+}

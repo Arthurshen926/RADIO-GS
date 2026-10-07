@@ -11,6 +11,9 @@ This is a research candidate; five-benchmark replacement accuracy is not establi
 The [two-scene implementation and readout study](docs/experiments/2026-10-07-query-field-two-scene-and-readout.md)
 includes real LERF evaluation. It identifies a substantial loss between native
 identity evidence and shared member selection; the candidate is not promoted.
+The [training-support correction](docs/experiments/2026-10-07-training-supported-identity.md)
+improves actual text subsets and region-image diagnostics on three scenes while
+preserving registered-point results. It remains an opt-in research candidate.
 
 The baseline source snapshot is `0f40545c2b93fa390e37038af8315c24b5bc57b5`.
 The older executable and results below remain baseline A; their defaults do
