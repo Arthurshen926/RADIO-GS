@@ -1,0 +1,4761 @@
+{
+  "schema": "radio_gs.architecture_attribution.v1",
+  "parent": "c6a7730",
+  "diagnostic_only": true,
+  "baseline_predictions_changed": false,
+  "new_method_promoted": false,
+  "independent_final_test": false,
+  "denominators": {
+    "fields": 30,
+    "lerf_query_views": 208,
+    "scannet_rooms": 10,
+    "nvos_cases": 8,
+    "uqis_queries": 268,
+    "uqis_targets": 67,
+    "fusion_development_views": 60,
+    "source_partial_regions": 2910
+  },
+  "scannet": {
+    "19": {
+      "native_miou": 0.36945195042257717,
+      "member_miou": 0.22285303734633724,
+      "perfect_observed_label_miou": 0.8789079743072514,
+      "observed_valid_fraction": 0.8365834218858301,
+      "all_member_below_half_fraction": 0.5777438653847649,
+      "member_top_tie_fraction": 0.06864974794518189,
+      "member_top_margin_median": 0.06534527651965619,
+      "observed_vertex_transitions": {
+        "both_correct": 242930,
+        "native_correct_member_wrong": 409925,
+        "native_wrong_member_correct": 79124,
+        "both_wrong_observed": 264994
+      }
+    },
+    "15": {
+      "native_miou": 0.377524039875153,
+      "member_miou": 0.23369364724393477,
+      "perfect_observed_label_miou": 0.8768164087928737,
+      "observed_valid_fraction": 0.8359431250704807,
+      "all_member_below_half_fraction": 0.6156334118380753,
+      "member_top_tie_fraction": 0.06333756906551558,
+      "member_top_margin_median": 0.06473141396418214,
+      "observed_vertex_transitions": {
+        "both_correct": 260106,
+        "native_correct_member_wrong": 388019,
+        "native_wrong_member_correct": 88919,
+        "both_wrong_observed": 234858
+      }
+    },
+    "10": {
+      "native_miou": 0.4419944270960567,
+      "member_miou": 0.26546159908271616,
+      "perfect_observed_label_miou": 0.8506180642627564,
+      "observed_valid_fraction": 0.8289616448806474,
+      "all_member_below_half_fraction": 0.6617973798180361,
+      "member_top_tie_fraction": 0.019059020185584658,
+      "member_top_margin_median": 0.08487043734639883,
+      "observed_vertex_transitions": {
+        "both_correct": 245954,
+        "native_correct_member_wrong": 350994,
+        "native_wrong_member_correct": 76804,
+        "both_wrong_observed": 164313
+      }
+    }
+  },
+  "uqis": {
+    "text": {
+      "iou": 0.12075455715566535,
+      "precision": 0.22628216865384174,
+      "recall": 0.19695494431536564,
+      "target_observed_fraction": 0.8742845734489051,
+      "observed_target_recall": 0.21449547377508185,
+      "target_unobserved_fraction": 0.125715426551095,
+      "target_observed_missed_fraction": 0.6773296291335393,
+      "queries": 67,
+      "supported": 67,
+      "top_candidate_target_count": 20,
+      "any_candidate_target_count": 27,
+      "target_associated_conditional_scene_count": 7,
+      "target_associated_conditional": {
+        "iou": 0.3580372123628574,
+        "precision": 0.6383867787205061,
+        "recall": 0.5100172082122407
+      },
+      "pooled_false_negative_unobserved_share": 0.1791662161783373,
+      "oracle_candidate_iou": 0.1645350276295044,
+      "candidate_masks_evaluated": 536,
+      "maximum_replay_error": 0.0,
+      "scope_bound_supported_only": {
+        "queries": 67,
+        "scene_count": 9,
+        "scene_macro": {
+          "target_unobserved": 0.125715426551095,
+          "target_observed_outside_envelope": 0.23172361876064906,
+          "target_observed_inside_envelope_missed": 0.4456060103728903,
+          "target_selected": 0.19695494431536564
+        },
+        "target_vertex_pooled": {
+          "target_unobserved": 0.15189001103284394,
+          "target_observed_outside_envelope": 0.3125893236017992,
+          "target_observed_inside_envelope_missed": 0.3832809980480353,
+          "target_selected": 0.15223966731732155
+        },
+        "effective_support_majority_target_count": 20,
+        "effective_support_zero_target_count": 47
+      }
+    },
+    "image": {
+      "iou": 0.15986098757685518,
+      "precision": 0.27212702918706866,
+      "recall": 0.24005600373478597,
+      "target_observed_fraction": 0.8742845734489051,
+      "observed_target_recall": 0.2536593489453137,
+      "target_unobserved_fraction": 0.125715426551095,
+      "target_observed_missed_fraction": 0.6342285697141191,
+      "queries": 67,
+      "supported": 67,
+      "top_candidate_target_count": 21,
+      "any_candidate_target_count": 32,
+      "target_associated_conditional_scene_count": 9,
+      "target_associated_conditional": {
+        "iou": 0.4286328595634642,
+        "precision": 0.7203841349788087,
+        "recall": 0.5232462774757491
+      },
+      "pooled_false_negative_unobserved_share": 0.18550858033674555,
+      "oracle_candidate_iou": 0.2212796357971179,
+      "candidate_masks_evaluated": 536,
+      "maximum_replay_error": 0.0,
+      "scope_bound_supported_only": {
+        "queries": 67,
+        "scene_count": 9,
+        "scene_macro": {
+          "target_unobserved": 0.125715426551095,
+          "target_observed_outside_envelope": 0.2641423730323377,
+          "target_observed_inside_envelope_missed": 0.3700861966817814,
+          "target_selected": 0.24005600373478597
+        },
+        "target_vertex_pooled": {
+          "target_unobserved": 0.15189001103284394,
+          "target_observed_outside_envelope": 0.26950352202325384,
+          "target_observed_inside_envelope_missed": 0.3973826699482305,
+          "target_selected": 0.18122379699567173
+        },
+        "effective_support_majority_target_count": 21,
+        "effective_support_zero_target_count": 46
+      }
+    },
+    "point_2d": {
+      "iou": 0.28373218415322987,
+      "precision": 0.5037397985437447,
+      "recall": 0.4702598620300168,
+      "target_observed_fraction": 0.8742845734489051,
+      "observed_target_recall": 0.4936223647557571,
+      "target_unobserved_fraction": 0.125715426551095,
+      "target_observed_missed_fraction": 0.4040247114188883,
+      "queries": 67,
+      "supported": 61,
+      "top_candidate_target_count": 61,
+      "any_candidate_target_count": 61,
+      "target_associated_conditional_scene_count": 9,
+      "target_associated_conditional": {
+        "iou": 0.3130816948738336,
+        "precision": 0.555072426471836,
+        "recall": 0.5177313777149971
+      },
+      "pooled_false_negative_unobserved_share": 0.21774020867398583,
+      "scope_bound_supported_only": {
+        "queries": 61,
+        "scene_count": 9,
+        "scene_macro": {
+          "target_unobserved": 0.0696679715050308,
+          "target_observed_outside_envelope": 0.011458865560382045,
+          "target_observed_inside_envelope_missed": 0.40114178521959004,
+          "target_selected": 0.5177313777149971
+        },
+        "target_vertex_pooled": {
+          "target_unobserved": 0.09533641094640469,
+          "target_observed_outside_envelope": 0.06325345458200911,
+          "target_observed_inside_envelope_missed": 0.49696878310560544,
+          "target_selected": 0.34444135136598075
+        },
+        "effective_support_majority_target_count": 59,
+        "effective_support_zero_target_count": 2
+      }
+    },
+    "point_3d": {
+      "iou": 0.27691263469022975,
+      "precision": 0.5073150655149958,
+      "recall": 0.450875423850583,
+      "target_observed_fraction": 0.8742845734489051,
+      "observed_target_recall": 0.4710552535946923,
+      "target_unobserved_fraction": 0.125715426551095,
+      "target_observed_missed_fraction": 0.4234091495983219,
+      "queries": 67,
+      "supported": 59,
+      "top_candidate_target_count": 59,
+      "any_candidate_target_count": 59,
+      "target_associated_conditional_scene_count": 9,
+      "target_associated_conditional": {
+        "iou": 0.31734335743135433,
+        "precision": 0.5777308551784885,
+        "recall": 0.5143638564695744
+      },
+      "pooled_false_negative_unobserved_share": 0.21534559350829993,
+      "scope_bound_supported_only": {
+        "queries": 59,
+        "scene_count": 9,
+        "scene_macro": {
+          "target_unobserved": 0.05904779178395062,
+          "target_observed_outside_envelope": 0.011613529662907192,
+          "target_observed_inside_envelope_missed": 0.41497482208356773,
+          "target_selected": 0.5143638564695744
+        },
+        "target_vertex_pooled": {
+          "target_unobserved": 0.08603090357562358,
+          "target_observed_outside_envelope": 0.06435806067605032,
+          "target_observed_inside_envelope_missed": 0.5063179500970928,
+          "target_selected": 0.34329308565123334
+        },
+        "effective_support_majority_target_count": 59,
+        "effective_support_zero_target_count": 0
+      }
+    }
+  },
+  "nvos": {
+    "macro": {
+      "positive_only": {
+        "iou": 0.5769796727024982,
+        "precision": 0.95935980295955,
+        "recall": 0.6054001583696591
+      },
+      "signed": {
+        "iou": 0.5768645863582337,
+        "precision": 0.9594067371652901,
+        "recall": 0.6052502904183494
+      },
+      "actual_subset": {
+        "iou": 0.7053595732215252,
+        "precision": 0.9168579995977022,
+        "recall": 0.7770688185516015
+      }
+    },
+    "per_scene": [
+      {
+        "scene": "fern",
+        "field_sha256": "e77d068d43a74db4efcc7cb38dfe800b5dc0f7d8b215963c5740e1f8bce11f9c",
+        "replay_max_abs_error": 0.0,
+        "metrics": {
+          "positive_only": {
+            "tp": 3114908,
+            "fp": 624201,
+            "fn": 319959,
+            "iou": 0.767394879809848,
+            "precision": 0.8330615662715369,
+            "recall": 0.906849668415109
+          },
+          "signed": {
+            "tp": 3114616,
+            "fp": 623801,
+            "fn": 320251,
+            "iou": 0.7673985652435725,
+            "precision": 0.8331376622779106,
+            "recall": 0.9067646578455585
+          },
+          "actual_subset": {
+            "tp": 3268650,
+            "fp": 857781,
+            "fn": 166217,
+            "iou": 0.7614530704590733,
+            "precision": 0.792125204565398,
+            "recall": 0.9516088978117639
+          }
+        },
+        "response_quantiles": {
+          "positive_only": {
+            "target": [
+              0.5583185911178591,
+              0.994303822517395,
+              0.9974969625473022
+            ],
+            "background": [
+              0.00012016131222480908,
+              0.00047697158879600465,
+              0.21589437723159777
+            ]
+          },
+          "signed": {
+            "target": [
+              0.5577036619186402,
+              0.9942647218704224,
+              0.9974762797355652
+            ],
+            "background": [
+              2.3717349176877188e-05,
+              0.0003346809244249016,
+              0.21434673368930818
+            ]
+          },
+          "actual_subset": {
+            "target": [
+              0.847793185710907,
+              0.9969873428344727,
+              0.9998478889465332
+            ],
+            "background": [
+              0.0,
+              0.0,
+              0.5152347683906551
+            ]
+          }
+        },
+        "prompt_response": {
+          "positive": {
+            "positive_component": 0.9831671714782715,
+            "negative_component": 0.0002134039532393217,
+            "signed": 0.9831016659736633
+          },
+          "negative": {
+            "positive_component": 0.006578972563147545,
+            "negative_component": 0.503585696220398,
+            "signed": 0.006048101000487804
+          }
+        },
+        "positive_selected": 121929,
+        "signed_selected": 121865,
+        "diagnostic_only": true,
+        "negative_removal_not_promoted": true,
+        "scale_m": 2.6987667083740234
+      },
+      {
+        "scene": "flower",
+        "field_sha256": "47b06bf876adaf20eeedd4f89dd0a1d92716a82d0ddac426b3429eb85b551419",
+        "replay_max_abs_error": 0.0,
+        "metrics": {
+          "positive_only": {
+            "tp": 207928,
+            "fp": 23,
+            "fn": 2473965,
+            "iou": 0.07752964671525879,
+            "precision": 0.9998893970214137,
+            "recall": 0.07753031161198452
+          },
+          "signed": {
+            "tp": 207928,
+            "fp": 23,
+            "fn": 2473965,
+            "iou": 0.07752964671525879,
+            "precision": 0.9998893970214137,
+            "recall": 0.07753031161198452
+          },
+          "actual_subset": {
+            "tp": 936630,
+            "fp": 6561,
+            "fn": 1745263,
+            "iou": 0.3483898180887603,
+            "precision": 0.9930438267540721,
+            "recall": 0.34924212114353553
+          }
+        },
+        "response_quantiles": {
+          "positive_only": {
+            "target": [
+              0.003771298984065652,
+              0.05714453011751175,
+              0.4346566259860999
+            ],
+            "background": [
+              0.0,
+              3.3896940617756755e-20,
+              0.003182142972946167
+            ]
+          },
+          "signed": {
+            "target": [
+              0.003771298984065652,
+              0.05714453011751175,
+              0.4346566259860999
+            ],
+            "background": [
+              0.0,
+              3.389274655355717e-20,
+              0.003182142972946167
+            ]
+          },
+          "actual_subset": {
+            "target": [
+              0.0,
+              0.08773770183324814,
+              0.9977366328239441
+            ],
+            "background": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prompt_response": {
+          "positive": {
+            "positive_component": 0.2613951563835144,
+            "negative_component": 1.0113522241894657e-09,
+            "signed": 0.2613951563835144
+          },
+          "negative": {
+            "positive_component": 0.0002485520963091403,
+            "negative_component": 0.00018838893447536975,
+            "signed": 0.0002485520963091403
+          }
+        },
+        "positive_selected": 3820,
+        "signed_selected": 3820,
+        "diagnostic_only": true,
+        "negative_removal_not_promoted": true,
+        "scale_m": 0.2437039464712143
+      },
+      {
+        "scene": "fortress",
+        "field_sha256": "5db3a179c8864e7c1079e5fc6297719d1f599a5fc71b013aad8cfa1c3e1088aa",
+        "replay_max_abs_error": 0.0,
+        "metrics": {
+          "positive_only": {
+            "tp": 1405164,
+            "fp": 19299,
+            "fn": 850337,
+            "iou": 0.6177088095656761,
+            "precision": 0.9864517365491416,
+            "recall": 0.6229941817804558
+          },
+          "signed": {
+            "tp": 1404300,
+            "fp": 19055,
+            "fn": 851201,
+            "iou": 0.6173952191108946,
+            "precision": 0.9866126159672043,
+            "recall": 0.6226111183280344
+          },
+          "actual_subset": {
+            "tp": 2095422,
+            "fp": 124982,
+            "fn": 160079,
+            "iou": 0.8802507726373178,
+            "precision": 0.9437120451953789,
+            "recall": 0.9290272981479503
+          }
+        },
+        "response_quantiles": {
+          "positive_only": {
+            "target": [
+              0.06955606490373611,
+              0.6356964707374573,
+              0.9138867855072021
+            ],
+            "background": [
+              1.5277256898116322e-05,
+              0.00017193451640196145,
+              0.0009358451468870054
+            ]
+          },
+          "signed": {
+            "target": [
+              0.06936325877904892,
+              0.6352307796478271,
+              0.9135611653327942
+            ],
+            "background": [
+              9.948009562776862e-08,
+              8.436953066848218e-06,
+              0.00029156077653169713
+            ]
+          },
+          "actual_subset": {
+            "target": [
+              0.626887321472168,
+              0.9953842759132385,
+              0.9998449683189392
+            ],
+            "background": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prompt_response": {
+          "positive": {
+            "positive_component": 0.6118457317352295,
+            "negative_component": 0.0017944928258657455,
+            "signed": 0.6115003824234009
+          },
+          "negative": {
+            "positive_component": 0.0007280766731128097,
+            "negative_component": 0.806958019733429,
+            "signed": 0.0006105080829001963
+          }
+        },
+        "positive_selected": 31976,
+        "signed_selected": 31961,
+        "diagnostic_only": true,
+        "negative_removal_not_promoted": true,
+        "scale_m": 1.7941341400146484
+      },
+      {
+        "scene": "horns_center",
+        "field_sha256": "d5f058f241e3cb28435adfac311584d5c8e0127d2a6cf5e4c7c94399280de8ef",
+        "replay_max_abs_error": 0.0,
+        "metrics": {
+          "positive_only": {
+            "tp": 1333000,
+            "fp": 5400,
+            "fn": 723517,
+            "iou": 0.646485770280763,
+            "precision": 0.9959653317393903,
+            "recall": 0.6481833118812049
+          },
+          "signed": {
+            "tp": 1332114,
+            "fp": 5399,
+            "fn": 724403,
+            "iou": 0.6460563863901342,
+            "precision": 0.9959634037201881,
+            "recall": 0.6477524863640807
+          },
+          "actual_subset": {
+            "tp": 1900781,
+            "fp": 20151,
+            "fn": 155736,
+            "iou": 0.9153032646527995,
+            "precision": 0.9895097796278056,
+            "recall": 0.9242719607958505
+          }
+        },
+        "response_quantiles": {
+          "positive_only": {
+            "target": [
+              0.20075515508651734,
+              0.6349671483039856,
+              0.9063743829727173
+            ],
+            "background": [
+              4.046439849858532e-10,
+              0.0004091642622370273,
+              0.004617297928780322
+            ]
+          },
+          "signed": {
+            "target": [
+              0.200545334815979,
+              0.6346067786216736,
+              0.9062601327896118
+            ],
+            "background": [
+              4.043099965933551e-10,
+              0.0004040768835693598,
+              0.004566587880253794
+            ]
+          },
+          "actual_subset": {
+            "target": [
+              0.653514301776886,
+              0.9993961453437805,
+              0.999862551689148
+            ],
+            "background": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prompt_response": {
+          "positive": {
+            "positive_component": 0.6509003043174744,
+            "negative_component": 0.0006379776168614626,
+            "signed": 0.6507377624511719
+          },
+          "negative": {
+            "positive_component": 0.0012155629228800535,
+            "negative_component": 0.01958596520125866,
+            "signed": 0.0011925664730370045
+          }
+        },
+        "positive_selected": 19009,
+        "signed_selected": 18998,
+        "diagnostic_only": true,
+        "negative_removal_not_promoted": true,
+        "scale_m": 0.9912951588630676
+      },
+      {
+        "scene": "horns_left",
+        "field_sha256": "d5f058f241e3cb28435adfac311584d5c8e0127d2a6cf5e4c7c94399280de8ef",
+        "replay_max_abs_error": 0.0,
+        "metrics": {
+          "positive_only": {
+            "tp": 633331,
+            "fp": 26028,
+            "fn": 81039,
+            "iou": 0.8553926401746088,
+            "precision": 0.9605252980546258,
+            "recall": 0.8865587860632446
+          },
+          "signed": {
+            "tp": 633194,
+            "fp": 25971,
+            "fn": 81176,
+            "iou": 0.855273448316384,
+            "precision": 0.9606001532241548,
+            "recall": 0.8863670086929742
+          },
+          "actual_subset": {
+            "tp": 671828,
+            "fp": 140206,
+            "fn": 42542,
+            "iou": 0.7861536013180805,
+            "precision": 0.8273397419319881,
+            "recall": 0.9404482271092011
+          }
+        },
+        "response_quantiles": {
+          "positive_only": {
+            "target": [
+              0.46568658351898196,
+              0.885981559753418,
+              0.9472495019435883
+            ],
+            "background": [
+              3.8146187597565273e-10,
+              0.0010909911943599582,
+              0.01186986593529582
+            ]
+          },
+          "signed": {
+            "target": [
+              0.4647216856479645,
+              0.8857941329479218,
+              0.9470394492149353
+            ],
+            "background": [
+              3.808843379582427e-10,
+              0.0010715320240706205,
+              0.011809649411588907
+            ]
+          },
+          "actual_subset": {
+            "target": [
+              0.8651756823062897,
+              0.9997221231460571,
+              0.9998705983161926
+            ],
+            "background": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prompt_response": {
+          "positive": {
+            "positive_component": 0.8732455372810364,
+            "negative_component": 0.0002836200874298811,
+            "signed": 0.8730316758155823
+          },
+          "negative": {
+            "positive_component": 0.006260855123400688,
+            "negative_component": 0.025284340605139732,
+            "signed": 0.0062264930456876755
+          }
+        },
+        "positive_selected": 12925,
+        "signed_selected": 12903,
+        "diagnostic_only": true,
+        "negative_removal_not_promoted": true,
+        "scale_m": 0.9912951588630676
+      },
+      {
+        "scene": "leaves",
+        "field_sha256": "70cf4610403902b124dff19d8403b66958d19723c01f2ef4455db4554fca948e",
+        "replay_max_abs_error": 0.0,
+        "metrics": {
+          "positive_only": {
+            "tp": 676307,
+            "fp": 3493,
+            "fn": 51221,
+            "iou": 0.9251539969440002,
+            "precision": 0.9948617240364813,
+            "recall": 0.9295958368612617
+          },
+          "signed": {
+            "tp": 676307,
+            "fp": 3493,
+            "fn": 51221,
+            "iou": 0.9251539969440002,
+            "precision": 0.9948617240364813,
+            "recall": 0.9295958368612617
+          },
+          "actual_subset": {
+            "tp": 712365,
+            "fp": 8187,
+            "fn": 15163,
+            "iou": 0.9682621667357605,
+            "precision": 0.9886378776271525,
+            "recall": 0.9791581904751432
+          }
+        },
+        "response_quantiles": {
+          "positive_only": {
+            "target": [
+              0.6928367733955383,
+              0.9373342096805573,
+              0.9810213625431061
+            ],
+            "background": [
+              4.3069592759858324e-13,
+              1.981986429200333e-06,
+              0.0004384648898849265
+            ]
+          },
+          "signed": {
+            "target": [
+              0.6928367733955383,
+              0.9373341798782349,
+              0.9810213625431061
+            ],
+            "background": [
+              3.9382191084624853e-13,
+              1.981671516659844e-06,
+              0.0004384587780805305
+            ]
+          },
+          "actual_subset": {
+            "target": [
+              0.9722960233688355,
+              0.999828040599823,
+              0.9998845458030701
+            ],
+            "background": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prompt_response": {
+          "positive": {
+            "positive_component": 0.9461680054664612,
+            "negative_component": 2.2995325262009647e-12,
+            "signed": 0.9461680054664612
+          },
+          "negative": {
+            "positive_component": 0.00013406213838607073,
+            "negative_component": 0.0015097148716449738,
+            "signed": 0.00013406203652266413
+          }
+        },
+        "positive_selected": 5857,
+        "signed_selected": 5857,
+        "diagnostic_only": true,
+        "negative_removal_not_promoted": true,
+        "scale_m": 0.20668242871761322
+      },
+      {
+        "scene": "orchids",
+        "field_sha256": "607796e83a0aad97a52ae3a89203d464d65082289a54b82e7fdde11f0c8db0bd",
+        "replay_max_abs_error": 0.0,
+        "metrics": {
+          "positive_only": {
+            "tp": 176737,
+            "fp": 104,
+            "fn": 1733261,
+            "iou": 0.09252751947278208,
+            "precision": 0.9994119010862865,
+            "recall": 0.09253255762571479
+          },
+          "signed": {
+            "tp": 176736,
+            "fp": 104,
+            "fn": 1733262,
+            "iou": 0.09252699594053092,
+            "precision": 0.9994118977606876,
+            "recall": 0.09253203406495714
+          },
+          "actual_subset": {
+            "tp": 443088,
+            "fp": 4883,
+            "fn": 1466910,
+            "iou": 0.2313919246156811,
+            "precision": 0.9890997408314377,
+            "recall": 0.23198348898794657
+          }
+        },
+        "response_quantiles": {
+          "positive_only": {
+            "target": [
+              0.0012538612005300821,
+              0.013558216392993927,
+              0.4606987446546555
+            ],
+            "background": [
+              2.1157899144602976e-31,
+              8.966811719801626e-07,
+              0.00014989862393122166
+            ]
+          },
+          "signed": {
+            "target": [
+              0.0012537542032077908,
+              0.013555612415075302,
+              0.46069767177104953
+            ],
+            "background": [
+              2.1157899144602976e-31,
+              8.294895792460011e-07,
+              0.00014921074034646153
+            ]
+          },
+          "actual_subset": {
+            "target": [
+              0.0,
+              0.00333378987852484,
+              0.9926220774650574
+            ],
+            "background": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prompt_response": {
+          "positive": {
+            "positive_component": 0.3012675940990448,
+            "negative_component": 7.129395089577883e-05,
+            "signed": 0.3012614846229553
+          },
+          "negative": {
+            "positive_component": 8.046086441027e-05,
+            "negative_component": 0.03487487509846687,
+            "signed": 8.004905248526484e-05
+          }
+        },
+        "positive_selected": 4247,
+        "signed_selected": 4247,
+        "diagnostic_only": true,
+        "negative_removal_not_promoted": true,
+        "scale_m": 0.30193331837654114
+      },
+      {
+        "scene": "trex",
+        "field_sha256": "3cb4713733f0acf79aa12f8725292c9c955d3585a4617e077a803b49077a59c5",
+        "replay_max_abs_error": 0.0,
+        "metrics": {
+          "positive_only": {
+            "tp": 1001958,
+            "fp": 105531,
+            "fn": 473774,
+            "iou": 0.6336441186570482,
+            "precision": 0.9047114689175242,
+            "recall": 0.6789566127182984
+          },
+          "signed": {
+            "tp": 1001799,
+            "fp": 105434,
+            "fn": 473933,
+            "iou": 0.6335824322050942,
+            "precision": 0.9047770433142799,
+            "recall": 0.6788488695779451
+          },
+          "actual_subset": {
+            "tp": 1344112,
+            "fp": 312431,
+            "fn": 131620,
+            "iou": 0.7516719672647292,
+            "precision": 0.8113957802483848,
+            "recall": 0.9108103639414202
+          }
+        },
+        "response_quantiles": {
+          "positive_only": {
+            "target": [
+              0.12034643664956093,
+              0.7389683723449707,
+              0.9559283792972565
+            ],
+            "background": [
+              7.290814755833713e-05,
+              0.0005445180868264288,
+              0.007645468087866894
+            ]
+          },
+          "signed": {
+            "target": [
+              0.12010987550020218,
+              0.7388185262680054,
+              0.9558394193649292
+            ],
+            "background": [
+              7.123043687897737e-05,
+              0.0005155934777576476,
+              0.007585011934861541
+            ]
+          },
+          "actual_subset": {
+            "target": [
+              0.5761085033416748,
+              0.9983104467391968,
+              0.9998593926429749
+            ],
+            "background": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prompt_response": {
+          "positive": {
+            "positive_component": 0.7275497317314148,
+            "negative_component": 0.0008561005815863609,
+            "signed": 0.7274099588394165
+          },
+          "negative": {
+            "positive_component": 0.0013168103760108352,
+            "negative_component": 0.07625599950551987,
+            "signed": 0.0012517955619841814
+          }
+        },
+        "positive_selected": 42096,
+        "signed_selected": 42079,
+        "diagnostic_only": true,
+        "negative_removal_not_promoted": true,
+        "scale_m": 2.133233070373535
+      }
+    ],
+    "scope_bounds": [
+      {
+        "scene": "fern",
+        "default_scale_m": 2.6987667083740234,
+        "envelope_radius_m": 9.959215084199075,
+        "current_target_recall": 0.9067646578455585,
+        "optimistic_response_target_recall": 0.9919673745737463,
+        "optimistic_positive_prompt_mean": 0.9961110353469849,
+        "interpretation": "Analytic cosine<=1 member upper bound through unchanged retained response; recall bound only, not IoU or a model result"
+      },
+      {
+        "scene": "flower",
+        "default_scale_m": 0.2437039464712143,
+        "envelope_radius_m": 0.8384236953405803,
+        "current_target_recall": 0.07753031161198452,
+        "optimistic_response_target_recall": 0.9902874574041545,
+        "optimistic_positive_prompt_mean": 0.9967765808105469,
+        "interpretation": "Analytic cosine<=1 member upper bound through unchanged retained response; recall bound only, not IoU or a model result"
+      },
+      {
+        "scene": "fortress",
+        "default_scale_m": 1.7941341400146484,
+        "envelope_radius_m": 7.164334958550922,
+        "current_target_recall": 0.6226111183280344,
+        "optimistic_response_target_recall": 0.9995956552446663,
+        "optimistic_positive_prompt_mean": 0.9985302090644836,
+        "interpretation": "Analytic cosine<=1 member upper bound through unchanged retained response; recall bound only, not IoU or a model result"
+      },
+      {
+        "scene": "horns_center",
+        "default_scale_m": 0.9912951588630676,
+        "envelope_radius_m": 2.886532022725503,
+        "current_target_recall": 0.6477524863640807,
+        "optimistic_response_target_recall": 0.9884032079481959,
+        "optimistic_positive_prompt_mean": 0.9843795895576477,
+        "interpretation": "Analytic cosine<=1 member upper bound through unchanged retained response; recall bound only, not IoU or a model result"
+      },
+      {
+        "scene": "horns_left",
+        "default_scale_m": 0.9912951588630676,
+        "envelope_radius_m": 2.886532022725503,
+        "current_target_recall": 0.8863670086929742,
+        "optimistic_response_target_recall": 0.9792250514439296,
+        "optimistic_positive_prompt_mean": 0.985222339630127,
+        "interpretation": "Analytic cosine<=1 member upper bound through unchanged retained response; recall bound only, not IoU or a model result"
+      },
+      {
+        "scene": "leaves",
+        "default_scale_m": 0.20668242871761322,
+        "envelope_radius_m": 0.9048990608606364,
+        "current_target_recall": 0.9295958368612617,
+        "optimistic_response_target_recall": 0.9842672721874622,
+        "optimistic_positive_prompt_mean": 0.9999170303344727,
+        "interpretation": "Analytic cosine<=1 member upper bound through unchanged retained response; recall bound only, not IoU or a model result"
+      },
+      {
+        "scene": "orchids",
+        "default_scale_m": 0.30193331837654114,
+        "envelope_radius_m": 1.0622696613471512,
+        "current_target_recall": 0.09253203406495714,
+        "optimistic_response_target_recall": 0.9861125509031947,
+        "optimistic_positive_prompt_mean": 0.9962472319602966,
+        "interpretation": "Analytic cosine<=1 member upper bound through unchanged retained response; recall bound only, not IoU or a model result"
+      },
+      {
+        "scene": "trex",
+        "default_scale_m": 2.133233070373535,
+        "envelope_radius_m": 6.998261276235861,
+        "current_target_recall": 0.6788488695779451,
+        "optimistic_response_target_recall": 0.9936546744259798,
+        "optimistic_positive_prompt_mean": 0.9896668791770935,
+        "interpretation": "Analytic cosine<=1 member upper bound through unchanged retained response; recall bound only, not IoU or a model result"
+      }
+    ]
+  },
+  "lerf": {
+    "query_views": [
+      {
+        "scene": "figurines",
+        "query": "green apple",
+        "frame": "frame_00041",
+        "tp": 7431,
+        "fp": 8892,
+        "fn": 10,
+        "iou": 0.4549684687442601,
+        "precision": 0.4552471972063959,
+        "recall": 0.9986560946109394
+      },
+      {
+        "scene": "figurines",
+        "query": "jake",
+        "frame": "frame_00041",
+        "tp": 6875,
+        "fp": 9235,
+        "fn": 897,
+        "iou": 0.40424531075439524,
+        "precision": 0.4267535692116698,
+        "recall": 0.8845856922285126
+      },
+      {
+        "scene": "figurines",
+        "query": "miffy",
+        "frame": "frame_00041",
+        "tp": 2200,
+        "fp": 367,
+        "fn": 59,
+        "iou": 0.8377760853008378,
+        "precision": 0.8570315543435918,
+        "recall": 0.9738822487826472
+      },
+      {
+        "scene": "figurines",
+        "query": "old camera",
+        "frame": "frame_00041",
+        "tp": 11809,
+        "fp": 11376,
+        "fn": 575,
+        "iou": 0.4970117845117845,
+        "precision": 0.5093379340090576,
+        "recall": 0.9535691214470284
+      },
+      {
+        "scene": "figurines",
+        "query": "pikachu",
+        "frame": "frame_00041",
+        "tp": 12035,
+        "fp": 5295,
+        "fn": 51,
+        "iou": 0.6924227604855877,
+        "precision": 0.6944604731679169,
+        "recall": 0.9957802416018534
+      },
+      {
+        "scene": "figurines",
+        "query": "pink ice cream",
+        "frame": "frame_00041",
+        "tp": 4589,
+        "fp": 11013,
+        "fn": 253,
+        "iou": 0.28943550930305895,
+        "precision": 0.29412895782591975,
+        "recall": 0.9477488641057414
+      },
+      {
+        "scene": "figurines",
+        "query": "pirate hat",
+        "frame": "frame_00041",
+        "tp": 1839,
+        "fp": 19120,
+        "fn": 0,
+        "iou": 0.08774273581754855,
+        "precision": 0.08774273581754855,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "porcelain hand",
+        "frame": "frame_00041",
+        "tp": 3768,
+        "fp": 3179,
+        "fn": 1,
+        "iou": 0.542314335060449,
+        "precision": 0.5423923995969483,
+        "recall": 0.9997346776333245
+      },
+      {
+        "scene": "figurines",
+        "query": "red apple",
+        "frame": "frame_00041",
+        "tp": 7747,
+        "fp": 23305,
+        "fn": 184,
+        "iou": 0.2480151107696248,
+        "precision": 0.2494847352827515,
+        "recall": 0.9767998991299962
+      },
+      {
+        "scene": "figurines",
+        "query": "red toy chair",
+        "frame": "frame_00041",
+        "tp": 24859,
+        "fp": 30248,
+        "fn": 80,
+        "iou": 0.4504502872053201,
+        "precision": 0.4511042154354256,
+        "recall": 0.9967921729018806
+      },
+      {
+        "scene": "figurines",
+        "query": "rubber duck with buoy",
+        "frame": "frame_00041",
+        "tp": 7533,
+        "fp": 3709,
+        "fn": 6,
+        "iou": 0.6697190611664295,
+        "precision": 0.6700764988436221,
+        "recall": 0.9992041384799045
+      },
+      {
+        "scene": "figurines",
+        "query": "rubber duck with hat",
+        "frame": "frame_00041",
+        "tp": 6049,
+        "fp": 17086,
+        "fn": 0,
+        "iou": 0.2614653122973849,
+        "precision": 0.2614653122973849,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "spatula",
+        "frame": "frame_00041",
+        "tp": 6280,
+        "fp": 136411,
+        "fn": 30,
+        "iou": 0.04400193384295233,
+        "precision": 0.0440111850081645,
+        "recall": 0.9952456418383518
+      },
+      {
+        "scene": "figurines",
+        "query": "tesla door handle",
+        "frame": "frame_00041",
+        "tp": 6892,
+        "fp": 21875,
+        "fn": 0,
+        "iou": 0.239580074390795,
+        "precision": 0.239580074390795,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "toy cat statue",
+        "frame": "frame_00041",
+        "tp": 1483,
+        "fp": 9546,
+        "fn": 7,
+        "iou": 0.1343783979702791,
+        "precision": 0.1344636866443014,
+        "recall": 0.9953020134228188
+      },
+      {
+        "scene": "figurines",
+        "query": "toy elephant",
+        "frame": "frame_00041",
+        "tp": 8477,
+        "fp": 7339,
+        "fn": 0,
+        "iou": 0.5359762266059687,
+        "precision": 0.5359762266059687,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "waldo",
+        "frame": "frame_00041",
+        "tp": 3404,
+        "fp": 7630,
+        "fn": 124,
+        "iou": 0.30507259365477685,
+        "precision": 0.3085009969186152,
+        "recall": 0.9648526077097506
+      },
+      {
+        "scene": "figurines",
+        "query": "green apple",
+        "frame": "frame_00105",
+        "tp": 15133,
+        "fp": 18422,
+        "fn": 0,
+        "iou": 0.4509909104455372,
+        "precision": 0.4509909104455372,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "green toy chair",
+        "frame": "frame_00105",
+        "tp": 9088,
+        "fp": 15227,
+        "fn": 961,
+        "iou": 0.3595505617977528,
+        "precision": 0.3737610528480362,
+        "recall": 0.9043685938899393
+      },
+      {
+        "scene": "figurines",
+        "query": "jake",
+        "frame": "frame_00105",
+        "tp": 3857,
+        "fp": 8610,
+        "fn": 198,
+        "iou": 0.30454007106198183,
+        "precision": 0.3093767546322291,
+        "recall": 0.9511713933415537
+      },
+      {
+        "scene": "figurines",
+        "query": "old camera",
+        "frame": "frame_00105",
+        "tp": 55310,
+        "fp": 44575,
+        "fn": 96,
+        "iou": 0.5532051089707044,
+        "precision": 0.5537367973169145,
+        "recall": 0.9982673356676173
+      },
+      {
+        "scene": "figurines",
+        "query": "pink ice cream",
+        "frame": "frame_00105",
+        "tp": 4666,
+        "fp": 7852,
+        "fn": 155,
+        "iou": 0.3681843288881875,
+        "precision": 0.3727432497204026,
+        "recall": 0.9678489939846505
+      },
+      {
+        "scene": "figurines",
+        "query": "pirate hat",
+        "frame": "frame_00105",
+        "tp": 889,
+        "fp": 49789,
+        "fn": 15,
+        "iou": 0.017536938038782476,
+        "precision": 0.01754212873436205,
+        "recall": 0.9834070796460177
+      },
+      {
+        "scene": "figurines",
+        "query": "pumpkin",
+        "frame": "frame_00105",
+        "tp": 63176,
+        "fp": 20334,
+        "fn": 52,
+        "iou": 0.7560374332830713,
+        "precision": 0.7565082026104658,
+        "recall": 0.9991775795533624
+      },
+      {
+        "scene": "figurines",
+        "query": "red apple",
+        "frame": "frame_00105",
+        "tp": 34609,
+        "fp": 14248,
+        "fn": 340,
+        "iou": 0.7034778543407119,
+        "precision": 0.7083734162965388,
+        "recall": 0.9902715385275688
+      },
+      {
+        "scene": "figurines",
+        "query": "rubber duck with buoy",
+        "frame": "frame_00105",
+        "tp": 4410,
+        "fp": 2141,
+        "fn": 2,
+        "iou": 0.6729742102853655,
+        "precision": 0.6731796672263777,
+        "recall": 0.9995466908431551
+      },
+      {
+        "scene": "figurines",
+        "query": "rubber duck with hat",
+        "frame": "frame_00105",
+        "tp": 2181,
+        "fp": 8951,
+        "fn": 2,
+        "iou": 0.19588647386384048,
+        "precision": 0.19592166726554078,
+        "recall": 0.9990838295923041
+      },
+      {
+        "scene": "figurines",
+        "query": "rubics cube",
+        "frame": "frame_00105",
+        "tp": 4824,
+        "fp": 3300,
+        "fn": 133,
+        "iou": 0.584231561099673,
+        "precision": 0.5937961595273265,
+        "recall": 0.973169255598144
+      },
+      {
+        "scene": "figurines",
+        "query": "spatula",
+        "frame": "frame_00105",
+        "tp": 1909,
+        "fp": 50273,
+        "fn": 0,
+        "iou": 0.03658349622475183,
+        "precision": 0.03658349622475183,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "tesla door handle",
+        "frame": "frame_00105",
+        "tp": 10568,
+        "fp": 25363,
+        "fn": 30,
+        "iou": 0.29387391896777065,
+        "precision": 0.2941192841835741,
+        "recall": 0.9971692772221173
+      },
+      {
+        "scene": "figurines",
+        "query": "green apple",
+        "frame": "frame_00152",
+        "tp": 6485,
+        "fp": 16367,
+        "fn": 84,
+        "iou": 0.2827432856644576,
+        "precision": 0.28378260108524417,
+        "recall": 0.9872126655503121
+      },
+      {
+        "scene": "figurines",
+        "query": "jake",
+        "frame": "frame_00152",
+        "tp": 10488,
+        "fp": 7302,
+        "fn": 339,
+        "iou": 0.5785206023498263,
+        "precision": 0.5895446880269815,
+        "recall": 0.9686893876420061
+      },
+      {
+        "scene": "figurines",
+        "query": "pikachu",
+        "frame": "frame_00152",
+        "tp": 19534,
+        "fp": 6048,
+        "fn": 3,
+        "iou": 0.7634942349032636,
+        "precision": 0.7635837698381674,
+        "recall": 0.9998464452065312
+      },
+      {
+        "scene": "figurines",
+        "query": "pirate hat",
+        "frame": "frame_00152",
+        "tp": 2077,
+        "fp": 21356,
+        "fn": 6,
+        "iou": 0.08861299543495883,
+        "precision": 0.08863568471813255,
+        "recall": 0.9971195391262602
+      },
+      {
+        "scene": "figurines",
+        "query": "porcelain hand",
+        "frame": "frame_00152",
+        "tp": 5638,
+        "fp": 2407,
+        "fn": 0,
+        "iou": 0.7008079552517091,
+        "precision": 0.7008079552517091,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "red apple",
+        "frame": "frame_00152",
+        "tp": 2889,
+        "fp": 12031,
+        "fn": 133,
+        "iou": 0.19192187603799907,
+        "precision": 0.19363270777479893,
+        "recall": 0.9559894109861019
+      },
+      {
+        "scene": "figurines",
+        "query": "rubber duck with hat",
+        "frame": "frame_00152",
+        "tp": 8203,
+        "fp": 7681,
+        "fn": 0,
+        "iou": 0.5164316293125157,
+        "precision": 0.5164316293125157,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "rubics cube",
+        "frame": "frame_00152",
+        "tp": 17460,
+        "fp": 12285,
+        "fn": 670,
+        "iou": 0.5740588525398652,
+        "precision": 0.5869894099848714,
+        "recall": 0.9630446773303916
+      },
+      {
+        "scene": "figurines",
+        "query": "toy cat statue",
+        "frame": "frame_00152",
+        "tp": 6767,
+        "fp": 11980,
+        "fn": 31,
+        "iou": 0.3603685163489189,
+        "precision": 0.36096442097402254,
+        "recall": 0.9954398352456605
+      },
+      {
+        "scene": "figurines",
+        "query": "toy elephant",
+        "frame": "frame_00152",
+        "tp": 20963,
+        "fp": 3924,
+        "fn": 78,
+        "iou": 0.8396955738033246,
+        "precision": 0.842327319484068,
+        "recall": 0.9962929518559004
+      },
+      {
+        "scene": "figurines",
+        "query": "waldo",
+        "frame": "frame_00152",
+        "tp": 5559,
+        "fp": 5018,
+        "fn": 498,
+        "iou": 0.501941309255079,
+        "precision": 0.5255743594592039,
+        "recall": 0.9177810797424467
+      },
+      {
+        "scene": "figurines",
+        "query": "bag",
+        "frame": "frame_00195",
+        "tp": 6124,
+        "fp": 17243,
+        "fn": 0,
+        "iou": 0.26207900029956777,
+        "precision": 0.26207900029956777,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "green apple",
+        "frame": "frame_00195",
+        "tp": 7539,
+        "fp": 11547,
+        "fn": 0,
+        "iou": 0.39500157183275697,
+        "precision": 0.39500157183275697,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "green toy chair",
+        "frame": "frame_00195",
+        "tp": 31062,
+        "fp": 16297,
+        "fn": 282,
+        "iou": 0.6520014273419953,
+        "precision": 0.6558837813298423,
+        "recall": 0.9910030627871363
+      },
+      {
+        "scene": "figurines",
+        "query": "miffy",
+        "frame": "frame_00195",
+        "tp": 919,
+        "fp": 493,
+        "fn": 59,
+        "iou": 0.6247450713800136,
+        "precision": 0.6508498583569405,
+        "recall": 0.9396728016359919
+      },
+      {
+        "scene": "figurines",
+        "query": "old camera",
+        "frame": "frame_00195",
+        "tp": 19247,
+        "fp": 26902,
+        "fn": 69,
+        "iou": 0.41643948245272405,
+        "precision": 0.4170621248564433,
+        "recall": 0.9964278318492441
+      },
+      {
+        "scene": "figurines",
+        "query": "pink ice cream",
+        "frame": "frame_00195",
+        "tp": 5907,
+        "fp": 12532,
+        "fn": 161,
+        "iou": 0.3175806451612903,
+        "precision": 0.32035359835132055,
+        "recall": 0.9734673698088332
+      },
+      {
+        "scene": "figurines",
+        "query": "pirate hat",
+        "frame": "frame_00195",
+        "tp": 1840,
+        "fp": 25966,
+        "fn": 37,
+        "iou": 0.06608483281255612,
+        "precision": 0.06617276846723728,
+        "recall": 0.9802876931273309
+      },
+      {
+        "scene": "figurines",
+        "query": "porcelain hand",
+        "frame": "frame_00195",
+        "tp": 1949,
+        "fp": 897,
+        "fn": 7,
+        "iou": 0.6831405538030144,
+        "precision": 0.6848208011243851,
+        "recall": 0.9964212678936605
+      },
+      {
+        "scene": "figurines",
+        "query": "rubber duck with buoy",
+        "frame": "frame_00195",
+        "tp": 4147,
+        "fp": 2591,
+        "fn": 36,
+        "iou": 0.6121936817242397,
+        "precision": 0.6154645295339863,
+        "recall": 0.9913937365527133
+      },
+      {
+        "scene": "figurines",
+        "query": "rubber duck with hat",
+        "frame": "frame_00195",
+        "tp": 4261,
+        "fp": 11259,
+        "fn": 42,
+        "iou": 0.2738079938311271,
+        "precision": 0.274548969072165,
+        "recall": 0.9902393678828724
+      },
+      {
+        "scene": "figurines",
+        "query": "rubics cube",
+        "frame": "frame_00195",
+        "tp": 6636,
+        "fp": 9998,
+        "fn": 226,
+        "iou": 0.39359430604982204,
+        "precision": 0.3989419261753036,
+        "recall": 0.9670649956280968
+      },
+      {
+        "scene": "figurines",
+        "query": "spatula",
+        "frame": "frame_00195",
+        "tp": 8815,
+        "fp": 80545,
+        "fn": 0,
+        "iou": 0.09864592658907789,
+        "precision": 0.09864592658907789,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "toy cat statue",
+        "frame": "frame_00195",
+        "tp": 2939,
+        "fp": 7240,
+        "fn": 50,
+        "iou": 0.2873203636719132,
+        "precision": 0.28873170252480596,
+        "recall": 0.9832719973235196
+      },
+      {
+        "scene": "figurines",
+        "query": "toy elephant",
+        "frame": "frame_00195",
+        "tp": 5038,
+        "fp": 4668,
+        "fn": 0,
+        "iou": 0.5190603750257573,
+        "precision": 0.5190603750257573,
+        "recall": 1.0
+      },
+      {
+        "scene": "figurines",
+        "query": "waldo",
+        "frame": "frame_00195",
+        "tp": 3021,
+        "fp": 4264,
+        "fn": 91,
+        "iou": 0.4095715835140998,
+        "precision": 0.41468771448181196,
+        "recall": 0.9707583547557841
+      },
+      {
+        "scene": "ramen",
+        "query": "bowl",
+        "frame": "frame_00006",
+        "tp": 0,
+        "fp": 0,
+        "fn": 53324,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "ramen",
+        "query": "chopsticks",
+        "frame": "frame_00006",
+        "tp": 7059,
+        "fp": 9704,
+        "fn": 12,
+        "iou": 0.42080476900149033,
+        "precision": 0.42110600727793357,
+        "recall": 0.9983029274501485
+      },
+      {
+        "scene": "ramen",
+        "query": "egg",
+        "frame": "frame_00006",
+        "tp": 6971,
+        "fp": 52411,
+        "fn": 2,
+        "iou": 0.11738852216085141,
+        "precision": 0.11739247583442794,
+        "recall": 0.9997131794062813
+      },
+      {
+        "scene": "ramen",
+        "query": "kamaboko",
+        "frame": "frame_00006",
+        "tp": 2808,
+        "fp": 16782,
+        "fn": 0,
+        "iou": 0.1433384379785605,
+        "precision": 0.1433384379785605,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "napkin",
+        "frame": "frame_00006",
+        "tp": 5413,
+        "fp": 23340,
+        "fn": 125,
+        "iou": 0.18744372879008242,
+        "precision": 0.1882586164921921,
+        "recall": 0.9774286746117732
+      },
+      {
+        "scene": "ramen",
+        "query": "nori",
+        "frame": "frame_00006",
+        "tp": 13313,
+        "fp": 33488,
+        "fn": 1,
+        "iou": 0.2844536558266741,
+        "precision": 0.2844597337663725,
+        "recall": 0.9999248910920835
+      },
+      {
+        "scene": "ramen",
+        "query": "onion segments",
+        "frame": "frame_00006",
+        "tp": 2772,
+        "fp": 120950,
+        "fn": 0,
+        "iou": 0.022405069429850794,
+        "precision": 0.022405069429850794,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "plate",
+        "frame": "frame_00006",
+        "tp": 0,
+        "fp": 0,
+        "fn": 49048,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "ramen",
+        "query": "sake cup",
+        "frame": "frame_00006",
+        "tp": 12005,
+        "fp": 36562,
+        "fn": 0,
+        "iou": 0.24718430209813247,
+        "precision": 0.24718430209813247,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "wavy noodles",
+        "frame": "frame_00006",
+        "tp": 4768,
+        "fp": 35946,
+        "fn": 0,
+        "iou": 0.1171095937515351,
+        "precision": 0.1171095937515351,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "bowl",
+        "frame": "frame_00024",
+        "tp": 0,
+        "fp": 0,
+        "fn": 161132,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "ramen",
+        "query": "chopsticks",
+        "frame": "frame_00024",
+        "tp": 11665,
+        "fp": 18356,
+        "fn": 0,
+        "iou": 0.3885613403950568,
+        "precision": 0.3885613403950568,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "corn",
+        "frame": "frame_00024",
+        "tp": 1840,
+        "fp": 414534,
+        "fn": 1,
+        "iou": 0.004419093365355749,
+        "precision": 0.004419103978634593,
+        "recall": 0.9994568169473113
+      },
+      {
+        "scene": "ramen",
+        "query": "egg",
+        "frame": "frame_00024",
+        "tp": 27804,
+        "fp": 154725,
+        "fn": 51,
+        "iou": 0.1522839303319093,
+        "precision": 0.15232647962789475,
+        "recall": 0.9981690899299946
+      },
+      {
+        "scene": "ramen",
+        "query": "kamaboko",
+        "frame": "frame_00024",
+        "tp": 12851,
+        "fp": 46315,
+        "fn": 0,
+        "iou": 0.21720244735151945,
+        "precision": 0.21720244735151945,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "nori",
+        "frame": "frame_00024",
+        "tp": 98937,
+        "fp": 90975,
+        "fn": 168,
+        "iou": 0.520501893939394,
+        "precision": 0.5209623404524201,
+        "recall": 0.9983048282125019
+      },
+      {
+        "scene": "ramen",
+        "query": "onion segments",
+        "frame": "frame_00024",
+        "tp": 18231,
+        "fp": 380675,
+        "fn": 0,
+        "iou": 0.04570249632745559,
+        "precision": 0.04570249632745559,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "wavy noodles",
+        "frame": "frame_00024",
+        "tp": 24920,
+        "fp": 100967,
+        "fn": 180,
+        "iou": 0.19767266612198275,
+        "precision": 0.1979553091264388,
+        "recall": 0.9928286852589642
+      },
+      {
+        "scene": "ramen",
+        "query": "chopsticks",
+        "frame": "frame_00060",
+        "tp": 12884,
+        "fp": 16381,
+        "fn": 10,
+        "iou": 0.4401024765157985,
+        "precision": 0.4402528617802836,
+        "recall": 0.9992244454785172
+      },
+      {
+        "scene": "ramen",
+        "query": "corn",
+        "frame": "frame_00060",
+        "tp": 1416,
+        "fp": 276192,
+        "fn": 0,
+        "iou": 0.005100717558571799,
+        "precision": 0.005100717558571799,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "egg",
+        "frame": "frame_00060",
+        "tp": 23768,
+        "fp": 110176,
+        "fn": 74,
+        "iou": 0.1773493112865436,
+        "precision": 0.17744729140536344,
+        "recall": 0.9968962335374549
+      },
+      {
+        "scene": "ramen",
+        "query": "kamaboko",
+        "frame": "frame_00060",
+        "tp": 9820,
+        "fp": 37609,
+        "fn": 0,
+        "iou": 0.2070463218705855,
+        "precision": 0.2070463218705855,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "napkin",
+        "frame": "frame_00060",
+        "tp": 20189,
+        "fp": 43973,
+        "fn": 66,
+        "iou": 0.3143333125739553,
+        "precision": 0.314656650353792,
+        "recall": 0.9967415452974574
+      },
+      {
+        "scene": "ramen",
+        "query": "onion segments",
+        "frame": "frame_00060",
+        "tp": 10301,
+        "fp": 282276,
+        "fn": 0,
+        "iou": 0.03520782563222673,
+        "precision": 0.03520782563222673,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "sake cup",
+        "frame": "frame_00060",
+        "tp": 9963,
+        "fp": 39192,
+        "fn": 0,
+        "iou": 0.2026853829722307,
+        "precision": 0.2026853829722307,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "wavy noodles",
+        "frame": "frame_00060",
+        "tp": 18919,
+        "fp": 68569,
+        "fn": 48,
+        "iou": 0.21612822153171266,
+        "precision": 0.21624679956108267,
+        "recall": 0.9974692887646965
+      },
+      {
+        "scene": "ramen",
+        "query": "bowl",
+        "frame": "frame_00065",
+        "tp": 0,
+        "fp": 0,
+        "fn": 80821,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "ramen",
+        "query": "chopsticks",
+        "frame": "frame_00065",
+        "tp": 5680,
+        "fp": 18497,
+        "fn": 1,
+        "iou": 0.23492431135743239,
+        "precision": 0.23493402820862805,
+        "recall": 0.99982397465235
+      },
+      {
+        "scene": "ramen",
+        "query": "corn",
+        "frame": "frame_00065",
+        "tp": 1200,
+        "fp": 199085,
+        "fn": 0,
+        "iou": 0.005991462166412861,
+        "precision": 0.005991462166412861,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "egg",
+        "frame": "frame_00065",
+        "tp": 13365,
+        "fp": 82764,
+        "fn": 0,
+        "iou": 0.13903192584963955,
+        "precision": 0.13903192584963955,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "kamaboko",
+        "frame": "frame_00065",
+        "tp": 5523,
+        "fp": 25855,
+        "fn": 0,
+        "iou": 0.17601504238638538,
+        "precision": 0.17601504238638538,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "napkin",
+        "frame": "frame_00065",
+        "tp": 5251,
+        "fp": 39913,
+        "fn": 150,
+        "iou": 0.11588030189345457,
+        "precision": 0.11626516694712603,
+        "recall": 0.9722273653027217
+      },
+      {
+        "scene": "ramen",
+        "query": "nori",
+        "frame": "frame_00065",
+        "tp": 22335,
+        "fp": 53160,
+        "fn": 166,
+        "iou": 0.2951983188168277,
+        "precision": 0.29584740711305385,
+        "recall": 0.992622550108884
+      },
+      {
+        "scene": "ramen",
+        "query": "onion segments",
+        "frame": "frame_00065",
+        "tp": 8630,
+        "fp": 205057,
+        "fn": 0,
+        "iou": 0.040386172298736,
+        "precision": 0.040386172298736,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "plate",
+        "frame": "frame_00065",
+        "tp": 0,
+        "fp": 0,
+        "fn": 39863,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "ramen",
+        "query": "sake cup",
+        "frame": "frame_00065",
+        "tp": 11502,
+        "fp": 22816,
+        "fn": 0,
+        "iou": 0.3351593915729355,
+        "precision": 0.3351593915729355,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "wavy noodles",
+        "frame": "frame_00065",
+        "tp": 9741,
+        "fp": 54815,
+        "fn": 3,
+        "iou": 0.15088523676017288,
+        "precision": 0.15089224859037115,
+        "recall": 0.999692118226601
+      },
+      {
+        "scene": "ramen",
+        "query": "bowl",
+        "frame": "frame_00081",
+        "tp": 25199,
+        "fp": 8415,
+        "fn": 26114,
+        "iou": 0.4218959282078757,
+        "precision": 0.7496578806449694,
+        "recall": 0.4910841307271062
+      },
+      {
+        "scene": "ramen",
+        "query": "chopsticks",
+        "frame": "frame_00081",
+        "tp": 8084,
+        "fp": 13670,
+        "fn": 0,
+        "iou": 0.37160981888388345,
+        "precision": 0.37160981888388345,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "egg",
+        "frame": "frame_00081",
+        "tp": 5537,
+        "fp": 28479,
+        "fn": 0,
+        "iou": 0.1627763405456256,
+        "precision": 0.1627763405456256,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "glass of water",
+        "frame": "frame_00081",
+        "tp": 13464,
+        "fp": 24071,
+        "fn": 0,
+        "iou": 0.3587052084720927,
+        "precision": 0.3587052084720927,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "kamaboko",
+        "frame": "frame_00081",
+        "tp": 1978,
+        "fp": 10954,
+        "fn": 0,
+        "iou": 0.15295391277451284,
+        "precision": 0.15295391277451284,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "napkin",
+        "frame": "frame_00081",
+        "tp": 2850,
+        "fp": 14589,
+        "fn": 1146,
+        "iou": 0.15334947538337368,
+        "precision": 0.16342680199552725,
+        "recall": 0.7132132132132132
+      },
+      {
+        "scene": "ramen",
+        "query": "nori",
+        "frame": "frame_00081",
+        "tp": 23390,
+        "fp": 19722,
+        "fn": 23,
+        "iou": 0.5422510722151385,
+        "precision": 0.5425403599925774,
+        "recall": 0.9990176397727758
+      },
+      {
+        "scene": "ramen",
+        "query": "onion segments",
+        "frame": "frame_00081",
+        "tp": 2033,
+        "fp": 73617,
+        "fn": 0,
+        "iou": 0.026873760740251156,
+        "precision": 0.026873760740251156,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "plate",
+        "frame": "frame_00081",
+        "tp": 58,
+        "fp": 1334,
+        "fn": 33456,
+        "iou": 0.0016643709825528007,
+        "precision": 0.041666666666666664,
+        "recall": 0.001730620039386525
+      },
+      {
+        "scene": "ramen",
+        "query": "sake cup",
+        "frame": "frame_00081",
+        "tp": 7841,
+        "fp": 15473,
+        "fn": 3465,
+        "iou": 0.2928040628850965,
+        "precision": 0.3363215235480827,
+        "recall": 0.6935255616486821
+      },
+      {
+        "scene": "ramen",
+        "query": "spoon",
+        "frame": "frame_00081",
+        "tp": 7296,
+        "fp": 31181,
+        "fn": 109,
+        "iou": 0.1890841237754626,
+        "precision": 0.18961977285131376,
+        "recall": 0.9852802160702229
+      },
+      {
+        "scene": "ramen",
+        "query": "wavy noodles",
+        "frame": "frame_00081",
+        "tp": 4248,
+        "fp": 23018,
+        "fn": 68,
+        "iou": 0.15541084363796004,
+        "precision": 0.15579843027946894,
+        "recall": 0.9842446709916589
+      },
+      {
+        "scene": "ramen",
+        "query": "chopsticks",
+        "frame": "frame_00119",
+        "tp": 4917,
+        "fp": 27433,
+        "fn": 0,
+        "iou": 0.15199381761978362,
+        "precision": 0.15199381761978362,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "corn",
+        "frame": "frame_00119",
+        "tp": 776,
+        "fp": 399452,
+        "fn": 0,
+        "iou": 0.0019388948299469302,
+        "precision": 0.0019388948299469302,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "egg",
+        "frame": "frame_00119",
+        "tp": 37489,
+        "fp": 147761,
+        "fn": 5,
+        "iou": 0.20236430865563682,
+        "precision": 0.2023697705802969,
+        "recall": 0.9998666453299194
+      },
+      {
+        "scene": "ramen",
+        "query": "kamaboko",
+        "frame": "frame_00119",
+        "tp": 12361,
+        "fp": 53517,
+        "fn": 0,
+        "iou": 0.18763471872248702,
+        "precision": 0.18763471872248702,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "nori",
+        "frame": "frame_00119",
+        "tp": 92253,
+        "fp": 94277,
+        "fn": 23,
+        "iou": 0.4945136234742942,
+        "precision": 0.4945745992601726,
+        "recall": 0.9997507477567298
+      },
+      {
+        "scene": "ramen",
+        "query": "onion segments",
+        "frame": "frame_00119",
+        "tp": 10029,
+        "fp": 395830,
+        "fn": 0,
+        "iou": 0.024710552186843215,
+        "precision": 0.024710552186843215,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "sake cup",
+        "frame": "frame_00119",
+        "tp": 0,
+        "fp": 21119,
+        "fn": 7648,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "ramen",
+        "query": "wavy noodles",
+        "frame": "frame_00119",
+        "tp": 36822,
+        "fp": 93296,
+        "fn": 57,
+        "iou": 0.28286537353562513,
+        "precision": 0.28298928664750456,
+        "recall": 0.9984544049459042
+      },
+      {
+        "scene": "ramen",
+        "query": "bowl",
+        "frame": "frame_00128",
+        "tp": 24940,
+        "fp": 8259,
+        "fn": 51866,
+        "iou": 0.2931875624522424,
+        "precision": 0.7512274466098376,
+        "recall": 0.3247142150352837
+      },
+      {
+        "scene": "ramen",
+        "query": "chopsticks",
+        "frame": "frame_00128",
+        "tp": 9921,
+        "fp": 14093,
+        "fn": 0,
+        "iou": 0.41313400516365456,
+        "precision": 0.41313400516365456,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "corn",
+        "frame": "frame_00128",
+        "tp": 723,
+        "fp": 162830,
+        "fn": 0,
+        "iou": 0.004420585375994326,
+        "precision": 0.004420585375994326,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "egg",
+        "frame": "frame_00128",
+        "tp": 17052,
+        "fp": 68927,
+        "fn": 0,
+        "iou": 0.1983274985752335,
+        "precision": 0.1983274985752335,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "glass of water",
+        "frame": "frame_00128",
+        "tp": 51959,
+        "fp": 11694,
+        "fn": 0,
+        "iou": 0.8162851711623961,
+        "precision": 0.8162851711623961,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "hand",
+        "frame": "frame_00128",
+        "tp": 9141,
+        "fp": 12869,
+        "fn": 246,
+        "iou": 0.41072070452911574,
+        "precision": 0.4153112221717401,
+        "recall": 0.973793544263343
+      },
+      {
+        "scene": "ramen",
+        "query": "kamaboko",
+        "frame": "frame_00128",
+        "tp": 5228,
+        "fp": 25652,
+        "fn": 0,
+        "iou": 0.16930051813471503,
+        "precision": 0.16930051813471503,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "napkin",
+        "frame": "frame_00128",
+        "tp": 0,
+        "fp": 28129,
+        "fn": 2900,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "ramen",
+        "query": "nori",
+        "frame": "frame_00128",
+        "tp": 45300,
+        "fp": 44972,
+        "fn": 32,
+        "iou": 0.5016389085754784,
+        "precision": 0.5018167316554414,
+        "recall": 0.9992940968852025
+      },
+      {
+        "scene": "ramen",
+        "query": "onion segments",
+        "frame": "frame_00128",
+        "tp": 4874,
+        "fp": 171912,
+        "fn": 0,
+        "iou": 0.027570056452434016,
+        "precision": 0.027570056452434016,
+        "recall": 1.0
+      },
+      {
+        "scene": "ramen",
+        "query": "plate",
+        "frame": "frame_00128",
+        "tp": 76,
+        "fp": 6374,
+        "fn": 62403,
+        "iou": 0.001103800851088551,
+        "precision": 0.011782945736434108,
+        "recall": 0.0012164087133276782
+      },
+      {
+        "scene": "ramen",
+        "query": "sake cup",
+        "frame": "frame_00128",
+        "tp": 10075,
+        "fp": 27407,
+        "fn": 2590,
+        "iou": 0.2514224396087043,
+        "precision": 0.2687956885971933,
+        "recall": 0.795499407816818
+      },
+      {
+        "scene": "ramen",
+        "query": "spoon",
+        "frame": "frame_00128",
+        "tp": 15928,
+        "fp": 77305,
+        "fn": 3795,
+        "iou": 0.16415879952178752,
+        "precision": 0.17084079671361,
+        "recall": 0.807585052983826
+      },
+      {
+        "scene": "ramen",
+        "query": "wavy noodles",
+        "frame": "frame_00128",
+        "tp": 16566,
+        "fp": 53910,
+        "fn": 9,
+        "iou": 0.2350287295169185,
+        "precision": 0.2350587434020092,
+        "recall": 0.9994570135746607
+      },
+      {
+        "scene": "teatime",
+        "query": "apple",
+        "frame": "frame_00002",
+        "tp": 1725,
+        "fp": 46014,
+        "fn": 0,
+        "iou": 0.036133978508138,
+        "precision": 0.036133978508138,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "bag of cookies",
+        "frame": "frame_00002",
+        "tp": 5204,
+        "fp": 4214,
+        "fn": 0,
+        "iou": 0.5525589297090677,
+        "precision": 0.5525589297090677,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "bear nose",
+        "frame": "frame_00002",
+        "tp": 9919,
+        "fp": 83434,
+        "fn": 0,
+        "iou": 0.10625261105695585,
+        "precision": 0.10625261105695585,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee mug",
+        "frame": "frame_00002",
+        "tp": 2737,
+        "fp": 16029,
+        "fn": 1,
+        "iou": 0.14584110406564715,
+        "precision": 0.14584887562613236,
+        "recall": 0.9996347699050402
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee",
+        "frame": "frame_00002",
+        "tp": 2926,
+        "fp": 13724,
+        "fn": 0,
+        "iou": 0.17573573573573573,
+        "precision": 0.17573573573573573,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "paper napkin",
+        "frame": "frame_00002",
+        "tp": 5353,
+        "fp": 9933,
+        "fn": 0,
+        "iou": 0.35018971608007327,
+        "precision": 0.35018971608007327,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "plate",
+        "frame": "frame_00002",
+        "tp": 4175,
+        "fp": 18034,
+        "fn": 0,
+        "iou": 0.18798685217704533,
+        "precision": 0.18798685217704533,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "sheep",
+        "frame": "frame_00002",
+        "tp": 60168,
+        "fp": 7296,
+        "fn": 3231,
+        "iou": 0.8510927222575854,
+        "precision": 0.8918534329420135,
+        "recall": 0.9490370510575876
+      },
+      {
+        "scene": "teatime",
+        "query": "stuffed bear",
+        "frame": "frame_00002",
+        "tp": 116195,
+        "fp": 9260,
+        "fn": 35583,
+        "iou": 0.7215377736931656,
+        "precision": 0.9261886732294449,
+        "recall": 0.7655589084056978
+      },
+      {
+        "scene": "teatime",
+        "query": "tea in a glass",
+        "frame": "frame_00002",
+        "tp": 3391,
+        "fp": 7302,
+        "fn": 0,
+        "iou": 0.3171233517254278,
+        "precision": 0.3171233517254278,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "three cookies",
+        "frame": "frame_00002",
+        "tp": 1546,
+        "fp": 18092,
+        "fn": 0,
+        "iou": 0.0787249210713922,
+        "precision": 0.0787249210713922,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "bag of cookies",
+        "frame": "frame_00025",
+        "tp": 6113,
+        "fp": 8746,
+        "fn": 6,
+        "iou": 0.4112344433232425,
+        "precision": 0.41140049801467127,
+        "recall": 0.9990194476221604
+      },
+      {
+        "scene": "teatime",
+        "query": "bear nose",
+        "frame": "frame_00025",
+        "tp": 7647,
+        "fp": 62137,
+        "fn": 0,
+        "iou": 0.10958099277771409,
+        "precision": 0.10958099277771409,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee mug",
+        "frame": "frame_00025",
+        "tp": 2716,
+        "fp": 16792,
+        "fn": 3,
+        "iou": 0.13920352621598073,
+        "precision": 0.13922493336067254,
+        "recall": 0.9988966531813167
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee",
+        "frame": "frame_00025",
+        "tp": 3065,
+        "fp": 22176,
+        "fn": 0,
+        "iou": 0.12142942038746483,
+        "precision": 0.12142942038746483,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "hooves",
+        "frame": "frame_00025",
+        "tp": 4685,
+        "fp": 94918,
+        "fn": 0,
+        "iou": 0.04703673584128992,
+        "precision": 0.04703673584128992,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "paper napkin",
+        "frame": "frame_00025",
+        "tp": 1611,
+        "fp": 12001,
+        "fn": 3,
+        "iou": 0.1183253764230628,
+        "precision": 0.11835145459888334,
+        "recall": 0.9981412639405205
+      },
+      {
+        "scene": "teatime",
+        "query": "plate",
+        "frame": "frame_00025",
+        "tp": 9769,
+        "fp": 26475,
+        "fn": 0,
+        "iou": 0.2695342677408675,
+        "precision": 0.2695342677408675,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "sheep",
+        "frame": "frame_00025",
+        "tp": 90782,
+        "fp": 12781,
+        "fn": 0,
+        "iou": 0.8765871981306065,
+        "precision": 0.8765871981306065,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "stuffed bear",
+        "frame": "frame_00025",
+        "tp": 79044,
+        "fp": 7438,
+        "fn": 1889,
+        "iou": 0.89445632617035,
+        "precision": 0.91399366342129,
+        "recall": 0.976659706176714
+      },
+      {
+        "scene": "teatime",
+        "query": "tea in a glass",
+        "frame": "frame_00025",
+        "tp": 2887,
+        "fp": 16083,
+        "fn": 0,
+        "iou": 0.1521876647337902,
+        "precision": 0.1521876647337902,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "three cookies",
+        "frame": "frame_00025",
+        "tp": 3048,
+        "fp": 25200,
+        "fn": 0,
+        "iou": 0.10790144435004248,
+        "precision": 0.10790144435004248,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "apple",
+        "frame": "frame_00043",
+        "tp": 3636,
+        "fp": 235713,
+        "fn": 0,
+        "iou": 0.01519120614667285,
+        "precision": 0.01519120614667285,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "bag of cookies",
+        "frame": "frame_00043",
+        "tp": 26572,
+        "fp": 14908,
+        "fn": 42,
+        "iou": 0.6399499060738886,
+        "precision": 0.6405978784956605,
+        "recall": 0.9984218832193582
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee mug",
+        "frame": "frame_00043",
+        "tp": 7708,
+        "fp": 48482,
+        "fn": 1,
+        "iou": 0.13717499243651118,
+        "precision": 0.1371774337070653,
+        "recall": 0.9998702814891685
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee",
+        "frame": "frame_00043",
+        "tp": 9176,
+        "fp": 67749,
+        "fn": 2,
+        "iou": 0.11928191662225227,
+        "precision": 0.11928501787455313,
+        "recall": 0.9997820876007845
+      },
+      {
+        "scene": "teatime",
+        "query": "hooves",
+        "frame": "frame_00043",
+        "tp": 54369,
+        "fp": 16037,
+        "fn": 793,
+        "iou": 0.763620275565668,
+        "precision": 0.7722211175183933,
+        "recall": 0.9856241615604946
+      },
+      {
+        "scene": "teatime",
+        "query": "paper napkin",
+        "frame": "frame_00043",
+        "tp": 8122,
+        "fp": 23664,
+        "fn": 36,
+        "iou": 0.2552322292753441,
+        "precision": 0.25552129868495566,
+        "recall": 0.9955871537141456
+      },
+      {
+        "scene": "teatime",
+        "query": "plate",
+        "frame": "frame_00043",
+        "tp": 34010,
+        "fp": 73286,
+        "fn": 33,
+        "iou": 0.31687614717364365,
+        "precision": 0.31697360572621536,
+        "recall": 0.9990306377228799
+      },
+      {
+        "scene": "teatime",
+        "query": "stuffed bear",
+        "frame": "frame_00043",
+        "tp": 47464,
+        "fp": 10169,
+        "fn": 3595,
+        "iou": 0.7752008884823937,
+        "precision": 0.8235559488487498,
+        "recall": 0.9295912571730743
+      },
+      {
+        "scene": "teatime",
+        "query": "tea in a glass",
+        "frame": "frame_00043",
+        "tp": 14591,
+        "fp": 27979,
+        "fn": 0,
+        "iou": 0.3427531125205544,
+        "precision": 0.3427531125205544,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "three cookies",
+        "frame": "frame_00043",
+        "tp": 10245,
+        "fp": 79392,
+        "fn": 0,
+        "iou": 0.11429432042571706,
+        "precision": 0.11429432042571706,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "apple",
+        "frame": "frame_00107",
+        "tp": 1708,
+        "fp": 52105,
+        "fn": 0,
+        "iou": 0.031739542489732965,
+        "precision": 0.031739542489732965,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "bag of cookies",
+        "frame": "frame_00107",
+        "tp": 7224,
+        "fp": 6389,
+        "fn": 0,
+        "iou": 0.5306692132520385,
+        "precision": 0.5306692132520385,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "bear nose",
+        "frame": "frame_00107",
+        "tp": 22946,
+        "fp": 113226,
+        "fn": 0,
+        "iou": 0.1685074758393796,
+        "precision": 0.1685074758393796,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee mug",
+        "frame": "frame_00107",
+        "tp": 3816,
+        "fp": 32001,
+        "fn": 12,
+        "iou": 0.10650590303943733,
+        "precision": 0.10654158639752073,
+        "recall": 0.9968652037617555
+      },
+      {
+        "scene": "teatime",
+        "query": "dall-e brand",
+        "frame": "frame_00107",
+        "tp": 2668,
+        "fp": 38694,
+        "fn": 2,
+        "iou": 0.06450053186345614,
+        "precision": 0.06450365069387361,
+        "recall": 0.9992509363295881
+      },
+      {
+        "scene": "teatime",
+        "query": "paper napkin",
+        "frame": "frame_00107",
+        "tp": 12690,
+        "fp": 19822,
+        "fn": 0,
+        "iou": 0.39031742125984253,
+        "precision": 0.39031742125984253,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "plate",
+        "frame": "frame_00107",
+        "tp": 6807,
+        "fp": 22995,
+        "fn": 20,
+        "iou": 0.22825430889947018,
+        "precision": 0.22840748943023959,
+        "recall": 0.9970704555441628
+      },
+      {
+        "scene": "teatime",
+        "query": "sheep",
+        "frame": "frame_00107",
+        "tp": 36711,
+        "fp": 14264,
+        "fn": 895,
+        "iou": 0.7077501445922498,
+        "precision": 0.7201765571358509,
+        "recall": 0.976200606286231
+      },
+      {
+        "scene": "teatime",
+        "query": "stuffed bear",
+        "frame": "frame_00107",
+        "tp": 157973,
+        "fp": 11577,
+        "fn": 642,
+        "iou": 0.9282046159631475,
+        "precision": 0.9317192568563846,
+        "recall": 0.9959524635122782
+      },
+      {
+        "scene": "teatime",
+        "query": "tea in a glass",
+        "frame": "frame_00107",
+        "tp": 3383,
+        "fp": 9708,
+        "fn": 0,
+        "iou": 0.2584218165151631,
+        "precision": 0.2584218165151631,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "three cookies",
+        "frame": "frame_00107",
+        "tp": 2222,
+        "fp": 25212,
+        "fn": 0,
+        "iou": 0.0809943865276664,
+        "precision": 0.0809943865276664,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "apple",
+        "frame": "frame_00129",
+        "tp": 7228,
+        "fp": 123762,
+        "fn": 0,
+        "iou": 0.05517978471639057,
+        "precision": 0.05517978471639057,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "dall-e brand",
+        "frame": "frame_00129",
+        "tp": 7457,
+        "fp": 116924,
+        "fn": 5,
+        "iou": 0.0599504767417555,
+        "precision": 0.05995288669491321,
+        "recall": 0.9993299383543286
+      },
+      {
+        "scene": "teatime",
+        "query": "plate",
+        "frame": "frame_00129",
+        "tp": 14753,
+        "fp": 28599,
+        "fn": 0,
+        "iou": 0.3403072522605647,
+        "precision": 0.3403072522605647,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "sheep",
+        "frame": "frame_00129",
+        "tp": 113179,
+        "fp": 32056,
+        "fn": 5448,
+        "iou": 0.7511066278213202,
+        "precision": 0.7792818535476985,
+        "recall": 0.9540745361511291
+      },
+      {
+        "scene": "teatime",
+        "query": "tea in a glass",
+        "frame": "frame_00129",
+        "tp": 13469,
+        "fp": 26159,
+        "fn": 1,
+        "iou": 0.33987736253753564,
+        "precision": 0.3398859392348844,
+        "recall": 0.9999257609502599
+      },
+      {
+        "scene": "teatime",
+        "query": "three cookies",
+        "frame": "frame_00129",
+        "tp": 4689,
+        "fp": 28281,
+        "fn": 0,
+        "iou": 0.1422202001819836,
+        "precision": 0.1422202001819836,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "yellow pouf",
+        "frame": "frame_00129",
+        "tp": 22372,
+        "fp": 2008,
+        "fn": 750,
+        "iou": 0.89025069637883,
+        "precision": 0.9176374077112387,
+        "recall": 0.9675633595709714
+      },
+      {
+        "scene": "teatime",
+        "query": "apple",
+        "frame": "frame_00140",
+        "tp": 7172,
+        "fp": 175746,
+        "fn": 0,
+        "iou": 0.03920882581265923,
+        "precision": 0.03920882581265923,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "bag of cookies",
+        "frame": "frame_00140",
+        "tp": 24513,
+        "fp": 16535,
+        "fn": 0,
+        "iou": 0.5971789124926915,
+        "precision": 0.5971789124926915,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee mug",
+        "frame": "frame_00140",
+        "tp": 14304,
+        "fp": 90542,
+        "fn": 0,
+        "iou": 0.13642866680655438,
+        "precision": 0.13642866680655438,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "coffee",
+        "frame": "frame_00140",
+        "tp": 15157,
+        "fp": 81709,
+        "fn": 0,
+        "iou": 0.1564738917680094,
+        "precision": 0.1564738917680094,
+        "recall": 1.0
+      },
+      {
+        "scene": "teatime",
+        "query": "paper napkin",
+        "frame": "frame_00140",
+        "tp": 36379,
+        "fp": 44192,
+        "fn": 58,
+        "iou": 0.45119001847970336,
+        "precision": 0.4515148130220551,
+        "recall": 0.9984082114334331
+      },
+      {
+        "scene": "teatime",
+        "query": "plate",
+        "frame": "frame_00140",
+        "tp": 30231,
+        "fp": 103379,
+        "fn": 13,
+        "iou": 0.2262409914460834,
+        "precision": 0.22626300426614773,
+        "recall": 0.9995701626768946
+      },
+      {
+        "scene": "teatime",
+        "query": "stuffed bear",
+        "frame": "frame_00140",
+        "tp": 120937,
+        "fp": 13645,
+        "fn": 6207,
+        "iou": 0.8589946657764456,
+        "precision": 0.8986119986328038,
+        "recall": 0.9511813376958409
+      },
+      {
+        "scene": "teatime",
+        "query": "tea in a glass",
+        "frame": "frame_00140",
+        "tp": 33414,
+        "fp": 36779,
+        "fn": 1,
+        "iou": 0.4760235917599795,
+        "precision": 0.4760303733990569,
+        "recall": 0.9999700733203651
+      },
+      {
+        "scene": "teatime",
+        "query": "three cookies",
+        "frame": "frame_00140",
+        "tp": 9365,
+        "fp": 100040,
+        "fn": 0,
+        "iou": 0.08559937845619488,
+        "precision": 0.08559937845619488,
+        "recall": 1.0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "Stainless steel pots",
+        "frame": "frame_00053",
+        "tp": 8892,
+        "fp": 6189,
+        "fn": 1661,
+        "iou": 0.5311193405805757,
+        "precision": 0.5896160732046947,
+        "recall": 0.8426039988628826
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "knife",
+        "frame": "frame_00053",
+        "tp": 9463,
+        "fp": 17464,
+        "fn": 70,
+        "iou": 0.35052042819572543,
+        "precision": 0.351431648531214,
+        "recall": 0.9926570859120948
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "ottolenghi",
+        "frame": "frame_00053",
+        "tp": 16057,
+        "fp": 11377,
+        "fn": 873,
+        "iou": 0.5672448510969018,
+        "precision": 0.5852956185754903,
+        "recall": 0.9484347312463083
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "pour-over vessel",
+        "frame": "frame_00053",
+        "tp": 7706,
+        "fp": 25744,
+        "fn": 0,
+        "iou": 0.23037369207772795,
+        "precision": 0.23037369207772795,
+        "recall": 1.0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "toaster",
+        "frame": "frame_00053",
+        "tp": 8985,
+        "fp": 6216,
+        "fn": 203,
+        "iou": 0.5832900545312906,
+        "precision": 0.5910795342411683,
+        "recall": 0.9779059643012625
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "yellow desk",
+        "frame": "frame_00053",
+        "tp": 0,
+        "fp": 0,
+        "fn": 66366,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "plastic ladle",
+        "frame": "frame_00066",
+        "tp": 1728,
+        "fp": 15887,
+        "fn": 1841,
+        "iou": 0.08881578947368421,
+        "precision": 0.09809821175134828,
+        "recall": 0.4841692350798543
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "pot",
+        "frame": "frame_00066",
+        "tp": 19423,
+        "fp": 7095,
+        "fn": 46,
+        "iou": 0.7311775335039904,
+        "precision": 0.7324458858134097,
+        "recall": 0.9976372695053675
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "refrigerator",
+        "frame": "frame_00066",
+        "tp": 53533,
+        "fp": 871,
+        "fn": 18516,
+        "iou": 0.7341332967635765,
+        "precision": 0.9839901477832512,
+        "recall": 0.7430082305097919
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "spatula",
+        "frame": "frame_00066",
+        "tp": 1479,
+        "fp": 4546,
+        "fn": 989,
+        "iou": 0.21086398631308811,
+        "precision": 0.24547717842323652,
+        "recall": 0.5992706645056726
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "cabinet",
+        "frame": "frame_00089",
+        "tp": 0,
+        "fp": 0,
+        "fn": 87637,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "ketchup",
+        "frame": "frame_00089",
+        "tp": 2571,
+        "fp": 5415,
+        "fn": 213,
+        "iou": 0.3135748261983169,
+        "precision": 0.3219383921863261,
+        "recall": 0.9234913793103449
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "knife",
+        "frame": "frame_00089",
+        "tp": 31567,
+        "fp": 56506,
+        "fn": 1913,
+        "iou": 0.350799013179828,
+        "precision": 0.35841858458324344,
+        "recall": 0.9428614097968937
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "dark cup",
+        "frame": "frame_00140",
+        "tp": 29840,
+        "fp": 30578,
+        "fn": 249,
+        "iou": 0.49186542931082794,
+        "precision": 0.4938925485782383,
+        "recall": 0.9917245505001828
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "frog cup",
+        "frame": "frame_00140",
+        "tp": 26273,
+        "fp": 21717,
+        "fn": 342,
+        "iou": 0.5435943060498221,
+        "precision": 0.5474682225463638,
+        "recall": 0.9871501033251926
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "plate",
+        "frame": "frame_00140",
+        "tp": 0,
+        "fp": 95680,
+        "fn": 36735,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "sink",
+        "frame": "frame_00140",
+        "tp": 207168,
+        "fp": 82772,
+        "fn": 219277,
+        "iou": 0.40683637820418406,
+        "precision": 0.7145202455680486,
+        "recall": 0.48580238952268173
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "spoon",
+        "frame": "frame_00140",
+        "tp": 1540,
+        "fp": 86068,
+        "fn": 2477,
+        "iou": 0.017094965865571406,
+        "precision": 0.01757830335129212,
+        "recall": 0.38337067463281055
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "knife",
+        "frame": "frame_00154",
+        "tp": 0,
+        "fp": 0,
+        "fn": 4618,
+        "iou": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "plate",
+        "frame": "frame_00154",
+        "tp": 121277,
+        "fp": 402854,
+        "fn": 0,
+        "iou": 0.2313868097861031,
+        "precision": 0.2313868097861031,
+        "recall": 1.0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "red cup",
+        "frame": "frame_00154",
+        "tp": 37795,
+        "fp": 25475,
+        "fn": 0,
+        "iou": 0.59736051841315,
+        "precision": 0.59736051841315,
+        "recall": 1.0
+      },
+      {
+        "scene": "waldo_kitchen",
+        "query": "sink",
+        "frame": "frame_00154",
+        "tp": 419250,
+        "fp": 81325,
+        "fn": 48425,
+        "iou": 0.7636612021857924,
+        "precision": 0.8375368326424611,
+        "recall": 0.896455872133426
+      }
+    ],
+    "scene_macro": {
+      "iou": 0.3231297063698939,
+      "precision": 0.3380810622430375,
+      "recall": 0.8760048187460563
+    },
+    "iou_replayed": true
+  },
+  "fusion": {
+    "families": {
+      "lerf": {
+        "teacher_ap": 0.9722980096103135,
+        "field_ap": 0.733232528237383,
+        "observed_positive_fraction": 0.9722792702312264,
+        "semantic_cosine": 0.9450305923819542,
+        "local_cosine": 0.6962686032056808
+      },
+      "nvos": {
+        "teacher_ap": 0.9958387867952406,
+        "field_ap": 0.9073323715333501,
+        "observed_positive_fraction": 0.9974062426584209,
+        "semantic_cosine": 0.9687635217394147,
+        "local_cosine": 0.8946058792727334
+      },
+      "scannet": {
+        "teacher_ap": 0.956747004614533,
+        "field_ap": 0.4914466195299438,
+        "observed_positive_fraction": 0.8689006353902464,
+        "semantic_cosine": 0.9180249303579331,
+        "local_cosine": 0.5639926284551621
+      },
+      "uqis": {
+        "teacher_ap": 0.9899267737342375,
+        "field_ap": 0.46776722256991005,
+        "observed_positive_fraction": 0.8599080655081168,
+        "semantic_cosine": 0.8972665435738034,
+        "local_cosine": 0.4653307729297214
+      }
+    },
+    "scenes": [
+      {
+        "scene": "figurines",
+        "family": "lerf",
+        "regions": 158,
+        "teacher_ap": 0.9951887008913404,
+        "field_ap": 0.7345153303420996,
+        "observed_positive_fraction": 0.9932230961850926,
+        "semantic_cosine": 0.9289828538894653,
+        "local_cosine": 0.5815715789794922
+      },
+      {
+        "scene": "ramen",
+        "family": "lerf",
+        "regions": 145,
+        "teacher_ap": 0.9747932816475869,
+        "field_ap": 0.7026745535029423,
+        "observed_positive_fraction": 0.9956147206240686,
+        "semantic_cosine": 0.955956757068634,
+        "local_cosine": 0.7218713760375977
+      },
+      {
+        "scene": "teatime",
+        "family": "lerf",
+        "regions": 118,
+        "teacher_ap": 0.9701327380535734,
+        "field_ap": 0.7018072823342205,
+        "observed_positive_fraction": 0.9002792641157442,
+        "semantic_cosine": 0.9480755031108856,
+        "local_cosine": 0.7238526940345764
+      },
+      {
+        "scene": "waldo_kitchen",
+        "family": "lerf",
+        "regions": 128,
+        "teacher_ap": 0.9490773178487536,
+        "field_ap": 0.7939329467702698,
+        "observed_positive_fraction": 1.0,
+        "semantic_cosine": 0.9471072554588318,
+        "local_cosine": 0.7577787637710571
+      },
+      {
+        "scene": "fern",
+        "family": "nvos",
+        "regions": 31,
+        "teacher_ap": 1.0,
+        "field_ap": 0.9726596190750146,
+        "observed_positive_fraction": 0.9999350117098901,
+        "semantic_cosine": 0.9838265478610992,
+        "local_cosine": 0.8981951177120209
+      },
+      {
+        "scene": "flower",
+        "family": "nvos",
+        "regions": 140,
+        "teacher_ap": 0.9954441082208417,
+        "field_ap": 0.8223550738416573,
+        "observed_positive_fraction": 0.9989795918975558,
+        "semantic_cosine": 0.9687620103359222,
+        "local_cosine": 0.9079074263572693
+      },
+      {
+        "scene": "fortress",
+        "family": "nvos",
+        "regions": 26,
+        "teacher_ap": 1.0,
+        "field_ap": 0.9551045639938635,
+        "observed_positive_fraction": 0.9850123891463647,
+        "semantic_cosine": 0.9506569802761078,
+        "local_cosine": 0.8628418445587158
+      },
+      {
+        "scene": "horns_center",
+        "family": "nvos",
+        "regions": 102,
+        "teacher_ap": 0.9951620225498894,
+        "field_ap": 0.8779220773874178,
+        "observed_positive_fraction": 1.0,
+        "semantic_cosine": 0.9713896811008453,
+        "local_cosine": 0.900126725435257
+      },
+      {
+        "scene": "leaves",
+        "family": "nvos",
+        "regions": 78,
+        "teacher_ap": 0.9996153846153846,
+        "field_ap": 0.9495787502676813,
+        "observed_positive_fraction": 0.9997703410111941,
+        "semantic_cosine": 0.9682771861553192,
+        "local_cosine": 0.8826300799846649
+      },
+      {
+        "scene": "orchids",
+        "family": "nvos",
+        "regions": 123,
+        "teacher_ap": 0.9952429622701598,
+        "field_ap": 0.8730528506673788,
+        "observed_positive_fraction": 0.9981463648439423,
+        "semantic_cosine": 0.9619626998901367,
+        "local_cosine": 0.8945063948631287
+      },
+      {
+        "scene": "trex",
+        "family": "nvos",
+        "regions": 93,
+        "teacher_ap": 0.9854070299104093,
+        "field_ap": 0.9006536655004379,
+        "observed_positive_fraction": 1.0,
+        "semantic_cosine": 0.9764695465564728,
+        "local_cosine": 0.9160335659980774
+      },
+      {
+        "scene": "scene0000_00",
+        "family": "scannet",
+        "regions": 109,
+        "teacher_ap": 0.9659055324757441,
+        "field_ap": 0.46115885052337496,
+        "observed_positive_fraction": 0.8885577398976054,
+        "semantic_cosine": 0.9216651916503906,
+        "local_cosine": 0.5779878199100494
+      },
+      {
+        "scene": "scene0062_00",
+        "family": "scannet",
+        "regions": 153,
+        "teacher_ap": 0.8757340115389629,
+        "field_ap": 0.47605454242279027,
+        "observed_positive_fraction": 0.8899371375153268,
+        "semantic_cosine": 0.9369894862174988,
+        "local_cosine": 0.6925169229507446
+      },
+      {
+        "scene": "scene0070_00",
+        "family": "scannet",
+        "regions": 95,
+        "teacher_ap": 0.9680257190288922,
+        "field_ap": 0.5372378461768181,
+        "observed_positive_fraction": 0.9714702866579357,
+        "semantic_cosine": 0.9117654860019684,
+        "local_cosine": 0.5791735947132111
+      },
+      {
+        "scene": "scene0097_00",
+        "family": "scannet",
+        "regions": 96,
+        "teacher_ap": 0.9909872618369314,
+        "field_ap": 0.6280055332300105,
+        "observed_positive_fraction": 0.9438609156447152,
+        "semantic_cosine": 0.9337196052074432,
+        "local_cosine": 0.6153949797153473
+      },
+      {
+        "scene": "scene0140_00",
+        "family": "scannet",
+        "regions": 138,
+        "teacher_ap": 0.9523039466436696,
+        "field_ap": 0.27615703471208264,
+        "observed_positive_fraction": 0.84482073692092,
+        "semantic_cosine": 0.8782629370689392,
+        "local_cosine": 0.4439677447080612
+      },
+      {
+        "scene": "scene0200_00",
+        "family": "scannet",
+        "regions": 77,
+        "teacher_ap": 0.9794574851792158,
+        "field_ap": 0.5594593230696907,
+        "observed_positive_fraction": 0.9462124159583798,
+        "semantic_cosine": 0.9254884719848633,
+        "local_cosine": 0.580940455198288
+      },
+      {
+        "scene": "scene0347_00",
+        "family": "scannet",
+        "regions": 121,
+        "teacher_ap": 0.9802702726945633,
+        "field_ap": 0.5489516948479166,
+        "observed_positive_fraction": 0.6296707366800998,
+        "semantic_cosine": 0.9155719578266144,
+        "local_cosine": 0.46072109043598175
+      },
+      {
+        "scene": "scene0400_00",
+        "family": "scannet",
+        "regions": 87,
+        "teacher_ap": 0.9098787986529678,
+        "field_ap": 0.6844653342936289,
+        "observed_positive_fraction": 0.9484864754238348,
+        "semantic_cosine": 0.951202929019928,
+        "local_cosine": 0.7053605318069458
+      },
+      {
+        "scene": "scene0590_00",
+        "family": "scannet",
+        "regions": 160,
+        "teacher_ap": 0.9683229143498779,
+        "field_ap": 0.39881482607479957,
+        "observed_positive_fraction": 0.9102920772973448,
+        "semantic_cosine": 0.9049640893936157,
+        "local_cosine": 0.5096032470464706
+      },
+      {
+        "scene": "scene0645_00",
+        "family": "scannet",
+        "regions": 97,
+        "teacher_ap": 0.9765841037445053,
+        "field_ap": 0.34416120994832483,
+        "observed_positive_fraction": 0.7156978319063014,
+        "semantic_cosine": 0.9006191492080688,
+        "local_cosine": 0.4742598980665207
+      },
+      {
+        "scene": "scene0030_00",
+        "family": "uqis",
+        "regions": 82,
+        "teacher_ap": 0.9999208997585254,
+        "field_ap": 0.6163781299993398,
+        "observed_positive_fraction": 0.8675109222531319,
+        "semantic_cosine": 0.9121249914169312,
+        "local_cosine": 0.5044750273227692
+      },
+      {
+        "scene": "scene0203_00",
+        "family": "uqis",
+        "regions": 75,
+        "teacher_ap": 0.9746942685572693,
+        "field_ap": 0.3359842107870102,
+        "observed_positive_fraction": 0.8762506580352784,
+        "semantic_cosine": 0.8570831418037415,
+        "local_cosine": 0.4253552258014679
+      },
+      {
+        "scene": "scene0246_00",
+        "family": "uqis",
+        "regions": 62,
+        "teacher_ap": 0.9734110680353847,
+        "field_ap": 0.39948712597529046,
+        "observed_positive_fraction": 0.8706713928089987,
+        "semantic_cosine": 0.9013484716415405,
+        "local_cosine": 0.3938509672880173
+      },
+      {
+        "scene": "scene0249_00",
+        "family": "uqis",
+        "regions": 62,
+        "teacher_ap": 0.9999897956849176,
+        "field_ap": 0.5885099374660673,
+        "observed_positive_fraction": 0.996944886061453,
+        "semantic_cosine": 0.9102195203304291,
+        "local_cosine": 0.5104705840349197
+      },
+      {
+        "scene": "scene0353_00",
+        "family": "uqis",
+        "regions": 114,
+        "teacher_ap": 0.9814818142835118,
+        "field_ap": 0.38671625230320356,
+        "observed_positive_fraction": 0.5502237654046008,
+        "semantic_cosine": 0.8965089321136475,
+        "local_cosine": 0.49970467388629913
+      },
+      {
+        "scene": "scene0435_00",
+        "family": "uqis",
+        "regions": 44,
+        "teacher_ap": 0.9996804311008195,
+        "field_ap": 0.43953744647728976,
+        "observed_positive_fraction": 0.8274545573036779,
+        "semantic_cosine": 0.8928056955337524,
+        "local_cosine": 0.4602604806423187
+      },
+      {
+        "scene": "scene0535_00",
+        "family": "uqis",
+        "regions": 57,
+        "teacher_ap": 0.9919630332984516,
+        "field_ap": 0.5669017895920058,
+        "observed_positive_fraction": 0.9986589404574612,
+        "semantic_cosine": 0.923039048910141,
+        "local_cosine": 0.5390151739120483
+      },
+      {
+        "scene": "scene0700_00",
+        "family": "uqis",
+        "regions": 63,
+        "teacher_ap": 0.9907909515198,
+        "field_ap": 0.5352134152852319,
+        "observed_positive_fraction": 0.8234953246419392,
+        "semantic_cosine": 0.9047268629074097,
+        "local_cosine": 0.41649022698402405
+      },
+      {
+        "scene": "scene0704_00",
+        "family": "uqis",
+        "regions": 76,
+        "teacher_ap": 0.9974087013694578,
+        "field_ap": 0.3411766952437516,
+        "observed_positive_fraction": 0.9279621426065109,
+        "semantic_cosine": 0.8775422275066376,
+        "local_cosine": 0.43835459649562836
+      }
+    ]
+  },
+  "training_inventory": [
+    {
+      "family": "nvos",
+      "scene": "flower",
+      "field": "output/query_field_20261007/five_benchmark_v1/nvos/flower/models/trained",
+      "elements": 329244,
+      "observed_fraction": 0.8589495936144622,
+      "eligible_fraction": 0.03076138061741444,
+      "default_scale_m": 0.2437039464712143,
+      "episodes": 1267,
+      "unique_sampled": 1010,
+      "episode_coverage": 0.7971586424625099,
+      "updates_per_episode": 1.5785319652722967,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.2193377033232887,
+      "fixed_partial_loss_after": 0.20410833004351203,
+      "field_sha256": "47b06bf876adaf20eeedd4f89dd0a1d92716a82d0ddac426b3429eb85b551419"
+    },
+    {
+      "family": "nvos",
+      "scene": "fortress",
+      "field": "output/query_field_20261007/five_benchmark_v1/nvos/fortress/models/trained",
+      "elements": 444915,
+      "observed_fraction": 0.7912590045289549,
+      "eligible_fraction": 0.034352629153883325,
+      "default_scale_m": 1.7941341400146484,
+      "episodes": 213,
+      "unique_sampled": 213,
+      "episode_coverage": 1.0,
+      "updates_per_episode": 9.389671361502348,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.5957303669504787,
+      "fixed_partial_loss_after": 0.21412569003730592,
+      "field_sha256": "5db3a179c8864e7c1079e5fc6297719d1f599a5fc71b013aad8cfa1c3e1088aa"
+    },
+    {
+      "family": "nvos",
+      "scene": "horns_center",
+      "field": "output/query_field_20261007/five_benchmark_v1/nvos/horns_center/models/trained",
+      "elements": 387695,
+      "observed_fraction": 0.9181702111195656,
+      "eligible_fraction": 0.05132127058641458,
+      "default_scale_m": 0.9912951588630676,
+      "episodes": 938,
+      "unique_sampled": 819,
+      "episode_coverage": 0.8731343283582089,
+      "updates_per_episode": 2.1321961620469083,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.13878736679845832,
+      "fixed_partial_loss_after": 0.29303692201021386,
+      "field_sha256": "d5f058f241e3cb28435adfac311584d5c8e0127d2a6cf5e4c7c94399280de8ef"
+    },
+    {
+      "family": "nvos",
+      "scene": "leaves",
+      "field": "output/query_field_20261007/five_benchmark_v1/nvos/leaves/models/trained",
+      "elements": 278479,
+      "observed_fraction": 0.843481914255653,
+      "eligible_fraction": 0.030788677063620595,
+      "default_scale_m": 0.20668242871761322,
+      "episodes": 713,
+      "unique_sampled": 658,
+      "episode_coverage": 0.9228611500701263,
+      "updates_per_episode": 2.805049088359046,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.1893990950908402,
+      "fixed_partial_loss_after": 0.17124942973746896,
+      "field_sha256": "70cf4610403902b124dff19d8403b66958d19723c01f2ef4455db4554fca948e"
+    },
+    {
+      "family": "nvos",
+      "scene": "orchids",
+      "field": "output/query_field_20261007/five_benchmark_v1/nvos/orchids/models/trained",
+      "elements": 337848,
+      "observed_fraction": 0.8449805829840639,
+      "eligible_fraction": 0.023031067225497855,
+      "default_scale_m": 0.30193331837654114,
+      "episodes": 1126,
+      "unique_sampled": 922,
+      "episode_coverage": 0.8188277087033747,
+      "updates_per_episode": 1.7761989342806395,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.18374780655778997,
+      "fixed_partial_loss_after": 0.2313652659539335,
+      "field_sha256": "607796e83a0aad97a52ae3a89203d464d65082289a54b82e7fdde11f0c8db0bd"
+    },
+    {
+      "family": "nvos",
+      "scene": "trex",
+      "field": "output/query_field_20261007/five_benchmark_v1/nvos/trex/models/trained",
+      "elements": 447910,
+      "observed_fraction": 0.8658793061106026,
+      "eligible_fraction": 0.029023687794422985,
+      "default_scale_m": 2.133233070373535,
+      "episodes": 761,
+      "unique_sampled": 711,
+      "episode_coverage": 0.9342969776609724,
+      "updates_per_episode": 2.628120893561104,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.19375191715043577,
+      "fixed_partial_loss_after": 0.20178582987891272,
+      "field_sha256": "3cb4713733f0acf79aa12f8725292c9c955d3585a4617e077a803b49077a59c5"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0070_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0070_00/models/trained",
+      "elements": 109380,
+      "observed_fraction": 0.9446882428231852,
+      "eligible_fraction": 0.3622782958493326,
+      "default_scale_m": 0.47475025057792664,
+      "episodes": 1043,
+      "unique_sampled": 881,
+      "episode_coverage": 0.8446788111217641,
+      "updates_per_episode": 1.9175455417066156,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.21763693645794288,
+      "fixed_partial_loss_after": 0.09383321431905102,
+      "field_sha256": "59f750abeb92f30b956e4b6189ad3a816c8808d1a9eb4465823eb51f6a347127"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0097_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0097_00/models/trained",
+      "elements": 72007,
+      "observed_fraction": 0.893635341008513,
+      "eligible_fraction": 0.5145888594164456,
+      "default_scale_m": 0.42288610339164734,
+      "episodes": 837,
+      "unique_sampled": 767,
+      "episode_coverage": 0.9163679808841099,
+      "updates_per_episode": 2.3894862604540026,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.2334465767043279,
+      "fixed_partial_loss_after": 0.06559258588989463,
+      "field_sha256": "9494690d84423c6d9ed4b08f7f1e299a42f8d06f6547d7f9732a80e36b6777be"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0062_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0062_00/models/trained",
+      "elements": 51610,
+      "observed_fraction": 0.8951559775237357,
+      "eligible_fraction": 0.5629916682813408,
+      "default_scale_m": 0.1784474104642868,
+      "episodes": 1121,
+      "unique_sampled": 923,
+      "episode_coverage": 0.8233719892952721,
+      "updates_per_episode": 1.784121320249777,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.1763285286583332,
+      "fixed_partial_loss_after": 0.041271364089368136,
+      "field_sha256": "b302eca51a259c150dd2cad8e8413d07a72a320ff20cdb53ee4d5bd534821abc"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0400_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0400_00/models/trained",
+      "elements": 155959,
+      "observed_fraction": 0.7738251720003334,
+      "eligible_fraction": 0.4107874505479004,
+      "default_scale_m": 0.6179937124252319,
+      "episodes": 655,
+      "unique_sampled": 617,
+      "episode_coverage": 0.9419847328244275,
+      "updates_per_episode": 3.053435114503817,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.22345859718718744,
+      "fixed_partial_loss_after": 0.07141258628676354,
+      "field_sha256": "303cbd072b00f44a5a1ce140d4faf5ebef17476a7421b3c9daf97d4eee1252ed"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0590_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0590_00/models/trained",
+      "elements": 222957,
+      "observed_fraction": 0.8652251330974134,
+      "eligible_fraction": 0.31420408419560725,
+      "default_scale_m": 0.5246807932853699,
+      "episodes": 958,
+      "unique_sampled": 838,
+      "episode_coverage": 0.8747390396659708,
+      "updates_per_episode": 2.0876826722338206,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.25062253565144954,
+      "fixed_partial_loss_after": 0.11777521041774829,
+      "field_sha256": "81ae66035d6b58b76b781ff24049ac6c42645e1c93f09c2e43423ec390a63204"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0000_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0000_00/models/trained",
+      "elements": 81369,
+      "observed_fraction": 0.81287713994273,
+      "eligible_fraction": 0.34189924909978003,
+      "default_scale_m": 0.4638001322746277,
+      "episodes": 1233,
+      "unique_sampled": 1008,
+      "episode_coverage": 0.8175182481751825,
+      "updates_per_episode": 1.6220600162206003,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.1981608060364017,
+      "fixed_partial_loss_after": 0.09485595042943859,
+      "field_sha256": "0b60cddcd82f7ab119f2ac61a3eda86e7d3e9e8e504dfaf67c99551769b9ec30"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0347_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0347_00/models/trained",
+      "elements": 67984,
+      "observed_fraction": 0.831180866086138,
+      "eligible_fraction": 0.4775241233231349,
+      "default_scale_m": 0.39161810278892517,
+      "episodes": 999,
+      "unique_sampled": 872,
+      "episode_coverage": 0.8728728728728729,
+      "updates_per_episode": 2.002002002002002,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.2708405616825579,
+      "fixed_partial_loss_after": 0.07596900865119333,
+      "field_sha256": "e31be78c84b3b5dff307a82789362f2400adcf706b15ae03f1ebf770eba9fc2d"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0140_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0140_00/models/trained",
+      "elements": 372941,
+      "observed_fraction": 0.8415164865219967,
+      "eligible_fraction": 0.21214347577766993,
+      "default_scale_m": 0.7499532103538513,
+      "episodes": 956,
+      "unique_sampled": 849,
+      "episode_coverage": 0.8880753138075314,
+      "updates_per_episode": 2.092050209205021,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.2624282486932586,
+      "fixed_partial_loss_after": 0.16744020848075186,
+      "field_sha256": "8c45958f9222c89f4d7d09471866e468bfd87baa74e5299a333fa94b92a44138"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0200_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0200_00/models/trained",
+      "elements": 83291,
+      "observed_fraction": 0.8907204860068915,
+      "eligible_fraction": 0.4809643298795788,
+      "default_scale_m": 0.6234992146492004,
+      "episodes": 740,
+      "unique_sampled": 678,
+      "episode_coverage": 0.9162162162162162,
+      "updates_per_episode": 2.7027027027027026,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.23505871919317273,
+      "fixed_partial_loss_after": 0.14338517718636934,
+      "field_sha256": "cf54c583bb761fa9108a4a1e6508b9c117619242134efcb5861970a70dcb0fec"
+    },
+    {
+      "family": "scannet",
+      "scene": "scene0645_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/scannet/scene0645_00/models/trained",
+      "elements": 352477,
+      "observed_fraction": 0.6258536017952945,
+      "eligible_fraction": 0.20854694065144677,
+      "default_scale_m": 0.4713447690010071,
+      "episodes": 943,
+      "unique_sampled": 837,
+      "episode_coverage": 0.887592788971368,
+      "updates_per_episode": 2.1208907741251326,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.20502491382828175,
+      "fixed_partial_loss_after": 0.12617379117918556,
+      "field_sha256": "59eeceb32c850f40f2afc1361fe9089ecc58d300483deb50df1639fe35fd2c96"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0030_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0030_00/models/trained",
+      "elements": 293811,
+      "observed_fraction": 0.8343629067665949,
+      "eligible_fraction": 0.24107674661602185,
+      "default_scale_m": 0.7706505656242371,
+      "episodes": 679,
+      "unique_sampled": 639,
+      "episode_coverage": 0.9410898379970545,
+      "updates_per_episode": 2.9455081001472756,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.22313712558239995,
+      "fixed_partial_loss_after": 0.09363585457088586,
+      "field_sha256": "81c513f191e87c6a073825a4866301190134d0df710252c9178566a58d41b71b"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0249_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0249_00/models/trained",
+      "elements": 331031,
+      "observed_fraction": 0.9437514915521507,
+      "eligible_fraction": 0.21108899166543316,
+      "default_scale_m": 0.8071660995483398,
+      "episodes": 582,
+      "unique_sampled": 555,
+      "episode_coverage": 0.9536082474226805,
+      "updates_per_episode": 3.4364261168384878,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.26313111982072296,
+      "fixed_partial_loss_after": 0.19888336277506644,
+      "field_sha256": "c45da77f6d700fffd7baa8d37aaf31d0e3b233c457e6683a918f928553fb4ea6"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0353_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0353_00/models/trained",
+      "elements": 208782,
+      "observed_fraction": 0.6873772643235528,
+      "eligible_fraction": 0.2027186251688364,
+      "default_scale_m": 0.37056583166122437,
+      "episodes": 704,
+      "unique_sampled": 664,
+      "episode_coverage": 0.9431818181818182,
+      "updates_per_episode": 2.840909090909091,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.1884906025317667,
+      "fixed_partial_loss_after": 0.06380176267144964,
+      "field_sha256": "d8e0fc772d3e7332bc7ba959fecb95d400442f45152a1d70dba45de6357c1673"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0435_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0435_00/models/trained",
+      "elements": 254995,
+      "observed_fraction": 0.7693092021412185,
+      "eligible_fraction": 0.251424537736034,
+      "default_scale_m": 0.5762759447097778,
+      "episodes": 646,
+      "unique_sampled": 611,
+      "episode_coverage": 0.9458204334365325,
+      "updates_per_episode": 3.0959752321981426,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.2280158926410263,
+      "fixed_partial_loss_after": 0.07564889435654927,
+      "field_sha256": "18f300e96c365d00360ce49dcad9f1d51bbcce596a7b001a92d2ab475b86060d"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0700_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0700_00/models/trained",
+      "elements": 167755,
+      "observed_fraction": 0.7286280587761915,
+      "eligible_fraction": 0.22675330094483026,
+      "default_scale_m": 0.4523775577545166,
+      "episodes": 486,
+      "unique_sampled": 484,
+      "episode_coverage": 0.9958847736625515,
+      "updates_per_episode": 4.11522633744856,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.27000807170514707,
+      "fixed_partial_loss_after": 0.0853381997737954,
+      "field_sha256": "890bf4a5b2ef4e64bcbff68ba2dbd0b8a780c36a1e1302202af8663daf433d7b"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0704_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0704_00/models/trained",
+      "elements": 183029,
+      "observed_fraction": 0.8292128569789486,
+      "eligible_fraction": 0.23135131591168612,
+      "default_scale_m": 0.4069352447986603,
+      "episodes": 578,
+      "unique_sampled": 564,
+      "episode_coverage": 0.9757785467128027,
+      "updates_per_episode": 3.4602076124567476,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.2556615240153273,
+      "fixed_partial_loss_after": 0.1096392156949805,
+      "field_sha256": "6f4cde56637a8aa82bbe91ef2dedcc095ce0b31948577d399bb34f8d4652d2bc"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0246_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0246_00/models/trained",
+      "elements": 201059,
+      "observed_fraction": 0.814656394391696,
+      "eligible_fraction": 0.233244967894996,
+      "default_scale_m": 0.4844038486480713,
+      "episodes": 559,
+      "unique_sampled": 540,
+      "episode_coverage": 0.9660107334525939,
+      "updates_per_episode": 3.5778175313059033,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.24415571328101776,
+      "fixed_partial_loss_after": 0.11190211125202282,
+      "field_sha256": "0e7c0943bc610fac0a305b13dbb14a2aaa7b7f888c119ad5f7294f681bb70e47"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0203_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0203_00/models/trained",
+      "elements": 205756,
+      "observed_fraction": 0.8114514279048971,
+      "eligible_fraction": 0.25547736153502204,
+      "default_scale_m": 0.41629043221473694,
+      "episodes": 720,
+      "unique_sampled": 660,
+      "episode_coverage": 0.9166666666666666,
+      "updates_per_episode": 2.7777777777777777,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.1835842526794295,
+      "fixed_partial_loss_after": 0.0713789351242465,
+      "field_sha256": "f6215f087b2225d72ea3a740ef2400ba4afc3c603d2ee8a0dc82637f1254a0b8"
+    },
+    {
+      "family": "uqis",
+      "scene": "scene0535_00",
+      "field": "output/query_field_20261007/five_benchmark_v1/uqis/scene0535_00/models/trained",
+      "elements": 90268,
+      "observed_fraction": 0.929509903841893,
+      "eligible_fraction": 0.3481964815881597,
+      "default_scale_m": 0.5492561459541321,
+      "episodes": 674,
+      "unique_sampled": 631,
+      "episode_coverage": 0.9362017804154302,
+      "updates_per_episode": 2.9673590504451037,
+      "support_counts": {
+        "anchor": 2000
+      },
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.24974932294744495,
+      "fixed_partial_loss_after": 0.12709065718740054,
+      "field_sha256": "845d137e8b0b957f0c29e193397dded3c27cc8b951a9b9381dfa6dd58ef4d1c4"
+    },
+    {
+      "family": "lerf",
+      "scene": "figurines",
+      "field": "output/query_field_20261007/figurines_fitted_metric_v1/models/trained",
+      "elements": 554467,
+      "observed_fraction": 0.6866323875000676,
+      "eligible_fraction": 0.04088791578218361,
+      "default_scale_m": 0.3447745740413666,
+      "episodes": 1455,
+      "unique_sampled": 1093,
+      "episode_coverage": 0.7512027491408935,
+      "updates_per_episode": 1.3745704467353952,
+      "support_counts": null,
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.19872020561323275,
+      "fixed_partial_loss_after": 0.5839255401077345,
+      "field_sha256": "1a2a790569c5c5d192a24604e275cc9abfdfe51e587f8ccf14da680fc4b80ec4"
+    },
+    {
+      "family": "lerf",
+      "scene": "ramen",
+      "field": "output/query_field_20261007/ramen_fitted_metric_v1/models/trained",
+      "elements": 592709,
+      "observed_fraction": 0.7638908806851255,
+      "eligible_fraction": 0.04768107114958605,
+      "default_scale_m": 0.27997347712516785,
+      "episodes": 1320,
+      "unique_sampled": 1032,
+      "episode_coverage": 0.7818181818181819,
+      "updates_per_episode": 1.5151515151515151,
+      "support_counts": null,
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.19827165818847292,
+      "fixed_partial_loss_after": 0.45455990537267293,
+      "field_sha256": "e9a0f24e8fbe96f89dc17e716b42139662f4c98b52cbb362381d439ba38226fb"
+    },
+    {
+      "family": "lerf",
+      "scene": "teatime",
+      "field": "output/query_field_20261007/teatime_fitted_metric_v1/models/trained",
+      "elements": 1829615,
+      "observed_fraction": 0.5460941236271019,
+      "eligible_fraction": 0.01795732982075464,
+      "default_scale_m": 0.4042361378669739,
+      "episodes": 1115,
+      "unique_sampled": 923,
+      "episode_coverage": 0.8278026905829596,
+      "updates_per_episode": 1.7937219730941705,
+      "support_counts": null,
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.18574249366613632,
+      "fixed_partial_loss_after": 0.44320092985047355,
+      "field_sha256": "d40a0d104aa52148ee74d79163fc2d226fc1faeee775a4204a66e0675f8d36c3"
+    },
+    {
+      "family": "lerf",
+      "scene": "waldo_kitchen",
+      "field": "output/query_field_20261007/waldo_kitchen_fitted_metric_v1/models/trained",
+      "elements": 1496561,
+      "observed_fraction": 0.7432166146251306,
+      "eligible_fraction": 0.031124023678286417,
+      "default_scale_m": 0.18828006088733673,
+      "episodes": 1247,
+      "unique_sampled": 995,
+      "episode_coverage": 0.7979149959903769,
+      "updates_per_episode": 1.6038492381716118,
+      "support_counts": null,
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.21882664145139638,
+      "fixed_partial_loss_after": 0.3261070531264915,
+      "field_sha256": "14095978dd013eaca9a2f55ad8bc3833e1f5c0beb0233ca27c43676a2874621c"
+    },
+    {
+      "family": "nvos",
+      "scene": "fern",
+      "field": "output/query_field_20261007/nvos_fern_v1/models/trained",
+      "elements": 329038,
+      "observed_fraction": 0.8957476036202505,
+      "eligible_fraction": 0.04802180903117573,
+      "default_scale_m": 2.6987667083740234,
+      "episodes": 183,
+      "unique_sampled": 183,
+      "episode_coverage": 1.0,
+      "updates_per_episode": 10.92896174863388,
+      "support_counts": null,
+      "render_objective": "subset_alpha",
+      "fixed_partial_loss_before": 0.36256160018800204,
+      "fixed_partial_loss_after": 0.03483649726277675,
+      "field_sha256": "e77d068d43a74db4efcc7cb38dfe800b5dc0f7d8b215963c5740e1f8bce11f9c"
+    }
+  ],
+  "source_budget_comparison": {
+    "scannet": [
+      {
+        "scene": "scene0070_00",
+        "v10_source_frames": 67,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0070_00.scene.json",
+        "sha256": "e371d3492bef723d46573fb36fb43c340f9813f6b6397e6b65f893d61bd9fc41",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0097_00",
+        "v10_source_frames": 38,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0097_00.scene.json",
+        "sha256": "a6b6be238e78bd59bc415a580b56fe72a6d4bbd132280b77495b6f2d6775772f",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0062_00",
+        "v10_source_frames": 37,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0062_00.scene.json",
+        "sha256": "feb9942528aa89e1f544bd284dcd24a5396c57289c1b6297f99099df47aaae69",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0400_00",
+        "v10_source_frames": 61,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0400_00.scene.json",
+        "sha256": "78c060b516eb1087e35b73573b526fc02a8f31da621faec7dd925747b9d6973c",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0590_00",
+        "v10_source_frames": 135,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0590_00.scene.json",
+        "sha256": "a7d6812548331b538c9104e18644875a49c0c1e27519c4e87c470fba7cea3c6a",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0000_00",
+        "v10_source_frames": 279,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0000_00.scene.json",
+        "sha256": "a64dbaafd60e379fd0f59e70624a3373d302ec514bfb397d4c6f892e80bc0bd7",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0347_00",
+        "v10_source_frames": 54,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0347_00.scene.json",
+        "sha256": "c30c1d1ed95edab89d8901f09914bbf3c63b3c1d9db9d2f42765c17d193d2c72",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0140_00",
+        "v10_source_frames": 215,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0140_00.scene.json",
+        "sha256": "f380a0e91f00cc406b18f5f219ac8e6dbf9bc9a5f4f29b16c78f77fb2180b30f",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0200_00",
+        "v10_source_frames": 46,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0200_00.scene.json",
+        "sha256": "9fc97074f796087c5fff62ccbb79c6be7f600a182630419c440b06f6f0341f54",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "scene0645_00",
+        "v10_source_frames": 226,
+        "new_training_frames": 18,
+        "evidence": "configs/consolidated/scannet_native/scene0645_00.scene.json",
+        "sha256": "47e63e3edf1a297a618f05f8f3abd5eb69aad710b21b17057d4527307e69e3f0",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      }
+    ],
+    "nvos": [
+      {
+        "scene": "fern",
+        "v10_source_frames": 19,
+        "new_training_frames": 12,
+        "evidence": "configs/pipeline/nvos_all_sources/fern.scene.json",
+        "sha256": "a969f2c116483128bbea73fea2e93bbdf4bc5e6cff6e9ba45524f3803a7eb067",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "flower",
+        "v10_source_frames": 33,
+        "new_training_frames": 18,
+        "evidence": "configs/pipeline/nvos_all_sources/flower.scene.json",
+        "sha256": "93d1183fffcd41e3febd3469c6120c8ba42335dcee3a11dd475621536c4de9c1",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "fortress",
+        "v10_source_frames": 41,
+        "new_training_frames": 18,
+        "evidence": "configs/pipeline/nvos_all_sources/fortress.scene.json",
+        "sha256": "b195dc0df72b9c9d8eaf91d71f05c4b1254a5195a2b4154c93b885c7c006a1e0",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "horns_center",
+        "v10_source_frames": 61,
+        "new_training_frames": 18,
+        "evidence": "configs/pipeline/nvos_all_sources/horns_center.scene.json",
+        "sha256": "5e5d52a237e273ab16069347c447ffa7d9bd1d4a5c1ab2007d80bca4b5334f39",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "horns_left",
+        "v10_source_frames": 61,
+        "new_training_frames": 18,
+        "evidence": "configs/pipeline/nvos_all_sources/horns_left.scene.json",
+        "sha256": "34d0025271da37100b58931f48be0caea16082d3ffccaae9814d7b03b227c7e3",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "leaves",
+        "v10_source_frames": 25,
+        "new_training_frames": 18,
+        "evidence": "configs/pipeline/nvos_all_sources/leaves.scene.json",
+        "sha256": "40877b0e733a0093f40d980f372ffa64a2c3cb329d0d979fc4617285f4925345",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "orchids",
+        "v10_source_frames": 24,
+        "new_training_frames": 18,
+        "evidence": "configs/pipeline/nvos_all_sources/orchids.scene.json",
+        "sha256": "898c250c0aa705fd88f5051245d8e52751d40f513fb6ec3ea2a6e6fc2d988bb6",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      },
+      {
+        "scene": "trex",
+        "v10_source_frames": 54,
+        "new_training_frames": 18,
+        "evidence": "configs/pipeline/nvos_all_sources/trex.scene.json",
+        "sha256": "d0d617b273ba4efda097ecdac76981f992b0fd643a4230f975e8c6e75edc6bca",
+        "source_count_interpretation": "declared source authority; not claimed actual cache admission count"
+      }
+    ],
+    "uqis": [
+      {
+        "scene": "scene0030_00",
+        "v10_source_frames": 119,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0030_00/map.json",
+        "sha256": "ef2cd7b55d38fab61fa745eccd535a067f262aa0f50407f815b4a9d991c38730",
+        "source_count_interpretation": "used map manifest"
+      },
+      {
+        "scene": "scene0249_00",
+        "v10_source_frames": 128,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0249_00/map.json",
+        "sha256": "6c71552b9c3d0a56eb33712e0e768bbdbe5daf9f6339820f13ca23cb67d702c1",
+        "source_count_interpretation": "used map manifest"
+      },
+      {
+        "scene": "scene0353_00",
+        "v10_source_frames": 141,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0353_00/map.json",
+        "sha256": "11c7cc357478ab7304a23dc0226097bea02396b38689dcad8280eb5c2d743e33",
+        "source_count_interpretation": "used map manifest"
+      },
+      {
+        "scene": "scene0435_00",
+        "v10_source_frames": 155,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0435_00/map.json",
+        "sha256": "54cde30eac65e28dd73834366c3361bd1a8e7b0ba001325d6f2245d965235c91",
+        "source_count_interpretation": "used map manifest"
+      },
+      {
+        "scene": "scene0700_00",
+        "v10_source_frames": 217,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0700_00/map.json",
+        "sha256": "39a56413a638002288ae99a43eeb4d78eded5e8109e9dabb6924f233bb7055e9",
+        "source_count_interpretation": "used map manifest"
+      },
+      {
+        "scene": "scene0704_00",
+        "v10_source_frames": 111,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0704_00/map.json",
+        "sha256": "cad4fb4530dc34c8564e00a8074628c24434a1ce82485ad2da87e37cb3bd25a7",
+        "source_count_interpretation": "used map manifest"
+      },
+      {
+        "scene": "scene0246_00",
+        "v10_source_frames": 140,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0246_00/map.json",
+        "sha256": "27d42a8279d391e778a49a373eb10abb8c459e20c5ca1861bfda04fc20c4ab46",
+        "source_count_interpretation": "used map manifest"
+      },
+      {
+        "scene": "scene0203_00",
+        "v10_source_frames": 66,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0203_00/map.json",
+        "sha256": "2a61e981fcf170835de5ec6f5138b7a96a65bdb7a737db5a87c24a818f05af02",
+        "source_count_interpretation": "used map manifest"
+      },
+      {
+        "scene": "scene0535_00",
+        "v10_source_frames": 30,
+        "new_training_frames": 18,
+        "evidence": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0535_00/map.json",
+        "sha256": "dd96afd326867af10d65c08f0f703900912df0bec83b3689977ec3d894b752e0",
+        "source_count_interpretation": "used map manifest"
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/diagnostic_corrections.json",
+      "sha256": "609b8f6b6acebd987b0a582494315c55738c943103216ee392a9041690bcd610"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/lerf_figurines.json",
+      "sha256": "51bd4cb8d0be17561dc80017bf7c3986bd16b1c063f4e30c63f046ec9e7e3c33"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/lerf_ramen.json",
+      "sha256": "473d5a386ab92ca259b8c80f7715ec8eb32d848b1d871dfccfdb95385ede4156"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/lerf_teatime.json",
+      "sha256": "7a7a33326c0828f0fda05661347d632195828176c11f6332f8ba7871784224c2"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/lerf_waldo_kitchen.json",
+      "sha256": "3dd2812fe8367078c03b97a54f86da00af711c2ca6268910b7d415ef89b1fafa"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/nvos_fern.json",
+      "sha256": "fd5a64599da67471d2e9f34a35ed67d5901b3c8210348cd6997735e722f9c95f"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/nvos_flower.json",
+      "sha256": "eea641213efcb7f3d01911bcc1e6b04fe29efc7e9ea4e345a1fc72614bd7d6ac"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/nvos_fortress.json",
+      "sha256": "2c00160a8f781634cf7664d4c7c87613d53165bfe804a6832629faf1b98e212a"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/nvos_horns_center.json",
+      "sha256": "27864c1f80141925c1cf8bf8f9ee0c18792997312e11df31822c265a0e3e3ecf"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/nvos_leaves.json",
+      "sha256": "3bcb923cecde44926d40092f9ba19afdf8b65e576f2dd84d7151cae72ab1ea32"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/nvos_orchids.json",
+      "sha256": "00984840acb63f74560308d26a966f25327372801dd05f8a78c53556b9317858"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/nvos_trex.json",
+      "sha256": "de49ebead58883cacb8518adf7dbb54e58422f1671cde0b4afa3f10a9a67a4bb"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0000_00.json",
+      "sha256": "fdeb622ab5ddcc32a212be83bd9048080f6b22d0f0037761e5225c32cae89dda"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0062_00.json",
+      "sha256": "e3ec49ed1526fdf935556e7f2191f5509f5212b926a87164f24a667f96dbf7ec"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0070_00.json",
+      "sha256": "e00efc75689b616091ce9ae063efb75b6b8a2eebf835411c4caeda8fe113e384"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0097_00.json",
+      "sha256": "818b2ba5319c810690934c6b4c6df8a953218e0f90cb5a24fc998c9eab682537"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0140_00.json",
+      "sha256": "d6cd938b039de6164a16be5394d98b4b132887a92bc7178af7fb617832fda47c"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0200_00.json",
+      "sha256": "0f99838ae531c287bfefd1118883967a851ebc207bd64041366102a45750cb09"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0347_00.json",
+      "sha256": "377a6f3108ebe255579ef05fe81914619a9f3657232c3dd428f8f9d3c99df14c"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0400_00.json",
+      "sha256": "a9371c1b4e4124cac7000c52937b56697765d56da5bbf7afa458e3c40379b6f1"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0590_00.json",
+      "sha256": "e443e434cad85fb3bef7b350094676a46364a8f5f369f84929599a1a43a60cd3"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/scannet_scene0645_00.json",
+      "sha256": "2403b08f577a0fa5f004341d63b0b693567da1cbabc59f82d2a319132eb4022e"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0030_00.json",
+      "sha256": "cedd00ceb3aca5a197dc0d3e832b8702eedcc1f56dd82605571ac62f95293a34"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0203_00.json",
+      "sha256": "559de26669ce0bb27cd3316050afd5dd716bed36a87796804e0d972672dbe132"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0246_00.json",
+      "sha256": "50af85d32987a817fcfa298d7eb41cdfd3ad647784eaecd9d16240b18d431eb8"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0249_00.json",
+      "sha256": "c1208bdda5493b76a35e2bc83f9940d4e2bad5f3047362cbc3a4f071b2b92a6a"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0353_00.json",
+      "sha256": "27a6b075d88f0af4a8aeebf76c41758507013c2e001bb39669b7e25446b71ea0"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0435_00.json",
+      "sha256": "b6bd851ae6deb9fc518d94660b68cf7ea0fd54cebb1ae67311d88288449527c9"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0535_00.json",
+      "sha256": "a5a789ab811b83eaddb162b8225a830cff01b258229729ac4a9b0da1d1723dda"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0700_00.json",
+      "sha256": "6fec76723fde49d17a41af70fb7a6179b79413806fded1768babd6b13ab09fea"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/fusion/uqis_scene0704_00.json",
+      "sha256": "0029f197557dee49321d40bebf068237104d02809b049b774028384369c6809a"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/inventory.json",
+      "sha256": "1e70d831503115d260b8cbffac69e35268098869f248d26e5e91cc6865f29d32"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/lerf.json",
+      "sha256": "0aa7bfd37b58dc6b5cc4601708762edb697096c3ef99f7292760a2bf909d3207"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/nvos/fern.json",
+      "sha256": "22ca9077432afcbcec3b0393adfc64df1f84c50f6c90cead6b984066bcf2c992"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/nvos/flower.json",
+      "sha256": "63360d744949a4925d6f4baecda6054fa59e92a7705695850065669553514264"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/nvos/fortress.json",
+      "sha256": "b13a717963d5b96bcd56b590660552fc219ec085194bef29ccd74a427ed0e099"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/nvos/horns_center.json",
+      "sha256": "183e2937e4ee54b4ca9f435515ed0397a9d23bce9e1ff123702452b900f22ca1"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/nvos/horns_left.json",
+      "sha256": "da2873a3edc6d67c1adaf8f9746efc3f6ba1318af540ea69592cca2539f33ddf"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/nvos/leaves.json",
+      "sha256": "0eac05afeea47f636e281969a75832bfdca83e84a1d3a8c7d10cffcd7381cdb9"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/nvos/orchids.json",
+      "sha256": "f0c117de4b407991b83d8ac913a7e76d8e80952c568291d228ee5e0684b33d59"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/nvos/trex.json",
+      "sha256": "f13cffa297d0d160754bad6d20b90d16ad87a9ffae443b8e3f16796b28692d09"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/protocol_receipt.json",
+      "sha256": "bbf8d45ddd63e8456e34aeb931e8c7f847674e08bdb6f567892a571b4c13b477"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scannet.json",
+      "sha256": "8d8e199dd47cd97c974add082521021ed4a74c8d153b0d6aa3773137a40477cc"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_nvos/fern.json",
+      "sha256": "a71221e6854931a75ba8912d3d047c777b3bd985b70e9da751b62d4ab19e5b1f"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_nvos/flower.json",
+      "sha256": "26964f4ef17d7c4505f1d1a785c12cbdf35482ca1eef98c03a67b30cd4eaee3b"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_nvos/fortress.json",
+      "sha256": "401da2394b5c098f7c14b9d2835f27d53d073b03ed0ca19b8549476035f7cd94"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_nvos/horns_center.json",
+      "sha256": "f4172c759b25373580814c53b3e368f192404c65d89d4b5d7caa836d38b734f7"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_nvos/horns_left.json",
+      "sha256": "bd7ac534a21fe14136da66e953787b55bf57ccd36bf51370eb6aac89b3ab88b4"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_nvos/leaves.json",
+      "sha256": "60446fba4b70e1e42d0df626e26e75252a04249d9acc76d71f3d77f445fa16ec"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_nvos/orchids.json",
+      "sha256": "4e12add26c7699524142550e2a15fc7b23b01259db134cfc453fe63c581f304c"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_nvos/trex.json",
+      "sha256": "5f5dbaed00bd02082bf4f3d2a608e0a1fe0a15c08eefb2d8e0a045621021d445"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0030_00.json",
+      "sha256": "9007d18508d8612d133638a6bc1a858576b991742f2ca2c5bf05f5693481da45"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0203_00.json",
+      "sha256": "37b312c4e5db07a93cf0ae14ff45a49de9674ceffebc307891c56643d8962251"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0246_00.json",
+      "sha256": "de6f0ea09422e66006c9b5a743e4e907f17a1af3bc1ff133ab50182f3276a501"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0249_00.json",
+      "sha256": "0c8d4a8b7a284032e58eb6cc992bc51c92a31234e85e95cdac9dc84970ef8d80"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0353_00.json",
+      "sha256": "0303e898a636b36736108c8bfaf00fbc64ee4c218646a7592578138e8dea49a0"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0435_00.json",
+      "sha256": "1dd8e9931a6a60a5fa272bfa5306670d738643408658d47a95490dbcf8412124"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0535_00.json",
+      "sha256": "a75eaa3c5055b8b9b8bc3788788a00cda4f319fc0f24cf348e9985c51433057c"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0700_00.json",
+      "sha256": "ecfc991cc070a40a18decfac5620cd30b578a13e8706f3fd6387e19a177934a2"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/scope_uqis/scene0704_00.json",
+      "sha256": "8a2698732502d2fa4588c650054ce7c99129ffe2ad2fa8eddaacc6d905ef097a"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0030_00.json",
+      "sha256": "fd2d7d82bf46ed4f8632c21883665f169b6aff62152db673c9491853c27cd1ad"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0203_00.json",
+      "sha256": "19e4b12a49b48fa4c58284222e0ba52b14d6ac4452c6c259530ca7838b4100b8"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0246_00.json",
+      "sha256": "346ccdf7178bc0bf48a5304e2418908baf0578b41520b955996e14cbed7d60a5"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0249_00.json",
+      "sha256": "b5b33b9c16e01b23423f23f4cb9c2b8af51719c4985fe0321e4a77be6906e300"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0353_00.json",
+      "sha256": "967f0e51c86fbfa9b216f6a352c296aeca29e54449e28d76a81ab850a24828e4"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0435_00.json",
+      "sha256": "03f708d66e408f4ee684d074436d9115a31c848ea45d6be62723109b55d657ff"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0535_00.json",
+      "sha256": "0ecae329db116ef8bbe41e53a32fc3b14daed76f46a41fb268855731c531b94f"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0700_00.json",
+      "sha256": "865f641573d80427dfcfe947a9c33115feb67dafd5681affb7fdcd9cd0640900"
+    },
+    {
+      "path": "output/query_field_20261008/architecture_attribution_v1/uqis/scene0704_00.json",
+      "sha256": "7b143a783cb8c2abe6db52ff05450ed2d911d6f85aaaa9fe6a3f00386df857f8"
+    },
+    {
+      "path": "scripts/research/attribute_query_field_architecture.py",
+      "sha256": "15792c797ed029cd759d8717d95cf52808881cc9e45a4317efd750bb219e9cba"
+    },
+    {
+      "path": "scripts/research/bound_query_field_scope.py",
+      "sha256": "dd617556371d299721561aa6d90e654d0b1320bd58d631110b77fb0dd1cc8368"
+    },
+    {
+      "path": "scripts/research/summarize_query_field_attribution.py",
+      "sha256": "d38d7369cb35b50a093d7c631c02f03100c9132b556d1d8c11edabf6d4f47e84"
+    },
+    {
+      "path": "docs/experiments/2026-10-08-architecture-attribution-protocol.md",
+      "sha256": "6a9ce8f3ce54fd2c1125c2347954507737161bf890a8c3214451d1914a2f2642"
+    },
+    {
+      "path": "docs/experiments/2026-10-08-scope-bound-protocol.md",
+      "sha256": "cf175261d06adf970c8c34b7e79ad7397b6da3e74e6a3aa9143dfa860d32d83f"
+    }
+  ],
+  "caveats": [
+    "These stage deltas are not additive causal components of the v10 gap.",
+    "Candidate oracles, observed-label ceilings and cosine bounds are privileged diagnostics, not predictions.",
+    "Fusion probe combines source fusion, observation coverage and projection on two held-out source views.",
+    "Conditional results retain their own counts and do not replace complete-cohort accuracy.",
+    "Teacher, source budget, source access and extra 3D supervision differ from v10."
+  ]
+}

@@ -305,3 +305,29 @@ member extent and typed readout losses. Do not compress, add per-benchmark
 fallbacks or resume local sweeps before that diagnosis. This system comparison
 has unequal source budgets and teachers; it is not an isolated architectural
 effect, an independent final test or evidence against the research direction.
+
+## Architectural attribution after full coverage
+
+The [complete diagnostic study](../experiments/2026-10-08-architecture-attribution-results.md)
+replays the accepted outputs and separates observation coverage, inferred anchor
+identity, conditional member extent and typed readout. Its candidate oracles,
+coverage ceilings and analytic scope bounds are evaluator-only evidence.
+
+Correct 3D anchors still yield weak extent; the hard spatial envelope excludes
+little of the supported-query target mass. NVOS negative removal barely changes
+the failures, while LERF overselects and NVOS underselects. Native field direction
+retention coexists with poor source-query ranking retention. ScanNet category
+competition loses to the same field's native control in every room. A single
+threshold, radius or negative-evidence repair is not supported by these results.
+
+The next research design must preserve native query evidence beyond anchor
+selection, learn identity-compatible scope from authorized source supervision,
+and give typed category competition a defined semantic evidence interpretation.
+One carrier and one shared member core remain requirements; they do not require
+discarding query evidence or comparing uncalibrated instance scores across
+classes. No particular new energy, learned head or scale policy is promoted yet.
+
+Source query-retention and known-identity member controls precede combined
+method changes. Match source budgets when making causal claims, record episode
+exposure, and preserve complete-cohort reporting. The current high-capacity
+storage prototype is not proof of a solved high-capacity query-preserving model.

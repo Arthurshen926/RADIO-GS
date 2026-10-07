@@ -7,6 +7,14 @@ This package is the new construction/learning/query path. The v10 executable
 recipe remains a frozen comparator. Neither its source-only NVOS solver nor
 its label-trained member tree is silently called by the new package.
 
+Latest evidence: the [architecture attribution](../experiments/2026-10-08-architecture-attribution-results.md)
+is complete on the full baseline. The current member implementation remains
+unchanged. Next designs must address functional native-query retention,
+identity evidence beyond anchor selection, correct-support extent and semantic
+category competition. The report distinguishes measured component effects from
+unvalidated joint identity/scope proposals; it supersedes historical local
+next-step suggestions below.
+
 ## Implementation boundary
 
 | Module | Responsibility |

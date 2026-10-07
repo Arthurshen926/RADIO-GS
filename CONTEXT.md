@@ -18,7 +18,42 @@ evidence or authorized spatial support; native matching remains paired with
 its decoder. This refines the Canonical Capability Feature vocabulary without
 requiring RADIO reconstruction or an identical scalar output across tasks.
 
-Current priority (2026-10-08, explicit user steering): complete one frozen
+Current priority (2026-10-08): architecture-level attribution and evidence-led
+method design after the complete five-task baseline. The full diagnostic run is
+complete: `docs/experiments/2026-10-08-architecture-attribution-results.md` and
+its JSON, under `output/query_field_20261008/architecture_attribution_v1`.
+All30 fields,60 feature-held-out source views/2910 partial regions,208 LERF
+query-views,10 ScanNet rooms,8 NVOS cases and268 UQIS queries are included.
+No runtime method, threshold or baseline prediction changed.
+
+Measured findings: UQIS target observation coverage87.43%; most target misses
+are on observed elements. Text/image top anchors hit20/67 and21/67 targets;
+best-GT choice among the same8 candidates only raises actual IoU12.08/15.99
+to16.45/22.13%. All59 supported3D anchors are target-correct, yet conditional
+actual IoU31.73%; only1.16% target mass is outside the fixed analytic envelope,
+while41.50% is observed, inside and still missed (conditional scene macro).
+Two of61 available2D prompts lose all target support after observed filtering.
+NVOS removing negatives changes macro IoU by only+0.0115pp; flower/orchids
+remain severe underselection. LERF actual precision/recall33.81/87.60% shows
+the opposite error direction. ScanNet member competition loses14.66pp relative
+to native19 on the same field;57.77% observed valid points have every category
+member score<=0.5. Source-partial-query AP after fusion/projection falls from
+95.67 to49.14% in ScanNet and98.99 to46.78% in UQIS, despite high semantic cosine.
+
+Interpretation: protected native storage is not functional query preservation;
+identity evidence is discarded too early; correct-support member extent remains
+weak; independent instance affinity is not calibrated category evidence.
+Hard geometry extent or the signed negative rule alone does not explain the
+failures. Soft scale/group/training effects remain coupled. Different source
+budgets/teachers/3D supervision prevent attributing the entire v10 gap causally.
+Next: matched observation/query-retention controls and known-identity member
+learning, then evidence-preserving identity and typed category competition.
+Preserve one Gaussian carrier, three native teacher roles and one conditional
+member core; no source-query solver, labelled member-head reuse, threshold sweep
+or compression work. Proposed joint identity/scope designs are not validated
+replacements. Do not restart the rejected aggregation-only studies.
+
+Completed prior priority (2026-10-08, explicit user steering): complete one frozen
 architecture baseline on all five benchmarks BEFORE further local optimization
 or staged gap diagnosis. Earlier local experimental promotion gates must not
 delay full-cohort integration. No new mixture/negative-rule/compression/speed
@@ -26,7 +61,7 @@ study is authorized as a substitute for this coverage. The common physical
 field at fb3c768 is fixed for this run. Full cohort: four LERF scenes (two
 retained readouts), eight NVOS tasks, ten ScanNet rooms, nine UQIS rooms with
 all67 targets/268 four-modal queries. Existing LERF and fern fields are reused;
-All 25 missing fields are now built, with horns left/centre sharing one field.
+all 25 missing fields are now built, with horns left/centre sharing one field.
 New fields use18 uniformly selected legal training views and2 development views,
 same2000-step physical recipe. Source budget and geometry differences from v10
 remain explicit. ScanNet/UQIS use declared unlabelled-mesh surface Gaussians,
