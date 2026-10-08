@@ -29,17 +29,19 @@ class CoordinateAdam:
     def update(self, rows, gradient):
         if rows.ndim != 1 or len(rows.unique()) != len(rows):
             raise ValueError('coordinate updates require unique rows')
-        gradient = gradient.detach().cpu().float()
+        gradient = gradient.detach().float()
+        device = gradient.device
         if not bool(torch.isfinite(gradient).all()):
             raise ValueError('nonfinite coordinate gradient')
         self.steps[rows] += 1
-        first = .9 * self.first[rows] + .1 * gradient
-        second = .999 * self.second[rows] + .001 * gradient.square()
-        self.first[rows] = first; self.second[rows] = second
-        steps = self.steps[rows].float()[:, None]
+        first = .9 * self.first[rows].to(device) + .1 * gradient
+        second = .999 * self.second[rows].to(device) + .001 * gradient.square()
+        self.first[rows] = first.cpu(); self.second[rows] = second.cpu()
+        steps = self.steps[rows].to(device).float()[:, None]
         corrected_first = first / (1 - torch.pow(.9, steps))
         corrected_second = second / (1 - torch.pow(.999, steps))
-        self.values[rows] -= self.learning_rate * corrected_first / (corrected_second.sqrt() + 1e-8)
+        updated = self.values[rows].to(device) - self.learning_rate * corrected_first / (corrected_second.sqrt() + 1e-8)
+        self.values[rows] = updated.cpu()
 
     def release_moments(self):
         self.first = self.second = None

@@ -132,3 +132,17 @@ def test_sparse_coordinate_adam_matches_independent_rows_and_preserves_absent_ro
     assert state.steps.tolist() == [2, 3, 0, 0, 2]
     with pytest.raises(ValueError, match='unique'):
         state.update(torch.tensor([1, 1]), torch.zeros(2, 3))
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA parity requires a GPU')
+def test_coordinate_adam_cpu_cuda_arithmetic_parity():
+    generator = torch.Generator().manual_seed(29)
+    initial = torch.randn(71, 1536, generator=generator) * .025
+    cpu, gpu = CoordinateAdam(initial, .001), CoordinateAdam(initial, .001)
+    for _ in range(31):
+        rows = torch.randperm(71, generator=generator)[:41]
+        gradient = torch.randn(41, 1536, generator=generator) * 1e-4
+        cpu.update(rows, gradient); gpu.update(rows, gradient.cuda())
+    assert torch.equal(cpu.steps, gpu.steps)
+    for name in ['values', 'first', 'second']:
+        torch.testing.assert_close(getattr(cpu, name), getattr(gpu, name), atol=1e-7, rtol=1e-5)

@@ -38,3 +38,13 @@ and all original v10 contract limitations. Single-vector coordinates, even when
 fully optimized, are not automatically a sufficient multimodal capacity upper
 bound. No default promotion, per-task winner selection or claim of complete
 performance recovery is authorized by this experiment's design alone.
+
+Execution revision, before any coordinate-model benchmark predictions: the CPU
+arithmetic trial at `native_coordinates_v1` (code `d67813c`) was stopped after five
+complete fields; all attempts remain on disk. Active-row Adam arithmetic now
+runs on the gradient device, retaining full FP32 CPU-resident state and the same
+equations. CPU/CUDA parity is tested before restarting the entire cohort under
+`native_coordinates_v2`; no completed CPU-trial field is mixed into its results.
+The three-arm protected-native results became available before this execution
+revision, but no coordinate-model benchmark result or hyperparameter change
+motivates it. The fixed method/data/optimization recipe above is unchanged.

@@ -11,7 +11,7 @@ from scripts.research import run_query_field_relations as common
 from scripts.research.run_query_field_relations import read, write, receipt, check, execute
 from scripts.research.run_query_field_protected import ROOT as PARENT_ROOT
 
-ROOT = Path('output/query_field_20261008/native_coordinates_v1')
+ROOT = Path('output/query_field_20261008/native_coordinates_v2')
 ARMS = ('native_coordinates',)
 PROTOCOL = Path('docs/experiments/2026-10-08-native-coordinate-protocol.md')
 
