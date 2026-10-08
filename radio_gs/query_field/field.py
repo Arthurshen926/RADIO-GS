@@ -146,10 +146,10 @@ class CapabilityField(nn.Module):
             native_support = F.normalize(self.local.decode(ids), dim=-1)
             native_prototype = (native_support * weights).sum(0)
             if rows is None:
-                cosine = self.local.score(native_prototype).flatten()
+                local_cosine = self.local.score(native_prototype).flatten()
             else:
-                cosine = F.normalize(self.local.decode(rows), dim=-1) @ F.normalize(native_prototype, dim=0)
-            affinity = affinity - (1 - cosine.clamp(-1, 1))
+                local_cosine = F.normalize(self.local.decode(rows), dim=-1) @ F.normalize(native_prototype, dim=0)
+            affinity = affinity - (1 - local_cosine.clamp(-1, 1))
         logits = self.log_temperature.exp().clamp(1, 50) * affinity
         if self.spatial_metric == "scale_normalized":
             # A physical-scale log prior on the same conditional member energy.

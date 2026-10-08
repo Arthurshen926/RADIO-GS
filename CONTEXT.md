@@ -7,6 +7,12 @@ inputs,67-point diagnosis, exact native replay and five copied-export cold
 checks are complete. No pending jobs or model promotion. Frozen construction
 7d9fcc8, complete tools7df5335;12 focused tests pass, including actual CUDA
 rendered gradients outside element samples. Prior failure study is f364d25.
+Study/result snapshot7896d0c predates a small runtime fix: when combining the
+optional native_cosine local metric with the new residual, preserve group cosine
+instead of overwriting its feature with local cosine. Two regression cases fail
+before/pass after;28 field/element/local-metric tests pass. All30 evaluated
+exports use local_metric=none, so the fixed branch was inactive in these scores.
+Use the frozen study snapshot for receipt verification after this code change.
 
 Joint .5 element +.25 primary/.25 secondary subset-rendered losses retain the
 same original parents, full source traces/samples/two epochs and export capacity.

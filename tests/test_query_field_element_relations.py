@@ -28,6 +28,30 @@ def test_zero_initialization_preserves_old_formula_and_native_scores():
     assert torch.equal(native, field.semantic.score(field.semantic.codes[2]))
 
 
+@pytest.mark.parametrize('rows', [None, [4, 2, 7, 4]])
+def test_native_local_metric_keeps_group_and_local_relation_features_distinct(rows):
+    field = metric_field(); field.local_metric = 'native_cosine'
+    support = Support(torch.tensor([1, 3]), torch.tensor([.2, .8]))
+    rows = None if rows is None else torch.tensor(rows)
+    base = field.member_logits(support, .7, rows).detach()
+    enable(field, torch.ones(12))
+    with torch.no_grad():
+        field.relation.layers[-1].weight.fill_(.2)
+    captured = []
+    hook = field.relation.register_forward_pre_hook(lambda _, args: captured.append(args[0].detach().clone()))
+    try:
+        actual = field.member_logits(support, .7, rows)
+    finally:
+        hook.remove()
+    features = torch.cat(captured)
+    group = field.grouping_features(.7)
+    prototype = torch.nn.functional.normalize((group[support.indices] * support.weights[:, None]).sum(0), dim=0)
+    group_cosine = (group if rows is None else group[rows]) @ prototype
+    assert not torch.allclose(group_cosine, features[:, 2])
+    torch.testing.assert_close(features[:, 0], group_cosine)
+    torch.testing.assert_close(actual, base + residual(field, support, .7, group_cosine, rows))
+
+
 def test_parent_source_reference_matches_deployed_logits():
     field = metric_field(); rows = torch.tensor([1, 7, 2, 1])
     expected = field.member_logits(Support(torch.tensor([2]), torch.ones(1)), .7, rows)

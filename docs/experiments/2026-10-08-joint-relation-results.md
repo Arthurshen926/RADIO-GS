@@ -187,6 +187,13 @@ UQIS 95.8177%。NVOS 是 7 个物理场、8 个测试输入。完整梯度次数
 暂挂后自动恢复。只改变调度，未改源样本、模型或训练规则，执行与校验记录保存在
 `execution/waldo_parallel.json` 并纳入结果证据。
 
+评测完成后的接口复查还修复了一处特征混用：当可选 `native_cosine` 局部度量与条件
+残差同时启用时，原实现会用局部 cosine 覆盖残差的分组 cosine 输入。现在两者独立
+保留。全行与乱序重复子集两项回归测试先复现失败，再随修复通过；相关三个测试文件
+共 28 项通过。核验本轮全部 30 个导出的 `spec.local_metric` 均为 `none`，因此该错误
+不影响本表，也不是性能差距的解释。完整评测代码／结果快照为 `7896d0c`；复核冻结
+哈希时应使用该快照，不把后续接口修复冒充重新完成了一轮 benchmark。
+
 ```bash
 export PYTHONPATH=.
 export OMP_NUM_THREADS=4
@@ -200,4 +207,4 @@ $PY -m scripts.research.summarize_query_field_joint_elements
 $PY -m scripts.research.plot_query_field_joint_elements
 ```
 
-后续提交补充诊断、汇总、检查与文档，未改变冻结构建代码和配方。
+训练和评分期间未改变冻结构建代码与配方；评测后的接口修复及其作用范围已单独说明。
