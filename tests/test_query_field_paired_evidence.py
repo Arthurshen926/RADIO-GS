@@ -65,6 +65,24 @@ def test_scale_mismatch_is_unknown_and_no_support_is_forced_positive():
     assert torch.equal(logits, evidence.refine(logits, unknown, 1.))
 
 
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA required')
+def test_soft_relation_function_matches_cpu_on_cuda():
+    rng = np.random.default_rng(20261009)
+    positive = rng.uniform(0, 1, (512, 64)).astype(np.float32)
+    negative = 1 - positive
+    unknown = rng.uniform(0, 1, positive.shape) < .35
+    positive[unknown] = 0; negative[unknown] = 0
+    data = state(positive, negative, np.repeat(np.arange(8), 8).tolist())
+    cpu = PairedEvidence(data, 512)
+    gpu = PairedEvidence({k: v.clone() for k, v in data.items()}, 512).cuda()
+    support = Support(torch.tensor([2, 51, 14]), torch.tensor([.2, .7, .1]))
+    logits = torch.from_numpy(rng.normal(size=512).astype(np.float32))
+    expected = cpu.refine(logits, support, 1.)
+    actual = gpu.refine(logits.cuda(), support, 1.).cpu()
+    assert not torch.equal(expected, logits)
+    torch.testing.assert_close(actual, expected, atol=2e-6, rtol=1e-5)
+
+
 def test_export_replay_all_input_types_and_legacy_native_state(tmp_path):
     field = example(); before = {k: v.clone() for k, v in field.state_dict().items()}
     pos = np.zeros((12, 3), np.float32); neg = pos.copy()
