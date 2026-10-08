@@ -212,6 +212,8 @@ def predict(design, gpus):
             complete = out / 'receipts' / (name + '.json')
             command = ['-m', 'radio_gs.query_field.public_uqis', '--field', job['field'], '--scene', name,
                        '--public', str(Path(cohort['uqis_package']) / 'method'), '--encoder', cohort['encoder'], '--output', str(out)]
+        if family in {'scannet', 'uqis'} and design.get('query_program', 'original') != 'original':
+            command += ['--query-program', design['query_program']]
         if complete.exists(): return
         execute(command, ROOT / 'logs/predict' / (arm + '_' + family + '_' + name + '.log'), gpu)
         print('predicted', arm, family, name, flush=True)

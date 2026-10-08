@@ -90,6 +90,14 @@ functional native construction remains open and is not a prerequisite for
 testing these two isolated deficiencies. This sequencing does not certify the
 initial mean field as a sufficient native-capability reference.
 
+The subsequent protected-native study implements the first source-only native
+functional construction, using full-dimensional residual maps baked into the
+same field. Group learning and shared acceptance parameters are separated in a
+matched intervention. This is a method experiment, not a replacement of the
+three-teacher/standalone contract or a capacity-upper-bound claim. Its fixed
+three-arm full-cohort protocol is `2026-10-08-protected-native-protocol.md` under
+`docs/experiments/`.
+
 The fixed common program uses the same cross-view-trained field recipe across
 all cohorts, global ordinal image candidates followed by bidirectional
 Gaussian-set matching, and bounded native/member category evidence. Text unions

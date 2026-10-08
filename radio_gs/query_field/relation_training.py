@@ -137,7 +137,18 @@ def buffer_digests(field):
     return result
 
 
-def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_rate=.001, device='cuda'):
+def training_parameters(field, policy):
+    """Separate Gaussian relation learning from shared acceptance calibration."""
+    if policy not in {'joint', 'group_only'}:
+        raise ValueError('unknown relation parameter policy')
+    for name, parameter in field.named_parameters():
+        parameter.requires_grad_(policy == 'joint' or name == 'group')
+    protected = {name: p.detach().clone() for name, p in field.named_parameters() if not p.requires_grad}
+    return [p for p in field.parameters() if p.requires_grad], protected
+
+
+def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_rate=.001,
+        parameter_policy='joint', device='cuda'):
     if arm not in {'local_anchor_control', 'cross_view_anchor'}:
         raise ValueError('unknown relation training arm')
     output = Path(output)
@@ -152,7 +163,8 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
     if parent_manifest['provenance']['observations_sha256'] != sha256(Path(observations) / 'observations.json'):
         raise ValueError('parent and relation observations differ')
     generator = torch.Generator().manual_seed(seed)
-    optimizer = torch.optim.Adam(field.parameters(), lr=learning_rate)
+    parameters, protected = training_parameters(field, parameter_policy)
+    optimizer = torch.optim.Adam(parameters, lr=learning_rate)
     history, trace = [], []
     visits = torch.zeros(len(source.examples), dtype=torch.long)
     height, width = source.manifest['raster_hw']
@@ -180,7 +192,7 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
                 (.5 * loss).backward()
                 losses.append(float(loss.detach()))
                 del member, rendered, loss
-            torch.nn.utils.clip_grad_norm_(field.parameters(), 1.)
+            torch.nn.utils.clip_grad_norm_(parameters, 1.)
             optimizer.step()
             row = {k: v for k, v in pair.items() if k not in {'positive', 'negative'}}
             row.update(primary_frame=primary['frame'], secondary_frame=secondary['frame'],
@@ -195,15 +207,19 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
                 print(arm, status, flush=True)
     if buffer_digests(field) != before:
         raise ValueError('relation training modified protected geometry/native/support buffers')
+    if any(not torch.equal(value, dict(field.named_parameters())[name]) for name, value in protected.items()):
+        raise ValueError('relation training modified protected shared member parameters')
     if not bool((visits == epochs).all()):
         raise ValueError('source region exposure is incomplete')
     export = save_field(field, output / 'field', dict(parent_field_sha256=parent_manifest['files']['field.pt']['sha256'],
         observations_sha256=sha256(Path(observations) / 'observations.json'),
-        supervision='source-only partial multi-view SAM relations', arm=arm,
+        supervision='source-only partial multi-view SAM relations', arm=arm, parameter_policy=parameter_policy,
         additional_3d_labels=False, benchmark_queries_used=False))
     report = dict(arm=arm, parent=str(parent), parent_sha256=parent_manifest['files']['field.pt']['sha256'],
         observations=str(observations), observations_sha256=sha256(Path(observations) / 'observations.json'),
         epochs=epochs, steps=nsteps, learning_rate=learning_rate, seed=seed,
+        parameter_policy=parameter_policy, protected_member_parameters=list(protected),
+        protected_member_parameters_unchanged=True,
         source_frames=[v['frame'] for v in source.views], training_regions=len(source.examples),
         each_region_visits=epochs, rendered_losses=2 * nsteps, protected_buffers_unchanged=True,
         cross_view_steps=sum(t['cross_view'] for t in trace),

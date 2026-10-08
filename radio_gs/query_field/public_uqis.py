@@ -16,7 +16,9 @@ from .storage import load_field, sha256
 
 
 @torch.no_grad()
-def predict(field_path,public,scene,output,encoder_path,device='cuda'):
+def predict(field_path,public,scene,output,encoder_path,device='cuda',query_program='original'):
+    from .query_program import PROGRAM
+    if query_program not in {'original', PROGRAM}: raise ValueError('unknown query program')
     public=Path(public);root=Path(output)
     for folder in ['predictions','selections','receipts','gaussians']:(root/folder).mkdir(parents=True,exist_ok=True)
     report_path=root/'receipts'/f'{scene}.json'
@@ -46,6 +48,11 @@ def predict(field_path,public,scene,output,encoder_path,device='cuda'):
     if encoded:del packet
     gc.collect();torch.cuda.empty_cache()
     field,manifest=load_field(field_path,device)
+    if query_program == PROGRAM:
+        from .runtime import QueryFieldRuntime
+        runtime = QueryFieldRuntime(field, manifest)
+    else:
+        runtime = field
     distance,indices=cKDTree(field.xyz.cpu().numpy()).query(xyz,workers=4)
     indices=torch.from_numpy(indices).to(device)
     rows=[]
@@ -63,7 +70,7 @@ def predict(field_path,public,scene,output,encoder_path,device='cuda'):
                                 [height,width],world_units_per_metre=1.)
             else:
                 packet=point_3d(field,query['point_world_xyz'],maximum_distance=.1)
-            result=field.query(packet)
+            result=runtime.query(packet)
             scores=result.membership_scores[indices].cpu().numpy().astype(np.float32)
             selected=result.selected[indices].cpu().numpy()
             diagnostics=result.diagnostics
@@ -91,7 +98,7 @@ def predict(field_path,public,scene,output,encoder_path,device='cuda'):
                          prediction_sha256=sha256(prediction),selection_sha256=sha256(selection),
                          gaussian_sha256=sha256(gaussian_path)))
         print(scene,modality,qid,status,flush=True)
-    report=dict(scene=scene,field_sha256=manifest['files']['field.pt']['sha256'],field_spec=manifest['spec'],
+    report=dict(scene=scene,query_program=query_program,field_sha256=manifest['files']['field.pt']['sha256'],field_spec=manifest['spec'],
                 queries=rows,query_count=len(rows),unsupported=sum(r['status']!='ok' for r in rows),
                 domain_sha256=domain['mesh_xyz_sha256'],distance_quantiles_m=np.quantile(distance,[.5,.9,.99,1]).tolist(),
                 observed_vertex_fraction=float(field.observed[indices].float().mean()),
@@ -107,6 +114,7 @@ if __name__=='__main__':
     parser.add_argument('--field',required=True);parser.add_argument('--public',required=True)
     parser.add_argument('--scene',required=True);parser.add_argument('--output',required=True)
     parser.add_argument('--encoder',required=True)
+    parser.add_argument('--query-program',default='original')
     args=parser.parse_args();torch.set_num_threads(4)
-    report=predict(args.field,args.public,args.scene,args.output,args.encoder)
+    report=predict(args.field,args.public,args.scene,args.output,args.encoder,query_program=args.query_program)
     print(json.dumps({k:v for k,v in report.items() if k!='queries'},indent=2))

@@ -11,7 +11,9 @@ from .storage import load_field, sha256
 
 
 @torch.no_grad()
-def predict(field_path, query_path, output, encoder_path, device='cuda'):
+def predict(field_path, query_path, output, encoder_path, device='cuda', query_program='original'):
+    from .query_program import PROGRAM
+    if query_program not in {'original', PROGRAM}: raise ValueError('unknown query program')
     root=Path(output);root.mkdir(parents=True,exist_ok=False)
     queries=json.loads(Path(query_path).read_text())['queries']
     field,manifest=load_field(field_path,device)
@@ -23,11 +25,17 @@ def predict(field_path, query_path, output, encoder_path, device='cuda'):
         native.append(result.semantic_scores.cpu());members.append(result.membership_scores.cpu())
         receipts.append(dict(class_id=query['class_id'],text=query['text'],selected=int(result.selected.sum()),
                              candidates=result.candidate_indices.cpu().tolist(),scale_m=result.scale))
-    torch.save(dict(xyz=field.xyz.cpu(),observed=field.observed.cpu(),queries=queries,
-                    native=torch.stack(native,1),member=torch.stack(members,1)),root/'predictions.pt')
+    payload=dict(xyz=field.xyz.cpu(),observed=field.observed.cpu(),queries=queries,
+                 native=torch.stack(native,1),member=torch.stack(members,1))
+    if query_program == PROGRAM:
+        from .category_evidence import corroborated_category_scores
+        payload['typed'] = corroborated_category_scores(payload['native'], payload['member'])
+    torch.save(payload,root/'predictions.pt')
     report=dict(field_sha256=manifest['files']['field.pt']['sha256'],query_sha256=sha256(query_path),
                 predictions_sha256=sha256(root/'predictions.pt'),queries=receipts,
-                primary='shared member union per category followed by complete-menu argmax',
+                query_program=query_program,
+                primary=('bounded native/member category evidence' if query_program == PROGRAM else
+                         'shared member union per category followed by complete-menu argmax'),
                 native_control='plain native class-name cosine argmax',
                 source_access=False,benchmark_labels_opened=False,field_spec=manifest['spec'],encoder=encoder_path)
     (root/'prediction.json').write_text(json.dumps(report,indent=2)+'\n')
@@ -43,7 +51,7 @@ def score(predictions,evaluation,output):
     data=torch.load(root/'predictions.pt',map_location='cpu',weights_only=True)
     spec=json.loads(Path(evaluation).read_text())
     sets={}
-    for arm in ['native','member']:
+    for arm in ['native','member'] + (['typed'] if 'typed' in data else []):
         sets[arm]={}
         for split,ids in spec['splits'].items():
             columns=[next(i for i,q in enumerate(data['queries']) if q['class_id']==c) for c in ids]
@@ -72,7 +80,8 @@ if __name__=='__main__':
     parser.add_argument('stage',choices=['predict','score'])
     parser.add_argument('--field');parser.add_argument('--queries');parser.add_argument('--evaluation');parser.add_argument('--encoder')
     parser.add_argument('--predictions');parser.add_argument('--output',required=True)
+    parser.add_argument('--query-program',default='original')
     args=parser.parse_args();torch.set_num_threads(4)
-    result=(predict(args.field,args.queries,args.output,args.encoder) if args.stage=='predict'
+    result=(predict(args.field,args.queries,args.output,args.encoder,query_program=args.query_program) if args.stage=='predict'
             else score(args.predictions,args.evaluation,args.output))
     print(json.dumps(result,indent=2))
