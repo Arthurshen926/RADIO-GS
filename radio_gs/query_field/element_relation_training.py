@@ -18,7 +18,8 @@ from torch.nn import functional as F
 
 from .conditional_relation import enable
 from .contracts import Support
-from .relation_training import SourceRelations, buffer_digests
+from .relation_training import SourceRelations, buffer_digests, weighted_partial_loss
+from .geometry import relaxed_subset_alpha
 from .storage import load_field, save_field, sha256
 
 
@@ -99,12 +100,14 @@ def parent_logits(field, group, anchor, scale, rows):
 
 
 @torch.no_grad()
-def audit(field, original_group, observations, device):
+def audit(field, original_group, observations, device, include_rendered=False):
     source = SourceRelations(observations, field.observed, split='development')
     elements = ElementRelations(source, field.observed)
     generator = torch.Generator().manual_seed(20261011)
     sample_generator = torch.Generator().manual_seed(20261012)
     values = dict(parent_bce=[], refined_bce=[])
+    if include_rendered:
+        values.update(parent_rendered_bce=[], refined_rendered_bce=[])
     skipped = 0
     for i in range(len(source.examples)):
         pair = source.pair(i, generator); sample = elements.sample(pair, sample_generator)
@@ -116,6 +119,21 @@ def audit(field, original_group, observations, device):
         after = field.member_logits(support, pair['scale'], rows)
         for key, logits in [('parent_bce', before), ('refined_bce', after)]:
             values[key].append(float(element_loss(logits, target, confidence, classes)))
+        if include_rendered:
+            all_rows = torch.arange(len(field.xyz), device=device)
+            members = dict(parent=parent_logits(field, original_group, pair['anchor'], pair['scale'], all_rows).sigmoid(),
+                           refined=field.support_membership(support, pair['scale']))
+            primary = source.views[pair['primary_view']]
+            secondary = source.views[pair['secondary_view']]
+            ri = pair['primary_region']; height, width = source.manifest['raster_hw']
+            for name, member in members.items():
+                losses = []
+                for view, positive, negative in [(primary, primary['positive'][ri], primary['negative'][ri]),
+                                                 (secondary, pair['positive'], pair['negative'])]:
+                    rendered = relaxed_subset_alpha(field, member, view['camera'], height, width,
+                                                    source.manifest['world_units_per_metre'])
+                    losses.append(float(weighted_partial_loss(rendered, positive.to(device).float(), negative.to(device).float())))
+                values[name + '_rendered_bce'].append(float(np.mean(losses)))
     if not values['parent_bce']:
         raise ValueError('no held-out source element relations')
     return dict(frames=[v['frame'] for v in source.views], regions=len(source.examples), skipped=skipped,
@@ -125,8 +143,9 @@ def audit(field, original_group, observations, device):
 
 def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_rate=.001,
         per_class=128, device='cuda'):
-    if arm not in {'element_relation', 'conditional_relation'}:
+    if arm not in {'element_relation', 'conditional_relation', 'joint_conditional_relation'}:
         raise ValueError('unknown element relation arm')
+    rendered_weight = .5 if arm == 'joint_conditional_relation' else 0.
     output = Path(output); output.mkdir(parents=True, exist_ok=False)
     started = time.monotonic(); field, manifest = load_field(parent, device)
     source_hash = sha256(Path(observations) / 'observations.json')
@@ -140,7 +159,7 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
     if source.manifest['world_units_per_metre'] != field.world_units_per_metre:
         raise ValueError('source geometry units differ')
     elements = ElementRelations(source, field.observed)
-    if arm == 'conditional_relation':
+    if arm != 'element_relation':
         enable(field, elements.confidence, seed)
     before = buffer_digests(field)
     for name, parameter in field.named_parameters():
@@ -155,6 +174,10 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
     trace, history, skipped = [], [], 0
     sample_digest = hashlib.sha256()
     sample_count, soft_count, confidence_sum = 0, 0, 0.
+    if rendered_weight:
+        render_gradient_count = torch.zeros(len(field.xyz), dtype=torch.int32, device=device)
+        render_gradient_mass = torch.zeros(len(field.xyz), device=device)
+        height, width = source.manifest['raster_hw']
     for epoch in range(epochs):
         for example in torch.randperm(len(source.examples), generator=generator).tolist():
             pair = source.pair(example, generator); visits[example] += 1
@@ -179,9 +202,31 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
             loss = element_loss(logits, target, confidence, classes)
             if not bool(torch.isfinite(loss)):
                 raise ValueError('nonfinite element relation loss')
-            loss.backward(); torch.nn.utils.clip_grad_norm_(parameters, 1.); optimizer.step()
+            ((1 - rendered_weight) * loss).backward()
+            element_value = float(loss.detach()); render_values = []
+            if rendered_weight:
+                ri = pair['primary_region']
+                for view, positive, negative in [(primary, primary['positive'][ri], primary['negative'][ri]),
+                                                 (secondary, pair['positive'], pair['negative'])]:
+                    full_logits = field.support_logits(support, pair['scale'])
+                    full_logits.retain_grad()
+                    rendered = relaxed_subset_alpha(field, full_logits.sigmoid(), view['camera'], height, width,
+                                                    source.manifest['world_units_per_metre'])
+                    rendered_loss = weighted_partial_loss(rendered, positive.to(device).float(), negative.to(device).float())
+                    if not bool(torch.isfinite(rendered_loss)):
+                        raise ValueError('nonfinite joint rendered relation loss')
+                    (rendered_weight * .5 * rendered_loss).backward()
+                    gradient = full_logits.grad.detach()
+                    render_gradient_count.add_(gradient.ne(0))
+                    render_gradient_mass.add_(gradient.abs())
+                    render_values.append(float(rendered_loss.detach()))
+                    del full_logits, rendered, rendered_loss, gradient
+            torch.nn.utils.clip_grad_norm_(parameters, 1.); optimizer.step()
             if len(trace) % 100 == 0 or len(trace) == epochs * len(source.examples):
-                status = dict(step=len(trace), steps=epochs * len(source.examples), loss=float(loss.detach()))
+                status = dict(step=len(trace), steps=epochs * len(source.examples), loss=element_value)
+                if rendered_weight:
+                    status.update(element_loss=element_value, rendered_loss=float(np.mean(render_values)),
+                                  loss=(1-rendered_weight)*element_value + rendered_weight*float(np.mean(render_values)))
                 history.append(status); print(arm, status, flush=True)
     if buffer_digests(field) != before or any(not torch.equal(p, dict(field.named_parameters())[k]) for k, p in protected.items()):
         raise ValueError('element training changed protected state')
@@ -189,9 +234,10 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
         raise ValueError('incomplete source region exposure')
     # Release training-only projection targets before opening held-out views.
     del elements
-    development = audit(field, original_group, observations, device)
+    development = audit(field, original_group, observations, device, include_rendered=bool(rendered_weight))
     export = save_field(field, output / 'field', dict(parent_field_sha256=manifest['files']['field.pt']['sha256'],
-        observations_sha256=source_hash, supervision='source-only partial per-Gaussian region relations',
+        observations_sha256=source_hash, supervision=('source-only joint partial element and subset-alpha relations'
+            if rendered_weight else 'source-only partial per-Gaussian region relations'),
         arm=arm, additional_3d_labels=False, benchmark_queries_used=False))
     observed = field.observed.cpu(); counts = exposure[observed]
     report = dict(arm=arm, parent=str(parent), parent_sha256=manifest['files']['field.pt']['sha256'],
@@ -207,5 +253,17 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
         shared_parameters_protected=list(protected), protected_state_unchanged=True,
         export_sha256=export['files']['field.pt']['sha256'], seconds=time.monotonic() - started,
         source_access_at_query=False, benchmark_queries_used=False)
+    if rendered_weight:
+        counts = render_gradient_count[field.observed].float()
+        mass = render_gradient_mass[field.observed]
+        if not bool(torch.isfinite(mass).all()):
+            raise ValueError('nonfinite rendered logit gradient accounting')
+        report.update(rendered_weight=rendered_weight, element_weight=1-rendered_weight,
+            rendered_logit_gradient=dict(observed_rows=len(counts), nonzero_rows=int((counts > 0).sum()),
+                nonzero_observed_fraction=float((counts > 0).float().mean()),
+                count_quantiles=torch.quantile(counts, torch.tensor([0., .25, .5, .75, 1.], device=device)).tolist(),
+                absolute_gradient_total=float(mass.sum()),
+                absolute_gradient_quantiles=torch.quantile(mass, torch.tensor([0., .25, .5, .75, 1.], device=device)).tolist(),
+                definition='actual weighted rendered-loss gradients at full member logits before parameter clipping; not parameter-update coverage'))
     (output / 'training.json').write_text(json.dumps(report, indent=2) + '\n')
     return report

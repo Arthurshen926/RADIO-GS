@@ -1,5 +1,15 @@
 # RADIO-GS — active system context
 
+Active follow-up: `docs/experiments/2026-10-08-joint-relation-protocol.md`, runner
+`scripts/research/run_query_field_joint_elements.py`, root `joint_element_relations_v1`.
+One all30-field arm uses .5 element +.25 primary/.25 secondary actual-subset
+rendered losses, with identical original parents/pairs/samples/two epochs and
+protected state. It also records actual rendered member-logit gradient coverage
+and audits both source objectives.12 focused tests pass, including real CUDA
+rendered gradients outside the sampled element rows. Complete all-five scoring,
+known-support diagnosis and copied-export checks before claims; no joint results
+or promotion yet. The completed failure study below remains immutable atf364d25.
+
 Latest completed study: `docs/experiments/2026-10-08-element-relation-results.md`
 and JSON. Both new arms have all60 exports, five-family scores,268 UQIS inputs
 per arm,30 source feature-binding audits, all67 point attribution cases, and10

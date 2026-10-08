@@ -128,8 +128,8 @@ def test_cuda_conditional_rows_match_full_decode_and_receive_gradients():
     assert torch.isfinite(field.group.grad).all() and field.relation.layers[0].weight.grad.abs().sum() > 0
 
 
-@pytest.mark.parametrize('arm', ['element_relation', 'conditional_relation'])
-def test_tiny_complete_fit_keeps_source_splits_and_export_contract(tmp_path, arm):
+@pytest.mark.parametrize('arm', ['element_relation', 'conditional_relation', 'joint_conditional_relation'])
+def test_tiny_complete_fit_keeps_source_splits_and_export_contract(tmp_path, arm, monkeypatch):
     from radio_gs.query_field.field import CapabilityField
     count = 108; pixels = torch.arange(count); observations = tmp_path / 'source'; observations.mkdir()
     masks = torch.zeros(2, 9, 12, dtype=torch.bool)
@@ -143,14 +143,48 @@ def test_tiny_complete_fit_keeps_source_splits_and_export_contract(tmp_path, arm
         entries.append(dict(frame=frame, split='development' if frame == 3 else 'train', compiled={'sha256': sha256(path)}))
     manifest = observations / 'observations.json'
     manifest.write_text(json.dumps(dict(frames=entries, world_units_per_metre=1.,
-        splits=dict(train_frames=[1, 2], development_frames=[3]))))
+        raster_hw=[9, 12], splits=dict(train_frames=[1, 2], development_frames=[3]))))
     geometry = dict(xyz=torch.randn(count, 3), normals=torch.zeros(count, 3), quaternions=torch.zeros(count, 4),
                     scales=torch.ones(count, 3), opacities=torch.full((count, 1), .8))
     field = CapabilityField(geometry, torch.randn(count, 9), torch.randn(count, 6), torch.randn(count, 4),
         torch.ones(count, dtype=torch.bool), spatial_metric='scale_normalized', world_units_per_metre=1.)
     save_field(field, tmp_path / 'parent', dict(observations_sha256=sha256(manifest)))
+    if arm == 'joint_conditional_relation':
+        # CPU orchestration check. The separate CUDA case exercises the actual
+        # subset rasterizer and full-row gradients beyond the element sample.
+        monkeypatch.setattr('radio_gs.query_field.element_relation_training.relaxed_subset_alpha',
+                            lambda field, membership, *args: membership * field.opacities.flatten())
     report = fit(tmp_path / 'parent', observations, tmp_path / arm, arm=arm, per_class=8, device='cpu')
     assert report['source_frames'] == [1, 2] and report['source_development']['frames'] == [3]
     assert report['steps'] == 8 and report['skipped_steps'] == 0 and report['protected_state_unchanged']
     loaded, _ = load_field(tmp_path / arm / 'field')
-    assert loaded.relation_decoder == ('native_geometry_v1' if arm == 'conditional_relation' else 'none')
+    assert loaded.relation_decoder == ('none' if arm == 'element_relation' else 'native_geometry_v1')
+    if arm == 'joint_conditional_relation':
+        assert report['rendered_weight'] == report['element_weight'] == .5
+        assert report['rendered_logit_gradient']['nonzero_rows'] > 0
+        assert report['rendered_logit_gradient']['absolute_gradient_total'] > 0
+        assert 'refined_rendered_bce' in report['source_development']['metrics']
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA rasterization required')
+def test_actual_subset_renderer_supervises_full_logits_outside_element_sample():
+    from radio_gs.query_field.geometry import relaxed_subset_alpha
+    from radio_gs.query_field.relation_training import weighted_partial_loss
+    field = metric_field().cuda()
+    with torch.no_grad():
+        field.xyz[:, 0] = torch.linspace(-.4, .4, 12, device='cuda')
+        field.xyz[:, 1] = 0; field.xyz[:, 2] = 2.
+        field.scales.fill_(.07); field.opacities.fill_(.8)
+        field.quaternions.zero_(); field.quaternions[:, 0] = 1.
+    enable(field, torch.ones(12))
+    camera = SimpleNamespace(intrinsic=torch.tensor([[50., 0., 32.], [0., 50., 32.], [0., 0., 1.]]),
+                             world_to_camera=torch.eye(4), width=64, height=64)
+    support = Support(torch.tensor([0], device='cuda'), torch.ones(1, device='cuda'))
+    logits = field.support_logits(support, 1.); logits.retain_grad()
+    rendered = relaxed_subset_alpha(field, logits.sigmoid(), camera, 64, 64, field.world_units_per_metre)
+    pixels = torch.arange(64*64, device='cuda')
+    positive = (pixels % 64 < 32).float(); negative = 1 - positive
+    (.25 * weighted_partial_loss(rendered, positive, negative)).backward()
+    assert torch.isfinite(logits.grad).all() and logits.grad[2:].abs().sum() > 0
+    assert field.relation.layers[-1].weight.grad.abs().sum() > 0
+    assert all(value.grad is None for value in field.buffers())
