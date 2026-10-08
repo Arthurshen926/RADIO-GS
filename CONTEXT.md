@@ -1,5 +1,18 @@
 # RADIO-GS — active system context
 
+Active follow-up: `docs/experiments/2026-10-08-element-relation-protocol.md`.
+Two matched source-only arms now implement direct partial Gaussian relation
+supervision and an optional native/geometry residual inside the common member
+core. Runner `scripts/research/run_query_field_elements.py`, intended root
+`output/query_field_20261008/element_relations_v1`. Compare with the earlier
+protected rendered control using identical original parents and complete source
+pair traces, not additional epochs from a selected winner. Protect native,
+geometry/support and original acceptance parameters. Unknown/conflicting source
+relations stay partial. New residual and one confidence scalar belong to the
+same standalone export. Complete all60 exports, five-family predictions/scores,
+source/native invariance checks and copied-export replay before final claims.
+Older frozen studies require their recorded code snapshots after this change.
+
 Latest completed studies: `docs/experiments/2026-10-08-native-coordinate-results.md`
 and `2026-10-08-protected-native-results.md`, with full JSON evidence. Four full
 arms, each all30 fields and all five benchmarks including268 UQIS inputs, are

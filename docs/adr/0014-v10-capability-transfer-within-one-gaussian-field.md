@@ -147,3 +147,14 @@ No arm is promoted. The next unimplemented method work should test native/geomet
 conditioning and reliable element relations inside the common member mechanism,
 plus native function supervision that exercises real text/crop-patch behavior.
 It must retain the same one-field, three-teacher, standalone-query contract.
+
+The next implementation now adds direct partial Gaussian relation supervision
+and an optional zero-initialized native/geometry residual inside the same member
+function. Its exported confidence is one training-derived scalar per Gaussian,
+not a per-view source bank. Native coordinates, geometry and original shared
+acceptance parameters remain protected. Two new arms use the exact source-pair
+trace of the earlier protected rendered control, separating the changed element
+objective from added decoder capacity. It transfers v10's use of native/metric
+evidence and carrier-level decisions without its labelled member model. Full
+performance and model promotion remain unproven; the active fixed protocol is
+[element relations](../experiments/2026-10-08-element-relation-protocol.md).

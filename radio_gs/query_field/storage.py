@@ -58,6 +58,7 @@ def load_field(directory, device="cpu"):
               for name in ["semantic", "local"]}
     field = CapabilityField(geometry, state["semantic.codes"], state["local.codes"], state["group"],
                             state["observed"], semantic_codec=codecs["semantic"],
-                            local_codec=codecs["local"], anchor_eligible=state.get("anchor_eligible"), **manifest["spec"])
+                            local_codec=codecs["local"], anchor_eligible=state.get("anchor_eligible"),
+                            relation_confidence=state.get("relation_confidence"), **manifest["spec"])
     field.load_state_dict(state, strict=True)
     return field.to(device).eval(), manifest

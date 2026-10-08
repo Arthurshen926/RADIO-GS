@@ -48,7 +48,9 @@ def compatible_regions(interiors, scales, pixels, weights, scale):
 
 
 class SourceRelations:
-    def __init__(self, root, observed):
+    def __init__(self, root, observed, split='train'):
+        if split not in {'train', 'development'}:
+            raise ValueError('unknown relation source split')
         self.root = Path(root)
         self.manifest = json.loads((self.root / 'observations.json').read_text())
         splits = self.manifest['splits']
@@ -56,11 +58,11 @@ class SourceRelations:
             raise ValueError('source training/development views overlap')
         self.views, self.examples = [], []
         observed = observed.cpu()
-        for frame in splits['train_frames']:
+        for frame in splits[split + '_frames']:
             entry = next(x for x in self.manifest['frames'] if x['frame'] == frame)
             path = self.root / f'view_{frame:05d}.pt'
-            if entry['split'] != 'train' or sha256(path) != entry['compiled']['sha256']:
-                raise ValueError('source relation observation changed or is not training')
+            if entry['split'] != split or sha256(path) != entry['compiled']['sha256']:
+                raise ValueError('source relation observation or split changed')
             raw = torch.load(path, map_location='cpu', weights_only=True)
             operator = raw['operator'].coalesce()
             pixels, rows = operator.indices().numpy()

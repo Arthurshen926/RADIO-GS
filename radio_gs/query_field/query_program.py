@@ -54,6 +54,7 @@ def query(field, packet):
         membership = torch.zeros(len(field.xyz), device=field.xyz.device)
     return QueryResult(native, membership, membership > field.threshold, candidates, weights, float(scale),
         dict(query_program=PROGRAM, shared_member_core=True, source_access=False,
+             conditional_relation_decoder=field.relation_decoder,
              identity_rule='global native ranks, field-set bidirectional correspondence, candidate native ranks',
              uncertainty_resolved=False, membership_scores_calibrated=False,
              hard_positive_constraint=False, local_correspondence=details,

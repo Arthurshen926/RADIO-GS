@@ -56,7 +56,8 @@ class CapabilityField(nn.Module):
                  semantic_codec=None, local_codec=None, default_scale=0.5,
                  threshold=0.5, candidate_count=8, candidate_radius=0.05,
                  anchor_eligible=None, spatial_metric="none", world_units_per_metre=None,
-                 local_metric="none", support_aggregation="normalized_prototype", negative_rule="product"):
+                 local_metric="none", support_aggregation="normalized_prototype", negative_rule="product",
+                 relation_decoder="none", relation_confidence=None):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -111,6 +112,14 @@ class CapabilityField(nn.Module):
         self.local_metric = local_metric
         self.support_aggregation = support_aggregation
         self.negative_rule = negative_rule
+        self.relation_decoder = "none"
+        self.relation = None
+        self.register_buffer("relation_confidence", None)
+        if relation_decoder != "none":
+            if relation_decoder != "native_geometry_v1" or relation_confidence is None:
+                raise ValueError("unknown or incomplete conditional relation decoder")
+            from .conditional_relation import enable
+            enable(self, relation_confidence)
 
     def grouping_features(self, scale):
         if not math.isfinite(float(scale)) or float(scale) <= 0:
@@ -128,7 +137,8 @@ class CapabilityField(nn.Module):
         weights = support.weights.to(features).reshape(-1, 1)
         prototype = F.normalize((features[ids] * weights).sum(0), dim=0)
         selected = features if rows is None else features[rows]
-        affinity = selected @ prototype - self.affinity_bias
+        cosine = selected @ prototype
+        affinity = cosine - self.affinity_bias
         if self.local_metric == "native_cosine":
             # Protected native directions contribute a common local metric,
             # including for registered rays and negative supports. Decoding and
@@ -148,6 +158,9 @@ class CapabilityField(nn.Module):
             xyz = self.xyz if rows is None else self.xyz[rows]
             distance = (xyz - centre) / (float(scale) * self.world_units_per_metre)
             logits = logits - 0.5 * distance.square().sum(-1)
+        if self.relation is not None:
+            from .conditional_relation import residual
+            logits = logits + residual(self, support, scale, cosine, rows)
         return logits
 
     def _candidates(self, score):
@@ -272,6 +285,7 @@ class CapabilityField(nn.Module):
                                inferred_anchor_domain="all_observed" if self.anchor_eligible is None else "training_eligible",
                                spatial_member_metric=self.spatial_metric,
                                native_local_member_metric=self.local_metric,
+                               conditional_relation_decoder=self.relation_decoder,
                                support_aggregation=self.support_aggregation,
                                negative_rule=self.negative_rule,
                                uncertainty_resolved=False, semantic_scores_calibrated=False,
@@ -288,8 +302,11 @@ class CapabilityField(nn.Module):
         return scores, labels
 
     def export_spec(self):
-        return dict(default_scale=self.default_scale, threshold=self.threshold,
+        spec = dict(default_scale=self.default_scale, threshold=self.threshold,
                     candidate_count=self.candidate_count, candidate_radius=self.candidate_radius,
                     spatial_metric=self.spatial_metric, world_units_per_metre=self.world_units_per_metre,
                     local_metric=self.local_metric, support_aggregation=self.support_aggregation,
                     negative_rule=self.negative_rule)
+        if self.relation_decoder != "none":
+            spec["relation_decoder"] = self.relation_decoder
+        return spec
