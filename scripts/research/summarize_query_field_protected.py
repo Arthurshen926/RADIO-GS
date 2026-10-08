@@ -38,6 +38,31 @@ def point_invariance(cohorts):
     return result
 
 
+def native_invariance(cohorts):
+    """Check the freshly encoded readers against previous common-program inputs."""
+    reference = PREVIOUS / 'common_program/uqis'
+    result = {a: dict(queries=0, exact_native_scores=0, max_abs_error=0.) for a in ARMS[:2]}
+    for job in cohorts[ARMS[0]]['uqis']:
+        queries = read(reference / 'receipts' / (job['name'] + '.json'))['queries']
+        for query in queries:
+            qid = query['query_id']
+            original = torch.load(reference / 'gaussians' / (qid + '.pt'), weights_only=True)['native_scores']
+            for arm in ARMS[:2]:
+                path = Path(cohorts[arm]['root']) / 'predictions/uqis/gaussians' / (qid + '.pt')
+                current = torch.load(path, weights_only=True)['native_scores']
+                value = result[arm]; value['queries'] += 1
+                if (original is None) != (current is None):
+                    raise ValueError('protected native query presence changed')
+                if original is None:
+                    value['exact_native_scores'] += 1
+                else:
+                    value['exact_native_scores'] += torch.equal(original, current)
+                    value['max_abs_error'] = max(value['max_abs_error'], float((original - current).abs().max()))
+    if any(r['queries'] != 268 or r['max_abs_error'] > 1e-6 for r in result.values()):
+        raise ValueError('protected native scores or fresh query encodings differ')
+    return result
+
+
 def main():
     design = frozen_design(); read(ROOT / 'scoring_complete.json')
     common.ROOT = ROOT; common.ARMS = ARMS
@@ -79,10 +104,13 @@ def main():
     runtime_path = ROOT / 'validation/runtime/report.json'; runtime = read(runtime_path); evidence.append(runtime_path)
     if any(not all(r['exact_replay'].values()) or r['forbidden_open_attempts'] for r in runtime['records']):
         raise ValueError('runtime replay failed')
+    evidence.extend([Path(__file__), Path('scripts/research/summarize_query_field_relations.py')])
     report = dict(complete=True, fields=30, exports=90, primary_arm='functional_native',
+        implementation_commit='ea23689',
         arms=list(data), macro=macro, per_scene=data, differences=differences,
         training=training, source_development=source_function, export_tensor_bytes=total_bytes,
-        registered_query_invariance=point_invariance(cohorts), runtime=runtime, uqis_diagnostics=diagnostics,
+        registered_query_invariance=point_invariance(cohorts), protected_native_invariance=native_invariance(cohorts),
+        runtime=runtime, uqis_diagnostics=diagnostics,
         v10_targets=previous['v10_targets'], source_only=True, source_access_at_query=False,
         model_promotion=False, independent_final_test=False, per_task_model_selection=False,
         evidence=[receipt(p) for p in sorted(set(evidence), key=str)])

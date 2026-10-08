@@ -10,6 +10,7 @@ from radio_gs.query_field.functional_training import (
     FunctionalSource, NativeResidual, fit, preference_loss, projected_query_scores)
 from radio_gs.query_field.relation_training import training_parameters
 from radio_gs.query_field.storage import load_field, save_field, sha256
+from radio_gs.query_field.coordinate_training import CoordinateAdam, fit as coordinate_fit
 
 
 def small_field(n=108):
@@ -89,10 +90,14 @@ def test_source_training_never_opens_development_and_rejects_tampering(tmp_path)
         FunctionalSource(tmp_path / 'source', field.observed)
 
 
-def test_functional_fit_improves_heldout_queries_and_bakes_standalone_field(tmp_path):
+@pytest.mark.parametrize('dtype', [torch.float32, torch.float16])
+@pytest.mark.parametrize('fitter', [fit, coordinate_fit])
+def test_functional_fit_improves_heldout_queries_and_bakes_standalone_field(tmp_path, dtype, fitter):
     field = small_field(); source = tmp_path / 'source'; source_fixture(source, field)
+    field.semantic.codes = field.semantic.codes.to(dtype)
+    field.local.codes = field.local.codes.to(dtype)
     save_field(field, tmp_path / 'parent', {'observations_sha256': sha256(source / 'observations.json')})
-    report = fit(tmp_path / 'parent', source, tmp_path / 'fit', epochs=10, pairs=8,
+    report = fitter(tmp_path / 'parent', source, tmp_path / 'fit', epochs=10, pairs=8,
                  learning_rate=.01, device='cpu')
     loaded, manifest = load_field(tmp_path / 'fit/field')
     assert manifest['external_scene_dependencies'] == []
@@ -102,9 +107,28 @@ def test_functional_fit_improves_heldout_queries_and_bakes_standalone_field(tmp_
         assert metric['refined_kl'] < metric['parent_kl']
         assert torch.equal(getattr(field, channel).codes[0], getattr(loaded, channel).codes[0])
         assert getattr(loaded, channel).weight is None
+        assert getattr(loaded, channel).codes.dtype == dtype
     for key, value in field.state_dict().items():
         if key not in {'semantic.codes', 'local.codes'}:
             assert torch.equal(value, loaded.state_dict()[key]), key
     # A registered member query is identical after native-only construction.
     support = Support(torch.tensor([14]), torch.ones(1))
     torch.testing.assert_close(field.member_logits(support, .5), loaded.member_logits(support, .5), rtol=0, atol=0)
+
+
+def test_sparse_coordinate_adam_matches_independent_rows_and_preserves_absent_rows():
+    generator = torch.Generator().manual_seed(87)
+    original = torch.randn(5, 3, generator=generator)
+    state = CoordinateAdam(original, learning_rate=.01)
+    reference = [torch.nn.Parameter(row.clone()) for row in original]
+    optimizers = [torch.optim.Adam([row], lr=.01) for row in reference]
+    for ids in [[0, 1], [1, 4], [4, 0, 1]]:
+        rows = torch.tensor(ids); gradient = torch.randn(len(rows), 3, generator=generator)
+        state.update(rows, gradient)
+        for row, grad in zip(ids, gradient):
+            reference[row].grad = grad.clone(); optimizers[row].step(); optimizers[row].zero_grad()
+    torch.testing.assert_close(state.values, torch.stack(reference), atol=1e-7, rtol=1e-6)
+    assert torch.equal(state.values[2:4], original[2:4])
+    assert state.steps.tolist() == [2, 3, 0, 0, 2]
+    with pytest.raises(ValueError, match='unique'):
+        state.update(torch.tensor([1, 1]), torch.zeros(2, 3))
