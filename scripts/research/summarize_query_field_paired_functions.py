@@ -10,11 +10,17 @@ from scripts.research import diagnose_query_field_observation_mass as mass
 from scripts.research.run_query_field_paired_functions import ROOT, PRIOR, ARMS, frozen_design, read, write, receipt, check
 from scripts.research.summarize_query_field_relations import collect, paired
 
+RESULT_PATH = Path('docs/experiments/2026-10-09-paired-function-results.json')
+
 
 def diagnose():
-    mass.main(ROOT, ARMS[0], dict(
+    extra = dict(
         protected_training=PRIOR / 'protected_training/predictions/uqis',
-        joint_conditional_relation=Path('output/query_field_20261008/joint_element_relations_v1/joint_conditional_relation/predictions/uqis')))
+        joint_conditional_relation=Path('output/query_field_20261008/joint_element_relations_v1/joint_conditional_relation/predictions/uqis'))
+    design = read(ROOT / 'design.json')
+    if design.get('hard_reference_root'):
+        extra['paired_function'] = Path(design['hard_reference_root']) / 'paired_function/predictions/uqis'
+    mass.main(ROOT, ARMS[0], extra)
 
 
 def main():
@@ -53,6 +59,18 @@ def main():
             raise ValueError('functional replay failed')
         if not any(r['known_elements'] > 0 for r in report['replay']):
             raise ValueError('functional replay only exercised empty evidence')
+        if design.get('hard_reference_root'):
+            hard_path = Path(design['hard_reference_root']) / 'fits/paired_function' / job['key'] / 'construction.json'
+            hard = read(hard_path); check(report['hard_reference'])
+            if not report['exact_hard_association_coordinates'] or report['source_frames'] != hard['source_frames'] or report['source_regions'] != hard['source_regions']:
+                raise ValueError('soft target extension changed fixed source/association conditions')
+            for soft_view, hard_view in zip(report['source_records'], hard['source_records']):
+                if any(soft_view[k] != hard_view[k] for k in ['frame', 'regions']):
+                    raise ValueError('soft target extension changed source region trace')
+            for soft_case, hard_case in zip(report['replay'], hard['replay']):
+                if any(soft_case[k] != hard_case[k] for k in ['source_frame', 'support', 'weights', 'scale']):
+                    raise ValueError('soft target extension changed replay supports')
+            evidence.append(hard_path)
         construction.append(dict(key=job['key'], family=job['family'], **report))
         evidence.extend([path / 'construction.json', path / 'field/manifest.json', Path(job['observations']) / 'observations.json'])
     if len(construction) != 30: raise ValueError('incomplete field cohort')
@@ -84,10 +102,21 @@ def main():
         v10_targets=previous['v10_targets'], source_only=True, training_steps=0,
         source_access_at_query=False, model_promotion=False, independent_final_test=False,
         per_task_model_selection=False, uncompressed_functional_reference=True,
-        full_v10_function_preservation=False, implementation_commit='2b67bed',
-        execution_adjustments=execution,
-        evidence=[receipt(p) for p in sorted(set(evidence), key=str)])
-    write(ROOT / 'summary.json', result); write('docs/experiments/2026-10-09-paired-function-results.json', result)
+        full_v10_function_preservation=False, implementation_commit=design.get('implementation_commit', '2b67bed'),
+        execution_adjustments=execution)
+    if design.get('hard_reference_root'):
+        activation_path = ROOT / 'diagnostics/paired_activation/report.json'
+        signed_path = ROOT / 'diagnostics/signed_activation/report.json'
+        activation, signed = read(activation_path), read(signed_path)
+        if not activation['exact_query_associations'] or activation['queries'] != 67 or len(signed['records']) != 8:
+            raise ValueError('incomplete conditional activation diagnosis')
+        result['soft_target_extension'] = dict(exact_source_and_association=True,
+            relation_availability={k: sum(r['relation_availability'][k] for r in construction)
+                for k in ['observed_rows', 'available_rows', 'hard_available_rows']},
+            point_activation=activation, signed_activation=signed)
+        evidence.extend([activation_path, signed_path, Path('scripts/research/summarize_query_field_soft_functions.py')])
+    result['evidence'] = [receipt(p) for p in sorted(set(evidence), key=str)]
+    write(ROOT / 'summary.json', result); write(RESULT_PATH, result)
     for metric in result['v10_targets']:
         print(metric, {a: round(100*macro[a][metric], 4) for a in ['protected_training', 'joint_conditional_relation', arm]}, flush=True)
     print('functional replay', result['functional_replay'], 'bytes', result['added_evidence_bytes'], flush=True)

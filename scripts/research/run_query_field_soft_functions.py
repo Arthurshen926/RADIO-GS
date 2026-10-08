@@ -2,6 +2,7 @@
 import argparse
 import copy
 from pathlib import Path
+import subprocess
 
 import torch
 
@@ -43,7 +44,7 @@ def prepare():
         configs=[receipt(p) for p in ROOT.glob('*/configs/*.json')], query_program=PROGRAM,
         source_only=True, primary_arm=ARMS[0], model_promotion=False, independent_final_test=False,
         per_task_model_selection=False, training_steps=0, prior_evidence_mass=1., uncompressed_reference=True,
-        hard_reference_root=str(HARD), implementation_commit='recorded by frozen code receipts'))
+        hard_reference_root=str(HARD), implementation_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()))
 
 
 def frozen_design():
@@ -77,7 +78,7 @@ def build(design, workers):
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('stage', choices=['prepare', 'compile', 'build', 'predict', 'score', 'validate', 'all'])
-    p.add_argument('--gpus', default='0,2,3,4,5'); p.add_argument('--workers', type=int, default=3)
+    p.add_argument('--gpus', default='0,2,3'); p.add_argument('--workers', type=int, default=3)
     p.add_argument('--index', type=int); args = p.parse_args(); torch.set_num_threads(4)
     if args.stage == 'prepare': prepare()
     else:

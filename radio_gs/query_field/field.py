@@ -125,9 +125,10 @@ class CapabilityField(nn.Module):
         self.evidence = None
         if evidence_kind != 'none':
             from .paired_evidence import KIND, enable
-            if evidence_kind != KIND or evidence_state is None:
+            from .soft_paired_evidence import KIND as SOFT_KIND, enable as enable_soft
+            if evidence_state is None or evidence_kind not in {KIND, SOFT_KIND}:
                 raise ValueError('unknown or incomplete paired-evidence field')
-            enable(self, evidence_state)
+            (enable if evidence_kind == KIND else enable_soft)(self, evidence_state)
 
     def grouping_features(self, scale):
         if not math.isfinite(float(scale)) or float(scale) <= 0:
