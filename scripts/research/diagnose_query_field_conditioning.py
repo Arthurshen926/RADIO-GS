@@ -15,12 +15,21 @@ from radio_gs.query_field.contracts import Support
 from radio_gs.query_field.element_relation_training import ElementRelations, element_loss
 from radio_gs.query_field.relation_training import SourceRelations
 from radio_gs.query_field.storage import load_field
-from scripts.research.run_query_field_elements import ROOT, read, write, receipt, execute, frozen_design
+from scripts.research.run_query_field_elements import ROOT, read, write, receipt, check, execute, frozen_design
 
 
 def scene(index):
     design = frozen_design(); job = design['fields'][index]
     path = ROOT / 'fits/conditional_relation' / job['key'] / 'field'
+    training = read(path.parent / 'training.json')
+    out = ROOT / 'diagnostics/conditioning' / (job['key'] + '.json')
+    if out.exists():
+        saved = read(out)
+        for key in ['field', 'observations', 'code']:
+            check(saved[key])
+        if saved['field']['sha256'] != training['export_sha256']:
+            raise ValueError('cached diagnostic field differs')
+        return
     field, _ = load_field(path, 'cuda')
     source = SourceRelations(job['observations'], field.observed, split='development')
     elements = ElementRelations(source, field.observed)
@@ -57,11 +66,10 @@ def scene(index):
                 residual_mean=float(correction.mean()), residual_std=float(correction.std(unbiased=False)),
                 residual_mean_absolute=float(correction.abs().mean())))
     metrics = {k: float(np.mean([r['bce'][k] for r in records])) for k in records[0]['bce']}
-    out = ROOT / 'diagnostics/conditioning' / (job['key'] + '.json')
     write(out, dict(key=job['key'], family=job['family'], metrics=metrics, records=records,
         field=receipt(path / 'field.pt'), observations=receipt(Path(job['observations']) / 'observations.json'),
         no_model_change=True, benchmark_queries_used=False, used_for_selection=False,
-        interpretation=__doc__))
+        interpretation=__doc__, code=receipt(Path(__file__))))
 
 
 def main(gpus):
