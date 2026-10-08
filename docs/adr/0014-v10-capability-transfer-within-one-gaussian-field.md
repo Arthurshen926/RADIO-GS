@@ -81,3 +81,34 @@ all four UQIS modalities; no per-query, scene or benchmark winner bundle.
 Full v10 performance remains a measured goal. Changed contracts may limit what
 is recoverable; no guarantee or top-conference novelty follows from this design.
 Compression and speed optimization follow capability recovery, not precede it.
+
+## Implementation record, 2026-10-08
+
+The first full-image identity intervention is complete. The next implementation
+advances the independent relation-training and typed-decision packages together;
+functional native construction remains open and is not a prerequisite for
+testing these two isolated deficiencies. This sequencing does not certify the
+initial mean field as a sufficient native-capability reference.
+
+The fixed common program uses the same cross-view-trained field recipe across
+all cohorts, global ordinal image candidates followed by bidirectional
+Gaussian-set matching, and bounded native/member category evidence. Text unions
+and registered support paths retain the existing common member operator. The
+two-arm relation study matches all source targets and exposures; only the
+auxiliary view's support condition differs. See the predeclared protocols:
+[training](../experiments/2026-10-08-cross-view-relation-protocol.md),
+[category evidence](../experiments/2026-10-08-typed-category-evidence-protocol.md),
+[common program](../experiments/2026-10-08-common-query-program-protocol.md).
+The standalone entry is `radio_gs.query_field.runtime.QueryFieldRuntime`.
+The [complete five-task study](../experiments/2026-10-08-cross-view-relation-results.md)
+now measures gains in image identity and category decoding, limited additional
+benefit from cross-view relations, and a LERF actual-selection regression. It
+does not establish a default promotion or full recovery. New disconnected false
+members despite preserved native identity require better conditional learning
+and functional evidence retention, not merely more steps of the same objective.
+A posthoc all-query figurines parameter-block swap retains positive effects of
+new grouping codes while localizing the severe selection regression to the
+shared scale/temperature/affinity block. Separating representation learning from
+shared acceptance calibration is the next controlled full-cohort intervention;
+it is not yet a globally validated freeze policy or a licence for scene-specific
+parameter selection.

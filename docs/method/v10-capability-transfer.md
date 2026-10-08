@@ -28,10 +28,65 @@ flowchart TD
   G --> D[实际元素选集与 2D 重渲染 / 固定评测域映射]
 ```
 
-其中功能训练、丰富关系训练及新的类型化读出尚未完成；现有实现是其薄弱原型。
+其中功能训练和多模态局部表示尚未完成；不能把整张图当作已完成的方法。
 双向匹配与排名融合的纯算子已经落地，且完成全部67图像的固定场对照：
 [首轮迁移结果](../experiments/2026-10-08-native-identity-transfer-results.md)。
 部分身份能力恢复，但 IoU 提升的区间跨零，尚未晋升或实现完整性能。
+
+## 第二轮已实现的共同版本
+
+`radio_gs.query_field.runtime.QueryFieldRuntime` 是独立运行入口。它加载原有的
+`field.pt + manifest.json`，接收 `QueryPacket`，并提供 `category_partition`。
+四种输入继续使用 `NativeQueryEncoder` 和注册点适配器；运行入口没有源数据加载器。
+同一套程序、同一跨视图训练配方用于所有场景，未按任务或场景选择获胜模型。
+
+**建场训练从单视图成员拟合扩展到部分跨视图关系。** 对一个源区域选取可靠内部
+Gaussian 锚点，利用其在其它训练视图的几何贡献查找共同支持。只接受内部投影质量
+至少一半、物理尺度比在 `[0.5, 2]` 内的区域；先在视图内归一化，再均匀采样有支持的
+其它视图。部分正证据和可信排除各自保留权重；未观测处不参与损失，冲突不硬化成负例。
+主视图和辅助视图都由**同一个原始锚点**条件化共同成员机制，分别经过实际 subset-alpha
+渲染监督，各占一半损失。每个合法训练区域完整遍历两次，不更新语义、局部、几何或
+候选域缓冲区。没有第二视图支持时重复原视图，并明确计数。
+
+配对控制看到完全相同的区域、视图、目标、尺度和步数，仅让辅助视图使用自己的内部
+锚点。这使“增加训练量和改变区域曝光”与“保留同一锚点的跨视图条件”可以分别比较。
+这还不是完整对象监督：关联来自粗投影和部分 SAM 区域，可能漏掉可见关系或错误关联。
+
+**图像实例保留原生身份证据直至范围选择。** 先在全部合法候选域对 SigLIP 与 DINO
+匹配分数分别排名融合，按既定规则保留八个空间候选；每个候选都使用共同成员机制生成
+Gaussian 集合，再计算集合与当前图像 patch 的双向匹配。原生语义排名与该匹配共同
+选择一个成员假设。候选不是硬正提示；无有效集合时返回空集。当前集合里的局部描述
+仍然是已融合的 Gaussian 向量，不能冒称恢复了 v10 的完整源 patch 信息。
+
+**类别分区恢复原生语义竞争。** 完整类别菜单的原生 cosine 经固定温度100得到 `p`，
+共同成员支持 `m` 形成 `p + p(1-p)m`。结构只能提供有界支持，强语义证据不被独立实例
+亲和直接替代。此温度来自 v10 的既有 ScanNet 配方；这个组合是新适配，不是 v10
+求解器，也不是已校准后验。15/10类报告从完整菜单结果取列，未知 Gaussian 保持 void。
+
+本轮在30个场景上完成两组训练和全部五项及 UQIS 四输入验证，保留父模型、
+配对控制、跨视图单项、类型化读出和固定组合的结果。完整结果见
+[关系训练与共同程序](../experiments/2026-10-08-cross-view-relation-results.md)：
+图像与类别能力恢复较明显，但成员范围进展有限，LERF实际选集出现退化，尚不晋升默认模型。
+后验参数块互换进一步发现：figurines只换新分组编码实际IoU43.85%，只换新共享解码参数21.59%，
+父模型41.79%。这支持优先检验分组学习与共享尺度／亲和接受范围的训练职责分离，
+而非丢弃已学表示；目前仅为局部因果定位，尚未完成该调整的五项验证。
+协议分别见
+[关系训练](../experiments/2026-10-08-cross-view-relation-protocol.md)、
+[类别读出](../experiments/2026-10-08-typed-category-evidence-protocol.md) 与
+[共同程序](../experiments/2026-10-08-common-query-program-protocol.md)。
+
+调用示例（查询编码器是共享依赖，场景文件不包含源图像）：
+
+```python
+from radio_gs.query_field.runtime import QueryFieldRuntime
+from radio_gs.query_field.adapters import NativeQueryEncoder, point_3d
+
+runtime = QueryFieldRuntime.load(scene_export, "cuda")
+encoder = NativeQueryEncoder(siglip_checkpoint, "cuda")
+text_result = runtime.query(encoder.text("a red chair"))
+image_result = runtime.query(encoder.image(current_reference_image))
+point_result = runtime.query(point_3d(runtime, current_world_point))
+```
 
 ## 成功经验与迁移验收
 
@@ -79,10 +134,11 @@ flowchart TD
 额外3D监督移除、NVOS 输入差异各自保留独立控制，不能把交互效应相加冒充归因。
 正式恢复结论要求完整五项与 UQIS 四模态共同复测，不能只提升图像或只报告 AP。
 
-当前完整基线与最终能力目标如下，单位均为百分数。A 与当前场存在已披露契约
+固定父模型完整基线与最终能力目标如下，单位均为百分数；第二轮共同版本见上面的完整结果。
+A 与父模型存在已披露契约
 差异；这些目标不能当成已证明可达的保证，也不能用 B→C 保留率掩盖 A→C 的总差距。
 
-| 本地保留协议 | 当前场 | v10 能力目标 A |
+| 本地保留协议 | 固定父模型 | v10 能力目标 A |
 |---|---:|---:|
 | LERF2D IoU | 49.4130 | 70.4007 |
 | LERF3D 实际选集投影 IoU（不是独立3D真值） | 32.3130 | 66.9633 |

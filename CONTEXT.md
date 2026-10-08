@@ -1,5 +1,54 @@
 # RADIO-GS — active system context
 
+Latest completed study, 2026-10-08: all30 fields fitted under two matched source
+relation arms; full five-benchmark evaluation and fixed common query program are
+complete. Read `docs/experiments/2026-10-08-cross-view-relation-results.md` and JSON.
+Artifacts: `output/query_field_20261008/cross_view_relations_v1`. Each arm visits
+all25,451 valid source regions twice (50,902 steps);35,536 updates have another
+supported view. Data, targets, scale, exposures and paired traces match; only
+the second-view support differs (local interior vs original3D anchor). All60
+exports preserve native/geometry/support buffers. No extra teacher/source/3D label.
+
+The standalone `query_field.runtime.QueryFieldRuntime` combines cross-view fields
+with global native-rank image candidates, Gaussian-set bidirectional matching,
+and complete-menu category p+p(1-p)m from native softmax(100*cosine) and common
+member support. It was fixed before benchmark scoring, uses one recipe across
+scenes, and never accesses source observations or a v10 solver at query time.
+
+Common-program IoU: LERF2D54.1849 (parent49.4130), actual subset projection29.5153
+(32.3130, regression), NVOS response57.7853 (57.6865), ScanNet19/15/10
+37.8765/38.7017/45.5402 (22.2853/23.3694/26.5462), UQIS text/image/2D/3D
+12.9450/21.9248/29.2119/28.4507 (12.0755/15.9861/28.3732/27.6913), all percentages.
+NVOS actual subset also regresses70.5360→69.8060. No default promotion or claim
+of full recovery. All predictions preceded scores, including all268 UQIS inputs.
+
+Attribution: the same cross-view field gains5.2963pp image IoU from the fixed
+image program, paired-scene95% interval[2.0101,8.1012]pp,8/9 scenes improve.
+ScanNet recovery mainly repairs category semantics: parent typed reader37.8238,
+unchanged native36.9452, cross-view typed37.8765. Matched cross-view-vs-local
+training effects are small and key intervals cross zero. Both original-reader
+arms preserve all268 native scores/candidates/weights/statuses exactly.32 tests
+pass; a copied real scene replays13 input/readout cases exactly in fresh source-
+denied processes (Python file audit, not an OS sandbox; one-scene smoke coverage).
+
+Next priority follows the negative evidence: figurines actual IoU41.7884→25.7584
+and precision42.1660→25.7994 with recall still99.47%; new disconnected false
+selections, not loss of target coverage. Local continuation is worse, so this is
+not isolated to cross-view association. More identical partial-render training
+is not the main recovery route. Native functional construction remains unbuilt;
+reliable conditional exclusions, preservation of query evidence after identity,
+and response/actual-set consistency need controlled method work. A posthoc
+factorial intervention on all figurines queries further localizes this failure:
+new group + parent shared parameters gives43.8528%; parent group + new shared
+parameters21.5872%. New groups help under either shared-parameter block; the
+shared scale/temperature/affinity updates cause the severe local regression.
+See `2026-10-08-figurines-parameter-attribution.json`. Next test representation
+learning separately from shared acceptance calibration across the full cohort;
+do not infer that freezing that block is optimal everywhere or blame bias alone.
+Keep unknown
+evidence unknown; do not tune scene/query thresholds, restore old solvers, or
+distill the labelled v10 head to hide these failures.
+
 Latest direction, 2026-10-08: the user explicitly authorizes adapting the ideal
 architecture to recover v10 capabilities while retaining its core. Read
 `docs/adr/0014-v10-capability-transfer-within-one-gaussian-field.md` and
