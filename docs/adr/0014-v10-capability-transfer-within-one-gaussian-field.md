@@ -158,3 +158,16 @@ objective from added decoder capacity. It transfers v10's use of native/metric
 evidence and carrier-level decisions without its labelled member model. Full
 performance and model promotion remain unproven; the active fixed protocol is
 [element relations](../experiments/2026-10-08-element-relation-protocol.md).
+
+The [complete element-relation study](../experiments/2026-10-08-element-relation-results.md)
+now closes all60 exports, five families and268 UQIS inputs/arm. Conditional
+membership improves source BCE and NVOS response (57.9518→74.6098%), while
+LERF2D collapses52.2864→16.9454% and actual selection32.8763→9.4783%.
+Correct-support point recall increases but precision and IoU decrease. Native
+and geometry feature binding matters on source relations; scalar exposure is
+not an adequate pair-visibility transfer. Neither arm is promoted. This does
+not invalidate the one-field core: it rejects treating source relation fit as
+sufficient calibrated selection. The next controlled repair jointly retains
+element relations and actual-subset rendered supervision, with the same parents,
+source pairs, sampling and inference, and explicit actual gradient coverage.
+Joint results are not yet established; no task-specific model selection follows.

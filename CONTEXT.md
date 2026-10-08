@@ -1,17 +1,36 @@
 # RADIO-GS — active system context
 
-Active follow-up: `docs/experiments/2026-10-08-element-relation-protocol.md`.
-Two matched source-only arms now implement direct partial Gaussian relation
-supervision and an optional native/geometry residual inside the common member
-core. Runner `scripts/research/run_query_field_elements.py`, intended root
-`output/query_field_20261008/element_relations_v1`. Compare with the earlier
-protected rendered control using identical original parents and complete source
-pair traces, not additional epochs from a selected winner. Protect native,
-geometry/support and original acceptance parameters. Unknown/conflicting source
-relations stay partial. New residual and one confidence scalar belong to the
-same standalone export. Complete all60 exports, five-family predictions/scores,
-source/native invariance checks and copied-export replay before final claims.
-Older frozen studies require their recorded code snapshots after this change.
+Latest completed study: `docs/experiments/2026-10-08-element-relation-results.md`
+and JSON. Both new arms have all60 exports, five-family scores,268 UQIS inputs
+per arm,30 source feature-binding audits, all67 point attribution cases, and10
+copied-export cold replays complete. Root `element_relations_v1`, construction
+code4bdf77a. Both keep exact protected native/geometry/support/shared parameters;
+full paired source traces and element samples match.70 related tests pass.
+
+Direct element training barely changes the protected rendered control. Adding
+the shared native/geometry residual improves source BCE .628311→.286285 (30/30)
+and NVOS response57.9518→74.6098%, but LERF2D52.2864→16.9454 and actual-set
+projection32.8763→9.4783 collapse (all4 scenes). LERF actual precision falls
+34.2303→9.6658%, recall rises87.8739→91.5271%. NVOS actual-set IoU improves only
+69.9469→71.9338%, much less than response. ScanNet19=37.9904%; UQIS text/image/
+2D/3D=12.9180/20.8970/26.8342/26.2318%. No arm promotion or task winner bundle.
+
+Known-correct59-point diagnostic: observed recall54.8275→67.8470%, precision
+58.3788→44.4343%, IoU32.5077→30.4461 (query means). Within-query exposure gap
+20.8757→15.5289pp, still not actual gradient evidence. Source native/geometry
+binding permutations worsen BCE, but scalar exposure contributes almost nothing.
+Direct sampled-row coverage averages36.8539% (LERF7.5087%,NVOS5.9546%); region
+coverage is not complete Gaussian optimization. Scalar exposure is not pair
+co-visibility. Total new payload42,312,688 bytes: one scalar/element +1441 weights.
+
+Next repair: matched joint element +actual-subset-rendered training, from the
+same original parents, same source pairs/samples/steps and common runtime. Keep
+conditional evidence; constrain its acceptance drift and measure actual rendered
+logit-gradient coverage. The element-only residual study did not retain new
+rendered loss during its two epochs, but its failures do not prove loss omission
+is the sole cause. No joint results yet. Preserve unknown/conflicting evidence,
+all-five evaluation and source-free inference; do not select per-task winners.
+Older frozen studies require their recorded code snapshots after changes.
 
 Latest completed studies: `docs/experiments/2026-10-08-native-coordinate-results.md`
 and `2026-10-08-protected-native-results.md`, with full JSON evidence. Four full
@@ -73,14 +92,11 @@ four-arm cold checks cover20 cases, one physical scene.53 related tests pass.
 All construction, prediction, scoring, source matching, output checks, summary
 and plotting are complete; there is no pending experiment from this batch.
 
-Next method priority: test conditional membership using native local evidence,
-geometry and reliable joint observations; distinguish element-level relation
-supervision from subset-alpha observation weighting without hardening unknown
-or conflicting regions. Native functional learning also needs queries that
-exercise actual text/crop-patch behavior and explicit element exposure. These
-are not yet implemented or validated changes. Do not keep fitting the same
-pseudoquery loss and infer recovery solely from source KL. Retain one field,
-three teacher roles and standalone inference; no v10 labelled-head distillation,
+The native/geometry conditional member hypothesis above is now fully tested.
+Joint source element/rendered calibration is the immediate follow-up; genuine
+pair visibility/disagreement and real text/crop-patch functional retention remain
+unresolved. Do not infer recovery from source BCE/KL or ranking AP alone. Retain
+one field, three teacher roles and standalone inference; no labelled-head reuse,
 source-bank runtime fallback, compression detour, or per-task solver revival.
 
 Earlier relation/common-program study remains reproducible at `dfd107b`; see
