@@ -81,11 +81,18 @@ def main():
     evidence.extend([CONTROL / 'summary.json', runtime_path, point_path,
         ROOT / 'diagnostics/point_observation_mass/report.json', Path(__file__), Path(protected.__file__),
         Path('scripts/research/summarize_query_field_relations.py')])
+    execution = []
+    for path in sorted((ROOT / 'execution').glob('*.json')):
+        record = read(path)
+        if 'training' in record: check(record['training'])
+        if 'code' in record: check(record['code'])
+        execution.append(record); evidence.append(path)
     result = dict(complete=True, fields=30, exports=30, primary_arm=arm, implementation_commit='7d9fcc8',
         macro=macro, per_scene=data, differences=differences, training=training, source_development=source,
         export_tensor_bytes=total_bytes, exact_conditional_control_source_traces=True, exact_element_samples=True,
         protected_native_invariance=native, runtime=runtime, known_support_diagnostics=point,
         uqis_diagnostics={arm: diagnostics}, v10_targets=previous['v10_targets'],
+        execution_adjustments=execution,
         source_only=True, source_access_at_query=False, model_promotion=False, independent_final_test=False,
         per_task_model_selection=False, source_feature_binding_interventions_run_for_this_arm=False,
         evidence=[receipt(p) for p in sorted(set(evidence), key=str)])
