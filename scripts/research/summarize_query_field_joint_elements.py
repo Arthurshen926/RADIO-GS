@@ -78,9 +78,12 @@ def main():
     explicit = read(Path(cohort['root']) / 'predictions/uqis/evaluation.json')['explicit_selection']
     diagnostics = dict(modalities={m: dict(scene_macro=v['scene_macro'], empty_selections=v['empty_selections'])
         for m, v in explicit['modalities'].items()}, dominant_selected_identity=explicit['identity_diagnosis'])
+    scale_path = ROOT / 'diagnostics/source_default_scales.json'; scales = read(scale_path)
+    if scales['fields'] != 30 or len(scales['records']) != 30:
+        raise ValueError('default-scale diagnostic incomplete')
     evidence.extend([CONTROL / 'summary.json', runtime_path, point_path,
         ROOT / 'diagnostics/point_observation_mass/report.json', Path(__file__), Path(protected.__file__),
-        Path('scripts/research/summarize_query_field_relations.py')])
+        Path('scripts/research/summarize_query_field_relations.py'), scale_path])
     execution = []
     for path in sorted((ROOT / 'execution').glob('*.json')):
         record = read(path)
@@ -92,6 +95,7 @@ def main():
         export_tensor_bytes=total_bytes, exact_conditional_control_source_traces=True, exact_element_samples=True,
         protected_native_invariance=native, runtime=runtime, known_support_diagnostics=point,
         uqis_diagnostics={arm: diagnostics}, v10_targets=previous['v10_targets'],
+        default_scale_diagnostic=scales,
         execution_adjustments=execution,
         source_only=True, source_access_at_query=False, model_promotion=False, independent_final_test=False,
         per_task_model_selection=False, source_feature_binding_interventions_run_for_this_arm=False,
