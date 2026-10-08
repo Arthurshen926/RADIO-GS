@@ -49,6 +49,8 @@ def main():
         if len(report['replay']) != 2 * len(report['source_frames']): raise ValueError('incomplete functional replay')
         if max(max(r['positive_error'], r['negative_error']) for r in report['replay']) > 1e-5:
             raise ValueError('functional replay failed')
+        if not any(r['known_elements'] > 0 for r in report['replay']):
+            raise ValueError('functional replay only exercised empty evidence')
         construction.append(dict(key=job['key'], family=job['family'], **report))
         evidence.extend([path / 'construction.json', path / 'field/manifest.json', Path(job['observations']) / 'observations.json'])
     if len(construction) != 30: raise ValueError('incomplete field cohort')
@@ -72,6 +74,7 @@ def main():
     result = dict(complete=True, primary_arm=arm, fields=30, macro=macro, per_scene=data, differences=differences,
         construction=construction, functional_replay=dict(cases=sum(len(r['replay']) for r in construction),
             max_absolute_error=max(max(q['positive_error'], q['negative_error']) for r in construction for q in r['replay']),
+            nonempty_cases=sum(q['known_elements'] > 0 for r in construction for q in r['replay']),
             direct_source_raster_vs_compiled_gaussian=True, benchmark_queries_used=False),
         field_tensor_bytes=sum(r['field_tensor_bytes'] for r in construction),
         added_evidence_bytes=sum(r['evidence_bytes'] for r in construction),
