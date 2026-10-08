@@ -4,6 +4,11 @@ Status: research direction authorized by the user on 2026-10-08; mechanisms belo
 are requirements or hypotheses, not a claim of recovered accuracy.
 Supersedes overly restrictive implementation choices in ADR0013, not its core.
 
+2026-10-09:[ADR0015](0015-functional-reference-before-compact-relation-learning.md)
+permits an explicitly uncompressed partial-relation functional reference within
+the Gaussian export. Verify conditional functions before compacting their
+coordinates; neither packaging nor feature reconstruction establishes parity.
+
 ## Decision
 
 The user explicitly permits adjusting the ideal architecture to absorb v10's

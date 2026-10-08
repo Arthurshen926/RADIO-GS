@@ -1,5 +1,19 @@
 # RADIO-GS — active system context
 
+Active2026-10-09: the user explicitly rejects substituting feature retention or
+training convergence for capability transfer. ADR0015 and
+`docs/experiments/2026-10-09-paired-function-protocol.md` define an uncompressed
+partial-relation functional reference on the same Gaussian rows. Source-indexed
+positive/exclusion coordinates and view groups preserve a specified weighted
+support-to-element function; independent replay goes through source raster
+masks before projection. Runtime reads no source assets. This is increased
+capacity, not compression, full v10 parity or a final novel representation.
+All30 protected rendered fields are fixed priors; one common finite-evidence
+update, no training/extra labels/teachers/views or per-task choice. Complete all
+five tasks and runtime checks before claims.33 related tests pass. Runner:
+`scripts/research/run_query_field_paired_functions.py`, root
+`output/query_field_20261009/paired_functions_v1`. No new benchmark results yet.
+
 Latest completed study: `docs/experiments/2026-10-08-joint-relation-results.md`
 and JSON; runner `scripts/research/run_query_field_joint_elements.py`, root
 `joint_element_relations_v1`. All30 exports, five benchmark scores,268 UQIS

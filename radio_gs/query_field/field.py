@@ -57,7 +57,8 @@ class CapabilityField(nn.Module):
                  threshold=0.5, candidate_count=8, candidate_radius=0.05,
                  anchor_eligible=None, spatial_metric="none", world_units_per_metre=None,
                  local_metric="none", support_aggregation="normalized_prototype", negative_rule="product",
-                 relation_decoder="none", relation_confidence=None):
+                 relation_decoder="none", relation_confidence=None,
+                 evidence_kind="none", evidence_state=None):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -120,6 +121,13 @@ class CapabilityField(nn.Module):
                 raise ValueError("unknown or incomplete conditional relation decoder")
             from .conditional_relation import enable
             enable(self, relation_confidence)
+        self.evidence_kind = 'none'
+        self.evidence = None
+        if evidence_kind != 'none':
+            from .paired_evidence import KIND, enable
+            if evidence_kind != KIND or evidence_state is None:
+                raise ValueError('unknown or incomplete paired-evidence field')
+            enable(self, evidence_state)
 
     def grouping_features(self, scale):
         if not math.isfinite(float(scale)) or float(scale) <= 0:
@@ -161,6 +169,8 @@ class CapabilityField(nn.Module):
         if self.relation is not None:
             from .conditional_relation import residual
             logits = logits + residual(self, support, scale, cosine, rows)
+        if self.evidence is not None:
+            logits = self.evidence.refine(logits, support, scale, rows)
         return logits
 
     def _candidates(self, score):
@@ -286,6 +296,7 @@ class CapabilityField(nn.Module):
                                spatial_member_metric=self.spatial_metric,
                                native_local_member_metric=self.local_metric,
                                conditional_relation_decoder=self.relation_decoder,
+                               paired_evidence=self.evidence_kind,
                                support_aggregation=self.support_aggregation,
                                negative_rule=self.negative_rule,
                                uncertainty_resolved=False, semantic_scores_calibrated=False,
@@ -309,4 +320,6 @@ class CapabilityField(nn.Module):
                     negative_rule=self.negative_rule)
         if self.relation_decoder != "none":
             spec["relation_decoder"] = self.relation_decoder
+        if self.evidence is not None:
+            spec['evidence_kind'] = self.evidence_kind
         return spec

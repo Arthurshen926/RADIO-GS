@@ -59,6 +59,8 @@ def load_field(directory, device="cpu"):
     field = CapabilityField(geometry, state["semantic.codes"], state["local.codes"], state["group"],
                             state["observed"], semantic_codec=codecs["semantic"],
                             local_codec=codecs["local"], anchor_eligible=state.get("anchor_eligible"),
-                            relation_confidence=state.get("relation_confidence"), **manifest["spec"])
+                            relation_confidence=state.get("relation_confidence"),
+                            evidence_state={k.removeprefix('evidence.'): v for k, v in state.items()
+                                            if k.startswith('evidence.')} or None, **manifest["spec"])
     field.load_state_dict(state, strict=True)
     return field.to(device).eval(), manifest
