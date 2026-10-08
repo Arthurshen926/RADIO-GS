@@ -1,5 +1,32 @@
 # RADIO-GS — active system context
 
+Latest direction, 2026-10-08: the user explicitly authorizes adapting the ideal
+architecture to recover v10 capabilities while retaining its core. Read
+`docs/adr/0014-v10-capability-transfer-within-one-gaussian-field.md` and
+`docs/method/v10-capability-transfer.md`. Shared Gaussian state and conditional
+relations do not require identical scalar task outputs. Necessary local modes,
+reliability and small typed readouts are permitted; their value must be tested.
+Standard inference remains standalone, with three teacher roles and no hidden
+v10 solver or labelled-member distillation. Full-native averaged descriptors
+are not automatically an adequate high-capacity capability reference.
+
+First implementation complete: `query_field/identity_evidence.py` transfers
+v10-compatible ordinal native fusion and weighted bidirectional matching, with
+exact old-operator tests. The fixed67-image/four-control study is complete:
+`docs/experiments/2026-10-08-native-identity-transfer-results.md` and JSON.
+Parent image IoU/AP15.9861/24.7530%; same-eight rank15.8670/25.1978%; same-eight
+Gaussian-set bidirectional17.6289/28.5899%; global eligible-anchor rank18.3874/28.2145%.
+Correct anchors21/21/25/26 of67. Both stronger controls improve8/9 scenes, but
+their paired-scene IoU intervals cross zero. No promotion or per-scene selection.
+All predictions preceded scoring;67 parent tensors/candidates/sets replay exactly.
+23 tests and a copied-field real-query four-control source-denied replay pass.
+This is a research intervention, not a changed default or a new five-task result.
+The completed five-task baseline and attribution below remain the reference.
+Next construction work must preserve functional responses/correspondence and
+learn visibility-aware conditional relations; do not treat reranking as sufficient
+or sweep fusion weights/candidate counts. Existing fixed-eight oracle22.13% and
+correct-point extent failures already require work beyond these query controls.
+
 Updated 2026-10-08 on `codex/query-preserving-gaussian-field`: the user authorized
 the scene-specific, three-teacher, query-preserving compact Gaussian research
 direction. New entry: `python -m radio_gs.query_field`. Read

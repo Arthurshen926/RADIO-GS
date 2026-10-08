@@ -2,6 +2,11 @@
 
 Status: accepted research direction by the user on 2026-10-07; no accuracy promotion.
 
+2026-10-08 refinement: [ADR0014](0014-v10-capability-transfer-within-one-gaussian-field.md)
+supersedes overly restrictive first-implementation choices. One field and a common
+conditional relation core allow necessary evidence capacity and typed decisions;
+mean native vectors and a single scalar member score are not architectural goals.
+
 The active research branch is `codex/query-preserving-gaussian-field`, in the
 independent worktree `/root/RADIO-GS-query-field`. Commit
 `0f40545c2b93fa390e37038af8315c24b5bc57b5` preserves the complete nonignored v10

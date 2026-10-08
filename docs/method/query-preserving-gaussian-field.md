@@ -3,6 +3,17 @@
 Research entry: `python -m radio_gs.query_field`.
 Decision: [ADR0013](../adr/0013-query-preserving-scene-specific-gaussian-field.md).
 
+Latest design: [v10 capability transfer](v10-capability-transfer.md), governed by
+[ADR0014](../adr/0014-v10-capability-transfer-within-one-gaussian-field.md).
+It retains the one-field core while allowing the evidence capacity and typed
+decisions required to recover performance. `identity_evidence` implements
+v10-compatible rank fusion and bidirectional correspondence as research primitives;
+the [fixed full-image control](../experiments/2026-10-08-native-identity-transfer-protocol.md)
+does not change the default field or claim that fused Gaussian sets equal source patches.
+Its [completed results](../experiments/2026-10-08-native-identity-transfer-results.md)
+show partial identity recovery, with no default promotion; construction capability
+retention and conditional member learning remain the next architectural work.
+
 This package is the new construction/learning/query path. The v10 executable
 recipe remains a frozen comparator. Neither its source-only NVOS solver nor
 its label-trained member tree is silently called by the new package.
