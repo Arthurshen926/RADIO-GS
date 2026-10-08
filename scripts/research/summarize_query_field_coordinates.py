@@ -27,15 +27,40 @@ def main():
                    for a in ['parent', 'previous_common', 'protected_training', 'functional_native']}
     original = read(PARENT_ROOT / 'protected_training/cohort.json')
     invariance = point_invariance(dict(protected_training=original, functional_native=cohort))
-    training, total_bytes = [], 0
+    training, total_bytes, matched_sources = [], 0, []
     for job in design['fields']:
         out = ROOT / 'fits' / ARMS[0] / job['key']
         report = read(out / 'training.json'); manifest = read(out / 'field/manifest.json')
-        files.extend([out / 'training.json', out / 'field/manifest.json'])
+        shared_path = PARENT_ROOT / 'fits/functional_native' / job['key'] / 'training.json'
+        shared = read(shared_path); parent_manifest = read(Path(job['input']) / 'manifest.json')
+        files.extend([out / 'training.json', out / 'field/manifest.json', shared_path])
         if not report['protected_state_unchanged']:
             raise ValueError('coordinate state protection failed')
+        for key in ['parent_sha256', 'observations_sha256', 'epochs', 'seed', 'pairs',
+                    'temperature', 'trust_weight', 'steps', 'training_regions',
+                    'each_region_visits', 'source_frames']:
+            if report[key] != shared[key]:
+                raise ValueError('coordinate/shared source recipe differs: ' + key)
+        for key in ['regions', 'frames', 'seed', 'used_for_optimization', 'used_for_selection']:
+            if report['source_development'][key] != shared['source_development'][key]:
+                raise ValueError('coordinate/shared development cohort differs: ' + key)
+        for channel in ['semantic', 'local']:
+            if not np.isclose(report['source_development']['metrics'][channel]['parent_kl'],
+                              shared['source_development']['metrics'][channel]['parent_kl'],
+                              rtol=0, atol=1e-7):
+                raise ValueError('coordinate/shared development parent function differs')
+        for key in ['spec', 'elements', 'observed', 'eligible_anchors', 'semantic_native_dim',
+                    'local_native_dim', 'semantic_code_dim', 'local_code_dim', 'group_dim',
+                    'tensor_bytes', 'external_scene_dependencies']:
+            if manifest[key] != parent_manifest[key]:
+                raise ValueError('coordinate export capacity/runtime contract differs: ' + key)
+        if report['benchmark_queries_used'] or report['source_access_at_query']:
+            raise ValueError('coordinate source-only contract differs')
+        matched_sources.append(job['key'])
         training.append(dict(key=job['key'], family=job['family'], **{k: v for k, v in report.items() if k != 'history'}))
         total_bytes += manifest['tensor_bytes']
+    if len(training) != 30 or sum(r['steps'] for r in training) != 50902:
+        raise ValueError('coordinate cohort or source region coverage differs')
     source = {c: dict(parent_kl=float(np.mean([r['source_development']['metrics'][c]['parent_kl'] for r in training])),
         refined_kl=float(np.mean([r['source_development']['metrics'][c]['refined_kl'] for r in training])),
         improved_scenes=sum(r['source_development']['metrics'][c]['refined_kl'] < r['source_development']['metrics'][c]['parent_kl'] for r in training),
@@ -51,6 +76,9 @@ def main():
     result = dict(complete=True, fields=30, exports=30, arm=ARMS[0], macro=macro, per_scene=data,
         differences=differences, training=training, source_development=source, export_tensor_bytes=total_bytes,
         registered_query_invariance=invariance, runtime=runtime, v10_targets=prior['v10_targets'],
+        matched_source_recipes=dict(fields=matched_sources, count=len(matched_sources),
+            steps=sum(r['steps'] for r in training), development_regions=sum(r['source_development']['regions'] for r in training),
+            export_capacity_unchanged=True, optimizer_parameterization_matched=False),
         source_only=True, source_access_at_query=False, model_promotion=False, per_task_model_selection=False,
         independent_final_test=False, cpu_trial_used_for_benchmarks=False,
         evidence=[receipt(p) for p in sorted(set(files), key=str)])

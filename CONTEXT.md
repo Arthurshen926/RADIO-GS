@@ -1,53 +1,80 @@
 # RADIO-GS — active system context
 
-Latest completed study, 2026-10-08: all30 fields fitted under two matched source
-relation arms; full five-benchmark evaluation and fixed common query program are
-complete. Read `docs/experiments/2026-10-08-cross-view-relation-results.md` and JSON.
-Artifacts: `output/query_field_20261008/cross_view_relations_v1`. Each arm visits
-all25,451 valid source regions twice (50,902 steps);35,536 updates have another
-supported view. Data, targets, scale, exposures and paired traces match; only
-the second-view support differs (local interior vs original3D anchor). All60
-exports preserve native/geometry/support buffers. No extra teacher/source/3D label.
+Latest completed studies: `docs/experiments/2026-10-08-native-coordinate-results.md`
+and `2026-10-08-protected-native-results.md`, with full JSON evidence. Four full
+arms, each all30 fields and all five benchmarks including268 UQIS inputs, are
+complete:120 exports total. Roots `output/query_field_20261008/native_coordinates_v2`
+and `protected_relations_v1`. The v2 query program is fixed across arms. Main
+construction revisions `ea23689`, `d67813c`, `083acc1`; no default promotion,
+per-scene/task winner selection, or complete v10 recovery is established.
 
-The standalone `query_field.runtime.QueryFieldRuntime` combines cross-view fields
-with global native-rank image candidates, Gaussian-set bidirectional matching,
-and complete-menu category p+p(1-p)m from native softmax(100*cosine) and common
-member support. It was fixed before benchmark scoring, uses one recipe across
-scenes, and never accesses source observations or a v10 solver at query time.
+Decoder rollback restores LERF actual-set projection29.5153→33.7203%, mainly
+figurines25.7584→43.8528. Training-time shared-parameter protection gives32.8763%
+and is worse than posthoc rollback; it is not a universal recovery. Compared
+with previous common program, protected LERF2D54.1849→52.2864, UQIS image
+21.9248→20.4974,3D point28.4507→28.0598. All30 relation traces match the previous
+joint fit; geometry/native/support buffers and protected shared parameters are
+exact. No default promotion or per-task model selection.
 
-Common-program IoU: LERF2D54.1849 (parent49.4130), actual subset projection29.5153
-(32.3130, regression), NVOS response57.7853 (57.6865), ScanNet19/15/10
-37.8765/38.7017/45.5402 (22.2853/23.3694/26.5462), UQIS text/image/2D/3D
-12.9450/21.9248/29.2119/28.4507 (12.0755/15.9861/28.3732/27.6913), all percentages.
-NVOS actual subset also regresses70.5360→69.8060. No default promotion or claim
-of full recovery. All predictions preceded scores, including all268 UQIS inputs.
+Source-only native functional construction is now implemented. Shared full-native
+affine residuals fit teacher query preferences and bake into the same field.
+25,451 source regions visited twice; source-development semantic KL improves
+.110428→.102544 (26/30 scenes), local .177713→.173917 (24/30), but transfer is
+inconsistent: UQIS text12.5155→13.8000, image20.4974→20.4352, LERF2D52.2864→50.5804
+(all four scenes decline). Source pseudoquery fitting is not proof of real query
+retention. Shared maps cannot separately correct spatially different mixtures.
+All134 registered UQIS point outputs and8 NVOS outputs remain bit-exact across
+native-only refinement. The two native-protected controls each replay all268
+native score vectors exactly; three copied real exports replay15 cold input/
+readout cases with no forbidden opens (Python audit, not OS sandbox; one scene).
 
-Attribution: the same cross-view field gains5.2963pp image IoU from the fixed
-image program, paired-scene95% interval[2.0101,8.1012]pp,8/9 scenes improve.
-ScanNet recovery mainly repairs category semantics: parent typed reader37.8238,
-unchanged native36.9452, cross-view typed37.8765. Matched cross-view-vs-local
-training effects are small and key intervals cross zero. Both original-reader
-arms preserve all268 native scores/candidates/weights/statuses exactly.32 tests
-pass; a copied real scene replays13 input/readout cases exactly in fresh source-
-denied processes (Python file audit, not an OS sandbox; one-scene smoke coverage).
+Full-UQIS post-score visibility diagnosis:59/67 3D inputs have correct supports,
+yet protected observed-target recall is only54.8275% (query mean). In57 queries
+with both exposure strata, high-contribution portions exceed low-contribution
+recall by20.8757pp, clustered interval[12.337,27.994],8/9 scenes same direction.
+This is association, not a measured training gradient or causal proof. Artifacts
+under `protected_relations_v1/diagnostics/point_observation_mass`. Do not hard-label
+weak/unknown observations or infer that a scalar threshold fixes membership.
 
-Next priority follows the negative evidence: figurines actual IoU41.7884→25.7584
-and precision42.1660→25.7994 with recall still99.47%; new disconnected false
-selections, not loss of target coverage. Local continuation is worse, so this is
-not isolated to cross-view association. More identical partial-render training
-is not the main recovery route. Native functional construction remains unbuilt;
-reliable conditional exclusions, preservation of query evidence after identity,
-and response/actual-set consistency need controlled method work. A posthoc
-factorial intervention on all figurines queries further localizes this failure:
-new group + parent shared parameters gives43.8528%; parent group + new shared
-parameters21.5872%. New groups help under either shared-parameter block; the
-shared scale/temperature/affinity updates cause the severe local regression.
-See `2026-10-08-figurines-parameter-attribution.json`. Next test representation
-learning separately from shared acceptance calibration across the full cohort;
-do not infer that freezing that block is optimal everywhere or blame bias alone.
-Keep unknown
-evidence unknown; do not tune scene/query thresholds, restore old solvers, or
-distill the labelled v10 head to hide these failures.
+Direct full-native per-Gaussian coordinate construction is complete, protocol
+`docs/experiments/2026-10-08-native-coordinate-protocol.md`, runner
+`scripts/research/run_query_field_coordinates.py`, construction code `083acc1`.
+Same source queries, two region epochs and v2 inference; row-local Adam .001,
+full FP32 construction states, original output dtype/dimensions. All30 source
+recipes and export capacities checked;50,902 steps,60 development views/2,788
+regions. CPU arithmetic trial v1 stopped before benchmark prediction after five
+fields; attempts retained; all30 restarted uniformly in v2 after CUDA parity.
+
+Relative to protected training, coordinates improve LERF actual projection
+32.8763→34.8311% (3/4 scenes; paired interval[-1.1248,5.1302]pp), ScanNet10
+45.4731→46.3277% (9/10;[.3047,1.5538]pp), but LERF2D52.2864→50.5530 and UQIS
+image20.4974→19.4973 decline. ScanNet19=37.8615,text=12.7697. Source semantic
+KL=.099348 (29/30 improve), local=.174727 (26/30), yet true query transfer remains
+inconsistent. Observed row exposure averages86.3243%, range63.0192–97.3935;
+region coverage does not prove full Gaussian optimization. Optimizer and
+parameterization both differ from shared residuals; this is not a pure capacity
+causal estimate or a sufficient one-vector capacity upper bound. All134 UQIS
+registered outputs plus8 NVOS outputs are exact vs protected. One copied real
+export replays all five input/readout cases without forbidden opens. Combined
+four-arm cold checks cover20 cases, one physical scene.53 related tests pass.
+All construction, prediction, scoring, source matching, output checks, summary
+and plotting are complete; there is no pending experiment from this batch.
+
+Next method priority: test conditional membership using native local evidence,
+geometry and reliable joint observations; distinguish element-level relation
+supervision from subset-alpha observation weighting without hardening unknown
+or conflicting regions. Native functional learning also needs queries that
+exercise actual text/crop-patch behavior and explicit element exposure. These
+are not yet implemented or validated changes. Do not keep fitting the same
+pseudoquery loss and infer recovery solely from source KL. Retain one field,
+three teacher roles and standalone inference; no v10 labelled-head distillation,
+source-bank runtime fallback, compression detour, or per-task solver revival.
+
+Earlier relation/common-program study remains reproducible at `dfd107b`; see
+`2026-10-08-cross-view-relation-results.md`. Preserve the one Gaussian field,
+SigLIP/DINO/SAM roles, common conditional membership, source-free runtime and
+actual-set verification. No old solver, labelled-v10-head distillation, or
+per-scene/query threshold tuning is part of the current track.
 
 Latest direction, 2026-10-08: the user explicitly authorizes adapting the ideal
 architecture to recover v10 capabilities while retaining its core. Read

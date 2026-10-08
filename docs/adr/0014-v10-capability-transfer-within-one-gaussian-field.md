@@ -84,11 +84,10 @@ Compression and speed optimization follow capability recovery, not precede it.
 
 ## Implementation record, 2026-10-08
 
-The first full-image identity intervention is complete. The next implementation
-advances the independent relation-training and typed-decision packages together;
-functional native construction remains open and is not a prerequisite for
-testing these two isolated deficiencies. This sequencing does not certify the
-initial mean field as a sufficient native-capability reference.
+The first full-image identity intervention was followed by independent
+relation-training and typed-decision packages. Functional native construction
+was subsequently implemented and tested below. This sequencing does not certify
+the initial mean field as a sufficient native-capability reference.
 
 The subsequent protected-native study implements the first source-only native
 functional construction, using full-dimensional residual maps baked into the
@@ -120,3 +119,31 @@ shared scale/temperature/affinity block. Separating representation learning from
 shared acceptance calibration is the next controlled full-cohort intervention;
 it is not yet a globally validated freeze policy or a licence for scene-specific
 parameter selection.
+
+The [completed protected-native study](../experiments/2026-10-08-protected-native-results.md)
+now tests that intervention on all 30 fields and all five benchmarks. Posthoc
+rollback improves LERF actual-set projection 29.5153 to 33.7203%, mainly from
+figurines; training-time protection yields 32.8763% and is not a universal
+improvement. Group representation and shared acceptance parameters co-adapt, so
+permanent freezing is not established as the final training policy. Shared
+native functional maps improve held-out source preferences but do not reliably
+transfer to real queries: all four LERF 2D scenes regress relative to protected
+training. All 134 registered UQIS point outputs and eight NVOS outputs are exact
+under native-only refinement. These paths structurally require membership
+learning changes to improve. Full-UQIS observed-target recall also correlates
+with source projection contribution; this is an exposure association, not a
+measurement of actual training gradients or a proven causal attribution.
+
+The subsequent [full native-coordinate control](../experiments/2026-10-08-native-coordinate-results.md)
+is also complete on all 30 fields, all five benchmarks and 268 UQIS inputs.
+Per-Gaussian coordinate fitting retains the same exported field and source query
+objective. Relative to protected training, LERF actual-set projection improves
+32.8763 to 34.8311% and ScanNet10 45.4731 to 46.3277%, while LERF2D falls 52.2864
+to 50.5530% and UQIS image falls 20.4974 to 19.4973%. Registered point outputs
+remain exact. Better source semantic preferences in 29/30 fields do not establish
+real-query recovery. Parameterization and optimizer both change, observed-row
+exposure averages 86.32%, and this is not a sufficient capacity upper bound.
+No arm is promoted. The next unimplemented method work should test native/geometry
+conditioning and reliable element relations inside the common member mechanism,
+plus native function supervision that exercises real text/crop-patch behavior.
+It must retain the same one-field, three-teacher, standalone-query contract.
