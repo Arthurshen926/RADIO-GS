@@ -170,4 +170,23 @@ not invalidate the one-field core: it rejects treating source relation fit as
 sufficient calibrated selection. The next controlled repair jointly retains
 element relations and actual-subset rendered supervision, with the same parents,
 source pairs, sampling and inference, and explicit actual gradient coverage.
-Joint results are not yet established; no task-specific model selection follows.
+The [joint repair](../experiments/2026-10-08-joint-relation-results.md) is now
+complete: all30 fields, five tasks,268 UQIS inputs, full point attribution and
+five copied-export checks. Compared with conditional-only, LERF2D improves
+16.9454→33.2817%, actual projection9.4783→13.0840, NVOS actual subset
+71.9338→76.3384 and both UQIS point inputs by about2pp. LERF remains worse
+than protected rendered training in every scene. Known-support precision
+recovers44.4343→50.6241%, still below protected58.3788. No promotion or
+task-specific model selection follows.
+
+Actual rendered logit gradients reach94.5246% of observed rows on average;
+source element/rendered errors improve in29/30 and28/30 fields respectively.
+These measurements rule out a disconnected rendering branch, not supervision
+bias, inadequate optimization or train/query-condition mismatch. All30 default
+scales lie within source10–90% quantiles. Native geometry conditioning and
+joint supervision remain implemented capabilities, not a validated final recipe.
+Next controls must distinguish calibrated known-support extent, uncertainty and
+union composition, and genuine native text/crop function retention. Partial
+unknowns cannot become negatives merely to suppress false positives. Missing
+same-decoder render-only training prevents a standalone synergy claim. The
+one-field, three-teacher, standalone inference contract remains unchanged.

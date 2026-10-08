@@ -1,14 +1,36 @@
 # RADIO-GS — active system context
 
-Active follow-up: `docs/experiments/2026-10-08-joint-relation-protocol.md`, runner
-`scripts/research/run_query_field_joint_elements.py`, root `joint_element_relations_v1`.
-One all30-field arm uses .5 element +.25 primary/.25 secondary actual-subset
-rendered losses, with identical original parents/pairs/samples/two epochs and
-protected state. It also records actual rendered member-logit gradient coverage
-and audits both source objectives.12 focused tests pass, including real CUDA
-rendered gradients outside the sampled element rows. Complete all-five scoring,
-known-support diagnosis and copied-export checks before claims; no joint results
-or promotion yet. The completed failure study below remains immutable atf364d25.
+Latest completed study: `docs/experiments/2026-10-08-joint-relation-results.md`
+and JSON; runner `scripts/research/run_query_field_joint_elements.py`, root
+`joint_element_relations_v1`. All30 exports, five benchmark scores,268 UQIS
+inputs,67-point diagnosis, exact native replay and five copied-export cold
+checks are complete. No pending jobs or model promotion. Frozen construction
+7d9fcc8, complete tools7df5335;12 focused tests pass, including actual CUDA
+rendered gradients outside element samples. Prior failure study is f364d25.
+
+Joint .5 element +.25 primary/.25 secondary subset-rendered losses retain the
+same original parents, full source traces/samples/two epochs and export capacity.
+Against conditional-only: LERF2D16.9454→33.2817%, actual projection9.4783→13.0840,
+NVOS actual-set71.9338→76.3384, UQIS2D26.8342→28.8602,3D26.2318→28.4509.
+NVOS response falls74.6098→70.9966 but exceeds protected57.9518 (7/8 improve).
+LERF still regresses in all4 scenes versus protected52.2864/32.8763; precision
+is13.7906 versus34.2303%, recall90.4444. ScanNet19/15/10=37.9527/38.7972/45.6303;
+UQIStext/image=13.2306/20.8428. No per-task winner bundle or v10 recovery claim.
+
+Known-correct59-point precision44.4343→50.6241%, still below protected58.3788;
+observed recall63.3705, actualIoU33.0234 (query means). Joint source element
+BCE=.344084 (29/30 improve), rendered BCE=.545022 vs parent.638630 (28/30).
+Actual weighted rendered-logit gradient coverage94.5246% observed rows versus
+36.8539% directly sampled; coverage is not adequate optimization or causality.
+Exposure-proxy recall gap18.5463pp remains;30 default scales lie within source
+10–90% quantiles. Rendering is connected and partly repairs acceptance drift,
+but incomplete pair evidence and train/query-condition mismatch remain open.
+Next method work must separate known-support calibration, uncertain/union query
+composition and native text/crop functionality; preserve unknowns and validate
+all inputs. Do not infer a unique cause from these controls, merely tune global
+thresholds, or resurrect labelled v10 solvers. Missing same-decoder render-only
+control prevents an isolated synergy claim. Source feature permutations were
+not rerun for the joint arm. Full results include paired-scene uncertainty.
 The new member core reads native descriptors even for registered points. Earlier
 native-update/point-output invariance only applied to the legacy member core;
 future native refinement must revalidate point/signed queries and all five tasks.
@@ -36,13 +58,11 @@ Direct sampled-row coverage averages36.8539% (LERF7.5087%,NVOS5.9546%); region
 coverage is not complete Gaussian optimization. Scalar exposure is not pair
 co-visibility. Total new payload42,312,688 bytes: one scalar/element +1441 weights.
 
-Next repair: matched joint element +actual-subset-rendered training, from the
-same original parents, same source pairs/samples/steps and common runtime. Keep
-conditional evidence; constrain its acceptance drift and measure actual rendered
-logit-gradient coverage. The element-only residual study did not retain new
-rendered loss during its two epochs, but its failures do not prove loss omission
-is the sole cause. No joint results yet. Preserve unknown/conflicting evidence,
-all-five evaluation and source-free inference; do not select per-task winners.
+The matched joint repair is now complete above. The element-only residual study
+did not retain new rendered loss during its two epochs, but neither its failures
+nor the partial joint recovery prove loss omission is the sole cause. Preserve
+unknown/conflicting evidence, all-five evaluation and source-free inference;
+do not select per-task winners.
 Older frozen studies require their recorded code snapshots after changes.
 
 Latest completed studies: `docs/experiments/2026-10-08-native-coordinate-results.md`
@@ -105,9 +125,9 @@ four-arm cold checks cover20 cases, one physical scene.53 related tests pass.
 All construction, prediction, scoring, source matching, output checks, summary
 and plotting are complete; there is no pending experiment from this batch.
 
-The native/geometry conditional member hypothesis above is now fully tested.
-Joint source element/rendered calibration is the immediate follow-up; genuine
-pair visibility/disagreement and real text/crop-patch functional retention remain
+The initial native/geometry conditional member and joint-supervision studies
+above are complete. Genuine pair visibility/disagreement, acceptance under
+typed query composition and real text/crop-patch functional retention remain
 unresolved. Do not infer recovery from source BCE/KL or ranking AP alone. Retain
 one field, three teacher roles and standalone inference; no labelled-head reuse,
 source-bank runtime fallback, compression detour, or per-task solver revival.
