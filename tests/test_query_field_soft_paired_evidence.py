@@ -1,3 +1,5 @@
+import json
+
 import torch
 
 from radio_gs.query_field.contracts import Support, QueryPacket
@@ -43,3 +45,35 @@ def test_soft_export_replays_same_common_field(tmp_path):
     packet = QueryPacket('point_3d', positive=Support(torch.tensor([0]), torch.ones(1)), exact_positive=True)
     assert torch.equal(field.query(packet).membership_scores, loaded.query(packet).membership_scores)
     assert manifest['external_scene_dependencies'] == []
+
+
+def test_compiler_adds_weak_target_rows_without_changing_associations(tmp_path):
+    from radio_gs.query_field.field import CapabilityField
+    from radio_gs.query_field.storage import sha256
+    from radio_gs.query_field.compile_paired_evidence import compile_field as hard_compile
+    from radio_gs.query_field.compile_soft_paired_evidence import compile_field as soft_compile
+    pixels = torch.arange(108); count = 216; source = tmp_path / 'source'; source.mkdir()
+    masks = torch.zeros(2, 9, 12, dtype=torch.bool)
+    masks[0, 1:8, 1:5] = True; masks[1, 1:8, 8:12] = True
+    operator = torch.sparse_coo_tensor(torch.stack([pixels.repeat_interleave(2), torch.arange(count)]),
+        torch.tensor([.98, .02]).repeat(108), (108, count)).coalesce()
+    records = []
+    for frame in [1, 2]:
+        path = source / f'view_{frame:05d}.pt'
+        torch.save(dict(masks=masks, scales_m=torch.ones(2), raw_mass=torch.ones(108), best_element=2*pixels,
+            operator=operator, intrinsic=torch.eye(3), world_to_camera=torch.eye(4), original_hw=[9, 12]), path)
+        records.append(dict(frame=frame, split='train', compiled={'sha256': sha256(path)}))
+    manifest = source / 'observations.json'
+    manifest.write_text(json.dumps(dict(frames=records, world_units_per_metre=1., raster_hw=[9, 12],
+        splits=dict(train_frames=[1, 2], development_frames=[3]))))
+    geometry = dict(xyz=torch.randn(count, 3), normals=torch.zeros(count, 3), quaternions=torch.zeros(count, 4),
+        scales=torch.ones(count, 3), opacities=torch.full((count, 1), .8))
+    field = CapabilityField(geometry, torch.randn(count, 9), torch.randn(count, 6), torch.randn(count, 4),
+        torch.ones(count, dtype=torch.bool), world_units_per_metre=1.)
+    save_field(field, tmp_path / 'parent', dict(observations_sha256=sha256(manifest)))
+    hard_compile(tmp_path / 'parent', source, tmp_path / 'hard')
+    report = soft_compile(tmp_path / 'parent', source, tmp_path / 'soft', tmp_path / 'hard/field')
+    coverage = report['relation_availability']
+    assert report['exact_hard_association_coordinates'] and report['protected_state_unchanged']
+    assert coverage['available_rows'] == 2 * coverage['hard_available_rows'] > 0
+    assert report['source_frames'] == [1, 2] and len(report['replay']) == 4
