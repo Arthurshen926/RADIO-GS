@@ -9,6 +9,9 @@ and audits both source objectives.12 focused tests pass, including real CUDA
 rendered gradients outside the sampled element rows. Complete all-five scoring,
 known-support diagnosis and copied-export checks before claims; no joint results
 or promotion yet. The completed failure study below remains immutable atf364d25.
+The new member core reads native descriptors even for registered points. Earlier
+native-update/point-output invariance only applied to the legacy member core;
+future native refinement must revalidate point/signed queries and all five tasks.
 
 Latest completed study: `docs/experiments/2026-10-08-element-relation-results.md`
 and JSON. Both new arms have all60 exports, five-family scores,268 UQIS inputs
