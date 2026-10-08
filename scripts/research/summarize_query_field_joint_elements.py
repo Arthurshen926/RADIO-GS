@@ -45,6 +45,11 @@ def main():
             raise ValueError('unexpected scene payload beyond the declared residual/confidence')
         if report['rendered_logit_gradient']['absolute_gradient_total'] <= 0:
             raise ValueError('rendered branch did not supervise members')
+        if not all(np.isfinite(v) for v in report['source_development']['metrics'].values()):
+            raise ValueError('nonfinite source-development result')
+        gradient_coverage = report['rendered_logit_gradient']['nonzero_observed_fraction']
+        if not 0 < gradient_coverage <= 1:
+            raise ValueError('invalid actual rendered-logit gradient coverage')
         total_bytes += manifest['tensor_bytes']
         training.append(dict(key=job['key'], family=job['family'], **{k: v for k, v in report.items() if k not in {'history', 'trace'}}))
         evidence.extend([out / 'training.json', out / 'field/manifest.json'])
@@ -62,7 +67,9 @@ def main():
         sampled_observed_fraction=float(np.mean([r['row_exposure']['sampled_rows']/r['row_exposure']['observed_rows'] for r in training])),
         rendered_nonzero_logit_gradient_observed_fraction=float(np.mean([r['rendered_logit_gradient']['nonzero_observed_fraction'] for r in training])))
     runtime_path = ROOT / 'validation/runtime/report.json'; runtime = read(runtime_path)
-    if len(runtime['records']) != 1 or any(not all(r['exact_replay'].values()) or r['forbidden_open_attempts'] for r in runtime['records']):
+    cases = {'text', 'image', 'point_2d', 'point_3d', 'category'}
+    if len(runtime['records']) != 1 or any(set(r['exact_replay']) != cases or
+            not all(r['exact_replay'].values()) or r['forbidden_open_attempts'] for r in runtime['records']):
         raise ValueError('joint standalone cold replay failed')
     protected.ARMS = ARMS; native = protected.native_invariance({arm: cohort})
     point_path = ROOT / 'diagnostics/point_observation_mass/within_query_comparison.json'; point = read(point_path)
