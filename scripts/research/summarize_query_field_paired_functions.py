@@ -31,6 +31,8 @@ def main():
     differences = {a + '__to__' + arm: {k: paired(data[a][k], data[arm][k], k) for k in data[arm]}
                    for a in data if a != arm}
     evidence = paths + [ROOT / p for p in ['design.json', 'construction_complete.json', 'predictions_complete.json', 'scoring_complete.json']]
+    execution = [read(p) for p in sorted((ROOT / 'execution').glob('*.json'))]
+    evidence.extend(sorted((ROOT / 'execution').glob('*.json')))
     construction = []
     for job in design['fields']:
         path = ROOT / 'fits' / arm / job['key']; report = read(path / 'construction.json')
@@ -83,6 +85,7 @@ def main():
         source_access_at_query=False, model_promotion=False, independent_final_test=False,
         per_task_model_selection=False, uncompressed_functional_reference=True,
         full_v10_function_preservation=False, implementation_commit='2b67bed',
+        execution_adjustments=execution,
         evidence=[receipt(p) for p in sorted(set(evidence), key=str)])
     write(ROOT / 'summary.json', result); write('docs/experiments/2026-10-09-paired-function-results.json', result)
     for metric in result['v10_targets']:
