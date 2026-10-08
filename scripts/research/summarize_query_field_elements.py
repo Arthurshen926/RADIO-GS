@@ -44,6 +44,9 @@ def main():
                         'semantic_code_dim', 'local_code_dim', 'group_dim', 'external_scene_dependencies']:
                 if manifest[key] != parent_manifest[key]:
                     raise ValueError('parent carrier/native contract changed: ' + key)
+            expected_extra = 0 if arm == 'element_relation' else 4 * (manifest['elements'] + 1441)
+            if manifest['tensor_bytes'] - parent_manifest['tensor_bytes'] != expected_extra:
+                raise ValueError('unexpected scene payload beyond decoder and scalar confidence')
             samples.append(report['sample_trace_sha256'])
             evidence.extend([out / 'training.json', out / 'field/manifest.json'])
             training.append(dict(arm=arm, key=job['key'], family=job['family'],
@@ -71,13 +74,28 @@ def main():
         raise ValueError('standalone copied-export replay failed')
     protected.ARMS = ARMS
     native = protected.native_invariance(cohorts)
+    conditioning_path = ROOT / 'diagnostics/conditioning/report.json'
+    point_path = ROOT / 'diagnostics/point_observation_mass/within_query_comparison.json'
+    conditioning = read(conditioning_path); point = read(point_path)
+    if conditioning['fields'] != 30 or len(conditioning['scenes']) != 30:
+        raise ValueError('conditioning diagnostic cohort incomplete')
+    fitted = {r['key']: r for r in training if r['arm'] == 'conditional_relation'}
+    for scene in conditioning['scenes']:
+        if not np.isclose(scene['metrics']['original'],
+                          fitted[scene['key']]['source_development']['metrics']['refined_bce'], atol=1e-5, rtol=1e-5):
+            raise ValueError('copied source audit does not replay the fitted source result')
+    for arm in ARMS:
+        if point['known_support'][arm]['queries'] != 59:
+            raise ValueError('known-correct point diagnostic denominator changed')
     evidence.extend([runtime_path, Path(__file__), Path(protected.__file__), CONTROL / 'summary.json',
-                     Path('scripts/research/summarize_query_field_relations.py')])
+                     Path('scripts/research/summarize_query_field_relations.py'), conditioning_path, point_path,
+                     ROOT / 'diagnostics/point_observation_mass/report.json'])
     result = dict(complete=True, fields=30, exports=60, primary_arm='conditional_relation',
         implementation_commit='4bdf77a', macro=macro, per_scene=data, differences=differences,
         training=training, source_development=source, export_tensor_bytes=total_bytes, added_tensor_bytes=extra_bytes,
         exact_control_source_traces=True, exact_element_samples=True, protected_native_invariance=native,
         runtime=runtime, uqis_diagnostics=diagnostics, v10_targets=previous['v10_targets'],
+        source_conditioning_diagnostics=conditioning, known_support_diagnostics=point,
         source_only=True, source_access_at_query=False, model_promotion=False, independent_final_test=False,
         per_task_model_selection=False, evidence=[receipt(p) for p in sorted(set(evidence), key=str)])
     write(ROOT / 'summary.json', result)
