@@ -10,6 +10,7 @@ from radio_gs.query_field.geometry import projection
 from radio_gs.query_field.public_nvos import load_strokes
 from radio_gs.query_field.storage import load_field
 from scripts.research.run_query_field_soft_functions import ROOT, ARMS, read, write, receipt, check
+from scripts.research.run_query_field_protected import ROOT as PROTECTED
 
 
 @torch.no_grad()
@@ -39,6 +40,11 @@ def main():
         error = float((actual.membership_scores.cpu() - saved['membership']).abs().max())
         if error > 1e-6 or not torch.equal(actual.selected.cpu(), saved['selected']):
             raise ValueError('authorized prompt replay changed prediction')
+        prior_path = PROTECTED / 'protected_training/predictions/nvos' / name / name
+        prior_receipt = read(prior_path / 'prediction.json')
+        check(dict(path=str(prior_path / 'predictions.pt'), sha256=prior_receipt['predictions_sha256']))
+        prior = torch.load(prior_path / 'predictions.pt', map_location='cpu', weights_only=True)
+        unchanged = {key: torch.equal(saved[key], prior[key]) for key in saved}
         supports = {}
         for sign in ['positive', 'negative']:
             support = getattr(packet, sign)
@@ -59,6 +65,7 @@ def main():
                 admitted_views=int(torch.unique(relation.views[coefficient > 0]).numel()),
                 activated_observed_rows=int((((pos + neg) > 0) & field.observed).sum()))
         records.append(dict(query=name, supports=supports, scale=actual.scale, prediction_replay_max_error=error,
+            exact_parent_outputs=unchanged, parent_prediction=receipt(prior_path / 'prediction.json'),
             prediction=receipt(path / 'prediction.json'), fixture=receipt(job['camera_fixture']),
             positive=receipt(job['positive']), negative=receipt(job['negative'])))
         print('signed admission audit', name, supports, flush=True)

@@ -1,18 +1,37 @@
 # RADIO-GS — active system context
 
-Active2026-10-09: the user explicitly rejects substituting feature retention or
-training convergence for capability transfer. ADR0015 and
-`docs/experiments/2026-10-09-paired-function-protocol.md` define an uncompressed
-partial-relation functional reference on the same Gaussian rows. Source-indexed
-positive/exclusion coordinates and view groups preserve a specified weighted
-support-to-element function; independent replay goes through source raster
-masks before projection. Runtime reads no source assets. This is increased
-capacity, not compression, full v10 parity or a final novel representation.
-All30 protected rendered fields are fixed priors; one common finite-evidence
-update, no training/extra labels/teachers/views or per-task choice. Complete all
-five tasks and runtime checks before claims.33 related tests pass. Runner:
-`scripts/research/run_query_field_paired_functions.py`, root
-`output/query_field_20261009/paired_functions_v1`. No new benchmark results yet.
+Active2026-10-09: user rejects replacing verifiable capability transfer with
+feature retention or source loss convergence. ADR0015 permits an uncompressed
+partial-relation functional reference on the same Gaussian field. The first
+reference is COMPLETE at snapshot f13f0ec; results in
+`docs/experiments/2026-10-09-paired-function-results.json`, root
+`output/query_field_20261009/paired_functions_v1`. All30 fields, five tasks,
+268 UQIS inputs,67-point diagnosis, native invariance and five copied-export
+replays passed.1,068 source functional replays across534 views/25,451 regions,
+981 nonempty, maximum error8.5831e-6. Added1,449,575,452 tensor bytes; no training.
+Native invariance includes None for point inputs. This retains declared partial
+functions, not complete v10 features or whole-instance correctness.
+
+Hard reference vs protected rendered prior: LERF2D52.2864→51.4479%, actual-set
+projection32.8763→30.1791 (all4 decline); NVOS response/actual set unchanged at
+57.9518/69.9469. ScanNet19=37.8253; UQIS text/image/2D/3D=
+12.7007/20.5680/29.2926/28.4821. Known-correct59-point IoU32.5077→33.0251,
+observed recall54.8275→55.5767, precision58.3788→58.4118 (query means).
+No model promotion, task winner bundle or v10 recovery claim. Shared GPU4 OOM
+at load was retried unchanged on0/2/3; failed empty output and log retained.
+
+The second full control, `soft_paired_functions_v1`, is now building at9a0c824.
+Its method was fixed from source-only coverage BEFORE any first-arm prediction
+(decision receipt retained). Hard evidence reaches only10.09/8.88/7.11% of
+observed rows in figurines/ramen/fern. Keep support association EXACTLY fixed;
+add weak target evidence with min(1,peak/.1). No extra views, labels, training,
+threshold changes or different prior. Larger sparse payload is disclosed.
+38 focused tests pass, including full synthetic compiler and export replay.
+Finish all30 fields/five tasks plus actual-query admission/transition diagnoses,
+including all67 UQIS points and all8 NVOS prompts. Do not equate whole-field
+availability with query activation or correct coverage. Runtime still reads
+only the field/current input/shared encoder. No pending change may silently
+alter frozen source receipts; use f13f0ec to verify the completed first study.
 
 Latest completed study: `docs/experiments/2026-10-08-joint-relation-results.md`
 and JSON; runner `scripts/research/run_query_field_joint_elements.py`, root
