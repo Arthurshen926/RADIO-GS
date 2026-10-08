@@ -43,7 +43,7 @@ def prepare():
         configs=[receipt(p) for p in ROOT.glob('*/configs/*.json')], query_program=PROGRAM,
         source_only=True, primary_arm=ARMS[0], model_promotion=False, independent_final_test=False,
         per_task_model_selection=False, training_steps=0, prior_evidence_mass=1., uncompressed_reference=True,
-        hard_reference_root=str(HARD), implementation_commit='recorded by frozen code receipts')))
+        hard_reference_root=str(HARD), implementation_commit='recorded by frozen code receipts'))
 
 
 def frozen_design():
