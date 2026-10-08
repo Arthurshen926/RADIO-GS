@@ -14,18 +14,20 @@ from radio_gs.query_field.storage import load_field, sha256
 from scripts.research.run_query_field_protected import ROOT, PREVIOUS, read, write, receipt, check
 
 
-def main():
-    read(ROOT / 'scoring_complete.json')
-    out = ROOT / 'diagnostics/point_observation_mass'
+def main(root=ROOT, cohort_arm='protected_training', extra_roots=None):
+    read(root / 'scoring_complete.json')
+    out = root / 'diagnostics/point_observation_mass'
     out.mkdir(parents=True, exist_ok=False)
-    cohort = read(ROOT / 'protected_training/cohort.json')
+    cohort_path = root / cohort_arm / 'cohort.json'
+    cohort = read(cohort_path)
     old = read('configs/query_field/five_benchmark_v1/cohort.json')
     roots = dict(parent=Path(old['root']) / 'predictions/uqis',
                  previous_common=PREVIOUS / 'common_program/uqis',
-                 protected_training=Path(cohort['root']) / 'predictions/uqis')
-    design = read(ROOT / 'design.json')
-    write(out / 'design.json', dict(code=receipt(Path(__file__)), inputs=receipt(ROOT / 'predictions_complete.json'),
-        cohort=receipt(ROOT / 'protected_training/cohort.json'), scenes=[j['name'] for j in cohort['uqis']],
+                 **{cohort_arm: Path(cohort['root']) / 'predictions/uqis'})
+    roots.update(extra_roots or {})
+    design = read(root / 'design.json')
+    write(out / 'design.json', dict(code=receipt(Path(__file__)), inputs=receipt(root / 'predictions_complete.json'),
+        cohort=receipt(cohort_path), prediction_roots={k: str(v) for k, v in roots.items()}, scenes=[j['name'] for j in cohort['uqis']],
         modality='point_3d', bins='five equal-frequency bins over observed Gaussian source contribution',
         contribution='sum of raw full-scene Gaussian projection contributions over legal training frames',
         no_fitting=True, no_model_selection=True, causal_claim=False))
@@ -84,6 +86,8 @@ def main():
                 seen = truth & observed_mesh
                 values[arm] = dict(status=receipts[arm][qid]['status'], correct_registered_support=correct,
                     observed_target_recall=int((seen & selected).sum()) / max(int(seen.sum()), 1),
+                    actual_iou=int((truth & selected).sum()) / max(int((truth | selected).sum()), 1),
+                    actual_precision=int((truth & selected).sum()) / max(int(selected.sum()), 1),
                     all_target_recall=int((truth & selected).sum()) / max(int(truth.sum()), 1), strata=strata)
             cases.append(dict(query_id=qid, target_vertices=int(truth.sum()),
                               observed_target_vertices=int((truth & observed_mesh).sum()), arms=values))
