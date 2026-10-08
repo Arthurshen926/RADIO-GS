@@ -66,3 +66,13 @@ local patch distributions, and complete-instance supervision remain outstanding
 capabilities. The reference is allowed to expose those omissions; passing a
 partial replay does not discharge them. No model promotion follows solely from
 more available rows, more export bytes, or any source numerical check.
+
+Both studies are now complete; see the [full results and attribution](../experiments/2026-10-09-paired-function-results.md).
+All eight NVOS signed inputs have zero admitted relation coordinates before
+scale gating and exactly unchanged parent outputs. Nineteen of59 correct UQIS
+point supports admit no view. Soft target availability rises substantially but
+does not repair support admission; extra evidence also increases false selected
+vertices. The next support-function design must distinguish unavailable evidence
+from reliable opposition and validate the actual uncertain/signed inputs. Do not
+interpret the completed source pseudoquery replay as that missing capability,
+or silently claim this partial reference has completed the full-capacity B baseline.

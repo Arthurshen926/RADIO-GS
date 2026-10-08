@@ -1,37 +1,70 @@
 # RADIO-GS — active system context
 
-Active2026-10-09: user rejects replacing verifiable capability transfer with
-feature retention or source loss convergence. ADR0015 permits an uncompressed
-partial-relation functional reference on the same Gaussian field. The first
-reference is COMPLETE at snapshot f13f0ec; results in
-`docs/experiments/2026-10-09-paired-function-results.json`, root
-`output/query_field_20261009/paired_functions_v1`. All30 fields, five tasks,
-268 UQIS inputs,67-point diagnosis, native invariance and five copied-export
-replays passed.1,068 source functional replays across534 views/25,451 regions,
-981 nonempty, maximum error8.5831e-6. Added1,449,575,452 tensor bytes; no training.
-Native invariance includes None for point inputs. This retains declared partial
-functions, not complete v10 features or whole-instance correctness.
+Active2026-10-09: TWO full functional-reference studies are COMPLETE. The user
+rejects substituting feature retention or source convergence for real capability
+transfer. Full report: `docs/experiments/2026-10-09-paired-function-results.md`,
+with separate hard/soft JSON evidence. Roots under `output/query_field_20261009/`:
+`paired_functions_v1` and `soft_paired_functions_v1`. No pending jobs or default
+promotion. Hard full snapshot f13f0ec; soft frozen construction9a0c824, diagnostic
+update8515b17. Use the matching snapshot for old code-receipt verification.
 
-Hard reference vs protected rendered prior: LERF2D52.2864→51.4479%, actual-set
-projection32.8763→30.1791 (all4 decline); NVOS response/actual set unchanged at
-57.9518/69.9469. ScanNet19=37.8253; UQIS text/image/2D/3D=
-12.7007/20.5680/29.2926/28.4821. Known-correct59-point IoU32.5077→33.0251,
-observed recall54.8275→55.5767, precision58.3788→58.4118 (query means).
-No model promotion, task winner bundle or v10 recovery claim. Shared GPU4 OOM
-at load was retried unchanged on0/2/3; failed empty output and log retained.
+Both keep all30 protected rendered fields as exact priors,534 valid source views,
+25,451 partial regions, native/geometry/group/shared parameters and v2 query
+program. Sparse Gaussian positive/exclusion coordinates and view groups preserve
+a specified partial relation function. Runtime uses no source assets. Each arm
+passes1,068 independent source/raster vs field replays (981 nonempty), max errors
+8.5831e-6/9.5367e-6; zero optimization. This is an uncompressed partial-function
+reference, not full v10 equivalence or proven novelty.38 focused tests pass.
+Both complete all five tasks/268 UQIS inputs/67-point diagnosis, exact268 native
+outputs (including None point inputs) and five copied-export cold replay cases
+on one physical scene each. Audit enforcement is Python file-open, not OS-level.
 
-The second full control, `soft_paired_functions_v1`, is now building at9a0c824.
-Its method was fixed from source-only coverage BEFORE any first-arm prediction
-(decision receipt retained). Hard evidence reaches only10.09/8.88/7.11% of
-observed rows in figurines/ramen/fern. Keep support association EXACTLY fixed;
-add weak target evidence with min(1,peak/.1). No extra views, labels, training,
-threshold changes or different prior. Larger sparse payload is disclosed.
-38 focused tests pass, including full synthetic compiler and export replay.
-Finish all30 fields/five tasks plus actual-query admission/transition diagnoses,
-including all67 UQIS points and all8 NVOS prompts. Do not equate whole-field
-availability with query activation or correct coverage. Runtime still reads
-only the field/current input/shared encoder. No pending change may silently
-alter frozen source receipts; use f13f0ec to verify the completed first study.
+Soft was fixed from source-only diagnostics BEFORE any hard-arm prediction. It
+keeps the hard support association matrix bit-exact and adds target evidence
+with min(1,peak/.1). Available coordinates cover23.6653→85.4164% of pooled observed
+Gaussian rows. Added tensor bytes hard1,449,575,452, soft7,808,142,516; total
+51,954,091,480/58,312,658,544. Six fern frames without valid episodes remain
+excluded; this is not all raw SAM evidence or a whole-instance upper bound.
+
+Performance vs protected Render: LERF2D52.2864→51.4479/50.8613%; actual-set
+projection32.8763→30.1791/30.1171, all4 scenes regress. NVOS response/actual-set
+unchanged57.9518/69.9469. Soft ScanNet19/15/10=37.8256/38.6413/45.4912;
+UQIS text/image/2D/3D=12.6971/20.4545/29.3328/28.5241. Soft-minus-hard UQIS3D
++.0420pp has paired interval[-.0735,.1659]; no meaningful coverage-only recovery.
+LERF selected-set metric is a 2D projection, not independent3D ground truth.
+Repeated development cohort and v10's different resources remain explicit.
+
+ACTUAL FUNCTIONAL GAP: all8 NVOS positive AND negative supports fail majority
+association BEFORE scale gating. Maximum positives .1187–.4422, negatives
+.0257–.4100, below .5. Relation masses are zero; soft outputs for membership,
+selected set and both responses are BIT-EXACT with the parent. Authorized prompt
+replay error0. This validates inactive relation functionality, not successful
+transfer with weak training. Unknown dilution, hard support coverage and global
+weighted averaging are not yet individually separated; do not blindly lower
+thresholds to force nonempty outputs.
+
+All67 UQIS3D queries replay within1e-6. Among fixed59 correct supports,19 have
+no admitted view in BOTH arms; average admitted views1.339. Target potential
+coverage52.0885→94.9755%, actual activation32.7492→55.5853% (query means).
+Soft observed target missed+unknown29.5338%, missed+positive-dominant5.2008%,
+missed+known-nonpositive9.5115%; these partitions explain the observed failures,
+not the guaranteed effect of a fix. Hard→soft pooled changes: gained405/lost72
+target vertices, gained931/removed61 non-target vertices (per-query counts).
+Known-support soft precision58.2474, observed recall55.7539, IoU33.0780%.
+New evidence is neither uniformly helpful nor complete-instance supervision.
+
+Next METHOD priority: preserve positive/exclusion/UNKNOWN support evidence and
+multi-ray uncertainty through association; compare real signed and inferred
+query functions, not only source point pseudoqueries. Retain jointly visible,
+any/all-mask and granularity-disagreement functions before member decisions.
+Native text/patch functional retention and complete-instance supervision/source
+budget differences remain separate unfinished capabilities. Do not substitute
+another lower BCE, larger target coverage, per-task winner bundle, source-bank
+runtime solver or labelled v10 head. One Gaussian field/common member/typed
+readout and the three teacher roles remain the core. Standard/source-assisted
+NVOS and supervision conditions must be reported separately if later extended.
+Hard GPU4 shared-memory OOM was recovered with unchanged recipe on0/2/3;
+failed log/empty directory retained. Soft has no failed experiment to resume.
 
 Latest completed study: `docs/experiments/2026-10-08-joint-relation-results.md`
 and JSON; runner `scripts/research/run_query_field_joint_elements.py`, root
