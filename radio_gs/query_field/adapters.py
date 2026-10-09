@@ -173,7 +173,7 @@ class NativeQueryEncoder:
             semantic = model(**values).pooler_output[0]
         return QueryPacket("text", task=task, semantic=semantic, scale=scale)
 
-    def image(self, image, *, scale=None):
+    def image(self, image, *, scale=None, native_resolution=False):
         import numpy as np
         from pathlib import Path
         from PIL import Image
@@ -185,6 +185,7 @@ class NativeQueryEncoder:
             self._dino = NativeRegionAppearance(device=self.device)
         pixels = torch.from_numpy(np.array(image.convert("RGB").resize((384,384),Image.Resampling.BICUBIC),copy=True))
         semantic = self._vision.encode(pixels.permute(2,0,1).float()[None]/255)[0]
-        resized = image.resize((448,round(image.height*448/image.width)),Image.Resampling.LANCZOS)
-        local,_ = self._dino.patches(resized)
-        return QueryPacket("image", semantic=semantic, local=local, scale=scale)
+        resized = image if native_resolution else image.resize((448,round(image.height*448/image.width)),Image.Resampling.LANCZOS)
+        local,valid = self._dino.patches(resized)
+        return QueryPacket("image", semantic=semantic, local=local, scale=scale,
+                           local_weights=valid if native_resolution else None)

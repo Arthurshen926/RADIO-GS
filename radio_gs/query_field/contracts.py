@@ -44,6 +44,7 @@ class QueryPacket:
     # Only a supplied positive 3D element can be an exact membership constraint.
     # A camera ray and an estimated text/image anchor are uncertain associations.
     exact_positive: bool = False
+    local_weights: torch.Tensor | None = None
 
     def validate(self, count: int, semantic_dim: int, local_dim: int) -> None:
         if self.modality not in {"text", "image", "point_2d", "point_3d"}:
@@ -64,6 +65,11 @@ class QueryPacket:
                     raise ValueError("query features must be finite and nonzero")
         if self.semantic is not None and self.semantic.numel() != semantic_dim:
             raise ValueError("one query packet contains one semantic query")
+        if self.local_weights is not None:
+            if self.local is None or self.local_weights.shape!=(self.local.reshape(-1,local_dim).shape[0],):
+                raise ValueError('local patch weights must align with local input')
+            if not torch.isfinite(self.local_weights).all() or bool((self.local_weights<0).any()) or not bool(self.local_weights.sum()>0):
+                raise ValueError('invalid local patch weights')
         for support in [self.positive, self.negative]:
             if support is not None:
                 support.validate(count)

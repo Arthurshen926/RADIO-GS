@@ -60,6 +60,8 @@ def load_field(directory, device="cpu"):
                             state["observed"], semantic_codec=codecs["semantic"],
                             local_codec=codecs["local"], anchor_eligible=state.get("anchor_eligible"),
                             relation_confidence=state.get("relation_confidence"),
+                            native_mode_state={k.removeprefix('native_modes.'):v for k,v in state.items()
+                                               if k.startswith('native_modes.')} or None,
                             evidence_state={k.removeprefix('evidence.'): v for k, v in state.items()
                                             if k.startswith('evidence.')} or None, **manifest["spec"])
     field.load_state_dict(state, strict=True)

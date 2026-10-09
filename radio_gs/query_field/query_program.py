@@ -18,6 +18,9 @@ def query(field, packet):
     old solver, source observation bank or benchmark-selected winner exists.
     """
     packet.validate(len(field.xyz), field.semantic.native_dim, field.local.native_dim)
+    if field.native_modes is not None and packet.modality in {'text','image'} and packet.positive is None:
+        from .native_modes import query_modes
+        return query_modes(field,packet)
     if (packet.modality != 'image' or packet.local is None or packet.positive is not None
             or packet.task != 'instance'):
         return field.query(packet)

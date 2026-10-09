@@ -58,7 +58,8 @@ class CapabilityField(nn.Module):
                  anchor_eligible=None, spatial_metric="none", world_units_per_metre=None,
                  local_metric="none", support_aggregation="normalized_prototype", negative_rule="product",
                  relation_decoder="none", relation_confidence=None,
-                 evidence_kind="none", evidence_state=None):
+                 evidence_kind="none", evidence_state=None, native_mode_state=None,
+                 native_mode_rule="none"):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -99,6 +100,12 @@ class CapabilityField(nn.Module):
         self.register_buffer("anchor_eligible", anchor_eligible)
         self.semantic = NativeCoordinates(semantic, **(semantic_codec or {}))
         self.local = NativeCoordinates(local, **(local_codec or {}))
+        if native_mode_rule not in {'none','mean','measure'}:raise ValueError('unknown native mode rule')
+        if (native_mode_rule=='none') != (native_mode_state is None):raise ValueError('incomplete native modes')
+        self.native_mode_rule=native_mode_rule;self.native_modes=None
+        if native_mode_state is not None:
+            from .native_modes import NativeModes
+            self.native_modes=NativeModes(native_mode_state,count)
         self.group = nn.Parameter(group.detach().float())
         self.scale_cutoffs = nn.Parameter(torch.linspace(math.log(default_scale)-2,
                                                         math.log(default_scale)+2, group.shape[1]))
@@ -333,7 +340,7 @@ class CapabilityField(nn.Module):
         return scores, labels
 
     def export_spec(self):
-        spec = dict(default_scale=self.default_scale, threshold=self.threshold,
+        spec = dict(native_mode_rule=self.native_mode_rule, default_scale=self.default_scale, threshold=self.threshold,
                     candidate_count=self.candidate_count, candidate_radius=self.candidate_radius,
                     spatial_metric=self.spatial_metric, world_units_per_metre=self.world_units_per_metre,
                     local_metric=self.local_metric, support_aggregation=self.support_aggregation,
