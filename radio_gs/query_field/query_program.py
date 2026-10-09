@@ -83,3 +83,30 @@ def category_partition(field, native_queries):
         available=field.observed | field.semantic_measure.supported
     labels = evidence.argmax(1).masked_fill(~available, -1)
     return evidence, labels
+
+
+@torch.no_grad()
+def text_union(field, native_query, generic_negatives, *, rule='measure', temperature=10., corroborate=True):
+    """Absolute native union on every supported mode, with common member support.
+
+    This is an explicit opt-in typed interface. The generic negatives and
+    temperature are query-program inputs, not stored historical class answers.
+    """
+    if field.semantic_measure is None:raise ValueError('text union requires a semantic measure field')
+    packet=QueryPacket('text',task='union',semantic=native_query)
+    member=query(field,packet)
+    background=field.semantic.score(generic_negatives).max(1).values
+    fallback=(temperature*(member.semantic_scores-background)).sigmoid()
+    prior=field.semantic_measure.union_probabilities(native_query,generic_negatives,fallback,rule,temperature)
+    if corroborate:
+        from radio_gs.querying.observation_readout import positive_support_rank
+        probability=positive_support_rank(prior,member.membership_scores)
+    else:probability=prior
+    available=field.observed|field.semantic_measure.supported
+    probability=probability.masked_fill(~available,0)
+    return QueryResult(prior,probability,probability>field.threshold,member.candidate_indices,
+        member.candidate_weights,member.scale,dict(shared_member_core=True,source_access=False,
+        typed_union=True,semantic_rule=rule,semantic_modes=len(field.semantic_measure.descriptors),
+        semantic_candidate_cap=None,absolute_generic_admission=True,other_requests_compete=False,
+        member_corroboration=corroborate,member_candidate_count=len(member.candidate_indices),
+        scores_calibrated=False,source_text_detection_transferred=False))

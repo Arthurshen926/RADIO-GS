@@ -29,3 +29,7 @@ class QueryFieldRuntime:
 
     def category_partition(self, native_queries):
         return category_partition(self.field, native_queries)
+
+    def text_union(self, native_query, generic_negatives, **options):
+        from .query_program import text_union
+        return text_union(self.field, native_query, generic_negatives, **options)

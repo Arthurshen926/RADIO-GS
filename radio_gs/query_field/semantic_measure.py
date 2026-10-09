@@ -58,3 +58,27 @@ class SemanticMeasure(nn.Module):
                 numerator=transfer@(reliability[:,None]*response)
                 result=torch.where(mass>0,numerator/mass.clamp_min(torch.finfo(mass.dtype).tiny),result)
         return torch.where(self.supported[:,None],result,fallback.to(result))
+
+    @torch.no_grad()
+    def union_probabilities(self, query, negatives, fallback, rule='measure', temperature=10.):
+        """Independent foreground union, not competition against other requests.
+
+        Generic background directions define absolute admission before spatial
+        integration. No best-mode-relative gate or candidate-count truncation.
+        The mean control collapses both foreground and background logits first.
+        """
+        if rule not in {'mean','measure'}:raise ValueError('unknown semantic union rule')
+        if query.numel()!=self.descriptors.shape[1] or negatives.ndim!=2 or not len(negatives) or negatives.shape[1]!=query.numel():
+            raise ValueError('union requires aligned foreground and background directions')
+        if not torch.isfinite(query).all() or not torch.isfinite(negatives).all():raise ValueError('nonfinite union inputs')
+        if fallback.shape!=(len(self.supported),) or not torch.isfinite(fallback).all():raise ValueError('invalid union fallback')
+        if not math.isfinite(temperature) or temperature<=0:raise ValueError('invalid union temperature')
+        q=F.normalize(query.to(self.mass).flatten(),dim=0)
+        neg=F.normalize(negatives.to(self.mass),dim=1)
+        directions=F.normalize(self.descriptors.to(self.mass),dim=1)
+        positive=directions@q;negative=directions@neg.T;operator=self.operator()
+        if rule=='mean':
+            response=(temperature*((operator@positive[:,None]).flatten()-(operator@negative).max(1).values)).sigmoid()
+        else:
+            response=(operator@(temperature*(positive-negative.max(1).values)).sigmoid()[:,None]).flatten()
+        return torch.where(self.supported,response,fallback.to(response))
