@@ -1,5 +1,38 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: text_union_functions_v1 IN PROGRESS. Frozen
+implementation recorded in design.json (7ca6d25/06abfd6;read actual receipt).
+All4 LERF scenes,756 legal source views,old development exclusions; no training,
+new labels,old source-query calibration or runtime text detector. Generic scene
+SemanticMeasure now exposes independent text union and QueryFieldRuntime.text_union.
+Controls mean/measure × prior/common-member corroboration;primary measure_typed.
+Every control has its own actual selected set. Fresh parent baseline retains old
+observed support;new controls share expanded support. Response and real selection
+must both be scored with unchanged retained LERF scorer;projection is not3DGT.
+
+Source compiler verifies RGB/mask/native bindings and frozen physical geometry,
+projects query-free region functions onto Gaussian rows,retains no source raster
+at runtime. Source3foreground/4background pseudo-directions compare pixel-side
+response before projection with field-side contraction,tolerance2e-5;record actual
+selection differences. Native union removes semantic top8/relative-best admission;
+common-member corroboration still uses old capped union and is only a hypothesis.
+18 related tests passed,including >8 separated positives,absent-query abstention,
+query independence,export and native/category regressions.
+
+Primary PID2087372,exec59039,log /tmp/radio_gs_text_union_run.log. Supervisor
+/tmp/radio_gs_text_union_finish.py exec97909 waits for primary completion then
+summarize_query_field_text_union and validate_query_field_text_union (GPU1).
+Log /tmp/radio_gs_text_union_finish.log. All builds before predictions,all8 grouped
+prediction jobs before scoring. Do not modify frozen code midrun,overwrite evidence
+or read partial metrics. Next finish real scores/selection attribution,copied-field
+runtime replay,report/ledger/context and commit. No default/full-five promotion.
+
+Independent NVOS preparation: nvos_missing_sources_v1 has all123 missing legal
+RGBs staged and hashed across7 fields,existing dev exclusions kept;job.json records
+SAM generation commands. NO SAM/native caches generated yet and no queries,tracks
+or targets read. Report docs/experiments/2026-10-09-nvos-missing-source-preparation.json.
+This is construction preparation,not completed NVOS function or benchmark progress.
+
 Active continuation2026-10-09: semantic_measure_functions_v2 COMPLETE,
 frozen f3c34dd.10 exports,190 class expressions/full menus,all predictions before
 all scoring,summary and cold replay complete. No active jobs;do not restart or
