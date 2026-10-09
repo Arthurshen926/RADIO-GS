@@ -1,37 +1,43 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-09: text_union_functions_v1 IN PROGRESS. Frozen
-implementation recorded in design.json (7ca6d25/06abfd6;read actual receipt).
-All4 LERF scenes,756 legal source views,old development exclusions; no training,
-new labels,old source-query calibration or runtime text detector. Generic scene
-SemanticMeasure now exposes independent text union and QueryFieldRuntime.text_union.
-Controls mean/measure × prior/common-member corroboration;primary measure_typed.
-Every control has its own actual selected set. Fresh parent baseline retains old
-observed support;new controls share expanded support. Response and real selection
-must both be scored with unchanged retained LERF scorer;projection is not3DGT.
+Active continuation2026-10-09: text_union_functions_v1 COMPLETE, frozen06abfd6.
+All4 LERF scenes,756 legal views,64,431 semantic atoms.18 tests passed;8 grouped
+predictions before scoring. No source runtime,training,new labels or old query
+calibration. Response IoU parent49.6752 -> primary measure_typed56.0037%, but
+actual subset projection30.0056 ->29.9632%; primary fails actual scope improvement.
+Mean prior/typed actual42.2767/28.2402;measure prior/typed42.9498/29.9632.
+Adding positive_support_rank hurts actual selection in all4 scenes: measure
+precision46.2069 ->30.3358%,recall84.1598 ->94.8561%. Ranking is not probability;
+this bounded positive bonus crosses semantic rejection threshold. Source nonlinear
+order alone has mixed outcome: prior response -1.1307pp,actual +0.6732pp.
+See docs/experiments/2026-10-09-text-union-functions-results.md/json/runtime.json.
+4 exports30.575GB,extra6.332GB uncompressed. Source12 replay max4.59e-6,
+5 threshold flips (2figurines/3waldo). Cold copied-field all21figurines texts:
+exact selections,maxscore1.19e-7,strict scoresFAIL,numericPASS,source probePASS.
+One scene preencoded Python-open guard only;not all-scene/raw-encoder/OS proof.
+No default/full-five promotion;old candidate cap remains in common member.
 
-Source compiler verifies RGB/mask/native bindings and frozen physical geometry,
-projects query-free region functions onto Gaussian rows,retains no source raster
-at runtime. Source3foreground/4background pseudo-directions compare pixel-side
-response before projection with field-side contraction,tolerance2e-5;record actual
-selection differences. Native union removes semantic top8/relative-best admission;
-common-member corroboration still uses old capped union and is only a hypothesis.
-18 related tests passed,including >8 separated positives,absent-query abstention,
-query independence,export and native/category regressions.
+Exploratory follow-up union_admission_v1 COMPLETE, frozen12e22d9. Prior labels
+seen,explicitly disclosed. Admission-preserving support option
+p+p(1-p)m clamp((p-t)/(1-t),0,1),t=.5;no rejected evidence becomes selected by rank
+boost. Same sealed4scenes/68texts/state,no new parameters/training. All4predict
+before4score. Response55.3608%,actual42.9498%,AP82.8793%;vsparent +5.6855/+12.9442pp.
+Response3scenes up1down(teatime),actual4up. Same actual sets as measure_prior,
+rerendered IoU exact;relative to prior response +1.2719pp all4up. No learned extent
+claim/default/full-five promotion.270,902 rank-only Gaussian-query admissions
+removed across68/68requests;these are not GT-labelled FP counts.
+20 tests passed. Copied-field21figurines texts actualset exact,scoremax1.79e-7,
+strictFAIL/numericPASS/sourceguardPASS. Single-scene preencoded Python audit only.
+All runs/cold/attribution exit0;no LERF jobs active. Reports:
+docs/experiments/2026-10-09-union-admission-results.md/json/attribution.json/runtime.json.
+See scripts/research/{run,validate,analyze}_query_field_union_admission.py.
+Keep original v1 failures;reproduce old version at06abfd6,new at12e22d9.
 
-Primary PID2087372,exec59039,log /tmp/radio_gs_text_union_run.log. Supervisor
-/tmp/radio_gs_text_union_finish.py exec97909 waits for primary completion then
-summarize_query_field_text_union and validate_query_field_text_union (GPU1).
-Log /tmp/radio_gs_text_union_finish.log. All builds before predictions,all8 grouped
-prediction jobs before scoring. Do not modify frozen code midrun,overwrite evidence
-or read partial metrics. Next finish real scores/selection attribution,copied-field
-runtime replay,report/ledger/context and commit. No default/full-five promotion.
-
-Independent NVOS preparation: nvos_missing_sources_v1 has all123 missing legal
-RGBs staged and hashed across7 fields,existing dev exclusions kept;job.json records
-SAM generation commands. NO SAM/native caches generated yet and no queries,tracks
-or targets read. Report docs/experiments/2026-10-09-nvos-missing-source-preparation.json.
-This is construction preparation,not completed NVOS function or benchmark progress.
+NVOS nvos_missing_sources_v1 GENERATION IN PROGRESS;all123 missing legalRGB
+paths staged/hashed across7fields. Builder exec42644 supervises GPU2/3,log
+/tmp/radio_gs_nvos_missing_build.log;fern5 and flower13 already SAM+native complete. Wait for
+all7 cache_complete.json/globalreceipt;no targetqueries/tracks read. Still not
+field transfer or NVOS benchmark improvement;do not claim that from source cache.
 
 Active continuation2026-10-09: semantic_measure_functions_v2 COMPLETE,
 frozen f3c34dd.10 exports,190 class expressions/full menus,all predictions before
