@@ -49,6 +49,8 @@ def main():
                         precision=tp/max(tp+fp,1),recall=tp/max(tp+fn,1),iou=tp/max(tp+fp+fn,1)))
         evidence.append(receipt(package/'evaluator'/domain['mesh_instance_ids_path']))
         print('input attribution',name,flush=True)
+    known={r['query_id'] for r in read(ROOT/'diagnostics/actual_queries.json')['records'] if r['prior_known_correct']}
+    if len(known)!=59:raise ValueError('fixed prior-correct cohort differs')
     summary={}
     for arm in paths:
         summary[arm]={}
@@ -57,8 +59,10 @@ def main():
             if arm=='surface' and modality!='point_2d':continue
             if len(rows)!=67:raise ValueError('incomplete attribution cohort')
             subsets={}
-            for group,subset in [('all',rows),('dominant_correct',[r for r in rows if r['dominant_correct']]),
-                                 ('dominant_incorrect',[r for r in rows if not r['dominant_correct']])]:
+            groups=[('all',rows),('dominant_correct',[r for r in rows if r['dominant_correct']]),
+                    ('dominant_incorrect',[r for r in rows if not r['dominant_correct']])]
+            if modality=='point_3d':groups.append(('fixed_prior_correct_3d',[r for r in rows if r['query_id'] in known]))
+            for group,subset in groups:
                 subsets[group]=dict(queries=len(subset),**{k:float(np.mean([r[k] for r in subset])) if subset else None
                     for k in ['precision','recall','iou']})
             summary[arm][modality]=dict(queries=len(rows),**{k:sum(r[k] for r in rows)
