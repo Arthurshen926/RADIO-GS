@@ -97,10 +97,11 @@ def summarize():
     remaining=read(ROOT/'diagnostics/remaining_family_sources.json')
     tests=read(ROOT/'validation/focused_tests.json')
     native_transfer=read(ROOT/'diagnostics/legacy_native_transfer.json')
+    supervision_split=read(ROOT/'diagnostics/supervision_disjointness.json')
     evidence=paths+[ROOT/p for p in ['design.json','construction_complete.json','predictions_complete.json',
         'scoring_complete.json','diagnostics/actual_queries.json','validation/runtime/report.json',
         'diagnostics/remaining_family_sources.json','validation/focused_tests.json',
-        'diagnostics/legacy_native_transfer.json']]
+        'diagnostics/legacy_native_transfer.json','diagnostics/supervision_disjointness.json']]
     evidence += [ROOT/'fits'/j['scene']/'construction.json' for j in design['fields']]+[Path(__file__)]
     result=dict(complete=True,completion_scope=design['scope'],model_promotion=False,
         construction_commit=design['implementation_commit'],per_scene=data,
@@ -115,6 +116,7 @@ def summarize():
         tensor_bytes={a:sum(next(v['tensor_bytes'] for v in r['records'] if v['arm']==a) for r in construction) for a in ARMS},
         actual_queries=diagnostic,runtime=cold,construction=construction,
         focused_tests=tests,legacy_native_transfer=native_transfer,
+        supervision_disjointness=supervision_split,
         remaining_family_sources=remaining['summary'],
         remaining_source_inventory_scope=remaining['limitation'],
         strict_cold_replay_passed=cold['strict_bitwise_passed'],
