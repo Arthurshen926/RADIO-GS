@@ -14,7 +14,7 @@ from radio_gs.query_field.storage import load_field,save_field
 from radio_gs.query_field.semantic_measure import SemanticMeasure
 from scripts.research.run_query_field_relations import read,write,receipt,check,execute,lanes
 
-ROOT=Path('output/query_field_20261009/semantic_measure_functions_v1')
+ROOT=Path('output/query_field_20261009/semantic_measure_functions_v2')
 PREVIOUS=Path('output/query_field_20261009/confidence_mixture_functions_v1')
 PROTOCOL=Path('docs/experiments/2026-10-09-semantic-measure-protocol.md')
 RULES=('mean','measure','reliable')
@@ -61,8 +61,10 @@ def compile_scene(j):
     if not source.get('query_independent') or source['geometry']['sha256']!=spec['geometry']['sha256']:
         raise ValueError('compiled source contract differs')
     field,parent=load_field(j['field']);before={k:v.clone() for k,v in field.state_dict().items()}
-    geo=torch.load(spec['geometry']['path'],map_location='cpu',weights_only=True)
-    if not torch.equal(field.xyz,geo['xyz']):raise ValueError('carrier rows differ')
+    from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
+    geo=FrozenGaussianGeometry.load(spec['geometry']['path'],expected_sha256=spec['geometry']['sha256'])
+    if any(not torch.equal(getattr(field,k),getattr(geo,k)) for k in ['xyz','normals','quaternions','scales','opacities']):
+        raise ValueError('carrier geometry differs')
     offsets=[0];headers=[];keep=[]
     for frame in spec['source_frames']:
         p=next((Path(x)/f'frame_{frame:05d}.pt' for x in native['native_region_directories'] if (Path(x)/f'frame_{frame:05d}.pt').exists()),None)

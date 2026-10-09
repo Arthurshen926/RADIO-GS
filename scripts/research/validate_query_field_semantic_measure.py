@@ -20,9 +20,16 @@ def worker(field,fixture,output):
         if any(path==r or path.startswith(r+os.sep) for r in forbidden):
             attempts.append(path);raise PermissionError('source path denied '+path)
     sys.addaudithook(audit)
+    try:
+        open(Path('output')/'semantic_measure_forbidden_probe','rb')
+    except PermissionError:
+        probe_blocked=True
+    else:
+        raise RuntimeError('source guard did not reject known forbidden input')
+    attempts.clear()
     runtime=QueryFieldRuntime.load(field,'cuda');queries=torch.load(fixture,weights_only=True).cuda()
     scores,labels=runtime.category_partition(queries)
-    torch.save(dict(scores=scores.cpu(),labels=labels.cpu(),forbidden_open_attempts=attempts),output)
+    torch.save(dict(scores=scores.cpu(),labels=labels.cpu(),forbidden_open_attempts=attempts,guard_probe_blocked=probe_blocked),output)
 
 
 def main():
@@ -42,7 +49,8 @@ def main():
     error=float((actual['scores']-expected).abs().max());exact=torch.equal(actual['scores'],expected)
     selected=torch.equal(actual['labels'],labels)
     result=dict(complete=True,scene=j['name'],menu=len(data['queries']),strict_scores=exact,
-        exact_partition=selected,maximum_error=error,source_denial_passed=not actual['forbidden_open_attempts'],
+        exact_partition=selected,maximum_error=error,source_denial_passed=actual['guard_probe_blocked'] and not actual['forbidden_open_attempts'],
+        guard_probe_blocked=actual['guard_probe_blocked'],
         forbidden_open_attempts=actual['forbidden_open_attempts'],numerical_passed=error<=1e-6 and selected,
         coverage='one scene full preencoded menu; shared runtime category_partition;not raw encoder or OS sandbox',
         evidence=[receipt(root/p) for p in ['fixture.pt','copied.pt','worker.log']]+[receipt(Path(__file__))])
