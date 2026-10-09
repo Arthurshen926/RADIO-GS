@@ -42,7 +42,7 @@ def mixture_logits(field,support,scale,*,shared_centre=False,chunk_size=32,aggre
 
 @torch.no_grad()
 def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggregation="legacy"):
-    if negative_aggregation not in {"legacy","expected_union"}:raise ValueError("unknown negative aggregation")
+    if negative_aggregation not in {"legacy","expected_union","expected_competition"}:raise ValueError("unknown negative aggregation")
     packet.validate(len(field.xyz),field.semantic.native_dim,field.local.native_dim)
     if packet.positive is None or packet.modality not in {'point_2d','point_3d'}:raise ValueError('positive rays need explicit spatial support')
     if packet.positive.components is None:return field.query(packet)
@@ -53,7 +53,7 @@ def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggr
     support=Support(ids[valid],w[valid],p.components.to(ids.device)[valid]);scale=field.default_scale if packet.scale is None else packet.scale
     logits=mixture_logits(field,support,scale,shared_centre=shared_centre,aggregation=aggregation)
     if field.evidence is not None:logits=field.evidence.refine(logits,support,scale)
-    if negative_aggregation=="expected_union" and packet.negative is not None:
+    if negative_aggregation in {"expected_union","expected_competition"} and packet.negative is not None:
         if field.negative_rule!="product" or packet.negative.components is None:
             raise ValueError("expected negative union requires registered negative rays and product rule")
         n=packet.negative;ids=n.indices.to(field.xyz.device);w=n.weights.to(field.xyz);valid=field.member_available[ids]&(w>0)
@@ -62,7 +62,11 @@ def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggr
             ns=Support(ids[valid],w[valid],n.components.to(ids.device)[valid])
             excluded=mixture_logits(field,ns,scale,aggregation="expected_union")
             if field.evidence is not None:excluded=field.evidence.refine(excluded,ns,scale)
-            probability=probability*(1-excluded.sigmoid())
+            if negative_aggregation=="expected_competition":
+                from .negative_evidence import competitive_membership
+                probability=competitive_membership(logits,excluded)
+            else:
+                probability=probability*(1-excluded.sigmoid())
     else:
         probability=field.exclude_membership(logits.sigmoid(),packet.negative,scale,logits)
     probability=probability.masked_fill(~field.member_available,0)

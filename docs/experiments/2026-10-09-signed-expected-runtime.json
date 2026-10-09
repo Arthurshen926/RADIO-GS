@@ -1,0 +1,38 @@
+{
+  "complete": true,
+  "case": "fern",
+  "strict": false,
+  "exact": {
+    "selected": true,
+    "membership": false,
+    "response": true,
+    "retained_response": false
+  },
+  "maximum_error": {
+    "selected": 0.0,
+    "membership": 1.7881393432617188e-07,
+    "response": 0.0,
+    "retained_response": 1.1920928955078125e-07
+  },
+  "numerical_passed": true,
+  "source_denial_passed": true,
+  "coverage": "one complete raw signed prompt case, fresh process and copied field; Python audit not OS sandbox",
+  "evidence": [
+    {
+      "path": "output/query_field_20261009/signed_expected_v1/validation/runtime/worker.log",
+      "sha256": "41b378d4ec098678fc552aca049f51d882e6e8890b323b4bd15977cc55cc4418"
+    },
+    {
+      "path": "output/query_field_20261009/signed_expected_v1/validation/runtime/predictions.pt",
+      "sha256": "014842eb4bd19cc651a4340c1196e346399c0575749d610f6791032f41f20467"
+    },
+    {
+      "path": "output/query_field_20261009/signed_expected_v1/validation/runtime/audit.json",
+      "sha256": "2cfce4cd080855c6c2ee0b9dfc7fb7da0211c415f4efa94ff215f83d6f6700f1"
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/scripts/research/validate_query_field_signed_expected.py",
+      "sha256": "80421c9260a8ec683db04c49f7b65b3fa2998b3024c5e631a3949d434437464a"
+    }
+  ]
+}
