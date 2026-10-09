@@ -33,11 +33,29 @@ docs/experiments/2026-10-09-union-admission-results.md/json/attribution.json/run
 See scripts/research/{run,validate,analyze}_query_field_union_admission.py.
 Keep original v1 failures;reproduce old version at06abfd6,new at12e22d9.
 
-NVOS nvos_missing_sources_v1 GENERATION IN PROGRESS;all123 missing legalRGB
-paths staged/hashed across7fields. Builder exec42644 supervises GPU2/3,log
-/tmp/radio_gs_nvos_missing_build.log;fern5 and flower13 already SAM+native complete. Wait for
-all7 cache_complete.json/globalreceipt;no targetqueries/tracks read. Still not
-field transfer or NVOS benchmark improvement;do not claim that from source cache.
+NVOS nvos_missing_sources_v1 CACHE COMPLETION AND SOURCE AUDIT COMPLETE.
+All7fields,123 missing frames generated,6118 new eligible region descriptors.
+Old+new243legalframes/11637regions verified;14development views excluded.
+Strict original-JPG byte validation FAILED atflower1:oldPNG is declared longest
+side1008 PIL LANCZOS thumbnail. Preserve failure in validation/original_byte_binding_v1.
+V2 exact declared-transform proof PASSED all243:135 original-byte bindings
+(123new+12oldfern),108 oldthumbnail bindings with exact RGB pixels;native/SAM/RGB
+encoding receipts checked where available. No tolerance/image-similarity waiver.
+Source resolution NOT uniform;SAM oldfern12schema2,oldother108/new123schema3.
+Consequently coverage closed but not a matched full-capacity reference or pure
+frame-budget control. Next unify108oldsource resolutions and12fern generator
+contracts (or matched controls),then compile function/member state and evaluate
+all8prompts. No new NVOS field,query/track/label read,prediction or score claim.
+Reports docs/experiments/2026-10-09-nvos-source-completion.md/json and
+2026-10-09-nvos-source-binding-failure.json. Global cached and verified receipts
+in output/query_field_20261009/nvos_missing_sources_v1/cache_complete.json and
+validation/derived_source_binding_v2/verified_sources.json. Historical preparation
+pending flags are immutable;do not restart/overwrite completed generation.
+No active jobs remain after this continuation. Worktree codex/query-preserving-
+gaussian-field;original /root/RADIO-GS HEAD/index unchanged. Next substantive
+work remains common conditional extent and a consistent full-five version;the
+admission guard cannot recover prior false negatives and must not become a
+permanent limitation of the ideal architecture.
 
 Active continuation2026-10-09: semantic_measure_functions_v2 COMPLETE,
 frozen f3c34dd.10 exports,190 class expressions/full menus,all predictions before
