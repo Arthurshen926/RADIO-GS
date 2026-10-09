@@ -94,3 +94,20 @@ soft observations have weighted known mass and are not claimed to reproduce
 v10 visibility or its supervised membership decision. The finite-evidence
 decision remains a hypothesis. Source replay now includes actual full rays;
 real signed inputs and all point queries must still pass separate task audits.
+
+The first mixture intervention was stopped before any scoring after a source
+counterexample showed vanishing regional confidence could borrow another
+region's view confidence. The [corrected protocol](../experiments/2026-10-09-confidence-mixture-function-protocol.md)
+uses p, not p/(p+n), as within-view preference. Its full study is now executed;
+see [results](../experiments/2026-10-09-confidence-mixture-results.md). Actual
+support activation improved but selected-set performance did not consistently
+improve. The original strict cold hash gate also failed; numerical and exact
+selection replay are supplemental evidence, not a waiver or model promotion.
+
+The complete-capacity reference is still outstanding. Source manifests expose
+534 current training views versus3,286 v10-declared views; supervision and input
+conditions differ too. Preserve legal query-independent sources and development
+splits when removing the arbitrary20-frame cap. Mean native descriptors,32-D
+groups and the finite-evidence update are revisable intermediate choices.
+Joint visibility/any/all/granularity statistics must be consumed and tested in
+the common member decision; binary primitive parity alone is not that transfer.

@@ -1,21 +1,64 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-09: confidence_mixture_functions_v1 is IN PROGRESS,
-frozen implementation c661e73, arm confidence_mixture_function. Full runner
-scripts/research/run_query_field_confidence_mixture_functions.py; report wrapper
-scripts/research/summarize_query_field_confidence_mixture.py. All51 focused tests
-pass. It preserves the previous Soft payload exactly and repairs support lookup.
-The earlier mixture_functions_v1 was STOPPED after30 constructions and partial
-predictions, BEFORE ANY scoring: a source-only counterexample p=[1,1e-6], n=0
-gave [.5,.5] association because regional confidence was divided out. Retain its
-outputs and source_counterexample_stop.json. Corrected preference uses admitted p
-rather than p/(p+n), with the same bounded component/view confidence. Do not
-describe the stopped trial as a full benchmark or the correction as measured yet.
-Manifest audit: current534 train views vs v10-declared3286 over30 distinct fields;
-all534 train views enter relation compilation. Fern originally12, not six invalid
-episodes dropped. Detailed budget receipts under both new roots' diagnostics.
+Active continuation2026-10-09: confidence_mixture_functions_v1 research batch is
+COMPLETE, but strict cold replay FAILED and no model is promoted. Frozen
+construction c661e73, arm confidence_mixture_function; 30 fields,31 jobs, all five
+scores,268 UQIS queries,67-point/8-signed diagnostics and budget audits complete.
+Report: docs/experiments/2026-10-09-confidence-mixture-results.md and JSON.
+Runner scripts/research/run_query_field_confidence_mixture_functions.py;
+summary wrapper scripts/research/summarize_query_field_confidence_mixture.py.
+No model jobs remain. Do not restart the whole pipeline or overwrite receipts.
 
-Active2026-10-09: TWO full functional-reference studies are COMPLETE. The user
+51 focused tests pass. Exact Soft payloads,58,312,658,544 tensor bytes, no extra
+source/training/labels. Per-component association uses admitted p as regional
+preference, normalized by view and multiplied by bounded max known mass, then
+mixed using input weights. Existing scale/observed filters, target P/N, finite
+update, signed product and typed readouts unchanged. Source replay1,068/1,068
+nonempty, max4.76837158203125e-6, fixed512 target rows plus all support rows.
+268 native outputs exact. This remains an uncompressed PARTIAL reference, not
+full matched B. Six v10 statistics have binary-limit parity tests but remain
+diagnostic; they are NOT consumed by the deployed member decision.
+
+Soft→new: LERF2D50.8613→49.6752%, actual-set projection30.1171→30.0056;
+NVOS response57.9518→61.8552 but actual-set69.9469→69.7200;
+ScanNet typed19/15/10=37.8310/38.6493/45.4900; UQIS text/image/2D/3D=
+12.6999/21.0120/29.2680/28.5413. No task-winner bundle or full recovery claim.
+All8 NVOS P/N now activate, all4 saved output kinds differ from parent. Correct
+point supports active40→55/59; mean views1.339→1.966 but effective mass only
+1.339→1.371. Target activation55.5853→72.4393%, negative-dominant target
+10.0394→16.5521%, missed-positive5.2008→8.1664. Correct-point IoU33.0780→
+33.0997%, observed recall55.7539→55.7364. Prior/evidence margin audit agrees
+with selections;53 correct queries contain17,588 weak-positive target misses.
+Required multiplier statistics are diagnostic only; no multiplier was applied.
+
+Strict copied-export replay: image score hash differs; all five selected outputs
+and other four score hashes exact. Original-operation-sequence raw capture in
+two fresh copied processes confirms1,339 image entries differ,max1.7881393e-7.
+Numeric<=1e-6 and exact selections pass; no forbidden source opens, one scene
+only, Python audit not OS sandbox. runtime_legacy_numeric/report.json preserves
+this result; runtime_numeric uses another sequence and is exact, which does NOT
+waive the original failure. No validation/runtime/report.json was fabricated.
+Summary complete=true means executed study, all_validation_gates_passed=false.
+No need prioritize float-bit engineering over the remaining method defects.
+
+Earlier mixture_functions_v1 STOPPED after30 constructions/partial predictions,
+BEFORE ANY scoring: source counterexample p=[1,1e-6],n=0 gave [.5,.5]. Retain
+outputs/source_counterexample_stop.json. Confidence repair fixed p/k→p before
+any v1/v2 score. Do not describe stopped v1 as a full benchmark study.
+
+Manifest audit: current534 train views vs v10-declared3286 over30 distinct fields;
+all534 train views enter compilation. Fern originally12, not six invalid episodes
+dropped. UQIS geometry exactly maps through unique source_vertex_ids in all9
+scenes;7 direct,2 with3 missing rows each. This establishes transfer feasibility,
+not performed full-source transfer or equal supervision. Next METHOD priority:
+full legal query-independent source B (remove arbitrary20-frame cap, retain dev
+split); joint visibility/any/all/granularity functions in the common decision;
+native patch-function and complete-instance supervision contracts. Do not freeze
+18 views/mean descriptors/32-D groups/fixed evidence update as architectural core.
+Core remains one Gaussian field, teacher roles, shared conditional membership,
+typed outputs and standalone inference. More activation alone is not recovery.
+
+Prior2026-10-09: TWO full functional-reference studies are COMPLETE. The user
 rejects substituting feature retention or source convergence for real capability
 transfer. Full report: `docs/experiments/2026-10-09-paired-function-results.md`,
 with separate hard/soft JSON evidence. Roots under `output/query_field_20261009/`:

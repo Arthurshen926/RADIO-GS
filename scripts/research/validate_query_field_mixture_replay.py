@@ -17,6 +17,8 @@ from radio_gs.query_field.runtime import QueryFieldRuntime
 from scripts.research.run_query_field_confidence_mixture_functions import ROOT, ARMS, read, write, receipt, check
 from scripts.research.run_query_field_protected import PREVIOUS
 
+CHILD_MODULE = 'scripts.research.validate_query_field_mixture_replay'
+VALIDATION_DIRECTORY = 'runtime_numeric'
 
 @torch.no_grad()
 def results(directory, fixture):
@@ -73,7 +75,7 @@ def child(args):
 
 def main():
     read(ROOT / 'scoring_complete.json')
-    out = ROOT / 'validation/runtime_numeric'; out.mkdir(parents=True, exist_ok=False)
+    out = ROOT / 'validation' / VALIDATION_DIRECTORY; out.mkdir(parents=True, exist_ok=False)
     prior = read(PREVIOUS / 'validation/runtime/report.json'); check(prior['fixture'])
     fixture = torch.load(prior['fixture']['path'], map_location='cpu', weights_only=True)
     directory = ROOT / 'fits' / ARMS[0] / 'uqis_scene0030_00/field'
@@ -88,7 +90,7 @@ def main():
         isolated = Path(temporary); shutil.copytree(directory, isolated / 'scene')
         shutil.copy2(prior['fixture']['path'], isolated / 'query.pt')
         for repeat in range(2):
-            command = [sys.executable, '-m', 'scripts.research.validate_query_field_mixture_replay', '--child',
+            command = [sys.executable, '-m', CHILD_MODULE, '--child',
                 '--field', str(isolated / 'scene'), '--fixture', str(isolated / 'query.pt'), '--output', str(isolated / 'result.pt')]
             for path in forbidden: command.extend(['--deny', str(path.resolve())])
             process = subprocess.run(command, cwd=isolated, env=dict(os.environ, PYTHONPATH=str(repo)),

@@ -13,6 +13,46 @@ from scripts.research.summarize_query_field_relations import collect, paired
 RESULT = Path('docs/experiments/2026-10-09-mixture-function-results.json')
 
 
+def runtime_audit(design, arm):
+    """Record an executed failed gate without turning tolerance into a waiver."""
+    cases = {'text', 'image', 'point_2d', 'point_3d', 'category'}
+    if not design.get('stopped_source_counterexample'):
+        path = ROOT / 'validation/runtime/report.json'; runtime = read(path)
+        if len(runtime['records']) != 1 or any(set(r['exact_replay']) != cases
+                or not all(r['exact_replay'].values()) or r['forbidden_open_attempts']
+                for r in runtime['records']):
+            raise ValueError('standalone replay failed')
+        return runtime, None, True, True, [path]
+
+    # This study finished its benchmarks but failed the original strict replay.
+    # Keep that gate failed; a complete report must include negative results.
+    strict_path = ROOT / 'validation/runtime' / (arm + '.comparison.json')
+    strict = read(strict_path)
+    if set(strict['exact_replay']) != cases or strict['copied']['forbidden_open_attempts']:
+        raise ValueError('strict replay coverage or source denial failed')
+    strict_passed = all(strict['exact_replay'].values())
+    runtime = dict(strict_cold_replay_passed=strict_passed, original_gate_unchanged=True,
+        report_status='passed' if strict_passed else 'failed', strict_trace=strict)
+    details = {}
+    paths = [strict_path, ROOT / 'validation/runtime.failed0/failure.json',
+        ROOT / 'execution/cold_retry.json',
+        Path('scripts/research/validate_query_field_mixture_replay.py'),
+        Path('scripts/research/validate_query_field_legacy_replay.py')]
+    for directory in ['runtime_numeric', 'runtime_legacy_numeric']:
+        path = ROOT / 'validation' / directory / 'report.json'; detail = read(path)
+        comparisons = [detail['original_repeat']] + [r['comparison'] for r in detail['records']]
+        if len(detail['records']) != 2 or any(set(c) != cases for c in comparisons):
+            raise ValueError('supplemental cold replay coverage incomplete')
+        if detail['tolerance'] != 1e-6 or not detail['numerically_equivalent'] or any(
+                not q['exact_selections'] or not 0 <= q['maximum_absolute_error'] <= 1e-6
+                for c in comparisons for q in c.values()):
+            raise ValueError('supplemental numerical replay failed')
+        if any(r['forbidden_open_attempts'] for r in detail['records']):
+            raise ValueError('supplemental copied replay accessed sources')
+        details[directory] = detail; paths.append(path)
+    return runtime, details, strict_passed, True, paths
+
+
 def diagnose():
     from scripts.research import diagnose_query_field_mixture_activation as points
     from scripts.research import diagnose_query_field_mixture_signed as signed
@@ -57,23 +97,8 @@ def main():
         construction.append(dict(key=job['key'], family=job['family'], **report))
         evidence.extend([directory / 'construction.json', directory / 'field/manifest.json'])
     if len(construction) != 30: raise ValueError('incomplete field cohort')
-    runtime_path = ROOT / 'validation/runtime/report.json'; runtime = read(runtime_path)
-    if len(runtime['records']) != 1 or any(set(r['exact_replay']) != {'text', 'image', 'point_2d', 'point_3d', 'category'}
-            or not all(r['exact_replay'].values()) or r['forbidden_open_attempts'] for r in runtime['records']):
-        raise ValueError('standalone replay failed')
-    runtime_detail = None
-    if design.get('stopped_source_counterexample'):
-        detail_path = ROOT / 'validation/runtime_numeric/report.json'; runtime_detail = read(detail_path)
-        # Keep the original strict contract. The extra raw tensors diagnose the
-        # initial failure; numerical tolerance does not waive hash equality here.
-        comparisons = [runtime_detail['original_repeat']] + [r['comparison'] for r in runtime_detail['records']]
-        if len(runtime_detail['records']) != 2 or any(not q['exact_scores'] or not q['exact_selections']
-                for comparison in comparisons for q in comparison.values()):
-            raise ValueError('supplemental raw replay is not exact')
-        if any(r['forbidden_open_attempts'] for r in runtime_detail['records']):
-            raise ValueError('supplemental copied replay accessed sources')
-        evidence.extend([detail_path, ROOT / 'validation/runtime.failed0/failure.json',
-            ROOT / 'execution/cold_retry.json', Path('scripts/research/validate_query_field_mixture_replay.py')])
+    runtime, runtime_detail, strict_passed, numeric_passed, runtime_paths = runtime_audit(design, arm)
+    evidence.extend(runtime_paths)
     protected.ARMS = ARMS; native = protected.native_invariance({arm: cohort})
     if native[arm]['exact_native_scores'] != 268: raise ValueError('native output changed')
     point_path = ROOT / 'diagnostics/mixture_activation/report.json'; point = read(point_path)
@@ -81,7 +106,7 @@ def main():
     budget_path = ROOT / 'diagnostics/reference_budgets.json'; budgets = read(budget_path)
     if point['queries'] != 67 or point['known_correct'] != 59 or len(signed['records']) != 8:
         raise ValueError('actual input audit incomplete')
-    evidence.extend([runtime_path, point_path, signed_path, budget_path, Path(design['prior_summary']['path']),
+    evidence.extend([point_path, signed_path, budget_path, Path(design['prior_summary']['path']),
         Path(__file__), Path(protected.__file__), Path('scripts/research/diagnose_query_field_mixture_activation.py'),
         Path('scripts/research/diagnose_query_field_mixture_signed.py'),
         Path('scripts/research/diagnose_query_field_support_composition.py')])
@@ -98,6 +123,9 @@ def main():
             raise ValueError('incomplete source-budget carrier feasibility audit')
         evidence.extend([carrier_path, Path('scripts/research/audit_query_field_carrier_correspondence.py')])
     result = dict(complete=True, primary_arm=arm, fields=30, macro=macro, per_scene=data, differences=differences,
+        completion_scope='All benchmark predictions, scoring and listed diagnostic audits executed; not model acceptance',
+        strict_cold_replay_passed=strict_passed, numerical_cold_replay_passed=numeric_passed,
+        all_validation_gates_passed=strict_passed and numeric_passed,
         construction=construction, functional_replay=dict(cases=sum(len(r['replay']) for r in construction),
             max_absolute_error=max(q[k] for r in construction for q in r['replay']
                 for k in ['positive_error', 'negative_error', 'coefficient_error']),
