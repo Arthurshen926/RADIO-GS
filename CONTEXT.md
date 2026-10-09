@@ -1,5 +1,34 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: native_mode_functions_v1 IN PROGRESS, frozen
+implementation ae80fc4.18 native mode exports then804 queries across mean_native,
+measure_resized,measure_native. All9 UQIS scenes/all4 inputs, not a full-five-task
+promotion. Same full1089 legal sources and inherited22-room/3-room supervision.
+Gaussian-bound modes preserve weighted Chamfer native functions and full candidate
+coverage; raw source patch raster/frame layout omitted but uncompressed appearance
+atoms ARE additional scene memory. ADR0016 explicitly records this architectural
+extension. Source8 pseudoqueries/scene compare every mode to original per-view
+match_regions before any benchmark input. Source-only construction; no new training.
+
+Controls separate local mean versus measure at identical native query inputs, and
+448-resized/unit-weight versus native-size/valid-padding query preprocessing at
+identical measure. Same geometric surface2D adapter for all3 arms; shared member
+and Gaussian native channels unchanged. Compared to parent, native identity modes
+also expose full-view descriptors instead of the old18-view Gaussian identity
+channels; do NOT attribute that compound contrast solely to local representation.
+44 distinct focused/regression checks pass. First scene source replay max1.79e-7,
+4688 supported modes,177253 atoms,zero source median-anchor differences.
+
+Primary PID2014132, log /tmp/radio_gs_native_modes_run.log, exec session23418.
+Post supervisor /tmp/radio_gs_native_modes_finish.py waits for scoring, then full
+input/identity attribution and one-scene measure_native copied-field/source-denial
+replay (including actual native-size image/padding and surface2D), then plotting.
+Log /tmp/radio_gs_native_modes_finish.log. All construction precedes prediction and
+all804 outputs precede any scores. Do not consult partial scores, adjust frozen
+code/protocol mid-study, restart completed batches, or overwrite evidence. Inspect
+running status before resuming. Next: finish actual metrics/attribution and human
+report, update ledger/context, preserve any failures, commit completed evidence.
+
 Active continuation2026-10-09: joint_observation_transfer_v1 and its separate
 surface_input_function_v1 probe are COMPLETE. All jobs finished; no whole-batch
 restart or receipt overwrite. Frozen construction dd9f9f2; surface probe c9fa0f7.
