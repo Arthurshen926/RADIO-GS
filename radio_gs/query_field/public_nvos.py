@@ -132,10 +132,11 @@ def predict(config, job, output, device="cuda"):
         torch.cuda.synchronize()
     registered = time.monotonic()
     program=job.get('query_program','parent')
-    if program=='reference_scope':
+    if program in {'reference_scope','reference_scope_visible'}:
         if input_contract!='reference_mask':raise ValueError('composition needs a declared reference mask')
         from .runtime import QueryFieldRuntime
-        result=QueryFieldRuntime(field).reference_scope(packet,reference,inference_masks[0],world_scale=world_scale)
+        result=QueryFieldRuntime(field).reference_scope(packet,reference,inference_masks[0],world_scale=world_scale,
+            observation="scene" if program=="reference_scope_visible" else "subset")
     elif program=='parent':result=field.query(packet)
     elif program in {'joint_unsigned','joint_signed'}:
         from .runtime import QueryFieldRuntime
