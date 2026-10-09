@@ -128,10 +128,18 @@ class CapabilityField(nn.Module):
             from .soft_paired_evidence import KIND as SOFT_KIND, enable as enable_soft
             from .mixture_paired_evidence import KIND as MIXTURE_KIND, enable as enable_mixture
             from .confidence_mixture_evidence import KIND as CONFIDENCE_KIND, enable as enable_confidence
-            if evidence_state is None or evidence_kind not in {KIND, SOFT_KIND, MIXTURE_KIND, CONFIDENCE_KIND}:
+            from .joint_observation import KIND as JOINT_KIND, enable as enable_joint
+            if evidence_state is None or evidence_kind not in {KIND, SOFT_KIND, MIXTURE_KIND, CONFIDENCE_KIND, JOINT_KIND}:
                 raise ValueError('unknown or incomplete paired-evidence field')
             {KIND: enable, SOFT_KIND: enable_soft, MIXTURE_KIND: enable_mixture,
-             CONFIDENCE_KIND: enable_confidence}[evidence_kind](self, evidence_state)
+             CONFIDENCE_KIND: enable_confidence, JOINT_KIND: enable_joint}[evidence_kind](self, evidence_state)
+
+    @property
+    def member_available(self):
+        """Native observation support and the member output domain are distinct."""
+        if self.evidence is not None and getattr(self.evidence, 'complete_carrier', False):
+            return torch.ones_like(self.observed)
+        return self.observed
 
     def grouping_features(self, scale):
         if not math.isfinite(float(scale)) or float(scale) <= 0:
@@ -141,6 +149,10 @@ class CapabilityField(nn.Module):
 
     def member_logits(self, support: Support, scale, rows=None):
         support.validate(len(self.xyz))
+        if not math.isfinite(float(scale)) or float(scale) <= 0:
+            raise ValueError("physical scale must be positive")
+        if self.evidence is not None and getattr(self.evidence, 'replaces_member_prior', False):
+            return self.evidence.member_logits(self, support, rows)
         if self.support_aggregation == "expected_energy" and len(support.indices) > 1:
             from .support_energy import expected_logits
             return expected_logits(self, support, scale, rows)
@@ -197,7 +209,7 @@ class CapabilityField(nn.Module):
             negative.validate(len(self.xyz))
             ids = negative.indices.to(self.xyz.device)
             weights = negative.weights.to(self.xyz.device).float()
-            supported = self.observed[ids] & (weights > 0)
+            supported = self.member_available[ids] & (weights > 0)
             if bool(supported.any()):
                 components = None if negative.components is None else negative.components.to(ids.device)[supported]
                 support = Support(ids[supported], weights[supported], components)
@@ -221,7 +233,7 @@ class CapabilityField(nn.Module):
         positive.validate(len(self.xyz))
         ids = positive.indices.to(self.xyz.device)
         weights = positive.weights.to(self.xyz.device).float()
-        supported = self.observed[ids]
+        supported = self.member_available[ids]
         if not bool(weights[supported].sum() > 0):
             raise ValueError("positive support lacks trained observation support")
         return self.member_logits(Support(ids[supported], weights[supported]), scale)
@@ -248,9 +260,10 @@ class CapabilityField(nn.Module):
         if packet.positive is not None:
             support = packet.positive
             ids = support.indices.to(self.xyz.device)
-            supported = self.observed[ids]
+            supported = self.member_available[ids]
             weights = support.weights.to(self.xyz.device).float()
             positive_coverage = float(weights[supported].sum()/weights.sum())
+            native_positive_coverage = float(weights[self.observed[ids]].sum()/weights.sum())
             if positive_coverage == 0 or (packet.exact_positive and positive_coverage < 1):
                 raise ValueError("positive support lacks trained observation support")
             candidates = ids
@@ -259,6 +272,7 @@ class CapabilityField(nn.Module):
             membership = positive_logits.sigmoid()
         else:
             positive_coverage = None
+            native_positive_coverage = None
             candidates = self._candidates(identity)
             if not len(candidates):
                 raise ValueError("field has no observed identity candidates")
@@ -285,7 +299,7 @@ class CapabilityField(nn.Module):
                 if competing:
                     positive_logits = torch.stack(values, dim=1)[:, admitted].max(dim=1).values
         membership = self.exclude_membership(membership, packet.negative, scale, positive_logits)
-        membership = membership.masked_fill(~self.observed, 0)
+        membership = membership.masked_fill(~self.member_available, 0)
         if packet.exact_positive:
             ids = packet.positive.indices[packet.positive.weights > 0].to(membership.device)
             membership[ids] = 1
@@ -305,7 +319,9 @@ class CapabilityField(nn.Module):
                                negative_rule=self.negative_rule,
                                uncertainty_resolved=False, semantic_scores_calibrated=False,
                                membership_scores_calibrated=False,
-                               observed_positive_mass_fraction=positive_coverage,
+                               observed_positive_mass_fraction=native_positive_coverage,
+                               member_positive_mass_fraction=positive_coverage,
+                               member_domain='complete_carrier' if getattr(self.evidence, 'complete_carrier', False) else 'observed',
                                hard_positive_constraint=packet.exact_positive))
 
     @torch.no_grad()

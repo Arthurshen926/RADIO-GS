@@ -111,3 +111,22 @@ splits when removing the arbitrary20-frame cap. Mean native descriptors,32-D
 groups and the finite-evidence update are revisable intermediate choices.
 Joint visibility/any/all/granularity statistics must be consumed and tested in
 the common member decision; binary primitive parity alone is not that transfer.
+
+## Declared decision-function transfer
+
+The next [factorial study](../experiments/2026-10-09-joint-observation-transfer-protocol.md)
+compiles the real binary observation functions into Gaussian coordinates and
+separates small/full legal source budgets from source-only/independently labelled
+membership decisions. The latter carries the EXISTING22-room extra supervision,
+declared under ADR0014; it is not a source-only claim. Forest nodes, thresholds
+and leaf values execute as field-owned tensors, not a runtime old solver/model
+loader. Native anchor response is collapsed into Gaussian moments with its norm
+intact. Full local patch identity is still not transferred.
+
+Native observation support and the member output domain are now distinct.
+Complete-carrier decisions and valid registered points must not be silently
+masked by the old native training coverage. Inferred native candidates retain
+their original domain. All modalities use the same member function; source
+assets remain offline. This focused study covers all9 UQIS scenes/all4 inputs,
+following prior full five-task coverage. It does not replace the required future
+five-task validation or establish novelty through repackaging exact functions.

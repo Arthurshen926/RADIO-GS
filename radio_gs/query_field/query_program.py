@@ -47,7 +47,7 @@ def query(field, packet):
         weights = torch.softmax(10 * identity, dim=0)
         chosen = int(weights.argmax())
         membership = field.exclude_membership(logits[chosen].sigmoid(), packet.negative, scale, logits[chosen])
-        membership = membership.masked_fill(~field.observed, 0)
+        membership = membership.masked_fill(~field.member_available, 0)
     else:
         candidates = candidates[:0]
         weights = torch.empty(0, device=field.xyz.device)
