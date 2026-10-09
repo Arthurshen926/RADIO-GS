@@ -76,3 +76,21 @@ vertices. The next support-function design must distinguish unavailable evidence
 from reliable opposition and validate the actual uncertain/signed inputs. Do not
 interpret the completed source pseudoquery replay as that missing capability,
 or silently claim this partial reference has completed the full-capacity B baseline.
+
+## Support-function intervention
+
+The next intervention changes support lookup while retaining the completed soft
+reference's entire tensor payload. Positive/exclusion evidence is interpreted
+per support component, before a confidence-weighted, within-view association is
+mixed over the current query. Unknown components abstain; conditional positive
+majority does not turn tiny known mass into a full view. The existing scale gate,
+target coordinates, finite-evidence member update and all typed readouts stay
+fixed. This is a declared composite association change, not an isolated causal
+test of each constituent operation. See the [fixed protocol](../experiments/2026-10-09-mixture-function-protocol.md).
+
+The diagnostic joint-statistic operator now reproduces all six v10 observation
+statistics in a tested binary/complementary-visible-exclusion limit. Real partial
+soft observations have weighted known mass and are not claimed to reproduce
+v10 visibility or its supervised membership decision. The finite-evidence
+decision remains a hypothesis. Source replay now includes actual full rays;
+real signed inputs and all point queries must still pass separate task audits.
