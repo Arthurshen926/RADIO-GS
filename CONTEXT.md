@@ -1,33 +1,48 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-09: semantic_measure_functions_v2 IN PROGRESS,
-frozen f3c34dd. Full10 ScanNet scenes, fixed mean/measure/entropy-reliable category
-functions on identical additional semantic measure state, each prior-only and
-same shared-member corroboration. Primary=reliable_typed, fresh parent program
-baseline; no winner selection, no new training or member labels. Parent member
-remains confidence_mixture_function, NOT the later UQIS labelled forest. Same
-protected old native/geometry/member tensors; full legal semantic sources minus
-same development frames. This is not whole-five-task validation or promotion.
+Active continuation2026-10-09: semantic_measure_functions_v2 COMPLETE,
+frozen f3c34dd.10 exports,190 class expressions/full menus,all predictions before
+all scoring,summary and cold replay complete. No active jobs;do not restart or
+overwrite receipts. Report docs/experiments/2026-10-09-semantic-measure-results.md,
+results.json,runtime.json,class-attribution.json. No promotion or full-five claim.
 
-Generic SemanticMeasure in field.pt retains native semantic atoms and sparse
-Gaussian association. Runtime category_partition handles complete menu before
-19/15/10 split selection. Averaged logits do not equal averaged probabilities;
-entropy information also needs modes. v10 source-time text detector and auxiliary
-local channel remain untransferred. Extra atoms are uncompressed memory, not
-novelty by packaging. Details ADR0017 and semantic-measure protocol.
+Scene macro ScanNet19/15/10 mIoU (%):
+parent37.8310/38.6493/45.4900 (fresh prediction matches previous macros exactly);
+mean_prior46.5091/48.0104/57.9432;mean_typed47.3967/48.9183/59.2483;
+measure_prior48.6937/50.2436/59.9142;measure_typed49.9136/51.5260/61.6482;
+reliable_prior50.1911/51.9323/61.4891;
+predeclared primary reliable_typed51.0166/52.8039/62.9232.
+v10 source-assisted reference61.0115/62.5276/72.4861; gaps9.9949/9.7237/9.5629pp.
+Primary improves all10 scenes in all3 splits;19/10 gains13.1856/17.4332pp.
+Matched nonlinear-order control +2.5169/+2.3998pp,8 improve2 regress;
+reliability +1.1030/+1.2750pp,9 improve1 regress. Scene0062 regresses in both
+local controls. Common members add0.8255/1.4340pp to reliable prior but19class
+has4 regressing scenes and95% interval crosses zero. Preserve limitations.
 
-Run log /tmp/radio_gs_semantic_measure_run_v2.log, exec71986; construction then
-all10 predictions then scoring. v1 stopped before queries on nested geometry
-KeyError; preserve its logs/stopped.json. Fixed via verified frozen geometry loader.
-18 relevant tests pass; earlier CUDA reference test normalized query differently,
-corrected the test to compare identical inputs, retained failed log. Current test
-log /tmp/radio_gs_semantic_measure_tests_final.log. No code/protocol tuning midrun.
+SemanticMeasure retains normalized native atoms and sparse Gaussian measures in
+field.pt; generic runtime category_partition and public_scannet program integrate
+complete-menu competition,entropy information,existing shared-member support.
+No sources/classes/answers/runtime old solver.1138 legal views excluding20 dev,
+72,380 supported atoms,60 source operator comparisons max4.76837e-7 and0 argmax
+differences.10-field tensor bytes10,568,441,049 vs parent8,761,187,938,+1,807,253,111.
+New state uncompressed;not novelty by packaging or shared image/semantic storage.
+Parent native/geometry/member tensors unchanged. Parent member is prior full-five
+confidence mixture,NOT UQIS labelled forest. No new training or member labels.
+Parent contrast also changes source coverage and native construction; matched
+new arms alone isolate nonlinear order/reliability. Query encoder stays parent.
+v10 runtime text detection and local auxiliary channel remain untransferred.
 
-After scoring: run summarize_query_field_semantic_measure and
-validate_query_field_semantic_measure (GPU1), inspect actual scores/limits, finish
-human report and ledger. Cold scope=one full preencoded menu,fresh copied scene,
-Python open guard with blocked probe;not OS sandbox/raw text encoder proof.
-Do not rerun completed batches or overwrite receipts.
+18 related tests pass. One copied field/19-class menu source-denied runtime replay:
+partition exact,maximum score error1.788139e-7,numerical pass,strict bitwise FAIL.
+Do not hide strict failure. Known forbidden probe blocked,no actual forbidden opens;
+Python hook,preencoded menu,not OS/raw encoder/all-scene proof. Initial v1 failed
+before queries due nested geometry key;preserved stopped.json. Initial test input
+normalization mismatch corrected without tolerance relaxation;logs preserved.
+
+Next prioritize complete LERF union and NVOS signed input functions and full legal
+source construction (NVOS123 missing native caches),then same-recipe full-five
+integration. Prior UQIS + this ScanNet + old other winners is NOT a new unified
+validation. Keep source/representation/input/typed readout/member factors separate.
 
 Active continuation2026-10-09: native_mode_functions_v1 COMPLETE. Frozen
 construction ae80fc4;18 exports,all804 predictions and all3 scores completed before
