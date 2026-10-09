@@ -29,6 +29,28 @@ all1072 predictions; all predictions precede scoring. Do not consult partial
 scores or promote/relabel extra supervision as source-only. Full five-task
 generalization and proper patch function preservation remain outstanding.
 
+All36 constructions now complete. Independent source replay288 cases has maximum
+15-feature error8.344650268554688e-7; forest execution on identical features passes
+1e-7. Reassociated native/joint feature roundoff can change forest scores (maximum
+.001207500696182251), although the sampled source selected sets all match. Do not
+claim end-to-end score bit equality. Tensor bytes across9 scenes per arm:
+small_source21,367,306,710; small_supervised21,390,881,454;
+full_source22,080,732,934; full_supervised22,104,307,678.
+Predictions are underway; no score was consulted. Primary supervisor PID1938963,
+log /tmp/radio_gs_joint_observation_run.log. Postprocessing supervisor
+/tmp/radio_gs_joint_finish.py waits for completed scoring, then runs point/native
+diagnostics, copied-export cold audits onGPU3, and the input probe onGPUs0,2.
+Postprocess log /tmp/radio_gs_joint_finish.log. Inspect status before restarting.
+
+Separately predeclared BEFORE factorial scores: surface_input_function_v1,
+frozen c9fa0f7. All67 UQIS2D inputs on the SAME full_supervised field; compare
+Gaussian contribution mixtures with a first-local-surface input registration
+derived only from Gaussian centres. This transfers the v10 geometric input
+operator, without clamping the estimated point positive or calling an old source
+solver. Two geometry/parity tests pass. Runner run_query_field_surface_input.py;
+protocol2026-10-09-surface-input-function-protocol.md. This input-only probe does
+not claim four-modality/five-task validation and does not change the2x2 study.
+
 Active continuation2026-10-09: confidence_mixture_functions_v1 research batch is
 COMPLETE, but strict cold replay FAILED and no model is promoted. Frozen
 construction c661e73, arm confidence_mixture_function; 30 fields,31 jobs, all five
