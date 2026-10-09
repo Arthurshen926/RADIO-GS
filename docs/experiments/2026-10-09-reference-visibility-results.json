@@ -1,0 +1,1076 @@
+{
+  "complete": true,
+  "cases": 8,
+  "primary": "visible_reference",
+  "macro": {
+    "subset_reference": {
+      "response_iou": 0.8208341376292707,
+      "selection_iou": 0.8488625595372754,
+      "precision": 0.922016448962103,
+      "recall": 0.9144768642453326,
+      "ap": 0.9226984981738875
+    },
+    "visible_reference": {
+      "response_iou": 0.8292214124169652,
+      "selection_iou": 0.8437008339114533,
+      "precision": 0.9061896408036955,
+      "recall": 0.9245365041472118,
+      "ap": 0.9182139460214194
+    }
+  },
+  "per_case": {
+    "subset_reference": {
+      "fern": {
+        "response_iou": 0.7420450624914623,
+        "selection_iou": 0.7730975234845412,
+        "precision": 0.8409582763722572,
+        "recall": 0.9054868791135144,
+        "ap": 0.8713544167527334
+      },
+      "flower": {
+        "response_iou": 0.8271680925934459,
+        "selection_iou": 0.8670714920287803,
+        "precision": 0.9662560557090987,
+        "recall": 0.8941464107628455,
+        "ap": 0.949487337541257
+      },
+      "fortress": {
+        "response_iou": 0.9252750135252553,
+        "selection_iou": 0.9016176588243228,
+        "precision": 0.9422852902742848,
+        "recall": 0.9543187965777892,
+        "ap": 0.9894008305133991
+      },
+      "horns_center": {
+        "response_iou": 0.917231441223179,
+        "selection_iou": 0.9542069707466118,
+        "precision": 0.9715719530343079,
+        "recall": 0.9816135728515738,
+        "ap": 0.9930880834489653
+      },
+      "horns_left": {
+        "response_iou": 0.8628119058206052,
+        "selection_iou": 0.8924263667109037,
+        "precision": 0.9527018149203937,
+        "recall": 0.9337990117166174,
+        "ap": 0.9502699996319129
+      },
+      "leaves": {
+        "response_iou": 0.9282789120097719,
+        "selection_iou": 0.9622689934912826,
+        "precision": 0.9876386970526049,
+        "recall": 0.9739996261312279,
+        "ap": 0.9927754684744936
+      },
+      "orchids": {
+        "response_iou": 0.7080970989344699,
+        "selection_iou": 0.739396891561597,
+        "precision": 0.9624639203437967,
+        "recall": 0.7613515825671021,
+        "ap": 0.8210617018974946
+      },
+      "trex": {
+        "response_iou": 0.6557655744359764,
+        "selection_iou": 0.7008145794501641,
+        "precision": 0.7522555839900814,
+        "recall": 0.9110990342419898,
+        "ap": 0.8141501471308437
+      }
+    },
+    "visible_reference": {
+      "fern": {
+        "response_iou": 0.7471834751488262,
+        "selection_iou": 0.764302161533907,
+        "precision": 0.8241766297536287,
+        "recall": 0.9131995503756041,
+        "ap": 0.8740092801211707
+      },
+      "flower": {
+        "response_iou": 0.8208313317135747,
+        "selection_iou": 0.8665816435432231,
+        "precision": 0.949667221297837,
+        "recall": 0.9082991006725474,
+        "ap": 0.9167341568178435
+      },
+      "fortress": {
+        "response_iou": 0.9553458473616695,
+        "selection_iou": 0.8950279021478165,
+        "precision": 0.9130148606870063,
+        "recall": 0.9784628780922731,
+        "ap": 0.9961548424001341
+      },
+      "horns_center": {
+        "response_iou": 0.9371923616363795,
+        "selection_iou": 0.9547835856418406,
+        "precision": 0.9631788148330198,
+        "recall": 0.9909536366584861,
+        "ap": 0.9960291243504755
+      },
+      "horns_left": {
+        "response_iou": 0.8676479407691721,
+        "selection_iou": 0.8901811952331347,
+        "precision": 0.9484610853659402,
+        "recall": 0.9354298192813248,
+        "ap": 0.9498939452849822
+      },
+      "leaves": {
+        "response_iou": 0.9349726097824738,
+        "selection_iou": 0.9649842806798351,
+        "precision": 0.9877300187100881,
+        "recall": 0.9766923060005938,
+        "ap": 0.9933237604104044
+      },
+      "orchids": {
+        "response_iou": 0.713996684562808,
+        "selection_iou": 0.7293918003935603,
+        "precision": 0.9411822357714141,
+        "recall": 0.7642269782481448,
+        "ap": 0.8215014385979005
+      },
+      "trex": {
+        "response_iou": 0.6566010483608191,
+        "selection_iou": 0.6843541021183093,
+        "precision": 0.7221062600106288,
+        "recall": 0.9290277638487205,
+        "ap": 0.7980650201884438
+      }
+    }
+  },
+  "diagnostics": {
+    "subset_reference": {
+      "fern": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "subset",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 183,
+          "selected_regions": [
+            113,
+            164,
+            126,
+            23,
+            21,
+            158,
+            36
+          ],
+          "reference_soft_iou_trace": [
+            0.8099619942338845,
+            0.8257157225110463,
+            0.833860356505342,
+            0.8369777678166966,
+            0.8388581909284466,
+            0.839289111047568,
+            0.8393097433371675
+          ],
+          "reference_proxy_soft_iou": 0.8393097433371675,
+          "reference_actual_soft_iou": 0.8387702368623239,
+          "proxy_pixels_missing_in_actual": 0,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9921748638153076,
+          "negative_selected_fraction": 0.004220140632241964
+        },
+        "selected": 103661
+      },
+      "flower": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "subset",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 1267,
+          "selected_regions": [
+            770,
+            359,
+            546,
+            558,
+            700,
+            271,
+            974,
+            829,
+            417,
+            488,
+            550,
+            255,
+            356,
+            737,
+            681,
+            45,
+            184,
+            930,
+            1037,
+            65,
+            324,
+            762,
+            1164,
+            405,
+            470,
+            769,
+            761,
+            56
+          ],
+          "reference_soft_iou_trace": [
+            0.28424594739051573,
+            0.5388375734488656,
+            0.7076451479781062,
+            0.8483989779129649,
+            0.8942440932233606,
+            0.9222696439568508,
+            0.9284247896617046,
+            0.9328579391843358,
+            0.9357498140093703,
+            0.937952669989371,
+            0.9392827189536753,
+            0.9399382029253576,
+            0.9405660621373676,
+            0.9411207963120565,
+            0.9415322543358439,
+            0.9418461540506491,
+            0.9421244309650268,
+            0.9423263296839239,
+            0.9425029770249754,
+            0.9426704271204532,
+            0.9427820465186807,
+            0.9428866062373127,
+            0.9429911659559446,
+            0.9430702585811127,
+            0.9431179269817229,
+            0.943151372102005,
+            0.9431573147680473,
+            0.9431632561857345
+          ],
+          "reference_proxy_soft_iou": 0.9431632561857345,
+          "reference_actual_soft_iou": 0.9443305911642442,
+          "proxy_pixels_missing_in_actual": 0,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 24133
+      },
+      "fortress": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "subset",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 213,
+          "selected_regions": [
+            82,
+            9,
+            32,
+            143,
+            118,
+            138
+          ],
+          "reference_soft_iou_trace": [
+            0.9010507724715862,
+            0.9103475091955852,
+            0.9110869583172134,
+            0.9114871505857235,
+            0.9117235528031769,
+            0.9118707212827356
+          ],
+          "reference_proxy_soft_iou": 0.9118707212827356,
+          "reference_actual_soft_iou": 0.911992535069841,
+          "proxy_pixels_missing_in_actual": 0,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 46393
+      },
+      "horns_center": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "subset",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 938,
+          "selected_regions": [
+            160,
+            70,
+            705,
+            21,
+            848,
+            44,
+            163,
+            518,
+            551,
+            367
+          ],
+          "reference_soft_iou_trace": [
+            0.9493126643895423,
+            0.9597909008067235,
+            0.961470444721734,
+            0.962179278577907,
+            0.9624479863615701,
+            0.9625701510079844,
+            0.9626914343188249,
+            0.9627959293847741,
+            0.9628480437701258,
+            0.9628931383579771
+          ],
+          "reference_proxy_soft_iou": 0.9628931383579771,
+          "reference_actual_soft_iou": 0.9629771827251071,
+          "proxy_pixels_missing_in_actual": 0,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9999570250511169,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 40728
+      },
+      "horns_left": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "subset",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 938,
+          "selected_regions": [
+            149,
+            338,
+            231,
+            863,
+            51
+          ],
+          "reference_soft_iou_trace": [
+            0.9483503154298564,
+            0.952679949933643,
+            0.954500013929854,
+            0.9551297959933344,
+            0.9554416894577887
+          ],
+          "reference_proxy_soft_iou": 0.9554416894577887,
+          "reference_actual_soft_iou": 0.955343352471296,
+          "proxy_pixels_missing_in_actual": 0,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 12884
+      },
+      "leaves": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "subset",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 713,
+          "selected_regions": [
+            643,
+            544
+          ],
+          "reference_soft_iou_trace": [
+            0.9544239879319407,
+            0.9552283023012595
+          ],
+          "reference_proxy_soft_iou": 0.9552283023012595,
+          "reference_actual_soft_iou": 0.9554767868205675,
+          "proxy_pixels_missing_in_actual": 0,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 5900
+      },
+      "orchids": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "subset",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 1126,
+          "selected_regions": [
+            1007,
+            883,
+            873,
+            691,
+            666,
+            581,
+            250,
+            386,
+            1050,
+            991,
+            369,
+            1088,
+            200,
+            267,
+            717,
+            249
+          ],
+          "reference_soft_iou_trace": [
+            0.28102358998771954,
+            0.5039371259850106,
+            0.6860223301421818,
+            0.796310389870247,
+            0.8429645592376469,
+            0.8538723194101537,
+            0.8593704323980255,
+            0.8614272723659757,
+            0.8622800419487033,
+            0.8626858513996857,
+            0.8630360799712572,
+            0.8632503438186602,
+            0.8633952782865548,
+            0.8634825850796696,
+            0.8635023661454071,
+            0.8635129444666199
+          ],
+          "reference_proxy_soft_iou": 0.8635129444666199,
+          "reference_actual_soft_iou": 0.8632574078831111,
+          "proxy_pixels_missing_in_actual": 0,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0003109629906248301
+        },
+        "selected": 23486
+      },
+      "trex": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "subset",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 761,
+          "selected_regions": [
+            176,
+            529,
+            546,
+            663,
+            652,
+            631,
+            297,
+            152,
+            340,
+            586,
+            112,
+            97,
+            31,
+            420,
+            674,
+            680,
+            533,
+            240,
+            39,
+            508
+          ],
+          "reference_soft_iou_trace": [
+            0.6150274569684562,
+            0.6430250977046026,
+            0.6546322631580108,
+            0.661448250227138,
+            0.6651602852424746,
+            0.6675391301739644,
+            0.6692039382386058,
+            0.6703580000905215,
+            0.6710408076599449,
+            0.6715658112155678,
+            0.6718389634189976,
+            0.6719495211783234,
+            0.6720534512957193,
+            0.672157381413115,
+            0.6722613115305108,
+            0.6723652416479067,
+            0.6724604808125249,
+            0.6725146457451053,
+            0.672562939680805,
+            0.6726108598496225
+          ],
+          "reference_proxy_soft_iou": 0.6726108598496225,
+          "reference_actual_soft_iou": 0.6751899944569804,
+          "proxy_pixels_missing_in_actual": 0,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9620053768157959,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 54251
+      }
+    },
+    "visible_reference": {
+      "fern": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "scene",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 183,
+          "selected_regions": [
+            113,
+            164,
+            126,
+            21,
+            23,
+            36,
+            158,
+            115,
+            129
+          ],
+          "reference_soft_iou_trace": [
+            0.8069357554776425,
+            0.8314758286656737,
+            0.8399510009191189,
+            0.8451252111499049,
+            0.8476452483214151,
+            0.849001708960537,
+            0.8496286383357057,
+            0.8498340461351749,
+            0.8498452683726356
+          ],
+          "reference_proxy_soft_iou": 0.8498452683726356,
+          "reference_actual_soft_iou": 0.8274280017937877,
+          "proxy_pixels_missing_in_actual": 76,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9921748638153076,
+          "negative_selected_fraction": 0.007196096703410149
+        },
+        "selected": 105434
+      },
+      "flower": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "scene",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 1267,
+          "selected_regions": [
+            770,
+            359,
+            772,
+            558,
+            700,
+            271,
+            930,
+            482,
+            974,
+            829,
+            550,
+            737,
+            322,
+            1110,
+            1164,
+            761,
+            666,
+            552,
+            184,
+            408,
+            618,
+            63,
+            681,
+            278,
+            344,
+            417,
+            430,
+            811,
+            903,
+            324,
+            59,
+            150,
+            348,
+            620,
+            897,
+            684,
+            196,
+            275,
+            823,
+            943,
+            351
+          ],
+          "reference_soft_iou_trace": [
+            0.25459105433683826,
+            0.4838468385238947,
+            0.6710991088957338,
+            0.8234320414213593,
+            0.8661601606760906,
+            0.8948114478587984,
+            0.903025979800168,
+            0.9094509353941241,
+            0.9154884383517465,
+            0.9197773932603756,
+            0.9220623410390519,
+            0.9235583675466449,
+            0.9250414660667717,
+            0.926403800710201,
+            0.9275565454084873,
+            0.928688466840129,
+            0.9297362913861565,
+            0.9306489887614017,
+            0.9315025078258131,
+            0.9320619486100251,
+            0.9325899944982916,
+            0.9331052802872252,
+            0.93359772514792,
+            0.9338868513364138,
+            0.9341717123448511,
+            0.9344450811274688,
+            0.9346543053528201,
+            0.9348635295781713,
+            0.9350646565631693,
+            0.9352570212960819,
+            0.9353792456314629,
+            0.9354837782439448,
+            0.9355883108564267,
+            0.9356928434689086,
+            0.9357754297320102,
+            0.9358555786842334,
+            0.9359296623519926,
+            0.9359929369128003,
+            0.936040738429367,
+            0.936070579119011,
+            0.9360860290252121
+          ],
+          "reference_proxy_soft_iou": 0.9360860290252121,
+          "reference_actual_soft_iou": 0.909449979435999,
+          "proxy_pixels_missing_in_actual": 34,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 25836
+      },
+      "fortress": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "scene",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 213,
+          "selected_regions": [
+            82,
+            9,
+            52,
+            204,
+            93,
+            45,
+            183,
+            32,
+            27,
+            138,
+            109
+          ],
+          "reference_soft_iou_trace": [
+            0.9399859032724842,
+            0.9516922073426567,
+            0.9622270843924512,
+            0.9671022003572122,
+            0.971339451438454,
+            0.9734967822154029,
+            0.9747359540230915,
+            0.9757029224638506,
+            0.9761353958838407,
+            0.9764231113380403,
+            0.9764714696388891
+          ],
+          "reference_proxy_soft_iou": 0.9764714696388891,
+          "reference_actual_soft_iou": 0.8773079677223264,
+          "proxy_pixels_missing_in_actual": 4,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 50617
+      },
+      "horns_center": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "scene",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 938,
+          "selected_regions": [
+            160,
+            506,
+            661,
+            106,
+            58,
+            70,
+            405,
+            229,
+            778,
+            345,
+            21,
+            848,
+            9,
+            367,
+            44,
+            720,
+            420
+          ],
+          "reference_soft_iou_trace": [
+            0.9350548578658063,
+            0.9555354522857398,
+            0.9591286219238575,
+            0.9611920809506062,
+            0.9619397250035624,
+            0.9623879777539993,
+            0.962787054130043,
+            0.9629507687246582,
+            0.9630763993670595,
+            0.9631975417763227,
+            0.9632996570673338,
+            0.9633732292137615,
+            0.9634230137932143,
+            0.9634680380810888,
+            0.9635035457375686,
+            0.9635288593900581,
+            0.9635429547383395
+          ],
+          "reference_proxy_soft_iou": 0.9635429547383395,
+          "reference_actual_soft_iou": 0.9347032269057584,
+          "proxy_pixels_missing_in_actual": 3,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9999570250511169,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 44376
+      },
+      "horns_left": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "scene",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 938,
+          "selected_regions": [
+            149,
+            338,
+            231,
+            656,
+            51,
+            863,
+            766,
+            842
+          ],
+          "reference_soft_iou_trace": [
+            0.939215945246958,
+            0.9479206681905685,
+            0.951226006547777,
+            0.9538032039353954,
+            0.9544607678853007,
+            0.9549821813834082,
+            0.9554774560919299,
+            0.9556334945411835
+          ],
+          "reference_proxy_soft_iou": 0.9556334945411835,
+          "reference_actual_soft_iou": 0.9515399099766289,
+          "proxy_pixels_missing_in_actual": 2,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 13353
+      },
+      "leaves": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "scene",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 713,
+          "selected_regions": [
+            475,
+            544
+          ],
+          "reference_soft_iou_trace": [
+            0.9519932930879209,
+            0.9541840447310095
+          ],
+          "reference_proxy_soft_iou": 0.9541840447310095,
+          "reference_actual_soft_iou": 0.9544779590676434,
+          "proxy_pixels_missing_in_actual": 14,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 5983
+      },
+      "orchids": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "scene",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 1126,
+          "selected_regions": [
+            1007,
+            883,
+            873,
+            691,
+            84,
+            61,
+            581,
+            386,
+            90,
+            1050,
+            276,
+            778,
+            633,
+            991,
+            249,
+            369,
+            666,
+            560,
+            29,
+            200,
+            402,
+            472,
+            267
+          ],
+          "reference_soft_iou_trace": [
+            0.2531077047900995,
+            0.4819003494827187,
+            0.6634042931654381,
+            0.7733855900547044,
+            0.8297016053471231,
+            0.8456548648737298,
+            0.8573565731435532,
+            0.8613854964160984,
+            0.8650773657074178,
+            0.8663112475769308,
+            0.8673009799533002,
+            0.8681208787918298,
+            0.8687797979444223,
+            0.8692643991880886,
+            0.8697439406577249,
+            0.8702083221494705,
+            0.8706463355559179,
+            0.870940953077955,
+            0.8711562267700456,
+            0.8712924498328084,
+            0.8714216042010627,
+            0.8714956322995814,
+            0.8715326398186818
+          ],
+          "reference_proxy_soft_iou": 0.8715326398186818,
+          "reference_actual_soft_iou": 0.8412638100200169,
+          "proxy_pixels_missing_in_actual": 10,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0003109629906248301
+        },
+        "selected": 25033
+      },
+      "trex": {
+        "diagnostics": {
+          "field_owned_region_composition": true,
+          "source_access": false,
+          "target_camera_used_by_decoder": false,
+          "reference_observation": "scene",
+          "input_contract": "explicit current reference foreground mask, positive-only",
+          "candidate_regions": 761,
+          "selected_regions": [
+            176,
+            529,
+            297,
+            546,
+            663,
+            471,
+            133,
+            586,
+            652,
+            392,
+            340,
+            97,
+            631,
+            152,
+            508,
+            674,
+            533,
+            39,
+            456
+          ],
+          "reference_soft_iou_trace": [
+            0.5946578937857716,
+            0.639370596356741,
+            0.6507254259980649,
+            0.6618554017381745,
+            0.6678103664034919,
+            0.6727396867096478,
+            0.6761045138099224,
+            0.677745373122274,
+            0.6792054199215889,
+            0.6805182952381318,
+            0.681266968110708,
+            0.6816578817908543,
+            0.6819737450584884,
+            0.6821890067346259,
+            0.6823453127995404,
+            0.6824529329810194,
+            0.6825514993354544,
+            0.6826011730609812,
+            0.6826376649307537
+          ],
+          "reference_proxy_soft_iou": 0.6826376649307537,
+          "reference_actual_soft_iou": 0.6677077722299468,
+          "proxy_pixels_missing_in_actual": 49,
+          "membership_output": "binary Gaussian region union, not calibrated probability",
+          "scores_calibrated": false,
+          "global_optimum": false,
+          "learned_local_kernel_used": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9620053768157959,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 57917
+      }
+    }
+  },
+  "comparisons": {
+    "subset_reference__visible_reference": {
+      "response_iou": {
+        "delta": 0.008387274787694618,
+        "lower": 0.0014671520615084572,
+        "upper": 0.016056079591829416,
+        "improved": 7,
+        "regressed": 1,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "selection_iou": {
+        "delta": -0.005161725625822122,
+        "lower": -0.010385772432757432,
+        "upper": -0.0013205283011145659,
+        "improved": 2,
+        "regressed": 6,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "precision": {
+        "delta": -0.015826808158407757,
+        "lower": -0.02465896833479437,
+        "upper": -0.008859695310976598,
+        "improved": 1,
+        "regressed": 7,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "recall": {
+        "delta": 0.010059639901879303,
+        "lower": 0.005496547955528536,
+        "upper": 0.01629149930271407,
+        "improved": 8,
+        "regressed": 0,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "ap": {
+        "delta": -0.00448455215246811,
+        "lower": -0.014912887971777833,
+        "upper": 0.00262523675203035,
+        "improved": 5,
+        "regressed": 3,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      }
+    }
+  },
+  "baseline_reproduction": [],
+  "source_frames": 120,
+  "source_frame_resolution_unmodified": true,
+  "whole_five_task": false,
+  "model_promotion": false,
+  "training_steps": 0,
+  "extra_state_bytes": 0,
+  "implementation_commit": "99b2a180c5c3d6d69a60e2544d9555f5d4b91640",
+  "collector": {
+    "path": "/root/RADIO-GS-query-field/scripts/research/summarize_query_field_signed_regions.py",
+    "sha256": "f0d8b49beb5bbf56ff4b498d90c6212b9ddc2049e8adab613df76fa55d5d13fa"
+  },
+  "reporting_repair": null
+}

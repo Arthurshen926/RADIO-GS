@@ -43,3 +43,5 @@ orchids在组合条件仍漏掉底部花簇；参考形状匹配和跨视图完�
 原始数值见[结果JSON](2026-10-09-reference-scope-results.json)、
 [审计](2026-10-09-reference-scope-audit.json)、[冷启动](2026-10-09-reference-scope-runtime.json)、
 [协议](2026-10-09-reference-scope-protocol.md)。所有研究均为顺序开发，不是盲测最终集。
+
+后续可见性固定对照已完成，见[完整结果与责任更新](2026-10-09-reference-visibility-results.md)。

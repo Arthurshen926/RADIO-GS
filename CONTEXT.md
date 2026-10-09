@@ -1,5 +1,23 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: reference_visibility_v1 COMPLETE frozen99b2a18.
+Same retained positive-SAM query mask/7fields/120sources; alternative reference
+observation only. All16 predictions before scores, all8 subset-composition baseline
+four payloads numerically EXACT. Full-scene visibility vs subset reference:
+response82.0834->82.9221%(7up1down,CI+.1467..+1.6056pp), actual84.8863->84.3701%
+(2up6down,CI-1.0386..-.1321pp). Recallall8up, precision7down. NO default promotion.
+V10response86.5134 gap3.5913pp, BUT richer input than raw-scribble; do NOT combine
+visible response82.9221 and previous subset actual84.8863 into one method result.
+Both use binary member output; AP/hidden extent still deficient. Next responsibility
+is reference-invisible additions' identity and actual boundary, not more coverage.
+7tests pass (includes prior6); operator parity onefield4nonGTpatterns max1.55e-6,
+0thresholddisagreements.67frozen hashes/GTinputs pass; fern cold all4payloadsexact,
+source denialPASS(onecase Python audit). Both all-case error maps viewed.
+Reports reference-visibility-results.md/json, -audit/-operator/-runtime JSONs;
+ADR0020 updated to reflect implemented reference-mask composition, NOT full raw
+query composition or five-task completion. Allsessions18884,43405,39044,58664 DONE.
+No new training/cache-harmonization/full-five jobs. Original worktree unchanged.
+
 Active continuation2026-10-09: reference_scope_v1 COMPLETE frozen36db112.
 All32 predictions/eight baseline replays before scores. Raw signed/positive vs
 retained positive-SAM mask rays/composition response78.0334/77.7077/74.7677/82.0834%,
@@ -13,7 +31,8 @@ member decoder with binary output, not unchanged local kernel or global optimum.
 Python audit). All-case error PNG/PDF viewed. Reports reference-scope-results.md/json,
 audit/runtime. Sessions18303,52235,91831 all finished. Next fixed hypothesis:
 reference matching should retain full-scene occlusion, rather than comparing
-unoccluded subset alpha with a visible query mask. No new batch yet. Original
+unoccluded subset alpha with a visible query mask. This follow-up is now complete
+as reference_visibility_v1 above. Original
 worktree unchanged; no new training/source harmonization/full-five jobs.
 
 Active continuation2026-10-09: scope_conditioning_v1 COMPLETE frozen1e07346.
