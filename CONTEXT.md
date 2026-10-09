@@ -1,5 +1,71 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: extent_stages_v1 COMPLETE at c823de9. All56 outputs
+before8 scores, old120-source fixed7fields. Removing regional/negative/both paths
+actual79.4595->78.9592/79.0533/78.8534%, no overall repair. Orchids all-region
+optimistic recall98.769%, scale-compatible96.380%, admitted78.751%, final45.940%;
+coverage is not instance discrimination, all-region macro precision17.8831%.
+Fortress compatible-region coverage21.062% while finalrecall98.864%; scale and
+whole-object scope differ. Same selected arrays on8 local replays, max score
+error1.788e-7. Frozen62files andGTbindings checked. Human report/results JSON
+2026-10-09-extent-stages-results; standalone PNG/PDF under experiment diagnostics.
+
+positive_union_v1 COMPLETE, frozen f2a1dd2. Local/unweighted/confidence-union
+response69.5949/78.6286/80.3691%, actual79.4595/73.6474/77.4433%. Primary failed
+actual scope: all8 precision lower, all8 recall higher; no promotion. Duplicate
+exclusive summary write failed AFTER all24 predictions/all8scores and initial
+summary were saved. Baseline checks saved separately, exact IoUs all8/GTsame;
+no rerun. Failure retained validation/reporting_failure.log; repair in941b7ba.
+Onecasefern cold all4payloads bitwise exact/source denial passed. Six tests pass.
+Reports positive-union-results.md/json/runtime.json/validation.json. Raw summary
+has inherited reporting_repair and empty baseline list; supplementary validation
+is authoritative for this study's baseline. No old receipts overwritten.
+
+positive_expected_v1 COMPLETE frozen941b7ba. All32predictions/8scores andfern
+strict cold replay pass (all4arrays exact, denial effective). 8tests/63file hashes
+pass. Two prior arms rerun,16macro IoU pairs exact. Coherence normalization repair
+confidence_union->coherent_union actual77.4433->80.5398%, +3.0965pp,7/8improve,
+all8precisionup. Adding spatial variance expected_union80.5423%, only+.0025pp;
+not main cause. Versuslocal79.4595%, primary80.5423% has4improve/4regress,
+95%cluster CI[-4.3337,+8.3626]pp, all8precisionlower; response69.5949->77.8783%.
+No default promotion. Reports positive-expected-results.md/json/runtime.json.
+
+signed_expected_v1 COMPLETE frozenb07a4d6. Same8cases24predictionbarrier then
+scores. Signed primary actual81.0450%, response72.2114%; versus positive expected
+union +0.5026ppactual but -5.6669ppresponse. All8precisionup/all8recalldown.
+Fern positivecoverage100->82.8898%, recall96.1967->72.4104%, response74.5374->30.8342%:
+independent product erroneously rejects strong conflicting positive evidence.
+No promotion.9tests/63frozenhashes pass. Cold fernselected/responseexact butscore
+max1.788e-7; strictFAIL,numericPASS,source denialPASS. Reports signed-expected
+results.md/json/runtime.json. All its jobs finished (8718).
+
+signed_competition_v1 COMPLETE frozena447306. All32predictions before8scores,
+thenfern copied-field cold (all4arrays bitwise EXACT, source denialPASS; onecase
+Python audit). 11targetedtests/63frozen source+collector+protocol hashes pass.
+Primary same signed expected kernels +existing positive/negative/null competition:
+response78.0334%, actual81.4219%, precision87.9763%, recall92.6114%. Compared with
+local69.5949/79.4595%, response+8.4385pp all8improve, actual+1.9623pp fourimprove/
+fourregress, 95%cluster CI[-3.1994,+8.8423]pp; all8precisiondown. No promotion.
+Fern positivecoverage82.8898->100%, response30.8342->76.8488% vs signed product;
+negativecoverage.0681%, so not achieved by discarding negative input. Versuspositive
+expectedunion actual+.8795pp but4casesregress. Againstlocal actualfern76.1407,
+flower87.9192,fortress83.1266,horns_center96.6832,horns_left77.3185,leaves96.8245,
+orchids61.6934,trex71.6688%. V10response86.5134 still8.4800pphigher, input/runtime
+contracts differ; do not compare candidate actual with v10response.
+All5studies/168predictions+score receipts/GTbinding audited;40local baseline
+Gaussian selections EXACT, scoreswithin1e-6. Product selections subsetofcompetition
+all8. Complete report docs/experiments/2026-10-09-signed-competition-results.md/json,
+-runtime.json, signed-series-audit.json; per-stage reports linked. Error mapsall8
+PNG/PDF under signed_competition_v1/diagnostics; extent-stage plot underitsroot.
+ALL jobs finished (51090,24065audit,94819plot included). No cache/training/full-five
+jobs pending. No source harmonization started. Original /root/RADIO-GS HEAD/index
+unchanged. Active worktree /root/RADIO-GS-query-field on codex/query-preserving-gaussian-field.
+Next research: trusted whole-object acceptance and exclusion; individual/nested
+region hypothesis quality rather than all-region coverage; true observation
+statistics-to-member decision transfer; separately harmonize243sources and account
+for v10 referenceRGB/SAM input expansion. Then ONE method/fullfive+UQISfourmodes.
+Do not repeat mean/max/negative-weight searches or select scene-specific winners.
+
 Active continuation2026-10-09: signed_regions_v1 and positive_rays_v1 COMPLETE.
 Two sequential fixed7-field/8-request/3-arm NVOS studies, each24 predictions
 before all8 scores. Same old120 sources, no training/new state/labels/source
