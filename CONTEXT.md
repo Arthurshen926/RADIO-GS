@@ -1,33 +1,45 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-09: native_mode_functions_v1 IN PROGRESS, frozen
-implementation ae80fc4.18 native mode exports then804 queries across mean_native,
-measure_resized,measure_native. All9 UQIS scenes/all4 inputs, not a full-five-task
-promotion. Same full1089 legal sources and inherited22-room/3-room supervision.
-Gaussian-bound modes preserve weighted Chamfer native functions and full candidate
-coverage; raw source patch raster/frame layout omitted but uncompressed appearance
-atoms ARE additional scene memory. ADR0016 explicitly records this architectural
-extension. Source8 pseudoqueries/scene compare every mode to original per-view
-match_regions before any benchmark input. Source-only construction; no new training.
+Active continuation2026-10-09: native_mode_functions_v1 COMPLETE. Frozen
+construction ae80fc4;18 exports,all804 predictions and all3 scores completed before
+analysis; post supervisor finished summary,cold replay,plot successfully. No jobs
+remain for this study. Do not restart or overwrite its evidence.
+Report docs/experiments/2026-10-09-native-mode-functions-results.md and matching
+results.json/runtime.json. No default promotion or new full-five-task validation.
 
-Controls separate local mean versus measure at identical native query inputs, and
-448-resized/unit-weight versus native-size/valid-padding query preprocessing at
-identical measure. Same geometric surface2D adapter for all3 arms; shared member
-and Gaussian native channels unchanged. Compared to parent, native identity modes
-also expose full-view descriptors instead of the old18-view Gaussian identity
-channels; do NOT attribute that compound contrast solely to local representation.
-44 distinct focused/regression checks pass. First scene source replay max1.79e-7,
-4688 supported modes,177253 atoms,zero source median-anchor differences.
+All9 UQIS scenes; scene-macro text/image/2D/3D IoU (%):
+mean_native20.1561/34.0541/49.5025/48.4807;
+measure_resized20.1561/38.3179/49.5025/48.4807;
+measure_native20.1561/39.8749/49.5025/48.4807.
+v10 reference16.3865/39.8980/49.7357/49.0470. Image parent gain13.0094pp,
+all9 scenes improve; image gap0.0230pp. Local mean->measure +5.8208pp,
+5 improve/4 regress; resized->native +1.5570pp,6 improve/3 regress. Both
+ablation scene-bootstrap95% intervals include zero. Text scene0700 falls22.7331
+->3.7712 despite aggregate gain. Reused development evaluation,not independent test.
 
-Primary PID2014132, log /tmp/radio_gs_native_modes_run.log, exec session23418.
-Post supervisor /tmp/radio_gs_native_modes_finish.py waits for scoring, then full
-input/identity attribution and one-scene measure_native copied-field/source-denial
-replay (including actual native-size image/padding and surface2D), then plotting.
-Log /tmp/radio_gs_native_modes_finish.log. All construction precedes prediction and
-all804 outputs precede any scores. Do not consult partial scores, adjust frozen
-code/protocol mid-study, restart completed batches, or overwrite evidence. Inspect
-running status before resuming. Next: finish actual metrics/attribution and human
-report, update ledger/context, preserve any failures, commit completed evidence.
+Gaussian-bound modes preserve full local weighted-Chamfer functions and candidate
+coverage. Same full1089 legal sources, inherited22-room/3-room supervision; no new
+training.37,679 modes/1,670,173 atoms,72 source replays max1.788e-7,zero anchor
+differences. Mean/measure field payload hashes match; parent shared member/geometry/
+old native channels unchanged.44 distinct tests pass. All old native responses and
+point outputs match their declared references exactly. One scene/four-input copied
+field replay exact,zero forbidden opens; Python guard,preencoded text/image fixtures,
+not OS denial or full encoder/all-scene proof. Prior strict failures remain preserved.
+
+Uncompressed appearance atoms ARE added source-derived scene memory.9-field tensor
+bytes27,667,535,242 versus parent22,104,307,678 (+5,563,227,564). ADR0016 explicitly
+permits this extension; do not claim packaging is novelty or compression. Native
+identity also expands from old18-view native channels to full-view descriptors;
+parent contrast is not solely mean versus measure. Same surface2D in all3 arms.
+Candidate contains target67/67 text and image; chosen identity24/67 text,44/67 image
+for measure_native; points67/67. Correct object is not sufficient: anchor within the
+object changes member extent. Full patch function and query preprocessing restored
+substantial performance but ranking/extent are still imperfect.
+
+Next: same recipe full LERF2D/LERF3D/ScanNet OVS/NVOS coverage,validate typed union
+and positive/negative interfaces,repair NVOS123 missing native caches without target
+leakage; then matched identity/within-object-anchor/member contrasts. Do not splice
+old per-task winners or overfocus on compression before capability validation.
 
 Active continuation2026-10-09: joint_observation_transfer_v1 and its separate
 surface_input_function_v1 probe are COMPLETE. All jobs finished; no whole-batch

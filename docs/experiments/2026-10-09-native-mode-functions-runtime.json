@@ -1,0 +1,63 @@
+{
+  "complete": true,
+  "comparison": {
+    "text": {
+      "exact_scores": true,
+      "maximum_error": 0.0,
+      "exact_selection": true,
+      "exact_candidates": true,
+      "exact_weights": true
+    },
+    "image": {
+      "exact_scores": true,
+      "maximum_error": 0.0,
+      "exact_selection": true,
+      "exact_candidates": true,
+      "exact_weights": true
+    },
+    "point_2d": {
+      "exact_scores": true,
+      "maximum_error": 0.0,
+      "exact_selection": true,
+      "exact_candidates": true,
+      "exact_weights": true
+    },
+    "point_3d": {
+      "exact_scores": true,
+      "maximum_error": 0.0,
+      "exact_selection": true,
+      "exact_candidates": true,
+      "exact_weights": true
+    }
+  },
+  "strict_bitwise_passed": true,
+  "numerical_and_selection_passed": true,
+  "source_denial_passed": true,
+  "forbidden_open_attempts": [],
+  "coverage": "one scene,measure_native;actual native-size image and padding plus surface2D included",
+  "enforcement": "Python file-open guard;not OS sandbox",
+  "queries": {
+    "text": "uq_3afc1e95a1c6b79f7e834f7853815040",
+    "image": "uq_0dc467f958d3b4512e6a1e2c9da54795",
+    "point_2d": "uq_05b2bf9cdb522b66240f8ebbd87fda1b",
+    "point_3d": "uq_286ffd912e30c6c7a8cdc9f819e1ef79"
+  },
+  "evidence": [
+    {
+      "path": "output/query_field_20261009/native_mode_functions_v1/validation/runtime/fixture.pt",
+      "sha256": "89ae317b17f8eb5de7e8e7645429991ec9a995ea2fb28de2b8cab44fdd4130a5"
+    },
+    {
+      "path": "output/query_field_20261009/native_mode_functions_v1/validation/runtime/original.pt",
+      "sha256": "d876f261773f63f6c7fdf150cc2996d4755c5062a2748034f87904f2af98641c"
+    },
+    {
+      "path": "output/query_field_20261009/native_mode_functions_v1/validation/runtime/copied.pt",
+      "sha256": "125104a45bfeccfccc8c0eed86af180bc45acf66d46693e212d1e4b72b45016e"
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/scripts/research/validate_query_field_native_modes.py",
+      "sha256": "700d121816dbf5763ebcec3c106ee129d9befc0028672897ac1de6f0b2e5247e"
+    }
+  ]
+}
