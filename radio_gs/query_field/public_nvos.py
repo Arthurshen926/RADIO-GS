@@ -115,9 +115,10 @@ def predict(config, job, output, device="cuda"):
     elif program in {'joint_unsigned','joint_signed'}:
         from .runtime import QueryFieldRuntime
         result=QueryFieldRuntime(field).signed_regions(packet,joint=program=='joint_signed')
-    elif program in {'positive_ray_shared','positive_ray_local'}:
+    elif program in {'positive_ray_shared','positive_ray_local','positive_ray_union','positive_ray_confidence_union'}:
         from .runtime import QueryFieldRuntime
-        result=QueryFieldRuntime(field).positive_rays(packet,shared_centre=program=='positive_ray_shared')
+        result=QueryFieldRuntime(field).positive_rays(packet,shared_centre=program=='positive_ray_shared',
+            aggregation={'positive_ray_union':'union','positive_ray_confidence_union':'confidence_union'}.get(program,'mixture'))
     else:raise ValueError('unknown signed query program')
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
