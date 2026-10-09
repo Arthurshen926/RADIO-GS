@@ -44,6 +44,8 @@ def main():
             raise ValueError('function-only intervention changed tensors or another readout')
         if not report['exact_tensor_payload'] or report['additional_tensor_bytes'] or report['training_steps']:
             raise ValueError('undeclared tensor/supervision change')
+        if design.get('stopped_source_counterexample') and not report['regional_confidence_retained']:
+            raise ValueError('source counterexample repair absent from an export')
         source = read(Path(job['observations']) / 'observations.json')
         if set(report['source_frames']) - set(source['splits']['train_frames']):
             raise ValueError('nontraining source in replay')
@@ -70,6 +72,12 @@ def main():
         Path(__file__), Path(protected.__file__), Path('scripts/research/diagnose_query_field_mixture_activation.py'),
         Path('scripts/research/diagnose_query_field_mixture_signed.py'),
         Path('scripts/research/diagnose_query_field_support_composition.py')])
+    stopped = None
+    if design.get('stopped_source_counterexample'):
+        stopped = read(design['stopped_source_counterexample']['path'])
+        if stopped['benchmark_scoring_started']: raise ValueError('source correction followed scoring')
+        evidence.extend([Path(design['stopped_source_counterexample']['path']),
+                         Path('scripts/research/summarize_query_field_confidence_mixture.py')])
     result = dict(complete=True, primary_arm=arm, fields=30, macro=macro, per_scene=data, differences=differences,
         construction=construction, functional_replay=dict(cases=sum(len(r['replay']) for r in construction),
             max_absolute_error=max(q[k] for r in construction for q in r['replay']
@@ -81,6 +89,7 @@ def main():
         exact_parent_tensor_payload=True, native_invariance=native, runtime=runtime,
         point_activation=point, signed_activation=signed, v10_targets=previous['v10_targets'],
         reference_budgets=budgets,
+        stopped_earlier_trial=stopped,
         source_only=True, training_steps=0, source_access_at_query=False, model_promotion=False,
         independent_final_test=False, per_task_model_selection=False, uncompressed_functional_reference=True,
         full_v10_function_preservation=False, implementation_commit=design['implementation_commit'],

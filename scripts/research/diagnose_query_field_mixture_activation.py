@@ -17,6 +17,8 @@ from radio_gs.query_field.soft_paired_evidence import SoftPairedEvidence
 from scripts.research.run_query_field_mixture_functions import ROOT, PREVIOUS, ARMS, read, write, receipt, check
 from scripts.research.run_query_field_protected import ROOT as PROTECTED
 
+RELATION_CLASS = MixturePairedEvidence
+
 
 def load_relation(directory, cls):
     manifest = read(directory / 'manifest.json')
@@ -34,14 +36,14 @@ def main():
     targets = read(package / 'evaluator/targets.json')
     roots = dict(protected_training=PROTECTED / 'protected_training/predictions/uqis',
         soft_paired_function=PREVIOUS / 'soft_paired_function/predictions/uqis',
-        mixture_function=ROOT / ARMS[0] / 'predictions/uqis')
+        **{ARMS[0]: ROOT / ARMS[0] / 'predictions/uqis'})
     write(out / 'design.json', dict(code=receipt(Path(__file__)), inputs=receipt(ROOT / 'predictions_complete.json'),
         targets=receipt(package / 'evaluator/targets.json'), all_point_queries=True,
         post_score=True, no_fitting=True, no_model_selection=True, causal_claim=False))
     records, evidence = [], []
     for job in cohort['uqis']:
         scene = job['name']; directory = Path(job['field'])
-        mixture_relation, xyz, observed, spec = load_relation(directory, MixturePairedEvidence)
+        mixture_relation, xyz, observed, spec = load_relation(directory, RELATION_CLASS)
         previous_relation = SoftPairedEvidence(mixture_relation.state_dict(), len(xyz))
         domain = next(d for d in targets['scene_domains'] if d['scene_id'] == scene)
         mesh_path = package / 'method' / domain['mesh_xyz_path']
@@ -67,7 +69,7 @@ def main():
             case = dict(query_id=qid, correct_registered_support=correct, target_vertices=int(truth.sum()),
                 observed_target_vertices=int(seen.sum()), unsupported=not len(ids), arms={})
             coefficients = None
-            for arm, relation in [('soft_paired_function', previous_relation), ('mixture_function', mixture_relation)]:
+            for arm, relation in [('soft_paired_function', previous_relation), (ARMS[0], mixture_relation)]:
                 if len(ids):
                     support = Support(ids, base['candidate_weights']); coefficient = relation.coefficients(support, spec['default_scale'])
                     coefficients = coefficient
@@ -103,7 +105,7 @@ def main():
                     effective_view_mass=0. if coefficients is None else float(coefficients.sum()),
                     target_positive_mass=float(p[seen].mean()) if seen.any() else 0.,
                     target_negative_mass=float(n[seen].mean()) if seen.any() else 0.)
-                if arm == 'mixture_function' and len(ids):
+                if arm == ARMS[0] and len(ids):
                     features = relation.joint_features(support, spec['default_scale'])
                     case['arms'][arm]['target_joint_features_mean'] = features[torch.from_numpy(index[seen])].mean(0).tolist() if seen.any() else [0.] * 6
             cases.append(case)
@@ -115,7 +117,7 @@ def main():
     known = [q for q in all_cases if q['correct_registered_support']]
     if len(all_cases) != 67 or len(known) != 59: raise ValueError('complete point cohort differs')
     summary = {}
-    for arm in ['soft_paired_function', 'mixture_function']:
+    for arm in ['soft_paired_function', ARMS[0]]:
         values = [q['arms'][arm] for q in known]
         summary[arm] = dict(known_correct_queries=len(known),
             queries_with_admitted_views=sum(q['admitted_views'] > 0 for q in values),

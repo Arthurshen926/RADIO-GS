@@ -20,11 +20,13 @@ def association_variants(relation, support, scale):
     confidence = p.new_zeros(relation.view_count).scatter_reduce_(0, relation.views,
         torch.where(admitted, known, 0.), reduce='amax', include_self=True).clamp_max(1.)
     conditional_global = normalized(preference) * confidence[relation.views]
+    confidence_global = normalized(torch.where(admitted, p, 0.)) * confidence[relation.views]
     mixture = relation.coefficients(support, scale)
     return dict(maximum_hard=float(hard.max()), maximum_soft_positive=float(p.max()),
         maximum_conditional_preference=float((p / known.clamp_min(1e-12)).max()),
         variants={k: dict(coordinates=int((a > 0).sum()),
             views=int(torch.unique(relation.views[a > 0]).numel()), effective_view_mass=float(a.sum()))
             for k, a in [('hard_global_majority', original), ('soft_global_majority', soft_global),
-                         ('soft_global_conditional', conditional_global), ('component_mixture', mixture)]},
+                         ('soft_global_conditional', conditional_global),
+                         ('soft_global_confidence', confidence_global), ('component_mixture', mixture)]},
         interpretation='Association-only function contrasts; no claim of isolated benchmark improvement')

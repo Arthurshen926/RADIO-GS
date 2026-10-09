@@ -1,5 +1,20 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: confidence_mixture_functions_v1 is IN PROGRESS,
+frozen implementation c661e73, arm confidence_mixture_function. Full runner
+scripts/research/run_query_field_confidence_mixture_functions.py; report wrapper
+scripts/research/summarize_query_field_confidence_mixture.py. All51 focused tests
+pass. It preserves the previous Soft payload exactly and repairs support lookup.
+The earlier mixture_functions_v1 was STOPPED after30 constructions and partial
+predictions, BEFORE ANY scoring: a source-only counterexample p=[1,1e-6], n=0
+gave [.5,.5] association because regional confidence was divided out. Retain its
+outputs and source_counterexample_stop.json. Corrected preference uses admitted p
+rather than p/(p+n), with the same bounded component/view confidence. Do not
+describe the stopped trial as a full benchmark or the correction as measured yet.
+Manifest audit: current534 train views vs v10-declared3286 over30 distinct fields;
+all534 train views enter relation compilation. Fern originally12, not six invalid
+episodes dropped. Detailed budget receipts under both new roots' diagnostics.
+
 Active2026-10-09: TWO full functional-reference studies are COMPLETE. The user
 rejects substituting feature retention or source convergence for real capability
 transfer. Full report: `docs/experiments/2026-10-09-paired-function-results.md`,
