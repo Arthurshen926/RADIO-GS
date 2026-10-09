@@ -100,6 +100,13 @@ def predict(config, job, output, device="cuda"):
     packet, registration = scribble_packet(operator, masks[0], masks[1] if job["mode"] == "signed" else None,
                                            scale=scale, preserve_rays=field.support_aggregation == 'expected_energy',
                                            negative_rays=field.negative_rule == 'competitive_rays')
+    if job.get('query_program','').startswith('positive_ray'):
+        from dataclasses import replace
+        from .adapters import raster_support
+        positive_rays,_=raster_support(operator,masks[0],preserve_rays=True)
+        packet=replace(packet,positive=positive_rays)
+        registration['positive_ray_hypotheses_retained']=True
+        registration['positive_ray_hypotheses']=int(positive_rays.components.unique().numel())
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
     registered = time.monotonic()
@@ -108,6 +115,9 @@ def predict(config, job, output, device="cuda"):
     elif program in {'joint_unsigned','joint_signed'}:
         from .runtime import QueryFieldRuntime
         result=QueryFieldRuntime(field).signed_regions(packet,joint=program=='joint_signed')
+    elif program in {'positive_ray_shared','positive_ray_local'}:
+        from .runtime import QueryFieldRuntime
+        result=QueryFieldRuntime(field).positive_rays(packet,shared_centre=program=='positive_ray_shared')
     else:raise ValueError('unknown signed query program')
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()

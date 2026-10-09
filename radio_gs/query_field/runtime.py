@@ -37,3 +37,7 @@ class QueryFieldRuntime:
     def signed_regions(self, packet, **options):
         from .signed_regions import query
         return query(self.field, packet, **options)
+
+    def positive_rays(self, packet, **options):
+        from .positive_rays import query
+        return query(self.field, packet, **options)

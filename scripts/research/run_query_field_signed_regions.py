@@ -54,15 +54,8 @@ def run(gpus):
     for j in d['jobs']:
         check(j['scoring']);score(read(j['scoring']['path']),ROOT/'predictions'/j['name']);print('scored',j['name'],flush=True)
     write(ROOT/'scoring_complete.json',dict(records=[receipt(ROOT/'predictions'/j['name']/'evaluation.json') for j in d['jobs']]))
-    per={a:{} for a in ARMS}
-    for j in d['jobs']:
-        for row in read(ROOT/'predictions'/j['name']/'evaluation.json')['results']:
-            arm=row['job'].split('__')[-1];per[arm][j['name']]=row
-    macro={a:{key:sum((v['retained_response']['iou'] if key=='response_iou' else v[key]) for v in per[a].values())/8
-        for key in ['response_iou','iou','precision','recall']} for a in ARMS}
-    report=dict(complete=True,primary='joint_signed',cases=8,macro=macro,per_case=per,whole_five_task=False,model_promotion=False,
-        source_frames=120,source_frame_resolution_unmodified=True,prior_labels_seen=True,implementation_commit=d['implementation_commit'])
-    write(ROOT/'summary.json',report);write('docs/experiments/2026-10-09-signed-region-results.json',report);print(macro,flush=True)
+    from scripts.research.summarize_query_field_signed_regions import main as summarize
+    summarize()
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('stage',choices=['prepare','run']);p.add_argument('--gpus',default='2,3');a=p.parse_args();torch.set_num_threads(4)
