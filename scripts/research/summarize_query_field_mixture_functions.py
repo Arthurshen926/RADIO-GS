@@ -61,6 +61,19 @@ def main():
     if len(runtime['records']) != 1 or any(set(r['exact_replay']) != {'text', 'image', 'point_2d', 'point_3d', 'category'}
             or not all(r['exact_replay'].values()) or r['forbidden_open_attempts'] for r in runtime['records']):
         raise ValueError('standalone replay failed')
+    runtime_detail = None
+    if design.get('stopped_source_counterexample'):
+        detail_path = ROOT / 'validation/runtime_numeric/report.json'; runtime_detail = read(detail_path)
+        # Keep the original strict contract. The extra raw tensors diagnose the
+        # initial failure; numerical tolerance does not waive hash equality here.
+        comparisons = [runtime_detail['original_repeat']] + [r['comparison'] for r in runtime_detail['records']]
+        if len(runtime_detail['records']) != 2 or any(not q['exact_scores'] or not q['exact_selections']
+                for comparison in comparisons for q in comparison.values()):
+            raise ValueError('supplemental raw replay is not exact')
+        if any(r['forbidden_open_attempts'] for r in runtime_detail['records']):
+            raise ValueError('supplemental copied replay accessed sources')
+        evidence.extend([detail_path, ROOT / 'validation/runtime.failed0/failure.json',
+            ROOT / 'execution/cold_retry.json', Path('scripts/research/validate_query_field_mixture_replay.py')])
     protected.ARMS = ARMS; native = protected.native_invariance({arm: cohort})
     if native[arm]['exact_native_scores'] != 268: raise ValueError('native output changed')
     point_path = ROOT / 'diagnostics/mixture_activation/report.json'; point = read(point_path)
@@ -93,6 +106,7 @@ def main():
             benchmark_queries_used=False),
         field_tensor_bytes=sum(r['field_tensor_bytes'] for r in construction), additional_tensor_bytes=0,
         exact_parent_tensor_payload=True, native_invariance=native, runtime=runtime,
+        runtime_raw_replay=runtime_detail,
         point_activation=point, signed_activation=signed, v10_targets=previous['v10_targets'],
         reference_budgets=budgets,
         stopped_earlier_trial=stopped,

@@ -39,6 +39,7 @@ def main():
             cold = json.loads(process.stdout.strip().splitlines()[-1])
         parity = {name: all(expected[name][k] == cold['results'][name][k]
                            for k in ['scores_sha256', 'selected_sha256', 'selected']) for name in expected}
+        write(root / (arm + '.comparison.json'), dict(expected=expected, copied=cold, exact_replay=parity))
         if not all(parity.values()) or cold['forbidden_open_attempts']:
             raise ValueError('copied-export replay or source denial failed')
         reports.append(dict(arm=arm, field=receipt(original / 'field.pt'), exact_replay=parity, **cold))
