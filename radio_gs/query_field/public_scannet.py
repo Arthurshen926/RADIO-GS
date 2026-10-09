@@ -18,10 +18,12 @@ def predict(field_path, query_path, output, encoder_path, device='cuda', query_p
     queries=json.loads(Path(query_path).read_text())['queries']
     field,manifest=load_field(field_path,device)
     encoder=NativeQueryEncoder(encoder_path,device)
-    native,members,receipts=[],[],[]
+    native,members,receipts,vectors=[],[],[],[]
     for query in queries:
         packet=encoder.text(query['text'],task='union')
-        result=field.query(packet)
+        from .query_program import query as program_query
+        result=program_query(field,packet) if query_program==PROGRAM else field.query(packet)
+        vectors.append(packet.semantic.flatten())
         native.append(result.semantic_scores.cpu());members.append(result.membership_scores.cpu())
         receipts.append(dict(class_id=query['class_id'],text=query['text'],selected=int(result.selected.sum()),
                              candidates=result.candidate_indices.cpu().tolist(),scale_m=result.scale))
@@ -29,7 +31,15 @@ def predict(field_path, query_path, output, encoder_path, device='cuda', query_p
                  native=torch.stack(native,1),member=torch.stack(members,1))
     if query_program == PROGRAM:
         from .category_evidence import corroborated_category_scores
-        payload['typed'] = corroborated_category_scores(payload['native'], payload['member'])
+        if field.semantic_measure is None:
+            payload['typed'] = corroborated_category_scores(payload['native'], payload['member'])
+        else:
+            from radio_gs.querying.observation_readout import positive_support_rank
+            prior=field.semantic_measure.probabilities(torch.stack(vectors),
+                (100*payload['native'].to(device)).softmax(1),field.semantic_measure_rule).cpu()
+            payload['measure_prior']=prior
+            payload['typed']=positive_support_rank(prior,payload['member'])
+            payload['observed']=payload['observed'] | field.semantic_measure.supported.cpu()
     torch.save(payload,root/'predictions.pt')
     report=dict(field_sha256=manifest['files']['field.pt']['sha256'],query_sha256=sha256(query_path),
                 predictions_sha256=sha256(root/'predictions.pt'),queries=receipts,

@@ -72,6 +72,14 @@ def category_partition(field, native_queries):
         result = query(field, QueryPacket('text', task='union', semantic=vector))
         native.append(result.semantic_scores); members.append(result.membership_scores)
     native = torch.stack(native, 1); members = torch.stack(members, 1)
-    evidence = corroborated_category_scores(native, members)
-    labels = evidence.argmax(1).masked_fill(~field.observed, -1)
+    if field.semantic_measure is None:
+        evidence = corroborated_category_scores(native, members)
+        available=field.observed
+    else:
+        from radio_gs.querying.observation_readout import positive_support_rank
+        prior=field.semantic_measure.probabilities(native_queries,(100*native.float()).softmax(1),
+                                                   field.semantic_measure_rule)
+        evidence=positive_support_rank(prior,members)
+        available=field.observed | field.semantic_measure.supported
+    labels = evidence.argmax(1).masked_fill(~available, -1)
     return evidence, labels
