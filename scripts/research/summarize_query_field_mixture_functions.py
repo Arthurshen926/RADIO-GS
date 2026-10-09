@@ -73,11 +73,17 @@ def main():
         Path('scripts/research/diagnose_query_field_mixture_signed.py'),
         Path('scripts/research/diagnose_query_field_support_composition.py')])
     stopped = None
+    carrier = None
     if design.get('stopped_source_counterexample'):
         stopped = read(design['stopped_source_counterexample']['path'])
         if stopped['benchmark_scoring_started']: raise ValueError('source correction followed scoring')
         evidence.extend([Path(design['stopped_source_counterexample']['path']),
                          Path('scripts/research/summarize_query_field_confidence_mixture.py')])
+        carrier_path = ROOT / 'diagnostics/uqis_carrier_correspondence.json'
+        carrier = read(carrier_path)
+        if len(carrier['records']) != 9 or carrier['exact_mapped_scenes'] != 9:
+            raise ValueError('incomplete source-budget carrier feasibility audit')
+        evidence.extend([carrier_path, Path('scripts/research/audit_query_field_carrier_correspondence.py')])
     result = dict(complete=True, primary_arm=arm, fields=30, macro=macro, per_scene=data, differences=differences,
         construction=construction, functional_replay=dict(cases=sum(len(r['replay']) for r in construction),
             max_absolute_error=max(q[k] for r in construction for q in r['replay']
@@ -90,6 +96,7 @@ def main():
         point_activation=point, signed_activation=signed, v10_targets=previous['v10_targets'],
         reference_budgets=budgets,
         stopped_earlier_trial=stopped,
+        uqis_carrier_correspondence=carrier,
         source_only=True, training_steps=0, source_access_at_query=False, model_promotion=False,
         independent_final_test=False, per_task_model_selection=False, uncompressed_functional_reference=True,
         full_v10_function_preservation=False, implementation_commit=design['implementation_commit'],
