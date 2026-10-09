@@ -41,7 +41,8 @@ def mixture_logits(field,support,scale,*,shared_centre=False,chunk_size=32,aggre
 
 
 @torch.no_grad()
-def query(field,packet,*,shared_centre=False,aggregation="mixture"):
+def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggregation="legacy"):
+    if negative_aggregation not in {"legacy","expected_union"}:raise ValueError("unknown negative aggregation")
     packet.validate(len(field.xyz),field.semantic.native_dim,field.local.native_dim)
     if packet.positive is None or packet.modality not in {'point_2d','point_3d'}:raise ValueError('positive rays need explicit spatial support')
     if packet.positive.components is None:return field.query(packet)
@@ -52,12 +53,24 @@ def query(field,packet,*,shared_centre=False,aggregation="mixture"):
     support=Support(ids[valid],w[valid],p.components.to(ids.device)[valid]);scale=field.default_scale if packet.scale is None else packet.scale
     logits=mixture_logits(field,support,scale,shared_centre=shared_centre,aggregation=aggregation)
     if field.evidence is not None:logits=field.evidence.refine(logits,support,scale)
-    probability=field.exclude_membership(logits.sigmoid(),packet.negative,scale,logits).masked_fill(~field.member_available,0)
+    if negative_aggregation=="expected_union" and packet.negative is not None:
+        if field.negative_rule!="product" or packet.negative.components is None:
+            raise ValueError("expected negative union requires registered negative rays and product rule")
+        n=packet.negative;ids=n.indices.to(field.xyz.device);w=n.weights.to(field.xyz);valid=field.member_available[ids]&(w>0)
+        probability=logits.sigmoid()
+        if bool(valid.any()):
+            ns=Support(ids[valid],w[valid],n.components.to(ids.device)[valid])
+            excluded=mixture_logits(field,ns,scale,aggregation="expected_union")
+            if field.evidence is not None:excluded=field.evidence.refine(excluded,ns,scale)
+            probability=probability*(1-excluded.sigmoid())
+    else:
+        probability=field.exclude_membership(logits.sigmoid(),packet.negative,scale,logits)
+    probability=probability.masked_fill(~field.member_available,0)
     if packet.exact_positive:
         probability[support.indices]=1
         if packet.negative is not None:probability[packet.negative.indices[packet.negative.weights>0]]=0
     return QueryResult(None,probability,probability>field.threshold,support.indices,support.weights/support.weights.sum(),float(scale),
         dict(shared_member_core=True,source_access=False,positive_rays=int(support.components.unique().numel()),
         positive_aggregation={'mixture':'mass-normalized log mean exp of normalized per-ray member energies','union':'maximum per-ray member energy','confidence_union':'maximum confidence-weighted per-ray membership','coherent_union':'confidence union retaining feature coherence','expected_union':'confidence union of exact expected per-ray member energies'}[aggregation],
-        positive_centre='pooled' if shared_centre else 'per_ray',ray_subsampling=False,hard_ray_constraints=False,
+        negative_aggregation=negative_aggregation,positive_centre='pooled' if shared_centre else 'per_ray',ray_subsampling=False,hard_ray_constraints=False,
         source_rgb_prompt_expansion_transferred=False,scores_calibrated=False))

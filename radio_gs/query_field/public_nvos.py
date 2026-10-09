@@ -105,6 +105,10 @@ def predict(config, job, output, device="cuda"):
         from .adapters import raster_support
         positive_rays,_=raster_support(operator,masks[0],preserve_rays=True)
         packet=replace(packet,positive=positive_rays)
+        if job.get('query_program')=='positive_ray_expected_signed' and job['mode']=='signed':
+            negative_rays,_=raster_support(operator,masks[1],preserve_rays=True)
+            packet=replace(packet,negative=negative_rays)
+            registration['negative_ray_hypotheses_retained']=True
         registration['positive_ray_hypotheses_retained']=True
         registration['positive_ray_hypotheses']=int(positive_rays.components.unique().numel())
     if str(device).startswith("cuda"):
@@ -115,10 +119,11 @@ def predict(config, job, output, device="cuda"):
     elif program in {'joint_unsigned','joint_signed'}:
         from .runtime import QueryFieldRuntime
         result=QueryFieldRuntime(field).signed_regions(packet,joint=program=='joint_signed')
-    elif program in {'positive_ray_shared','positive_ray_local','positive_ray_union','positive_ray_confidence_union','positive_ray_coherent_union','positive_ray_expected_union'}:
+    elif program in {'positive_ray_shared','positive_ray_local','positive_ray_union','positive_ray_confidence_union','positive_ray_coherent_union','positive_ray_expected_union','positive_ray_expected_signed'}:
         from .runtime import QueryFieldRuntime
         result=QueryFieldRuntime(field).positive_rays(packet,shared_centre=program=='positive_ray_shared',
-            aggregation={'positive_ray_union':'union','positive_ray_confidence_union':'confidence_union','positive_ray_coherent_union':'coherent_union','positive_ray_expected_union':'expected_union'}.get(program,'mixture'))
+            aggregation={'positive_ray_union':'union','positive_ray_confidence_union':'confidence_union','positive_ray_coherent_union':'coherent_union','positive_ray_expected_union':'expected_union','positive_ray_expected_signed':'expected_union'}.get(program,'mixture'),
+            negative_aggregation='expected_union' if program=='positive_ray_expected_signed' else 'legacy')
     else:raise ValueError('unknown signed query program')
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
