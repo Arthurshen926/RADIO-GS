@@ -77,3 +77,11 @@ def test_compiler_adds_weak_target_rows_without_changing_associations(tmp_path):
     assert report['exact_hard_association_coordinates'] and report['protected_state_unchanged']
     assert coverage['available_rows'] == 2 * coverage['hard_available_rows'] > 0
     assert report['source_frames'] == [1, 2] and len(report['replay']) == 4
+    from radio_gs.query_field.compile_mixture_evidence import compile_field as mixture_compile
+    mixture = mixture_compile(tmp_path / 'soft/field', source, tmp_path / 'mixture')
+    assert mixture['exact_tensor_payload'] and mixture['additional_tensor_bytes'] == 0
+    assert mixture['parent_sha256'] == mixture['export_sha256']
+    assert len(mixture['replay']) == 4 and all(r['known_elements'] for r in mixture['replay'])
+    assert {r['kind'] for r in mixture['replay']} == {'point', 'two_full_rays'}
+    loaded, _ = load_field(tmp_path / 'mixture/field')
+    assert loaded.evidence_kind == 'mixture_partial_view_evidence_v1'

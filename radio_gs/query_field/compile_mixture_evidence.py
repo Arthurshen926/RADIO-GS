@@ -1,0 +1,105 @@
+"""Change only support lookup; independently replay from construction rasters."""
+import copy
+import json
+from pathlib import Path
+import shutil
+import time
+
+import numpy as np
+from scipy import sparse
+import torch
+
+from .contracts import Support
+from .element_relation_training import view_transfer
+from .mixture_paired_evidence import KIND, MixturePairedEvidence
+from .relation_training import SourceRelations
+from .storage import load_field, sha256
+
+
+@torch.no_grad()
+def compile_field(parent, observations, output):
+    output = Path(output); output.mkdir(parents=True, exist_ok=False)
+    started = time.monotonic(); field, manifest = load_field(parent)
+    if field.evidence_kind != 'soft_partial_view_evidence_v1':
+        raise ValueError('matched soft reference required')
+    source_path = Path(observations) / 'observations.json'
+    if manifest['provenance']['observations_sha256'] != sha256(source_path):
+        raise ValueError('source geometry/rows differ')
+    source = SourceRelations(observations, field.observed)
+    if source.manifest['world_units_per_metre'] != field.world_units_per_metre:
+        raise ValueError('physical units differ')
+    relation = MixturePairedEvidence(field.evidence.state_dict(), len(field.xyz))
+    queries = []
+    for view in source.views:
+        pixels = view['pixels'][0][torch.tensor([0, len(view['pixels'][0]) // 2])]
+        anchor = view['best'][pixels[:1]].long()
+        queries.append((view['frame'], 'point', Support(anchor, torch.ones(1)), float(view['scales'][0])))
+        # Actual full projection contributors, not a two-dominant-anchor proxy.
+        indices, weights = [], []
+        for pixel, weight in zip(pixels.tolist(), [.25, .75]):
+            ray = view['columns'].getrow(pixel)
+            keep = field.observed[ray.indices].numpy() & (ray.data > 0)
+            ids, values = ray.indices[keep], ray.data[keep]
+            if not len(ids): raise ValueError('source replay ray has no observed support')
+            indices.extend(ids.tolist()); weights.extend((weight * values / values.sum()).tolist())
+        queries.append((view['frame'], 'two_full_rays', Support(torch.tensor(indices), torch.tensor(weights)),
+                        float(view['scales'][0])))
+    target_rows = np.unique(np.r_[np.linspace(0, len(field.xyz) - 1, min(512, len(field.xyz)), dtype=np.int64),
+                                 np.concatenate([q[2].indices.numpy() for q in queries])])
+    support_rows = np.unique(np.concatenate([q[2].indices.numpy() for q in queries]))
+    # Recreate only the source-side operands needed by the fixed replay. Runtime
+    # never sees these masks/cameras. Combine masks BEFORE lifting target rows.
+    sources = []
+    for view in source.views:
+        full, peak = view_transfer(view['columns'], field.observed, minimum_peak=0.)
+        transfer = (sparse.diags(np.minimum(1., peak / .1)) @ full).tocsr()
+        masks = [sparse.csr_matrix(view[k].numpy().astype(np.float32)) for k in ['positive', 'negative']]
+        sources.append((view, [(transfer[support_rows] @ m.T).toarray() for m in masks],
+                        transfer[target_rows], masks))
+    replay = []
+    for frame, kind, support, scale in queries:
+        expected = [np.zeros(len(target_rows), np.float32), np.zeros(len(target_rows), np.float32)]
+        ids = np.searchsorted(support_rows, support.indices.numpy())
+        weights = support.weights.numpy() / float(support.weights.sum())
+        expected_coefficients = []
+        for view, (p, n), transfer, masks in sources:
+            p, n = p[ids], n[ids]
+            known = p + n; ratio = view['scales'].numpy() / scale
+            admitted = (p > n) & (ratio >= .5)[None, :] & (ratio <= 2)[None, :]
+            preference = np.where(admitted, p / np.maximum(known, 1e-12), 0)
+            confidence = np.minimum(np.where(admitted, known, 0).max(1), 1.)
+            association = preference / np.maximum(preference.sum(1, keepdims=True), 1e-12)
+            coefficient = (association * (confidence * weights)[:, None]).sum(0)
+            expected_coefficients.extend(coefficient.tolist())
+            for k, mask in enumerate(masks): expected[k] += transfer @ (mask.T @ coefficient)
+        actual = relation.masses(support, scale, torch.from_numpy(target_rows))
+        errors = [float(np.max(np.abs(a.numpy() - b))) for a, b in zip(actual, expected)]
+        coefficient = relation.coefficients(support, scale)
+        coefficient_error = float(np.max(np.abs(coefficient.numpy() - expected_coefficients)))
+        if max(*errors, coefficient_error) > 1e-5:
+            raise ValueError('source/raster and exported mixture functions differ')
+        replay.append(dict(source_frame=frame, kind=kind, support_rows=len(support.indices), scale=scale,
+            positive_error=errors[0], negative_error=errors[1], coefficient_error=coefficient_error,
+            known_elements=int(((actual[0] + actual[1]) > 0).sum()),
+            admitted_views=int(torch.unique(relation.views[coefficient > 0]).numel())))
+    # The experiment changes a function, not one tensor. Independent byte copy
+    # keeps the export standalone and proves exact state retention by SHA256.
+    destination = output / 'field'; destination.mkdir()
+    shutil.copyfile(Path(parent) / 'field.pt', destination / 'field.pt')
+    if sha256(destination / 'field.pt') != manifest['files']['field.pt']['sha256']:
+        raise ValueError('copied payload differs')
+    exported = copy.deepcopy(manifest); exported['spec']['evidence_kind'] = KIND
+    exported['provenance'].update(support_lookup='mixture of confidence-weighted partial associations',
+                                  benchmark_queries_used=False, additional_3d_labels=False)
+    (destination / 'manifest.json').write_text(json.dumps(exported, indent=2) + '\n')
+    report = dict(parent_sha256=manifest['files']['field.pt']['sha256'],
+        export_sha256=exported['files']['field.pt']['sha256'], exact_tensor_payload=True,
+        protected_state_unchanged=True, source_frames=[v['frame'] for v in source.views],
+        source_regions=sum(len(v['scales']) for v in source.views), training_steps=0,
+        field_tensor_bytes=exported['tensor_bytes'], additional_tensor_bytes=0,
+        replay=replay, replay_target_rows=target_rows.tolist(),
+        source_access_at_query=False, benchmark_queries_used=False,
+        replay_scope='all valid source views; point and two full rays; fixed sampled target rows plus all support rows',
+        complete_v10_function_preservation=False, seconds=time.monotonic() - started)
+    (output / 'construction.json').write_text(json.dumps(report, indent=2) + '\n')
+    return report
