@@ -24,6 +24,8 @@ def summarize():
     data['parent']={k.removeprefix('UQIS '):v for k,v in prior['per_scene']['full_supervised'].items()}
     for job in d['fields']:
         scene=job['scene'];domain=next(x for x in targets['scene_domains'] if x['scene_id']==scene)
+        decisions={arm:{q['query_id']:q['diagnostics'] for q in
+            read(ROOT/arm/'predictions/uqis/receipts'/(scene+'.json'))['queries']} for arm in ARMS}
         labels=np.load(package/'evaluator'/domain['mesh_instance_ids_path'])
         obs=read(Path(job['observations'])/'observations.json')
         geo=torch.load(obs['geometry']['path'],map_location='cpu',weights_only=True)
@@ -34,9 +36,10 @@ def summarize():
                 for arm in ARMS:
                     path=ROOT/arm/'predictions/uqis';saved=torch.load(path/'gaussians'/(qid+'.pt'),map_location='cpu',weights_only=True)
                     ids=saved['candidates'].numpy();weight=saved['candidate_weights'].numpy();correct=row_labels[ids]==target['instance_id']
+                    chosen=decisions[arm][qid].get('chosen_mode',int(weight.argmax()) if len(weight) else -1)
                     selected=np.load(path/'selections'/(qid+'.npy'));tp=int((selected&truth).sum());fp=int((selected&~truth).sum());fn=int((~selected&truth).sum())
                     records.append(dict(arm=arm,scene=scene,modality=m,query_id=qid,candidates=len(ids),
-                        correct_identity=bool(len(ids) and correct[weight.argmax()]),candidate_has_target=bool(correct.any()),
+                        correct_identity=bool(len(ids) and correct[chosen]),chosen_candidate=chosen,candidate_has_target=bool(correct.any()),
                         iou=tp/max(tp+fp+fn,1),precision=tp/max(tp+fp,1),recall=tp/max(tp+fn,1)))
                     if m in ['text','image']:
                         old=torch.load(PARENT/'full_supervised/predictions/uqis/gaussians'/(qid+'.pt'),map_location='cpu',weights_only=True)
