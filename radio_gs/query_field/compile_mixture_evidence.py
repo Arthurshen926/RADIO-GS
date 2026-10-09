@@ -17,7 +17,7 @@ from .storage import load_field, sha256
 
 
 @torch.no_grad()
-def compile_field(parent, observations, output):
+def compile_field(parent, observations, output, *, confidence_weighted=False):
     output = Path(output); output.mkdir(parents=True, exist_ok=False)
     started = time.monotonic(); field, manifest = load_field(parent)
     if field.evidence_kind != 'soft_partial_view_evidence_v1':
@@ -28,7 +28,11 @@ def compile_field(parent, observations, output):
     source = SourceRelations(observations, field.observed)
     if source.manifest['world_units_per_metre'] != field.world_units_per_metre:
         raise ValueError('physical units differ')
-    relation = MixturePairedEvidence(field.evidence.state_dict(), len(field.xyz))
+    if confidence_weighted:
+        from .confidence_mixture_evidence import KIND as evidence_kind, ConfidenceMixtureEvidence as relation_class
+    else:
+        evidence_kind, relation_class = KIND, MixturePairedEvidence
+    relation = relation_class(field.evidence.state_dict(), len(field.xyz))
     queries = []
     for view in source.views:
         pixels = view['pixels'][0][torch.tensor([0, len(view['pixels'][0]) // 2])]
@@ -66,7 +70,7 @@ def compile_field(parent, observations, output):
             p, n = p[ids], n[ids]
             known = p + n; ratio = view['scales'].numpy() / scale
             admitted = (p > n) & (ratio >= .5)[None, :] & (ratio <= 2)[None, :]
-            preference = np.where(admitted, p / np.maximum(known, 1e-12), 0)
+            preference = np.where(admitted, p if confidence_weighted else p / np.maximum(known, 1e-12), 0)
             confidence = np.minimum(np.where(admitted, known, 0).max(1), 1.)
             association = preference / np.maximum(preference.sum(1, keepdims=True), 1e-12)
             coefficient = (association * (confidence * weights)[:, None]).sum(0)
@@ -88,7 +92,7 @@ def compile_field(parent, observations, output):
     shutil.copyfile(Path(parent) / 'field.pt', destination / 'field.pt')
     if sha256(destination / 'field.pt') != manifest['files']['field.pt']['sha256']:
         raise ValueError('copied payload differs')
-    exported = copy.deepcopy(manifest); exported['spec']['evidence_kind'] = KIND
+    exported = copy.deepcopy(manifest); exported['spec']['evidence_kind'] = evidence_kind
     exported['provenance'].update(support_lookup='mixture of confidence-weighted partial associations',
                                   benchmark_queries_used=False, additional_3d_labels=False)
     (destination / 'manifest.json').write_text(json.dumps(exported, indent=2) + '\n')
@@ -100,6 +104,7 @@ def compile_field(parent, observations, output):
         replay=replay, replay_target_rows=target_rows.tolist(),
         source_access_at_query=False, benchmark_queries_used=False,
         replay_scope='all valid source views; point and two full rays; fixed sampled target rows plus all support rows',
-        complete_v10_function_preservation=False, seconds=time.monotonic() - started)
+        complete_v10_function_preservation=False, regional_confidence_retained=confidence_weighted,
+        seconds=time.monotonic() - started)
     (output / 'construction.json').write_text(json.dumps(report, indent=2) + '\n')
     return report

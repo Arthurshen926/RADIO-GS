@@ -14,6 +14,9 @@ KIND = 'mixture_partial_view_evidence_v1'
 
 
 class MixturePairedEvidence(SoftPairedEvidence):
+    def preference(self, positive, known):
+        return positive / known.clamp_min(1e-12)
+
     def coefficients(self, support, scale):
         support.validate(self.count)
         if not math.isfinite(float(scale)) or float(scale) <= 0:
@@ -30,7 +33,7 @@ class MixturePairedEvidence(SoftPairedEvidence):
             negative = self.matrix('negative', rows).to_dense()
             known = positive + negative
             admitted = (positive > negative) & compatible[None, :]
-            preference = torch.where(admitted, positive / known.clamp_min(1e-12), 0.)
+            preference = torch.where(admitted, self.preference(positive, known), 0.)
             views = self.views.expand(len(rows), -1)
             mass = positive.new_zeros((len(rows), self.view_count))
             mass.scatter_add_(1, views, preference)
