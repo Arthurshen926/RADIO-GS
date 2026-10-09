@@ -1,5 +1,34 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: joint_observation_transfer_v1 IN PROGRESS, frozen
+implementation dd9f9f2. Runner scripts/research/run_query_field_joint_observation.py.
+Four predeclared arms: small_source/small_supervised/full_source/full_supervised.
+All9 UQIS scenes/all268 inputs each; this is a focused capability study after
+full five-task coverage, NOT a new full five-task candidate. Source budgets162
+versus1089 legal frames, with the SAME18 development frames excluded. Reuses
+query-free SAM/RGB-D visibility/regional SigLIP source functions, not benchmark
+prompts or labels. The supervised arms inherit the EXISTING22-room instance-label
+forest and3-room calibration, explicitly EXTRA supervision; no new training.
+
+Field-owned tensors preserve15 DirectAnchorEvidence functions and the forest
+decision. Native row moments retain magnitude; binary membership/visibility
+retain nested any/all disagreement. Exact source_vertex_ids map all9 carriers.
+No old solver/joblib/source asset loader runs at query time. Both source and
+supervised heads use a complete carrier, distinct from original native observed
+support; inferred native candidate domain is unchanged. Same shared member core
+for all4 inputs; uncertain rays use declared mixture rather than old dominant
+anchor. Image patch/native identity transfer remains unfinished. Group prior
+is replaced by the declared function, not added as another weighted correction.
+
+53 distinct focused/legacy tests pass across46-case regression and16-case program
+runs (9 overlap), including CPU/CUDA forest split boundaries. Construction checks
+16 fixed source-domain anchors x512 sampled target rows plus anchors per scene
+and budget before predictions; numerical feature<=1e-5, identical-feature forest
+<=1e-7 and zero source-case selection differences required. All36 exports precede
+all1072 predictions; all predictions precede scoring. Do not consult partial
+scores or promote/relabel extra supervision as source-only. Full five-task
+generalization and proper patch function preservation remain outstanding.
+
 Active continuation2026-10-09: confidence_mixture_functions_v1 research batch is
 COMPLETE, but strict cold replay FAILED and no model is promoted. Frozen
 construction c661e73, arm confidence_mixture_function; 30 fields,31 jobs, all five
