@@ -94,8 +94,11 @@ def summarize():
         raise ValueError('construction incomplete')
     replay=[q for r in construction for arm in r['records'] if arm['arm'].endswith('_source') for q in arm['source_replay']]
     diagnostic=read(ROOT/'diagnostics/actual_queries.json');cold=read(ROOT/'validation/runtime/report.json')
+    remaining=read(ROOT/'diagnostics/remaining_family_sources.json')
+    tests=read(ROOT/'validation/focused_tests.json')
     evidence=paths+[ROOT/p for p in ['design.json','construction_complete.json','predictions_complete.json',
-        'scoring_complete.json','diagnostics/actual_queries.json','validation/runtime/report.json']]
+        'scoring_complete.json','diagnostics/actual_queries.json','validation/runtime/report.json',
+        'diagnostics/remaining_family_sources.json','validation/focused_tests.json']]
     evidence += [ROOT/'fits'/j['scene']/'construction.json' for j in design['fields']]+[Path(__file__)]
     result=dict(complete=True,completion_scope=design['scope'],model_promotion=False,
         construction_commit=design['implementation_commit'],per_scene=data,
@@ -109,6 +112,8 @@ def summarize():
             selection_disagreements=sum(q['selection_disagreements'] for q in replay)),
         tensor_bytes={a:sum(next(v['tensor_bytes'] for v in r['records'] if v['arm']==a) for r in construction) for a in ARMS},
         actual_queries=diagnostic,runtime=cold,construction=construction,
+        focused_tests=tests,remaining_family_sources=remaining['summary'],
+        remaining_source_inventory_scope=remaining['limitation'],
         strict_cold_replay_passed=cold['strict_bitwise_passed'],
         numerical_cold_replay_passed=cold['numerical_and_selection_passed'],
         source_denial_passed=cold['source_denial_passed'],

@@ -51,6 +51,14 @@ solver. Two geometry/parity tests pass. Runner run_query_field_surface_input.py;
 protocol2026-10-09-surface-input-function-protocol.md. This input-only probe does
 not claim four-modality/five-task validation and does not change the2x2 study.
 
+Remaining21-field source inventory completed, read-only/no labels:
+diagnostics/remaining_family_sources.json. All21 geometry receipts match v10.
+After retaining development exclusions, LERF756/756 and ScanNet1138/1138 frames
+have native descriptor headers marking query independence and existing referenced
+SAM files. NVOS120/243 have such caches;123 need native-cache preparation.
+This is presence/header evidence, NOT rehashed mask validation or completed
+full-source transfer. No legacy query-conditioned calibration is inherited.
+
 Active continuation2026-10-09: confidence_mixture_functions_v1 research batch is
 COMPLETE, but strict cold replay FAILED and no model is promoted. Frozen
 construction c661e73, arm confidence_mixture_function; 30 fields,31 jobs, all five
