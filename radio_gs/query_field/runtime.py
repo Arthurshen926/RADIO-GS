@@ -41,3 +41,7 @@ class QueryFieldRuntime:
     def positive_rays(self, packet, **options):
         from .positive_rays import query
         return query(self.field, packet, **options)
+
+    def reference_scope(self, packet, camera, reference, **options):
+        from .reference_scope import query
+        return query(self.field, packet, camera, reference, **options)

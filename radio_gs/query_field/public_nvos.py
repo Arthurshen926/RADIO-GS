@@ -88,6 +88,23 @@ def predict(config, job, output, device="cuda"):
     reference = SimpleNamespace(**fixture["reference"])
     if stroke_receipt["native_hw"] != [reference.height, reference.width]:
         raise ValueError("scribble raster and registered reference camera differ")
+    input_contract=job.get('prompt_input','raw_scribbles')
+    if input_contract not in {'raw_scribbles','reference_mask'}:raise ValueError('unknown prompt input contract')
+    reference_receipt=None
+    if input_contract=='reference_mask':
+        if job['mode']!='positive':raise ValueError('reference mask intervention is positive-only')
+        if job['reference_frame']!=reference.frame:raise ValueError('reference mask/camera frame mismatch')
+        raw=np.asarray(Image.open(job['reference_mask']))
+        foreground=np.any(raw>127,axis=2) if raw.ndim==3 else raw>127
+        if foreground.shape!=tuple(reversed(job['reference_raster_wh'])) or not foreground.any():
+            raise ValueError('reference mask raster differs from declared query')
+        reference_receipt=dict(path=job['reference_mask'],sha256=sha256(job['reference_mask']),native_hw=list(foreground.shape),
+            input_condition='retained official-positive-derived SAM query mask; not raw scribbles',
+            generating_rgb_sam_cost_inherited=True,query_mask_inferred_this_run=False)
+        # Keep official strokes separately for audit; only positive inference evidence changes.
+        inference_masks=masks.clone()
+        inference_masks[0]=F.interpolate(torch.from_numpy(foreground.copy()).float()[None,None],size=(height,width),mode='area')[0,0]
+    else:inference_masks=masks
     geometry = SimpleNamespace(xyz=field.xyz, get_xyz=lambda: field.xyz,
         get_rotation=lambda: field.quaternions, get_scaling=lambda: field.scales,
         get_opacity=lambda: field.opacities)
@@ -96,14 +113,14 @@ def predict(config, job, output, device="cuda"):
     if scope_policy not in {"default", "positive_extent"}:
         raise ValueError("unknown registered extent policy")
     scale = None if scope_policy == "default" else raster_extent_scale(
-        operator, masks[0], field.xyz, world_scale, field.default_scale)
-    packet, registration = scribble_packet(operator, masks[0], masks[1] if job["mode"] == "signed" else None,
+        operator, inference_masks[0], field.xyz, world_scale, field.default_scale)
+    packet, registration = scribble_packet(operator, inference_masks[0], inference_masks[1] if job["mode"] == "signed" else None,
                                            scale=scale, preserve_rays=field.support_aggregation == 'expected_energy',
                                            negative_rays=field.negative_rule == 'competitive_rays')
     if job.get('query_program','').startswith('positive_ray'):
         from dataclasses import replace
         from .adapters import raster_support
-        positive_rays,_=raster_support(operator,masks[0],preserve_rays=True)
+        positive_rays,_=raster_support(operator,inference_masks[0],preserve_rays=True)
         packet=replace(packet,positive=positive_rays)
         if job.get('query_program') in {'positive_ray_expected_signed','positive_ray_expected_competitive','positive_ray_positive_scope','positive_ray_signed_scope'} and job['mode']=='signed':
             negative_rays,_=raster_support(operator,masks[1],preserve_rays=True)
@@ -115,7 +132,11 @@ def predict(config, job, output, device="cuda"):
         torch.cuda.synchronize()
     registered = time.monotonic()
     program=job.get('query_program','parent')
-    if program=='parent':result=field.query(packet)
+    if program=='reference_scope':
+        if input_contract!='reference_mask':raise ValueError('composition needs a declared reference mask')
+        from .runtime import QueryFieldRuntime
+        result=QueryFieldRuntime(field).reference_scope(packet,reference,inference_masks[0],world_scale=world_scale)
+    elif program=='parent':result=field.query(packet)
     elif program in {'joint_unsigned','joint_signed'}:
         from .runtime import QueryFieldRuntime
         result=QueryFieldRuntime(field).signed_regions(packet,joint=program=='joint_signed')
@@ -163,7 +184,9 @@ def predict(config, job, output, device="cuda"):
                                       shared_decode=decoded-registered, target_projection=projected-decoded),
                   timing_condition="one run, shared GPU, excludes serialization and prompt-agreement audit",
                   peak_cuda_allocated_bytes=None if not str(device).startswith("cuda") else torch.cuda.max_memory_allocated(),
-                  prompt_policy="official raw scribbles; uncertain registered rays; signed policy declared in field spec")
+                  prompt_input=input_contract,reference_mask_receipt=reference_receipt,
+                  prompt_policy=("official raw scribbles; uncertain registered rays; signed policy declared in field spec" if input_contract=='raw_scribbles' else
+                                 "explicit retained positive-derived SAM reference mask; generating RGB/SAM cost inherited; no tracks"))
     (out / "prediction.json").write_text(json.dumps(report, indent=2)+"\n")
     return dict(job=job["name"], selected=report["selected"], scale_m=result.scale,
                 registration=registration)
