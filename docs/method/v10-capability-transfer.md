@@ -1,5 +1,11 @@
 # v10 能力迁移与理想架构的融合方案
 
+2026-10-09新诊断：[完整八例单区域容量与接受](../experiments/2026-10-09-region-candidates-results.md)
+已完成6139候选渲染。flower/orchids单坐标oracle不足，fortress/leaves尺度门丢失好候选，
+八例兼容池与支持接受池oracle相同。不能用高并集覆盖证明完整对象表示已具备，也不能
+只将问题归因候选排序。下一责任：同场内可组合对象范围、局部尺度与对象范围分离、
+扩展部分的共同身份与可信度。仅诊断，不更新正式指标或默认方法。
+
 2026-10-08。决策见 [ADR0014](../adr/0014-v10-capability-transfer-within-one-gaussian-field.md)。
 这是当前研究设计与验收账本，不是已经实现完整性能的声明。
 

@@ -1,5 +1,22 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: region_candidates_v1 COMPLETE, frozen eb98736.
+All6139 single-region Gaussian subsets +32 controls rendered before any scoring,
+same7fields/8requests/old120sources. Diagnostic192x256 only, NOT benchmark scores.
+Bpositive>0 coordinate subset oracle all/compatible/admitted/top-coefficient macro
+71.1089/58.9308/58.9308/55.5826%. Flower/orchids all-single-region oracle29.43/22.76
+vs local72.40/44.86: ranking alone insufficient in this candidate family; not a
+whole-model upper bound. Fortress all91.58->compatible6.09, leaves96.51->84.58:
+local kernel scale is not object extent. Compatible and admitted oracle IDENTICAL
+all8; do not blame all residual errors on support admission. Need compositional
+whole-object hypotheses, separate extent scale, added-part credibility before
+region mixing. No default promotion or new formal accuracy claim. All jobs finished
+(89044generation/scoring,53847audit). Hashes, GTbindings, pool nesting pass;
+32control response reproductions max1.1921e-7 (not all bitwise). Pytest2tests pass;
+unittest discovery0 not counted. Reports 2026-10-09-region-candidates-results.md/json
+and -audit.json. Original worktree HEAD/index unchanged. No new training/source
+harmonization/full-five jobs launched. See report and ADR0019 for next method step.
+
 Active continuation2026-10-09: extent_stages_v1 COMPLETE at c823de9. All56 outputs
 before8 scores, old120-source fixed7fields. Removing regional/negative/both paths
 actual79.4595->78.9592/79.0533/78.8534%, no overall repair. Orchids all-region
