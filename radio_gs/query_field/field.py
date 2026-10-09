@@ -162,11 +162,11 @@ class CapabilityField(nn.Module):
         gate = torch.sigmoid(2 * (math.log(float(scale)) - self.scale_cutoffs))
         return F.normalize(self.group * gate, dim=-1)
 
-    def member_logits(self, support: Support, scale, rows=None):
+    def member_logits(self, support: Support, scale, rows=None, *, include_evidence=True):
         support.validate(len(self.xyz))
         if not math.isfinite(float(scale)) or float(scale) <= 0:
             raise ValueError("physical scale must be positive")
-        if self.evidence is not None and getattr(self.evidence, 'replaces_member_prior', False):
+        if include_evidence and self.evidence is not None and getattr(self.evidence, 'replaces_member_prior', False):
             return self.evidence.member_logits(self, support, rows)
         if self.support_aggregation == "expected_energy" and len(support.indices) > 1:
             from .support_energy import expected_logits
@@ -200,7 +200,7 @@ class CapabilityField(nn.Module):
         if self.relation is not None:
             from .conditional_relation import residual
             logits = logits + residual(self, support, scale, cosine, rows)
-        if self.evidence is not None:
+        if include_evidence and self.evidence is not None:
             logits = self.evidence.refine(logits, support, scale, rows)
         return logits
 

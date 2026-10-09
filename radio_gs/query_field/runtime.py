@@ -33,3 +33,7 @@ class QueryFieldRuntime:
     def text_union(self, native_query, generic_negatives, **options):
         from .query_program import text_union
         return text_union(self.field, native_query, generic_negatives, **options)
+
+    def signed_regions(self, packet, **options):
+        from .signed_regions import query
+        return query(self.field, packet, **options)

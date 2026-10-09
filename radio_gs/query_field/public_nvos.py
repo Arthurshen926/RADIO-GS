@@ -103,7 +103,12 @@ def predict(config, job, output, device="cuda"):
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
     registered = time.monotonic()
-    result = field.query(packet)
+    program=job.get('query_program','parent')
+    if program=='parent':result=field.query(packet)
+    elif program in {'joint_unsigned','joint_signed'}:
+        from .runtime import QueryFieldRuntime
+        result=QueryFieldRuntime(field).signed_regions(packet,joint=program=='joint_signed')
+    else:raise ValueError('unknown signed query program')
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
     decoded = time.monotonic()
