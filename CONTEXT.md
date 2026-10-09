@@ -1,6 +1,7 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-09: joint_observation_transfer_v1 IN PROGRESS, frozen
+Active continuation2026-10-09: joint_observation_transfer_v1 PRIMARY SCORED;
+post-score input probe and copied-export audits IN PROGRESS. Frozen
 implementation dd9f9f2. Runner scripts/research/run_query_field_joint_observation.py.
 Four predeclared arms: small_source/small_supervised/full_source/full_supervised.
 All9 UQIS scenes/all268 inputs each; this is a focused capability study after
@@ -36,11 +37,22 @@ All36 constructions now complete. Independent source replay288 cases has maximum
 claim end-to-end score bit equality. Tensor bytes across9 scenes per arm:
 small_source21,367,306,710; small_supervised21,390,881,454;
 full_source22,080,732,934; full_supervised22,104,307,678.
-Predictions are underway; no score was consulted. Primary supervisor PID1938963,
-log /tmp/radio_gs_joint_observation_run.log. Postprocessing supervisor
-/tmp/radio_gs_joint_finish.py waits for completed scoring, then runs point/native
-diagnostics, copied-export cold audits onGPU3, and the input probe onGPUs0,2.
-Postprocess log /tmp/radio_gs_joint_finish.log. Inspect status before restarting.
+All1072 predictions and four scores are complete. Scene macro text/image/2D/3D:
+small_source10.0574/18.7295/23.2063/23.5256%;
+full_source14.6929/24.2419/40.2754/40.5871%;
+small_supervised15.1257/23.8846/38.8643/41.1677%;
+full_supervised17.2524/26.8655/46.4446/48.4807%.
+v10 targets16.3865/39.8980/49.7357/49.0470%. No promotion or final-test claim.
+Primary process finished. Postprocessing supervisor /tmp/radio_gs_joint_finish.py
+(PID1952154) now runs copied-export cold audits onGPU3 and the input probe on
+GPUs0,2, then will summarize and plot. Log /tmp/radio_gs_joint_finish.log.
+Point/native diagnostics completed: every arm134/134 native scores exact; all67
+3D supports correct. Fixed prior59 correct supports full_supervised P/R/IoU=
+70.1553/66.7753/48.4314%; prior P/IoU58.3361/33.0997%.
+After the surface probe finishes, also run
+scripts.research.diagnose_query_field_input_identity (all actual inputs), then
+finish the pending human report2026-10-09-joint-observation-transfer-results.md.
+Inspect status before restarting; do not overwrite completed receipts.
 
 Separately predeclared BEFORE factorial scores: surface_input_function_v1,
 frozen c9fa0f7. All67 UQIS2D inputs on the SAME full_supervised field; compare
