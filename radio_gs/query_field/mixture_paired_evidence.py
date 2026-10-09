@@ -17,14 +17,17 @@ class MixturePairedEvidence(SoftPairedEvidence):
     def preference(self, positive, known):
         return positive / known.clamp_min(1e-12)
 
-    def coefficients(self, support, scale):
+    def coefficients(self, support, scale, *, scope_policy="local"):
+        if scope_policy not in {"local", "all"}:
+            raise ValueError("unknown relation scope policy")
         support.validate(self.count)
         if not math.isfinite(float(scale)) or float(scale) <= 0:
             raise ValueError('invalid physical scale')
         weights = support.weights.to(self.scales)
         weights = weights / weights.sum()
         ratio = self.scales / float(scale)
-        compatible = (ratio >= .5) & (ratio <= 2)
+        compatible = ((ratio >= .5) & (ratio <= 2) if scope_policy == "local"
+                      else torch.ones_like(ratio, dtype=torch.bool))
         coefficient = torch.zeros_like(self.scales)
         # Chunking bounds temporary support x region state for full scribbles.
         for offset in range(0, len(support.indices), 512):
@@ -44,6 +47,21 @@ class MixturePairedEvidence(SoftPairedEvidence):
             association *= confidence[:, self.views].clamp_max(1.)
             coefficient += (association * weights[offset:offset + len(rows), None]).sum(0)
         return coefficient
+
+    def refine_scope(self, logits, support, scale, *, scope_policy="local"):
+        """Decouple regional scope eligibility from the unchanged local kernel.
+
+        All-scale eligibility is a capacity intervention, not object identity.
+        Confidence and normalization still bound each source view's evidence.
+        """
+        if scope_policy == "local":
+            return self.refine(logits, support, scale)
+        coefficient = self.coefficients(support, scale, scope_policy=scope_policy)
+        positive, negative = (torch.sparse.mm(self.matrix(p), coefficient[:, None]).flatten()
+                              for p in ["positive", "negative"])
+        probability = (logits.sigmoid() + positive) / (1 + positive + negative)
+        updated = torch.logit(probability.clamp(1e-6, 1 - 1e-6))
+        return torch.where(positive + negative > 0, updated, logits)
 
     def joint_features(self, support, scale, rows=None):
         """Six partial-evidence analogues of v10's joint observation statistics.

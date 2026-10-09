@@ -41,8 +41,14 @@ def mixture_logits(field,support,scale,*,shared_centre=False,chunk_size=32,aggre
 
 
 @torch.no_grad()
-def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggregation="legacy"):
+def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggregation="legacy",region_scope="local"):
     if negative_aggregation not in {"legacy","expected_union","expected_competition"}:raise ValueError("unknown negative aggregation")
+    if region_scope not in {"local", "positive_all", "signed_all"}:raise ValueError("unknown region scope")
+    if region_scope != "local":
+        from .mixture_paired_evidence import MixturePairedEvidence
+        if not isinstance(field.evidence, MixturePairedEvidence):raise ValueError("scope intervention requires partial mixture evidence")
+        if negative_aggregation != "expected_competition" or packet.positive is None or packet.positive.components is None:
+            raise ValueError("scope intervention requires explicit signed expected-ray competition")
     packet.validate(len(field.xyz),field.semantic.native_dim,field.local.native_dim)
     if packet.positive is None or packet.modality not in {'point_2d','point_3d'}:raise ValueError('positive rays need explicit spatial support')
     if packet.positive.components is None:return field.query(packet)
@@ -52,7 +58,9 @@ def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggr
     if not bool(valid.any()):raise ValueError('no supported positive ray')
     support=Support(ids[valid],w[valid],p.components.to(ids.device)[valid]);scale=field.default_scale if packet.scale is None else packet.scale
     logits=mixture_logits(field,support,scale,shared_centre=shared_centre,aggregation=aggregation)
-    if field.evidence is not None:logits=field.evidence.refine(logits,support,scale)
+    if field.evidence is not None:
+        logits=(field.evidence.refine(logits,support,scale) if region_scope=="local" else
+                field.evidence.refine_scope(logits,support,scale,scope_policy="all"))
     if negative_aggregation in {"expected_union","expected_competition"} and packet.negative is not None:
         if field.negative_rule!="product" or packet.negative.components is None:
             raise ValueError("expected negative union requires registered negative rays and product rule")
@@ -61,7 +69,9 @@ def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggr
         if bool(valid.any()):
             ns=Support(ids[valid],w[valid],n.components.to(ids.device)[valid])
             excluded=mixture_logits(field,ns,scale,aggregation="expected_union")
-            if field.evidence is not None:excluded=field.evidence.refine(excluded,ns,scale)
+            if field.evidence is not None:
+                excluded=(field.evidence.refine_scope(excluded,ns,scale,scope_policy="all") if region_scope=="signed_all" else
+                          field.evidence.refine(excluded,ns,scale))
             if negative_aggregation=="expected_competition":
                 from .negative_evidence import competitive_membership
                 probability=competitive_membership(logits,excluded)
@@ -76,5 +86,5 @@ def query(field,packet,*,shared_centre=False,aggregation="mixture",negative_aggr
     return QueryResult(None,probability,probability>field.threshold,support.indices,support.weights/support.weights.sum(),float(scale),
         dict(shared_member_core=True,source_access=False,positive_rays=int(support.components.unique().numel()),
         positive_aggregation={'mixture':'mass-normalized log mean exp of normalized per-ray member energies','union':'maximum per-ray member energy','confidence_union':'maximum confidence-weighted per-ray membership','coherent_union':'confidence union retaining feature coherence','expected_union':'confidence union of exact expected per-ray member energies'}[aggregation],
-        negative_aggregation=negative_aggregation,positive_centre='pooled' if shared_centre else 'per_ray',ray_subsampling=False,hard_ray_constraints=False,
+        region_scope=region_scope,local_kernel_scale_unchanged=True,negative_aggregation=negative_aggregation,positive_centre='pooled' if shared_centre else 'per_ray',ray_subsampling=False,hard_ray_constraints=False,
         source_rgb_prompt_expansion_transferred=False,scores_calibrated=False))

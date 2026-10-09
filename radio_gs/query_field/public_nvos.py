@@ -105,7 +105,7 @@ def predict(config, job, output, device="cuda"):
         from .adapters import raster_support
         positive_rays,_=raster_support(operator,masks[0],preserve_rays=True)
         packet=replace(packet,positive=positive_rays)
-        if job.get('query_program') in {'positive_ray_expected_signed','positive_ray_expected_competitive'} and job['mode']=='signed':
+        if job.get('query_program') in {'positive_ray_expected_signed','positive_ray_expected_competitive','positive_ray_positive_scope','positive_ray_signed_scope'} and job['mode']=='signed':
             negative_rays,_=raster_support(operator,masks[1],preserve_rays=True)
             packet=replace(packet,negative=negative_rays)
             registration['negative_ray_hypotheses_retained']=True
@@ -119,11 +119,12 @@ def predict(config, job, output, device="cuda"):
     elif program in {'joint_unsigned','joint_signed'}:
         from .runtime import QueryFieldRuntime
         result=QueryFieldRuntime(field).signed_regions(packet,joint=program=='joint_signed')
-    elif program in {'positive_ray_shared','positive_ray_local','positive_ray_union','positive_ray_confidence_union','positive_ray_coherent_union','positive_ray_expected_union','positive_ray_expected_signed','positive_ray_expected_competitive'}:
+    elif program in {'positive_ray_shared','positive_ray_local','positive_ray_union','positive_ray_confidence_union','positive_ray_coherent_union','positive_ray_expected_union','positive_ray_expected_signed','positive_ray_expected_competitive','positive_ray_positive_scope','positive_ray_signed_scope'}:
         from .runtime import QueryFieldRuntime
         result=QueryFieldRuntime(field).positive_rays(packet,shared_centre=program=='positive_ray_shared',
-            aggregation={'positive_ray_union':'union','positive_ray_confidence_union':'confidence_union','positive_ray_coherent_union':'coherent_union','positive_ray_expected_union':'expected_union','positive_ray_expected_signed':'expected_union','positive_ray_expected_competitive':'expected_union'}.get(program,'mixture'),
-            negative_aggregation={'positive_ray_expected_signed':'expected_union','positive_ray_expected_competitive':'expected_competition'}.get(program,'legacy'))
+            aggregation={'positive_ray_union':'union','positive_ray_confidence_union':'confidence_union','positive_ray_coherent_union':'coherent_union','positive_ray_expected_union':'expected_union','positive_ray_expected_signed':'expected_union','positive_ray_expected_competitive':'expected_union','positive_ray_positive_scope':'expected_union','positive_ray_signed_scope':'expected_union'}.get(program,'mixture'),
+            negative_aggregation={'positive_ray_expected_signed':'expected_union','positive_ray_expected_competitive':'expected_competition','positive_ray_positive_scope':'expected_competition','positive_ray_signed_scope':'expected_competition'}.get(program,'legacy'),
+            region_scope={'positive_ray_positive_scope':'positive_all','positive_ray_signed_scope':'signed_all'}.get(program,'local'))
     else:raise ValueError('unknown signed query program')
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
