@@ -1,5 +1,11 @@
 # v10 能力迁移与理想架构的融合方案
 
+2026-10-09进一步完成[尺度分离与对象组合研究](../experiments/2026-10-09-scope-and-composition-results.md)：
+尺度放开实际仅+0.0829pp，不提升默认；目标标签辅助的现有部分组合，在flower/orchids
+实际选集诊断可94.39/90.76，不能当推理成绩，但说明组成部分已可用。
+下一功能责任明确为查询条件下的可信范围组合，见[ADR0020](../adr/0020-compositional-instance-scope-within-one-field.md)。
+当前只完成可行组合证据，未实现新的无标签组合解码器，不再把扩大覆盖本身视作迁移完成。
+
 2026-10-09新诊断：[完整八例单区域容量与接受](../experiments/2026-10-09-region-candidates-results.md)
 已完成6139候选渲染。flower/orchids单坐标oracle不足，fortress/leaves尺度门丢失好候选，
 八例兼容池与支持接受池oracle相同。不能用高并集覆盖证明完整对象表示已具备，也不能

@@ -1,0 +1,516 @@
+{
+  "complete": true,
+  "label_assisted_diagnostic": true,
+  "benchmark_metrics": false,
+  "model_promotion": false,
+  "global_optimum": false,
+  "per_case": {
+    "fern": {
+      "case": "fern",
+      "selected_regions": [
+        34,
+        56,
+        126,
+        36,
+        158,
+        21,
+        143
+      ],
+      "region_count": 7,
+      "total_regions": 183,
+      "trace": [
+        0.7492646118429467,
+        0.7639735772357723,
+        0.7724212398373984,
+        0.7753728974928594,
+        0.7760076166296414,
+        0.7763530077314728,
+        0.7765531062124249
+      ],
+      "single_region_oracle": 0.7492646118429467,
+      "proxy": {
+        "iou": 0.7765531062124249,
+        "precision": 0.8723179739711572,
+        "recall": 0.8761393344167314
+      },
+      "actual": {
+        "iou": 0.7773608505315822,
+        "precision": 0.8712413261372398,
+        "recall": 0.8782590263548364
+      },
+      "label_assisted": true,
+      "gt": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fern/IMG_4027_mask.png",
+        "sha256": "c48d8bdc2bc9260a1dc8e1f03864e5a91e7b5279d862edfece0e1623ffa9f47d"
+      },
+      "benchmark_metrics": false,
+      "global_optimum": false,
+      "alpha_monotonicity_violations": 0,
+      "payload": {
+        "path": "output/query_field_20261009/region_composition_v1/diagnostics/fern/diagnostic.pt",
+        "sha256": "f6bc9ed19268e1d1927d976f309dbef4ae2cfff78e7ba48b5c657a766f1787aa"
+      }
+    },
+    "flower": {
+      "case": "flower",
+      "selected_regions": [
+        341,
+        770,
+        278,
+        324,
+        700,
+        38,
+        271,
+        694,
+        974,
+        829,
+        603,
+        954,
+        457,
+        476,
+        482,
+        255,
+        206,
+        1164,
+        56,
+        608,
+        1187,
+        45,
+        111,
+        141,
+        202,
+        314,
+        355,
+        460,
+        681,
+        761,
+        934,
+        417,
+        184,
+        737,
+        404,
+        618,
+        1068,
+        1175
+      ],
+      "region_count": 38,
+      "total_regions": 1267,
+      "trace": [
+        0.29425369151396547,
+        0.5140377291648215,
+        0.6898193036579991,
+        0.813044626353314,
+        0.8723254998246229,
+        0.9060749299719888,
+        0.9231644351098276,
+        0.9294148517449489,
+        0.9338286713286713,
+        0.9361999650410767,
+        0.9376037752337674,
+        0.9385865292216301,
+        0.9395633187772926,
+        0.9404366812227074,
+        0.9409606986899564,
+        0.9413254169213306,
+        0.941674670392037,
+        0.9420239238627434,
+        0.9421985505980965,
+        0.9423731773334497,
+        0.942470536883457,
+        0.9425628491620112,
+        0.9426501396648045,
+        0.9427374301675978,
+        0.942824720670391,
+        0.9429120111731844,
+        0.9429993016759777,
+        0.943086592178771,
+        0.9431738826815642,
+        0.9432611731843575,
+        0.9433484636871509,
+        0.9433879972086532,
+        0.9433978719693006,
+        0.9434077432856645,
+        0.9434126776528032,
+        0.9434176111595467,
+        0.9434225438061198,
+        0.9434274755927475
+      ],
+      "single_region_oracle": 0.29425369151396547,
+      "proxy": {
+        "iou": 0.9434274755927475,
+        "precision": 0.9658218811351061,
+        "recall": 0.9760122644061683
+      },
+      "actual": {
+        "iou": 0.9438837654428397,
+        "precision": 0.9640127954505064,
+        "recall": 0.9783569302912797
+      },
+      "label_assisted": true,
+      "gt": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/flower/IMG_2962_mask.png",
+        "sha256": "dd94edff4733c28944bf36f5b9cc4db062bd9385d73132e158038a48e71f51ff"
+      },
+      "benchmark_metrics": false,
+      "global_optimum": false,
+      "alpha_monotonicity_violations": 0,
+      "payload": {
+        "path": "output/query_field_20261009/region_composition_v1/diagnostics/flower/diagnostic.pt",
+        "sha256": "06978891c188ddfe4c733a6fe067b15e9244922c634e6bccf73010cfd7598c7e"
+      }
+    },
+    "fortress": {
+      "case": "fortress",
+      "selected_regions": [
+        93,
+        9,
+        32,
+        63,
+        199,
+        13,
+        21,
+        143,
+        192
+      ],
+      "region_count": 9,
+      "total_regions": 213,
+      "trace": [
+        0.9158474667818948,
+        0.947203627726193,
+        0.9488286732160207,
+        0.950016193457843,
+        0.9505553182400683,
+        0.9507689021785561,
+        0.9508756941478,
+        0.950982486117044,
+        0.951089278086288
+      ],
+      "single_region_oracle": 0.9158474667818948,
+      "proxy": {
+        "iou": 0.951089278086288,
+        "precision": 0.9792193512919186,
+        "recall": 0.9706811989100818
+      },
+      "actual": {
+        "iou": 0.9516335682254965,
+        "precision": 0.9790202108963093,
+        "recall": 0.9714441416893733
+      },
+      "label_assisted": true,
+      "gt": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fortress/IMG_1800_mask.png",
+        "sha256": "b87257873a1efc29092e6f14af97d0615a50aa543467f44b86e6c699ab3eabe0"
+      },
+      "benchmark_metrics": false,
+      "global_optimum": false,
+      "alpha_monotonicity_violations": 0,
+      "payload": {
+        "path": "output/query_field_20261009/region_composition_v1/diagnostics/fortress/diagnostic.pt",
+        "sha256": "62dc944f8ee21ffa22e1106aafb59e01ace30df3b88e23f8958156c6905f677c"
+      }
+    },
+    "horns_center": {
+      "case": "horns_center",
+      "selected_regions": [
+        405,
+        106,
+        705,
+        277,
+        367,
+        848,
+        698,
+        604,
+        622,
+        695
+      ],
+      "region_count": 10,
+      "total_regions": 938,
+      "trace": [
+        0.9444185504544396,
+        0.9504410399257196,
+        0.952878365831012,
+        0.9538550724637681,
+        0.9546666666666667,
+        0.9553623188405798,
+        0.9558260869565217,
+        0.9561739130434782,
+        0.9562898550724638,
+        0.9564057971014492
+      ],
+      "single_region_oracle": 0.9444185504544396,
+      "proxy": {
+        "iou": 0.9564057971014492,
+        "precision": 0.9739079102715467,
+        "recall": 0.9815564017134698
+      },
+      "actual": {
+        "iou": 0.956551963851234,
+        "precision": 0.9732405988447483,
+        "recall": 0.9823893384102809
+      },
+      "label_assisted": true,
+      "gt": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_center/DJI_20200223_163024_597_mask.png",
+        "sha256": "bb2d799785f0da19c473354583303a462a87220daed883a1377bfba3f76ce307"
+      },
+      "benchmark_metrics": false,
+      "global_optimum": false,
+      "alpha_monotonicity_violations": 0,
+      "payload": {
+        "path": "output/query_field_20261009/region_composition_v1/diagnostics/horns_center/diagnostic.pt",
+        "sha256": "4824e6020c7b94d1f765c56c0556b3e849f9155624a45f853e41c658b8e9a3b7"
+      }
+    },
+    "horns_left": {
+      "case": "horns_left",
+      "selected_regions": [
+        386,
+        438,
+        537,
+        231,
+        692,
+        766,
+        863,
+        599,
+        86
+      ],
+      "region_count": 9,
+      "total_regions": 938,
+      "trace": [
+        0.8847804555959062,
+        0.8910825929582099,
+        0.8937561294540699,
+        0.8950980392156863,
+        0.89640522875817,
+        0.8970588235294118,
+        0.8977124183006536,
+        0.8980392156862745,
+        0.8980725253185233
+      ],
+      "single_region_oracle": 0.8847804555959062,
+      "proxy": {
+        "iou": 0.8980725253185233,
+        "precision": 0.9568395405499478,
+        "recall": 0.9359891045284303
+      },
+      "actual": {
+        "iou": 0.8972602739726028,
+        "precision": 0.9552083333333333,
+        "recall": 0.9366700715015321
+      },
+      "label_assisted": true,
+      "gt": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_left/DJI_20200223_163024_597_mask.png",
+        "sha256": "d64ba3b8a0648c2698dddd6eae1b0e3d6bbdbe163eac4a07f180be109d0f8c28"
+      },
+      "benchmark_metrics": false,
+      "global_optimum": false,
+      "alpha_monotonicity_violations": 0,
+      "payload": {
+        "path": "output/query_field_20261009/region_composition_v1/diagnostics/horns_left/diagnostic.pt",
+        "sha256": "f381e75be317e1c440e965b8610795105e140a857abc161ea78fcb4376395481"
+      }
+    },
+    "leaves": {
+      "case": "leaves",
+      "selected_regions": [
+        327
+      ],
+      "region_count": 1,
+      "total_regions": 713,
+      "trace": [
+        0.965082444228904
+      ],
+      "single_region_oracle": 0.965082444228904,
+      "proxy": {
+        "iou": 0.965082444228904,
+        "precision": 0.987429705590473,
+        "recall": 0.9770867430441899
+      },
+      "actual": {
+        "iou": 0.965082444228904,
+        "precision": 0.987429705590473,
+        "recall": 0.9770867430441899
+      },
+      "label_assisted": true,
+      "gt": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/leaves/IMG_2997_mask.png",
+        "sha256": "b3275f9ee6894bb54340340e0af207bdd4b6b961984926211541a10bfeb5e2d4"
+      },
+      "benchmark_metrics": false,
+      "global_optimum": false,
+      "alpha_monotonicity_violations": 0,
+      "payload": {
+        "path": "output/query_field_20261009/region_composition_v1/diagnostics/leaves/diagnostic.pt",
+        "sha256": "45a03a9e563034aeb870b9a0fd7ff9dc67891489238f5d8328106ca738c1be29"
+      }
+    },
+    "orchids": {
+      "case": "orchids",
+      "selected_regions": [
+        1007,
+        1060,
+        883,
+        873,
+        691,
+        666,
+        587,
+        250,
+        392,
+        249,
+        708,
+        722,
+        947,
+        991,
+        489,
+        1050,
+        509,
+        761,
+        995,
+        1120,
+        161,
+        291,
+        404,
+        467,
+        721,
+        369
+      ],
+      "region_count": 26,
+      "total_regions": 1126,
+      "trace": [
+        0.22755227552275523,
+        0.4102408909333011,
+        0.5765895953757225,
+        0.7248981548046969,
+        0.8297770890451782,
+        0.8666508482619528,
+        0.8928275044457618,
+        0.8976882039122703,
+        0.9007461802676774,
+        0.9019631031220435,
+        0.9031456953642384,
+        0.9042440004728691,
+        0.9051724137931034,
+        0.9056447803495512,
+        0.9059990552668871,
+        0.9062905700460285,
+        0.9064196365352843,
+        0.9065486725663717,
+        0.9066776781500708,
+        0.906806653297157,
+        0.9069246195588062,
+        0.9070425858204554,
+        0.9071605520821046,
+        0.9072785183437537,
+        0.9073964846054029,
+        0.9074074074074074
+      ],
+      "single_region_oracle": 0.22755227552275523,
+      "proxy": {
+        "iou": 0.9074074074074074,
+        "precision": 0.9475304840497598,
+        "recall": 0.9554148037754595
+      },
+      "actual": {
+        "iou": 0.9076125382983737,
+        "precision": 0.9466568338249755,
+        "recall": 0.9565325384997516
+      },
+      "label_assisted": true,
+      "gt": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/orchids/IMG_4480_mask.png",
+        "sha256": "222ee86fd11c35eab26e4f27032d79d2b2d96658e01db3787d3e06bbe787f34b"
+      },
+      "benchmark_metrics": false,
+      "global_optimum": false,
+      "alpha_monotonicity_violations": 0,
+      "payload": {
+        "path": "output/query_field_20261009/region_composition_v1/diagnostics/orchids/diagnostic.pt",
+        "sha256": "ce41c8dbe2ff33f2acd8eb9e2d40d1a22dcb6ccabcbd7ae1965d0e2593fd0e0b"
+      }
+    },
+    "trex": {
+      "case": "trex",
+      "selected_regions": [
+        652,
+        529,
+        663,
+        297,
+        152,
+        121,
+        31,
+        165,
+        289,
+        91,
+        240,
+        599,
+        213,
+        245,
+        420,
+        714,
+        340
+      ],
+      "region_count": 17,
+      "total_regions": 761,
+      "trace": [
+        0.707509245859463,
+        0.7236405596422905,
+        0.7309352517985611,
+        0.7366532721010333,
+        0.7396475139704829,
+        0.7407938100014329,
+        0.7418707921501217,
+        0.742660747529715,
+        0.7434135166093929,
+        0.7439862542955327,
+        0.74423930156004,
+        0.7444190040068689,
+        0.7445621064682313,
+        0.7447052089295936,
+        0.744848311390956,
+        0.7449914138523183,
+        0.7450307450307451
+      ],
+      "single_region_oracle": 0.707509245859463,
+      "proxy": {
+        "iou": 0.7450307450307451,
+        "precision": 0.8446822308690013,
+        "recall": 0.8632974316487159
+      },
+      "actual": {
+        "iou": 0.744793152639087,
+        "precision": 0.842640413169787,
+        "recall": 0.8651201325600663
+      },
+      "label_assisted": true,
+      "gt": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/trex/DJI_20200223_163619_411_mask.png",
+        "sha256": "f237151e17a048828f6a98fdbfcae462be067b5938a3c158c497f5727fe1df60"
+      },
+      "benchmark_metrics": false,
+      "global_optimum": false,
+      "alpha_monotonicity_violations": 0,
+      "payload": {
+        "path": "output/query_field_20261009/region_composition_v1/diagnostics/trex/diagnostic.pt",
+        "sha256": "05845dce0d5ab6395d5e57c72347b8325d4f5e794d29adfc2c734ce22678417b"
+      }
+    }
+  },
+  "macro": {
+    "proxy": {
+      "iou": 0.8928835973723112,
+      "precision": 0.9409686347161137,
+      "recall": 0.9420221603054059
+    },
+    "actual": {
+      "iou": 0.893022319648765,
+      "precision": 0.9399312771559215,
+      "recall": 0.9432323652939137
+    }
+  },
+  "scope_prediction_barrier": {
+    "path": "output/query_field_20261009/scope_conditioning_v1/predictions_complete.json",
+    "sha256": "a86b177b43d9989e2bf3227dd4294ebfd8719b30ba2868db9713ec10febf8ce6"
+  },
+  "implementation_commit": "f197b4cede080e1cc51dabace857207786a560f2"
+}

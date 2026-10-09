@@ -1,0 +1,887 @@
+{
+  "complete": true,
+  "cases": 8,
+  "primary": "positive_ray_signed_scope",
+  "macro": {
+    "positive_ray_expected_competitive": {
+      "response_iou": 0.7803340996814891,
+      "selection_iou": 0.8142186762630826,
+      "precision": 0.879763462491894,
+      "recall": 0.9261139540834635,
+      "ap": 0.96551097757701
+    },
+    "positive_ray_positive_scope": {
+      "response_iou": 0.7788500281265102,
+      "selection_iou": 0.8150459530425584,
+      "precision": 0.8809523056973567,
+      "recall": 0.9257880246675303,
+      "ap": 0.9647495744594291
+    },
+    "positive_ray_signed_scope": {
+      "response_iou": 0.7788630136155854,
+      "selection_iou": 0.8150473676596164,
+      "precision": 0.8809523675476854,
+      "recall": 0.9257894644596139,
+      "ap": 0.9647436306180255
+    }
+  },
+  "per_case": {
+    "positive_ray_expected_competitive": {
+      "fern": {
+        "response_iou": 0.768487641042557,
+        "selection_iou": 0.7614068421154297,
+        "precision": 0.7914741083855054,
+        "recall": 0.9524779270929559,
+        "ap": 0.9188623359742888
+      },
+      "flower": {
+        "response_iou": 0.6078251011386706,
+        "selection_iou": 0.8791919001567546,
+        "precision": 0.9535711672764196,
+        "recall": 0.918510917475082,
+        "ap": 0.9528605983703579
+      },
+      "fortress": {
+        "response_iou": 0.9087746811509709,
+        "selection_iou": 0.8312661153179837,
+        "precision": 0.8347744349015767,
+        "recall": 0.9949696320241046,
+        "ap": 0.9910202988187056
+      },
+      "horns_center": {
+        "response_iou": 0.9293860079709328,
+        "selection_iou": 0.9668318591990313,
+        "precision": 0.9786717138085523,
+        "recall": 0.9876417262779739,
+        "ap": 0.9958332308428844
+      },
+      "horns_left": {
+        "response_iou": 0.8830511864287143,
+        "selection_iou": 0.7731851606872278,
+        "precision": 0.7974385272053517,
+        "recall": 0.9621526659854137,
+        "ap": 0.9647372357345247
+      },
+      "leaves": {
+        "response_iou": 0.9528567313690988,
+        "selection_iou": 0.9682452201680944,
+        "precision": 0.9824962991392072,
+        "recall": 0.9852404306088562,
+        "ap": 0.9937926262411494
+      },
+      "orchids": {
+        "response_iou": 0.44417699941329575,
+        "selection_iou": 0.6169340963158233,
+        "precision": 0.972333736514247,
+        "recall": 0.6279572020494262,
+        "ap": 0.9630789836496093
+      },
+      "trex": {
+        "response_iou": 0.7481144489376725,
+        "selection_iou": 0.7166882161443169,
+        "precision": 0.7273477127042924,
+        "recall": 0.9799611311538952,
+        "ap": 0.9439025109845589
+      }
+    },
+    "positive_ray_positive_scope": {
+      "fern": {
+        "response_iou": 0.7684899276443393,
+        "selection_iou": 0.7614068421154297,
+        "precision": 0.7914741083855054,
+        "recall": 0.9524779270929559,
+        "ap": 0.9188709554051926
+      },
+      "flower": {
+        "response_iou": 0.6029421080750331,
+        "selection_iou": 0.8791945973361449,
+        "precision": 0.9536076986536725,
+        "recall": 0.9184799691859444,
+        "ap": 0.952336575106385
+      },
+      "fortress": {
+        "response_iou": 0.9178428050289966,
+        "selection_iou": 0.8316672698252421,
+        "precision": 0.8348425248818606,
+        "recall": 0.9954475746186767,
+        "ap": 0.9903258470299297
+      },
+      "horns_center": {
+        "response_iou": 0.9269160994771362,
+        "selection_iou": 0.9664705453898012,
+        "precision": 0.9787609066461479,
+        "recall": 0.9871739450731504,
+        "ap": 0.9953943589539825
+      },
+      "horns_left": {
+        "response_iou": 0.8830431906889439,
+        "selection_iou": 0.7821766066112542,
+        "precision": 0.8070064000882933,
+        "recall": 0.9621526659854137,
+        "ap": 0.9659256252975192
+      },
+      "leaves": {
+        "response_iou": 0.9530202075070493,
+        "selection_iou": 0.9684417959474755,
+        "precision": 0.9823939561260127,
+        "recall": 0.9855469480212445,
+        "ap": 0.9940396532766115
+      },
+      "orchids": {
+        "response_iou": 0.4310844116318591,
+        "selection_iou": 0.6148969978739591,
+        "precision": 0.9723502941406148,
+        "recall": 0.6258399223454684,
+        "ap": 0.9617075198593413
+      },
+      "trex": {
+        "response_iou": 0.7474614749587232,
+        "selection_iou": 0.7161129692411611,
+        "precision": 0.7271825566567462,
+        "recall": 0.979185245017388,
+        "ap": 0.9393960607464714
+      }
+    },
+    "positive_ray_signed_scope": {
+      "fern": {
+        "response_iou": 0.7684831612131325,
+        "selection_iou": 0.7614068421154297,
+        "precision": 0.7914741083855054,
+        "recall": 0.9524779270929559,
+        "ap": 0.9188842325690605
+      },
+      "flower": {
+        "response_iou": 0.6030512296500163,
+        "selection_iou": 0.8791945973361449,
+        "precision": 0.9536076986536725,
+        "recall": 0.9184799691859444,
+        "ap": 0.9523367828245163
+      },
+      "fortress": {
+        "response_iou": 0.9177343637978767,
+        "selection_iou": 0.8316672698252421,
+        "precision": 0.8348425248818606,
+        "recall": 0.9954475746186767,
+        "ap": 0.9902658892353675
+      },
+      "horns_center": {
+        "response_iou": 0.9269091517600209,
+        "selection_iou": 0.9664705453898012,
+        "precision": 0.9787609066461479,
+        "recall": 0.9871739450731504,
+        "ap": 0.9953757700990962
+      },
+      "horns_left": {
+        "response_iou": 0.8830648165698264,
+        "selection_iou": 0.7821766066112542,
+        "precision": 0.8070064000882933,
+        "recall": 0.9621526659854137,
+        "ap": 0.965943267964972
+      },
+      "leaves": {
+        "response_iou": 0.9530201433880581,
+        "selection_iou": 0.9684417959474755,
+        "precision": 0.9823939561260127,
+        "recall": 0.9855469480212445,
+        "ap": 0.9940455234567575
+      },
+      "orchids": {
+        "response_iou": 0.4311584342066147,
+        "selection_iou": 0.6149083148104233,
+        "precision": 0.9723507889432439,
+        "recall": 0.6258514406821368,
+        "ap": 0.9616913410287564
+      },
+      "trex": {
+        "response_iou": 0.7474828083391379,
+        "selection_iou": 0.7161129692411611,
+        "precision": 0.7271825566567462,
+        "recall": 0.979185245017388,
+        "ap": 0.9394062377656769
+      }
+    }
+  },
+  "diagnostics": {
+    "positive_ray_expected_competitive": {
+      "fern": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1833,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "local",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0006809390615671873
+        },
+        "selected": 123101
+      },
+      "flower": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 2456,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "local",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 20982
+      },
+      "fortress": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1432,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "local",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 55594
+      },
+      "horns_center": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1247,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "local",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9999570250511169,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 38554
+      },
+      "horns_left": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 701,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "local",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 15236
+      },
+      "leaves": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 711,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "local",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 6528
+      },
+      "orchids": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 900,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "local",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 17246
+      },
+      "trex": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1373,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "local",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9960683584213257,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 77782
+      }
+    },
+    "positive_ray_positive_scope": {
+      "fern": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1833,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "positive_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0006809390615671873
+        },
+        "selected": 123101
+      },
+      "flower": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 2456,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "positive_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 20944
+      },
+      "fortress": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1432,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "positive_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 55755
+      },
+      "horns_center": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1247,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "positive_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9999570250511169,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 38085
+      },
+      "horns_left": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 701,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "positive_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 15228
+      },
+      "leaves": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 711,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "positive_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 6547
+      },
+      "orchids": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 900,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "positive_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 17085
+      },
+      "trex": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1373,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "positive_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9960683584213257,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 77740
+      }
+    },
+    "positive_ray_signed_scope": {
+      "fern": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1833,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "signed_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0006809390615671873
+        },
+        "selected": 123101
+      },
+      "flower": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 2456,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "signed_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 20945
+      },
+      "fortress": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1432,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "signed_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 55757
+      },
+      "horns_center": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1247,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "signed_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9999570250511169,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 38090
+      },
+      "horns_left": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 701,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "signed_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 15229
+      },
+      "leaves": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 711,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "signed_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 6547
+      },
+      "orchids": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 900,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "signed_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 1.0,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 17086
+      },
+      "trex": {
+        "diagnostics": {
+          "shared_member_core": true,
+          "source_access": false,
+          "positive_rays": 1373,
+          "positive_aggregation": "confidence union of exact expected per-ray member energies",
+          "region_scope": "signed_all",
+          "local_kernel_scale_unchanged": true,
+          "negative_aggregation": "expected_competition",
+          "positive_centre": "per_ray",
+          "ray_subsampling": false,
+          "hard_ray_constraints": false,
+          "source_rgb_prompt_expansion_transferred": false,
+          "scores_calibrated": false
+        },
+        "prompt_agreement": {
+          "positive_covered_fraction": 0.9960683584213257,
+          "negative_selected_fraction": 0.0
+        },
+        "selected": 77740
+      }
+    }
+  },
+  "comparisons": {
+    "positive_ray_expected_competitive__positive_ray_positive_scope": {
+      "response_iou": {
+        "delta": -0.0014840715549789968,
+        "lower": -0.00589101981031416,
+        "upper": 0.002523095599601144,
+        "improved": 3,
+        "regressed": 5,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "selection_iou": {
+        "delta": 0.0008272767794757635,
+        "lower": -0.0008125835229240033,
+        "upper": 0.0025708368429480082,
+        "improved": 4,
+        "regressed": 3,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "precision": {
+        "delta": 0.001188843205462628,
+        "lower": -7.121915785365529e-05,
+        "upper": 0.0028953501755068613,
+        "improved": 5,
+        "regressed": 2,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "recall": {
+        "delta": -0.00032592941593319325,
+        "lower": -0.0009494515727478464,
+        "upper": 0.0001289616918698075,
+        "improved": 2,
+        "regressed": 4,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "ap": {
+        "delta": -0.0007614031175807168,
+        "lower": -0.0021463556763212555,
+        "upper": 7.554326984668496e-05,
+        "improved": 3,
+        "regressed": 5,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      }
+    },
+    "positive_ray_expected_competitive__positive_ray_signed_scope": {
+      "response_iou": {
+        "delta": -0.001471086065903647,
+        "lower": -0.005832742353340788,
+        "upper": 0.0024971711000408106,
+        "improved": 3,
+        "regressed": 5,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "selection_iou": {
+        "delta": 0.0008286913965337844,
+        "lower": -0.000807733407296503,
+        "upper": 0.0025708368429480082,
+        "improved": 4,
+        "regressed": 3,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "precision": {
+        "delta": 0.0011889050557912645,
+        "lower": -7.121820103001117e-05,
+        "upper": 0.0028953996557697704,
+        "improved": 5,
+        "regressed": 2,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "recall": {
+        "delta": -0.00032448962384963587,
+        "lower": -0.0009450346807897089,
+        "upper": 0.0001289616918698075,
+        "improved": 2,
+        "regressed": 4,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "ap": {
+        "delta": -0.0007673469589844772,
+        "lower": -0.0021526265844403246,
+        "upper": 7.347511062745403e-05,
+        "improved": 3,
+        "regressed": 5,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      }
+    },
+    "positive_ray_positive_scope__positive_ray_signed_scope": {
+      "response_iou": {
+        "delta": 1.2985489075349743e-05,
+        "lower": -3.364775546920202e-05,
+        "upper": 5.68775127051862e-05,
+        "improved": 4,
+        "regressed": 4,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "selection_iou": {
+        "delta": 1.4146170580209283e-06,
+        "lower": 0.0,
+        "upper": 4.850115627500326e-06,
+        "improved": 1,
+        "regressed": 0,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "precision": {
+        "delta": 6.185032863648132e-08,
+        "lower": 0.0,
+        "upper": 2.120582696107931e-07,
+        "improved": 1,
+        "regressed": 0,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "recall": {
+        "delta": 1.4397920835573785e-06,
+        "lower": 0.0,
+        "upper": 4.936430000768155e-06,
+        "improved": 1,
+        "regressed": 0,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      },
+      "ap": {
+        "delta": -5.943841403760475e-06,
+        "lower": -2.463072235267221e-05,
+        "upper": 6.682390701895358e-06,
+        "improved": 5,
+        "regressed": 3,
+        "cases": 8,
+        "clusters": 7,
+        "bootstrap_samples": 2000
+      }
+    }
+  },
+  "baseline_reproduction": [],
+  "source_frames": 120,
+  "source_frame_resolution_unmodified": true,
+  "whole_five_task": false,
+  "model_promotion": false,
+  "training_steps": 0,
+  "extra_state_bytes": 0,
+  "implementation_commit": "1e073461cef81b86800d53f84cacdbd62aa2274b",
+  "collector": {
+    "path": "/root/RADIO-GS-query-field/scripts/research/summarize_query_field_signed_regions.py",
+    "sha256": "f0d8b49beb5bbf56ff4b498d90c6212b9ddc2049e8adab613df76fa55d5d13fa"
+  },
+  "reporting_repair": null
+}

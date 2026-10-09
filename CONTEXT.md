@@ -1,5 +1,29 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: scope_conditioning_v1 COMPLETE frozen1e07346.
+All24 predictions/eight baseline replays before scoring. Same raw signed8queries,
+7fields/old120sources, no training/state/source additions. Local vs positive-all
+vs signed-all regional scope (local kernels unchanged): response78.0334/77.8850/
+77.8863%, actual81.4219/81.5046/81.5047%. Primary actual+0.0829pp, CI[-.0808,.2571],
+4up3down1same; response-.1471pp. NOT meaningful scope recovery, NO promotion.
+17relatedtests pass;66frozen hashes/GTsame. All8baseline selections EXACT, scoremax
+2.5332e-7. Fern copied-field cold source denialPASS; selected/actualresponseEXACT,
+membership1.1921e-7/retained5.9605e-8 =>strictFAIL,numericPASS(onecase Pythonaudit).
+
+region_composition_v1 COMPLETE frozenf197b4c, ran only AFTER above24predictionbarrier.
+Explicit GT-assisted greedy2D union then actual Gaussian union rerender,192x256
+DIAGNOSTIC ONLY, not benchmark/inference accuracy/global optimum. Same6139parts.
+All8 actual composition IoU: fern77.7361,flower94.3884,fortress95.1634,horns_center
+95.6552,horns_left89.7260,leaves96.5082,orchids90.7613,trex74.4793%; macro89.3022.
+Flower38parts/orchids26parts vs single29.4254/22.7552: useful parts are available;
+query-only composition acceptance still missing. Proxy/actual differ, monotonicity
+violations0;2diagnostic tests incl greedy local-optimum counterexample pass.
+ADR0020 defines NEXT compositional decoder responsibility, NOT implemented decoder.
+Report docs/experiments/2026-10-09-scope-and-composition-results.md plus JSONs,
+audit/runtime; diagnostic PNG/PDF under region_composition_v1/diagnostics.
+ALL sessions finished (64802,6643,55677,18040). No full-five/cache/training jobs.
+Original worktree HEAD/index unchanged; active codex/query-preserving-gaussian-field.
+
 Active continuation2026-10-09: region_candidates_v1 COMPLETE, frozen eb98736.
 All6139 single-region Gaussian subsets +32 controls rendered before any scoring,
 same7fields/8requests/old120sources. Diagnostic192x256 only, NOT benchmark scores.

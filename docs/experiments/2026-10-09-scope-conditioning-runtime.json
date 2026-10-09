@@ -1,0 +1,38 @@
+{
+  "complete": true,
+  "case": "fern",
+  "strict": false,
+  "exact": {
+    "selected": true,
+    "membership": false,
+    "response": true,
+    "retained_response": false
+  },
+  "maximum_error": {
+    "selected": 0.0,
+    "membership": 1.1920928955078125e-07,
+    "response": 0.0,
+    "retained_response": 5.960464477539063e-08
+  },
+  "numerical_passed": true,
+  "source_denial_passed": true,
+  "coverage": "one complete raw signed prompt case, fresh process and copied field; Python audit not OS sandbox",
+  "evidence": [
+    {
+      "path": "output/query_field_20261009/scope_conditioning_v1/validation/runtime/worker.log",
+      "sha256": "41b378d4ec098678fc552aca049f51d882e6e8890b323b4bd15977cc55cc4418"
+    },
+    {
+      "path": "output/query_field_20261009/scope_conditioning_v1/validation/runtime/predictions.pt",
+      "sha256": "32bc41cb27295ae399016b2858fc1981847a32454fef4ccef2ef89205063e743"
+    },
+    {
+      "path": "output/query_field_20261009/scope_conditioning_v1/validation/runtime/audit.json",
+      "sha256": "2cfce4cd080855c6c2ee0b9dfc7fb7da0211c415f4efa94ff215f83d6f6700f1"
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/scripts/research/validate_query_field_scope_conditioning.py",
+      "sha256": "531088889b4181b9b4ee8932ae66f31a4135624868343e851115e9f3e9c55816"
+    }
+  ]
+}
