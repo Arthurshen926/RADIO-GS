@@ -1,6 +1,7 @@
 """Collect retained NVOS foreground_iou keys and actual signed-function diagnostics."""
 from scripts.research.run_query_field_signed_regions import ROOT,PREVIOUS,ARMS,read,write,receipt
 from scripts.research.summarize_query_field_relations import paired
+from itertools import combinations
 
 def main(root=ROOT,document_prefix='signed-region'):
     ROOT=root
@@ -18,11 +19,11 @@ def main(root=ROOT,document_prefix='signed-region'):
             if arm=='parent':baseline.append(dict(case=j['name'],response_delta=row['retained_response']['foreground_iou']-prior['results'][0]['retained_response']['foreground_iou'],selection_delta=row['foreground_iou']-prior['results'][0]['foreground_iou']))
     macro={a:{k:sum(v[k] for v in per[a].values())/8 for k in next(iter(per[a].values()))} for a in ARMS}
     comparisons={a+'__'+b:{k:paired({s:v[k] for s,v in per[a].items()},{s:v[k] for s,v in per[b].items()},'NVOS '+k)
-        for k in macro[a]} for a,b in [(ARMS[0],ARMS[1]),(ARMS[0],ARMS[2]),(ARMS[1],ARMS[2])]}
+        for k in macro[a]} for a,b in combinations(ARMS,2)}
     report=dict(complete=True,cases=8,primary=d['primary'],macro=macro,per_case=per,diagnostics=diagnostics,comparisons=comparisons,
         baseline_reproduction=baseline,source_frames=120,source_frame_resolution_unmodified=True,whole_five_task=False,model_promotion=False,
         training_steps=0,extra_state_bytes=0,implementation_commit=d['implementation_commit'],
-        collector=receipt(__file__),reporting_repair='retained scorer uses foreground_iou, not iou; no prediction/scoring changes')
+        collector=receipt(__file__),reporting_repair='retained scorer uses foreground_iou, not iou; no prediction/scoring changes' if document_prefix=='signed-region' else None)
     write(ROOT/'summary.json',report);write('docs/experiments/2026-10-09-'+document_prefix+'-results.json',report);print(macro,flush=True)
 
 if __name__=='__main__':main()

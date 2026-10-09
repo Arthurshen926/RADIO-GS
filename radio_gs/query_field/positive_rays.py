@@ -6,7 +6,7 @@ from .support_energy import moments,logits_from_moments
 
 
 def mixture_logits(field,support,scale,*,shared_centre=False,chunk_size=32,aggregation="mixture"):
-    if aggregation not in {"mixture","union","confidence_union"}:raise ValueError("unknown positive aggregation")
+    if aggregation not in {"mixture","union","confidence_union","coherent_union","expected_union"}:raise ValueError("unknown positive aggregation")
     if support.components is None:return field.member_logits(support,scale,include_evidence=False)
     order=torch.argsort(support.components.cpu(),stable=True)
     _,counts=torch.unique_consecutive(support.components.cpu()[order],return_counts=True)
@@ -21,16 +21,19 @@ def mixture_logits(field,support,scale,*,shared_centre=False,chunk_size=32,aggre
         for offset,size in enumerate(sizes.tolist()):
             a,b=starts[start+offset:start+offset+2].tolist();padded_ids[offset,:size]=ids[a:b];mass[offset,:size]=weights[a:b]
         ray_mass=mass.double().sum(1)
-        if aggregation=="confidence_union" and bool((ray_mass>1+1e-5).any()):raise ValueError("ray confidence must be fractional registered-pixel mass")
+        if aggregation in {"confidence_union","coherent_union","expected_union"} and bool((ray_mass>1+1e-5).any()):raise ValueError("ray confidence must be fractional registered-pixel mass")
         prior=(ray_mass/total).log().to(features)
-        group,centres,_,local=moments(field,features,padded_ids.to(features.device),mass.to(features.device))
+        group,centres,variance,local=moments(field,features,padded_ids.to(features.device),mass.to(features.device))
         if shared_centre:centres=centre[None].expand(len(sizes),-1)
-        stats=(F.normalize(group,dim=-1),centres,features.new_zeros(len(sizes)),None if local is None else F.normalize(local,dim=-1))
+        if aggregation in {"coherent_union","expected_union"}:
+            stats=(group,centres,variance if aggregation=="expected_union" else features.new_zeros(len(sizes)),local)
+        else:
+            stats=(F.normalize(group,dim=-1),centres,features.new_zeros(len(sizes)),None if local is None else F.normalize(local,dim=-1))
         logits=logits_from_moments(field,features,scale,stats)
         if aggregation=="mixture":
             result=torch.logaddexp(result,torch.logsumexp(logits+prior,1))
         else:
-            if aggregation=="confidence_union":
+            if aggregation in {"confidence_union","coherent_union","expected_union"}:
                 probability=logits.sigmoid()*ray_mass.clamp(0,1).to(features)[None,:]
                 logits=torch.logit(probability.clamp(1e-7,1-1e-7))
             result=torch.maximum(result,logits.max(1).values)
@@ -55,6 +58,6 @@ def query(field,packet,*,shared_centre=False,aggregation="mixture"):
         if packet.negative is not None:probability[packet.negative.indices[packet.negative.weights>0]]=0
     return QueryResult(None,probability,probability>field.threshold,support.indices,support.weights/support.weights.sum(),float(scale),
         dict(shared_member_core=True,source_access=False,positive_rays=int(support.components.unique().numel()),
-        positive_aggregation={'mixture':'mass-normalized log mean exp of normalized per-ray member energies','union':'maximum per-ray member energy','confidence_union':'maximum confidence-weighted per-ray membership'}[aggregation],
+        positive_aggregation={'mixture':'mass-normalized log mean exp of normalized per-ray member energies','union':'maximum per-ray member energy','confidence_union':'maximum confidence-weighted per-ray membership','coherent_union':'confidence union retaining feature coherence','expected_union':'confidence union of exact expected per-ray member energies'}[aggregation],
         positive_centre='pooled' if shared_centre else 'per_ray',ray_subsampling=False,hard_ray_constraints=False,
         source_rgb_prompt_expansion_transferred=False,scores_calibrated=False))

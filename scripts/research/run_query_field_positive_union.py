@@ -64,8 +64,7 @@ def summarize():
         previous=old['per_case']['positive_ray_local'][name]
         checks.append(dict(case=name,selection_delta=values['selection_iou']-previous['selection_iou'],response_delta=values['response_iou']-previous['response_iou']))
     if any(r['selection_delta']!=0 or abs(r['response_delta'])>1e-6 for r in checks):raise ValueError('positive local parent changed')
-    report['baseline_reproduction']=checks;report['reporting_repair']=None
-    write(ROOT/'summary.json',report);write('docs/experiments/2026-10-09-positive-union-results.json',report)
+    write(ROOT/'validation/baseline_reproduction.json',dict(complete=True,baseline_reproduction=checks,predictions_rerun=False,scoring_rerun=False))
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('stage',choices=['prepare','run']);p.add_argument('--gpus',default='2,3');a=p.parse_args();torch.set_num_threads(4)
