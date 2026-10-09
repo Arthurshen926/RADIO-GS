@@ -19,7 +19,7 @@ def summarize():
         for m in ['text','image','point_2d','point_3d']:
             data[arm][m+' IoU']={s:v['iou'] for s,v in result['explicit_selection']['modalities'][m]['per_scene'].items()}
             data[arm][m+' AP']={s:v['average_precision'] for s,v in result['modalities'][m]['per_scene'].items()}
-        invariance[arm]=dict(native_queries=0,native_exact=0,point_queries=0,point_selection_exact=0,point_max_error=0.)
+        invariance[arm]=dict(native_queries=0,native_exact=0,native_max_error=0.,point_queries=0,point_selection_exact=0,point_max_error=0.)
     prior=read(PARENT/'summary.json')
     data['parent']={k.removeprefix('UQIS '):v for k,v in prior['per_scene']['full_supervised'].items()}
     for job in d['fields']:
@@ -45,12 +45,17 @@ def summarize():
                         old=torch.load(PARENT/'full_supervised/predictions/uqis/gaussians'/(qid+'.pt'),map_location='cpu',weights_only=True)
                         invariance[arm]['native_queries']+=1
                         invariance[arm]['native_exact']+=int(torch.equal(old['native_scores'],saved['native_scores']))
+                        error=float((old['native_scores']-saved['native_scores']).abs().max())
+                        records[-1]['previous_native_error']=error
+                        invariance[arm]['native_max_error']=max(invariance[arm]['native_max_error'],error)
                     else:
                         oldpath=(Path('output/query_field_20261009/surface_input_function_v1/gaussians') if m=='point_2d' else PARENT/'full_supervised/predictions/uqis/gaussians')
                         old=torch.load(oldpath/(qid+'.pt'),map_location='cpu',weights_only=True)
                         invariance[arm]['point_queries']+=1
                         invariance[arm]['point_selection_exact']+=int(torch.equal(old['selected'],saved['selected']))
-                        invariance[arm]['point_max_error']=max(invariance[arm]['point_max_error'],float((old['membership']-saved['membership']).abs().max()))
+                        error=float((old['membership']-saved['membership']).abs().max())
+                        records[-1]['previous_point_error']=error;records[-1]['previous_point_selection_exact']=torch.equal(old['selected'],saved['selected'])
+                        invariance[arm]['point_max_error']=max(invariance[arm]['point_max_error'],error)
         print('diagnosed',scene,flush=True)
     attribution={}
     for arm in ARMS:
