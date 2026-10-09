@@ -1,5 +1,44 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: signed_regions_v1 and positive_rays_v1 COMPLETE.
+Two sequential fixed7-field/8-request/3-arm NVOS studies, each24 predictions
+before all8 scores. Same old120 sources, no training/new state/labels/source
+runtime. Full reports docs/experiments/2026-10-09-signed-region-results.md/json
+and 2026-10-09-positive-ray-results.md/json, runtime JSON companions.
+
+Signed freeze ffe6bb6: primary joint_signed actual69.7200 ->69.6806%, failed.
+Signed vs joint_unsigned changes actual only+0.000005pp. Flower/orchids unchanged,
+positive coverage41.58/45.63%. Confirms earlier negative branch not main omission.
+Initial missing-design launch failed before predictions; post-scoring collector
+used iou instead of foreground_iou. Separate corrected collector recovered
+summary without rerunning predictions/scoring. Failures and SHA-verified executed
+collector retained under logs and validation/reporting. Cold fern exact all4
+payloads, source-denial probe effective, no denied opens; onecase Python audit.
+
+Positive freeze c0fd2c6: Runtime.positive_rays retains every positive ray member
+hypothesis, mass-normalized log-mean-exp energies, same negative input/formula,
+source refinement, scale and threshold. Not calibrated probability or full v10
+RGB/SAM expansion. Shared-centre control changes per-ray normalization and
+nonlinear order; local-centre primary separately changes centres. No top-k.
+Parent/shared/local response61.8552/68.8367/69.5949%, actual69.7200/78.6507/79.4595%.
+Primary precision91.9179->91.6925%, recall76.7605->86.7903%; actual6 improve/2 regress
+(horns_center-0.4812pp, leaves-0.1638pp). Physical7-cluster CIactual improvement
+[+0.5835,+24.6562]pp. Shared->local+0.8088pp but CIcrosses0 and5/8regress;
+do not claim local superiority or pick percase arm. Parent fresh IoUs identical.
+Flower actual23.9933->72.5906%, orchids21.0862->45.6963%; positive coverage
+98.5366/99.5057% but recall73.6265/45.9405%. Preserving prompt hypotheses restores
+function; beyond-prompt whole-object extent remains deficient. No novel/full-five
+or default promotion. v10response86.5134% still16.9185pp higher with input/runtime
+contract differences. Do not compare v10response with candidateactual metric.
+26 tests pass; frozen source+protocol SHA audit61/62files passes. Cold fern
+selected/response exact, membership5.96e-8/retained_response9.31e-10 differences;
+strictFAIL, numericPASS, denialPASS. Scopeonecase Python audit, not OS/allcases.
+All execution jobs finished including exec75310; no experiments running.
+Next: harmonize243-source resolution/generation contracts, separate partial
+region coverage from conditional acceptance under fixed positive-hypothesis
+interface, then same-method full-five/UQISfour-mode integration. Source completion
+is not already a same-budget reference. No further negative-weight tuning.
+
 Active continuation2026-10-09: text_union_functions_v1 COMPLETE, frozen06abfd6.
 All4 LERF scenes,756 legal views,64,431 semantic atoms.18 tests passed;8 grouped
 predictions before scoring. No source runtime,training,new labels or old query
