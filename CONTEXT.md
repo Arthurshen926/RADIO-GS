@@ -1,5 +1,34 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: semantic_measure_functions_v2 IN PROGRESS,
+frozen f3c34dd. Full10 ScanNet scenes, fixed mean/measure/entropy-reliable category
+functions on identical additional semantic measure state, each prior-only and
+same shared-member corroboration. Primary=reliable_typed, fresh parent program
+baseline; no winner selection, no new training or member labels. Parent member
+remains confidence_mixture_function, NOT the later UQIS labelled forest. Same
+protected old native/geometry/member tensors; full legal semantic sources minus
+same development frames. This is not whole-five-task validation or promotion.
+
+Generic SemanticMeasure in field.pt retains native semantic atoms and sparse
+Gaussian association. Runtime category_partition handles complete menu before
+19/15/10 split selection. Averaged logits do not equal averaged probabilities;
+entropy information also needs modes. v10 source-time text detector and auxiliary
+local channel remain untransferred. Extra atoms are uncompressed memory, not
+novelty by packaging. Details ADR0017 and semantic-measure protocol.
+
+Run log /tmp/radio_gs_semantic_measure_run_v2.log, exec71986; construction then
+all10 predictions then scoring. v1 stopped before queries on nested geometry
+KeyError; preserve its logs/stopped.json. Fixed via verified frozen geometry loader.
+18 relevant tests pass; earlier CUDA reference test normalized query differently,
+corrected the test to compare identical inputs, retained failed log. Current test
+log /tmp/radio_gs_semantic_measure_tests_final.log. No code/protocol tuning midrun.
+
+After scoring: run summarize_query_field_semantic_measure and
+validate_query_field_semantic_measure (GPU1), inspect actual scores/limits, finish
+human report and ledger. Cold scope=one full preencoded menu,fresh copied scene,
+Python open guard with blocked probe;not OS sandbox/raw text encoder proof.
+Do not rerun completed batches or overwrite receipts.
+
 Active continuation2026-10-09: native_mode_functions_v1 COMPLETE. Frozen
 construction ae80fc4;18 exports,all804 predictions and all3 scores completed before
 analysis; post supervisor finished summary,cold replay,plot successfully. No jobs
