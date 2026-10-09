@@ -1,75 +1,85 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-09: joint_observation_transfer_v1 PRIMARY SCORED;
-post-score input probe and copied-export audits IN PROGRESS. Frozen
-implementation dd9f9f2. Runner scripts/research/run_query_field_joint_observation.py.
-Four predeclared arms: small_source/small_supervised/full_source/full_supervised.
-All9 UQIS scenes/all268 inputs each; this is a focused capability study after
-full five-task coverage, NOT a new full five-task candidate. Source budgets162
-versus1089 legal frames, with the SAME18 development frames excluded. Reuses
-query-free SAM/RGB-D visibility/regional SigLIP source functions, not benchmark
-prompts or labels. The supervised arms inherit the EXISTING22-room instance-label
-forest and3-room calibration, explicitly EXTRA supervision; no new training.
+Active continuation2026-10-09: joint_observation_transfer_v1 and its separate
+surface_input_function_v1 probe are COMPLETE. All jobs finished; no whole-batch
+restart or receipt overwrite. Frozen construction dd9f9f2; surface probe c9fa0f7.
+Report docs/experiments/2026-10-09-joint-observation-transfer-results.md, complete
+factorial and surface JSONs, and input-identity-attribution-results.json.
+No default model promotion, independent final test or new full-five-task claim.
+This is all9 UQIS scenes/all4 inputs after prior complete five-task coverage.
 
-Field-owned tensors preserve15 DirectAnchorEvidence functions and the forest
-decision. Native row moments retain magnitude; binary membership/visibility
-retain nested any/all disagreement. Exact source_vertex_ids map all9 carriers.
-No old solver/joblib/source asset loader runs at query time. Both source and
-supervised heads use a complete carrier, distinct from original native observed
-support; inferred native candidate domain is unchanged. Same shared member core
-for all4 inputs; uncertain rays use declared mixture rather than old dominant
-anchor. Image patch/native identity transfer remains unfinished. Group prior
-is replaced by the declared function, not added as another weighted correction.
+Four predeclared arms,36 exports,1072 predictions completed before scoring.
+Scene macro text/image/2D/3D IoU (%):
+small_source10.0574/18.7295/23.2063/23.5256;
+full_source14.6929/24.2419/40.2754/40.5871;
+small_supervised15.1257/23.8846/38.8643/41.1677;
+full_supervised17.2524/26.8655/46.4446/48.4807.
+v10 reference16.3865/39.8980/49.7357/49.0470. Full supervised3D gap0.5663pp.
+Small/full legal budgets162/1089 frames, same18 development views excluded.
+Source-only and supervised budgets use the SAME query-free SAM/RGB-D/native
+recipe. Contrast against old Confidence ALSO changes projection, decision and
+carrier domain; it is not a budget-only experiment. Both budget and decision
+matter; their gains are not additive. Full-source source-only3D is40.5871%.
 
-53 distinct focused/legacy tests pass across46-case regression and16-case program
-runs (9 overlap), including CPU/CUDA forest split boundaries. Construction checks
-16 fixed source-domain anchors x512 sampled target rows plus anchors per scene
-and budget before predictions; numerical feature<=1e-5, identical-feature forest
-<=1e-7 and zero source-case selection differences required. All36 exports precede
-all1072 predictions; all predictions precede scoring. Do not consult partial
-scores or promote/relabel extra supervision as source-only. Full five-task
-generalization and proper patch function preservation remain outstanding.
+Field-owned binary membership/visibility retain joint any/all/nested disagreement.
+All15 DirectAnchorEvidence functions feed the actual compiled forest in supervised
+arms. Native row moments retain magnitude; cached v10 native transfers exactly
+match the declared view-balanced function in all9 scenes. Explicit source_vertex_ids
+map carriers (two scenes retain their three missing degenerate rows). The forest
+function really is retained as tensors, with EXISTING22-room instance supervision
+and3-room calibration; no training or current benchmark labels used. This is an
+uncompressed functional reference, not novelty from tensor packaging. All19
+ScanNet/UQIS room IDs are disjoint from fit/calibration after scan suffix removal.
 
-All36 constructions now complete. Independent source replay288 cases has maximum
-15-feature error8.344650268554688e-7; forest execution on identical features passes
-1e-7. Reassociated native/joint feature roundoff can change forest scores (maximum
-.001207500696182251), although the sampled source selected sets all match. Do not
-claim end-to-end score bit equality. Tensor bytes across9 scenes per arm:
-small_source21,367,306,710; small_supervised21,390,881,454;
-full_source22,080,732,934; full_supervised22,104,307,678.
-All1072 predictions and four scores are complete. Scene macro text/image/2D/3D:
-small_source10.0574/18.7295/23.2063/23.5256%;
-full_source14.6929/24.2419/40.2754/40.5871%;
-small_supervised15.1257/23.8846/38.8643/41.1677%;
-full_supervised17.2524/26.8655/46.4446/48.4807%.
-v10 targets16.3865/39.8980/49.7357/49.0470%. No promotion or final-test claim.
-Primary process finished. Postprocessing supervisor /tmp/radio_gs_joint_finish.py
-(PID1952154) now runs copied-export cold audits onGPU3 and the input probe on
-GPUs0,2, then will summarize and plot. Log /tmp/radio_gs_joint_finish.log.
-Point/native diagnostics completed: every arm134/134 native scores exact; all67
-3D supports correct. Fixed prior59 correct supports full_supervised P/R/IoU=
-70.1553/66.7753/48.4314%; prior P/IoU58.3361/33.0997%.
-After the surface probe finishes, also run
-scripts.research.diagnose_query_field_input_identity (all actual inputs), then
-finish the pending human report2026-10-09-joint-observation-transfer-results.md.
-Inspect status before restarting; do not overwrite completed receipts.
+The common member function replaces the prior, with no old solver/joblib/source
+asset loader at query time. Complete-carrier members are distinct from native
+observed support. Inferred native candidates still use original native coverage.
+Stored old spatial_metric/default_scale/group parameters are inactive in this
+member branch; active displacement features are bounded physical metres. Extra
+supervision remains explicit; threshold.35 odds are recentered at the common.5
+interface, not calibrated probabilities. Native patch function is still missing.
 
-Separately predeclared BEFORE factorial scores: surface_input_function_v1,
-frozen c9fa0f7. All67 UQIS2D inputs on the SAME full_supervised field; compare
-Gaussian contribution mixtures with a first-local-surface input registration
-derived only from Gaussian centres. This transfers the v10 geometric input
-operator, without clamping the estimated point positive or calling an old source
-solver. Two geometry/parity tests pass. Runner run_query_field_surface_input.py;
-protocol2026-10-09-surface-input-function-protocol.md. This input-only probe does
-not claim four-modality/five-task validation and does not change the2x2 study.
+288 fixed source replay cases/151488 sampled rows: feature max8.34465e-7,
+source-function max5.36442e-7; forest on IDENTICAL inputs exact. Reassociated
+feature roundoff changes whole-function forest probabilities by at most.0012075,
+with zero sampled selected-set disagreements. Do not claim exhaustive or end-to-end
+bit equality. Tensor bytes small_source21,367,306,710;small_supervised21,390,881,454;
+full_source22,080,732,934;full_supervised22,104,307,678.53 distinct field/regression
+checks and2 surface adapter tests pass. Four arms each134/134 original native
+semantic scores are exact; this is not local patch function equivalence.
 
-Remaining21-field source inventory completed, read-only/no labels:
-diagnostics/remaining_family_sources.json. All21 geometry receipts match v10.
-After retaining development exclusions, LERF756/756 and ScanNet1138/1138 frames
-have native descriptor headers marking query independence and existing referenced
-SAM files. NVOS120/243 have such caches;123 need native-cache preparation.
-This is presence/header evidence, NOT rehashed mask validation or completed
-full-source transfer. No legacy query-conditioned calibration is inherited.
+Registered3D supports correct59->67/67. Fixed original59 correct supports:
+prior P/R/IoU58.3361/53.3664/33.0997%; full supervised70.1553/66.7753/48.4314%.
+These are query means with full-target recall, NOT scene macros or observed-only
+recall. Full image identity correct29/67 versus prior33; candidates contain target
+37/67. Text correct20/67, candidate contains27/67, unchanged. Better scope does
+not establish native identity transfer; candidate recall also remains insufficient.
+
+Separate surface probe, declared BEFORE any factorial score: all67 2D inputs on
+same full_supervised field. First local surface intersection from Gaussian centres
+only, no RGB/depth/source, no positive clamp. IoU46.4446->49.5025%; delta3.0579pp,
+paired95%CI[.7558,5.6198],8/9 scenes improve; v10 gap.2332pp. Not a synthetic
+four-input/five-task winner bundle. Original mixtures already have67/67 correct
+dominant supports;19 contain other-instance components (overall correct mass97.644%).
+Those19 query-mean IoU43.9738->54.5450%, precision57.8165->72.2527%; pure48
+IoU47.6545->47.5822%. Thus mixed-condition propagation, not dominant-point accuracy,
+is the unresolved input defect. Surface location and nonlinear effects not isolated.
+
+Copied-export cold audit finished: all20 selected outputs exact, no forbidden
+source opens, all numeric<=1e-6. STRICT BITWISE GATE FAILED: full_source2D has348
+different entries,max1.7881393e-7; other19 cases exact, including full_supervised5/5.
+One real scene per arm; Python file-open guard, not OS sandbox; primary ray adapter,
+not all surface-probe inputs. Preserve failure and prior Confidence failure.
+
+Remaining21-field read-only inventory: all geometry receipts match v10. After
+existing development exclusions, LERF756/756 and ScanNet1138/1138 frames have
+query-independent native headers and referenced SAM files;NVOS120/243,123 missing.
+Presence/header evidence only; masks not rehashed or transfer validated. No legacy
+query-conditioned calibration inherited. Next method work: recover actual local
+patch/candidate functions, integrate validated input conditions into common runtime,
+validate source projection/carrier contracts across other families, then complete
+one uniform five-task study. Do not return to adding losses on a fixed mean/32-D
+representation or prioritize compression before capability recovery.
 
 Active continuation2026-10-09: confidence_mixture_functions_v1 research batch is
 COMPLETE, but strict cold replay FAILED and no model is promoted. Frozen

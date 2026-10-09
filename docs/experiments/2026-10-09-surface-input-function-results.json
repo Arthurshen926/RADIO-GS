@@ -1,0 +1,3182 @@
+{
+  "complete": true,
+  "scope": "all67 UQIS2D inputs only;not full-modality or five-task evaluation",
+  "member_field": "full_supervised joint observation function;unchanged",
+  "extra_supervision": true,
+  "before_iou": 0.4644462883381716,
+  "after_iou": 0.4950249939015621,
+  "paired": {
+    "delta": 0.030578705563390554,
+    "lower": 0.007558353652974924,
+    "upper": 0.05619775593427103,
+    "improved": 8,
+    "regressed": 1,
+    "cases": 9,
+    "clusters": 9,
+    "bootstrap_samples": 2000
+  },
+  "per_scene_before": {
+    "scene0030_00": 0.40841480578506584,
+    "scene0203_00": 0.4425277120387888,
+    "scene0246_00": 0.4462233462855478,
+    "scene0249_00": 0.47723789317606063,
+    "scene0353_00": 0.4959321971084407,
+    "scene0435_00": 0.540760987518601,
+    "scene0535_00": 0.3650484045043351,
+    "scene0700_00": 0.4154869183892824,
+    "scene0704_00": 0.5883843302374221
+  },
+  "per_scene_after": {
+    "scene0030_00": 0.41411879338189994,
+    "scene0203_00": 0.44383734640279676,
+    "scene0246_00": 0.4698969748400998,
+    "scene0249_00": 0.4658422127267853,
+    "scene0353_00": 0.49879799192420865,
+    "scene0435_00": 0.585975496925597,
+    "scene0535_00": 0.44883333671497444,
+    "scene0700_00": 0.5265625099507371,
+    "scene0704_00": 0.6013602822469605
+  },
+  "metrics": {
+    "benchmark_version": "scannet-uqis-9-v0.3.1-candidate",
+    "role": "opened_development_candidate",
+    "target_count": 67,
+    "query_count": 67,
+    "scene_count": 9,
+    "row_scope": "modality_comparator",
+    "modalities": {
+      "point_2d": {
+        "query_count": 67,
+        "scene_count": 9,
+        "scene_macro": {
+          "average_precision": 0.7561611045369355,
+          "oracle_iou": 0.6045907522406726,
+          "fixed_iou_0.5": 0.4950249939015621,
+          "acc_at_iou_0.25": 0.8267195767195767,
+          "acc_at_iou_0.50": 0.5006613756613756,
+          "selected_purity": 0.7141142169381817,
+          "positive_coverage": 0.6662388109118793,
+          "same_class_distractor_iou": 0.022801672924195555,
+          "centroid_error_m": 0.2967575512978246
+        },
+        "scene_clustered_ci": {
+          "average_precision": {
+            "estimate": 0.7561611045369355,
+            "lower": 0.7196064990649405,
+            "upper": 0.7945331883266785,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "oracle_iou": {
+            "estimate": 0.6045907522406726,
+            "lower": 0.5676872821394171,
+            "upper": 0.6459254830965346,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "fixed_iou_0.5": {
+            "estimate": 0.4950249939015621,
+            "lower": 0.45552700611657393,
+            "upper": 0.5367323320228803,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "acc_at_iou_0.25": {
+            "estimate": 0.8267195767195767,
+            "lower": 0.7221726190476191,
+            "upper": 0.9285714285714286,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "acc_at_iou_0.50": {
+            "estimate": 0.5006613756613756,
+            "lower": 0.39814814814814814,
+            "upper": 0.5892857142857143,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "selected_purity": {
+            "estimate": 0.7141142169381817,
+            "lower": 0.646304804385084,
+            "upper": 0.7846336353415605,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "positive_coverage": {
+            "estimate": 0.6662388109118793,
+            "lower": 0.6113074220451648,
+            "upper": 0.732596613905211,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "same_class_distractor_iou": {
+            "estimate": 0.022801672924195555,
+            "lower": 0.006671598207210485,
+            "upper": 0.0422698482242782,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          },
+          "centroid_error_m": {
+            "estimate": 0.2967575512978246,
+            "lower": 0.17434194388142404,
+            "upper": 0.45889721725922894,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          }
+        },
+        "per_scene": {
+          "scene0030_00": {
+            "average_precision": 0.6919655849629543,
+            "oracle_iou": 0.5400079234035117,
+            "fixed_iou_0.5": 0.41411879338189994,
+            "acc_at_iou_0.25": 0.625,
+            "acc_at_iou_0.50": 0.5,
+            "selected_purity": 0.5747293171524593,
+            "positive_coverage": 0.7044916771471621,
+            "same_class_distractor_iou": 0.0811115858306301,
+            "centroid_error_m": 0.8129709494846821
+          },
+          "scene0203_00": {
+            "average_precision": 0.7585238082635809,
+            "oracle_iou": 0.5936242736772911,
+            "fixed_iou_0.5": 0.44383734640279676,
+            "acc_at_iou_0.25": 0.625,
+            "acc_at_iou_0.50": 0.625,
+            "selected_purity": 0.7548562438247306,
+            "positive_coverage": 0.5673702364412752,
+            "same_class_distractor_iou": 0.06251952601269244,
+            "centroid_error_m": 0.17921687140052625
+          },
+          "scene0246_00": {
+            "average_precision": 0.6862014685538047,
+            "oracle_iou": 0.5637073990798007,
+            "fixed_iou_0.5": 0.4698969748400998,
+            "acc_at_iou_0.25": 0.8333333333333334,
+            "acc_at_iou_0.50": 0.5,
+            "selected_purity": 0.6138549736781549,
+            "positive_coverage": 0.6698985288474558,
+            "same_class_distractor_iou": 0.023678861788617885,
+            "centroid_error_m": 0.13813436587180575
+          },
+          "scene0249_00": {
+            "average_precision": 0.7577221299924539,
+            "oracle_iou": 0.5917498824015486,
+            "fixed_iou_0.5": 0.4658422127267853,
+            "acc_at_iou_0.25": 0.625,
+            "acc_at_iou_0.50": 0.375,
+            "selected_purity": 0.7326664084986483,
+            "positive_coverage": 0.5801479804485009,
+            "same_class_distractor_iou": 9.310293460449874e-05,
+            "centroid_error_m": 0.5840373587936547
+          },
+          "scene0353_00": {
+            "average_precision": 0.6897344555328957,
+            "oracle_iou": 0.5373146639253092,
+            "fixed_iou_0.5": 0.49879799192420865,
+            "acc_at_iou_0.25": 0.875,
+            "acc_at_iou_0.50": 0.5,
+            "selected_purity": 0.7032539457645499,
+            "positive_coverage": 0.607108999925859,
+            "same_class_distractor_iou": 0.01434941919242519,
+            "centroid_error_m": 0.2075857317741172
+          },
+          "scene0435_00": {
+            "average_precision": 0.841892783101164,
+            "oracle_iou": 0.7063319546694582,
+            "fixed_iou_0.5": 0.585975496925597,
+            "acc_at_iou_0.25": 1.0,
+            "acc_at_iou_0.50": 0.625,
+            "selected_purity": 0.8499856814028832,
+            "positive_coverage": 0.709270865933993,
+            "same_class_distractor_iou": 6.836034602764244e-05,
+            "centroid_error_m": 0.24005535791658922
+          },
+          "scene0535_00": {
+            "average_precision": 0.7320715971512377,
+            "oracle_iou": 0.566328568715621,
+            "fixed_iou_0.5": 0.44883333671497444,
+            "acc_at_iou_0.25": 1.0,
+            "acc_at_iou_0.50": 0.16666666666666666,
+            "selected_purity": 0.7413613411614092,
+            "positive_coverage": 0.5817227042605734,
+            "same_class_distractor_iou": 4.276246131010711e-05,
+            "centroid_error_m": 0.24107064120417032
+          },
+          "scene0700_00": {
+            "average_precision": 0.8219699495657031,
+            "oracle_iou": 0.6901470715011326,
+            "fixed_iou_0.5": 0.5265625099507371,
+            "acc_at_iou_0.25": 1.0,
+            "acc_at_iou_0.50": 0.5,
+            "selected_purity": 0.574679079877989,
+            "positive_coverage": 0.8944264429884012,
+            "same_class_distractor_iou": 0.02215221724478145,
+            "centroid_error_m": 0.09642966882519223
+          },
+          "scene0704_00": {
+            "average_precision": 0.8253681637086253,
+            "oracle_iou": 0.6521050327923801,
+            "fixed_iou_0.5": 0.6013602822469605,
+            "acc_at_iou_0.25": 0.8571428571428571,
+            "acc_at_iou_0.50": 0.7142857142857143,
+            "selected_purity": 0.8816409610828109,
+            "positive_coverage": 0.6817118622136926,
+            "same_class_distractor_iou": 0.0011992205066706642,
+            "centroid_error_m": 0.17131701640968408
+          }
+        }
+      }
+    },
+    "uq_rank": null,
+    "paired_query_robustness": null,
+    "text_language_groups": {},
+    "language_groups_overlap": true,
+    "target_scope_groups": {
+      "review_marked_annotation_group": {
+        "point_2d": {
+          "query_count": 4,
+          "scene_count": 3,
+          "scene_macro": {
+            "average_precision": 0.6594674020322694,
+            "oracle_iou": 0.49760008229170255,
+            "fixed_iou_0.5": 0.32358357514836633,
+            "acc_at_iou_0.25": 0.3333333333333333,
+            "acc_at_iou_0.50": 0.3333333333333333,
+            "selected_purity": 0.591279970853356,
+            "positive_coverage": 0.7091972656598426,
+            "same_class_distractor_iou": 0.058591068636870726,
+            "centroid_error_m": 0.5118049443562845
+          },
+          "scene_clustered_ci": {
+            "average_precision": {
+              "estimate": 0.6594674020322694,
+              "lower": 0.4580008518791221,
+              "upper": 0.9444630708497402,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "oracle_iou": {
+              "estimate": 0.49760008229170255,
+              "lower": 0.26010928961748636,
+              "upper": 0.8329911019849418,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "fixed_iou_0.5": {
+              "estimate": 0.32358357514836633,
+              "lower": 0.17368819746536004,
+              "upper": 0.6019108280254777,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "acc_at_iou_0.25": {
+              "estimate": 0.3333333333333333,
+              "lower": 0.0,
+              "upper": 1.0,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "acc_at_iou_0.50": {
+              "estimate": 0.3333333333333333,
+              "lower": 0.0,
+              "upper": 1.0,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "selected_purity": {
+              "estimate": 0.591279970853356,
+              "lower": 0.17370762420609828,
+              "upper": 0.9704321455648218,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "positive_coverage": {
+              "estimate": 0.7091972656598426,
+              "lower": 0.19631901840490798,
+              "upper": 0.9995826377295493,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "same_class_distractor_iou": {
+              "estimate": 0.058591068636870726,
+              "lower": 0.0,
+              "upper": 0.17577320591061218,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "centroid_error_m": {
+              "estimate": 0.5118049443562845,
+              "lower": 0.14223856414774183,
+              "upper": 0.7278395582097156,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            }
+          },
+          "per_scene": {
+            "scene0030_00": {
+              "average_precision": 0.5759382833679458,
+              "oracle_iou": 0.3996998552726794,
+              "fixed_iou_0.5": 0.17368819746536004,
+              "acc_at_iou_0.25": 0.0,
+              "acc_at_iou_0.50": 0.0,
+              "selected_purity": 0.17370762420609825,
+              "positive_coverage": 0.9995826377295493,
+              "same_class_distractor_iou": 0.17577320591061218,
+              "centroid_error_m": 0.6653367107113961
+            },
+            "scene0435_00": {
+              "average_precision": 0.9444630708497402,
+              "oracle_iou": 0.8329911019849419,
+              "fixed_iou_0.5": 0.6019108280254777,
+              "acc_at_iou_0.25": 1.0,
+              "acc_at_iou_0.50": 1.0,
+              "selected_purity": 0.629700142789148,
+              "positive_coverage": 0.9316901408450704,
+              "same_class_distractor_iou": 0.0,
+              "centroid_error_m": 0.14223856414774183
+            },
+            "scene0704_00": {
+              "average_precision": 0.4580008518791221,
+              "oracle_iou": 0.26010928961748636,
+              "fixed_iou_0.5": 0.19515169995426132,
+              "acc_at_iou_0.25": 0.0,
+              "acc_at_iou_0.50": 0.0,
+              "selected_purity": 0.9704321455648218,
+              "positive_coverage": 0.19631901840490798,
+              "same_class_distractor_iou": 0.0,
+              "centroid_error_m": 0.7278395582097156
+            }
+          }
+        }
+      },
+      "not_marked_as_group": {
+        "point_2d": {
+          "query_count": 63,
+          "scene_count": 9,
+          "scene_macro": {
+            "average_precision": 0.7656334105650974,
+            "oracle_iou": 0.6150360651299928,
+            "fixed_iou_0.5": 0.5111992701774383,
+            "acc_at_iou_0.25": 0.8657407407407408,
+            "acc_at_iou_0.50": 0.5264550264550265,
+            "selected_purity": 0.7308191868893917,
+            "positive_coverage": 0.6607678077611957,
+            "same_class_distractor_iou": 0.01931897986732548,
+            "centroid_error_m": 0.2934721605910492
+          },
+          "scene_clustered_ci": {
+            "average_precision": {
+              "estimate": 0.7656334105650974,
+              "lower": 0.7283334491304754,
+              "upper": 0.8063809319032098,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "oracle_iou": {
+              "estimate": 0.6150360651299928,
+              "lower": 0.5775574978855051,
+              "upper": 0.654541044249805,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "fixed_iou_0.5": {
+              "estimate": 0.5111992701774383,
+              "lower": 0.4704968203306049,
+              "upper": 0.558008872432744,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "acc_at_iou_0.25": {
+              "estimate": 0.8657407407407408,
+              "lower": 0.7638888888888888,
+              "upper": 0.9537037037037037,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "acc_at_iou_0.50": {
+              "estimate": 0.5264550264550265,
+              "lower": 0.4060515873015873,
+              "upper": 0.6343088624338622,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "selected_purity": {
+              "estimate": 0.7308191868893917,
+              "lower": 0.6675322836599783,
+              "upper": 0.7940072693186577,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "positive_coverage": {
+              "estimate": 0.6607678077611957,
+              "lower": 0.6031826697559951,
+              "upper": 0.7294916626652078,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "same_class_distractor_iou": {
+              "estimate": 0.01931897986732548,
+              "lower": 0.006278438321939279,
+              "upper": 0.03374049985812553,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            },
+            "centroid_error_m": {
+              "estimate": 0.2934721605910492,
+              "lower": 0.1597298496879647,
+              "upper": 0.46622919891212494,
+              "confidence": 0.95,
+              "bootstrap_samples": 2000,
+              "bootstrap_unit": "scene",
+              "seed": 20260813
+            }
+          },
+          "per_scene": {
+            "scene0030_00": {
+              "average_precision": 0.7306413521612906,
+              "oracle_iou": 0.5867772794471223,
+              "fixed_iou_0.5": 0.4942623253540799,
+              "acc_at_iou_0.25": 0.8333333333333334,
+              "acc_at_iou_0.50": 0.6666666666666666,
+              "selected_purity": 0.7084032148012464,
+              "positive_coverage": 0.6061280236196998,
+              "same_class_distractor_iou": 0.04955771247063608,
+              "centroid_error_m": 0.8621823624091108
+            },
+            "scene0203_00": {
+              "average_precision": 0.7585238082635809,
+              "oracle_iou": 0.5936242736772911,
+              "fixed_iou_0.5": 0.44383734640279676,
+              "acc_at_iou_0.25": 0.625,
+              "acc_at_iou_0.50": 0.625,
+              "selected_purity": 0.7548562438247306,
+              "positive_coverage": 0.5673702364412752,
+              "same_class_distractor_iou": 0.06251952601269244,
+              "centroid_error_m": 0.17921687140052625
+            },
+            "scene0246_00": {
+              "average_precision": 0.6862014685538047,
+              "oracle_iou": 0.5637073990798007,
+              "fixed_iou_0.5": 0.4698969748400998,
+              "acc_at_iou_0.25": 0.8333333333333334,
+              "acc_at_iou_0.50": 0.5,
+              "selected_purity": 0.6138549736781549,
+              "positive_coverage": 0.6698985288474558,
+              "same_class_distractor_iou": 0.023678861788617885,
+              "centroid_error_m": 0.13813436587180575
+            },
+            "scene0249_00": {
+              "average_precision": 0.7577221299924539,
+              "oracle_iou": 0.5917498824015486,
+              "fixed_iou_0.5": 0.4658422127267853,
+              "acc_at_iou_0.25": 0.625,
+              "acc_at_iou_0.50": 0.375,
+              "selected_purity": 0.7326664084986483,
+              "positive_coverage": 0.5801479804485009,
+              "same_class_distractor_iou": 9.310293460449874e-05,
+              "centroid_error_m": 0.5840373587936547
+            },
+            "scene0353_00": {
+              "average_precision": 0.6897344555328957,
+              "oracle_iou": 0.5373146639253092,
+              "fixed_iou_0.5": 0.49879799192420865,
+              "acc_at_iou_0.25": 0.875,
+              "acc_at_iou_0.50": 0.5,
+              "selected_purity": 0.7032539457645499,
+              "positive_coverage": 0.607108999925859,
+              "same_class_distractor_iou": 0.01434941919242519,
+              "centroid_error_m": 0.2075857317741172
+            },
+            "scene0435_00": {
+              "average_precision": 0.8272398848513675,
+              "oracle_iou": 0.6882377907672462,
+              "fixed_iou_0.5": 0.5836990210541856,
+              "acc_at_iou_0.25": 1.0,
+              "acc_at_iou_0.50": 0.5714285714285714,
+              "selected_purity": 0.8814550440619883,
+              "positive_coverage": 0.6774966838038392,
+              "same_class_distractor_iou": 7.812610974587708e-05,
+              "centroid_error_m": 0.25402918559785315
+            },
+            "scene0535_00": {
+              "average_precision": 0.7320715971512377,
+              "oracle_iou": 0.566328568715621,
+              "fixed_iou_0.5": 0.44883333671497444,
+              "acc_at_iou_0.25": 1.0,
+              "acc_at_iou_0.50": 0.16666666666666666,
+              "selected_purity": 0.7413613411614092,
+              "positive_coverage": 0.5817227042605734,
+              "same_class_distractor_iou": 4.276246131010711e-05,
+              "centroid_error_m": 0.24107064120417032
+            },
+            "scene0700_00": {
+              "average_precision": 0.8219699495657031,
+              "oracle_iou": 0.6901470715011326,
+              "fixed_iou_0.5": 0.5265625099507371,
+              "acc_at_iou_0.25": 1.0,
+              "acc_at_iou_0.50": 0.5,
+              "selected_purity": 0.574679079877989,
+              "positive_coverage": 0.8944264429884012,
+              "same_class_distractor_iou": 0.02215221724478145,
+              "centroid_error_m": 0.09642966882519223
+            },
+            "scene0704_00": {
+              "average_precision": 0.8865960490135425,
+              "oracle_iou": 0.7174376566548624,
+              "fixed_iou_0.5": 0.6690617126290771,
+              "acc_at_iou_0.25": 1.0,
+              "acc_at_iou_0.50": 0.8333333333333334,
+              "selected_purity": 0.8668424303358092,
+              "positive_coverage": 0.7626106695151568,
+              "same_class_distractor_iou": 0.0013990905911157748,
+              "centroid_error_m": 0.07856325944301215
+            }
+          }
+        }
+      }
+    },
+    "image_reference_difficulty_groups": {},
+    "diagnostic_groups_change_primary_cohort": false,
+    "fixed_iou_status": "uncalibrated_diagnostic",
+    "oracle_iou_status": "diagnostic_only",
+    "per_query": [
+      {
+        "query_id": "uq_92a65abc334d97f2dff4bc58f66f5916",
+        "scene_id": "scene0030_00",
+        "instance_id": 20,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "attribute"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.8984635519366176,
+        "oracle_iou": 0.811267071320182,
+        "fixed_iou_0.5": 0.6164650257266027,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.6694352159468439,
+        "positive_coverage": 0.8862455017992803,
+        "same_class_distractor_iou": 0.078429060030664,
+        "centroid_error_m": 1.8166012570064651,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_6246df8c1c4a774fa41a2a8cda7f9109",
+        "scene_id": "scene0030_00",
+        "instance_id": 22,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.8715135478468459,
+        "oracle_iou": 0.6672251074998604,
+        "fixed_iou_0.5": 0.6467014386427467,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9479122910190708,
+        "positive_coverage": 0.6705295061508291,
+        "same_class_distractor_iou": 0.017331627311852973,
+        "centroid_error_m": 0.36945588411568125,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_05b2bf9cdb522b66240f8ebbd87fda1b",
+        "scene_id": "scene0030_00",
+        "instance_id": 23,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.26846898471260655,
+        "oracle_iou": 0.2010711894666369,
+        "fixed_iou_0.5": 0.10706217463903349,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.19183386131643787,
+        "positive_coverage": 0.19502594381821434,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 1.2793797956089847,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_2dce189ed9ed93fd8bf0eb1a4f275099",
+        "scene_id": "scene0030_00",
+        "instance_id": 25,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "ordinal",
+          "annotation_group"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.5325904619973799,
+        "oracle_iou": 0.3836589698046181,
+        "fixed_iou_0.5": 0.21563682219419925,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.21567567567567567,
+        "positive_coverage": 0.9991652754590985,
+        "same_class_distractor_iou": 0.1496493928510347,
+        "centroid_error_m": 0.44441386217947043,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_b5cf402a35d461da2e21cacfb802edee",
+        "scene_id": "scene0030_00",
+        "instance_id": 26,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "ordinal",
+          "annotation_group"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.6192861047385118,
+        "oracle_iou": 0.41574074074074074,
+        "fixed_iou_0.5": 0.13173957273652084,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.13173957273652084,
+        "positive_coverage": 1.0,
+        "same_class_distractor_iou": 0.2018970189701897,
+        "centroid_error_m": 0.8862595592433219,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_171d96eb00a45842cb4737aedcb1adad",
+        "scene_id": "scene0030_00",
+        "instance_id": 27,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9643153466870525,
+        "oracle_iou": 0.8426080363912054,
+        "fixed_iou_0.5": 0.7699967876646322,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9868258542610128,
+        "positive_coverage": 0.7779941577409932,
+        "same_class_distractor_iou": 0.00322108345534407,
+        "centroid_error_m": 0.05873593355749822,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_9fd7e5a6d22b4eebb5a8eff26d01546b",
+        "scene_id": "scene0030_00",
+        "instance_id": 48,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute",
+          "spatial",
+          "comparison"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.5814049422455446,
+        "oracle_iou": 0.3455826558265583,
+        "fixed_iou_0.5": 0.32472843450479233,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.8625254582484725,
+        "positive_coverage": 0.3424528301886792,
+        "same_class_distractor_iou": 0.03548604103599058,
+        "centroid_error_m": 1.041359750789121,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_2121a62c258f82271e363e2809233b60",
+        "scene_id": "scene0030_00",
+        "instance_id": 52,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "attribute"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.7996817395390758,
+        "oracle_iou": 0.6529096161782914,
+        "fixed_iou_0.5": 0.5006200909466721,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.5918866080156403,
+        "positive_coverage": 0.764520202020202,
+        "same_class_distractor_iou": 0.16287846298996483,
+        "centroid_error_m": 0.6075615533769141,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_0b5c7f9f252f5304c7931b4d4c3f9c66",
+        "scene_id": "scene0249_00",
+        "instance_id": 22,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "attribute"
+        ],
+        "reference_difficulty_flags": [
+          "partial_target",
+          "background_dominance"
+        ],
+        "average_precision": 0.916339317696995,
+        "oracle_iou": 0.7064296051271449,
+        "fixed_iou_0.5": 0.475867269984917,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 1.0,
+        "positive_coverage": 0.475867269984917,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.39775924681074765,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_f2b73cf50aee66084508259300bc7ec3",
+        "scene_id": "scene0249_00",
+        "instance_id": 24,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "attribute"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9359223066578805,
+        "oracle_iou": 0.7782404997397189,
+        "fixed_iou_0.5": 0.7720812182741117,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9032066508313539,
+        "positive_coverage": 0.841726618705036,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.04147618918626172,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_c75e9691ccc310b1c4910906a35735cf",
+        "scene_id": "scene0249_00",
+        "instance_id": 25,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.7444425807924268,
+        "oracle_iou": 0.45437109878997106,
+        "fixed_iou_0.5": 0.22064314562219003,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.9841944255608429,
+        "positive_coverage": 0.22142775207433182,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 1.5601336567981978,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_4829d9c98d1933de5ce1041025560dbd",
+        "scene_id": "scene0249_00",
+        "instance_id": 26,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.8793263914391984,
+        "oracle_iou": 0.7438456420492349,
+        "fixed_iou_0.5": 0.6430527036276523,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9542915185373286,
+        "positive_coverage": 0.6634887005649718,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.07092533393200419,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_2f26637f63ef25ff55a88cdec954fd9f",
+        "scene_id": "scene0249_00",
+        "instance_id": 33,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9489807357252336,
+        "oracle_iou": 0.855191256830601,
+        "fixed_iou_0.5": 0.8333333333333334,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.918918918918919,
+        "positive_coverage": 0.8994708994708994,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.2740018045657638,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_345b6adf12791bdc5e3ab27fabcc7ce9",
+        "scene_id": "scene0249_00",
+        "instance_id": 34,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "partial_target",
+          "exposure"
+        ],
+        "average_precision": 0.2560668740159246,
+        "oracle_iou": 0.17718191377497372,
+        "fixed_iou_0.5": 0.09652432969215491,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.12755905511811025,
+        "positive_coverage": 0.28404441846873174,
+        "same_class_distractor_iou": 0.0007448234768359899,
+        "centroid_error_m": 1.9116278324729257,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_a41bf6f19031f00621bbcdb7d1d3e7c2",
+        "scene_id": "scene0249_00",
+        "instance_id": 35,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "partial_target",
+          "exposure"
+        ],
+        "average_precision": 0.46819505446129017,
+        "oracle_iou": 0.29757839180378765,
+        "fixed_iou_0.5": 0.20152091254752852,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.4894459102902375,
+        "positive_coverage": 0.2551581843191197,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.3505818990424805,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_ab735f45e400fb0f18d6052f79fd97d0",
+        "scene_id": "scene0249_00",
+        "instance_id": 37,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9125037791506826,
+        "oracle_iou": 0.7211606510969568,
+        "fixed_iou_0.5": 0.4837147887323944,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.4837147887323944,
+        "positive_coverage": 1.0,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.06579290754085668,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_98d5764054ecb01aced519ceea68b74c",
+        "scene_id": "scene0353_00",
+        "instance_id": 4,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "ordinal",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9369313351938509,
+        "oracle_iou": 0.7945726604108547,
+        "fixed_iou_0.5": 0.744812718943681,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.8791348600508906,
+        "positive_coverage": 0.8297808465926149,
+        "same_class_distractor_iou": 0.0006509357200976403,
+        "centroid_error_m": 0.0443290654169074,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_126ca77f78de6f6eef44cfcada75be67",
+        "scene_id": "scene0353_00",
+        "instance_id": 5,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.918171486155356,
+        "oracle_iou": 0.7820895522388059,
+        "fixed_iou_0.5": 0.7784019975031211,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9261047159301894,
+        "positive_coverage": 0.8299500831946756,
+        "same_class_distractor_iou": 0.008538422903063787,
+        "centroid_error_m": 0.033568916136894625,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_be9168b142c2e1749e424bb0ec09786c",
+        "scene_id": "scene0353_00",
+        "instance_id": 18,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.3102135911171366,
+        "oracle_iou": 0.1995890813031993,
+        "fixed_iou_0.5": 0.16635859519408502,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.49889135254988914,
+        "positive_coverage": 0.19973368841544606,
+        "same_class_distractor_iou": 0.06754627806222922,
+        "centroid_error_m": 0.6211861251265317,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_bfd4188426fb88fb6446517e52cca129",
+        "scene_id": "scene0353_00",
+        "instance_id": 33,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.685717883543003,
+        "oracle_iou": 0.5119128658951668,
+        "fixed_iou_0.5": 0.45288248337028825,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.6377829820452772,
+        "positive_coverage": 0.6097014925373134,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.1723419013048121,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_eab67aca9782dc38c15068c57e3b8c82",
+        "scene_id": "scene0353_00",
+        "instance_id": 34,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "dark",
+          "low_detail"
+        ],
+        "average_precision": 0.8816272487763663,
+        "oracle_iou": 0.7363445378151261,
+        "fixed_iou_0.5": 0.6651624548736462,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.6736745886654479,
+        "positive_coverage": 0.9813581890812251,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.031918059510563354,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_f6ceed9d82ea5a455fc27309b70d120c",
+        "scene_id": "scene0353_00",
+        "instance_id": 45,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.5230997131872674,
+        "oracle_iou": 0.3696561024949427,
+        "fixed_iou_0.5": 0.30809635935518925,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.6472602739726028,
+        "positive_coverage": 0.37026556377884196,
+        "same_class_distractor_iou": 0.0017211703958691911,
+        "centroid_error_m": 0.24445384108033963,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_08bf47443a599187b6d945243f8ef67f",
+        "scene_id": "scene0353_00",
+        "instance_id": 50,
+        "modality": "point_2d",
+        "language_tags": [
+          "uncertain_identity"
+        ],
+        "reference_difficulty_flags": [
+          "annotation_identity_ambiguity"
+        ],
+        "average_precision": 0.841966708574317,
+        "oracle_iou": 0.6352370689655172,
+        "fixed_iou_0.5": 0.620395821880154,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.8349981502034776,
+        "positive_coverage": 0.7070802005012531,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.05467238188038159,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_d52435649256f5584ca19716b815d1b4",
+        "scene_id": "scene0353_00",
+        "instance_id": 51,
+        "modality": "point_2d",
+        "language_tags": [
+          "negation",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.42014767771586853,
+        "oracle_iou": 0.2691154422788606,
+        "fixed_iou_0.5": 0.25427350427350426,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.5281846426986241,
+        "positive_coverage": 0.3290019353055018,
+        "same_class_distractor_iou": 0.03633854645814168,
+        "centroid_error_m": 0.4582155637365072,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_c92eb84e68d8e04c85ebbb8f3149d7b6",
+        "scene_id": "scene0435_00",
+        "instance_id": 11,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.7001624053161688,
+        "oracle_iou": 0.5392307692307692,
+        "fixed_iou_0.5": 0.4031481348379214,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.9866314863676341,
+        "positive_coverage": 0.4053624340536243,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.4884122172586775,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_68202d49376831431a605681885815a2",
+        "scene_id": "scene0435_00",
+        "instance_id": 12,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.7806851875669969,
+        "oracle_iou": 0.5593270742172565,
+        "fixed_iou_0.5": 0.3956615501712546,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.9920483460559797,
+        "positive_coverage": 0.39692033596334947,
+        "same_class_distractor_iou": 0.0005468827682211395,
+        "centroid_error_m": 0.33666530464622246,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_4b281075f3a17a7d401893dd4dce247b",
+        "scene_id": "scene0435_00",
+        "instance_id": 14,
+        "modality": "point_2d",
+        "language_tags": [
+          "functional"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.8277421256186821,
+        "oracle_iou": 0.7065081351689612,
+        "fixed_iou_0.5": 0.6798088410991637,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.917741935483871,
+        "positive_coverage": 0.7239185750636132,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.4945758880560888,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_106416d774081883f1700b121953660d",
+        "scene_id": "scene0435_00",
+        "instance_id": 22,
+        "modality": "point_2d",
+        "language_tags": [
+          "functional",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.6201384660833651,
+        "oracle_iou": 0.50234375,
+        "fixed_iou_0.5": 0.49842767295597484,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.9378698224852071,
+        "positive_coverage": 0.5154471544715448,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.3253754034488403,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_0d7d5554c4d71920338581efbd9c98a2",
+        "scene_id": "scene0435_00",
+        "instance_id": 29,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9510804181398824,
+        "oracle_iou": 0.841845140032949,
+        "fixed_iou_0.5": 0.5335968379446641,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.5460060667340748,
+        "positive_coverage": 0.9591474245115453,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.055074996970262885,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_fc4ec8174322cef05eec9c94c9729521",
+        "scene_id": "scene0435_00",
+        "instance_id": 35,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "annotation_group"
+        ],
+        "reference_difficulty_flags": [
+          "exposure",
+          "annotation_group"
+        ],
+        "average_precision": 0.9444630708497402,
+        "oracle_iou": 0.8329911019849419,
+        "fixed_iou_0.5": 0.6019108280254777,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.629700142789148,
+        "positive_coverage": 0.9316901408450704,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.14223856414774183,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_16533bfc2383812aa051a8135b0596be",
+        "scene_id": "scene0435_00",
+        "instance_id": 39,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "exposure"
+        ],
+        "average_precision": 0.9636995488657015,
+        "oracle_iou": 0.8676028084252758,
+        "fixed_iou_0.5": 0.8127240143369175,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.8704414587332053,
+        "positive_coverage": 0.9245667686034659,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.03413825027742968,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_f10895c991808be069c2149a1fab294f",
+        "scene_id": "scene0435_00",
+        "instance_id": 64,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9471710423687749,
+        "oracle_iou": 0.8008068582955119,
+        "fixed_iou_0.5": 0.7625260960334029,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9194461925739459,
+        "positive_coverage": 0.8171140939597316,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.04396223852745029,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_51c2e8f24c47f82506f9a7b354689b6c",
+        "scene_id": "scene0700_00",
+        "instance_id": 1,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9246891734430374,
+        "oracle_iou": 0.7644489736497306,
+        "fixed_iou_0.5": 0.7534437393592324,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9238944771303853,
+        "positive_coverage": 0.8033003300330033,
+        "same_class_distractor_iou": 0.004877228388832829,
+        "centroid_error_m": 0.07992881510320032,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_81d31b3773d1683563d8a0f141cb7013",
+        "scene_id": "scene0700_00",
+        "instance_id": 2,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.3540942169508823,
+        "oracle_iou": 0.34131153920996304,
+        "fixed_iou_0.5": 0.315800960279354,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.3795907660020986,
+        "positive_coverage": 0.6526838069463239,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.21961454618942894,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_ebd07601c8aff1e8f9f833fd37f069f8",
+        "scene_id": "scene0700_00",
+        "instance_id": 5,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.759862073958053,
+        "oracle_iou": 0.5638867635807192,
+        "fixed_iou_0.5": 0.5113825652415325,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.5142378559463987,
+        "positive_coverage": 0.9892588614393125,
+        "same_class_distractor_iou": 0.052105638829407566,
+        "centroid_error_m": 0.0559935491125528,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_b95506d871e3599e0fe0c036a9a248fd",
+        "scene_id": "scene0700_00",
+        "instance_id": 6,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9094454065624253,
+        "oracle_iou": 0.6835515082527035,
+        "fixed_iou_0.5": 0.4163012638638122,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.4172699069286453,
+        "positive_coverage": 0.9944547134935305,
+        "same_class_distractor_iou": 0.000839278220730172,
+        "centroid_error_m": 0.11696693613631712,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_8b68d20c1234f16b79b2d38b55345184",
+        "scene_id": "scene0700_00",
+        "instance_id": 7,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "comparison"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9394534129518827,
+        "oracle_iou": 0.8255578093306288,
+        "fixed_iou_0.5": 0.44582685329186106,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.4557498675145734,
+        "positive_coverage": 0.9534368070953437,
+        "same_class_distractor_iou": 0.00028498147620404675,
+        "centroid_error_m": 0.17675135578060341,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_9b59eabca31eb8e0fe308cdf9516bdd0",
+        "scene_id": "scene0700_00",
+        "instance_id": 17,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.862097521678696,
+        "oracle_iou": 0.7352941176470589,
+        "fixed_iou_0.5": 0.6780923994038748,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.794066317626527,
+        "positive_coverage": 0.8227848101265823,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.010616055248760666,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_71fb36bf0a32c9e616bd42dd673179c3",
+        "scene_id": "scene0700_00",
+        "instance_id": 18,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9458114626348603,
+        "oracle_iou": 0.8491083676268861,
+        "fixed_iou_0.5": 0.39815384615384614,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.4028642590286426,
+        "positive_coverage": 0.9714714714714715,
+        "same_class_distractor_iou": 0.07412935323383085,
+        "centroid_error_m": 0.07455336793931579,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_6e4717b937c1432a7c7d252e5d681155",
+        "scene_id": "scene0700_00",
+        "instance_id": 35,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.8803063283457879,
+        "oracle_iou": 0.7580174927113703,
+        "fixed_iou_0.5": 0.6934984520123839,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.7097591888466414,
+        "positive_coverage": 0.9680207433016422,
+        "same_class_distractor_iou": 0.044981257809246146,
+        "centroid_error_m": 0.03701272509135878,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_a67cb45ca6126f21d5de19a935c37b22",
+        "scene_id": "scene0704_00",
+        "instance_id": 1,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.8439285688436536,
+        "oracle_iou": 0.6239737274220033,
+        "fixed_iou_0.5": 0.42977177245373,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.9059358544758258,
+        "positive_coverage": 0.44984549560256715,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.17211254574078666,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_93c02e58c196684252142211331d09e5",
+        "scene_id": "scene0704_00",
+        "instance_id": 2,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9169404662485312,
+        "oracle_iou": 0.749721293199554,
+        "fixed_iou_0.5": 0.7405349406667923,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9378578244274809,
+        "positive_coverage": 0.7787461622264039,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.052608959717624644,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_a2470a3c69496b57bd3c60fc9dc44caf",
+        "scene_id": "scene0704_00",
+        "instance_id": 6,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute",
+          "annotation_group"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.4580008518791221,
+        "oracle_iou": 0.26010928961748636,
+        "fixed_iou_0.5": 0.19515169995426132,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.9704321455648218,
+        "positive_coverage": 0.19631901840490798,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.7278395582097156,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_9a036203ed515208614e7fe8d351c690",
+        "scene_id": "scene0704_00",
+        "instance_id": 10,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.920953717651669,
+        "oracle_iou": 0.7353716394306801,
+        "fixed_iou_0.5": 0.7016241299303945,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.7462981243830207,
+        "positive_coverage": 0.9213893967093236,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.047786696535438655,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_8c6ce122841bcecd7320a3c33d308010",
+        "scene_id": "scene0704_00",
+        "instance_id": 11,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "ordinal"
+        ],
+        "reference_difficulty_flags": [
+          "blur"
+        ],
+        "average_precision": 0.8338397319153397,
+        "oracle_iou": 0.6885676741130092,
+        "fixed_iou_0.5": 0.6763224181360201,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9148211243611585,
+        "positive_coverage": 0.7217741935483871,
+        "same_class_distractor_iou": 0.008394543546694649,
+        "centroid_error_m": 0.03171989411433075,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_cb5efaff87e8e995de83458be0834ad3",
+        "scene_id": "scene0704_00",
+        "instance_id": 19,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9357840757672703,
+        "oracle_iou": 0.7843353557639272,
+        "fixed_iou_0.5": 0.7434607645875252,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.7963362068965517,
+        "positive_coverage": 0.9180124223602485,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.06754744344470845,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_b61a8d81bac71ed8229937d587a3c658",
+        "scene_id": "scene0704_00",
+        "instance_id": 26,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute"
+        ],
+        "reference_difficulty_flags": [
+          "blur"
+        ],
+        "average_precision": 0.8681297336547904,
+        "oracle_iou": 0.72265625,
+        "fixed_iou_0.5": 0.72265625,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.8998054474708171,
+        "positive_coverage": 0.7858963466440102,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.0996040171051838,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_cb1676c0148c8cc64248f310857475f2",
+        "scene_id": "scene0246_00",
+        "instance_id": 3,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9761379084231638,
+        "oracle_iou": 0.8925276752767528,
+        "fixed_iou_0.5": 0.6204840406874781,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9744408945686901,
+        "positive_coverage": 0.6307494829922271,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.0655283889667041,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_2e02a4c146bb252bb6fbf37d2b6c3457",
+        "scene_id": "scene0246_00",
+        "instance_id": 5,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9200483997744802,
+        "oracle_iou": 0.72544080604534,
+        "fixed_iou_0.5": 0.687402799377916,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9253314724354501,
+        "positive_coverage": 0.7277716794731065,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.11453237604790582,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_5a5c7f6b2a3e541ff2dac9911c3fcfb6",
+        "scene_id": "scene0246_00",
+        "instance_id": 6,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.6043158738640052,
+        "oracle_iou": 0.4724310776942356,
+        "fixed_iou_0.5": 0.42829457364341084,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.484118291347207,
+        "positive_coverage": 0.7878787878787878,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.08160580777135171,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_8a95a646e64519117367f9d1285d1809",
+        "scene_id": "scene0246_00",
+        "instance_id": 33,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "blur",
+          "exposure"
+        ],
+        "average_precision": 0.5163279201906015,
+        "oracle_iou": 0.39507389162561574,
+        "fixed_iou_0.5": 0.28797289666854886,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.33530571992110453,
+        "positive_coverage": 0.6710526315789473,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.13882645289239542,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_4bbec9eeb97f2b40a742fca3fe799f77",
+        "scene_id": "scene0246_00",
+        "instance_id": 37,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial",
+          "attribute"
+        ],
+        "reference_difficulty_flags": [
+          "reflection",
+          "identity_ambiguity"
+        ],
+        "average_precision": 0.18104519690063678,
+        "oracle_iou": 0.1511879049676026,
+        "fixed_iou_0.5": 0.15056461731493098,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.3082191780821918,
+        "positive_coverage": 0.22741629816803538,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.38750955532578474,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_7cc097f50b2198a5dab2041d1997733e",
+        "scene_id": "scene0246_00",
+        "instance_id": 39,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.9193335121699403,
+        "oracle_iou": 0.7455830388692579,
+        "fixed_iou_0.5": 0.6446629213483146,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.6557142857142857,
+        "positive_coverage": 0.9745222929936306,
+        "same_class_distractor_iou": 0.1420731707317073,
+        "centroid_error_m": 0.04080361422669275,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_1f908549aeef5367445a27fb127394df",
+        "scene_id": "scene0203_00",
+        "instance_id": 3,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute",
+          "spatial",
+          "negation"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.6677020888907383,
+        "oracle_iou": 0.42227899846704137,
+        "fixed_iou_0.5": 0.06633029780950037,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 1.0,
+        "positive_coverage": 0.06633029780950037,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.2500403613455994,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_285d21a6e78273f601237d4ce2144e03",
+        "scene_id": "scene0203_00",
+        "instance_id": 4,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.7610111267988167,
+        "oracle_iou": 0.5888409961685823,
+        "fixed_iou_0.5": 0.5876440303996078,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.7504696305572949,
+        "positive_coverage": 0.7303473491773309,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.06312495634669162,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_c209d2ce8f5b5edcc550b297b06f1ce6",
+        "scene_id": "scene0203_00",
+        "instance_id": 6,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.7295683867867523,
+        "oracle_iou": 0.5507889971544365,
+        "fixed_iou_0.5": 0.057415829797625224,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.8203227213257741,
+        "positive_coverage": 0.058147083371974405,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.6496944038436363,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_cb75a29621d286877bceea1f9c7f390d",
+        "scene_id": "scene0203_00",
+        "instance_id": 8,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "uncertain_identity"
+        ],
+        "reference_difficulty_flags": [
+          "annotation_identity_ambiguity"
+        ],
+        "average_precision": 0.826458140216512,
+        "oracle_iou": 0.6305182341650671,
+        "fixed_iou_0.5": 0.5138600138600139,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.8402266288951842,
+        "positive_coverage": 0.5695084485407066,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.10357250903631637,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_9b9e858e6fdb03eafa89c64c08d6c020",
+        "scene_id": "scene0203_00",
+        "instance_id": 9,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.954443748785153,
+        "oracle_iou": 0.8098603398956756,
+        "fixed_iou_0.5": 0.7978302049250904,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9370954692556634,
+        "positive_coverage": 0.8429767103347889,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.03385778371602313,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_e2aca58e179f7fc291afdbdb231d2f1d",
+        "scene_id": "scene0203_00",
+        "instance_id": 17,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "blur"
+        ],
+        "average_precision": 0.9811498004757397,
+        "oracle_iou": 0.8734746307000643,
+        "fixed_iou_0.5": 0.8570544554455446,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9070072036673216,
+        "positive_coverage": 0.9396200814111262,
+        "same_class_distractor_iou": 0.003068829460762823,
+        "centroid_error_m": 0.018260672943241015,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_8c16773bfa5fd7e39301ec826e72becf",
+        "scene_id": "scene0203_00",
+        "instance_id": 18,
+        "modality": "point_2d",
+        "language_tags": [
+          "attribute",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "blur"
+        ],
+        "average_precision": 0.7478433310102813,
+        "oracle_iou": 0.5794743429286608,
+        "fixed_iou_0.5": 0.5141414141414141,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.6052318668252081,
+        "positive_coverage": 0.7735562310030395,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.08720454324654092,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_2683be39d89c705a0dc2033decd40f16",
+        "scene_id": "scene0203_00",
+        "instance_id": 19,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "blur"
+        ],
+        "average_precision": 0.4000138431446539,
+        "oracle_iou": 0.2937576499388005,
+        "fixed_iou_0.5": 0.15642252484357747,
+        "acc_at_iou_0.25": 0.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.17849643007139857,
+        "positive_coverage": 0.5584756898817346,
+        "same_class_distractor_iou": 0.4970873786407767,
+        "centroid_error_m": 0.22797974072616115,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_7651376a6f4b6e482f84e239473a4a37",
+        "scene_id": "scene0535_00",
+        "instance_id": 9,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial"
+        ],
+        "reference_difficulty_flags": [
+          "annotation_identity_ambiguity"
+        ],
+        "average_precision": 0.6534823917789163,
+        "oracle_iou": 0.39781685870224376,
+        "fixed_iou_0.5": 0.3247407407407407,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.3454144342893161,
+        "positive_coverage": 0.8443759630200308,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.10774566976961086,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_70ee0015f6c9805d6fe155a9f34914c0",
+        "scene_id": "scene0535_00",
+        "instance_id": 10,
+        "modality": "point_2d",
+        "language_tags": [
+          "spatial",
+          "comparison"
+        ],
+        "reference_difficulty_flags": [
+          "blur"
+        ],
+        "average_precision": 0.9984361762283742,
+        "oracle_iou": 0.9679595278246206,
+        "fixed_iou_0.5": 0.9679595278246206,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 1.0,
+        "selected_purity": 0.9982608695652174,
+        "positive_coverage": 0.9695945945945946,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.006375299202187663,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_4a0a0d87022221a5038060597aa793a2",
+        "scene_id": "scene0535_00",
+        "instance_id": 11,
+        "modality": "point_2d",
+        "language_tags": [
+          "negation",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.8517867932736785,
+        "oracle_iou": 0.661430246189918,
+        "fixed_iou_0.5": 0.30161394448030987,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.9749582637729549,
+        "positive_coverage": 0.30396877033181524,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.2888495196375244,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_f023fd76798096b1981d523470b264c8",
+        "scene_id": "scene0535_00",
+        "instance_id": 12,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "spatial"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.7679154128621851,
+        "oracle_iou": 0.547264374216901,
+        "fixed_iou_0.5": 0.32419246298788695,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.9145704793545325,
+        "positive_coverage": 0.33431644691186674,
+        "same_class_distractor_iou": 0.0001021346134204882,
+        "centroid_error_m": 0.3034544308510034,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_c23459704015bae3996e09e0efd9286e",
+        "scene_id": "scene0535_00",
+        "instance_id": 13,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison"
+        ],
+        "reference_difficulty_flags": [
+          "backlight"
+        ],
+        "average_precision": 0.577152846806732,
+        "oracle_iou": 0.39001969796454367,
+        "fixed_iou_0.5": 0.3879636638909917,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.6422305764411027,
+        "positive_coverage": 0.49492998551424433,
+        "same_class_distractor_iou": 0.00015444015444015445,
+        "centroid_error_m": 0.4654849423101384,
+        "empty_prediction": false
+      },
+      {
+        "query_id": "uq_810a952accf6d8e90dc058b6d3e08a6e",
+        "scene_id": "scene0535_00",
+        "instance_id": 16,
+        "modality": "point_2d",
+        "language_tags": [
+          "comparison",
+          "attribute"
+        ],
+        "reference_difficulty_flags": [],
+        "average_precision": 0.5436559619575404,
+        "oracle_iou": 0.4334807073954984,
+        "fixed_iou_0.5": 0.3865296803652968,
+        "acc_at_iou_0.25": 1.0,
+        "acc_at_iou_0.50": 0.0,
+        "selected_purity": 0.5727334235453315,
+        "positive_coverage": 0.5431504651908887,
+        "same_class_distractor_iou": 0.0,
+        "centroid_error_m": 0.27451398545455724,
+        "empty_prediction": false
+      }
+    ],
+    "explicit_selection": {
+      "query_count": 67,
+      "modalities": {
+        "point_2d": {
+          "query_count": 67,
+          "scene_count": 9,
+          "per_scene": {
+            "scene0030_00": {
+              "iou": 0.41411879338189994,
+              "purity": 0.5747293171524593,
+              "coverage": 0.7044916771471621
+            },
+            "scene0203_00": {
+              "iou": 0.44383734640279676,
+              "purity": 0.7548562438247306,
+              "coverage": 0.5673702364412752
+            },
+            "scene0246_00": {
+              "iou": 0.4698969748400998,
+              "purity": 0.6138549736781549,
+              "coverage": 0.6698985288474558
+            },
+            "scene0249_00": {
+              "iou": 0.4658422127267853,
+              "purity": 0.7326664084986483,
+              "coverage": 0.5801479804485009
+            },
+            "scene0353_00": {
+              "iou": 0.49879799192420865,
+              "purity": 0.7032539457645499,
+              "coverage": 0.607108999925859
+            },
+            "scene0435_00": {
+              "iou": 0.585975496925597,
+              "purity": 0.8499856814028832,
+              "coverage": 0.709270865933993
+            },
+            "scene0535_00": {
+              "iou": 0.44883333671497444,
+              "purity": 0.7413613411614092,
+              "coverage": 0.5817227042605734
+            },
+            "scene0700_00": {
+              "iou": 0.5265625099507371,
+              "purity": 0.574679079877989,
+              "coverage": 0.8944264429884012
+            },
+            "scene0704_00": {
+              "iou": 0.6013602822469605,
+              "purity": 0.8816409610828109,
+              "coverage": 0.6817118622136926
+            }
+          },
+          "empty_selections": 0,
+          "scene_macro": {
+            "iou": 0.4950249939015621,
+            "purity": 0.7141142169381817,
+            "coverage": 0.6662388109118793
+          },
+          "iou_ci": {
+            "estimate": 0.4950249939015621,
+            "lower": 0.45552700611657393,
+            "upper": 0.5367323320228803,
+            "confidence": 0.95,
+            "bootstrap_samples": 2000,
+            "bootstrap_unit": "scene",
+            "seed": 20260813
+          }
+        }
+      },
+      "per_query": [
+        {
+          "query_id": "uq_92a65abc334d97f2dff4bc58f66f5916",
+          "scene_id": "scene0030_00",
+          "instance_id": 20,
+          "modality": "point_2d",
+          "iou": 0.6164650257266027,
+          "purity": 0.6694352159468439,
+          "coverage": 0.8862455017992803,
+          "same_class_distractor_iou": 0.078429060030664,
+          "selected_elements": 6622,
+          "dominant_selected_instance_ids": [
+            20
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_6246df8c1c4a774fa41a2a8cda7f9109",
+          "scene_id": "scene0030_00",
+          "instance_id": 22,
+          "modality": "point_2d",
+          "iou": 0.6467014386427467,
+          "purity": 0.9479122910190708,
+          "coverage": 0.6705295061508291,
+          "same_class_distractor_iou": 0.017331627311852973,
+          "selected_elements": 11903,
+          "dominant_selected_instance_ids": [
+            22
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_05b2bf9cdb522b66240f8ebbd87fda1b",
+          "scene_id": "scene0030_00",
+          "instance_id": 23,
+          "modality": "point_2d",
+          "iou": 0.10706217463903349,
+          "purity": 0.19183386131643787,
+          "coverage": 0.19502594381821434,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 5682,
+          "dominant_selected_instance_ids": [
+            0
+          ],
+          "target_is_unique_dominant_instance": false
+        },
+        {
+          "query_id": "uq_2dce189ed9ed93fd8bf0eb1a4f275099",
+          "scene_id": "scene0030_00",
+          "instance_id": 25,
+          "modality": "point_2d",
+          "iou": 0.21563682219419925,
+          "purity": 0.21567567567567567,
+          "coverage": 0.9991652754590985,
+          "same_class_distractor_iou": 0.1496493928510347,
+          "selected_elements": 5550,
+          "dominant_selected_instance_ids": [
+            21
+          ],
+          "target_is_unique_dominant_instance": false
+        },
+        {
+          "query_id": "uq_b5cf402a35d461da2e21cacfb802edee",
+          "scene_id": "scene0030_00",
+          "instance_id": 26,
+          "modality": "point_2d",
+          "iou": 0.13173957273652084,
+          "purity": 0.13173957273652084,
+          "coverage": 1.0,
+          "same_class_distractor_iou": 0.2018970189701897,
+          "selected_elements": 5898,
+          "dominant_selected_instance_ids": [
+            21
+          ],
+          "target_is_unique_dominant_instance": false
+        },
+        {
+          "query_id": "uq_171d96eb00a45842cb4737aedcb1adad",
+          "scene_id": "scene0030_00",
+          "instance_id": 27,
+          "modality": "point_2d",
+          "iou": 0.7699967876646322,
+          "purity": 0.9868258542610128,
+          "coverage": 0.7779941577409932,
+          "same_class_distractor_iou": 0.00322108345534407,
+          "selected_elements": 4858,
+          "dominant_selected_instance_ids": [
+            27
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_9fd7e5a6d22b4eebb5a8eff26d01546b",
+          "scene_id": "scene0030_00",
+          "instance_id": 48,
+          "modality": "point_2d",
+          "iou": 0.32472843450479233,
+          "purity": 0.8625254582484725,
+          "coverage": 0.3424528301886792,
+          "same_class_distractor_iou": 0.03548604103599058,
+          "selected_elements": 2946,
+          "dominant_selected_instance_ids": [
+            48
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_2121a62c258f82271e363e2809233b60",
+          "scene_id": "scene0030_00",
+          "instance_id": 52,
+          "modality": "point_2d",
+          "iou": 0.5006200909466721,
+          "purity": 0.5918866080156403,
+          "coverage": 0.764520202020202,
+          "same_class_distractor_iou": 0.16287846298996483,
+          "selected_elements": 6138,
+          "dominant_selected_instance_ids": [
+            52
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_0b5c7f9f252f5304c7931b4d4c3f9c66",
+          "scene_id": "scene0249_00",
+          "instance_id": 22,
+          "modality": "point_2d",
+          "iou": 0.475867269984917,
+          "purity": 1.0,
+          "coverage": 0.475867269984917,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1893,
+          "dominant_selected_instance_ids": [
+            22
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_f2b73cf50aee66084508259300bc7ec3",
+          "scene_id": "scene0249_00",
+          "instance_id": 24,
+          "modality": "point_2d",
+          "iou": 0.7720812182741117,
+          "purity": 0.9032066508313539,
+          "coverage": 0.841726618705036,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1684,
+          "dominant_selected_instance_ids": [
+            24
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_c75e9691ccc310b1c4910906a35735cf",
+          "scene_id": "scene0249_00",
+          "instance_id": 25,
+          "modality": "point_2d",
+          "iou": 0.22064314562219003,
+          "purity": 0.9841944255608429,
+          "coverage": 0.22142775207433182,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 5884,
+          "dominant_selected_instance_ids": [
+            25
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_4829d9c98d1933de5ce1041025560dbd",
+          "scene_id": "scene0249_00",
+          "instance_id": 26,
+          "modality": "point_2d",
+          "iou": 0.6430527036276523,
+          "purity": 0.9542915185373286,
+          "coverage": 0.6634887005649718,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1969,
+          "dominant_selected_instance_ids": [
+            26
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_2f26637f63ef25ff55a88cdec954fd9f",
+          "scene_id": "scene0249_00",
+          "instance_id": 33,
+          "modality": "point_2d",
+          "iou": 0.8333333333333334,
+          "purity": 0.918918918918919,
+          "coverage": 0.8994708994708994,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2775,
+          "dominant_selected_instance_ids": [
+            33
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_345b6adf12791bdc5e3ab27fabcc7ce9",
+          "scene_id": "scene0249_00",
+          "instance_id": 34,
+          "modality": "point_2d",
+          "iou": 0.09652432969215491,
+          "purity": 0.12755905511811025,
+          "coverage": 0.28404441846873174,
+          "same_class_distractor_iou": 0.0007448234768359899,
+          "selected_elements": 3810,
+          "dominant_selected_instance_ids": [
+            32
+          ],
+          "target_is_unique_dominant_instance": false
+        },
+        {
+          "query_id": "uq_a41bf6f19031f00621bbcdb7d1d3e7c2",
+          "scene_id": "scene0249_00",
+          "instance_id": 35,
+          "modality": "point_2d",
+          "iou": 0.20152091254752852,
+          "purity": 0.4894459102902375,
+          "coverage": 0.2551581843191197,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1516,
+          "dominant_selected_instance_ids": [
+            35
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_ab735f45e400fb0f18d6052f79fd97d0",
+          "scene_id": "scene0249_00",
+          "instance_id": 37,
+          "modality": "point_2d",
+          "iou": 0.4837147887323944,
+          "purity": 0.4837147887323944,
+          "coverage": 1.0,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2272,
+          "dominant_selected_instance_ids": [
+            37
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_98d5764054ecb01aced519ceea68b74c",
+          "scene_id": "scene0353_00",
+          "instance_id": 4,
+          "modality": "point_2d",
+          "iou": 0.744812718943681,
+          "purity": 0.8791348600508906,
+          "coverage": 0.8297808465926149,
+          "same_class_distractor_iou": 0.0006509357200976403,
+          "selected_elements": 3144,
+          "dominant_selected_instance_ids": [
+            4
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_126ca77f78de6f6eef44cfcada75be67",
+          "scene_id": "scene0353_00",
+          "instance_id": 5,
+          "modality": "point_2d",
+          "iou": 0.7784019975031211,
+          "purity": 0.9261047159301894,
+          "coverage": 0.8299500831946756,
+          "same_class_distractor_iou": 0.008538422903063787,
+          "selected_elements": 2693,
+          "dominant_selected_instance_ids": [
+            5
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_be9168b142c2e1749e424bb0ec09786c",
+          "scene_id": "scene0353_00",
+          "instance_id": 18,
+          "modality": "point_2d",
+          "iou": 0.16635859519408502,
+          "purity": 0.49889135254988914,
+          "coverage": 0.19973368841544606,
+          "same_class_distractor_iou": 0.06754627806222922,
+          "selected_elements": 1804,
+          "dominant_selected_instance_ids": [
+            18
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_bfd4188426fb88fb6446517e52cca129",
+          "scene_id": "scene0353_00",
+          "instance_id": 33,
+          "modality": "point_2d",
+          "iou": 0.45288248337028825,
+          "purity": 0.6377829820452772,
+          "coverage": 0.6097014925373134,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1281,
+          "dominant_selected_instance_ids": [
+            33
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_eab67aca9782dc38c15068c57e3b8c82",
+          "scene_id": "scene0353_00",
+          "instance_id": 34,
+          "modality": "point_2d",
+          "iou": 0.6651624548736462,
+          "purity": 0.6736745886654479,
+          "coverage": 0.9813581890812251,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1094,
+          "dominant_selected_instance_ids": [
+            34
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_f6ceed9d82ea5a455fc27309b70d120c",
+          "scene_id": "scene0353_00",
+          "instance_id": 45,
+          "modality": "point_2d",
+          "iou": 0.30809635935518925,
+          "purity": 0.6472602739726028,
+          "coverage": 0.37026556377884196,
+          "same_class_distractor_iou": 0.0017211703958691911,
+          "selected_elements": 2628,
+          "dominant_selected_instance_ids": [
+            45
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_08bf47443a599187b6d945243f8ef67f",
+          "scene_id": "scene0353_00",
+          "instance_id": 50,
+          "modality": "point_2d",
+          "iou": 0.620395821880154,
+          "purity": 0.8349981502034776,
+          "coverage": 0.7070802005012531,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2703,
+          "dominant_selected_instance_ids": [
+            50
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_d52435649256f5584ca19716b815d1b4",
+          "scene_id": "scene0353_00",
+          "instance_id": 51,
+          "modality": "point_2d",
+          "iou": 0.25427350427350426,
+          "purity": 0.5281846426986241,
+          "coverage": 0.3290019353055018,
+          "same_class_distractor_iou": 0.03633854645814168,
+          "selected_elements": 2253,
+          "dominant_selected_instance_ids": [
+            51
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_c92eb84e68d8e04c85ebbb8f3149d7b6",
+          "scene_id": "scene0435_00",
+          "instance_id": 11,
+          "modality": "point_2d",
+          "iou": 0.4031481348379214,
+          "purity": 0.9866314863676341,
+          "coverage": 0.4053624340536243,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 5685,
+          "dominant_selected_instance_ids": [
+            11
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_68202d49376831431a605681885815a2",
+          "scene_id": "scene0435_00",
+          "instance_id": 12,
+          "modality": "point_2d",
+          "iou": 0.3956615501712546,
+          "purity": 0.9920483460559797,
+          "coverage": 0.39692033596334947,
+          "same_class_distractor_iou": 0.0005468827682211395,
+          "selected_elements": 6288,
+          "dominant_selected_instance_ids": [
+            12
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_4b281075f3a17a7d401893dd4dce247b",
+          "scene_id": "scene0435_00",
+          "instance_id": 14,
+          "modality": "point_2d",
+          "iou": 0.6798088410991637,
+          "purity": 0.917741935483871,
+          "coverage": 0.7239185750636132,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2480,
+          "dominant_selected_instance_ids": [
+            14
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_106416d774081883f1700b121953660d",
+          "scene_id": "scene0435_00",
+          "instance_id": 22,
+          "modality": "point_2d",
+          "iou": 0.49842767295597484,
+          "purity": 0.9378698224852071,
+          "coverage": 0.5154471544715448,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1352,
+          "dominant_selected_instance_ids": [
+            22
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_0d7d5554c4d71920338581efbd9c98a2",
+          "scene_id": "scene0435_00",
+          "instance_id": 29,
+          "modality": "point_2d",
+          "iou": 0.5335968379446641,
+          "purity": 0.5460060667340748,
+          "coverage": 0.9591474245115453,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 989,
+          "dominant_selected_instance_ids": [
+            29
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_fc4ec8174322cef05eec9c94c9729521",
+          "scene_id": "scene0435_00",
+          "instance_id": 35,
+          "modality": "point_2d",
+          "iou": 0.6019108280254777,
+          "purity": 0.629700142789148,
+          "coverage": 0.9316901408450704,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2101,
+          "dominant_selected_instance_ids": [
+            35
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_16533bfc2383812aa051a8135b0596be",
+          "scene_id": "scene0435_00",
+          "instance_id": 39,
+          "modality": "point_2d",
+          "iou": 0.8127240143369175,
+          "purity": 0.8704414587332053,
+          "coverage": 0.9245667686034659,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1042,
+          "dominant_selected_instance_ids": [
+            39
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_f10895c991808be069c2149a1fab294f",
+          "scene_id": "scene0435_00",
+          "instance_id": 64,
+          "modality": "point_2d",
+          "iou": 0.7625260960334029,
+          "purity": 0.9194461925739459,
+          "coverage": 0.8171140939597316,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1589,
+          "dominant_selected_instance_ids": [
+            64
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_51c2e8f24c47f82506f9a7b354689b6c",
+          "scene_id": "scene0700_00",
+          "instance_id": 1,
+          "modality": "point_2d",
+          "iou": 0.7534437393592324,
+          "purity": 0.9238944771303853,
+          "coverage": 0.8033003300330033,
+          "same_class_distractor_iou": 0.004877228388832829,
+          "selected_elements": 5269,
+          "dominant_selected_instance_ids": [
+            1
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_81d31b3773d1683563d8a0f141cb7013",
+          "scene_id": "scene0700_00",
+          "instance_id": 2,
+          "modality": "point_2d",
+          "iou": 0.315800960279354,
+          "purity": 0.3795907660020986,
+          "coverage": 0.6526838069463239,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 3812,
+          "dominant_selected_instance_ids": [
+            6
+          ],
+          "target_is_unique_dominant_instance": false
+        },
+        {
+          "query_id": "uq_ebd07601c8aff1e8f9f833fd37f069f8",
+          "scene_id": "scene0700_00",
+          "instance_id": 5,
+          "modality": "point_2d",
+          "iou": 0.5113825652415325,
+          "purity": 0.5142378559463987,
+          "coverage": 0.9892588614393125,
+          "same_class_distractor_iou": 0.052105638829407566,
+          "selected_elements": 1791,
+          "dominant_selected_instance_ids": [
+            5
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_b95506d871e3599e0fe0c036a9a248fd",
+          "scene_id": "scene0700_00",
+          "instance_id": 6,
+          "modality": "point_2d",
+          "iou": 0.4163012638638122,
+          "purity": 0.4172699069286453,
+          "coverage": 0.9944547134935305,
+          "same_class_distractor_iou": 0.000839278220730172,
+          "selected_elements": 3868,
+          "dominant_selected_instance_ids": [
+            6
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_8b68d20c1234f16b79b2d38b55345184",
+          "scene_id": "scene0700_00",
+          "instance_id": 7,
+          "modality": "point_2d",
+          "iou": 0.44582685329186106,
+          "purity": 0.4557498675145734,
+          "coverage": 0.9534368070953437,
+          "same_class_distractor_iou": 0.00028498147620404675,
+          "selected_elements": 1887,
+          "dominant_selected_instance_ids": [
+            7
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_9b59eabca31eb8e0fe308cdf9516bdd0",
+          "scene_id": "scene0700_00",
+          "instance_id": 17,
+          "modality": "point_2d",
+          "iou": 0.6780923994038748,
+          "purity": 0.794066317626527,
+          "coverage": 0.8227848101265823,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 573,
+          "dominant_selected_instance_ids": [
+            17
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_71fb36bf0a32c9e616bd42dd673179c3",
+          "scene_id": "scene0700_00",
+          "instance_id": 18,
+          "modality": "point_2d",
+          "iou": 0.39815384615384614,
+          "purity": 0.4028642590286426,
+          "coverage": 0.9714714714714715,
+          "same_class_distractor_iou": 0.07412935323383085,
+          "selected_elements": 1606,
+          "dominant_selected_instance_ids": [
+            18
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_6e4717b937c1432a7c7d252e5d681155",
+          "scene_id": "scene0700_00",
+          "instance_id": 35,
+          "modality": "point_2d",
+          "iou": 0.6934984520123839,
+          "purity": 0.7097591888466414,
+          "coverage": 0.9680207433016422,
+          "same_class_distractor_iou": 0.044981257809246146,
+          "selected_elements": 1578,
+          "dominant_selected_instance_ids": [
+            35
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_a67cb45ca6126f21d5de19a935c37b22",
+          "scene_id": "scene0704_00",
+          "instance_id": 1,
+          "modality": "point_2d",
+          "iou": 0.42977177245373,
+          "purity": 0.9059358544758258,
+          "coverage": 0.44984549560256715,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 4178,
+          "dominant_selected_instance_ids": [
+            1
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_93c02e58c196684252142211331d09e5",
+          "scene_id": "scene0704_00",
+          "instance_id": 2,
+          "modality": "point_2d",
+          "iou": 0.7405349406667923,
+          "purity": 0.9378578244274809,
+          "coverage": 0.7787461622264039,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 8384,
+          "dominant_selected_instance_ids": [
+            2
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_a2470a3c69496b57bd3c60fc9dc44caf",
+          "scene_id": "scene0704_00",
+          "instance_id": 6,
+          "modality": "point_2d",
+          "iou": 0.19515169995426132,
+          "purity": 0.9704321455648218,
+          "coverage": 0.19631901840490798,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1319,
+          "dominant_selected_instance_ids": [
+            6
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_9a036203ed515208614e7fe8d351c690",
+          "scene_id": "scene0704_00",
+          "instance_id": 10,
+          "modality": "point_2d",
+          "iou": 0.7016241299303945,
+          "purity": 0.7462981243830207,
+          "coverage": 0.9213893967093236,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2026,
+          "dominant_selected_instance_ids": [
+            10
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_8c6ce122841bcecd7320a3c33d308010",
+          "scene_id": "scene0704_00",
+          "instance_id": 11,
+          "modality": "point_2d",
+          "iou": 0.6763224181360201,
+          "purity": 0.9148211243611585,
+          "coverage": 0.7217741935483871,
+          "same_class_distractor_iou": 0.008394543546694649,
+          "selected_elements": 587,
+          "dominant_selected_instance_ids": [
+            11
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_cb5efaff87e8e995de83458be0834ad3",
+          "scene_id": "scene0704_00",
+          "instance_id": 19,
+          "modality": "point_2d",
+          "iou": 0.7434607645875252,
+          "purity": 0.7963362068965517,
+          "coverage": 0.9180124223602485,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1856,
+          "dominant_selected_instance_ids": [
+            19
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_b61a8d81bac71ed8229937d587a3c658",
+          "scene_id": "scene0704_00",
+          "instance_id": 26,
+          "modality": "point_2d",
+          "iou": 0.72265625,
+          "purity": 0.8998054474708171,
+          "coverage": 0.7858963466440102,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1028,
+          "dominant_selected_instance_ids": [
+            26
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_cb1676c0148c8cc64248f310857475f2",
+          "scene_id": "scene0246_00",
+          "instance_id": 3,
+          "modality": "point_2d",
+          "iou": 0.6204840406874781,
+          "purity": 0.9744408945686901,
+          "coverage": 0.6307494829922271,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 9077,
+          "dominant_selected_instance_ids": [
+            3
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_2e02a4c146bb252bb6fbf37d2b6c3457",
+          "scene_id": "scene0246_00",
+          "instance_id": 5,
+          "modality": "point_2d",
+          "iou": 0.687402799377916,
+          "purity": 0.9253314724354501,
+          "coverage": 0.7277716794731065,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1433,
+          "dominant_selected_instance_ids": [
+            5
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_5a5c7f6b2a3e541ff2dac9911c3fcfb6",
+          "scene_id": "scene0246_00",
+          "instance_id": 6,
+          "modality": "point_2d",
+          "iou": 0.42829457364341084,
+          "purity": 0.484118291347207,
+          "coverage": 0.7878787878787878,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 913,
+          "dominant_selected_instance_ids": [
+            6
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_8a95a646e64519117367f9d1285d1809",
+          "scene_id": "scene0246_00",
+          "instance_id": 33,
+          "modality": "point_2d",
+          "iou": 0.28797289666854886,
+          "purity": 0.33530571992110453,
+          "coverage": 0.6710526315789473,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1521,
+          "dominant_selected_instance_ids": [
+            33
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_4bbec9eeb97f2b40a742fca3fe799f77",
+          "scene_id": "scene0246_00",
+          "instance_id": 37,
+          "modality": "point_2d",
+          "iou": 0.15056461731493098,
+          "purity": 0.3082191780821918,
+          "coverage": 0.22741629816803538,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1168,
+          "dominant_selected_instance_ids": [
+            37
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_7cc097f50b2198a5dab2041d1997733e",
+          "scene_id": "scene0246_00",
+          "instance_id": 39,
+          "modality": "point_2d",
+          "iou": 0.6446629213483146,
+          "purity": 0.6557142857142857,
+          "coverage": 0.9745222929936306,
+          "same_class_distractor_iou": 0.1420731707317073,
+          "selected_elements": 1400,
+          "dominant_selected_instance_ids": [
+            39
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_1f908549aeef5367445a27fb127394df",
+          "scene_id": "scene0203_00",
+          "instance_id": 3,
+          "modality": "point_2d",
+          "iou": 0.06633029780950037,
+          "purity": 1.0,
+          "coverage": 0.06633029780950037,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 539,
+          "dominant_selected_instance_ids": [
+            3
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_285d21a6e78273f601237d4ce2144e03",
+          "scene_id": "scene0203_00",
+          "instance_id": 4,
+          "modality": "point_2d",
+          "iou": 0.5876440303996078,
+          "purity": 0.7504696305572949,
+          "coverage": 0.7303473491773309,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 3194,
+          "dominant_selected_instance_ids": [
+            4
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_c209d2ce8f5b5edcc550b297b06f1ce6",
+          "scene_id": "scene0203_00",
+          "instance_id": 6,
+          "modality": "point_2d",
+          "iou": 0.057415829797625224,
+          "purity": 0.8203227213257741,
+          "coverage": 0.058147083371974405,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2293,
+          "dominant_selected_instance_ids": [
+            6
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_cb75a29621d286877bceea1f9c7f390d",
+          "scene_id": "scene0203_00",
+          "instance_id": 8,
+          "modality": "point_2d",
+          "iou": 0.5138600138600139,
+          "purity": 0.8402266288951842,
+          "coverage": 0.5695084485407066,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 1765,
+          "dominant_selected_instance_ids": [
+            8
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_9b9e858e6fdb03eafa89c64c08d6c020",
+          "scene_id": "scene0203_00",
+          "instance_id": 9,
+          "modality": "point_2d",
+          "iou": 0.7978302049250904,
+          "purity": 0.9370954692556634,
+          "coverage": 0.8429767103347889,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 4944,
+          "dominant_selected_instance_ids": [
+            9
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_e2aca58e179f7fc291afdbdb231d2f1d",
+          "scene_id": "scene0203_00",
+          "instance_id": 17,
+          "modality": "point_2d",
+          "iou": 0.8570544554455446,
+          "purity": 0.9070072036673216,
+          "coverage": 0.9396200814111262,
+          "same_class_distractor_iou": 0.003068829460762823,
+          "selected_elements": 1527,
+          "dominant_selected_instance_ids": [
+            17
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_8c16773bfa5fd7e39301ec826e72becf",
+          "scene_id": "scene0203_00",
+          "instance_id": 18,
+          "modality": "point_2d",
+          "iou": 0.5141414141414141,
+          "purity": 0.6052318668252081,
+          "coverage": 0.7735562310030395,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 841,
+          "dominant_selected_instance_ids": [
+            18
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_2683be39d89c705a0dc2033decd40f16",
+          "scene_id": "scene0203_00",
+          "instance_id": 19,
+          "modality": "point_2d",
+          "iou": 0.15642252484357747,
+          "purity": 0.17849643007139857,
+          "coverage": 0.5584756898817346,
+          "same_class_distractor_iou": 0.4970873786407767,
+          "selected_elements": 2381,
+          "dominant_selected_instance_ids": [
+            17
+          ],
+          "target_is_unique_dominant_instance": false
+        },
+        {
+          "query_id": "uq_7651376a6f4b6e482f84e239473a4a37",
+          "scene_id": "scene0535_00",
+          "instance_id": 9,
+          "modality": "point_2d",
+          "iou": 0.3247407407407407,
+          "purity": 0.3454144342893161,
+          "coverage": 0.8443759630200308,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 3173,
+          "dominant_selected_instance_ids": [
+            0
+          ],
+          "target_is_unique_dominant_instance": false
+        },
+        {
+          "query_id": "uq_70ee0015f6c9805d6fe155a9f34914c0",
+          "scene_id": "scene0535_00",
+          "instance_id": 10,
+          "modality": "point_2d",
+          "iou": 0.9679595278246206,
+          "purity": 0.9982608695652174,
+          "coverage": 0.9695945945945946,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 575,
+          "dominant_selected_instance_ids": [
+            10
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_4a0a0d87022221a5038060597aa793a2",
+          "scene_id": "scene0535_00",
+          "instance_id": 11,
+          "modality": "point_2d",
+          "iou": 0.30161394448030987,
+          "purity": 0.9749582637729549,
+          "coverage": 0.30396877033181524,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2396,
+          "dominant_selected_instance_ids": [
+            11
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_f023fd76798096b1981d523470b264c8",
+          "scene_id": "scene0535_00",
+          "instance_id": 12,
+          "modality": "point_2d",
+          "iou": 0.32419246298788695,
+          "purity": 0.9145704793545325,
+          "coverage": 0.33431644691186674,
+          "same_class_distractor_iou": 0.0001021346134204882,
+          "selected_elements": 2107,
+          "dominant_selected_instance_ids": [
+            12
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_c23459704015bae3996e09e0efd9286e",
+          "scene_id": "scene0535_00",
+          "instance_id": 13,
+          "modality": "point_2d",
+          "iou": 0.3879636638909917,
+          "purity": 0.6422305764411027,
+          "coverage": 0.49492998551424433,
+          "same_class_distractor_iou": 0.00015444015444015445,
+          "selected_elements": 1596,
+          "dominant_selected_instance_ids": [
+            13
+          ],
+          "target_is_unique_dominant_instance": true
+        },
+        {
+          "query_id": "uq_810a952accf6d8e90dc058b6d3e08a6e",
+          "scene_id": "scene0535_00",
+          "instance_id": 16,
+          "modality": "point_2d",
+          "iou": 0.3865296803652968,
+          "purity": 0.5727334235453315,
+          "coverage": 0.5431504651908887,
+          "same_class_distractor_iou": 0.0,
+          "selected_elements": 2956,
+          "dominant_selected_instance_ids": [
+            16
+          ],
+          "target_is_unique_dominant_instance": true
+        }
+      ],
+      "paired_query_robustness": null,
+      "identity_diagnosis": {
+        "point_2d": {
+          "query_count": 67,
+          "dominant_target_count": 60,
+          "scene_macro_dominant_target_rate": 0.8981481481481483,
+          "per_scene": {
+            "scene0030_00": {
+              "query_count": 8,
+              "dominant_target_count": 5,
+              "dominant_target_rate": 0.625
+            },
+            "scene0203_00": {
+              "query_count": 8,
+              "dominant_target_count": 7,
+              "dominant_target_rate": 0.875
+            },
+            "scene0246_00": {
+              "query_count": 6,
+              "dominant_target_count": 6,
+              "dominant_target_rate": 1.0
+            },
+            "scene0249_00": {
+              "query_count": 8,
+              "dominant_target_count": 7,
+              "dominant_target_rate": 0.875
+            },
+            "scene0353_00": {
+              "query_count": 8,
+              "dominant_target_count": 8,
+              "dominant_target_rate": 1.0
+            },
+            "scene0435_00": {
+              "query_count": 8,
+              "dominant_target_count": 8,
+              "dominant_target_rate": 1.0
+            },
+            "scene0535_00": {
+              "query_count": 6,
+              "dominant_target_count": 5,
+              "dominant_target_rate": 0.8333333333333334
+            },
+            "scene0700_00": {
+              "query_count": 8,
+              "dominant_target_count": 7,
+              "dominant_target_rate": 0.875
+            },
+            "scene0704_00": {
+              "query_count": 7,
+              "dominant_target_count": 7,
+              "dominant_target_rate": 1.0
+            }
+          },
+          "conditional_scene_count": 9,
+          "conditional_scene_macro": {
+            "iou": 0.5290616418926016,
+            "purity": 0.7710950983516885,
+            "coverage": 0.6672868032824822
+          },
+          "interpretation": "secondary actual-set identity/extent diagnosis; empty sets and dominant ties fail; background/void included; conditional results never replace full-cohort accuracy"
+        }
+      },
+      "evaluator_threshold_fitted": false,
+      "ranking_scores_unchanged": true,
+      "contract": "explicit method-selected elements; secondary output distinct from ranking AP and fixed-score diagnostics"
+    }
+  },
+  "model_promotion": false,
+  "hard_positive_constraint": false,
+  "evidence": [
+    {
+      "path": "output/query_field_20261009/surface_input_function_v1/design.json",
+      "sha256": "0bcda1088a41af0475b02c8bb89cd7b4b4f00294daa573b0842520f40768480f"
+    },
+    {
+      "path": "output/query_field_20261009/surface_input_function_v1/predictions_complete.json",
+      "sha256": "def894ab5a720500b71ea685b40c4c346dff73f94c217380e0ab4913bfd20456"
+    },
+    {
+      "path": "output/query_field_20261009/surface_input_function_v1/evaluation.json",
+      "sha256": "d9c0570ebfb46e9d9bee6726800b88077c7698e8ef9ab2e4fedc7150168d0bfb"
+    }
+  ],
+  "inherited_member_evaluation": {
+    "path": "output/query_field_20261009/joint_observation_transfer_v1/full_supervised/predictions/uqis/evaluation.json",
+    "sha256": "3ac93d3ddfca8c95d35e5e4cec5dba4c67b69966c589e825ecea9c251d4c7e17"
+  }
+}
