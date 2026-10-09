@@ -46,3 +46,26 @@ def test_common_runtime_export_keeps_query_independence(tmp_path):
     assert bool(first.selected.all()) and first.diagnostics['member_candidate_count']==3
     save_field(f,tmp_path/'field',{});loaded=QueryFieldRuntime.load(tmp_path/'field')
     assert torch.equal(first.membership_scores,loaded.text_union(q,neg).membership_scores)
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_member_ranking_cannot_override_union_admission(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    from radio_gs.query_field.query_program import admission_preserving_support
+    from radio_gs.querying.observation_readout import positive_support_rank
+    p=torch.tensor([0.,.2,.4,.499999,.5,.500001,.7,1.],device=device)
+    member=torch.ones_like(p)
+    assert positive_support_rank(p,member)[2]>.5  # actual false-admission failure
+    for threshold in [.3,.5,.8]:
+        scores=admission_preserving_support(p,member,threshold)
+        assert torch.equal(scores>threshold,p>threshold)
+        assert bool(((scores>=0)&(scores<=1)).all())
+        assert torch.equal(scores[p<=threshold],p[p<=threshold])
+        assert torch.equal(admission_preserving_support(p,torch.zeros_like(p),threshold),p)
+    f=example();f.semantic_measure=measure();runtime=QueryFieldRuntime(f)
+    q=torch.eye(9)[0];neg=torch.eye(9)[1:3]
+    prior=runtime.text_union(q,neg,corroborate=False)
+    guarded=runtime.text_union(q,neg,support_rule='admission_preserving')
+    assert torch.equal(prior.selected,guarded.selected)
+    assert guarded.diagnostics['membership_extent_refined'] is False
+    with pytest.raises(ValueError):runtime.text_union(q,neg,support_rule='unknown')

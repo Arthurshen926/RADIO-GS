@@ -86,12 +86,13 @@ def category_partition(field, native_queries):
 
 
 @torch.no_grad()
-def text_union(field, native_query, generic_negatives, *, rule='measure', temperature=10., corroborate=True):
+def text_union(field, native_query, generic_negatives, *, rule='measure', temperature=10., corroborate=True, support_rule='positive_rank'):
     """Absolute native union on every supported mode, with common member support.
 
     This is an explicit opt-in typed interface. The generic negatives and
     temperature are query-program inputs, not stored historical class answers.
     """
+    if support_rule not in {'positive_rank','admission_preserving'}:raise ValueError('unknown union support rule')
     if field.semantic_measure is None:raise ValueError('text union requires a semantic measure field')
     packet=QueryPacket('text',task='union',semantic=native_query)
     member=query(field,packet)
@@ -100,7 +101,9 @@ def text_union(field, native_query, generic_negatives, *, rule='measure', temper
     prior=field.semantic_measure.union_probabilities(native_query,generic_negatives,fallback,rule,temperature)
     if corroborate:
         from radio_gs.querying.observation_readout import positive_support_rank
-        probability=positive_support_rank(prior,member.membership_scores)
+        if support_rule=='admission_preserving':
+            probability=admission_preserving_support(prior,member.membership_scores,field.threshold)
+        else:probability=positive_support_rank(prior,member.membership_scores)
     else:probability=prior
     available=field.observed|field.semantic_measure.supported
     probability=probability.masked_fill(~available,0)
@@ -108,5 +111,19 @@ def text_union(field, native_query, generic_negatives, *, rule='measure', temper
         member.candidate_weights,member.scale,dict(shared_member_core=True,source_access=False,
         typed_union=True,semantic_rule=rule,semantic_modes=len(field.semantic_measure.descriptors),
         semantic_candidate_cap=None,absolute_generic_admission=True,other_requests_compete=False,
-        member_corroboration=corroborate,member_candidate_count=len(member.candidate_indices),
+        member_corroboration=corroborate,support_rule=support_rule,
+        membership_extent_refined=False if support_rule=='admission_preserving' else None,
+        member_candidate_count=len(member.candidate_indices),
         scores_calibrated=False,source_text_detection_transferred=False))
+
+
+def admission_preserving_support(prior, member, threshold=.5):
+    """Rank corroboration cannot turn rejected semantic evidence into admission.
+
+    Positive semantic margin scales the existing bounded boost continuously.
+    The selected set is exactly the semantic prior's set, not a claim of newly
+    learned conditional extent. No benchmark-specific parameter is introduced.
+    """
+    if not 0 < threshold < 1:raise ValueError('union threshold must lie inside (0,1)')
+    margin=((prior-threshold)/(1-threshold)).clamp(0,1)
+    return prior+prior*(1-prior)*member*margin
