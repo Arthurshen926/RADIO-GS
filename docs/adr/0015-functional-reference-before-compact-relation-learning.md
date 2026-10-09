@@ -7,8 +7,12 @@ The next capacity reference may store uncompressed, source-indexed sparse
 positive/exclusion coordinates on the Gaussian rows, with physical scales and
 view groups for dependent evidence. Their purpose is to compare the function
 computed from legal source observations with the function available from one
-exported field. Images, raster masks, cameras, source feature banks and labelled
-v10 classifiers remain absent at standard query time. This is expanded scene
+exported field. Images, raster masks, cameras and source feature banks remain
+absent at standard query time. The initial source-only reference also excludes
+the labelled v10 classifier. The later declared decision-transfer condition below
+explicitly permits its function as compiled field tensors, with its existing
+extra supervision reported; changing the storage format does not remove that
+classifier function or turn it into a source-only method. This is expanded scene
 state, not compression, and packaging by itself does not establish innovation.
 
 The first reference preserves a specific partial support-to-element function:
