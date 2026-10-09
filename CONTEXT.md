@@ -1,18 +1,20 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-09: reference_scope_v1 RUNNING, frozen36db112.
-Four full8 arms: raw_signed control, raw_positive sign control, retained-v10-query
-mask positive rays, same-mask field-region composition(primary). Explicit richer
-query input, RGB/SAM generation inherited/cached, no runtime source tracks/old
-fitters. All32 predictions must precede scores. Current session18303 GPU2/3.
-New Runtime.reference_scope uses only current reference camera/mask and field-owned
-Bpositive>0 regional subsets; greedy soft-IoU composition, binary Gaussian union.
-Not unchanged local kernel, not global optimum, not raw-scribble performance gain.
-6targetedtests passed. Cold source-denial helper and provenance audit prepared,
-not yet run. Old24-room regional addition head was reviewed and NOT imported:
-historical end-to-end selection failed and pure-seed condition mismatched.
-Do not read target GT or change frozen method while batch runs. No new training,
-source harmonization or full-five jobs started. Existing outputs never overwritten.
+Active continuation2026-10-09: reference_scope_v1 COMPLETE frozen36db112.
+All32 predictions/eight baseline replays before scores. Raw signed/positive vs
+retained positive-SAM mask rays/composition response78.0334/77.7077/74.7677/82.0834%,
+actual81.4219/79.3031/64.1988/84.8863%. Matched mask input composition+20.6875pp
+actual,7up1down,CI[5.4698,33.9088],all8precisionup/recall down. Mixed raw-signed to
+composition +3.4644ppactual is NOT raw-input gain;4up4down; APall8down. No promotion.
+Mask generation inherited(not rerun), no source tracks/RGB or old solver. Query
+mask/SAM/RGB input cost must remain declared. Runtime.reference_scope is alternative
+member decoder with binary output, not unchanged local kernel or global optimum.
+6tests pass,67frozen hashes/GTbinding; fern cold all4arrays exact/denialPASS(onecase
+Python audit). All-case error PNG/PDF viewed. Reports reference-scope-results.md/json,
+audit/runtime. Sessions18303,52235,91831 all finished. Next fixed hypothesis:
+reference matching should retain full-scene occlusion, rather than comparing
+unoccluded subset alpha with a visible query mask. No new batch yet. Original
+worktree unchanged; no new training/source harmonization/full-five jobs.
 
 Active continuation2026-10-09: scope_conditioning_v1 COMPLETE frozen1e07346.
 All24 predictions/eight baseline replays before scoring. Same raw signed8queries,
