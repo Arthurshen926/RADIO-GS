@@ -63,9 +63,10 @@ def main():
     if native[arm]['exact_native_scores'] != 268: raise ValueError('native output changed')
     point_path = ROOT / 'diagnostics/mixture_activation/report.json'; point = read(point_path)
     signed_path = ROOT / 'diagnostics/signed_activation/report.json'; signed = read(signed_path)
+    budget_path = ROOT / 'diagnostics/reference_budgets.json'; budgets = read(budget_path)
     if point['queries'] != 67 or point['known_correct'] != 59 or len(signed['records']) != 8:
         raise ValueError('actual input audit incomplete')
-    evidence.extend([runtime_path, point_path, signed_path, Path(design['prior_summary']['path']),
+    evidence.extend([runtime_path, point_path, signed_path, budget_path, Path(design['prior_summary']['path']),
         Path(__file__), Path(protected.__file__), Path('scripts/research/diagnose_query_field_mixture_activation.py'),
         Path('scripts/research/diagnose_query_field_mixture_signed.py'),
         Path('scripts/research/diagnose_query_field_support_composition.py')])
@@ -79,6 +80,7 @@ def main():
         field_tensor_bytes=sum(r['field_tensor_bytes'] for r in construction), additional_tensor_bytes=0,
         exact_parent_tensor_payload=True, native_invariance=native, runtime=runtime,
         point_activation=point, signed_activation=signed, v10_targets=previous['v10_targets'],
+        reference_budgets=budgets,
         source_only=True, training_steps=0, source_access_at_query=False, model_promotion=False,
         independent_final_test=False, per_task_model_selection=False, uncompressed_functional_reference=True,
         full_v10_function_preservation=False, implementation_commit=design['implementation_commit'],

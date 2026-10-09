@@ -23,8 +23,10 @@ Soft was fixed from source-only diagnostics BEFORE any hard-arm prediction. It
 keeps the hard support association matrix bit-exact and adds target evidence
 with min(1,peak/.1). Available coordinates cover23.6653→85.4164% of pooled observed
 Gaussian rows. Added tensor bytes hard1,449,575,452, soft7,808,142,516; total
-51,954,091,480/58,312,658,544. Six fern frames without valid episodes remain
-excluded; this is not all raw SAM evidence or a whole-instance upper bound.
+51,954,091,480/58,312,658,544. Manifest audit correction: fern originally has12
+training views, other29 fields18 each; NO training views are dropped by relation
+compilation. The previous six-invalid-episode explanation was incorrect. This
+is not all raw SAM evidence or a whole-instance upper bound.
 
 Performance vs protected Render: LERF2D52.2864→51.4479/50.8613%; actual-set
 projection32.8763→30.1791/30.1171, all4 scenes regress. NVOS response/actual-set
