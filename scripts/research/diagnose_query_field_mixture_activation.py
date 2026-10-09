@@ -44,6 +44,7 @@ def main():
     for job in cohort['uqis']:
         scene = job['name']; directory = Path(job['field'])
         mixture_relation, xyz, observed, spec = load_relation(directory, RELATION_CLASS)
+        if spec['threshold'] != .5: raise ValueError('margin audit requires the fixed .5 decision')
         previous_relation = SoftPairedEvidence(mixture_relation.state_dict(), len(xyz))
         domain = next(d for d in targets['scene_domains'] if d['scene_id'] == scene)
         mesh_path = package / 'method' / domain['mesh_xyz_path']
@@ -81,6 +82,14 @@ def main():
                 expected[~observed] = 0; expected[ids] = 1
                 error = float((expected - pred['membership']).abs().max())
                 if error > 1e-5: raise ValueError('saved point prediction does not match functional update')
+                # At threshold .5 the finite-evidence decision is exactly the
+                # prior margin plus signed evidence. Audit the deployed result,
+                # excluding hard anchors and a stated floating-point boundary.
+                margin = 2 * base['membership'] - 1 + pos - neg
+                stable = observed & (margin.abs() > 2e-6)
+                stable[ids] = False
+                disagreements = int(((margin > 0) != pred['selected'])[stable].sum())
+                if disagreements: raise ValueError('member decision differs from its evidence margin')
                 p, n = pos.numpy()[index], neg.numpy()[index]
                 known = (p + n) > 0; selected = pred['selected'].numpy()[index]
                 potential = ((relation.positive_pointer.diff() > 0) | (relation.negative_pointer.diff() > 0)).numpy()[index]
@@ -105,6 +114,14 @@ def main():
                     effective_view_mass=0. if coefficients is None else float(coefficients.sum()),
                     target_positive_mass=float(p[seen].mean()) if seen.any() else 0.,
                     target_negative_mass=float(n[seen].mean()) if seen.any() else 0.)
+                prior_margin = (2 * base['membership'].numpy() - 1)[index]
+                weak_positive_misses = seen & ~selected & (p > n) & (prior_margin < 0)
+                required = -prior_margin[weak_positive_misses] / (p - n)[weak_positive_misses]
+                case['arms'][arm]['decision_margin_audit'] = dict(stable_disagreements=disagreements,
+                    numerical_boundary_rows=int((observed & (margin.abs() <= 2e-6)).sum()),
+                    weak_positive_missed_target_vertices=int(weak_positive_misses.sum()),
+                    required_evidence_multiplier_median=None if not len(required) else float(np.median(required)),
+                    interpretation='Algebraic diagnostic only; no evidence multiplier was fitted or applied')
                 if arm == ARMS[0] and len(ids):
                     features = relation.joint_features(support, spec['default_scale'])
                     case['arms'][arm]['target_joint_features_mean'] = features[torch.from_numpy(index[seen])].mean(0).tolist() if seen.any() else [0.] * 6
