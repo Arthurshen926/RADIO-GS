@@ -1,5 +1,19 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-09: reference_scope_v1 RUNNING, frozen36db112.
+Four full8 arms: raw_signed control, raw_positive sign control, retained-v10-query
+mask positive rays, same-mask field-region composition(primary). Explicit richer
+query input, RGB/SAM generation inherited/cached, no runtime source tracks/old
+fitters. All32 predictions must precede scores. Current session18303 GPU2/3.
+New Runtime.reference_scope uses only current reference camera/mask and field-owned
+Bpositive>0 regional subsets; greedy soft-IoU composition, binary Gaussian union.
+Not unchanged local kernel, not global optimum, not raw-scribble performance gain.
+6targetedtests passed. Cold source-denial helper and provenance audit prepared,
+not yet run. Old24-room regional addition head was reviewed and NOT imported:
+historical end-to-end selection failed and pure-seed condition mismatched.
+Do not read target GT or change frozen method while batch runs. No new training,
+source harmonization or full-five jobs started. Existing outputs never overwritten.
+
 Active continuation2026-10-09: scope_conditioning_v1 COMPLETE frozen1e07346.
 All24 predictions/eight baseline replays before scoring. Same raw signed8queries,
 7fields/old120sources, no training/state/source additions. Local vs positive-all
