@@ -21,7 +21,7 @@ def greedy(masks,target):
 
 
 def main():
-    read(ROOT/'scoring_complete.json')
+    read(ROOT/'design.json')  # Source-only diagnostic; no dependency on target scores.
     cfg=read(ROOT/'prediction_config.json');legacy={j['name']:j for j in read('configs/pipeline/system_v10.json')['jobs'] if j['benchmark']=='lerf'}
     out=ROOT/'validation/source_candidates';out.mkdir(parents=True,exist_ok=False)
     write(out/'protocol.json',dict(target_gt_used=False,source_detections_diagnostic_only=True,
