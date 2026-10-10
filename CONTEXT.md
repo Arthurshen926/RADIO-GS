@@ -1,5 +1,27 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: field-owned scope constraints and native confidence studies COMPLETE.
+Compiled SAME field.pt:18411atoms,+846823494tensorbytes;72views/5137accepted/5756candidates.
+All singleton columns +720full-row synthetic conditions PASS tolerance2e-6,max1.5497e-6;
+all4fresh-process reloads PASS sampledrows, oldtensorsEXACT. No evalquery compiler input.
+First full4LERF/68text study freeze5678b97: actual nativepartial24.4084/nativescope25.8000,
+teacherpartial38.2426/teacherscope38.3964%. Teacherpartial all68 oldatom actualsetsEXACT.
+Second full4/68 freezeb763f09 restores existing viewconfidence, no parameter search:
+confidencepartial35.1182->confidencescope36.0394%,4up,CI[0.5576,1.4486]pp.
+Below prioradmission42.9498%; NOT default promotion or full performance recovery.
++10.2394pp vs binaryscope repairs lostfunction, NOT improvement over establishedbaseline.
+Allarms semanticresponse54.0889/AP82.5249 unchanged; not actualset performance.
+Both auditsPASS, allpredictions beforeGT scoring,18targetedtestsPASS.
+Fresh field+query APIs both figurines21 exactsets, maxerror1.1921e-7; Python sourceguard,
+notOSsandbox; fullquery coldtest only1scene. Two prescoring failures retained(v1CSR/v2P).
+METHOD DECISION: finiteP/N is initializer/evidence summary, not settled final memberdecoder.
+Joint coverage/redundancy/selectedopacity function remains to transfer using independent
+noneval constructionconditions; field constraints alone do NOT deploy privileged50.0961%.
+View confidence only; per-region uncertainty/native identity acceptance remain incomplete.
+Keep singlefield/three teachers/typedquery/sameactual2D3Dset/no query-time sourcefit.
+No wholefive update/paperclosure. See docs/experiments/2026-10-10-scope-confidence-results.md.
+
+
 Active continuation2026-10-10: compiled_scope_permissions_v1 COMPLETE, implementation15382b4.
 Query-free construction of scope permissions into SAME field.pt via optional
 CapabilityField.scope_permissions. Uses only existing source observations and exact
