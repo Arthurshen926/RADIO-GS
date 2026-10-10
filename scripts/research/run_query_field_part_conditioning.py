@@ -80,7 +80,13 @@ def run(gpus):
     for j in cfg['jobs']:
         result=read(ROOT/'predictions'/j['name']/'evaluation/evaluation.json')['metrics']
         old=read(BASE/'predictions'/j['name']/'evaluation/evaluation.json')['metrics']['admission_preserving']
-        assert result['admission']==old
+        current=result['admission']
+        for key in ['iou','ap','localization','observations']:assert current[key]==old[key]
+        for key in ['miou','acc025','acc05','count','missing']:assert current['selected'][key]==old['selected'][key]
+        # Prediction artifact paths necessarily change; compare all scored
+        # objects by their bound labels and values, not their output filenames.
+        keys=['frame','query','gt_path','iou','missing']
+        assert [[x[k] for k in keys] for x in current['selected']['objects']]==[[x[k] for k in keys] for x in old['selected']['objects']]
         for a in ARMS:
             m=result[a];per[a][j['scene']]=dict(response_iou=m['iou'],selection_iou=m['selected']['miou'],ap=m['ap'])
     report=dict(complete=True,per_scene=per,macro={a:{k:sum(x[k] for x in per[a].values())/4 for k in next(iter(per[a].values()))} for a in ARMS},
