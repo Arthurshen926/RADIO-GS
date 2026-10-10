@@ -7,7 +7,7 @@ from radio_gs.query_field.part_conditioning import native_region_probability,rea
 from scripts.research.run_query_field_relations import read,write,receipt,check,execute,lanes
 from scripts.research.compile_query_field_scope_constraints import ROOT as FIELDS,CONFIG
 
-ROOT=Path('output/query_field_20261010/scope_constraint_readout_v2')
+ROOT=Path('output/query_field_20261010/scope_constraint_readout_v3')
 SOURCE=Path('output/query_field_20261009/text_union_functions_v1')
 REFERENCE=Path('output/query_field_20261010/scope_exclusion_v1')
 ARMS=['native_partial','native_scope','teacher_partial','teacher_scope']
@@ -53,10 +53,9 @@ def predict(index):
         native=native_region_probability(field.evidence,fixture['native_query_vectors'][qi].cuda(),fixture['generic_negative_vectors'].cuda())
         providers=dict(native=(native>.5)&(mass>0),teacher=(teacher['probability'][:,qi].cuda()>.5)&(mass>0));details={}
         for provider,accepted in providers.items():
-            prepared={}
+            prepared=field.scope_constraints.paired(accepted,field.scope_permissions)
             for scope in [False,True]:
                 arm=provider+('_scope' if scope else '_partial')
-                prepared[scope]=field.scope_constraints(accepted,field.scope_permissions,expanded=scope)
                 score,detail=read_parts(prior,available,prepared[scope]);members[arm].append(score.cpu());details[arm]=detail
             assert torch.equal(prepared[False][0],prepared[True][0])
             assert bool((prepared[True][1]>=prepared[False][1]-2e-6).all())

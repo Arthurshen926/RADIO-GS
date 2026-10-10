@@ -18,6 +18,8 @@ def test_readout_computes_current_semantics_and_keeps_member_set_distinct():
         def __call__(self,accepted,permissions,expanded=True):
             assert accepted.tolist()==[True]
             return torch.zeros(3,1),torch.tensor([[1.],[0.],[0.]]) if expanded else torch.zeros(3,1),{}
+        def paired(self,accepted,permissions):
+            return {flag:self(accepted,permissions,expanded=flag) for flag in [False,True]}
     field=SimpleNamespace(observed=torch.ones(3,dtype=torch.bool),semantic=Semantic(),semantic_measure=Measure(),
         evidence=Evidence(),scope_constraints=Constraints(),scope_permissions=object())
     result=query_text_scope(field,torch.tensor([1.,0.]),torch.tensor([[0.,1.]]))

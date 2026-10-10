@@ -37,6 +37,18 @@ class ConstraintView(nn.Module):
         return torch.sparse.mm(lift,labels)
 
 
+    def paired(self,accepted,permitted):
+        chosen=accepted[self.regions]
+        if not bool(chosen.any()):return self.value.new_zeros(self.count,3)
+        p=self.positive[:,chosen].any(1);n=self.negative[:,chosen].all(1)
+        allowed=permitted[self.candidates]
+        expanded=n|self.interior[:,allowed].any(1) if bool(allowed.any()) else n
+        if bool((p&expanded).any()):raise ValueError('permission conflicts with positive atoms')
+        labels=torch.stack([p,n,expanded],1).to(self.value.dtype)
+        lift=torch.sparse_csr_tensor(self.pointer,self.index,self.value,size=(self.count,len(p)))
+        return torch.sparse.mm(lift,labels)
+
+
 class ScopeConstraints(nn.Module):
     def __init__(self,state,count,permissions):
         super().__init__()
@@ -54,6 +66,17 @@ class ScopeConstraints(nn.Module):
         p=torch.stack([x[:,0] for x in values],1);n=torch.stack([x[:,1] for x in values],1)
         return p,n,dict(admitted_regions=int(accepted.sum()),scope_exclusion=expanded,
             union_before_lifting=True,field_owned_constraints=True)
+
+
+    @torch.no_grad()
+    def paired(self,accepted,permissions):
+        permitted=permissions(accepted)
+        values=[v.paired(accepted,permitted) for v in self.views]
+        p,n,expanded=[torch.stack([x[:,k] for x in values],1) for k in range(3)]
+        def result(negative,flag):
+            return p,negative,dict(admitted_regions=int(accepted.sum()),scope_exclusion=flag,
+                union_before_lifting=True,field_owned_constraints=True,shared_positive_reduction=True)
+        return {False:result(n,False),True:result(expanded,True)}
 
 
 def compile_view(transfer,positive,negative,interior,regions,candidates):

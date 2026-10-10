@@ -34,3 +34,8 @@ Implementation correction before any target scoring: readout_v1 aborted in first
 prediction on unsupported CSR .T/as_strided. readout_v2 uses explicit transpose(0,1),
 as existing repository functions do. Same methods, thresholds, fields and tolerance;
 retain original failure. A CSR integration regression test covers the corrected path.
+
+Second pre-score correction: v2 separate CUDA sparse reductions failed the bitwise
+shared-positive gate. v3 computes P, old N, expanded N in one sparse operation and
+shares the identical P tensor between controls. No gate/tolerance relaxation or
+method change. Existing compiled tensors are reused; paired path separately tested.

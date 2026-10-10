@@ -28,7 +28,7 @@ def query_text_scope(field,query,negatives,*,expanded=True):
     probability=native_region_probability(field.evidence,query,negatives)
     mass=torch.sparse.mm(field.evidence.matrix('positive').transpose(0,1),available.float()[:,None]).flatten()
     accepted=(probability>.5)&(mass>0)
-    prepared=field.scope_constraints(accepted,field.scope_permissions,expanded=expanded)
+    prepared=field.scope_constraints.paired(accepted,field.scope_permissions)[expanded]
     member,details=read_parts(prior,available,prepared)
     return ScopeReadout(prior,member,member>.5,accepted,
         dict(details,readout='independent semantic probability and actual member set',

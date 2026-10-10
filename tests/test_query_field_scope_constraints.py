@@ -23,7 +23,9 @@ def test_all_subsets_preserve_union_before_lifting_including_overlaps():
         neg,_=union_exclusion(masks,scales,a,visible,old)
         pos=p[a].any(0) if a.any() else torch.zeros_like(visible)
         expected=torch.from_numpy(transfer@torch.stack([pos,neg],-1).reshape(-1,2).float().numpy())
-        actual=module(a,g);torch.testing.assert_close(torch.stack([actual[0][:,0],actual[1][:,0]],1),expected,atol=2e-6,rtol=0)
+        both=module.paired(a,g)
+        assert both[False][0].data_ptr()==both[True][0].data_ptr()
+        actual=both[True];torch.testing.assert_close(torch.stack([actual[0][:,0],actual[1][:,0]],1),expected,atol=2e-6,rtol=0)
         baseline=module(a,g,expanded=False)
         assert torch.equal(actual[0],baseline[0]) and bool((actual[1]>=baseline[1]-1e-7).all())
 
