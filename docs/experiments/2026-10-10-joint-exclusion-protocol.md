@@ -41,3 +41,10 @@ predictions without reopening observations or cached response inputs. Fixtures
 are comparator only. Report sampled coverage/negative changes, deletion volume,
 full actual-set IoU/P/R, semantics, failures and confidence intervals. A protected
 sample is NOT a guarantee for unsampled image locations or full3D object extent.
+
+Implementation preflight clarification (before any real-scene validation):
+predictor freshly recomputes native semantic/member inputs through the same API
+as cold inference. Historical scores are used only as output semantic controls
+and comparators. Initial finite decisions must match the previous baseline
+exactly; scores tolerate2e-6. This avoids mixing two numerical paths in a
+score-ordered discrete decoder. Prepared-only design was archived before rerun.

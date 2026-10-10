@@ -5,7 +5,7 @@ import torch
 from radio_gs.query_field.storage import load_field
 from radio_gs.query_field.joint_exclusion import JointExclusionDecoder
 from radio_gs.query_field.part_conditioning import native_region_probability
-from radio_gs.query_field.scope_confidence import confident_scope
+from radio_gs.query_field.scope_confidence import query_text_scope_confident
 from scripts.research.run_query_field_relations import read,write,receipt,check,execute,lanes
 from scripts.research.compile_query_field_coverage_factors import ROOT as FIELDS
 ROOT=Path('output/query_field_20261010/joint_exclusion_v1')
@@ -46,9 +46,9 @@ def predict(index):
     for k,v in old['geometry'].items():assert torch.equal(v,getattr(field,k).cpu())
     members={a:[] for a in ARMS};diagnostics=[]
     for qi,text in enumerate(old['texts']):
-        prior=old['scores']['confidence_scope'][:,qi].cuda()
-        probability=native_region_probability(field.evidence,old['native_query_vectors'][qi].cuda(),old['generic_negative_vectors'].cuda())
-        values,accepted=confident_scope(field,prior,probability);initial=values[True][0]
+        native=query_text_scope_confident(field,old['native_query_vectors'][qi].cuda(),old['generic_negative_vectors'].cuda())
+        initial=native.membership_score;accepted=native.accepted_regions
+        assert float((native.semantic_probability.cpu()-old['scores']['confidence_scope'][:,qi]).abs().max())<=2e-6
         assert torch.equal(initial>.5,old['selected_by_control']['confidence_scope'][:,qi].cuda())
         assert float((initial.cpu()-old['membership_by_control']['confidence_scope'][:,qi]).abs().max())<=2e-6
         members['finite'].append(initial.cpu());controls={}
