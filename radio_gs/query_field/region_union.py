@@ -16,20 +16,20 @@ def prepare_union_parts(evidence,prior,available,region_probability):
     positive=evidence.matrix('positive');negative=evidence.matrix('negative')
     mass=torch.sparse.mm(positive.transpose(0,1),available.to(prior)[:,None]).flatten()
     preference=torch.where(mass>0,(2*region_probability.to(prior)-1).clamp(0,1),0)
-    p=prior.new_zeros(evidence.count,evidence.view_count);n=torch.zeros_like(p)
-    confidence=prior.new_zeros(evidence.view_count)
-    for view in range(evidence.view_count):
-        ids=torch.where((evidence.views==view)&(preference>0))[0]
-        if not len(ids):continue
-        confidence[view]=preference[ids].max()
-        pv=prior.new_zeros(evidence.count);nv=prior.new_ones(evidence.count)
-        # Bound temporary memory without changing candidate membership or union.
-        for chunk in ids.split(16):
-            weights=prior.new_zeros(len(evidence.views),len(chunk))
-            weights[chunk,torch.arange(len(chunk),device=prior.device)]=1
-            pv=torch.maximum(pv,torch.sparse.mm(positive,weights).max(1).values)
-            nv=torch.minimum(nv,torch.sparse.mm(negative,weights).min(1).values)
-        p[:,view]=pv*confidence[view];n[:,view]=nv*confidence[view]
+    p=prior.new_zeros(evidence.count,evidence.view_count);n=torch.ones_like(p)
+    confidence=prior.new_zeros(evidence.view_count).scatter_reduce_(0,evidence.views,
+        preference,reduce='amax',include_self=True)
+    ids=torch.where(preference>0)[0]
+    # Gather all accepted coordinates in bounded chunks, then reduce by view.
+    # Zero negative entries participate in amin: unknown must not become background.
+    for chunk in ids.split(16):
+        if not len(chunk):continue
+        weights=prior.new_zeros(len(evidence.views),len(chunk))
+        weights[chunk,torch.arange(len(chunk),device=prior.device)]=1
+        groups=evidence.views[chunk][None].expand(evidence.count,-1)
+        p.scatter_reduce_(1,groups,torch.sparse.mm(positive,weights),reduce='amax',include_self=True)
+        n.scatter_reduce_(1,groups,torch.sparse.mm(negative,weights),reduce='amin',include_self=True)
+    p*=confidence[None];n*=confidence[None]
     return p,n,dict(admitted_regions=int((preference>0).sum()),active_views=int((confidence>0).sum()),
         confidence_sum=float(confidence.sum()),native_region_acceptance=True,
         same_view_union=True,negative_requires_all_accepted_regions=True,
