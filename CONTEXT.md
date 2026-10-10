@@ -1,5 +1,33 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: native_region_functions_v2 COMPLETE frozen2bb4bb8.
+Full4 LERF scenes/68 texts/5 controls, all predictions before scoring. Field-owned
+native ROI functions bound exactly to5137 existing regions/72 source views; +15,780,864
+bytes, total30,591,186,984 bytes uncompressed. No new sources/training/labels.
+Admission/pooled-protected/native/native-protected response55.3608/58.3877/61.5980/
+61.3865%; actual42.9498/42.2742/41.5689/40.8779%. Primary actual3down1up; P42.4152,
+R87.3411. Empty accepted queries13->0/68 but scope WORSE. NO default promotion.
+Shared P/N exact monotonicity PASS all68/two acceptors; original failure retained.
+Cold figurines21/all4 setsEXACT, Python denialPASS, publicAPI1 selectionEXACT;
+native maxerror3.28e-7, pooled-protected1.01328e-6 exceeds1e-6: overall numericFAIL.
+No tolerance relaxation. v1 stopped before any scoring to fix FP16 arithmetic;
+v2 keeps original half storage but uses FP32 query math. Aborted artifacts retained.
+Source diagnostic1224 pairs/459 detected: native union44.5744, weighted48.9494,
+best-single76.4779, greedy feasible84.7994% agreement with RAW v10 detections.
+Not targetGT, global optimum or deployable performance. 368/765 empty detections
+still accept regions; emptiness is UNKNOWN, not reliable negative/true false positive.
+All source snapshots match compiler. Candidate acceptance is a priority hypothesis,
+NOT proof Gaussian lifting/coverage/composition are solved. Next fixed intervention:
+source-teacher-supported acceptance into same field decoder, with source-assisted
+DIAGNOSTIC budget, before choosing a new field-owned condition function/training.
+Do not compile benchmark answers or train on eval queries; no more threshold sweep.
+region_union helper+2tests complete, not publicAPI/benchmarked. Prepared full study
+NOT launched because source native union worsens all4; no blind expansion pursuit.
+44 other relatedtests passed. Main8134/audit42663/runtime7988/source82115/plot77762
+finished (runtime1=declared gate failure). No active study/training/full-five jobs.
+See docs/experiments/2026-10-10-native-region-results.md for complete claims/bounds.
+
+
 Active continuation2026-10-10: part_conditioning_v1 COMPLETE frozen2f753ef.
 Full4 LERF scenes/68 texts, unchanged fields/sources, preencoded query fixtures,
 all predictions before scoring. Admission/parts/protected response55.3608/57.2624/
