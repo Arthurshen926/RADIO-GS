@@ -1,0 +1,38 @@
+{
+  "complete": true,
+  "case": "fern",
+  "strict": false,
+  "exact": {
+    "selected": true,
+    "membership": false,
+    "response": true,
+    "retained_response": false
+  },
+  "maximum_error": {
+    "selected": 0.0,
+    "membership": 1.1920928955078125e-07,
+    "response": 0.0,
+    "retained_response": 1.7881393432617188e-07
+  },
+  "numerical_passed": true,
+  "source_denial_passed": true,
+  "coverage": "one positive-derived reference-mask composition case, fresh process and copied field; Python audit not OS sandbox",
+  "evidence": [
+    {
+      "path": "output/query_field_20261010/reference_member_evidence_v1/validation/runtime/worker.log",
+      "sha256": "41b378d4ec098678fc552aca049f51d882e6e8890b323b4bd15977cc55cc4418"
+    },
+    {
+      "path": "output/query_field_20261010/reference_member_evidence_v1/validation/runtime/predictions.pt",
+      "sha256": "56c550dd9d1566539612d889a65e26ed686c763a0ae7793d216d390c9efd3c2f"
+    },
+    {
+      "path": "output/query_field_20261010/reference_member_evidence_v1/validation/runtime/audit.json",
+      "sha256": "2cfce4cd080855c6c2ee0b9dfc7fb7da0211c415f4efa94ff215f83d6f6700f1"
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/scripts/research/validate_query_field_reference_member_evidence.py",
+      "sha256": "3d59923eb0ad87ea0aef9d4b8be86274ecd919d812b994ad41e48b5a9b627d9e"
+    }
+  ]
+}
