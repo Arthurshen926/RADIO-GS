@@ -28,6 +28,7 @@ def main():
         matched_frames='existing partial-region construction only',query_threshold=.5,
         detector_threshold=.5,raster='existing observation raster; bilinear detector probability then >.5',
         greedy='strict IoU improvement, lowest-index tie, achieved feasible composition, not global optimum',
+        mixture='source-pixel diagnostic: native-margin weighted mean vs Boolean union on identical accepted raw masks; not Gaussian predictions',
         code=receipt(__file__),driver_design=receipt(ROOT/'design.json')))
     scenes={}
     for job in cfg['jobs']:
@@ -47,9 +48,15 @@ def main():
                 target=(F.interpolate(entry['masks'].float().amax(0)[None,None],size=(height,width),mode='bilinear',align_corners=False)[0,0]>.5).flatten() if len(entry['scores']) else torch.zeros(height*width,dtype=torch.bool)
                 p=native_region_probability(evidence,vectors[qi],negatives);accepted=p>.5
                 pred=masks[accepted].any(0) if accepted.any() else torch.zeros_like(target)
+                preference=(2*p-1).clamp_min(0)
+                mixture=(masks.float().T@preference/preference.sum().clamp_min(1e-12))>.5
+                mixed_tp=int((mixture&target).sum())
                 tp=int((pred&target).sum());positive=bool(target.any());row=dict(frame=frame,text=text,teacher_present=positive,
                     accepted_regions=int(accepted.sum()),predicted_pixels=int(pred.sum()),teacher_pixels=int(target.sum()),
-                    native_iou=tp/max(int((pred|target).sum()),1),native_precision=tp/max(int(pred.sum()),1),native_recall=tp/max(int(target.sum()),1))
+                    native_iou=tp/max(int((pred|target).sum()),1),
+                    native_mixture_iou=mixed_tp/max(int((mixture|target).sum()),1),
+                    native_mixture_recall=mixed_tp/max(int(target.sum()),1),
+                    positive_covered_but_mixture_rejected=int((target&pred&~mixture).sum()),native_precision=tp/max(int(pred.sum()),1),native_recall=tp/max(int(target.sum()),1))
                 if positive:
                     single=(masks&target).sum(1)/(masks|target).sum(1).clamp_min(1)
                     feasible,chosen=greedy(masks,target)
@@ -58,7 +65,7 @@ def main():
                 rows.append(row)
             print('source diagnostic',job['scene'],frame,flush=True)
         positive=[r for r in rows if r['teacher_present']];absent=[r for r in rows if not r['teacher_present']]
-        keys=['native_iou','native_precision','native_recall','best_single','greedy_feasible_iou','all_candidate_coverage']
+        keys=['native_iou','native_mixture_iou','native_mixture_recall','native_precision','native_recall','best_single','greedy_feasible_iou','all_candidate_coverage']
         scenes[job['scene']]=dict(positive_pairs=len(positive),absent_pairs=len(absent),
             positive_mean={k:sum(r[k] for r in positive)/len(positive) for k in keys},
             absent_with_any_native_region=sum(r['accepted_regions']>0 for r in absent),
