@@ -1,5 +1,22 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: part_conditioning_v1 COMPLETE frozen2f753ef.
+Full4 LERF scenes/68 texts, unchanged fields/sources, preencoded query fixtures,
+all predictions before scoring. Admission/parts/protected response55.3608/57.2624/
+58.3877%, actual-set projection42.9498/42.3954/42.2742%. Primary actual3down1up,
+P46.2069->45.4751, R84.1598->84.2635; NO promotion or scope recovery claim.
+13/68 queries accept no parts. V10 other-view raster censoring is only partially
+approximated, NOT complete instance identity/function preservation.
+14tests pass; original1e-7 monotonicity gate FAIL (max2.3842e-7, no lost selections),
+separately recomputed sparse evidence differs numerically. Keep failure and predictions.
+Cold figurines21 queries selectionEXACT, scorestrictFAIL/numericPASS(max5.9605e-7);
+publicAPI one query selectionEXACT, Python denialPASS; not allscene/rawencoder proof.
+Next hypothesis: preserve native regional query function before Gaussian averaging,
+compile exact source_records ROI bindings into same field; NOT yet implemented.
+Protected/control must share P/N once. No default/full-five/training/source expansion.
+See docs/experiments/2026-10-10-part-conditioning-results.md and audit/runtime JSONs.
+
+
 Active continuation2026-10-10: reference_member_evidence_v1 COMPLETE frozen001e828,
 reference_member_readout_v1 COMPLETE frozen6c51cd9. Same8queries/7fields/120sources,
 same retained positive-SAM query masks (inherited generation cost),32conditional

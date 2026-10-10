@@ -1,0 +1,26 @@
+"""All LERF scene/query-view selection pairs, no selected success examples."""
+from pathlib import Path
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from scripts.research.run_query_field_part_conditioning import ROOT,read
+
+cfg=read(ROOT/'prediction_config.json');read(ROOT/'scoring_complete.json')
+fig,axes=plt.subplots(2,4,figsize=(15,7),layout='constrained')
+for column,job in enumerate(cfg['jobs']):
+    metrics=read(ROOT/'predictions'/job['name']/'evaluation/evaluation.json')['metrics']
+    baseline=metrics['admission']['selected']['objects']
+    for arm,color in [('parts','#4477aa'),('protected_parts','#cc6677')]:
+        other=metrics[arm]['selected']['objects']
+        assert [(x['frame'],x['query']) for x in baseline]==[(x['frame'],x['query']) for x in other]
+        axes[0,column].scatter([x['iou'] for x in baseline],[x['iou'] for x in other],s=15,alpha=.55,c=color,label=arm)
+    ax=axes[0,column];ax.plot([0,1],[0,1],c='gray',lw=1);ax.set(xlim=(0,1),ylim=(0,1),title=job['scene'],xlabel='Baseline actual-set IoU',ylabel='Candidate actual-set IoU');ax.set_aspect('equal')
+    names=['admission','parts','protected_parts'];positions=range(3)
+    ax=axes[1,column];ax.bar([x-.18 for x in positions],[metrics[a]['iou']*100 for a in names],width=.36,label='Response')
+    ax.bar([x+.18 for x in positions],[metrics[a]['selected']['miou']*100 for a in names],width=.36,label='Actual set')
+    ax.set_xticks(list(positions),['Baseline','Parts','Protected'],rotation=15);ax.set(ylim=(0,100),ylabel='IoU (%)')
+axes[0,0].legend(fontsize=8);axes[1,0].legend(fontsize=8)
+fig.suptitle('Complete LERF cohort: response gains need not recover actual scope\nDots are all query-view evaluations, not independent scene samples')
+out=ROOT/'diagnostics';out.mkdir(exist_ok=True)
+for suffix in ['png','pdf']:fig.savefig(out/('all_scene_comparison.'+suffix),dpi=170)
+print(out/'all_scene_comparison.png')
