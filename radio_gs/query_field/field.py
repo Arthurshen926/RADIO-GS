@@ -59,7 +59,8 @@ class CapabilityField(nn.Module):
                  local_metric="none", support_aggregation="normalized_prototype", negative_rule="product",
                  relation_decoder="none", relation_confidence=None,
                  evidence_kind="none", evidence_state=None, native_mode_state=None,
-                 native_mode_rule="none", semantic_measure_state=None, semantic_measure_rule="none"):
+                 native_mode_rule="none", semantic_measure_state=None, semantic_measure_rule="none",
+                 scope_permission_state=None):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -148,6 +149,13 @@ class CapabilityField(nn.Module):
                 raise ValueError('unknown or incomplete paired-evidence field')
             {KIND: enable, SOFT_KIND: enable_soft, MIXTURE_KIND: enable_mixture,
              CONFIDENCE_KIND: enable_confidence, JOINT_KIND: enable_joint}[evidence_kind](self, evidence_state)
+
+        self.scope_permissions = None
+        if scope_permission_state is not None:
+            from .scope_permissions import ScopePermissions
+            self.scope_permissions = ScopePermissions(scope_permission_state)
+            if self.evidence is None or not torch.equal(self.scope_permissions.accepted_views, self.evidence.views):
+                raise ValueError('scope permissions do not bind to field evidence')
 
     @property
     def member_available(self):
