@@ -113,12 +113,15 @@ class JointExclusionDecoder:
 
 
 @torch.no_grad()
-def query_text_joint_exclusion(field,query,negatives,*,decoder=None,joint=True):
+def query_text_joint_exclusion(field,query,negatives,*,decoder=None,joint=True,initializer="finite"):
     from .scope_confidence import query_text_scope_confident
     result=query_text_scope_confident(field,query,negatives)
     decoder=decoder if decoder is not None else JointExclusionDecoder(field)
     if decoder.field is not field:raise ValueError('decoder bound to another field')
-    member,details=decoder.decode(result.membership_score,result.accepted_regions,joint=joint)
+    if initializer not in {"finite","semantic"}:raise ValueError("unknown member initializer")
+    initial=result.membership_score if initializer=="finite" else result.semantic_probability
+    member,details=decoder.decode(initial,result.accepted_regions,joint=joint)
+    details["initializer"]=initializer
     from dataclasses import replace
     return replace(result,membership_score=member,selected=member>.5,
                    diagnostics=dict(result.diagnostics,joint_exclusion=details))

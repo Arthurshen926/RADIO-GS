@@ -57,4 +57,7 @@ def test_field_decoder_labels_and_public_api(monkeypatch):
     monkeypatch.setattr(scope_confidence,'query_text_scope_confident',native)
     output=query_text_joint_exclusion(field,torch.ones(1),torch.ones(1,1),decoder=decoder)
     assert torch.equal(output.membership_score,result) and output.selected.tolist()==[False,True]
+    semantic=query_text_joint_exclusion(field,torch.ones(1),torch.ones(1,1),decoder=decoder,initializer='semantic')
+    assert torch.equal(semantic.membership_score,torch.tensor([.3,.7]))
+    with pytest.raises(ValueError):query_text_joint_exclusion(field,torch.ones(1),torch.ones(1,1),decoder=decoder,initializer='invalid')
     with pytest.raises(ValueError):decoder.decode(torch.ones(2,dtype=torch.bool),accepted)
