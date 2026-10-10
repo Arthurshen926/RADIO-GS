@@ -21,13 +21,13 @@ class CoverageView(nn.Module):
             raise ValueError('invalid coverage coordinates')
         if self.pointer.shape != (len(self.atom)+1,) or int(self.pointer[0]) != 0 or int(self.pointer[-1]) != len(self.index) or bool((self.pointer.diff()<0).any()):
             raise ValueError('invalid coverage pointer')
-        if self.alpha.shape != self.index.shape or not torch.isfinite(self.alpha).all() or bool(((self.alpha<0)|(self.alpha>1)).any()):
+        if not self.alpha.is_floating_point() or self.alpha.shape != self.index.shape or not torch.isfinite(self.alpha).all() or bool(((self.alpha<0)|(self.alpha>1)).any()):
             raise ValueError('invalid footprint alpha')
         if bool(((self.index<0)|(self.index>=count)).any()) or bool(((self.atom<0)|(self.atom>=atoms)).any()):
             raise ValueError('unaligned coverage factor binding')
 
     def forward(self, membership):
-        if membership.shape != (self.count,) or not torch.isfinite(membership).all() or bool(((membership<0)|(membership>1)).any()):
+        if not membership.is_floating_point() or membership.shape != (self.count,) or not torch.isfinite(membership).all() or bool(((membership<0)|(membership>1)).any()):
             raise ValueError('invalid membership')
         if not len(self.index):
             return membership.sum()*0 + membership.new_zeros(len(self.atom))
