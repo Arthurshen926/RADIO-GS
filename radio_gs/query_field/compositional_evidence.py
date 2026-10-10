@@ -58,4 +58,4 @@ class CompositionalEvidence:
             positive.append(values[:,0]);negative.append(values[:,1])
         return torch.stack(positive,1),torch.stack(negative,1),dict(admitted_regions=int(accepted.sum()),
             active_views=active,confidence_sum=float(active),union_before_lifting=True,
-            query_independent_atom_state=True,source_access=False,source_raster_access=False)
+            query_independent_atom_state=True,source_raster_access=False)

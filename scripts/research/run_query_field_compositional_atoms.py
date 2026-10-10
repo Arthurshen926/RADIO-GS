@@ -8,7 +8,7 @@ from radio_gs.query_field.part_conditioning import prepare_parts,read_parts,nati
 from radio_gs.query_field.region_union import prepare_union_parts
 from scripts.research.teacher_part_acceptance import select_parts
 
-ROOT=Path('output/query_field_20261010/compositional_atoms_v1')
+ROOT=Path('output/query_field_20261010/compositional_atoms_v2')
 REFERENCE=Path('output/query_field_20261010/teacher_acceptance_v1')
 SOURCE=Path('output/query_field_20261009/text_union_functions_v1')
 BASE=Path('output/query_field_20261009/union_admission_v1')

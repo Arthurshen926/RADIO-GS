@@ -26,3 +26,12 @@ def test_unknown_empty_and_duplicate_regions_do_not_create_negative_evidence():
     torch.testing.assert_close(a[:,0],torch.tensor([1.,0.,0.]));torch.testing.assert_close(b[:,0],torch.tensor([0.,1.,0.]))
     a,b,d=model.prepare(torch.zeros(2,dtype=torch.bool));assert not a.any() and not b.any() and d['active_views']==0
     with pytest.raises(ValueError):model.prepare(torch.ones(2))
+
+
+def test_atom_preparation_integrates_with_shared_member_decoder():
+    from radio_gs.query_field.part_conditioning import read_parts
+    t=sparse.eye(2,dtype=np.float32,format='csr');p=np.array([[1,0]],bool)
+    model=CompositionalEvidence(dict(count=2,region_count=1,views=[compile_view(t,p,~p,[0])]))
+    prior=torch.tensor([.3,.7]);available=torch.ones(2,dtype=torch.bool)
+    result,details=read_parts(prior,available,model.prepare(torch.tensor([True])),protect=True)
+    torch.testing.assert_close(result,torch.tensor([.65,.35]));assert not details['source_access']
