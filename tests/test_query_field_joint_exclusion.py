@@ -33,3 +33,28 @@ def test_frozen_initial_visibility_underestimates_after_front_removal():
     weights=_initial_weights(ptr,ids,alpha,selected)
     np.testing.assert_allclose(weights,[.8,.16])
     assert weights[1]<.8
+
+
+def test_field_decoder_labels_and_public_api(monkeypatch):
+    from radio_gs.query_field.coverage_factors import CoverageView
+    from radio_gs.query_field.joint_exclusion import JointExclusionDecoder,query_text_joint_exclusion
+    from radio_gs.query_field.scope_readout import ScopeReadout
+    from radio_gs.query_field import scope_confidence
+    state=dict(pointer=torch.tensor([0,2,3]),index=torch.tensor([0,1,0]),alpha=torch.tensor([.8,.8,.8]),atom=torch.tensor([0,1]))
+    factors=CoverageView(state,2,2)
+    constraints=SimpleNamespace(regions=torch.tensor([0]),candidates=torch.tensor([0]),
+        positive=torch.tensor([[True],[False]]),negative=torch.tensor([[False],[True]]),interior=torch.zeros(2,1,dtype=torch.bool))
+    class Permissions:
+        accepted_views=torch.tensor([0])
+        def __call__(self,a):return torch.tensor([False])
+    field=SimpleNamespace(xyz=torch.zeros(2,3),scope_permissions=Permissions(),scope_constraints=SimpleNamespace(views=[constraints]),coverage_factors=SimpleNamespace(views=[factors]))
+    decoder=JointExclusionDecoder(field);initial=torch.tensor([.6,.9]);accepted=torch.tensor([True])
+    result,detail=decoder.decode(initial,accepted)
+    assert result.tolist()==[0.,initial[1].item()] and detail['positive_coverage_losses']==0
+    assert torch.equal(initial,torch.tensor([.6,.9]))
+    assert torch.equal(decoder.decode(initial,torch.tensor([False]))[0],initial)
+    def native(*args):return ScopeReadout(torch.tensor([.3,.7]),initial.clone(),initial>.5,accepted,{})
+    monkeypatch.setattr(scope_confidence,'query_text_scope_confident',native)
+    output=query_text_joint_exclusion(field,torch.ones(1),torch.ones(1,1),decoder=decoder)
+    assert torch.equal(output.membership_score,result) and output.selected.tolist()==[False,True]
+    with pytest.raises(ValueError):decoder.decode(torch.ones(2,dtype=torch.bool),accepted)

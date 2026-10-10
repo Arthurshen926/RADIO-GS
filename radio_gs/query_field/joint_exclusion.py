@@ -119,6 +119,6 @@ def query_text_joint_exclusion(field,query,negatives,*,decoder=None,joint=True):
     decoder=decoder if decoder is not None else JointExclusionDecoder(field)
     if decoder.field is not field:raise ValueError('decoder bound to another field')
     member,details=decoder.decode(result.membership_score,result.accepted_regions,joint=joint)
-    result.membership_score=member;result.selected=member>.5
-    result.diagnostics=dict(result.diagnostics,joint_exclusion=details)
-    return result
+    from dataclasses import replace
+    return replace(result,membership_score=member,selected=member>.5,
+                   diagnostics=dict(result.diagnostics,joint_exclusion=details))
