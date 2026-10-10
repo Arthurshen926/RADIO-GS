@@ -1,5 +1,22 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: compiled_scope_permissions_v1 COMPLETE, implementation15382b4.
+Query-free construction of scope permissions into SAME field.pt via optional
+CapabilityField.scope_permissions. Uses only existing source observations and exact
+region bindings; no evalquery/RAWteacher/labels/previous prediction access in compiler.
+4LERF/72views/5137accepted coords/5756candidate coords; +3,741,368 tensorbytes.
+9,889 synthetic conditions (all singletons,empty,all,64seeded combinations/view)
+EXACT against source mask rule; fresh-process reload all4PASS; all parent tensorsEXACT.
+Python open/io.open/os.open guard for output/mnt except scene package; not OS sandbox.
+24targeted/regressiontestsPASS. No benchmark score update or default query change.
+CRITICAL: output is candidate REGION PERMISSION only. Does NOT transfer negative
+interior union to Gaussian measure or actual member solver; NOT deployed50.0961%.
+Next migration must preserve those functions with nonevaluation construction conditions,
+not compile68eval answers, blindly sum marginal regions, or restore query-time source fit.
+Semantic response and actual set retain distinct duties; same actual set for2D/3D.
+See docs/experiments/2026-10-10-compiled-scope-permissions-results.md.
+
+
 Active continuation2026-10-10: scope_exclusion_v1 COMPLETE frozen5537d80.
 Full4LERF/68texts/4arms, same72sourceviews/5137admissioncoords, source-assisted
 transient fitting ONLY. Preserve old negative permission; add existing comparable
