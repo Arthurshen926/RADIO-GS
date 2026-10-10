@@ -1,5 +1,26 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: compiled_coverage_factors_v1 COMPLETE, buildb4aa628/auditc27b116.
+Sampled JOINT selected-opacity function, NOT memberdecoder or newbenchmark result.
+Same4LERF/72trainviews; query-independent16x16samples/view,18432factors/5124669hits;
++61791516tensorbytes in SAMEfield.pt. Full tile incidences retain hiddenGaussians;
+member-scaled cutoff/opacityceiling/exclusive termination match renderer.
+No storedcamera/pixelcoordinate/imagegeometry/RGB/maskraster/queryanswers; still
+source-derived view-grouped factor representation, NOT finalcompactarchitecture.
+504independent memberconditions/129024alpha comparisonsPASS; maxalpha8.0407e-5
+(frozen1e-4), ALL silhouette decisionsEXACT. Allrow mean-alpha gradienterror4.7003e-9.
+All4coldreloadPASS, parenttensorsEXACT, sourcePythonguard/noOSsandbox; coldgrad512rows/view.
+Fixedfullvisibility diagnostic: backhalf5996/18432 silhouette disagreements vs joint0;
+random15 2265/18432 vs0. Constructionfunction comparison, NOT benchmark error rates.
+23unique targeted/regressiontestsPASS; all jobsfinished. New inputdtype validation after
+freeze does not change floating arithmetic. No defaultpromotion/wholefive/paperclosure.
+Next: shared member decoder leveraging validated interactions on noneval construction
+conditions, plus native acceptance and footprint/cost function transfer. Do not restore
+per-query sourcefit, cache evaluationanswers, or equate operator parity with membership.
+Scores remain previous36.0394 vs admission42.9498; privileged50.0961 not deployed.
+See docs/experiments/2026-10-10-coverage-factors-results.md.
+
+
 Active continuation2026-10-10: field-owned scope constraints and native confidence studies COMPLETE.
 Compiled SAME field.pt:18411atoms,+846823494tensorbytes;72views/5137accepted/5756candidates.
 All singleton columns +720full-row synthetic conditions PASS tolerance2e-6,max1.5497e-6;
