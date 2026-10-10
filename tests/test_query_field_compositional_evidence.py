@@ -35,3 +35,23 @@ def test_atom_preparation_integrates_with_shared_member_decoder():
     prior=torch.tensor([.3,.7]);available=torch.ones(2,dtype=torch.bool)
     result,details=read_parts(prior,available,model.prepare(torch.tensor([True])),protect=True)
     torch.testing.assert_close(result,torch.tensor([.65,.35]));assert not details['source_access']
+
+
+def test_all_acceptance_subsets_match_direct_partial_union_across_views():
+    from itertools import product
+    rng=np.random.default_rng(19);states=[];direct=[]
+    for vi in range(2):
+        relation=rng.integers(0,3,(5,9));relation[:,-1]=relation[:,0]
+        p=relation==1;n=relation==2
+        t=rng.random((3,9),dtype=np.float32);t/=t.sum(1,keepdims=True)
+        states.append(compile_view(sparse.csr_matrix(t),p,n,range(vi*5,(vi+1)*5)))
+        direct.append((t,p,n))
+    model=CompositionalEvidence(dict(count=3,region_count=10,views=states))
+    for bits in product([False,True],repeat=5):
+        accepted=torch.tensor(list(bits)+list(reversed(bits)))
+        a,b,_=model.prepare(accepted)
+        for vi,(t,p,n) in enumerate(direct):
+            chosen=accepted[vi*5:(vi+1)*5].numpy()
+            ep=t@p[chosen].any(0).astype(np.float32) if chosen.any() else np.zeros(3,np.float32)
+            en=t@n[chosen].all(0).astype(np.float32) if chosen.any() else np.zeros(3,np.float32)
+            torch.testing.assert_close(a[:,vi],torch.from_numpy(ep));torch.testing.assert_close(b[:,vi],torch.from_numpy(en))

@@ -1,5 +1,31 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: FOUR matched-source studies COMPLETE; final freeze4b74134.
+Full4LERF/68texts,72views/5137regions, teacher-assisted diagnostics, NOT deployment.
+Exact overlap atoms primary37.2457% vs marginal union37.3503; no promotion of840MBstate.
+Source-normalized member primary23.7258; tiny known evidence overconfidence is harmful.
+Joint source_parts/no-footprint/footprint actual24.8836/26.4769/36.6399%.
+Fixed-energy initializer intervention (same footprint denominator, only startinglogits)
+finite_parts/joint-source-init/joint-finite-init actual38.2426/36.6399/48.0850%.
+Final+11.4451pp vs matchedjoint,4up; versus admission42.9498 +5.1352pp,3up1down,
+BUT source-assisted perqueryfit, NOT deployed recovery. Response59.3934/38.4321/17.5375,
+AP81.5923/64.0395/59.8598; do not hide tradeoffs or assemble winner metrics.
+453 admitted sourcepairs: final knownIoU92.3145 yet fullcandidate agreement55.5858,
+RAWteacher agreement51.9250; predicted unknown60.5616/outsidecandidate42.5202%.
+These are conditional source protocols, NOT GT/error rates/heldout/global bound.
+Partial negatives lack complete scope; unknown != negative, emptyteacher != absence.
+Next functional responsibility: reliable conditional exclusion/scope completeness AND
+consistent response readout, under fixed measure; native acceptance also unresolved.
+Do not fix current marginal P/N as final architecture or equate convergence with function.
+Keep one field/three teachers/typed query/same actual2D3Dset. Source fitting only reference;
+transfer with independent nonevaluation construction conditions, never evalanswerbank.
+Four auditsPASS;20targetedtestsPASS; atoms/readout cold21 each exactsets/PythondenyPASS.
+Original atoms v1 integrationfailure retained beforeGT; fixedv2 withoutgate relaxation.
+All study jobs ended; no unified-five evaluation or paperclosure. See
+ docs/experiments/2026-10-10-fixed-initializer-reference-results.md.
+
+Earlier continuation records below are historical, not current deployment claims.
+
 Active continuation2026-10-10: teacher_acceptance_v1 COMPLETE frozen8034a59.
 Full4 LERF scenes/68texts/7controls; all predictions before scoring. Same fields,
 72views/5137regions; extra RAW v10 source-query detections: SOURCE-ASSISTED DIAGNOSTIC,

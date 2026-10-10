@@ -1,0 +1,1194 @@
+{
+  "passed": true,
+  "source_assisted_diagnostic": true,
+  "transient_query_fitting": true,
+  "deployment_claim": false,
+  "whole_five_task": false,
+  "macro": {
+    "source_parts": {
+      "response_iou": 0.48815873744550387,
+      "selection_iou": 0.2488357041671499,
+      "ap": 0.739407372659283,
+      "precision": 0.26167371673108186,
+      "recall": 0.9241444781614054
+    },
+    "joint_no_footprint": {
+      "response_iou": 0.49352263393964213,
+      "selection_iou": 0.26476881555526743,
+      "ap": 0.7185758468211833,
+      "precision": 0.2786515394816018,
+      "recall": 0.9133365576444665
+    },
+    "joint_footprint": {
+      "response_iou": 0.38432063111994585,
+      "selection_iou": 0.36639850020706477,
+      "ap": 0.6403952937574153,
+      "precision": 0.3866732879012127,
+      "recall": 0.888745259162586
+    }
+  },
+  "per_scene": {
+    "source_parts": {
+      "figurines": {
+        "response_iou": 0.5598834204886641,
+        "selection_iou": 0.22908442111007304,
+        "ap": 0.7902058406911608,
+        "precision": 0.2299684551917178,
+        "recall": 0.9868789950704924
+      },
+      "ramen": {
+        "response_iou": 0.4734919291812743,
+        "selection_iou": 0.23330651673961175,
+        "ap": 0.6398428199381446,
+        "precision": 0.24459257873013074,
+        "recall": 0.869462994116173
+      },
+      "teatime": {
+        "response_iou": 0.35807753873247083,
+        "selection_iou": 0.19718770645922834,
+        "ap": 0.7361721217775399,
+        "precision": 0.19959396498114262,
+        "recall": 0.9833433809198099
+      },
+      "waldo_kitchen": {
+        "response_iou": 0.561182061379606,
+        "selection_iou": 0.3357641723596865,
+        "ap": 0.7914087082302871,
+        "precision": 0.37253986802133626,
+        "recall": 0.8568925425391463
+      }
+    },
+    "joint_no_footprint": {
+      "figurines": {
+        "response_iou": 0.5602362571766467,
+        "selection_iou": 0.2299069020751421,
+        "ap": 0.7520183001184143,
+        "precision": 0.23170002650648844,
+        "recall": 0.9757338476080101
+      },
+      "ramen": {
+        "response_iou": 0.4754364113684114,
+        "selection_iou": 0.2590422505457711,
+        "ap": 0.618474177246493,
+        "precision": 0.27046610514748454,
+        "recall": 0.8667363465622547
+      },
+      "teatime": {
+        "response_iou": 0.37849800733817834,
+        "selection_iou": 0.20833782427399386,
+        "ap": 0.721774443736252,
+        "precision": 0.21107032421767577,
+        "recall": 0.956357353968613
+      },
+      "waldo_kitchen": {
+        "response_iou": 0.5599198598753322,
+        "selection_iou": 0.3617882853261628,
+        "ap": 0.7820364661835737,
+        "precision": 0.4013697020547585,
+        "recall": 0.8545186824389888
+      }
+    },
+    "joint_footprint": {
+      "figurines": {
+        "response_iou": 0.5544230159555029,
+        "selection_iou": 0.3398637787055483,
+        "ap": 0.694892451592436,
+        "precision": 0.34721630163812384,
+        "recall": 0.9495078386873804
+      },
+      "ramen": {
+        "response_iou": 0.21443340115242598,
+        "selection_iou": 0.3479887640619795,
+        "ap": 0.5680125784146479,
+        "precision": 0.3646650273611956,
+        "recall": 0.8464025050825162
+      },
+      "teatime": {
+        "response_iou": 0.3874559678074162,
+        "selection_iou": 0.3177316423585849,
+        "ap": 0.6175689234090134,
+        "precision": 0.32269526962567074,
+        "recall": 0.9345900646219173
+      },
+      "waldo_kitchen": {
+        "response_iou": 0.3809701395644383,
+        "selection_iou": 0.46000981570214633,
+        "ap": 0.6811072216135643,
+        "precision": 0.5121165529798605,
+        "recall": 0.8244806282585299
+      }
+    }
+  },
+  "comparisons": {
+    "source_parts__joint_no_footprint": {
+      "response_iou": {
+        "delta": 0.005363896494138348,
+        "lower": -0.0004605305814210786,
+        "upper": 0.015403560626276278,
+        "improved": 3,
+        "regressed": 1,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "selection_iou": {
+        "delta": 0.015933111388117573,
+        "lower": 0.005986299389917293,
+        "upper": 0.025879923386317852,
+        "improved": 4,
+        "regressed": 0,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "ap": {
+        "delta": -0.020831525838099857,
+        "lower": -0.032240074939881874,
+        "upper": -0.011884960044000636,
+        "improved": 0,
+        "regressed": 4,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "precision": {
+        "delta": 0.016977822750519962,
+        "lower": 0.0066039652756518935,
+        "upper": 0.02735168022538803,
+        "improved": 4,
+        "regressed": 0,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "recall": {
+        "delta": -0.01080792051693874,
+        "lower": -0.02092118210187724,
+        "upper": -0.002550253827037885,
+        "improved": 0,
+        "regressed": 4,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      }
+    },
+    "source_parts__joint_footprint": {
+      "response_iou": {
+        "delta": -0.10383810632555797,
+        "lower": -0.21963522492200802,
+        "upper": 0.011959012270892078,
+        "improved": 1,
+        "regressed": 3,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "selection_iou": {
+        "delta": 0.11756279603991486,
+        "lower": 0.11273080245892149,
+        "upper": 0.12239478962090822,
+        "improved": 4,
+        "regressed": 0,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "ap": {
+        "delta": -0.09901207890186772,
+        "lower": -0.11445234249262465,
+        "upper": -0.08144805279680323,
+        "improved": 0,
+        "regressed": 4,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "precision": {
+        "delta": 0.12499957117013082,
+        "lower": 0.11866014753873545,
+        "upper": 0.13470062587665937,
+        "improved": 4,
+        "regressed": 0,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "recall": {
+        "delta": -0.035399218998819426,
+        "lower": -0.044667965793573544,
+        "upper": -0.026638155871020558,
+        "improved": 0,
+        "regressed": 4,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      }
+    },
+    "joint_no_footprint__joint_footprint": {
+      "response_iou": {
+        "delta": -0.10920200281969632,
+        "lower": -0.21997636526343967,
+        "upper": 0.0015723596240470317,
+        "improved": 1,
+        "regressed": 3,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "selection_iou": {
+        "delta": 0.10162968465179728,
+        "lower": 0.09358402194609594,
+        "upper": 0.10967534735749862,
+        "improved": 4,
+        "regressed": 0,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "ap": {
+        "delta": -0.07818055306376787,
+        "lower": -0.10256738244862401,
+        "upper": -0.05379372367891172,
+        "improved": 0,
+        "regressed": 4,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "precision": {
+        "delta": 0.10802174841961085,
+        "lower": 0.09855542801228204,
+        "upper": 0.11432391908000203,
+        "improved": 4,
+        "regressed": 0,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      },
+      "recall": {
+        "delta": -0.024591298481880686,
+        "lower": -0.02813203155054428,
+        "upper": -0.021050565413217093,
+        "improved": 0,
+        "regressed": 4,
+        "cases": 4,
+        "clusters": 4,
+        "bootstrap_samples": 2000
+      }
+    }
+  },
+  "details": {
+    "figurines": {
+      "queries": 21,
+      "fitting": {
+        "joint_no_footprint": {
+          "active_queries": 19,
+          "steps": 4560,
+          "seconds": 25.43311582878232
+        },
+        "joint_footprint": {
+          "active_queries": 19,
+          "steps": 4560,
+          "seconds": 21.181928670033813
+        }
+      },
+      "geometry_exact": true,
+      "initializer_exact": true
+    },
+    "ramen": {
+      "queries": 15,
+      "fitting": {
+        "joint_no_footprint": {
+          "active_queries": 12,
+          "steps": 2880,
+          "seconds": 17.076666904613376
+        },
+        "joint_footprint": {
+          "active_queries": 12,
+          "steps": 2880,
+          "seconds": 15.365506928414106
+        }
+      },
+      "geometry_exact": true,
+      "initializer_exact": true
+    },
+    "teatime": {
+      "queries": 14,
+      "fitting": {
+        "joint_no_footprint": {
+          "active_queries": 12,
+          "steps": 2880,
+          "seconds": 32.50267579779029
+        },
+        "joint_footprint": {
+          "active_queries": 12,
+          "steps": 2880,
+          "seconds": 23.58867553807795
+        }
+      },
+      "geometry_exact": true,
+      "initializer_exact": true
+    },
+    "waldo_kitchen": {
+      "queries": 18,
+      "fitting": {
+        "joint_no_footprint": {
+          "active_queries": 13,
+          "steps": 3120,
+          "seconds": 22.95421446301043
+        },
+        "joint_footprint": {
+          "active_queries": 13,
+          "steps": 3120,
+          "seconds": 18.802181290462613
+        }
+      },
+      "geometry_exact": true,
+      "initializer_exact": true
+    }
+  },
+  "all_predictions_before_scoring": true,
+  "gt_hashes_current_audit_snapshot": true,
+  "gt_files": [
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/green apple.jpg",
+      "sha256": "1199a50b71de2dd6e9a0cf0b6eee736d4d9361f07d6ec2dbac892f6dc342b05c"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/jake.jpg",
+      "sha256": "db2afd4833dadc6fa6b636a9b96dc795f8a965fa10b7a2c851d4c7b3ce2aa329"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/miffy.jpg",
+      "sha256": "488939fbb89d539a1bc86428e277ddce297f126f82d96770cbd16596592fbcab"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/old camera.jpg",
+      "sha256": "123cb01747b56b0e2f8fff59b01d78fa4f90630d651753cd97ec0d0e4c7bf652"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/pikachu.jpg",
+      "sha256": "cecc24f9813c2184d568a6504bdf2e0d8461cd2b3f9cbaa0aaa3350afeabdffb"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/pink ice cream.jpg",
+      "sha256": "a718d234729ea28b70dc85bf1c073df534a38fcb8cf2dfbd2385867d59b297ac"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/pirate hat.jpg",
+      "sha256": "9f614f9fca1d13d5b0524cfbdc3b28ea8fb6a2b1428b7486f6edf4931d515f9e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/porcelain hand.jpg",
+      "sha256": "c827a46be259481fc635cb99eec02f0b0c4a7cf249bd7e99fdfb53574dde9415"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/red apple.jpg",
+      "sha256": "3172d090432066de169af249355db06b8bcdab279675576760db00ea26ccf45a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/red toy chair.jpg",
+      "sha256": "ba546f626cd9f5693d0a937d537270cd58aa4718a1c2a4159cfd55aac90b6f07"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/rubber duck with buoy.jpg",
+      "sha256": "61c59e96252295bfc1de73d36e2b19761e4abf15af8442dad8252714f4a1b1ee"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/rubber duck with hat.jpg",
+      "sha256": "080b2d4a69b629455367af38936b56b62f662fd3e46b3c9e8df27a27dc72c508"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/spatula.jpg",
+      "sha256": "cd7aaa754a2e56ffe5e92a6f173c97ac2cdd7f53b8fd6b718dd47fe9112ef26e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/tesla door handle.jpg",
+      "sha256": "f53910a0de10659ecf2628cd5062fffc14bae0c35735b89c66e7c74c29510db5"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/toy cat statue.jpg",
+      "sha256": "fffd641352c05cbda5c5b5cc4bacea01edec5a897287ee54fb9bd7fa7e0ff224"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/toy elephant.jpg",
+      "sha256": "959fddb50575b81f296314416d04edcfa5156274973a2e7c23d9d389bdc600ff"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00041/waldo.jpg",
+      "sha256": "5a80102d3dc13340f0f311717642bb745c5682429fb5f07047ca8ffd6e9a4d3e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/green apple.jpg",
+      "sha256": "19d89a0eac4944d58b09d4b78059ff3ebe0cb5ce93d0df20328f29c762b38f45"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/green toy chair.jpg",
+      "sha256": "6adefb7a56d5aaa0167e8f39aaad2b41ed23184fef5f8bee9c21c297f2649ca0"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/jake.jpg",
+      "sha256": "97fe5e47d50c0f4fe66e6a7daf722a2ecf9b049a33a814109c2e488ef93255f4"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/old camera.jpg",
+      "sha256": "4f74b40da495351266ec5bf0650ffd9161730cbbb067ee023a875374f1b6a203"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/pink ice cream.jpg",
+      "sha256": "1f5cf19e56e3ac804961875eafeb087db222a0b29e7d756167f0e868842f9d21"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/pirate hat.jpg",
+      "sha256": "948ad60d05a65d86bd541b221862009992b27a840c94da9845e15c4000655ea8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/pumpkin.jpg",
+      "sha256": "1bec72c9f0984bdedbde1b4406a6dbd3d6e705ab5d4dc13008a66be10fdb91a7"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/red apple.jpg",
+      "sha256": "60b957bc6557e1d1029cb878fbd9f176e0cb06d824b1757220e9ff5bf3db9d7e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/rubber duck with buoy.jpg",
+      "sha256": "96a7608d304c975d8e0d66ec49d647f69fed4e6b76c75ef3be1f4708ef081794"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/rubber duck with hat.jpg",
+      "sha256": "a3d38bd005765a10c27a82afe85841db08989592799c533840d750e024cf336f"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/rubics cube.jpg",
+      "sha256": "00175743790600729e4499ff035904b0438e3a320ea1417abd7c625d50bfec1e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/spatula.jpg",
+      "sha256": "6660faf4985701bdad7c36597f53b93920966debb95372f7599a8fd729a39468"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00105/tesla door handle.jpg",
+      "sha256": "60ba97952e7313c4753d8282f350ed63df57705543ec59c950f72c4db7bc7fb3"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/green apple.jpg",
+      "sha256": "d3c9ca8039144cc211c9f29092b46ed98cc909dfb6adadbd74a2339e029d4fa4"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/jake.jpg",
+      "sha256": "0085e9485b15f187c1ffabbf707a1f67d12d2e483f063918ebe093f8866be275"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/pikachu.jpg",
+      "sha256": "c0edbb41d02cf32d5a4c27c335c53d5361b9121ac7235d60a0fa5252fe456c50"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/pirate hat.jpg",
+      "sha256": "9cbf546ad98201bd07033cbdd138bec9d7bd99351386e6a2cff32c6834b0c568"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/porcelain hand.jpg",
+      "sha256": "831618efa86c7f03db793231bc7353b7d324009395b7de6ceb1cb0fa6bc3327f"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/red apple.jpg",
+      "sha256": "e29d8d0b6b7387207997d1483b2c50f58f2f0943cf8e5b3b51148c59ecb7b0d5"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/rubber duck with hat.jpg",
+      "sha256": "2566cd201ca33caffc9b417b9f655df340cf24e45013066128c47cb086090393"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/rubics cube.jpg",
+      "sha256": "3ead5139cf6d85270a6e18594e43fa4738e55975bfe69730b84d8e89d1abf3d9"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/toy cat statue.jpg",
+      "sha256": "5b4ff8575f8253745e1c8ab07312f909a7374095897b74961de9bb970a30735e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/toy elephant.jpg",
+      "sha256": "1147fea92d3f583c355a4cc0efc6796b77972be4ddeff16012abb8e0766b1867"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00152/waldo.jpg",
+      "sha256": "94c49d2aeacd5c1fdba41e226cde0c65cd801efb6e7734f2dc4a2362df8db5d2"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/bag.jpg",
+      "sha256": "ff397f29aa80e3dd4f358d22599404d4f30b3d33d3c23535dd46a8381655f99e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/green apple.jpg",
+      "sha256": "5cc4e8634ee1b3caf1424d38aa205dddb9054849def9c0fd83aaa4d999b82178"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/green toy chair.jpg",
+      "sha256": "a0fffb5508748d9f49e278ae7480e64980922666ef5f56b2df9392107b60f190"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/miffy.jpg",
+      "sha256": "15a51af48ff8338f31375e2578dd4df4c5a758dcaaa994b736f9ba85922afe17"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/old camera.jpg",
+      "sha256": "a55af2fbe20622d4964050b11aee4f2e2a5c76d1b5b1ae73e1e825a2d0de81f8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/pink ice cream.jpg",
+      "sha256": "629e0930fdc0a966b758c58f1f2cb45a87160be8e1ab780f4dad80e503dba6f1"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/pirate hat.jpg",
+      "sha256": "6a7c1c9632bbbbc85348e37638f7d83a270eb802215fa2d6044ba35eeef84ef9"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/porcelain hand.jpg",
+      "sha256": "b717ca757c5d259a39b3f8c6ca575dc35a1ea460f2d21dfcc9ecdfee94f87832"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/rubber duck with buoy.jpg",
+      "sha256": "52adb4ad6be413ae100cd469d81908ff2019a8d131786d1c3111d0fe81d506af"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/rubber duck with hat.jpg",
+      "sha256": "398898526c13e96d578710b66175dd73f2e69f6c99b14446d3581bbf3d370f6a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/rubics cube.jpg",
+      "sha256": "88a2df370f9e52c4fa02b5b870cf57dc1fbf67284b32c524afdb40d0e366f65a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/spatula.jpg",
+      "sha256": "0cca5d53873fe7fc3c29431d2373a6c750a2728b89ee92c2438fa4257f499afa"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/toy cat statue.jpg",
+      "sha256": "e5134794caeabc3ece618c75a0448b4c87e260f72b2fc6b315bb221f6fba4247"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/toy elephant.jpg",
+      "sha256": "03c4a2669e6ed0b47d12e9cdfe76cb072c5415db7d402e41bfb4cf5c21843fff"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/figurines/gt/frame_00195/waldo.jpg",
+      "sha256": "eb41a0432dcb430e985268fb7d0bea7ea4e5f296b1d7ec306c0f2b2dc0b3eec8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/bowl.jpg",
+      "sha256": "1c3e089da005e37edeb755b84a801e9f5d6852a908786e96228e741699e86f96"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/chopsticks.jpg",
+      "sha256": "6ba398b730347046609768289c3f60fc84b973b1b69c69d5a49fbff607612054"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/egg.jpg",
+      "sha256": "d5bc60dcf9994b690bb7289281a00d3efc41388b2d23c45d91a7880fa5083928"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/kamaboko.jpg",
+      "sha256": "353738d665c43c3fe338aed47a9bd71618819c6b033dc5005f0b29afb7f54901"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/napkin.jpg",
+      "sha256": "fa7da78978f1fa60203704341e0df192ac7dd8c9237a478cc6617a5a6708b5f3"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/nori.jpg",
+      "sha256": "463982d778c77edd32ccba88440170ea87ab23a34da4018057795cfd650873dc"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/onion segments.jpg",
+      "sha256": "72a998d82fb6e6bc0c380bd5e560568326a2df4ba5f270ea10e3475919b8732f"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/plate.jpg",
+      "sha256": "6da95d5c35b599980637580bed8b76a04c529bcb48ec281bf27a9cad345ea330"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/sake cup.jpg",
+      "sha256": "b9204f35e767c9bc22d320f367d9c6af010f9058863f9afb604929f7a0247a90"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00006/wavy noodles.jpg",
+      "sha256": "6f4e925adc5f2cf0d68de7eda77ef89f6beec8962bb8339f4b840d60efe7af22"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00024/bowl.jpg",
+      "sha256": "2855d293832a2e6c14d06ba8e53101fbb18d17d47c6c84ba422cebf244fc68f2"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00024/chopsticks.jpg",
+      "sha256": "e844d51fae5ef6b7a39dab84abc50cb66b90dbc34767fcf57bca7af624c9bb3b"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00024/corn.jpg",
+      "sha256": "2408b41fc93081742bd633b7ca975bc3840b52859ebe08f1aa223b09b4b0f0a8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00024/egg.jpg",
+      "sha256": "b9adaf8fe765fe907801f4f238531be862feeab7ff320a2c6d8c5c1c9a8741e5"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00024/kamaboko.jpg",
+      "sha256": "b12fd62d3f297c62ce1ea599ec83c5727947bc13ea5e94603babe68734cf16f5"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00024/nori.jpg",
+      "sha256": "9c08242bb813c72b9b1ad89188b7b1c54b6e449b0918634b7e4620ed7821968a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00024/onion segments.jpg",
+      "sha256": "8e8a84294e98eef63a234a5e3e23748bcf7720c65c44caaa2c8e089dcfc52e49"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00024/wavy noodles.jpg",
+      "sha256": "56aad30884a69111dde0cb360a4c98de1a1dea048b2af915f397b8bfc73e5fdf"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00060/chopsticks.jpg",
+      "sha256": "cebc44fb05e7e66e3a2a3ec071df9067f12f326da44b656f0242850379fee852"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00060/corn.jpg",
+      "sha256": "36c1acae4ef9df9488b87e30b047278ba03ca162fff610d1c65f5930bd2dc6b8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00060/egg.jpg",
+      "sha256": "445567d5a044d564f2dc69f2c9bac6d5ffeb1597937e635522859ccdd89f3d60"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00060/kamaboko.jpg",
+      "sha256": "29a2fa7f67a4892abbf7d364bbf9a06be5cdf6559826b976c9670c282be4f757"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00060/napkin.jpg",
+      "sha256": "c1a3f361af9a4330c1bae3025d323cc42ffb0b0d9094d3f5c61691389fa60067"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00060/onion segments.jpg",
+      "sha256": "722d8a531ac106bfd0cd1e4c880cbff8bad378d5667ee18f72429ee7abbe010d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00060/sake cup.jpg",
+      "sha256": "15ab852c3ee7943e7221b2b42a153b1044213b64e3a3070053658be3155deca8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00060/wavy noodles.jpg",
+      "sha256": "d2da8a0ea3b8a8409d0419481910b5838577152ea69d27302c5f3f371729c3e4"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/bowl.jpg",
+      "sha256": "bff22f3e1ae4e19d68b02765f8ea2a3dbfb57eb8a112506acf348e8e9160b4b8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/chopsticks.jpg",
+      "sha256": "a171e82177182e9fbc38ee0a9372bd72631d8d4c89006aa6a9d1d93a9c95d234"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/corn.jpg",
+      "sha256": "11e6c6ef8ad65122eeb4aa6dae1ca8bdd08f5eababe02f0000622872c99b5045"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/egg.jpg",
+      "sha256": "d5b4c42a214b639d1986a9082e61bfc9ca8d5101b301a5847be09fc4874f89d5"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/kamaboko.jpg",
+      "sha256": "a33f9149a50fe9d2ae9de935417374c6300d4b51ee82da4b9587eea0a18d7e05"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/napkin.jpg",
+      "sha256": "5122b92f2e0264d74b4b20a40275c99cfb4cc4ec3a9f354d02adc2c2ad1bf5a6"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/nori.jpg",
+      "sha256": "4da97cd0febd329f8008ff2840b7baaafb10dcdbf11b18b919ea50b6768b291f"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/onion segments.jpg",
+      "sha256": "fd90ac5441ab9c544c829c5a987b56527e0dfa0220517d709633058995009e6f"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/plate.jpg",
+      "sha256": "81f374e60044171cc30e18bb813feb9872293f522000963c0f4c38f1d55dc86c"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/sake cup.jpg",
+      "sha256": "86144dbe5738deb7de4bcb24667326cdfcf2a819fc319b63fae2caa234ba4365"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00065/wavy noodles.jpg",
+      "sha256": "7ad179c18bf98ebe21624b7998d2e1b13a9beb78d8f1ab01d6625ecd09a6dd55"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/bowl.jpg",
+      "sha256": "fb2964e0bc682e2c3d0f34e22338bb7d130dd3067c0ef365ad76ee488881b062"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/chopsticks.jpg",
+      "sha256": "ffd91272629366bc04ea6dae9bcd01969e615c5b94926e11f983e9f748278c75"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/egg.jpg",
+      "sha256": "394e7969933dfbd00c06882fe8ff605b91be4b70c3f132e6b49cb34c1b9e9ffd"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/glass of water.jpg",
+      "sha256": "fc73f3fee63a9371917ae126c28764f9432db63a03ee47f5f2930aa5ee21406e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/kamaboko.jpg",
+      "sha256": "d1b96e26b676c889d109ad36ad34415901abfdd1fd98df196a0fe4eb2606cf3f"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/napkin.jpg",
+      "sha256": "1ebd619f7313684cbc90bf7a6995b296e353dc925cf7c385c53734747cca54ae"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/nori.jpg",
+      "sha256": "f09c01f3da4027aa84fbb3d18c52e9324fa5b876cc690314b903f9a3efa37acb"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/onion segments.jpg",
+      "sha256": "3200b16f203fff1466b546744b2c451440afb5598a9eed01b8eaa414dc8d2d07"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/plate.jpg",
+      "sha256": "24f960f479be4ea7dfc11b3050ad8eeee7a92e72762dc4b9a45aa42e2f17f8b4"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/sake cup.jpg",
+      "sha256": "ad4bb39a0d8287ec5e1cc982442e1103699b18a72fc4d394d4bfe4ae7a161784"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/spoon.jpg",
+      "sha256": "47123f0de1aba301fc58cf611db169d24e43d04a6fed04a9329a3e691358c3f3"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00081/wavy noodles.jpg",
+      "sha256": "9fcef407198e7c65d8f0360f3077bdfd824912a3955ee5341a98b703ce8409e7"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00119/chopsticks.jpg",
+      "sha256": "c21d112ab2f33241b34d2c6842f32fda54f9232e8ea2ab20be26085bdbf10c6d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00119/corn.jpg",
+      "sha256": "6ac7df485d41c2397125a582008b61d619f31e028eeb78dbf6d5722651cd740d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00119/egg.jpg",
+      "sha256": "7976d03bec7aaee9ecf0c97b4a5276d8ae8ac33ef7049de07adacebc46361ff0"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00119/kamaboko.jpg",
+      "sha256": "998eddd1a3fb30202712107c5a2388dce7c13226a240c034187a312edfbd87da"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00119/nori.jpg",
+      "sha256": "df27d0b540e16dfb044996ce0c29b56828e894778efb66dd84228aac50a39b0d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00119/onion segments.jpg",
+      "sha256": "98dc7a8345f447bdf76695e5cebed9b6e7fda1981870914d36499dd837783821"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00119/sake cup.jpg",
+      "sha256": "c5525e02c422d7703b4a4abc6d61a7eb0af3239248fb4914aa3b7a07783605ff"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00119/wavy noodles.jpg",
+      "sha256": "cf7325fc6444afbee39452b4f88b1bb818d7cb4b31bb52ed7f878fbf98b4a017"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/bowl.jpg",
+      "sha256": "a54dee37399d3cec76a5d2ff734eceadb2c12c1754f18e114fcd1a6c733a6d5e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/chopsticks.jpg",
+      "sha256": "2e303bbee8d81b304374a9e75855b0dc5f7fe79db64a0f2d1961b49738523ef5"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/corn.jpg",
+      "sha256": "b3a1a434e91c131d040d640d0762e45cc3e50c62cf956d43bf690ca7d4a556ca"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/egg.jpg",
+      "sha256": "ff9fcbb140068e48234338800e08f90794ab5f9db63440801b5ac557e7f970da"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/glass of water.jpg",
+      "sha256": "397b193a31926e6cc3c21f4ee471b0c99d4c0291667d69fb76956b6618f78a37"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/hand.jpg",
+      "sha256": "3736c45cdfa0e592470a3c33fd6cb421e4f03fc655b31819f7f19a3cff4f0503"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/kamaboko.jpg",
+      "sha256": "94cdc8d461a54e38f9f277e0d893f8089a30f4a7304e69cb797e8dab50eeca85"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/napkin.jpg",
+      "sha256": "9c50f53300dd0887bd5b5346a722705f426361748283841281f8c4ccf18d8d28"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/nori.jpg",
+      "sha256": "4542c91ebde649ff11e1bc5e3fb604177a41c0f94da7d69029917262cef6a1fe"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/onion segments.jpg",
+      "sha256": "3914d24339ebc0c6243b9cf4c72d54c25598004af7024be712cdacb46e0d8fdb"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/plate.jpg",
+      "sha256": "b7bd633cdf0e2bdc5113e95dc4181c720a971957627d65673f12adfade14ac04"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/sake cup.jpg",
+      "sha256": "cf2b7038da8cb930d6a30d0dbfefa26868eb1c325ffeb39c23518b5e3a6592a6"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/spoon.jpg",
+      "sha256": "9cf9343af8ed4c39c607b68fed95b16fa1663f40c2ffd562b0ad5efcafe099d7"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/ramen/gt/frame_00128/wavy noodles.jpg",
+      "sha256": "ef528c0980c3cb4407861b1afb6dcced6b4663dc9e1ae740166d9bd0439cd8e6"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/apple.jpg",
+      "sha256": "a049a17eaa67ac1670c31abc71c24361589e35b4484a813b12a9001f62ae2859"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/bag of cookies.jpg",
+      "sha256": "2b788dda32c65be49908df9669b6e6087627d5ff6e382eab00861ea94ddd26d0"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/bear nose.jpg",
+      "sha256": "d78bde1152220489d6f2a17bf93dae4f1ea0ef5baf5b5f6ee49a5956aea3eda4"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/coffee mug.jpg",
+      "sha256": "d9ff9688e90934397e3ec6fd9adb251845eec5bb9fa2fd3cf26026cd0172349d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/coffee.jpg",
+      "sha256": "9f76a3a39e2c3f87dcdddf3f079bdcc4756ec2b979c0307b334289bdb9a74a1e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/paper napkin.jpg",
+      "sha256": "8561ef6560b1ac7e2bdf5731f52164ed707d06d8554cbdb28e61974306b391c6"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/plate.jpg",
+      "sha256": "7ceddb6573f0750c46fa76b1d02c407de045553ca029ee30af738df78ca87327"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/sheep.jpg",
+      "sha256": "e3c75e0b9796df05623a4f99733feec42f17bea0d9340db03d4f19ffd158a410"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/stuffed bear.jpg",
+      "sha256": "ea4be7d35f6b6a507b704dbba85f0ba3f2ea132120313ad3f76da54a6da1826d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/tea in a glass.jpg",
+      "sha256": "981e143afbd00e6ecabe7d37249b47f72d769e9ea2c6e1e74861e3e90796613a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00002/three cookies.jpg",
+      "sha256": "ebc5bef386b4aae432119222657fdd3b58bda48e3e31f99580b0cdcc2d0b0370"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/bag of cookies.jpg",
+      "sha256": "14e8aa5e94c79fe0acb1bc26b56f7732039c466f87f693dbb9319c1c03876730"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/bear nose.jpg",
+      "sha256": "e151aab4312ca5dd92e05387b2c69174367d7402524d86f967b70139345caeda"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/coffee mug.jpg",
+      "sha256": "c9794f4b90f27b154bb066e5ff675a5cfa1c3e180eeb3bd54e2ca6c41ab38f54"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/coffee.jpg",
+      "sha256": "08c8a964d3b20bbb5c197629ba321593a787a17e16a6baea88ae684c37eaa69a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/hooves.jpg",
+      "sha256": "d7e738d9cdb93ad9d694ef83dcbc2e2532ca3ad3f7dc639034911c4e2cad7375"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/paper napkin.jpg",
+      "sha256": "7d8209f4cb84ad798a99a0c5e968e8d062cae3ce26ee73960d509a93523376eb"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/plate.jpg",
+      "sha256": "ba6a075e28fef3a319f31fd5681d0418ae8133bee7895d2c0130db137497aea8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/sheep.jpg",
+      "sha256": "a7381454f5ccb7ea6fc643efeec22d1c334058cd5e3c840f3a9ee10afb79f77d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/stuffed bear.jpg",
+      "sha256": "2a96530fff9abb665752b78870f550c9c5beb7b42cd80bd705977b24e6750651"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/tea in a glass.jpg",
+      "sha256": "244b5e0d56ebcbdf41fbbf79fe7d85f068ff56ed79ee5a9dbfb6ab0564903123"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00025/three cookies.jpg",
+      "sha256": "6d6442885f1c4018c653b735eb0d2053090065b0d10d168076c3357f3103ec55"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/apple.jpg",
+      "sha256": "0be8887af53b91c613fe3d8939e6b12a3b7860dd328ba098e123906a8cc65fe8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/bag of cookies.jpg",
+      "sha256": "26539e5d5f211f19e774b48c2675d4a1a0176915f321d078af355f3aaf75f124"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/coffee mug.jpg",
+      "sha256": "91096a5661e8450124b51a740069003abcc7171a87bd41aab663944aaef4aead"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/coffee.jpg",
+      "sha256": "384894aadf5acf331997d874eb6661b711506b786db7ddef04a18abf237bb8d3"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/hooves.jpg",
+      "sha256": "8d6478a033fb42b81acf80ec93a9d27631e351f362134a1777585d90674d4e40"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/paper napkin.jpg",
+      "sha256": "7327bdf49f09ecce7b6a8c4a9d439211b4fd6fe425c06e794ba2b4a8fa82f632"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/plate.jpg",
+      "sha256": "efbcc38ef8db12154a95cc0194164dd9a2def0d4fad3f5ed5371897d82dba9b0"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/stuffed bear.jpg",
+      "sha256": "c43a315f53a89c847cd683e567dcda65a800813f56fb48f1314f43d20fdff638"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/tea in a glass.jpg",
+      "sha256": "dc78bc4504bfe33c996548617468787d3706438797499689c3d512d5593f1cd8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00043/three cookies.jpg",
+      "sha256": "772fc2823fb6190c360147799d1c9e565f81f4f0c3a34334f0b4bff78349db23"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/apple.jpg",
+      "sha256": "613cf5d88e6a81b57dca8c5e3e4ec2e75d061ad9af196c2da08ec0b6fc14b966"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/bag of cookies.jpg",
+      "sha256": "e8ec3fbad50b462ac5d342fb9690c485b67e8dffe6984a1f09b798e29016e23d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/bear nose.jpg",
+      "sha256": "348a2d1c7c602d0a9196e5eff49d291f4166f92394034b22cbaaa6a7c148354a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/coffee mug.jpg",
+      "sha256": "df9912fb0a369122c41bc9aa54747c5ceda3fd1923e9cd7e4a887962ed7abfa1"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/dall-e brand.jpg",
+      "sha256": "9db278c39b45283af2cb9c207b89a9af7b86e3fb0419476195433abea770d176"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/paper napkin.jpg",
+      "sha256": "ba66a849c1a64f43dfb35b736b92f1d21354989cb7753d7568b7beae86710e8e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/plate.jpg",
+      "sha256": "20625ab4d1171927750e992a0e855c3526027d4f7314f637c1cb55bf02d18cb2"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/sheep.jpg",
+      "sha256": "daf93287ac4159c6f1bfdd9920079a7cc0938b04acb41c60249af7fbe6bd50ac"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/stuffed bear.jpg",
+      "sha256": "c93a5393834a90d5fff1877d9d176d0f830b5c60c11110f0c22aa24192bc495d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/tea in a glass.jpg",
+      "sha256": "89d350aa44272471902387a501f5f6fc12a5e350f1c24add3398be24b3306126"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00107/three cookies.jpg",
+      "sha256": "365fc58166c13880214251bc36945c6d7efef42693828bcfe2b9f5d7a07fa6e4"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00129/apple.jpg",
+      "sha256": "51c91c3c0f8e771324af1beb066dd92e34dd42892d9ae38c9a364c7acdb64ef8"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00129/dall-e brand.jpg",
+      "sha256": "abb63ebd7500121dcfd851fbcb4f6c235ef58a64b6c2b38696d933a95850a4aa"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00129/plate.jpg",
+      "sha256": "552ad2f6696c5d0aa3a50ea94685eb884aa799cf6b07c487ed03b483810a9b84"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00129/sheep.jpg",
+      "sha256": "986e67dd4230c9259452cca3a545d9ade5b15417e892f440bdaa957afa206a53"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00129/tea in a glass.jpg",
+      "sha256": "e4a32a9f499527da4ec376750a28e705f48ba0982f92a20f110be501e608cb83"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00129/three cookies.jpg",
+      "sha256": "26c8dd24eab45938e7af6430b1f0d9725a5b187b9de03597835732e6884b1dd4"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00129/yellow pouf.jpg",
+      "sha256": "bf63bfff6992bc0068f08e740208e958aa10f53b42c7aa2ce41a157f321f913a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/apple.jpg",
+      "sha256": "6f5a18a12d413e3f9e8447bbd18cde5faa0007ac36cc78a4188b86dd9641239e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/bag of cookies.jpg",
+      "sha256": "c3ebe7e048461af196d67efef623c3acfbbf863d35fd2796be47ded8c734b5ce"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/coffee mug.jpg",
+      "sha256": "471c2586f2ffaaf4bc7fae796a57b98abc759ffd1dc9ef5ad3a7fd6121c8ddbc"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/coffee.jpg",
+      "sha256": "c967fc01b496fb9129cca189a98013acdb481e7ab802ff716ce50f1ae864309e"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/paper napkin.jpg",
+      "sha256": "71bc109d7036464579c70a2b66042160a4f8280e168875294a82109193305ff5"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/plate.jpg",
+      "sha256": "550983787e37896f799e74f5449a385cc4ced61fb3375cf066544915ad3e3d1c"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/stuffed bear.jpg",
+      "sha256": "b59c307ccbc06a3160536fb78d3b7cb50b6311bbad572ca4bcabfb2c09d4eb4d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/tea in a glass.jpg",
+      "sha256": "99d7f7883b51e0dd3f0f438a5ec06f1d7f164f508978b92e65933edd7f952578"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/teatime/gt/frame_00140/three cookies.jpg",
+      "sha256": "4390528d595e49b518f5675dfa3ea54b036d33195b3300a3b0895a0a4a9a8150"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00053/Stainless steel pots.jpg",
+      "sha256": "474901d0e806d0f64a52980ac2f457f51c0b51f1c634822f7c605624b4b907e9"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00053/knife.jpg",
+      "sha256": "95096d901bf582ab938a01ae46c68e143a18d7f36790d22cf289c56e8b8fd784"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00053/ottolenghi.jpg",
+      "sha256": "56472ca44a7c009a8ade92e823be2571ded4d22582e1f23c990a55215d2fa25a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00053/pour-over vessel.jpg",
+      "sha256": "3482fe0f52b540c9974924df5cba9d0781d2e69d8e783590c920fd5290d08a84"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00053/toaster.jpg",
+      "sha256": "801f952a70606ef8f21b273da8e7b782ab33341aeb349fcef58f315a97527ee9"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00053/yellow desk.jpg",
+      "sha256": "2dd3557aa6e459177f2d3f1ba2d65f03907abc71952e78d4c9b096c78de83370"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00066/plastic ladle.jpg",
+      "sha256": "458a8f5133a660ad1bffbb8fc7ea4565868bc4386e16e14f381b7a3eb63d82d9"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00066/pot.jpg",
+      "sha256": "ec09b74940e5da7732862af015ae278ad23208325eb7e2288451cb971de9cf81"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00066/refrigerator.jpg",
+      "sha256": "d9bd04dd81f506d080ed0d66d6cc2adc7aeb1771b0a7cd64601c6fbc8ff3c636"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00066/spatula.jpg",
+      "sha256": "d5fb00f6a91b460b8229bbbb00b6ddfb866ec1e1f09dcb9c6b42c984388432cc"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00089/cabinet.jpg",
+      "sha256": "c801eb3542b5dd49befc23413a970b5f16e3f2c1333b23209e7932e360d49714"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00089/ketchup.jpg",
+      "sha256": "8e595a50e1038d8363edd5bf8e24e294a0f33ca2dbcd9c1c75c357eee2fdc0a9"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00089/knife.jpg",
+      "sha256": "ba9b6dc81f44820c81f8d0ccd4e21ffda1c46d36a63236ca1c70d404df208701"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00140/dark cup.jpg",
+      "sha256": "c2047a2d0ad668cc83954eb610db4a63c49dc51a1c91d0407aaf42b015905cb7"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00140/frog cup.jpg",
+      "sha256": "de17723821eb8a863d105e25e66b303fcbde80a9d1914ee561b0a0b6b3c2a4d9"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00140/plate.jpg",
+      "sha256": "e1f826174336fabd26dcc09c61dc2e3061ee4f0c7c4fe656def5a35f383fba0a"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00140/sink.jpg",
+      "sha256": "6f13f11406d7098f5c8139f52adcc9220bbda6d15c3f0b30d9d1f9458d6d264f"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00140/spoon.jpg",
+      "sha256": "0cb0b1c1c0acaaf5841c3eac78abd359fd6874faaabd4bd32d2ef949ba833130"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00154/knife.jpg",
+      "sha256": "a8a9cd7d2ea6834c36e3363398115619381b747a8964702c3744f236a8d75eea"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00154/plate.jpg",
+      "sha256": "268a60323a803325de36d109489f74e5da804ad0d96c4dff606b707c546c897d"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00154/red cup.jpg",
+      "sha256": "3d4ac93ed4df322a7172e38285bc855fd4b36a54500396b2e5c55787d1ca7db2"
+    },
+    {
+      "path": "output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt/waldo_kitchen/gt/frame_00154/sink.jpg",
+      "sha256": "4346e8ec6ef1e6581a7df535f5cb6bcfcff25da25e2e03a431b996386cac3cf9"
+    }
+  ],
+  "code": {
+    "path": "/root/RADIO-GS-query-field/scripts/research/audit_query_field_joint_subset_reference.py",
+    "sha256": "83b6168965a7582a17e14f68f13fc4469c16dbf57238211074eb4868507fad8d"
+  },
+  "design": {
+    "path": "output/query_field_20261010/joint_subset_reference_v1/design.json",
+    "sha256": "a167ca3e43d09a3040916f1ff185b1d929c0f2dbfef4faac73f83f6ee823923f"
+  }
+}
