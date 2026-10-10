@@ -40,7 +40,8 @@ def worker(root):
 
 
 def run():
-    read(ROOT/'scoring_complete.json');cfg=read(ROOT/'prediction_config.json');job=cfg['jobs'][0]
+    cfg=read(ROOT/'prediction_config.json');job=cfg['jobs'][0]
+    read(ROOT/'predictions'/job['name']/'prediction.json')  # Replay needs sealed predictions, never target scoring.
     out=ROOT/'validation/runtime';out.mkdir(parents=True,exist_ok=False)
     with tempfile.TemporaryDirectory(prefix='radio_parts_') as temp:
         tmp=Path(temp);shutil.copytree(job['field'],tmp/'field')
