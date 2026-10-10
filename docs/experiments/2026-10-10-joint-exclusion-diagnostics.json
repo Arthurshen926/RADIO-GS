@@ -1,0 +1,362 @@
+{
+  "passed": true,
+  "studies": {
+    "joint_exclusion_v1": {
+      "query_view_pairs": 756,
+      "known_positive_occurrences": 431809,
+      "known_negative_occurrences": 2731533,
+      "full_source": {
+        "finite": {
+          "positive_covered": 353578,
+          "negative_covered": 134277,
+          "positive_coverage_lost": 0,
+          "sampled_positive_lost": 0,
+          "unsampled_positive_lost": 0
+        },
+        "frozen_visibility": {
+          "positive_covered": 348651,
+          "negative_covered": 105096,
+          "positive_coverage_lost": 4927,
+          "sampled_positive_lost": 0,
+          "unsampled_positive_lost": 4927
+        },
+        "joint_coverage": {
+          "positive_covered": 346284,
+          "negative_covered": 99966,
+          "positive_coverage_lost": 7294,
+          "sampled_positive_lost": 0,
+          "unsampled_positive_lost": 7294
+        }
+      },
+      "source_partial_known_iou": {
+        "finite": {
+          "figurines": {
+            "pooled": 0.5697355311227255,
+            "query_view_mean": 0.5858527538306177
+          },
+          "ramen": {
+            "pooled": 0.5746140087129235,
+            "query_view_mean": 0.44561521061836296
+          },
+          "teatime": {
+            "pooled": 0.6877734026789772,
+            "query_view_mean": 0.6673789306028055
+          },
+          "waldo_kitchen": {
+            "pooled": 0.6344497729383181,
+            "query_view_mean": 0.4064323788347374
+          }
+        },
+        "frozen_visibility": {
+          "figurines": {
+            "pooled": 0.6079877170369247,
+            "query_view_mean": 0.6114617858401644
+          },
+          "ramen": {
+            "pooled": 0.5893299603208982,
+            "query_view_mean": 0.460726245573776
+          },
+          "teatime": {
+            "pooled": 0.7288719987919666,
+            "query_view_mean": 0.6869047731720098
+          },
+          "waldo_kitchen": {
+            "pooled": 0.6489998290306035,
+            "query_view_mean": 0.4133691573003319
+          }
+        },
+        "joint_coverage": {
+          "figurines": {
+            "pooled": 0.6108762490392006,
+            "query_view_mean": 0.6134081753807997
+          },
+          "ramen": {
+            "pooled": 0.5898830822393575,
+            "query_view_mean": 0.45888369068320756
+          },
+          "teatime": {
+            "pooled": 0.7333002392953516,
+            "query_view_mean": 0.6872675879104262
+          },
+          "waldo_kitchen": {
+            "pooled": 0.6491836869588208,
+            "query_view_mean": 0.4134288020795603
+          }
+        }
+      },
+      "source_partial_known_iou_macro": {
+        "finite": {
+          "pooled": 0.616643178863236,
+          "query_view_mean": 0.5263198184716309
+        },
+        "frozen_visibility": {
+          "pooled": 0.6437973762950983,
+          "query_view_mean": 0.5431154904715705
+        },
+        "joint_coverage": {
+          "pooled": 0.6458108143831827,
+          "query_view_mean": 0.5432470640134984
+        }
+      },
+      "member_domain": {
+        "initial_selected": 897004,
+        "initial_observed": 755986,
+        "initial_semantic_only": 141018,
+        "initial_factor_touched": 537879,
+        "removed": 67883,
+        "remaining_untouched": 359125
+      },
+      "receipts": [
+        {
+          "path": "output/query_field_20261010/joint_exclusion_v1/diagnostics/source_figurines.json",
+          "sha256": "56cb60004de34e8676a1c69be33f2f3511a5740496ceff4d82381c144d5e4aca"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_v1/diagnostics/domain_figurines.json",
+          "sha256": "7a40c73b4a55c0a0054abba28aef4f530d5e4441a231b91ede8134d31f1edf77"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_v1/diagnostics/source_ramen.json",
+          "sha256": "aa6fae60bd2d89b773b4c051449b56fb300fc5c288528e0aee225e3af53624d4"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_v1/diagnostics/domain_ramen.json",
+          "sha256": "5c585d0798ef9aa4377e5f2faf1f74ffb8b048c19aef9e3157bacd4168ad144f"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_v1/diagnostics/source_teatime.json",
+          "sha256": "90b76b3665f68e08f296577369fd3d884a5acfa5d1eef21fef585de74f01af76"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_v1/diagnostics/domain_teatime.json",
+          "sha256": "7a71f858700bf3969d5d15d42c9d6d99c9fb57db4867e8fe37061ec5ce41e55c"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_v1/diagnostics/source_waldo_kitchen.json",
+          "sha256": "47d959da16047233dff59f8dae007c95871e773d8013018e8fef5f8e2ada99ed"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_v1/diagnostics/domain_waldo_kitchen.json",
+          "sha256": "7376342fd37238f3c7391ac21963373cb82ba34b2ad162f0d3ab85257539e20d"
+        }
+      ],
+      "cold_query_api": {
+        "passed": true,
+        "scene": "figurines",
+        "queries": 21,
+        "actual_sets_exact": true,
+        "max_errors": {
+          "semantic": 1.1920928955078125e-07,
+          "member": 1.7881393432617188e-07
+        },
+        "tolerance": 2e-06,
+        "denied_attempts": [],
+        "python_guard_not_os_sandbox": true,
+        "numerical_runtime_initialized_on_synthetic_data_before_guard": true,
+        "source_raster_access": false,
+        "query_vectors_are_inputs": true,
+        "cached_response_is_comparator_not_input": true,
+        "query_parameter_fitting": false,
+        "field_sha256": "783041d2f01428270fc5bdaa20ab2320077f0a480a8252c8904ebf01c5706871"
+      },
+      "source_labels_are_partial_pseudo_labels": true,
+      "not_benchmark_error_rates": true
+    },
+    "joint_exclusion_prior_v1": {
+      "query_view_pairs": 756,
+      "known_positive_occurrences": 431809,
+      "known_negative_occurrences": 2731533,
+      "full_source": {
+        "semantic_initial": {
+          "positive_covered": 264992,
+          "negative_covered": 82661,
+          "positive_coverage_lost": 0,
+          "sampled_positive_lost": 0,
+          "unsampled_positive_lost": 0
+        },
+        "finite_joint": {
+          "positive_covered": 346284,
+          "negative_covered": 99966,
+          "positive_coverage_lost": 1295,
+          "sampled_positive_lost": 0,
+          "unsampled_positive_lost": 1295
+        },
+        "frozen_visibility": {
+          "positive_covered": 262139,
+          "negative_covered": 69271,
+          "positive_coverage_lost": 2853,
+          "sampled_positive_lost": 0,
+          "unsampled_positive_lost": 2853
+        },
+        "joint_coverage": {
+          "positive_covered": 261075,
+          "negative_covered": 66677,
+          "positive_coverage_lost": 3917,
+          "sampled_positive_lost": 0,
+          "unsampled_positive_lost": 3917
+        }
+      },
+      "source_partial_known_iou": {
+        "semantic_initial": {
+          "figurines": {
+            "pooled": 0.4643235102572452,
+            "query_view_mean": 0.5653874843768291
+          },
+          "ramen": {
+            "pooled": 0.4378784794666938,
+            "query_view_mean": 0.38114445968659977
+          },
+          "teatime": {
+            "pooled": 0.653943372438935,
+            "query_view_mean": 0.6491561435532442
+          },
+          "waldo_kitchen": {
+            "pooled": 0.46253458320021207,
+            "query_view_mean": 0.28219251767121306
+          }
+        },
+        "finite_joint": {
+          "figurines": {
+            "pooled": 0.6108762490392006,
+            "query_view_mean": 0.6134081753807997
+          },
+          "ramen": {
+            "pooled": 0.5898830822393575,
+            "query_view_mean": 0.45888369068320756
+          },
+          "teatime": {
+            "pooled": 0.7333002392953516,
+            "query_view_mean": 0.6872675879104262
+          },
+          "waldo_kitchen": {
+            "pooled": 0.6491836869588208,
+            "query_view_mean": 0.4134288020795603
+          }
+        },
+        "frozen_visibility": {
+          "figurines": {
+            "pooled": 0.46679465741830267,
+            "query_view_mean": 0.569771021358232
+          },
+          "ramen": {
+            "pooled": 0.43567215492292055,
+            "query_view_mean": 0.3841660224627409
+          },
+          "teatime": {
+            "pooled": 0.6779868828211665,
+            "query_view_mean": 0.6581867305501597
+          },
+          "waldo_kitchen": {
+            "pooled": 0.47019210075049117,
+            "query_view_mean": 0.28549943212340767
+          }
+        },
+        "joint_coverage": {
+          "figurines": {
+            "pooled": 0.4677737006861952,
+            "query_view_mean": 0.571677711133374
+          },
+          "ramen": {
+            "pooled": 0.4339149690566332,
+            "query_view_mean": 0.3826291763071366
+          },
+          "teatime": {
+            "pooled": 0.6824109998427096,
+            "query_view_mean": 0.6584274295892196
+          },
+          "waldo_kitchen": {
+            "pooled": 0.4702799393070423,
+            "query_view_mean": 0.2853860908954293
+          }
+        }
+      },
+      "source_partial_known_iou_macro": {
+        "semantic_initial": {
+          "pooled": 0.5046699863407715,
+          "query_view_mean": 0.4694701513219715
+        },
+        "finite_joint": {
+          "pooled": 0.6458108143831827,
+          "query_view_mean": 0.5432470640134984
+        },
+        "frozen_visibility": {
+          "pooled": 0.5126614489782202,
+          "query_view_mean": 0.47440580162363505
+        },
+        "joint_coverage": {
+          "pooled": 0.5135949022231451,
+          "query_view_mean": 0.47453010198128986
+        }
+      },
+      "member_domain": {
+        "initial_selected": 756509,
+        "initial_observed": 615491,
+        "initial_semantic_only": 141018,
+        "initial_factor_touched": 427052,
+        "removed": 42981,
+        "remaining_untouched": 329457
+      },
+      "receipts": [
+        {
+          "path": "output/query_field_20261010/joint_exclusion_prior_v1/diagnostics/source_figurines.json",
+          "sha256": "3a5ab8071bf20f79a35bb131c0f8749c26d73c6fbdc40321aefbfcfaf792b53a"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_prior_v1/diagnostics/domain_figurines.json",
+          "sha256": "0146d79dc9c5cd86f58fb0dca6e2ab3dc2729438b185c66d9dc1560be75de5d2"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_prior_v1/diagnostics/source_ramen.json",
+          "sha256": "d176dcd92fb501721e00467474fa27f7708e2904dfc7084fb76681f537985462"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_prior_v1/diagnostics/domain_ramen.json",
+          "sha256": "ef4b338c074195fdeb6cc7fd4ae2b0a8b9c8a6cbd33c608a35de6c88de5f639c"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_prior_v1/diagnostics/source_teatime.json",
+          "sha256": "47483b30f2bfe234d482d322f071284b93e9d252be3207615235975aaa233a34"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_prior_v1/diagnostics/domain_teatime.json",
+          "sha256": "f24d8cd86bb9ac07474a446e8e3fc14aa6aaddb1027021480d630f2997eb8c54"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_prior_v1/diagnostics/source_waldo_kitchen.json",
+          "sha256": "106c9283c44796476ca53f73871a9178620d70f62c954cbaa80e4ec64990975e"
+        },
+        {
+          "path": "output/query_field_20261010/joint_exclusion_prior_v1/diagnostics/domain_waldo_kitchen.json",
+          "sha256": "207dcde257fed6be9c67b47508468ffb19c8672886d9f062a4befca3d4025b85"
+        }
+      ],
+      "cold_query_api": {
+        "passed": true,
+        "scene": "figurines",
+        "queries": 21,
+        "actual_sets_exact": true,
+        "max_errors": {
+          "semantic": 1.1920928955078125e-07,
+          "member": 1.1920928955078125e-07
+        },
+        "tolerance": 2e-06,
+        "denied_attempts": [],
+        "python_guard_not_os_sandbox": true,
+        "numerical_runtime_initialized_on_synthetic_data_before_guard": true,
+        "source_raster_access": false,
+        "query_vectors_are_inputs": true,
+        "cached_response_is_comparator_not_input": true,
+        "query_parameter_fitting": false,
+        "field_sha256": "783041d2f01428270fc5bdaa20ab2320077f0a480a8252c8904ebf01c5706871"
+      },
+      "source_labels_are_partial_pseudo_labels": true,
+      "not_benchmark_error_rates": true
+    }
+  },
+  "matching_source_conditions": true,
+  "thresholds_changed": false,
+  "construction_conditions": 64,
+  "benchmark_queries_per_study": 68,
+  "whole_five_task": false,
+  "code_sha256": "b5f2d422fc418f0287478907ab0e0e8075a74b43e506acf793cde181f0c7582c"
+}

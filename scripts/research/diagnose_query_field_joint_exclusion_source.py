@@ -11,7 +11,7 @@ from radio_gs.query_field.joint_exclusion import CUTOFF
 from scripts.research.run_query_field_joint_exclusion import ROOT,ARMS,read,write
 
 
-def run(index):
+def run(index, initial_arm="finite"):
     read(ROOT/'predictions_complete.json');job=read(ROOT/'prediction_config.json')['jobs'][index]
     field,manifest=load_field(job['field'],'cuda')
     data=torch.load(ROOT/'predictions'/job['name']/'predictions.pt',weights_only=True)
@@ -41,7 +41,7 @@ def run(index):
                 pred[arm]=selected_alpha(field,data['selected_by_control'][arm][:,qi].cuda(),v['camera'],v['height'],v['width'],field.world_units_per_metre)>CUTOFF
             item=dict(query=qi,text=text,frame=v['frame'],positive=int(positive.sum()),negative=int(negative.sum()),arms={})
             for arm in ARMS:
-                lost=positive&pred['finite']&~pred[arm]
+                lost=positive&pred[initial_arm]&~pred[arm]
                 item['arms'][arm]=dict(positive_covered=int((positive&pred[arm]).sum()),negative_covered=int((negative&pred[arm]).sum()),
                     positive_coverage_lost=int(lost.sum()),sampled_positive_lost=int((lost&v['sampled']).sum()),
                     unsampled_positive_lost=int((lost&~v['sampled']).sum()))

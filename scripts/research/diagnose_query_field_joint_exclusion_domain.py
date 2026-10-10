@@ -6,7 +6,7 @@ from radio_gs.query_field.storage import load_field
 from scripts.research.run_query_field_joint_exclusion import ROOT,read,write
 
 
-def run(index):
+def run(index, initial_arm="finite"):
     read(ROOT/'predictions_complete.json');job=read(ROOT/'prediction_config.json')['jobs'][index]
     field,manifest=load_field(job['field']);data=torch.load(ROOT/'predictions'/job['name']/'predictions.pt',weights_only=True)
     touched=torch.zeros(len(field.xyz),dtype=torch.bool)
@@ -14,7 +14,7 @@ def run(index):
     available=field.observed|field.semantic_measure.supported
     assert torch.equal(available,data['observed']);rows=[]
     for qi,text in enumerate(data['texts']):
-        initial=data['selected_by_control']['finite'][:,qi];selected=data['selected_by_control']['joint_coverage'][:,qi]
+        initial=data['selected_by_control'][initial_arm][:,qi];selected=data['selected_by_control']['joint_coverage'][:,qi]
         removed=initial&~selected
         assert not bool((removed&~touched).any())
         rows.append(dict(text=text,initial_selected=int(initial.sum()),initial_observed=int((initial&field.observed).sum()),

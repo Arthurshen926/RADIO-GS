@@ -1,5 +1,38 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: TWO complete4LERF/68text one-pass member studies.
+Frozen22f2a7e(first)/8684c0f(nativeprior); no training/query-parameterfit/source inference.
+JointExclusionDecoder deletes only members requesting known-negative repair, preserves
+initially covered positive FACTORS, sequential onepass; cannot add missing members.
+First finite36.0394 -> fixedvisibility38.1582 / joint37.8983%,4up both; joint not better.
+CRITICAL initializer correction: field measure_prior binary set EXACTLY reproduces
+existing admission42.9498 across68. Do not force it through weaker finiteP/N module.
+Second semanticinitial42.9498 -> fixed43.9940(4up,CI[.5630,1.5254]pp),
+joint43.5621(3up1down,CI[-.2422,1.1905]pp). Jointvsfixed-.4319pp,ALL4lower.
+Allarms same semanticresponse54.0889/AP82.5249; do NOT borrow old55.3608 response.
+No defaultpromotion, fullv10 recovery, wholefive update or paperclosure.
+64independent constructionconditions x2 decoders PASS nonlinear factor protection.
+Two full auditsPASS; five newtestsPASS; immutable ScopeReadout wrapper fixed923c4ae.
+Both figurines21 coldAPIs exactsets; finite maxmember1.7881e-7/prior1.1921e-7.
+Cold Numba JIT package-metadata scan initially tripped sourceguard; failure retained;
+synthetic-only runtimewarmup then sameguardPASS. Python guard, not OS sandbox.
+Fullsource diagnostics match756query-view conditions in BOTHstudies, partialpseudo
+labels notGT. Finitejoint loses7294 positivepixel occurrences, semanticjoint3917;
+ALL outside16x16 samples, versus fixed4927/2853. Factor protection != full extent.
+Nativeprior selects756509 member occurrences;141018 semantic-only(18.64%) outside
+factor observed-domain;427052(56.45%) touch a factor. Domain != actual output domain.
+MOST IMPORTANT: source partial-known IoU scene macro finitejoint64.5811 vs
+semanticjoint51.3595 (former higher ALL4), yet benchmark37.8983 vs43.5621.
+Higher pseudo-constraint agreement is NOT object-function recovery. Distinguish
+conditional identity reliability from geometric generalization; neither alone proven.
+Next: preserve native initializer; audit conditional acceptance and full member-domain
+contract BEFORE strengthening sampled exclusion; then full coverage + bidirectional
+member decisions. Do not train harder on unverified union pseudo-object truth.
+Keep onefield/three teachers/typed query/sameactual2D3Dset/no query-time sourcefit.
+See docs/experiments/2026-10-10-joint-exclusion-prior-results.md and
+ docs/experiments/2026-10-10-joint-exclusion-diagnostics.json.
+
+
 Active continuation2026-10-10: compiled_coverage_factors_v1 COMPLETE, buildb4aa628/auditc27b116.
 Sampled JOINT selected-opacity function, NOT memberdecoder or newbenchmark result.
 Same4LERF/72trainviews; query-independent16x16samples/view,18432factors/5124669hits;
