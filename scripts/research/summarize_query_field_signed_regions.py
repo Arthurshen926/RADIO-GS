@@ -3,7 +3,7 @@ from scripts.research.run_query_field_signed_regions import ROOT,PREVIOUS,ARMS,r
 from scripts.research.summarize_query_field_relations import paired
 from itertools import combinations
 
-def main(root=ROOT,document_prefix='signed-region'):
+def main(root=ROOT,document_prefix='signed-region',document_date='2026-10-09'):
     ROOT=root
     d=read(ROOT/'design.json');read(ROOT/'scoring_complete.json');ARMS=d['arms'];per={a:{} for a in ARMS};diagnostics={a:{} for a in ARMS};baseline=[]
     for j in d['jobs']:
@@ -24,6 +24,6 @@ def main(root=ROOT,document_prefix='signed-region'):
         baseline_reproduction=baseline,source_frames=120,source_frame_resolution_unmodified=True,whole_five_task=False,model_promotion=False,
         training_steps=0,extra_state_bytes=0,implementation_commit=d['implementation_commit'],
         collector=receipt(__file__),reporting_repair='retained scorer uses foreground_iou, not iou; no prediction/scoring changes' if document_prefix=='signed-region' else None)
-    write(ROOT/'summary.json',report);write('docs/experiments/2026-10-09-'+document_prefix+'-results.json',report);print(macro,flush=True)
+    write(ROOT/'summary.json',report);write('docs/experiments/'+document_date+'-'+document_prefix+'-results.json',report);print(macro,flush=True)
 
 if __name__=='__main__':main()
