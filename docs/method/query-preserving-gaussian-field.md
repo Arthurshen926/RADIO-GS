@@ -1,5 +1,11 @@
 # Query-preserving Gaussian field: implementation and experiment ledger
 
+2026-10-10: [complete reference member studies](../experiments/2026-10-10-reference-member-readout-results.md)
+add optional current-reference member exclusion and separate fraction/admission readouts.
+Same8/7fields/120sources,32predictions; actual84.3701->86.9550, finalresponse83.1015,
+no default promotion or five-task claim. No new scene state/training/source access.
+Reference background conflict and positive-part acceptance remain distinct deficits.
+
 Research entry: `python -m radio_gs.query_field`.
 Decision: [ADR0013](../adr/0013-query-preserving-scene-specific-gaussian-field.md).
 

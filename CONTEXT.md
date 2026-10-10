@@ -1,5 +1,32 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: reference_member_evidence_v1 COMPLETE frozen001e828,
+reference_member_readout_v1 COMPLETE frozen6c51cd9. Same8queries/7fields/120sources,
+same retained positive-SAM query masks (inherited generation cost),32conditional
+predictions, each study full prediction barrier before GT scoring. No training/state.
+Visible composition -> reference background-majority exclusion inside composed set:
+actual84.3701->86.9550%(7up1down,CI+.8109..+5.1619pp),P90.6190->94.6896 all8up,
+R92.4537->91.3060 all8down. Fractional response82.9221->82.5562; not promotion.
+Readout-only fraction->binary admission response82.5562->83.1015%(all8up); ALL8
+actual sets/projections EXACT unchanged. Finalvsoriginalresponse only+.1794pp,
+2up6down,CIcross0. V10response86.5134 gap3.4119pp; NO cross-metric/full-five claim.
+FinalAP93.1872; binary membership still not calibrated complete-instance posterior.
+FPalpha attribution: zero-reference-evidence mean3.06%, rejected44.06%, kept52.88%.
+FNfullscene contribution: fern/trex49.62/49.27% unselected reference-positive;
+orchids86.47% reference-background vs0.13% zero-evidence; horns_left24.88% domain
+unavailable,42.53% zero-reference. Contribution associations NOT Gaussian GT or
+counterfactual IoU. Nonzero visibility may be weak/occluded; background exclusion
+cannot replace cross-view positive identity protection. Next distinguish positive
+part acceptance, trustworthy exclusions, and actual absence of evidence. No new
+cross-view decoder implemented. See Oct10 reference-member-readout-results.md.
+7tests(current superset) pass. Both67frozen hashes/inputs/GT audits pass. First
+coldfern selection/actual EXACT, continuous errors<=1.79e-7(strictFAIL,numericPASS);
+finalbinary coldfern all4EXACT,denialPASS(onecase Python). Secondfraction baseline
+selection/actual EXACT,continuous<=2.3842e-7; AP tiny drift retained,not all scoresexact.
+Both all-case figures viewed. Allsessions19112/78056/25330/27471/64153 and
+12357/60936/75590/44216/75452 DONE. No newtraining/sourceharmonization/fullfivejobs.
+Original worktree HEAD/index unchanged. Active codex/query-preserving-gaussian-field.
+
 Active continuation2026-10-09: reference_visibility_v1 COMPLETE frozen99b2a18.
 Same retained positive-SAM query mask/7fields/120sources; alternative reference
 observation only. All16 predictions before scores, all8 subset-composition baseline
