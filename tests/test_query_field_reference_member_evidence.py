@@ -33,3 +33,14 @@ def test_visible_fraction_cannot_resolve_occluded_identity():
     scores,selected,d=reference_member_evidence(operator,torch.ones(3,dtype=torch.bool),torch.tensor([0.]),prior)
     assert selected.tolist()==[False,False,True]
     assert d['weak_visibility_is_not_identity'] and scores[-1]==1
+
+
+def test_admission_readout_is_same_set_not_foreground_fraction_as_probability():
+    operator=torch.eye(4).to_sparse();observed=torch.ones(4,dtype=torch.bool)
+    prior=torch.tensor([True,True,True,False]);q=torch.tensor([.7,.5,.2,1.])
+    fraction,selected,_=reference_member_evidence(operator,observed,q,prior)
+    binary,admitted,d=reference_member_evidence(operator,observed,q,prior,readout='admission')
+    assert torch.equal(admitted,selected) and torch.equal(binary,admitted.float())
+    assert not torch.equal(fraction,binary) and admitted.tolist()==[True,True,False,False]
+    assert d['reference_member_readout']=='admission'
+    with pytest.raises(ValueError):reference_member_evidence(operator,observed,q,prior,readout='unsupported')

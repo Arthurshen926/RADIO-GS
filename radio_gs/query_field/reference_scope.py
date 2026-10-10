@@ -42,7 +42,7 @@ def visible_region_scores(operator, observed, membership):
     return torch.where(mass>.5,scores,0.)
 
 
-def reference_member_evidence(operator, observed, reference, prior):
+def reference_member_evidence(operator, observed, reference, prior, *, readout="fraction"):
     """Condition a composed set on its visible footprint in the current mask.
 
     This is a visibility-weighted foreground fraction, not an instance posterior
@@ -50,6 +50,7 @@ def reference_member_evidence(operator, observed, reference, prior):
     also preserves the prior selection; background-majority evidence can remove
     members, but this operation cannot invent new parts outside the composition.
     """
+    if readout not in {"fraction","admission"}:raise ValueError('unknown reference member readout')
     reference=torch.as_tensor(reference,device=operator.device,dtype=operator.dtype).flatten()
     if reference.numel()!=operator.shape[0] or prior.shape!=(operator.shape[1],) or observed.shape!=prior.shape:
         raise ValueError('unaligned reference member evidence')
@@ -66,22 +67,26 @@ def reference_member_evidence(operator, observed, reference, prior):
     fraction=fraction.clamp(0,1)
     scores=prior.to(operator.dtype)*torch.where(visible,fraction,torch.ones_like(fraction))
     selected=prior & (~visible | (positive>=.5*mass))
+    if readout=="admission":scores=selected.to(operator.dtype)
     return scores,selected,dict(reference_visible_members=int((prior & visible).sum()),
         reference_unseen_members=int((prior & ~visible).sum()),
         reference_rejected_members=int((prior & ~selected).sum()),
         reference_tied_members=int((prior & visible & (positive==.5*mass)).sum()),
         reference_unseen_changed=int(((selected!=prior) & ~visible).sum()),
+        reference_member_readout=readout,
         reference_member_rule='visible foreground fraction; strict background majority rejects; unseen and ties retain prior',
         weak_visibility_is_not_identity=True)
 
 
 @torch.no_grad()
-def query(field,packet,camera,reference,world_scale=1.,*,observation="subset",member_conditioning=False):
+def query(field,packet,camera,reference,world_scale=1.,*,observation="subset",member_conditioning=False,member_readout="fraction"):
     from .confidence_mixture_evidence import ConfidenceMixtureEvidence
     from .geometry import selected_alpha, projection
     from types import SimpleNamespace
     if observation not in {"subset","scene"}:raise ValueError("unknown reference observation operator")
     if member_conditioning and observation!="scene":raise ValueError("member evidence requires full-scene visibility")
+    if member_readout not in {"fraction","admission"} or (member_readout!="fraction" and not member_conditioning):
+        raise ValueError("member readout requires reference conditioning")
     packet.validate(len(field.xyz),field.semantic.native_dim,field.local.native_dim)
     if packet.modality!='point_2d' or packet.negative is not None or packet.exact_positive:
         raise ValueError('reference scope requires an explicit positive-only raster query')
@@ -112,7 +117,7 @@ def query(field,packet,camera,reference,world_scale=1.,*,observation="subset",me
     selected &=field.member_available
     conditioning={};membership=selected.float()
     if member_conditioning:
-        membership,selected,conditioning=reference_member_evidence(operator,field.observed,reference,selected)
+        membership,selected,conditioning=reference_member_evidence(operator,field.observed,reference,selected,readout=member_readout)
     actual=selected_alpha(field,selected,camera,h,w,world_scale).reshape(h,w).cpu().numpy()>.5
     intersection=float(reference[actual].sum());union=float(actual.sum()+reference.sum()-intersection)
     support=packet.positive
@@ -126,5 +131,6 @@ def query(field,packet,camera,reference,world_scale=1.,*,observation="subset",me
              reference_proxy_soft_iou=trace[-1] if trace else 0.,reference_actual_soft_iou=intersection/max(union,1e-12),
              proxy_pixels_missing_in_actual=int((proxy & ~actual).sum()),
              membership_output=('visible foreground fraction inside composed set; unseen prior retained, not calibrated probability'
-                                if member_conditioning else 'binary Gaussian region union, not calibrated probability'),
+                                if member_conditioning and member_readout=="fraction" else
+                                'binary Gaussian set membership, not calibrated probability'),
              scores_calibrated=False,global_optimum=False,learned_local_kernel_used=False))
