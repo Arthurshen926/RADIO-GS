@@ -92,7 +92,7 @@ def text_union(field, native_query, generic_negatives, *, rule='measure', temper
     This is an explicit opt-in typed interface. The generic negatives and
     temperature are query-program inputs, not stored historical class answers.
     """
-    if support_rule not in {'positive_rank','admission_preserving','parts','protected_parts'}:raise ValueError('unknown union support rule')
+    if support_rule not in {'positive_rank','admission_preserving','parts','protected_parts','native_parts','native_protected_parts'}:raise ValueError('unknown union support rule')
     if field.semantic_measure is None:raise ValueError('text union requires a semantic measure field')
     packet=QueryPacket('text',task='union',semantic=native_query)
     member=query(field,packet)
@@ -101,10 +101,12 @@ def text_union(field, native_query, generic_negatives, *, rule='measure', temper
     prior=field.semantic_measure.union_probabilities(native_query,generic_negatives,fallback,rule,temperature)
     if corroborate:
         from radio_gs.querying.observation_readout import positive_support_rank
-        if support_rule in {'parts','protected_parts'}:
-            from .part_conditioning import condition_parts
+        if support_rule in {'parts','protected_parts','native_parts','native_protected_parts'}:
+            from .part_conditioning import condition_parts,native_region_probability
+            region_probability=(native_region_probability(field.evidence,native_query,generic_negatives,temperature)
+                if support_rule.startswith('native_') else None)
             probability,_=condition_parts(field.evidence,prior,field.observed|field.semantic_measure.supported,
-                protect=support_rule=='protected_parts')
+                protect=support_rule in {'protected_parts','native_protected_parts'},region_probability=region_probability)
         elif support_rule=='admission_preserving':
             probability=admission_preserving_support(prior,member.membership_scores,field.threshold)
         else:probability=positive_support_rank(prior,member.membership_scores)

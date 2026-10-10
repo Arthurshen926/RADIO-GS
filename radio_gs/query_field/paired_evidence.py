@@ -3,7 +3,7 @@
 This is a capacity reference, not a learned compact embedding. Sparse positive
 and reliable-exclusion coordinates preserve the source relation functions;
 view identifiers only balance dependent nested coordinates. No images, masks,
-cameras, source loaders, teacher descriptors or labelled member model are used
+cameras, source loaders or labelled member model are used
 by this module. Unknown relations contribute neither positive nor negative mass.
 """
 import math
@@ -18,12 +18,18 @@ KIND = 'partial_view_evidence_v1'
 class PairedEvidence(nn.Module):
     def __init__(self, state, count):
         super().__init__()
+        state = dict(state)
+        semantic = state.pop('region_semantic', None)
         expected = {'views', 'scales'} | {f'{p}_{k}' for p in ['positive', 'negative']
                                            for k in ['pointer', 'index', 'value']}
         if set(state) != expected:
             raise ValueError('incomplete paired-evidence state')
         for name, value in state.items():
             self.register_buffer(name, value.detach())
+        if semantic is not None and (semantic.ndim != 2 or semantic.shape[0] != len(self.views) or
+                                     semantic.shape[1] == 0 or not bool(torch.isfinite(semantic).all())):
+            raise ValueError('unaligned native region semantics')
+        self.register_buffer('region_semantic', None if semantic is None else semantic.detach())
         self.count = count
         if self.views.ndim != 1 or self.scales.shape != self.views.shape or not len(self.views):
             raise ValueError('unaligned relation coordinates')
