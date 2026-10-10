@@ -29,3 +29,8 @@ member decoder; do not assume it restores the50.0961%joint-fit reference. Do not
 if actual performance regresses, mix best arms per query, change thresholds, store68
 query answers, or claim uniform five-task performance. Source geometry/coverage and
 native acceptance remain separate unresolved functions.
+
+Implementation correction before any target scoring: readout_v1 aborted in first
+prediction on unsupported CSR .T/as_strided. readout_v2 uses explicit transpose(0,1),
+as existing repository functions do. Same methods, thresholds, fields and tolerance;
+retain original failure. A CSR integration regression test covers the corrected path.

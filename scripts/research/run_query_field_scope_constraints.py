@@ -7,7 +7,7 @@ from radio_gs.query_field.part_conditioning import native_region_probability,rea
 from scripts.research.run_query_field_relations import read,write,receipt,check,execute,lanes
 from scripts.research.compile_query_field_scope_constraints import ROOT as FIELDS,CONFIG
 
-ROOT=Path('output/query_field_20261010/scope_constraint_readout_v1')
+ROOT=Path('output/query_field_20261010/scope_constraint_readout_v2')
 SOURCE=Path('output/query_field_20261009/text_union_functions_v1')
 REFERENCE=Path('output/query_field_20261010/scope_exclusion_v1')
 ARMS=['native_partial','native_scope','teacher_partial','teacher_scope']
@@ -46,7 +46,7 @@ def predict(index):
     assert fixture['texts']==teacher['texts']==[q['text'] for q in read(j['queries'])['queries']]
     assert torch.equal(teacher['views'],field.evidence.views.cpu()) and torch.equal(fixture['observed'],available.cpu())
     for k,v in fixture['geometry'].items():assert torch.equal(v,getattr(field,k).cpu())
-    mass=torch.sparse.mm(field.evidence.matrix('positive').T,available.float()[:,None]).flatten()
+    mass=torch.sparse.mm(field.evidence.matrix('positive').transpose(0,1),available.float()[:,None]).flatten()
     members={a:[] for a in ARMS};diagnostics=[]
     for qi,text in enumerate(fixture['texts']):
         prior=fixture['scores']['measure_prior'][:,qi].cuda()

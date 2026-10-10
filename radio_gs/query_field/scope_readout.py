@@ -26,7 +26,7 @@ def query_text_scope(field,query,negatives,*,expanded=True):
     fallback=(10*(field.semantic.score(query).flatten()-background)).sigmoid()
     prior=field.semantic_measure.union_probabilities(query,negatives,fallback,'measure',10.).masked_fill(~available,0)
     probability=native_region_probability(field.evidence,query,negatives)
-    mass=torch.sparse.mm(field.evidence.matrix('positive').T,available.float()[:,None]).flatten()
+    mass=torch.sparse.mm(field.evidence.matrix('positive').transpose(0,1),available.float()[:,None]).flatten()
     accepted=(probability>.5)&(mass>0)
     prepared=field.scope_constraints(accepted,field.scope_permissions,expanded=expanded)
     member,details=read_parts(prior,available,prepared)

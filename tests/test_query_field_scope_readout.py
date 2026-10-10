@@ -13,7 +13,7 @@ def test_readout_computes_current_semantics_and_keeps_member_set_distinct():
             return torch.tensor([.8,.6,.3])
     class Evidence:
         region_semantic=torch.tensor([[1.,0.]])
-        def matrix(self,key):return torch.ones(3,1).to_sparse()
+        def matrix(self,key):return torch.ones(3,1).to_sparse_csr()
     class Constraints:
         def __call__(self,accepted,permissions,expanded=True):
             assert accepted.tolist()==[True]
