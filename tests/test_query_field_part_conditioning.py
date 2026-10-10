@@ -102,3 +102,14 @@ def test_compiler_checks_source_indices_and_preserves_parent_state(tmp_path):
     records[0]['frame']=9;construction.write_text(json.dumps(dict(source_records=records)))
     with pytest.raises(ValueError,match='illegal source frame'):
         compile_field(parent/'field',source,construction,tmp_path/'illegal')
+
+
+def test_native_half_storage_uses_float32_query_function():
+    from radio_gs.query_field.part_conditioning import native_region_probability
+    from torch.nn import functional as F
+    evidence=Evidence();evidence.region_semantic=torch.tensor([[.136,.272,.447],[.631,.71,.814],[0.,0.,0.]],dtype=torch.float16)
+    query=torch.tensor([.34412,.57123,.312]);negatives=torch.tensor([[.731,.912,.151]])
+    d=F.normalize(evidence.region_semantic.float(),dim=1)
+    expected=(10*(d@F.normalize(query,dim=0)-(d@F.normalize(negatives,dim=1).T).max(1).values)).sigmoid()
+    actual=native_region_probability(evidence,query,negatives)
+    assert actual.dtype==torch.float32 and torch.equal(actual,expected)

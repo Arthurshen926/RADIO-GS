@@ -31,3 +31,9 @@ unless actual scope and broad behavior justify it. No unified-five claim.
 If actual scope still fails, do not continue acceptance threshold/temperature
 search. Revisit candidate coverage and query-conditioned instance correspondence
 with separately declared source/diagnostic contracts. Retain all failures.
+
+Pre-score implementation correction: v1 stopped after figurines predictions and
+before ANY scoring when FP16 storage was found to determine query arithmetic.
+v2 explicitly uses FP32 native cosine/sigmoid, matching the existing semantic
+measure function; descriptors retain original storage precision. No labels/scores
+inspected, no threshold adjustment. v1 artifacts and abort receipt are retained.

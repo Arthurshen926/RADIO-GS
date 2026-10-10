@@ -77,6 +77,8 @@ def native_region_probability(evidence,query,negatives,temperature=10.):
         raise ValueError('unaligned region query directions')
     if not bool(torch.isfinite(query).all()) or not bool(torch.isfinite(negatives).all()) or not math.isfinite(temperature) or temperature<=0:
         raise ValueError('invalid region query')
+    # Match the existing native semantic function: FP16 is storage, not arithmetic.
+    descriptors=descriptors.float()
     directions=F.normalize(descriptors,dim=1)
     foreground=directions@F.normalize(query.to(descriptors).flatten(),dim=0)
     background=(directions@F.normalize(negatives.to(descriptors),dim=1).T).max(1).values

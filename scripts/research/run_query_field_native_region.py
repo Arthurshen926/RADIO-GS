@@ -7,7 +7,7 @@ from radio_gs.query_field.storage import load_field
 from radio_gs.query_field.part_conditioning import prepare_parts,read_parts,native_region_probability
 from radio_gs.query_field.compile_region_semantic import compile_field
 
-ROOT=Path('output/query_field_20261010/native_region_functions_v1')
+ROOT=Path('output/query_field_20261010/native_region_functions_v2')
 SOURCE=Path('output/query_field_20261009/text_union_functions_v1')
 BASE=Path('output/query_field_20261009/union_admission_v1')
 ARMS=['admission','pooled_parts','pooled_protected','native_parts','native_protected']
