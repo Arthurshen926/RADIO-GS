@@ -29,15 +29,21 @@ def prepare():
         current_query_fixtures_reused=True,training_steps=0,new_state_bytes=0,whole_five_task=False))
 
 
-def design():
+def design(verify_inputs=True):
     d=read(ROOT/'design.json')
-    for r in d['code']+[d['configuration'],d['protocol']]+d['inputs']:check(r)
+    for r in d['code']+[d['configuration'],d['protocol']]+(d['inputs'] if verify_inputs else []):check(r)
     return d
 
 
 @torch.no_grad()
 def predict(index):
-    d=design();cfg=read(d['configuration']['path']);j=cfg['jobs'][index]
+    d=design(verify_inputs=False);cfg=read(d['configuration']['path']);j=cfg['jobs'][index]
+    current={str(Path(j['field'])/'manifest.json'),j['queries']}
+    current.update(str(root/'predictions'/j['name']/name) for root in [SOURCE,BASE] for name in ['prediction.json','predictions.pt'])
+    for r in d['inputs']:
+        if r['path'] in current:check(r)
+    # load_field below verifies this scene's tensor against the frozen manifest;
+    # a worker need not repeatedly hash all unrelated scene tensors.
     data=torch.load(SOURCE/'predictions'/j['name']/'predictions.pt',map_location='cpu',weights_only=True)
     baseline=torch.load(BASE/'predictions'/j['name']/'predictions.pt',map_location='cpu',weights_only=True)
     field,_=load_field(j['field'],'cuda');available=field.observed|field.semantic_measure.supported
