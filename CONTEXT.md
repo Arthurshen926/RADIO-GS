@@ -1,5 +1,27 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: scope_exclusion_v1 COMPLETE frozen5537d80.
+Full4LERF/68texts/4arms, same72sourceviews/5137admissioncoords, source-assisted
+transient fitting ONLY. Preserve old negative permission; add existing comparable
+region interiors disjoint from WHOLE accepted union; singleton exact, unknown not
+blanket negative. Same finite initializer/footprint denominator/activeviews/240steps.
+Actual48.0850->50.0961%,4up,CI[0.5743,4.2588]pp;P53.5001->55.7690,R80.2044->80.1094.
+IMPORTANT correction to prior response attribution: v10 preserves semantic scores
+independently of membership. Existing field measure_prior typed response54.0889/AP82.5249
+EXACT for old/newsets; earlier17.5375 response came from substituting memberprobability
+into semantic renderer. Readout correction, NOT learned semantic improvement or proof
+semantic heatmap == actual-set raster. 2D actual-set and3D still use same members.
+Added290814 negative pixel occurrences in39queries/152sourcepairs,13 overlap RAWteacher
+foreground; teacher NOT GT. Full453sourcepairs: knownIoU92.3145->92.0715, fullteacher
+agreement51.9250->54.2326, candidateagreement55.5858->57.6823. Scope still incomplete.
+AuditPASS;7targetedtestsPASS;12emptyqueries exactfallback;all jobs finished.
+No new default/whole-five/deployed recovery. Scope permission helper is construction-
+only, not compiled into field. Next transfer permission/actual-member FUNCTION using
+independent nonevaluation construction conditions; no evalanswerbank/perquery source
+fit in standard inference. Native acceptance and coverage still unresolved.
+See docs/experiments/2026-10-10-scope-exclusion-results.md.
+
+
 Active continuation2026-10-10: FOUR matched-source studies COMPLETE; final freeze4b74134.
 Full4LERF/68texts,72views/5137regions, teacher-assisted diagnostics, NOT deployment.
 Exact overlap atoms primary37.2457% vs marginal union37.3503; no promotion of840MBstate.
