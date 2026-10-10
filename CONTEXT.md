@@ -1,5 +1,28 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-10: teacher_acceptance_v1 COMPLETE frozen8034a59.
+Full4 LERF scenes/68texts/7controls; all predictions before scoring. Same fields,
+72views/5137regions; extra RAW v10 source-query detections: SOURCE-ASSISTED DIAGNOSTIC,
+NOT deployment/training/promotion. Teacher greedy acceptance matches previous
+source feasibility exactly1224pairs; binaryconfidence changes too, not identity-only.
+Actual admission/native-protected/teacher-protected/teacher-union-protected:
+42.9498/40.8779/38.5247/37.3503%. Primaryvsbaseline3down1up; vsnative2down2up.
+Teacher mixture protection and unionvsmixture each actual4down. P40.0994/R90.9686.
+No recovery claim. 12queries no teacher-selected regions keep baseline sets.
+AuditPASS; sharedP/N exactmonotonic all68x2; 12targetedtestsPASS. Support replay
+all68x4 actualsetsEXACT, maxerror5.0664e-7<=1e-6. Main selected withoutpositive
+42.5599% macroquerycount, includes12emptyqueries; NOT false-positive fraction.
+Prior remains atunknown positions; v10 also retains prior atno-active-source.
+Functional deficit: current marginal P/N update lacks v10 actual member-opacity
+silhouette objective/footprint constraint. Code-level difference, not sole causal
+attribution; rawteacher errors/confidence/lifting/coverage remain confounded.
+Do NOT just train stronger acceptor or promote marginalunion. Next verify exact
+source-union lifting vs marginal composition and actual-set joint decoder under
+fixed acceptance/source budget; migrate into one-field functions before training.
+No source RGB/mask/track reopening in standard inference or benchmark answerbank.
+No unified-five claim. All jobs main57959/audit18470/plot70317/support13580 done.
+See docs/experiments/2026-10-10-teacher-acceptance-results.md for claims/bounds.
+
 Active continuation2026-10-10: native_region_functions_v2 COMPLETE frozen2bb4bb8.
 Full4 LERF scenes/68 texts/5 controls, all predictions before scoring. Field-owned
 native ROI functions bound exactly to5137 existing regions/72 source views; +15,780,864
