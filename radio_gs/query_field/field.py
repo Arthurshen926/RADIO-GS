@@ -60,7 +60,7 @@ class CapabilityField(nn.Module):
                  relation_decoder="none", relation_confidence=None,
                  evidence_kind="none", evidence_state=None, native_mode_state=None,
                  native_mode_rule="none", semantic_measure_state=None, semantic_measure_rule="none",
-                 scope_permission_state=None, scope_constraint_state=None, coverage_factor_state=None):
+                 scope_permission_state=None, scope_constraint_state=None, coverage_factor_state=None, support_footprint_state=None):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -170,6 +170,13 @@ class CapabilityField(nn.Module):
             if self.scope_constraints is None:
                 raise ValueError('coverage factors require bound scope constraints')
             self.coverage_factors = CoverageFactors(coverage_factor_state, count, self.scope_constraints)
+
+        self.support_footprint = None
+        if support_footprint_state is not None:
+            from .support_footprint import SupportFootprint
+            self.support_footprint = SupportFootprint(support_footprint_state, count)
+            if self.scope_constraints is None or len(self.support_footprint.cost) != len(self.scope_constraints.views):
+                raise ValueError('footprint requires aligned scope views')
 
     @property
     def member_available(self):

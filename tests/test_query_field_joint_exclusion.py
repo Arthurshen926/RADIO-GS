@@ -68,3 +68,22 @@ def test_field_decoder_labels_and_public_api(monkeypatch):
     assert not semantic.diagnostics['coverage_view_confidence_preserved']
     with pytest.raises(ValueError):query_text_joint_exclusion(field,torch.ones(1),torch.ones(1,1),decoder=decoder,initializer='invalid')
     with pytest.raises(ValueError):decoder.decode(torch.ones(2,dtype=torch.bool),accepted)
+
+    from radio_gs.query_field.member_energy import query_text_member_energy
+    from radio_gs.query_field.support_footprint import SupportFootprint
+    from radio_gs.query_field import part_conditioning
+    field.support_footprint=SupportFootprint({'cost':torch.tensor([[1.,1.]])},2)
+    field.evidence=object()
+    monkeypatch.setattr(part_conditioning,'native_region_probability',lambda *args:torch.tensor([.9]))
+    monkeypatch.setattr(scope_confidence,'native_scope_confidence',lambda *args:(accepted,torch.tensor([.8])))
+    import builtins
+    def denied(*args,**kwargs):raise AssertionError('query attempted file access')
+    with monkeypatch.context() as guard:
+        guard.setattr(builtins,'open',denied)
+        energy=query_text_member_energy(field,torch.ones(1),torch.ones(1,1),decoder=decoder)
+    assert energy.selected.tolist()==[False,True]
+    assert energy.diagnostics['coverage_view_confidence_preserved']
+    assert not energy.diagnostics['member_energy']['query_parameter_fitting']
+    field.support_footprint=None
+    with pytest.raises(ValueError,match='footprint'):
+        query_text_member_energy(field,torch.ones(1),torch.ones(1,1),decoder=decoder)

@@ -5,12 +5,19 @@ from .scope_readout import ScopeReadout
 
 
 @torch.no_grad()
-def confident_scope(field,prior,probability):
+def native_scope_confidence(field,prior,probability):
     available=field.observed|field.semantic_measure.supported
     mass=torch.sparse.mm(field.evidence.matrix('positive').transpose(0,1),available.float()[:,None]).flatten()
     preference=torch.where(mass>0,(2*probability-1).clamp(0,1),0.)
     accepted=preference>0
     confidence=prior.new_zeros(field.evidence.view_count).scatter_reduce_(0,field.evidence.views,preference,reduce='amax',include_self=True)
+    return accepted,confidence
+
+
+@torch.no_grad()
+def confident_scope(field,prior,probability):
+    available=field.observed|field.semantic_measure.supported
+    accepted,confidence=native_scope_confidence(field,prior,probability)
     prepared=field.scope_constraints.paired(accepted,field.scope_permissions)
     positive=prepared[False][0]*confidence[None,:];result={}
     for expanded in [False,True]:

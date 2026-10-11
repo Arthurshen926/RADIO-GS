@@ -63,6 +63,11 @@ def test_energy_matches_independent_enumeration_and_is_monotone():
         for g in range(5):
             neighbor = selected.copy(); neighbor[g] = ~neighbor[g]
             assert energy(neighbor) >= energy(selected)-1e-10
+        for g in np.flatnonzero(selected):
+            for h in np.flatnonzero(~selected):
+                neighbor = selected.copy(); neighbor[g] = False; neighbor[h] = True
+                assert energy(neighbor) >= energy(selected)-1e-10
+
 
 
 def test_zero_prior_disables_undefined_footprint_ratio():
@@ -78,7 +83,7 @@ def test_rejects_conflicting_labels():
 def test_local_solution_can_miss_better_member_exchange():
     # Expensive initial member and cheap alternative cover the same extent.
     # Neither single flip helps, while a simultaneous exchange would help.
-    selected, d = solve([[2, 2]], [.9, .1], [True], footprint=[10, 1])
+    selected, d = solve([[2, 2]], [.9, .1], [True], footprint=[10, 1], exchange_candidates=0)
     assert selected.tolist() == [True, False]
     assert d['converged']
     alternative_energy = .1/9.1 + .1*.8
@@ -91,3 +96,22 @@ def test_sparse_duplicate_entries_match_canonical_matrix():
     expected, ref = solve([[2]], [.2], [True])
     assert np.array_equal(result, expected)
     assert details['energy_trace'] == ref['energy_trace']
+
+
+def test_joint_exchange_escapes_verified_single_flip_trap():
+    selected, d = solve([[2, 2]], [.9, .1], [True], footprint=[10, 1])
+    assert selected.tolist() == [False, True]
+    assert d['exchanges'] == 1 and d['converged']
+    assert np.max(np.diff(d['energy_trace'])) <= 1e-10
+
+
+def test_exchange_checks_entire_union_not_only_shared_positive():
+    # Cheap member also covers a known negative: replacement must be rejected.
+    selected, d = solve([[2, 2], [0, 2]], [.9, .1], [True, False],
+                        [False, True], footprint=[10, 1])
+    assert selected.tolist() == [True, False] and d['exchanges'] == 0
+
+
+def test_negative_exchange_budget_rejected():
+    with pytest.raises(ValueError, match='exchange'):
+        solve([[2]], [.9], [True], exchange_candidates=-1)

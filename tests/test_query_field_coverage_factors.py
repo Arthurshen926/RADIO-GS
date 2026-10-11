@@ -60,7 +60,10 @@ def test_field_roundtrip_keeps_parent_and_joint_function(tmp_path):
     old={k:v.clone() for k,v in field.state_dict().items()}
     state=dict(pointer=torch.tensor([0,2]),index=torch.tensor([0,1]),alpha=torch.tensor([.9,.8]),atom=torch.tensor([0]))
     field.coverage_factors=CoverageFactors({'views.0.'+k:v for k,v in state.items()},n,field.scope_constraints)
+    from radio_gs.query_field.support_footprint import SupportFootprint
+    field.support_footprint=SupportFootprint({'cost':torch.arange(n,dtype=torch.float32)[None]},n)
     save_field(field,tmp_path/'field',{});restored,_=load_field(tmp_path/'field')
+    assert torch.equal(restored.support_footprint(torch.tensor([True])),torch.arange(n,dtype=torch.float32))
     for k,v in old.items():assert torch.equal(v,restored.state_dict()[k])
     member=torch.full((n,),.5,requires_grad=True)
     a=field.coverage_factors.views[0](member);b=restored.coverage_factors.views[0](member)

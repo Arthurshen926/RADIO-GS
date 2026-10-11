@@ -64,6 +64,8 @@ def load_field(directory, device="cpu"):
                                                     if k.startswith('semantic_measure.')} or None,
                             native_mode_state={k.removeprefix('native_modes.'):v for k,v in state.items()
                                                if k.startswith('native_modes.')} or None,
+                            support_footprint_state={k.removeprefix('support_footprint.'):v for k,v in state.items()
+                                                    if k.startswith('support_footprint.')} or None,
                             coverage_factor_state={k.removeprefix('coverage_factors.'):v for k,v in state.items()
                                                     if k.startswith('coverage_factors.')} or None,
                             scope_constraint_state={k.removeprefix('scope_constraints.'):v for k,v in state.items()
