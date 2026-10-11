@@ -8,7 +8,7 @@ from radio_gs.query_field.storage import load_field
 from radio_gs.query_field.scope_topology import assemble_scope
 from radio_gs.query_field.native_text_device import NativeTextDevice
 from radio_gs.scripts.eval_opengaussian_lerf_baseline import load_binary_mask
-from scripts.research.run_query_field_scope_topology import ROOT,PARENT,PARENT_FIELDS,ARMS,design
+from scripts.research.run_query_field_scope_topology import ROOT,PARENT,PARENT_FIELDS,CANONICAL,ARMS,design
 from scripts.research.run_query_field_relations import read,write,check,receipt
 from scripts.research.summarize_query_field_relations import paired
 
@@ -39,6 +39,7 @@ def main():
             assert r['exact_composition_ray_tests']==10*r['rays'] and r['rays']==49152
         data=torch.load(out/'predictions.pt',weights_only=True)
         old=torch.load(PARENT/'predictions'/j['name']/'predictions.pt',weights_only=True)
+        prior_reference=torch.load(CANONICAL/'inputs'/scene/'response.pt',weights_only=True)['semantic_probability']
         fixed=torch.load(PARENT/'predictions'/j['name']/'privileged_scope.pt',weights_only=True)
         scopes=torch.load(out/'research_scopes.pt',weights_only=True)
         for a in ARMS[:2]:assert torch.equal(data['membership_by_control'][a],old['membership_by_control'][a])
@@ -80,7 +81,7 @@ def main():
                 if active:assert np.all(np.diff(row['arms'][a]['energy_trace'])<=1e-8)
                 else:
                     actual=data['membership_by_control'][a][:,qi]
-                    reference=old['membership_by_control']['semantic_initial'][:,qi]
+                    reference=prior_reference[:,qi]
                     assert float((actual-reference).abs().max())<=2e-6
                     assert torch.equal(actual>.5,reference>.5)
         confidence_rows=[]
@@ -133,7 +134,7 @@ def main():
                 for r in record['diagnostics'] for c in r['capacity']),
             active={a:sum(bool(r['arms'][a]['active_views']) for r in record['diagnostics']) for a in ARMS[2:]})
         print('audited',scene,metrics,flush=True)
-        del data,fixed;gc.collect()
+        del data,fixed,prior_reference;gc.collect()
     macro={a:{k:sum(s['metrics'][a][k] for s in scenes.values())/4 for k in ['iou','precision','recall']} for a in ARMS}
     comparisons={a:{b:paired({s:r['metrics'][b]['iou'] for s,r in scenes.items()},
                             {s:r['metrics'][a]['iou'] for s,r in scenes.items()},'actual selected-set IoU')
