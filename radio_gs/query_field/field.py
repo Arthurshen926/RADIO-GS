@@ -61,7 +61,7 @@ class CapabilityField(nn.Module):
                  evidence_kind="none", evidence_state=None, native_mode_state=None,
                  native_mode_rule="none", semantic_measure_state=None, semantic_measure_rule="none",
                  scope_permission_state=None, scope_constraint_state=None, coverage_factor_state=None, support_footprint_state=None, region_carrier_state=None,
-                 extent_factor_state=None):
+                 extent_factor_state=None, extent_preparation_state=None):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -177,6 +177,14 @@ class CapabilityField(nn.Module):
         if extent_factor_state is not None:
             from .extent_factors import ExtentFactors
             self.extent_factors = ExtentFactors(extent_factor_state, count, self.opacities)
+        self.extent_preparation = None
+        if extent_preparation_state is not None:
+            from .extent_preparation import ExtentPreparation
+            self.extent_preparation = ExtentPreparation(extent_preparation_state, count)
+            if self.extent_factors is None or len(self.extent_preparation.views) != len(self.extent_factors.views):
+                raise ValueError('extent preparation requires aligned optical factors')
+            if any(len(p.valid) != len(f.atom) for p, f in zip(self.extent_preparation.views, self.extent_factors.views)):
+                raise ValueError('extent preparation ray count differs from optics')
         if region_carrier_state is not None:
             from .region_carrier import RegionCarrier
             self.region_carrier = RegionCarrier(region_carrier_state, count)

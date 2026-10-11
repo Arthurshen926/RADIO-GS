@@ -72,6 +72,8 @@ def load_field(directory, device="cpu"):
                                                     if k.startswith('coverage_factors.')} or None,
                             extent_factor_state={k.removeprefix('extent_factors.'):v for k,v in state.items()
                                                  if k.startswith('extent_factors.')} or None,
+                            extent_preparation_state={k.removeprefix('extent_preparation.'):v for k,v in state.items()
+                                                      if k.startswith('extent_preparation.')} or None,
                             scope_constraint_state={k.removeprefix('scope_constraints.'):v for k,v in state.items()
                                                     if k.startswith('scope_constraints.')} or None,
                             scope_permission_state={k.removeprefix('scope_permissions.'):v for k,v in state.items()
