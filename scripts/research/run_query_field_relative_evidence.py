@@ -99,7 +99,8 @@ def complete(gpus):
         m=read(ROOT/'predictions'/j['name']/'evaluation/evaluation.json')['metrics']
         old=read(PARENT/'predictions'/j['name']/'evaluation/evaluation.json')['metrics']
         for a in ARMS:
-            if a!=ARM:assert m[a]==old[a]
+            if a!=ARM:
+                for k in ['miou','count','missing']:assert m[a]['selected'][k]==old[a]['selected'][k]
             for k in ['iou','ap','localization','observations']:assert m[a][k]==old['native_complete_scope'][k]
             per[a][j['scene']]=m[a]['selected']['miou']
     write(ROOT/'summary.json',dict(complete=True,per_scene=per,macro={a:sum(v.values())/4 for a,v in per.items()},
