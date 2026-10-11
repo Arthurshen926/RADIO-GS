@@ -2,7 +2,14 @@
 import numpy as np
 from numba import njit
 from scipy import sparse
-from .extent_decision import ExtentDecision, probability, binary_cross_entropy
+from .extent_decision import ExtentDecision, CUTOFF, binary_cross_entropy
+
+
+@njit(cache=True)
+def probability_at_cutoff(alpha, cutoff):
+    """The consumed task's alpha decision boundary maps to probability one half."""
+    a = min(max(alpha, 1e-6), 1-1e-6)
+    return a * (1-cutoff) / (a*(1-cutoff) + cutoff*(1-a))
 
 
 @njit(cache=True)
@@ -24,7 +31,7 @@ def response(head, following, alpha, row, position=-1, remove=True):
 
 @njit(cache=True)
 def decisions(ptr, idx, alpha, colptr, colrows, colposition, rowview, initial,
-              target, known, coefficient, weight, cost, max_passes):
+              target, known, coefficient, weight, cost, max_passes, decision_cutoff=CUTOFF):
     selected = initial.copy(); views = len(weight); rows = len(rowview)
     head = np.full(rows, -1, np.int32); following = np.full(len(idx), -1, np.int32)
     prob = np.zeros(rows); bce = np.zeros(views); mass = np.zeros(views); overlap = np.zeros(views); truth = np.zeros(views)
@@ -32,7 +39,7 @@ def decisions(ptr, idx, alpha, colptr, colrows, colposition, rowview, initial,
         if not known[r]: continue
         for k in range(ptr[r+1]-1, ptr[r]-1, -1):
             if selected[idx[k]]: following[k] = head[r]; head[r] = k
-        v = rowview[r]; p = probability(response(head, following, alpha, r))
+        v = rowview[r]; p = probability_at_cutoff(response(head, following, alpha, r), decision_cutoff)
         prob[r] = p; bce[v] += coefficient[r]*binary_cross_entropy(p, target[r])
         mass[v] += p; overlap[v] += p*target[r]; truth[v] += target[r]
     trace = np.zeros(max_passes+1); flips = 0; changed = 0; evaluated = 0
@@ -51,7 +58,7 @@ def decisions(ptr, idx, alpha, colptr, colrows, colposition, rowview, initial,
             for k in range(colptr[g], colptr[g+1]):
                 r = colrows[k]
                 if not known[r]: continue
-                v = rowview[r]; p = probability(response(head, following, alpha, r, colposition[k], selected[g]))
+                v = rowview[r]; p = probability_at_cutoff(response(head, following, alpha, r, colposition[k], selected[g]), decision_cutoff)
                 scratch[k-colptr[g]] = p; diff = p-prob[r]
                 dm[v] += diff; dt[v] += diff*target[r]
                 db[v] += coefficient[r]*(binary_cross_entropy(p,target[r])-binary_cross_entropy(prob[r],target[r]))
@@ -91,13 +98,14 @@ class LinkedExtentDecision(ExtentDecision):
         assert np.array_equal(positions.indptr, self.colptr) and np.array_equal(positions.indices, self.colrows)
         self.colposition = positions.data
 
-    def solve(self, initial, target, positive, negative, confidence, cost, *, max_passes=4):
+    def solve(self, initial, target, positive, negative, confidence, cost, *, max_passes=4, decision_cutoff=CUTOFF):
         # Keep the reference's validation, weighting and reporting literally the
         # same; bind only its numerical kernel through an instance adapter below.
-        return solve(self, initial, target, positive, negative, confidence, cost, max_passes=max_passes)
+        return solve(self, initial, target, positive, negative, confidence, cost,
+                     max_passes=max_passes, decision_cutoff=decision_cutoff)
 
 
-def solve(self, initial, target, positive, negative, confidence, cost, *, max_passes=4):
+def solve(self, initial, target, positive, negative, confidence, cost, *, max_passes=4, decision_cutoff=CUTOFF):
     initial = np.asarray(initial); target = np.asarray(target, dtype=np.float64)
     positive = np.asarray(positive); negative = np.asarray(negative)
     confidence = np.asarray(confidence, dtype=np.float64); cost = np.asarray(cost, dtype=np.float64)
@@ -109,6 +117,8 @@ def solve(self, initial, target, positive, negative, confidence, cost, *, max_pa
         raise ValueError('invalid signed extent evidence')
     if confidence.shape != (len(self.sizes),) or not isinstance(max_passes, int) or not 1 <= max_passes <= 8:
         raise ValueError('invalid view or bounded decision policy')
+    if not np.isfinite(decision_cutoff) or not 0 < decision_cutoff < 1:
+        raise ValueError('decision alpha cutoff must be finite and strictly between zero and one')
     if any(not np.isfinite(v).all() for v in [target, confidence, cost]) or (cost < 0).any() or (target < 0).any() or (target > 1).any() or (confidence < 0).any() or (confidence > 1).any():
         raise ValueError('invalid extent values')
     active = confidence > 0
@@ -119,7 +129,7 @@ def solve(self, initial, target, positive, negative, confidence, cost, *, max_pa
     for vi, (a,b) in enumerate(zip(self.slices[:-1],self.slices[1:])):
         coefficient[a:b] = .5*(positive[a:b]/max(positive[a:b].sum(),1)+negative[a:b]/max(negative[a:b].sum(),1))
     selected, trace, flips, evaluated, converged = decisions(self.pointer,self.index,self.alpha,self.colptr,
-        self.colrows,self.colposition,self.rowview,initial,target,known,coefficient,weight,cost,max_passes)
+        self.colrows,self.colposition,self.rowview,initial,target,known,coefficient,weight,cost,max_passes,decision_cutoff)
     if (np.diff(trace)>1e-8).any(): raise RuntimeError('nonmonotone exact coordinate objective')
     return selected, dict(fallback=False, energy_trace=trace.tolist(),passes=len(trace)-1,flips=flips,
         evaluated=evaluated,converged=bool(converged),added=int((selected & ~initial).sum()),removed=int((initial & ~selected).sum()),

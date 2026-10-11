@@ -57,3 +57,8 @@ class QueryFieldRuntime:
     def reference_scope(self, packet, camera, reference, **options):
         from .reference_scope import query
         return query(self.field, packet, camera, reference, **options)
+
+    def reference_extent(self, packet, camera, reference, **options):
+        """Shared actual-set decisions from the explicitly supplied current mask."""
+        from .reference_extent import query
+        return query(self.field, packet, camera, reference, **options)

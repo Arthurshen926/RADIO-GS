@@ -132,7 +132,16 @@ def predict(config, job, output, device="cuda"):
         torch.cuda.synchronize()
     registered = time.monotonic()
     program=job.get('query_program','parent')
-    if program in {'reference_scope','reference_scope_visible','reference_scope_conditioned','reference_scope_admitted'}:
+    extent_state=None
+    if program in {'reference_extent_prior','reference_extent_lifted','reference_extent_literal'}:
+        if input_contract!='reference_mask':raise ValueError('reference extent needs an explicit full query mask')
+        from .runtime import QueryFieldRuntime
+        extent_state={}
+        result=QueryFieldRuntime(field).reference_extent(packet,reference,inference_masks[0],
+            initializer='lifted' if program=='reference_extent_lifted' else 'prior',
+            decision_cutoff=10.5/255 if program=='reference_extent_literal' else config['alpha_threshold'],
+            audit_state=extent_state)
+    elif program in {'reference_scope','reference_scope_visible','reference_scope_conditioned','reference_scope_admitted'}:
         if input_contract!='reference_mask':raise ValueError('composition needs a declared reference mask')
         from .runtime import QueryFieldRuntime
         result=QueryFieldRuntime(field).reference_scope(packet,reference,inference_masks[0],world_scale=world_scale,
@@ -190,6 +199,9 @@ def predict(config, job, output, device="cuda"):
                   prompt_input=input_contract,reference_mask_receipt=reference_receipt,
                   prompt_policy=("official raw scribbles; uncertain registered rays; signed policy declared in field spec" if input_contract=='raw_scribbles' else
                                  "explicit retained positive-derived SAM reference mask; generating RGB/SAM cost inherited; no tracks"))
+    if extent_state is not None:
+        torch.save(extent_state,out/'extent_state.pt')
+        report['extent_state']=dict(path=str(out/'extent_state.pt'),sha256=sha256(out/'extent_state.pt'))
     (out / "prediction.json").write_text(json.dumps(report, indent=2)+"\n")
     return dict(job=job["name"], selected=report["selected"], scale_m=result.scale,
                 registration=registration)
