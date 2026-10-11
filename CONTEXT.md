@@ -1,5 +1,41 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-12 IN PROGRESS: signed ablations + other-view spatial
+completion. ROOT output/query_field_20261012/scope_completion_v1; freeze1fb9cc2.
+Three SOURCEFREE newarms atomic_positive_native_negative, native_positive_atomic_negative,
+other_view_positive_completion (PRIMARY), controls seed/native_complete/atomic50.8519.
+Allnegativeparts retainoriginpositiveviewpermission beforemixing; conflict->unknown.
+Primary lifts atomicactive cP/cN viaA_obs, forviewv sumsONLYothers(float64), Gaussian
+positive iffpos-neg>1e-8; projectpositivewitness/fullmass, >.5fullmass+1e-8; onlynativeP
+interior&atomicunknown&validrays canbeadded. No selfwitness, no recursivefeedback,
+no newstate/teacher/training/sourcequeryread. AtomicNoriginlicense retained evenwhen
+newPactivatesview. Same c/preparation/cost/R_set/4passes.16testsPASS; independentSciPy
+reconstruction30randomcasesPASS. Mainmethodfrozen; do not alterit basedonnewlogs.
+CoordinatorPID564660(session25775), log/tmp/radio_gs_scope_completion_run.log,
+workers564758(index0GPU0),564760(index1GPU3),564759(index2GPU4),564761(index3GPU5).
+Afterall68x3newpredictionsautomaticscoreall4 thenROOT/summary.json. FinalizerPID567877
+(session15881), /tmp/radio_gs_scope_completion_finalize.py waits summary thenindependent
+scripts.research.audit_query_field_scope_completion (dc2f38f), logROOT/audit_independent.log.
+DO NOT kill/restart/duplicateworkers; finishscores/audit/results beforefinalreply.
+No newGTscores read yet. Latest counts3/2/2/5; alljobs running normally.
+
+Public text extent API implemented910032e: QueryFieldRuntime.prepare_text_extent /
+text_extent, radio_gs/query_field/extent_runtime.py. Field+currentlegalvectors only;
+atomicdefaultforTHISexplicitentry, other_view_positive explicitexperimentaloption.
+Existingglobaldefault unchanged. CPUfield/scopeCUDA mirror, query-independentsynthetic
+one-ray JITwarmup beforefiledenial; no storedqueryscope/answer/researchmoduledependency.
+Publiccold first-query-per-scene validation running ROOTtext_extent_public_v1,
+coordinator569884(session12063), log/tmp/radio_gs_text_extent_public_run.log, GPU2
+sequential4scenes. Figurines firstquerycoldfullvalue+bitsEXACT; remainingpending.
+Workersreceiveonlyfield+legitimatequeryfixture; neverloadreferenceprediction, parent
+comparesafterward. builtins/io.open+torch.load forbidden throughoutactualquery,notOS.
+No newaccuracyclaim orall68/full5claim from4probes. Queryscopeadapters forNVOS/UQIS/
+ScanNetnotimplementedbythisAPI; oldpublicfunctionsstillinplace.
+NEXT completeallstudies; considerfull68 publicfunctionparity tocoverfallbacks; audit
+five-task remaining input/field contracts withoutsplicingpertaskwinners. Needresults
+report/ADR/method/currentcontext/commit; originalHEAD/indexcheckatend.
+END active scope completion note.
+
 Active continuation2026-10-12 COMPLETE: signed atomic scope, corrected negative
 permission and source-order capacity. BOTH full4/68 prediction/scoring/independent
 audits PASS; all own jobs finished, no sessions/GPU jobs to resume or duplicate.
