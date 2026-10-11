@@ -1,5 +1,24 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11: actual-member-domain coverage correction IN PROGRESS.
+Core02d6cb6; current runners2ad07e8. Worktree /root/RADIO-GS-query-field only.
+Explicit member_domain for compiler/relaxed renderer; legacy observed default retained.
+New construction uses observed OR semantic_measure.supported; source-label domain
+stays observed. Native semantic initializer, scope atoms,16x16 samples,policy unchanged.
+All4/72view construction + source-denied cold reload PASS;648independent conditions;
+actual binary selected_alpha comparison max7.7486e-7;softmax1.8477e-6;
+allrow gradientmax3.9145e-9. AllparenttensorsEXACT;64synthetic decoder cases x2PASS.
+New factors5820653hits/+70143324bytes (old5124669/+61791516); no full-extent guarantee.
+13targetedtestsPASS. Two teatime cold CUDA OOMs on sharedGPU3/0 retained; GPU4passed.
+Field root output/query_field_20261011/compiled_available_coverage_v1.
+Audit docs/experiments/2026-10-11-available-coverage-audit.json PASS.
+Full4/68 domain-only study root output/query_field_20261011/joint_exclusion_domain_v1:
+fivearms semantic_initial/observed_joint/observed_fixed/frozen_visibility/joint_coverage.
+Preparing/running onGPU4; last two names are NEW available-domain arms. Old arms
+are fixed comparisons only; fresh native query inputs drive new predictions.
+Allpredictions must finish before scoring. No new accuracy claim/default promotion
+or whole-five completion yet. Pipeline also requests member audit + cold figurines API.
+
 Active continuation2026-10-10: TWO complete4LERF/68text one-pass member studies.
 Frozen22f2a7e(first)/8684c0f(nativeprior); no training/query-parameterfit/source inference.
 JointExclusionDecoder deletes only members requesting known-negative repair, preserves
