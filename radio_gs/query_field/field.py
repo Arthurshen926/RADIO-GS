@@ -60,7 +60,7 @@ class CapabilityField(nn.Module):
                  relation_decoder="none", relation_confidence=None,
                  evidence_kind="none", evidence_state=None, native_mode_state=None,
                  native_mode_rule="none", semantic_measure_state=None, semantic_measure_rule="none",
-                 scope_permission_state=None, scope_constraint_state=None, coverage_factor_state=None, support_footprint_state=None):
+                 scope_permission_state=None, scope_constraint_state=None, coverage_factor_state=None, support_footprint_state=None, region_carrier_state=None):
         super().__init__()
         count = len(geometry["xyz"])
         if any(len(x) != count for x in [semantic, local, group, observed]):
@@ -171,6 +171,10 @@ class CapabilityField(nn.Module):
                 raise ValueError('coverage factors require bound scope constraints')
             self.coverage_factors = CoverageFactors(coverage_factor_state, count, self.scope_constraints)
 
+        self.region_carrier = None
+        if region_carrier_state is not None:
+            from .region_carrier import RegionCarrier
+            self.region_carrier = RegionCarrier(region_carrier_state, count)
         self.support_footprint = None
         if support_footprint_state is not None:
             from .support_footprint import SupportFootprint
