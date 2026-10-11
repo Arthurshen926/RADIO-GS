@@ -112,6 +112,8 @@ def main():
         probes={};counts={a:dict(active_queries=0,active_views=0,conflicts=0) for a in NEW_ARMS}
         for qi,text in enumerate(data['texts']):
             scopes,conflicts=scopes_for(qi,atomic,previous,fixed);row=record['diagnostics'][qi]
+            for mixed,matched in zip(scopes[HYBRIDS[2]],previous['matched_positive_scope'][qi]):
+                for key in ['target','positive','negative']:assert torch.equal(mixed[key],matched[key])
             assert row['native_scope_exact'] and row['native_prior_max_error']<=2e-6
             assert conflicts==row['conflicts']
             for arm in NEW_ARMS:
@@ -159,8 +161,8 @@ def main():
                     for base in baselines:
                         before,old_iou,gt_path=baseline_masks[base][key];assert gt_path==item['gt_path']
                         added=pred&~before;removed=before&~pred;change=changes[arm][base]
-                        change['added_tp']+=int((added&gt).sum());change['added_fp']+=int((added&~gt).sum())
-                        change['removed_tp']+=int((removed&gt).sum());change['removed_fp']+=int((removed&~gt).sum())
+                        change['added_tp']+=int((added & gt).sum());change['added_fp']+=int((added & ~gt).sum())
+                        change['removed_tp']+=int((removed & gt).sum());change['removed_fp']+=int((removed & ~gt).sum())
                         change['beneficial_cases']+=int(iou>old_iou);change['harmful_cases']+=int(iou<old_iou)
             metrics[arm]=dict(iou=float(np.mean(ious)),precision=float(np.mean(ps)),recall=float(np.mean(rs)))
             assert abs(metrics[arm]['iou']-summary['per_scene'][arm][scene])<1e-12
