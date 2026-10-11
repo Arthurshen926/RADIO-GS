@@ -1,5 +1,31 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-12 IN PROGRESS: signed_scope_v1 at
+output/query_field_20261012/signed_scope_v1. Freeze73600bc, auditcode732ad3b.
+Four new conditions: sourcefree native_atomic_abstention and three privileged
+P-source x N-source interventions, all using identical native viewconfidence.
+Atomic response interval over covering proposals: min>.5 positive, max<.5
+negative, disagreement/tie/uncovered unknown; erode signed atoms separately;
+keep valid/protectednegative/activeview/cost/4pass policies. Not a calibrated
+interval or proof all scales are equally reliable. Newhead not established.
+22 testsPASS plus independent objective smoke. No field/tensor/defaultchanges.
+Prediction stage recomputes prior and native scopes with frozen parity gates;
+all 68 x4 newpredictions must finish before any newGT scoring. Old4controls exact.
+Runner coordinator PID497153 (shell497150), execsession80691; predictors
+497249(index0/GPU0),497250(index1/GPU3),497252(index2/GPU4),497251(index3/GPU5).
+Do NOT duplicate/kill these. Logs ROOT/logs/predict_{0..3}.log; coordinator log
+/tmp/radio_gs_signed_scope_run.log. Coordinator automatically scores all4 after
+prediction barrier and writes summary. Audit not started yet; run afterwards:
+PYTHONPATH=. OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 /root/miniconda3/envs/cybersim_agent/bin/python
+-m scripts.research.audit_query_field_signed_scope
+Audit independently reconstructs all atomic signs/scopes via NumPy, hybrid
+conflicts/activeviews, actualmaskIoU/P/R and perarm/scenereal objective/preparation.
+Firstprior fullstudies remain complete below. New results PENDING; don't claim
+accuracy improvement, native identity recovery or fullfive until measured.
+NEXT finish all predictions/scoring/audit, retain failures if any, write result,
+update ADR0020/method/currentcontext, localcommit, verifyoriginalHEAD/index.
+END active signed scope note.
+
 Active continuation2026-10-12 COMPLETE: TWO full4/68 scope experiments and both
 independent audits PASS. All own prediction/scoring/audit jobs finished; no work to
 resume or duplicate. Standard best remains46.6535%; no newdefault/fullfive/paperclosure.
