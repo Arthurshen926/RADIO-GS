@@ -1,22 +1,24 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-11 RUNNING: matched native regional pooling plus identity/seed factorial.
-Branch unchanged; last committed code c127495. Do NOT start duplicate jobs.
-First study output/query_field_20261011/native_region_appearance_v1: native_448 and native_full
-replace ONLY region_carrier.descriptors; same72 training frames total/4scenes, exact proposal binding,
-cold other268 tensors exact and tensor bytes unchanged. First3 scenes finished; waldo last export running.
-Compiler process driver executes all4; pipeline waits for construction/*/complete.json then runs
-run_query_field_native_region_appearance prepare/run (GPU2), audit, then
-run_query_field_identity_scope prepare/run (GPU2), audit. Logs under first study/logs/pipeline_*.
-Second root output/query_field_20261011/query_identity_scope_v1. Protocol/representation fixed
-BEFORE first new scores: native448 only;2x2 native-positive prerequisite / preserved seed base.
-Predeclared primary native_seeded vs seed_addition46.6535. No threshold/model changes.
-Prior label-free admission audit:108/351 quality-admitted regions have native probability<=.5;
-this is NOT proof of false membership. Public identity_scope API and11 targeted tests passed.
-Both studies require all4/68 prediction barriers before scoring, actual-set masks, unchanged controls,
-Python open denied after warmup; no default promotion / five-task closure. NO NEW SCORES YET.
-See native-region-appearance-protocol and query-identity-scope-protocol. Once finished replace this
-RUNNING entry with verified results, preserve old failures. Original checkout must stay untouched.
+Active continuation2026-10-11 RUNNING: pooling study DONE; identity/seed factorial v2 in progress.
+First root output/query_field_20261011/native_region_appearance_v1: full4/68/8arms and audit PASS.
+Actual IoU native44844.2674/nativefull44.2394 vs oldconditional44.2876 and seed46.6535;
+primary FAILED,1up3down vs oldconditional,4down vs seed. Native pooling fixed appearance
+cosine medians from.792-.910 to.561-.638 (training.592);15other feature medians EXACT;
+36/68admissions change but no performance gain. Do NOT infer entire quality input domain aligned.
+Cold8fields only region_carrier.descriptors changed;other268tensors EXACT,samebytes.
+Source bindings/hash verified72trainviews TOTAL/4scenes; no runtime RGB/masks/cameras.
+Main extension precision14.2245% vs fixed;4.6700% vs seed (with65614seed pixels removed).
+See native-region-appearance-results/audit/construction files. Default unchanged.
+Second root output/query_field_20261011/query_identity_scope_v2: running prepare/run/audit
+via own pipeline, GPU2, logs there. Do NOT start duplicate jobs. Frozen c5bb194.
+Fixed native448 before first new scores;2x2 native>0.5 prerequisite / seed-preserved base;
+predeclared primary native_seeded vs seed_addition. Model/threshold/field unchanged.
+v1 stopped firstquery before scoring: public repeated CUDA scores differ max1.19e-7,
+3diagnostic replays actualsets/admissions/seed EXACT. v2 uses EXISTING2e-6 score tolerance
+but still EXACT actualsets; all4rerun. v1/public_float_diagnosis.json retained.
+11targeted tests passed. No new identity scores yet, no default/five-task/paper closure.
+Original checkout HEAD/index unchanged. Finish report+ADR+CONTEXT after v2 completes.
 
 Active continuation2026-10-11: binary Gaussian region scope full4/68 study COMPLETE.
 Actual-set IoU initial42.9498/fixed45.1953/seed_addition46.6535/conditional_addition44.2876/
