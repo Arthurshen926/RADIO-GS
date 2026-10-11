@@ -83,6 +83,15 @@ def main():
                     reference=old['membership_by_control']['semantic_initial'][:,qi]
                     assert float((actual-reference).abs().max())<=2e-6
                     assert torch.equal(actual>.5,reference>.5)
+        confidence_rows=[]
+        for qi,row in enumerate(record['diagnostics']):
+            active={a:row['arms'][a]['active_views'] for a in ARMS[2:]}
+            common=sorted(set(active[ARMS[2]]) & set(active[ARMS[3]]))
+            confidence_rows.append(dict(query=row['query'],common_views=len(common),
+                mean_active={a:float(np.mean([float(scopes[a][qi][vi]['confidence']) for vi in ids])) if ids else None
+                             for a,ids in active.items()},
+                mean_common={a:float(np.mean([float(scopes[a][qi][vi]['confidence']) for vi in common])) if common else None
+                             for a in ARMS[2:]}))
         # A fresh native scope is produced with only the cold field and legal
         # vectors. No privileged target, query-scoped detector or old prior input.
         probe=0;device_native=NativeTextDevice(field,'cuda')
@@ -115,6 +124,7 @@ def main():
                 retained_greedy=mean([r['retained']['greedy_iou'] for r in capacity]),
                 native=mean([r['native_iou'] for r in capacity])),
             replaced_negative_conflicts=conflicts,cold_native_scope_io_denied=True,
+            confidence=confidence_rows,
             native_positive_views_without_reference_scope=sum(
                 c['native_accepted']>0 and c['source_confidence']==0
                 for r in record['diagnostics'] for c in r['capacity']),
