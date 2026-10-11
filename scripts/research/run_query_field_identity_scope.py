@@ -14,7 +14,7 @@ from radio_gs.query_field.region_carrier import query_text_region_scope
 from radio_gs.query_field.identity_region_scope import IdentityRegionScopeDecoder, query_text_identity_scope
 from scripts.research.run_query_field_relations import read, write, receipt, check, execute, lanes
 
-ROOT = Path('output/query_field_20261011/query_identity_scope_v1')
+ROOT = Path('output/query_field_20261011/query_identity_scope_v2')
 PARENT = Path('output/query_field_20261011/native_region_appearance_v1')
 ARMS = ['frozen_visibility', 'seed_addition', 'unqualified_addition', 'unqualified_seeded', 'native_addition', 'native_seeded']
 PROTOCOL = Path('docs/experiments/2026-10-11-query-identity-scope-protocol.md')
@@ -58,7 +58,7 @@ def predict(index):
     members = dict(frozen_visibility=old['frozen_visibility'], seed_addition=old['seed_addition'],
         unqualified_addition=old['native_448_addition'], unqualified_seeded=torch.maximum(old['seed_addition'], old['native_448_addition']))
     query_text_region_scope(field, previous['native_query_vectors'][0], previous['generic_negative_vectors'], **kwargs)
-    extension = []; seeded = []; details = []
+    extension = []; seeded = []; details = []; max_public_score_error = 0.
     def denied(*args, **kwargs): raise AssertionError('runtime file open')
     for qi, text in enumerate(previous['texts']):
         with patch.object(builtins, 'open', denied):
@@ -68,7 +68,12 @@ def predict(index):
             assert torch.equal(values[a] > .5, previous['selected_by_control'][a][:, qi]), (text, a)
             assert float((values[a] - old[a][:, qi]).abs().max()) <= 2e-6
         expected = torch.maximum(values['seed_addition'], values['conditional_addition'])
-        assert torch.equal(public.membership_score, expected)
+        # Repeated CUDA semantic reductions need not be bitwise equal. Use the
+        # existing 2e-6 continuous-score contract while keeping exact set parity.
+        assert torch.equal(public.selected, expected > .5)
+        public_score_error = float((public.membership_score - expected).abs().max())
+        assert public_score_error <= 2e-6
+        max_public_score_error = max(max_public_score_error, public_score_error)
         extension.append(values['conditional_addition']); seeded.append(public.membership_score)
         details.append(dict(text=text, **detail)); print('predicted', j['scene'], qi, text, detail, flush=True)
     members.update(native_addition=torch.stack(extension, 1), native_seeded=torch.stack(seeded, 1))
@@ -78,7 +83,8 @@ def predict(index):
     torch.save(previous, out / 'predictions.pt')
     write(out / 'prediction.json', dict(configuration=cfg, job=j, diagnostics=details, queries=len(details),
         predictions_sha256=receipt(out / 'predictions.pt')['sha256'], source_access=False, target_labels_opened=False,
-        evaluation_scene_opened_by_predictor=False, controls_exact=True, public_entry_exact=True,
+        evaluation_scene_opened_by_predictor=False, controls_exact=True, public_entry_sets_exact=True,
+        public_score_max_error=max_public_score_error, public_score_tolerance=2e-6,
         file_opens_denied_queries=len(details), os_sandbox=False, warmup='first actual query before Python open guard'))
 
 

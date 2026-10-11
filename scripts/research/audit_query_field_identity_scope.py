@@ -25,7 +25,8 @@ def main():
             assert torch.equal(sets[a], previous['selected_by_control'][b])
         assert torch.equal(sets['unqualified_seeded'], seed | sets['unqualified_addition'])
         assert torch.equal(sets['native_seeded'], seed | sets['native_addition'])
-        assert r['public_entry_exact'] and not r['target_labels_opened'] and not r['source_access']
+        assert r['public_entry_sets_exact'] and r['public_score_max_error'] <= 2e-6
+        assert not r['target_labels_opened'] and not r['source_access']
         e = read(out / 'evaluation/evaluation.json'); metrics = {}; masks = {}; objects = {}
         for a in ARMS:
             rows = e['metrics'][a]['selected']['objects']; objects[a] = {(x['frame'], x['query']): x for x in rows}
