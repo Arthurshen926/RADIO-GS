@@ -12,10 +12,10 @@ from scripts.research.run_query_field_relations import read, write, receipt, che
 from scripts.research.run_query_field_canonical_subset_reference import ROOT as PARENT
 from scripts.research.compile_query_field_extent_factors import ROOT as FIELDS, PROTOCOL
 
-ROOT = Path('output/query_field_20261011/extent_decision_v1')
+ROOT = Path('output/query_field_20261011/extent_decision_v2')
 ARMS = ['seed_addition', 'dense_joint', 'source_initial', 'extent_discrete']
 CODE = [__file__, 'scripts/research/compile_query_field_extent_factors.py',
-        'radio_gs/query_field/extent_factors.py', 'radio_gs/query_field/extent_decision.py',
+        'radio_gs/query_field/extent_factors.py', 'radio_gs/query_field/extent_decision.py', 'radio_gs/query_field/extent_cuda.py',
         'radio_gs/query_field/coverage_factors.py', 'radio_gs/query_field/field.py',
         'radio_gs/query_field/storage.py', 'radio_gs/pipeline/subset.py']
 

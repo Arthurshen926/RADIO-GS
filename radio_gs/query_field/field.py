@@ -176,7 +176,7 @@ class CapabilityField(nn.Module):
         self.extent_factors = None
         if extent_factor_state is not None:
             from .extent_factors import ExtentFactors
-            self.extent_factors = ExtentFactors(extent_factor_state, count)
+            self.extent_factors = ExtentFactors(extent_factor_state, count, self.opacities)
         if region_carrier_state is not None:
             from .region_carrier import RegionCarrier
             self.region_carrier = RegionCarrier(region_carrier_state, count)

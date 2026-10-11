@@ -9,6 +9,7 @@ def fixture():
     # Redundant foreground, missing foreground, and two background footprints.
     state = dict(pointer=torch.tensor([0, 2, 3, 5]), index=torch.tensor([0, 1, 2, 0, 3]),
                  alpha=torch.tensor([.9, .8, .9, .7, .9]), atom=torch.zeros(3, dtype=torch.long))
+    state['visibility'] = state['alpha'].clone()
     return ExtentFactors({'views.0.'+k: v for k, v in state.items()}, 4)
 
 
@@ -39,7 +40,7 @@ def test_joint_objective_and_bidirectional_decisions():
 
 def test_exact_occlusion_cutoff_and_flip():
     ptr = np.array([0, 3]); ids = np.array([0, 1, 2]); alpha = np.array([.92, .999, .2], np.float32)
-    f = ExtentFactors({'views.0.'+k: v for k, v in dict(pointer=torch.tensor(ptr), index=torch.tensor(ids), alpha=torch.tensor(alpha), atom=torch.tensor([0])).items()}, 3)
+    f = ExtentFactors({'views.0.'+k: v for k, v in dict(pointer=torch.tensor(ptr), index=torch.tensor(ids), alpha=torch.tensor(alpha), visibility=torch.tensor(alpha), atom=torch.tensor([0])).items()}, 3)
     for bits in itertools.product([False, True], repeat=3):
         selected = np.array(bits)
         for flip in [-1, 0, 1, 2]:
@@ -59,11 +60,23 @@ def test_empty_source_keeps_native_and_invalid_evidence_rejected():
     with pytest.raises(ValueError): decoder.solve(initial, y, p, p, np.ones(1), np.ones(4))
 
 
+def test_float32_termination_matches_native_not_float64_product():
+    # Native float32 stays just ABOVE 1e-4; float64 is just below it. Omitting
+    # this last hit changes alpha by ~.08755, despite a tiny product difference.
+    alpha = np.array([.7812169790267944, .5993716716766357, .9988591074943542], np.float32)
+    assert np.prod(1-alpha.astype(np.float64)) < 1e-4
+    t = np.float32(1.)
+    for a in alpha: t = np.float32(t*np.float32(np.float32(1)-a))
+    assert t > 1e-4
+    actual = render_row(np.array([0, 3]), np.arange(3), alpha, np.ones(3, bool), 0)
+    assert actual == np.float32(1)-t
+
+
 def test_extent_field_roundtrip_preserves_parent(tmp_path):
     from test_query_preserving_field import example
     from radio_gs.query_field.storage import load_field, save_field
     field = example(); old = {k: v.clone() for k, v in field.state_dict().items()}
-    field.extent_factors = ExtentFactors(fixture().state_dict(), len(field.xyz))
+    field.extent_factors = ExtentFactors(fixture().state_dict(), len(field.xyz), field.opacities)
     save_field(field, tmp_path/'field', {})
     restored, manifest = load_field(tmp_path/'field')
     for k, v in old.items(): assert torch.equal(v, restored.state_dict()[k])

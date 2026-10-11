@@ -15,15 +15,39 @@ CUTOFF = 10.5 / 255
 
 @njit(cache=True)
 def render_row(pointer, index, alpha, selected, row, flip=-1):
-    transmittance = 1.; result = 0.
+    transmittance = np.float32(1.)
     for k in range(pointer[row], pointer[row+1]):
         g = index[k]
         if selected[g] == (g == flip): continue
-        a = min(float(alpha[k]), .999)
+        a = min(alpha[k], np.float32(.999))
         if a < 1/255: continue
-        next_t = transmittance * (1-a)
-        if next_t < 1e-4: break
-        result += transmittance * a; transmittance = next_t
+        next_t = np.float32(transmittance * np.float32(np.float32(1)-a))
+        if next_t <= 1e-4: break
+        transmittance = next_t
+    return np.float32(1)-transmittance
+
+
+@njit(cache=True)
+def render_binary(pointer, index, alpha, selected):
+    result = np.zeros(len(pointer)-1, np.float32)
+    for row in range(len(result)):
+        result[row] = render_row(pointer, index, alpha, selected, row)
+    return result
+
+
+@njit(cache=True)
+def render_membership(pointer, index, visibility, opacity, member):
+    result = np.zeros(len(pointer)-1, np.float32)
+    for row in range(len(result)):
+        t = np.float32(1.)
+        for k in range(pointer[row], pointer[row+1]):
+            g = index[k]
+            a = min(np.float32(.999), np.float32(np.float32(opacity[g]*member[g])*visibility[k]))
+            if a < np.float32(1/255): continue
+            next_t = np.float32(t*np.float32(np.float32(1)-a))
+            if next_t <= 1e-4: break
+            t = next_t
+        result[row] = np.float32(1)-t
     return result
 
 
