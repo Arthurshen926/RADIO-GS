@@ -1,24 +1,37 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-11 RUNNING: pooling study DONE; identity/seed factorial v2 in progress.
-First root output/query_field_20261011/native_region_appearance_v1: full4/68/8arms and audit PASS.
-Actual IoU native44844.2674/nativefull44.2394 vs oldconditional44.2876 and seed46.6535;
-primary FAILED,1up3down vs oldconditional,4down vs seed. Native pooling fixed appearance
-cosine medians from.792-.910 to.561-.638 (training.592);15other feature medians EXACT;
-36/68admissions change but no performance gain. Do NOT infer entire quality input domain aligned.
-Cold8fields only region_carrier.descriptors changed;other268tensors EXACT,samebytes.
-Source bindings/hash verified72trainviews TOTAL/4scenes; no runtime RGB/masks/cameras.
-Main extension precision14.2245% vs fixed;4.6700% vs seed (with65614seed pixels removed).
-See native-region-appearance-results/audit/construction files. Default unchanged.
-Second root output/query_field_20261011/query_identity_scope_v2: running prepare/run/audit
-via own pipeline, GPU2, logs there. Do NOT start duplicate jobs. Frozen c5bb194.
-Fixed native448 before first new scores;2x2 native>0.5 prerequisite / seed-preserved base;
-predeclared primary native_seeded vs seed_addition. Model/threshold/field unchanged.
-v1 stopped firstquery before scoring: public repeated CUDA scores differ max1.19e-7,
-3diagnostic replays actualsets/admissions/seed EXACT. v2 uses EXISTING2e-6 score tolerance
-but still EXACT actualsets; all4rerun. v1/public_float_diagnosis.json retained.
-11targeted tests passed. No new identity scores yet, no default/five-task/paper closure.
-Original checkout HEAD/index unchanged. Finish report+ADR+CONTEXT after v2 completes.
+Active continuation2026-10-11 COMPLETE: two full4/68 studies reject pooling-only/identity-gated extensions.
+First8arms: native44844.2674/nativefull44.2394 vs oldconditional44.2876 and seed46.6535.
+Second6arms/2x2: unqualified_addition44.2674/unqualified_seeded44.0126/native_addition44.3600/
+native_seeded PRIMARY44.4338. Main vs seed-2.2197pp,ALL4down,CI[-3.9430,-.4965]pp.
+Native gating with seed floor+0.4212pp vs WEAKER unqualified_seeded,NOT current-best improvement.
+Main added pixels vs seed55866TP/463357FP (10.7595%),28benefit/96harm,0removed;3292added
+Gaussian occurrences. MainP/R45.7491/86.7444 vs seed48.7356/85.4985. Default NOT promoted.
+CRITICAL NEW CAPACITY RESULT: arbitrary perfect PIXEL additions while retaining original mask
+have macro IoU upper bound53.4562(initial)/56.9889(fixed)/54.9752(seed),below saved v10
+actual projection reference66.9633 (different source/access conditions). Formula |GT|/(|GT|+FP).
+This is POSTHOC GT diagnostic only,NOT method accuracy,Gaussian attainability,or ideal-architecture
+impossibility. Pixel deletion-only ceilings84.1598/83.0460/85.4985 are equally optimistic.
+NEXT ARCHITECTURE CONSTRAINT: native functions/controls preserved,but initial member sets/seed
+are REVISABLE priors,not irrevocable floors. Need query-conditioned extent + meaningful exclusion
+and measure-aligned bidirectional actual-set inference. Do NOT keep tuning appearance/thresholds,
+blindly re-promote failed energy/replace routes,or assume unknown=background. Whole-instance forest
+is not a generic text/part/attribute/union scope judge. Do NOT declare a new decoder already solved.
+Native pooling nevertheless restored real function: cosines.792-.910 ->.561-.638 (train.592),
+15other feature medians EXACT,36/68admissions changed but no total gain. Source72trainviews TOTAL,
+5137same proposals.8cold fields only region_carrier.descriptors differs;other268tensors EXACT,
+same bytes;source hashes/two-level mask/view/scale/semantic binding checked. Runtime no source.
+IdentityRegionScopeDecoder/query_text_identity_scope are REJECTED research prototypes,not defaults.
+All68public sets EXACT after Python open guard warmup (not OSsandbox);maxfloat error1.19e-7.
+v1 stopped firstquery before scoring on bitwise CUDA float comparison;3diagnostic repeats have
+0set/admission/seed differences. v2 keeps exact set checks,existing2e-6float tolerance;all4rerun.
+Both studies allpredictions before scores,independent saved-mask audits PASS;12distinct tests PASS
+in runs,including exhaustive4pixel oracle bounds. AlljobsFINISHED. Original HEAD/index unchanged.
+Roots output/query_field_20261011/{native_region_appearance_v1,query_identity_scope_v2}; failed
+identity v1 retained with public_float_diagnosis.json. Freeze first95f8082/secondc5bb194.
+Reports docs/experiments/2026-10-11-{native-region-appearance,query-identity-scope}-results.md,
+matching audits/construction and monotone-capacity-audit.json. ADR0020 updated. Best remains
+seed46.6535 DEVELOPMENT candidate; no new five-task/v10 restoration/independent final/paper closure.
 
 Active continuation2026-10-11: binary Gaussian region scope full4/68 study COMPLETE.
 Actual-set IoU initial42.9498/fixed45.1953/seed_addition46.6535/conditional_addition44.2876/
