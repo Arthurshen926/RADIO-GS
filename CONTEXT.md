@@ -15,7 +15,9 @@ CoordinatorPID564660(session25775), log/tmp/radio_gs_scope_completion_run.log,
 workers564758(index0GPU0),564760(index1GPU3),564759(index2GPU4),564761(index3GPU5).
 Afterall68x3newpredictionsautomaticscoreall4 thenROOT/summary.json. FinalizerPID567877
 (session15881), /tmp/radio_gs_scope_completion_finalize.py waits summary thenindependent
-scripts.research.audit_query_field_scope_completion (dc2f38f), logROOT/audit_independent.log.
+scripts.research.audit_query_field_scope_completion (latest3583b62), logROOT/audit_independent.log.
+Audit now alsochecks atomicP<=completedP<=nativeP, N exactlyoriginadmitted; sourcepseudo
+added-positive agreement from376nonemptyreferenceviews (diagnostic only; notinprediction).
 DO NOT kill/restart/duplicateworkers; finishscores/audit/results beforefinalreply.
 No newGTscores read yet. Latest counts3/2/2/5; alljobs running normally.
 
@@ -24,16 +26,36 @@ text_extent, radio_gs/query_field/extent_runtime.py. Field+currentlegalvectors o
 atomicdefaultforTHISexplicitentry, other_view_positive explicitexperimentaloption.
 Existingglobaldefault unchanged. CPUfield/scopeCUDA mirror, query-independentsynthetic
 one-ray JITwarmup beforefiledenial; no storedqueryscope/answer/researchmoduledependency.
-Publiccold first-query-per-scene validation running ROOTtext_extent_public_v1,
-coordinator569884(session12063), log/tmp/radio_gs_text_extent_public_run.log, GPU2
-sequential4scenes. Figurines firstquerycoldfullvalue+bitsEXACT; remainingpending.
-Workersreceiveonlyfield+legitimatequeryfixture; neverloadreferenceprediction, parent
-comparesafterward. builtins/io.open+torch.load forbidden throughoutactualquery,notOS.
-No newaccuracyclaim orall68/full5claim from4probes. Queryscopeadapters forNVOS/UQIS/
-ScanNetnotimplementedbythisAPI; oldpublicfunctionsstillinplace.
-NEXT completeallstudies; considerfull68 publicfunctionparity tocoverfallbacks; audit
-five-task remaining input/field contracts withoutsplicingpertaskwinners. Needresults
-report/ADR/method/currentcontext/commit; originalHEAD/indexcheckatend.
+Publiccold first-query-per-scene validation COMPLETE: ROOTtext_extent_public_v1,
+all4firstqueries fullmembervalues+selectedbitsEXACT; no newGT. AuditJSONcommitted99e2eaa.
+Full68 publicvalidation nowrunning: ROOTtext_extent_public_full_v1, freeze5abe900.
+Wrapper /tmp/radio_gs_public_full_after_smoke.py PID572916/session11527; coordinator
+PID574265, log/tmp/radio_gs_text_extent_public_full_run.log. Sequentialscene workers
+GPU2 (currentlyfigurines13/21 lastseen). All68actualpublicpredictionsbeforecomparison;
+no newGTscores. Workerreceivesfield+legalvectorbatch ONLY; referencesonlycontroller
+loads AFTER all4predictions. Pythonbuiltins/io.open+torch.load deniedfullactualquery;
+syntheticone-rayJITwarmup atinitialization. Rawtextencoder NOTrevalidated; no OSsandbox.
+Publicscope_rule atomic defaultonlyfornewexplicitentry, globaldefaultsunchanged.
+Do NOT stop/end whilethisvalidationstillrunning. Reap sessionsaftercompletion.
+
+Commonextent metadata inventory COMPLETE99e2eaa: 31requests/30uniquefields.
+4LERFpackageshave scope_topology/extent_preparation/extent_factors. 10ScanNet,8NVOS
+requests(7fields),9UQIS allLACKnew3components. ScanNethas10semanticmeasure;UQIS9native
+modes; NVOSneither (doesnotmean nosemantic/localfeatures). Metadata-onlypickleopcode
+inspection, not fullpayload integrity/numericvalidation. Reportcommon-extent-readiness.md/
+JSON. No splicing per-family pastwinners or newfullfiveclaim. Typedcategorypartition,
+signedprompts,currentimagepatches,uncertain2Drays/exactlegal3Dpoints needdistinctscope
+contracts beforecommondecision. Textentrydoesnotimplementtheseadapters.
+
+Primaryliteratureabstractcheck2026-10-12 added to mechanisms doc67b909a: PairGS
+arxiv2607.01140; NormLift2609.18898; GaussDet2606.30638; PostTrainingSemanticLifting
+2610.08756. Existingrelationalhierarchy/reliabilityvoting/signedlifting/errorattribution
+cannotbeclaimednovelalone. Abstractonlyscreen, notexhaustivefullpaperreview. Finalcite
+primaryURLs if discussingtheirclaims; no needduplicate researchjustforstatus.
+NEXT finish mainprediction/scoring/independentaudit AND full68publicparity. No newmethod
+changes or additionalstudies. Writecombinedcompletionresultsreport pluspublicAPIusage/
+parityboundary; updateADR0020/method/context; code/docscommit; originalHEAD/indexverify.
+Oldbaseline50.8519, no newmainGTscoresready/read yet. Mainlastcounts9/9/9/17=44/68.
 END active scope completion note.
 
 Active continuation2026-10-12 COMPLETE: signed atomic scope, corrected negative
