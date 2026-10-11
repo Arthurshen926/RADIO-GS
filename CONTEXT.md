@@ -1,38 +1,60 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12 IN PROGRESS: signed_scope_v1 at
-output/query_field_20261012/signed_scope_v1. Freeze73600bc, auditcode732ad3b.
-Four new conditions: sourcefree native_atomic_abstention and three privileged
-P-source x N-source interventions, all using identical native viewconfidence.
-Atomic response interval over covering proposals: min>.5 positive, max<.5
-negative, disagreement/tie/uncovered unknown; erode signed atoms separately;
-keep valid/protectednegative/activeview/cost/4pass policies. Not a calibrated
-interval or proof all scales are equally reliable. Newhead not established.
-22 testsPASS plus independent objective smoke. No field/tensor/defaultchanges.
-Prediction stage recomputes prior and native scopes with frozen parity gates;
-all 68 x4 newpredictions must finish before any newGT scoring. Old4controls exact.
-Runner coordinator PID497153 (shell497150), execsession80691; predictors
-497249(index0/GPU0),497250(index1/GPU3),497252(index2/GPU4),497251(index3/GPU5).
-Do NOT duplicate/kill these. Logs ROOT/logs/predict_{0..3}.log; coordinator log
-/tmp/radio_gs_signed_scope_run.log. Coordinator automatically scores all4 after
-prediction barrier and writes summary. Finalizer /tmp/radio_gs_signed_scope_finalize.py PID505183/session66098 waits
-summary then automatically runs audit; do NOT duplicate. Command it owns:
-PYTHONPATH=. OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 /root/miniconda3/envs/cybersim_agent/bin/python
--m scripts.research.audit_query_field_signed_scope
-Audit independently reconstructs all atomic signs/scopes via NumPy, hybrid
-conflicts/activeviews, actualmaskIoU/P/R and perarm/scenereal objective/preparation.
-Firstprior fullstudies remain complete below. New results PENDING; don't claim
-accuracy improvement, native identity recovery or fullfive until measured.
-NEXT finish all predictions/scoring/audit, retain failures if any, write result,
-update ADR0020/method/currentcontext, localcommit, verifyoriginalHEAD/index.
-Source-only native-order threshold capacity audit COMPLETE, session78873 reaped;
-log ROOT/native_order_capacity_attempt1.log. Exact tied-score prefix upperbound
-on source pseudo masks, not targetGT/deployable policy/Gaussianupperbound. TestPASS.
-Native threshold .5 sourceIoU47.7222%, per-query/view optimal threshold69.1932%,
-proposalgreedy84.7519%. Float64 cosine-order family; exact tied-score prefix
-optimization, original .5 nativeIoUs allreplayed; not CUDA-order bitwise claim.
-Firstattempt failed before anyresults because installed torch lacks mmap keyword;
-removed that loader option only (01379b6), retained originalfailure log.
+Active continuation2026-10-12 IN PROGRESS: TWO studies, keep both running.
+Primary ROOT output/query_field_20261012/signed_scope_v1; freeze73600bc.
+Four new arms: sourcefree native_atomic_abstention and three PRIVILEGED raw
+P-source x N-source interventions, same native c. Atomic min/max covering response:
+min>.5 P, max<.5 N, uncovered/tie/disagreement unknown; signed erosion, sameprior
+protection/c/positiveviewgate/A_obs/cost/4pass. No newfield/default/training.
+23 relevant testsPASS + independent objective smoke. All4/68 x4 before scores.
+CoordinatorPID497153 execsession80691, log/tmp/radio_gs_signed_scope_run.log.
+Predictor only remaining figPID497249/GPU0 as of lastcheck (19/21); others complete.
+Finalizer /tmp/radio_gs_signed_scope_finalize.py PID505183/session66098 waits summary
+then runs scripts.research.audit_query_field_signed_scope, ROOT/audit_independent.log.
+Audit latest052e59c (not732ad3b); now reports raw-N permission coupling, all atomic
+NumPy scopes, masks, additions/removals, independent realinitial/final objectives.
+Do NOT duplicate/kill these workers. No current GT scores read by assistant yet.
+
+CRITICAL source-contract fix found BEFORE any primary newscore. Raw reference N
+includes INACTIVE origin views, originally suppressed by refc>0 AND refP.any().
+Mixing nativeP/c with rawrefN resurrects unpermitted negative labels. Raw intervention
+remains archived/explicit, cannot call it transfer of v10 effective negativepermission.
+Affected effective rays: fig6820113/ram3821827/tea3830404/waldo6586438.
+Source check all68: the other2 hybrid arms have IDENTICAL EFFECTIVE N after origin
+permission canonicalization; their original results remain valid. Native atomic
+candidate is unaffected. Runtime+independent checks verify this equivalence again.
+
+Correction ROOT output/query_field_20261012/scope_permission_v1; freeze28548e8,
+prepared before rawpredcomplete AND before rawscores (both designflagsfalse).
+One new privileged arm native_positive_admitted_reference_negative: materialize
+originref admission then mix N with nativeP/c; allotherfunctions and nativeactiveviews
+unchanged. scope_activation.py retains canonical gate; not a universal requirement
+for other typed negative-only legal prompts. Two additional testsPASS =>25 relevant.
+CoordinatorPID538170 execsession38459 (shell538167), log/tmp/radio_gs_scope_permission_run.log.
+Predictors538263(index0/GPU0),538266(index1/GPU3),538264(index2/GPU4),538265(index3/GPU5).
+As lastseen early queries all4 executing. Automatic complete scores only2arms after
+all68newpredictions. Newfinalizer /tmp/radio_gs_scope_permission_finalize.py waits
+correctedsummary AND raw independent audit, then runs audit_query_field_scope_permission
+to ROOT/audit_independent.log. Tool session/PID available from tool history/ps.
+Permission audit independently replays ALL68 preparations in float64 sparse batches,
+correctedN/removedcounts, other2arm equivalence, actualmasks and per-scene objectives.
+
+Source-only native_order_capacity diagnostic COMPLETE, session78873 reaped.
+Fixednative sourceIoU47.7222%, per-query/view optimal threshold69.1932%, proposalgreedy
+84.7519%. Float64 cosine-order family; exact tied-score prefix optimization; original
+.5 sourceIoUs allreplayed, not fullCUDA order bitwise claim. 376nonempty sourcepseudo
+queryviews, not targetGT/deployable policy/Gaussian upperbound. Report
+2026-10-12-native-order-capacity.md/JSON; standalone test passed. Firstmmap-loader
+attempt failed before results (unsupported torch keyword); eager rerun01379b6 passed,
+originalfailure log retained. No predictions altered by this posthoc diagnosis.
+
+Method doc now separates crop-compatibility existence vs universal spatial scope;
+v10 conditional detector precedes density veto, applying same formula to allfixed
+proposals changes conditioningdomain. No new learnedhead implemented/claimed.
+NEXT finish BOTH studies/scoring/audits; fix only evidenced execution issues; report
+valid P/N factorial using CORRECTED N arm, raw intervention separate; atomiccandidate
+vsbest46.6535; update ADR0020/method/context; localcommit; originalHEAD/index verify.
+No new default/fullfive/paperclosure claims before actual positive evidence.
 END active signed scope note.
 
 Active continuation2026-10-12 COMPLETE: TWO full4/68 scope experiments and both
