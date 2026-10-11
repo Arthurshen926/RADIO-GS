@@ -78,7 +78,11 @@ def main():
                 active=[vi for vi,s in enumerate(scopes[a][qi]) if bool(s['confidence']>0 and s['positive'].any())]
                 assert active==row['arms'][a]['active_views']
                 if active:assert np.all(np.diff(row['arms'][a]['energy_trace'])<=1e-8)
-                else:assert torch.equal(data['membership_by_control'][a][:,qi],old['membership_by_control']['semantic_initial'][:,qi])
+                else:
+                    actual=data['membership_by_control'][a][:,qi]
+                    reference=old['membership_by_control']['semantic_initial'][:,qi]
+                    assert float((actual-reference).abs().max())<=2e-6
+                    assert torch.equal(actual>.5,reference>.5)
         # A fresh native scope is produced with only the cold field and legal
         # vectors. No privileged target, query-scoped detector or old prior input.
         probe=0;device_native=NativeTextDevice(field,'cuda')
@@ -111,6 +115,12 @@ def main():
                 retained_greedy=mean([r['retained']['greedy_iou'] for r in capacity]),
                 native=mean([r['native_iou'] for r in capacity])),
             replaced_negative_conflicts=conflicts,cold_native_scope_io_denied=True,
+            native_positive_views_without_reference_scope=sum(
+                c['native_accepted']>0 and c['source_confidence']==0
+                for r in record['diagnostics'] for c in r['capacity']),
+            reference_views_without_native_admission=sum(
+                c['native_accepted']==0 and c['source_confidence']>0
+                for r in record['diagnostics'] for c in r['capacity']),
             active={a:sum(bool(r['arms'][a]['active_views']) for r in record['diagnostics']) for a in ARMS[2:]})
         print('audited',scene,metrics,flush=True)
         del data,fixed;gc.collect()

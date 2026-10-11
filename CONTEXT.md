@@ -3,9 +3,11 @@
 Active continuation2026-10-11 RUNNING: complete union-before-morphology topology.
 Implementation freeze4dbf90f; independent audit toola80df98. ROOT
 output/query_field_20261011/scope_topology_v1. Runner
-python -m scripts.research.run_query_field_scope_topology run --gpus0,5
-is active (session95052/PID394079). First2 scenes compiled; predictions in progress;
-then remaining2 scenes, all68 prediction barrier BEFORE any GT scoring. Do not start
+Original coordinatorPID394079 terminated ONLY to schedule4 concurrent scenes;
+first2 prediction children396101/396654 continue unchanged. New scheduler
+/tmp/radio_gs_scope_topology_schedule.py session77075 starts scenes2/3 onGPUs0/5
+alongside first2 (no method change), then completes scoring/audit. Schedulingreceipt
+ROOT/scheduling.json. All68 prediction barrier BEFORE any GT scoring. Do not start
 a duplicate runner. Full fields inherit extent_preparation_v1/fields unchanged and
 add scope_topology incidence/neighborhood/native descriptors/retained IDs. Full
 query-free native proposals (5756), not just previous5137. Full384x512 binary native
