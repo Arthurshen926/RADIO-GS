@@ -1,5 +1,25 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11: member exchanges + analytic footprint + native confidence COMPLETE FUNCTIONAL WIRING.
+Experimental query_text_member_energy now uses strong semantic initial, shared native confidence,
+field-only coverage and stored footprint; bounded +/- decisions + up to8 shared-positive exchange
+candidates/member/pass,8passes; weights .1/.1. No source fitting or default promotion.
+Cheap replacement trap fixed; negative leakage replacement rejected; no global optimum claim.
+SupportFootprint optional field state preserves old loading. Integral is infinite-plane projected
+unoccluded Gaussian support, NOT clipped image area or full-object extent protection.
+4 real scenes/72views compiled observed-reference EXACT; all4coldreload parent tensors EXACT;
+80source-denied footprint conditions PASS; code/view/source/provenance auditPASS.
+Additional322081344bytes (uncompressed perview costs); total4473352members across4scenes.
+29targeted testsPASS incl actualCUDA projection, numerical quadrature, storage, native confidence,
+30random small energy/allflip/exchange checks and synthetic source-denied experimental API.
+Root output/query_field_20261011/compiled_support_footprint_v1; logs retained; alljobsfinished.
+Numerical implementation f14ab6d; cold validator e742267; root implementation.json binds hashes.
+NO new benchmark predictions: latest actual45.1953 fixed/44.8761 joint remain current.
+Coverage remains sampled; soft energy does NOT guarantee initially-covered positive retention.
+NEXT: controlled real predictions + full-source extent diagnosis; freeze controls/ablations before
+scoring, and resolve missing extent evidence. Do not call function wiring performance recovery.
+See docs/experiments/2026-10-11-member-exchange-footprint.md and support-footprint-audit.json.
+
 Active continuation2026-10-11: bidirectional member ENERGY FUNCTION reference added.
 radio_gs/query_field/member_energy.py: bounded discrete +/- updates, reliability-weighted
 positive deficit/negative excess, fixed-prior normalized footprint, prior disagreement.
