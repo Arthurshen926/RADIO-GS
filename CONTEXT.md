@@ -1,5 +1,48 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-12 IN PROGRESS: NVOS explicit current-reference input
+transferred to shared extent engine, full8cases x4conditions. ROOT
+output/query_field_20261012/reference_extent_v1. Methodfreezeb04ce8b; audit/probedc26037.
+Main coordinatorPID622576 session19658 log/tmp/radio_gs_reference_extent_run.log,
+GPUs0,2,3,4; externalGPU1job DO NOTTOUCH. All32predictionsbeforeGT. No newscore read.
+FinalizerPID628958 session54011 /tmp/radio_gs_reference_extent_finish.py waits summary
+then runs scripts.research.audit_query_field_reference_extent run on0,2,3,4,
+logROOT/audit_run.log. Do NOTkill/restart/duplicate; finishallscore/auditbeforefinal.
+Coldsource-denied firstfernprimary probe COMPLETE PASS, session23902 reaped;
+ROOT/cold_probe.json and docs/experiments/2026-10-12-reference-extent-cold-probe.json.
+
+ARMS composed (fresh previous reference_scope_admitted), shared_prior (PRIMARY),
+shared_lift, shared_literal. Same7fields/8requests,120sourceobservations,currentretained
+positive-derivedSAMmask/camera; inheritedqueryRGB/SAMcost, NOTrawscribbles.
+Newreference_extent.py instantiatesA_obs/footprint/R_set fromfield+CURRENTlegalcamera,
+no historicalsourceRGB/mask/track/targetcamera/freecontinuousqueryfitting. Thisislegal
+input-specificgeometry, not26newstoredsourcefieldcompilations. Full192x256currentraster;
+domainfield.member_available;P=(fractionaltarget>0)&valid,N=(target==0)&valid.
+Explicitfull2DmaskcomplementpermissionNOTlegalforrawsparseprompts. c=1,Pgatefallback.
+shared_prior keepsfreshcomposedbinaryinitializer; shared_lift rebuildsvisibleinitial
+throughA_obs andnormalizescostagainstnewinitial; unknownkeepsprior. Same4passes/.1cost.
+Sharedlinkedkernel nowexplicitdecision_cutoff, LERFdefault10.5/255 exactlegacyfunction;
+NVOS usesexistingconsumerboundary.5, literalcontrol retainsLERFcutoff. NoGTthresholdtuning.
+Public QueryFieldRuntime.reference_extent +public_nvos newtypedroutes implemented.
+All3newconditions save currentquery factors/stateforauditONLY, notdeploymentanswercache.
+
+12targetedtestsPASS, includes24legacyrandomfulltrace/everydecisionexact andindependent
+fullobjectiveflip enumeration at3cutoffs. Firsttestattempt failedonlynewdiagnosticdictkey;
+removedunsolicitedsharedkey, defaultreportsfullyunchanged, rerunPASS. Auditintegralimage
+resampling initiallyusedonearea division differing5.96e-8; fixedbeforeGT todeclaredfloat32
+heightthenwidthdivision. All8currentquerymasksnowBITEXACT independentintegerintegrals;
+no gate relaxation/predictionchange. Thesearea masksarenotGT.
+Auditgates implementedbeforeGT: initial2e-6,costrelative2e-5,A_obs2e-6,footprintrelative2e-5,
+compiledvsindependentfullrendereralpha1e-4 anddecisionbitdiff0, CPUobjective1e-7,
+physicalrendererobjective2e-6. Rebuildallscopes/initial/cost, baselineexact, alltargetIoU/P/R/AP.
+Auditor frozenbeforeGT; ifactualauditfails retainloganddiagnose, nevermasknewscore/regressions.
+Coldprobe deniesalloutput anddatasetroot open/io.open plusanytorch.loadduringwholeactual
+query; legalqueryinputs loadedbefore; code/compiler-cacheIOallowed;notOSsandbox.
+NEXT finish32prediction/scoring/audit. Judgepriorvsvisiblelift vsliteralcutoff andreference
+fitvsheldtarget. UpdateADR0020/method/common-readiness forCURRENT-camera instantiation
+withoutassertingalltasksneedstoredsourcefactors. No default/five/paperpromotion inadvance.
+END active reference extent note.
+
 Active continuation2026-10-12 COMPLETE: positive/negative ablations, other-view
 completion and full public text replay. All own prediction/scoring/audit jobs
 finished; no jobs to resume or duplicate. Worktree /root/RADIO-GS-query-field,
