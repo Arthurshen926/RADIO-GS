@@ -47,6 +47,8 @@ def main():
     a.add_argument('--negative-likelihood', choices=['hard', 'contaminated', 'unknown', 'weighted'], default='hard')
     a.add_argument('--optimization-state-in')
     a.add_argument('--optimization-state-out')
+    a.add_argument('--scope-state-out', help='Research-only export of fully assembled privileged query evidence')
+    a.add_argument('--scope-state-only', action='store_true', help='Export scope evidence without fitting or producing a readout')
     a.add_argument('--pixel-loss', choices=['mean', 'balanced'], default='mean')
     a.add_argument('--source-coverage-reference')
     a.add_argument('--support-prior', choices=['none', 'count', 'footprint'], default='none')
@@ -68,6 +70,8 @@ def main():
     a.add_argument('--steps', type=int, default=240)
     a.add_argument('--mode', choices=['admission', 'seeded'], required=True)
     args = a.parse_args()
+    if args.scope_state_only and not args.scope_state_out:
+        a.error('--scope-state-only requires --scope-state-out')
     args.carrier_arm = 'adaptive_allrgb'
     args.arm = 'decision'
     args.scope_negatives = False
@@ -303,6 +307,13 @@ def main():
         seed = total_positive / total_mass.clamp_min(1e-08)
         prior[:, newly_active] = torch.maximum(prior[:, newly_active], seed[:, newly_active])
     admission_counts = torch.stack(admission).sum(0).tolist()
+    if args.scope_state_out:
+        torch.save(dict(texts=initial['texts'], source_frames=source_frames,
+            source_raster=[h, w], privileged_query_evidence=True,
+            views=[dict(target=v['y'].cpu(), positive=v['pos'].cpu(), negative=v['neg'].cpu(),
+                        confidence=v['confidence'].cpu()) for v in views]), args.scope_state_out)
+        if args.scope_state_only:
+            return
     del total_mass, total_positive, m, n
     result = load(args.retained_selection)['selection_scores'].cuda() if args.retained_selection else prior.clone()
     history = []
