@@ -1,21 +1,36 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-11 IN PROGRESS: field-owned full-scene observation lift
+Active continuation2026-10-11 COMPLETE: field-owned full-scene observation lift
 and query-normalized footprint. Implementation b169813; immutable per-query logs
 fixed658b34a. ROOT output/query_field_20261011/extent_preparation_v2; fields remain
-extent_preparation_v1/fields. V1 two complete field exports, first query/scene exact,
-then exclusive latest_check.json collided; no complete predictions/newGT reads.
-V2 same numeric function/gates, query-indexed logs, full68 re-run; two remaining
-scenes compilation concurrent. Runner run --gpus 0,5,3,4.22 relevant testsPASS.
-Source initialization and cost now computed from field+explicit fixed scope+native
-prior; no continuous query parameters. Scope STILL PRIVILEGED; no default promotion.
-Frozen gates initial<=2e-6, threshold bits0, costrelative<=2e-5, final selectionbits0.
-If all68 exact, inherit previous audited metrics by prediction identity without
-reopeningGT; do not call this a new accuracy increase. Pending independent cold
-audit script audit_query_field_extent_preparation.py (also float64 replay).
-Mechanism/closure document docs/method/query-field-mechanisms-and-closure.md separates
-native functions,typed signed scope,and actual-set decision. Scope generator remains
-the key unclosed capability; no claim of three proven novel contributions.
+extent_preparation_v1/fields. ALL4/68 predictions complete; independent cold auditPASS;
+all jobs finished.359 parent tensors/scene EXACT; full member values/selected bitsEXACT.
+56active/12nativefallbacks. Initial maxabsolute4.1723e-7; costmaxrelative2.3837e-7;
+frozen gates2e-6/2e-5 not relaxed; initial threshold bits0/finalbits0 differences.
+Independent CPUfloat64 mass/cost replay all68 maxerrors4.7574e-7/4.5442e-7; cold
+builtin/io.open+torch.load denied probe eachscene PASS (not OS sandbox).22testsPASS.
+Source initialization and cost now computed from field+explicit fixed scope+fixed
+native prior; no continuous query parameters. Scope STILL PRIVILEGED; no default
+promotion. All68 actual sets exactlyretain previous56.9282% vs same-input57.5700%.
+Metrics inherited by exact fullprediction identity, no newGT reads/no accuracygain.
+Standard best remains46.6535; not new full-five/LERF3DGT or historicalv10 equivalence.
+72views/3538944rays/245114387incidences (including originalzero coefficients),
+additional5227908028bytes=4.8689GiB. No query/sourceRGB/mask/camera answers in new
+state. Uncompressed functional reference; same4passes and source scope policy.
+V1 two complete field exports and first query/scene exact, then exclusive log
+filename collided; no completepredictions/GT. V2 numbered logs only, all68 rerun,
+old failures retained. Prediction runner run --gpus0,5,3,4 finished; audit finished.
+Reports docs/experiments/2026-10-11-extent-preparation-results.md and siblingauditJSON.
+Mechanism/closure doc docs/method/query-field-mechanisms-and-closure.md separates
+native query functions,typed signed scope,and actual-set decision. Includes restricted
+functional sufficiency argument, explicit novelty limitations and primary literature.
+NEXT concentrate on field-owned full scope generation: query-free candidate capacity,
+native identity admission,union/instance/part composition,negative/unknown/confidence.
+Do not revive failed forest/simplethresholds or conflate existing partialP/N summaries
+with complete queryscope. Keep new initialization/cost/optics/policy fixed while testing
+scope functions, then public shared typed chain + joint5/UQIS4. Remaining historical
+accuracy gap NOT solely attributed to scope: sourcebudget/nativeprior/domain/policy
+differences remain. No three-proven-innovations or paperclosure claim.
 END active preparation note.
 
 Active continuation2026-10-11 COMPLETE: full-extent field geometry + finite member

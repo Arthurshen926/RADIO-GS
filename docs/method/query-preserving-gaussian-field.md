@@ -1,5 +1,12 @@
 # Query-preserving Gaussian field: implementation and experiment ledger
 
+2026-10-11: [mechanism and closure design](query-field-mechanisms-and-closure.md)
+supersedes the historical first-implementation diagram below. Whole-phase optics
+and finite member decisions are validated on fixed scopes; the subsequent
+[full-scene lift and normalized cost transfer](../experiments/2026-10-11-extent-preparation-results.md)
+preserves all68 final sets exactly, with four cold audits passing. Complete scope
+generation is still privileged; standard best and full-five claims are unchanged.
+
 2026-10-10: [complete reference member studies](../experiments/2026-10-10-reference-member-readout-results.md)
 add optional current-reference member exclusion and separate fraction/admission readouts.
 Same8/7fields/120sources,32predictions; actual84.3701->86.9550, finalresponse83.1015,

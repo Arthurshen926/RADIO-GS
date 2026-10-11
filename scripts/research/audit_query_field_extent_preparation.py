@@ -1,5 +1,6 @@
 """Cold field/input audit and independent float64 mass/cost reconstruction."""
 import gc
+import argparse
 import time
 from pathlib import Path
 import torch
@@ -9,12 +10,15 @@ from scripts.research.run_query_field_relations import read, write, receipt, che
 from radio_gs.query_field.storage import load_field
 
 
-def main():
+def main(wait_seconds=0):
     began=time.monotonic();d=design();cfg=read(ROOT/'prediction_config.json')
+    deadline=began+wait_seconds
     for record in d['inputs']:check(record)
     records=[]
     for j in cfg['jobs']:
-        scene=j['scene'];out=ROOT/'predictions'/j['name'];pred=read(out/'prediction.json');check(pred['predictions'])
+        scene=j['scene'];out=ROOT/'predictions'/j['name']
+        while not (out/'prediction.json').exists() and time.monotonic()<deadline:time.sleep(5)
+        pred=read(out/'prediction.json');check(pred['predictions'])
         field,manifest=load_field(FIELDS/scene/'field')
         old_manifest=read(PARENT_FIELDS/scene/'field/manifest.json')
         old_state=torch.load(PARENT_FIELDS/scene/'field/field.pt',weights_only=True)
@@ -98,4 +102,5 @@ def main():
 
 
 if __name__=='__main__':
-    torch.set_num_threads(4);main()
+    p=argparse.ArgumentParser();p.add_argument('--wait-seconds',type=int,default=0);a=p.parse_args()
+    torch.set_num_threads(4);main(a.wait_seconds)
