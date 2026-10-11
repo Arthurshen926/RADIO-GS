@@ -1,5 +1,31 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11: TWO real member-function studies + causal diagnostics COMPLETE; neither promoted.
+All4/68: initial42.9498/fixed45.1953/joint44.8761; energy33.2131/noexchange31.3874/
+nofootprint35.3066/unitconfidence32.9546. Second witness-energy33.2230/witness-no-penalty34.8089.
+First7arms/second5arms all predictions before scores; both independent mask auditsPASS.
+Exchange+1.8257pp all4up; footprint penalty-2.0934pp all4down; confidence+.2586pp CI crosses0.
+Witness gate+.0099pp,2up2down,CI[-.5532,.7285]pp: hypothesis NOT sufficient, no improvement claim.
+Posthoc2x2 actualsets: initial42.9498/removalonly43.1761/additiononly34.2264/full33.2131;
+addition main loss(-8.7234pp), interaction-1.2396pp. Do not turn no-addition into final architecture.
+Full source756pairs labels/old3controls EXACT: gains76521P/losses21782P ALL unsampled;
+Ncoverage100583 vs initial82661; sourcepartialIoU59.9283 >50.467 despite realobject loss.
+Figurines159/428added lack visibleP; gate actually tested and failed to restore performance.
+Added prior medians .374/.406/.391/.440,none<.1: no evidence for grossly irrelevant native scores.
+25final targeted testsPASS, compiled/reference48synthetics+firstreal exact; coldpublic witness21exact,
+file reads denied after synthetic kernel warmup; not OS sandbox. AlljobsFINISHED.
+v1 OOM unused finite readout; v2 independent native entry, prior2scenes all7setsEXACT. Original checkout untouched.
+Freeze energy bd61f38; witness7d146b9. Historical energy hash audit replay at freeze (later optional gate added).
+Roots output/query_field_20261011/{member_energy_v2,member_change_factorial_v1,member_witness_v1}.
+NEXT architecture responsibility: explicit identity/whole-scope/ADDED-PART quality and coherent expansion,
+then joint actual-set geometry/full positive-negative extent. Do not keep tuning this sparse minimum-cover decoder.
+v10 audit: actual text cost confidence-weighted/source-normalized,BCE+overlap,denser interlaced pixels;
+current unweighted cost/strong-native-normalizer/capped optical energy is NOT complete functional equivalence.
+conditional_region_membership separately predicts added purity + per-view admission on instance/anchor routes;
+do not conflate that route with LERF source-assisted text or compare input budgets as causal equivalents.
+Keep single field/three teacher roles/typed queries/same actual2D3Dset; no query sourcefit or eval answerbank.
+No updated five-task/v10 recovery/paper closure. See docs/experiments/2026-10-11-member-energy-results.md.
+
 Active continuation2026-10-11: member exchanges + analytic footprint + native confidence COMPLETE FUNCTIONAL WIRING.
 Experimental query_text_member_energy now uses strong semantic initial, shared native confidence,
 field-only coverage and stored footprint; bounded +/- decisions + up to8 shared-positive exchange
