@@ -9,7 +9,7 @@ from scipy import sparse
 
 
 def solve_member_energy(matrix, prior, positive, negative, reliability, footprint,
-                        *, cutoff, support_weight=.1, prior_weight=.1, max_passes=8, exchange_candidates=8, engine="reference"):
+                        *, cutoff, support_weight=.1, prior_weight=.1, max_passes=8, exchange_candidates=8, engine="reference", addition_allowed=None):
     """Bounded deterministic coordinate descent on one binary Gaussian set.
 
     E = weighted positive deficit + weighted negative excess (each class
@@ -57,6 +57,13 @@ def solve_member_energy(matrix, prior, positive, negative, reliability, footprin
     # Disable that term explicitly instead of dividing by epsilon.
     cost = footprint / denominator if denominator > 0 else np.zeros(count)
     disagreement = np.abs(2 * prior - 1) / max(int(touched.sum()), 1)
+    if addition_allowed is not None:
+        addition_allowed = np.asarray(addition_allowed)
+        if addition_allowed.dtype != bool or addition_allowed.shape != (count,):
+            raise ValueError('invalid addition witness domain')
+        # Preserve the original prior normalization and all initial members.
+        # The witness authorizes NEW members; it never replaces the strong prior.
+        touched = touched & (initial | addition_allowed)
     coverage = np.asarray(matrix @ selected.astype(float)).ravel()
 
     def data_loss(values, indexes):
@@ -136,7 +143,7 @@ def solve_member_energy(matrix, prior, positive, negative, reliability, footprin
                          query_parameter_fitting=False, full_extent_guaranteed=False)
 
 
-def query_text_member_energy(field, query, negatives, *, decoder=None, **policy):
+def query_text_member_energy(field, query, negatives, *, decoder=None, addition_policy="unrestricted", **policy):
     """Experimental native TEXT entrypoint; strong prior and field-only inputs.
 
     Requires compiled support footprint. Its coverage remains sampled; this API
@@ -145,7 +152,7 @@ def query_text_member_energy(field, query, negatives, *, decoder=None, **policy)
     import torch
     from dataclasses import replace
     from .joint_exclusion import JointExclusionDecoder, CUTOFF
-    from .scope_confidence import native_text_evidence, native_scope_confidence
+    from .scope_confidence import native_text_evidence, native_scope_confidence, native_positive_witness
     from .scope_readout import ScopeReadout
     with torch.no_grad():
         if getattr(field, 'support_footprint', None) is None:
@@ -165,8 +172,12 @@ def query_text_member_energy(field, query, negatives, *, decoder=None, **policy)
         # data reliability is separate so low confidence retains its magnitude.
         active = torch.stack([accepted[c.regions].any() for c in field.scope_constraints.views])
         cost = field.support_footprint(active).cpu().numpy()
+        if addition_policy not in {"unrestricted", "positive_witness"}:
+            raise ValueError('unknown addition policy')
+        witness = native_positive_witness(field, accepted).cpu().numpy() if addition_policy=="positive_witness" else None
         selected, details = solve_member_energy(decoder.matrix, initial.cpu().numpy(),
-            positive, negative, reliability, cost, cutoff=-np.log1p(-CUTOFF), **policy)
+            positive, negative, reliability, cost, cutoff=-np.log1p(-CUTOFF), addition_allowed=witness, **policy)
+        details['addition_policy'] = addition_policy
         selected = torch.from_numpy(selected).to(initial.device)
         member = initial.clone()
         member[selected & ~(initial > .5)] = 1.

@@ -129,3 +129,24 @@ def test_compiled_engine_matches_reference_with_sparse_ties_and_exchanges():
             assert np.array_equal(ref,out)
             for k in ['passes','flips','exchanges','pairs_evaluated','converged']:assert rd[k]==od[k]
             np.testing.assert_allclose(rd['energy_trace'],od['energy_trace'],atol=1e-12,rtol=1e-12)
+
+
+def test_witness_preserves_weak_completion_but_rejects_unwitnessed_ray_explainer():
+    for engine in ['reference','compiled']:
+        selected,_=solve([[0,2,2]], [.9,.2,.2], [True], footprint=[1,10,1],
+            addition_allowed=np.array([False,True,False]),engine=engine)
+        assert selected.tolist()==[True,True,False]
+
+
+def test_all_witnesses_preserve_reference_and_zero_witnesses_keep_prior_without_evidence():
+    args=([[2,2]],[.9,.1],[True])
+    ref,_=solve(*args,footprint=[10,1])
+    selected,_=solve(*args,footprint=[10,1],addition_allowed=np.ones(2,bool))
+    assert np.array_equal(ref,selected)
+    selected,_=solve([[2,2]],[.9,.1],[False],addition_allowed=np.zeros(2,bool))
+    assert selected.tolist()==[True,False]
+
+
+def test_witness_domain_validation():
+    with pytest.raises(ValueError,match='witness'):
+        solve([[2]],[.1],[True],addition_allowed=[1.])

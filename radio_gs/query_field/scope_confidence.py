@@ -44,3 +44,16 @@ def query_text_scope_confident(field,query,negatives,*,expanded=True):
     prior,probability=native_text_evidence(field,query,negatives)
     results,accepted=confident_scope(field,prior,probability);member,details=results[expanded]
     return ScopeReadout(prior,member,member>.5,accepted,dict(details,experimental=True,transient_query_fitting=False,cached_query_response=False))
+
+
+@torch.no_grad()
+def native_positive_witness(field,accepted):
+    """A new Gaussian needs visible positive support from an accepted region.
+
+    Joint ray coverage includes hidden geometry; explaining a positive ray alone
+    is not an identity witness. Existing prior members are not gated here.
+    """
+    if accepted.dtype!=torch.bool or accepted.shape!=field.evidence.views.shape:
+        raise ValueError('invalid accepted witness domain')
+    positive=field.evidence.matrix('positive')
+    return torch.sparse.mm(positive,accepted.to(positive.dtype)[:,None]).flatten()>0
