@@ -74,7 +74,7 @@ def test_field_decoder_labels_and_public_api(monkeypatch):
     from radio_gs.query_field import part_conditioning
     field.support_footprint=SupportFootprint({'cost':torch.tensor([[1.,1.]])},2)
     field.evidence=object()
-    monkeypatch.setattr(part_conditioning,'native_region_probability',lambda *args:torch.tensor([.9]))
+    monkeypatch.setattr(scope_confidence,'native_text_evidence',lambda *args:(torch.tensor([.3,.7]),torch.tensor([.9])))
     monkeypatch.setattr(scope_confidence,'native_scope_confidence',lambda *args:(accepted,torch.tensor([.8])))
     import builtins
     def denied(*args,**kwargs):raise AssertionError('query attempted file access')

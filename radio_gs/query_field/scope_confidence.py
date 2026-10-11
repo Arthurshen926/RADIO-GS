@@ -28,11 +28,19 @@ def confident_scope(field,prior,probability):
 
 
 @torch.no_grad()
-def query_text_scope_confident(field,query,negatives,*,expanded=True):
+def native_text_evidence(field,query,negatives):
+    """Native prior and region probabilities without the optional finite readout."""
     available=field.observed|field.semantic_measure.supported
     background=field.semantic.score(negatives).max(1).values
     fallback=(10*(field.semantic.score(query).flatten()-background)).sigmoid()
     prior=field.semantic_measure.union_probabilities(query,negatives,fallback,'measure',10.).masked_fill(~available,0)
     probability=native_region_probability(field.evidence,query,negatives)
+    return prior,probability
+
+
+@torch.no_grad()
+def query_text_scope_confident(field,query,negatives,*,expanded=True):
+    available=field.observed|field.semantic_measure.supported
+    prior,probability=native_text_evidence(field,query,negatives)
     results,accepted=confident_scope(field,prior,probability);member,details=results[expanded]
     return ScopeReadout(prior,member,member>.5,accepted,dict(details,experimental=True,transient_query_fitting=False,cached_query_response=False))

@@ -6,14 +6,14 @@ import torch
 from radio_gs.query_field.storage import load_field
 from radio_gs.query_field.joint_exclusion import JointExclusionDecoder,CUTOFF
 from radio_gs.query_field.member_energy import solve_member_energy
-from radio_gs.query_field.scope_confidence import query_text_scope_confident,native_scope_confidence
+from radio_gs.query_field.scope_confidence import native_text_evidence,native_scope_confidence
 from radio_gs.query_field.part_conditioning import native_region_probability
 from scripts.research.run_query_field_relations import read,write,receipt,check,execute,lanes
-ROOT=Path('output/query_field_20261011/member_energy_v1')
+ROOT=Path('output/query_field_20261011/member_energy_v2')
 PARENT=Path('output/query_field_20261011/joint_exclusion_domain_v1')
 FIELDS=Path('output/query_field_20261011/compiled_support_footprint_v1')
 ARMS=['semantic_initial','frozen_visibility','joint_coverage','member_energy','no_exchange','no_footprint','unit_confidence']
-PROTOCOL=Path('docs/experiments/2026-10-11-member-energy-protocol.md')
+PROTOCOL=Path('docs/experiments/2026-10-11-member-energy-v2-protocol.md')
 
 
 def prepare():
@@ -26,6 +26,9 @@ def prepare():
         j['field']=str(FIELDS/j['scene']/'field')
         for p in [Path(j['field'])/'manifest.json',Path(j['queries']),PARENT/'predictions'/j['name']/'prediction.json',PARENT/'predictions'/j['name']/'predictions.pt']:
             records.append(receipt(p))
+    for j in cfg['jobs'][:2]:
+        previous=Path('output/query_field_20261011/member_energy_v1/predictions')/j['name']
+        records.extend([receipt(previous/'prediction.json'),receipt(previous/'predictions.pt')])
     write(ROOT/'prediction_config.json',cfg)
     write(ROOT/'design.json',dict(configuration=receipt(ROOT/'prediction_config.json'),inputs=records,
         code=[receipt(p) for p in sorted(Path('radio_gs/query_field').glob('*.py'))]+[receipt(__file__)],
@@ -52,9 +55,8 @@ def predict(index):
     members={a:[] for a in ARMS};diagnostics=[]
     for qi,text in enumerate(old['texts']):
         start=time.monotonic();q=old['native_query_vectors'][qi].cuda();neg=old['generic_negative_vectors'].cuda()
-        native=query_text_scope_confident(field,q,neg);initial=native.semantic_probability
-        accepted,confidence=native_scope_confidence(field,initial,native_region_probability(field.evidence,q,neg))
-        assert torch.equal(accepted,native.accepted_regions)
+        initial,probability=native_text_evidence(field,q,neg)
+        accepted,confidence=native_scope_confidence(field,initial,probability)
         assert torch.equal(initial>.5,old['selected_by_control']['semantic_initial'][:,qi].cuda())
         assert float((initial.cpu()-old['scores']['semantic_initial'][:,qi]).abs().max())<=2e-6
         for a in ARMS[:3]:members[a].append(old['membership_by_control'][a][:,qi])
@@ -76,6 +78,11 @@ def predict(index):
         print('predicted',j['scene'],qi,text,'seconds',diagnostics[-1]['seconds'],
               'primary',controls['member_energy'],flush=True)
     members={a:torch.stack(v,1) for a,v in members.items()};sets={a:v>.5 for a,v in members.items()}
+    previous=Path('output/query_field_20261011/member_energy_v1/predictions')/j['name']/'predictions.pt'
+    if previous.exists():
+        v1=torch.load(previous,weights_only=True)
+        for a in ARMS:assert torch.equal(sets[a],v1['selected_by_control'][a]),a
+        print('all seven arms exact v1',j['scene'],flush=True)
     old.update(scores={a:old['scores']['semantic_initial'] for a in ARMS},membership_by_control=members,
         selected=sets['member_energy'],selected_by_control=sets)
     torch.save(old,out/'predictions.pt')

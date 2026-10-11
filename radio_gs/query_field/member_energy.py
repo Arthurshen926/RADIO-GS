@@ -145,17 +145,15 @@ def query_text_member_energy(field, query, negatives, *, decoder=None, **policy)
     import torch
     from dataclasses import replace
     from .joint_exclusion import JointExclusionDecoder, CUTOFF
-    from .scope_confidence import query_text_scope_confident, native_scope_confidence
-    from .part_conditioning import native_region_probability
+    from .scope_confidence import native_text_evidence, native_scope_confidence
+    from .scope_readout import ScopeReadout
     with torch.no_grad():
         if getattr(field, 'support_footprint', None) is None:
             raise ValueError('member energy requires compiled support footprint')
-        result = query_text_scope_confident(field, query, negatives)
-        initial = result.semantic_probability
-        probability = native_region_probability(field.evidence, query, negatives)
+        initial, probability = native_text_evidence(field, query, negatives)
         accepted, confidence = native_scope_confidence(field, initial, probability)
-        if not torch.equal(accepted, result.accepted_regions):
-            raise ValueError('native acceptance changed between readouts')
+        result = ScopeReadout(initial, initial, initial>.5, accepted,
+            dict(experimental=True, transient_query_fitting=False, cached_query_response=False))
         decoder = decoder if decoder is not None else JointExclusionDecoder(field)
         if decoder.field is not field:
             raise ValueError('decoder bound to another field')
