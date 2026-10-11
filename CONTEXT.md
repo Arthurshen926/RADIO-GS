@@ -1,5 +1,23 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11 IN PROGRESS: field-owned full-scene observation lift
+and query-normalized footprint. Implementation b169813; immutable per-query logs
+fixed658b34a. ROOT output/query_field_20261011/extent_preparation_v2; fields remain
+extent_preparation_v1/fields. V1 two complete field exports, first query/scene exact,
+then exclusive latest_check.json collided; no complete predictions/newGT reads.
+V2 same numeric function/gates, query-indexed logs, full68 re-run; two remaining
+scenes compilation concurrent. Runner run --gpus 0,5,3,4.22 relevant testsPASS.
+Source initialization and cost now computed from field+explicit fixed scope+native
+prior; no continuous query parameters. Scope STILL PRIVILEGED; no default promotion.
+Frozen gates initial<=2e-6, threshold bits0, costrelative<=2e-5, final selectionbits0.
+If all68 exact, inherit previous audited metrics by prediction identity without
+reopeningGT; do not call this a new accuracy increase. Pending independent cold
+audit script audit_query_field_extent_preparation.py (also float64 replay).
+Mechanism/closure document docs/method/query-field-mechanisms-and-closure.md separates
+native functions,typed signed scope,and actual-set decision. Scope generator remains
+the key unclosed capability; no claim of three proven novel contributions.
+END active preparation note.
+
 Active continuation2026-10-11 COMPLETE: full-extent field geometry + finite member
 function migration. ROOT output/query_field_20261011/extent_decision_v3; fields
 compiled_extent_factors_v2. Freeze7594535(v1),42058ad(geometry),bc08988(linked execution).
