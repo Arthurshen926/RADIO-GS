@@ -80,6 +80,8 @@ def test_field_decoder_labels_and_public_api(monkeypatch):
     def denied(*args,**kwargs):raise AssertionError('query attempted file access')
     with monkeypatch.context() as guard:
         guard.setattr(builtins,'open',denied)
+        def finite_forbidden(*args,**kwargs):raise AssertionError('unused finite readout requested')
+        guard.setattr(scope_confidence,'query_text_scope_confident',finite_forbidden)
         energy=query_text_member_energy(field,torch.ones(1),torch.ones(1,1),decoder=decoder)
     assert energy.selected.tolist()==[False,True]
     assert energy.diagnostics['coverage_view_confidence_preserved']
