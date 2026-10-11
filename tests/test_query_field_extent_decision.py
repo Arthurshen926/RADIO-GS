@@ -15,13 +15,19 @@ def fixture():
 
 def reference(factors, selected, target, positive, negative, confidence, cost):
     member = torch.tensor(selected, dtype=torch.float64); result = .1 * np.dot(cost, selected)
+    offset = 0
     for vi, f in enumerate(factors.views):
+        if confidence[vi] == 0:
+            offset += len(f.atom); continue
         p = torch.sigmoid(torch.logit(f(member).clamp(1e-6, 1-1e-6)) - torch.logit(torch.tensor(CUTOFF, dtype=torch.float64)))
-        y = torch.tensor(target, dtype=torch.float64); pos = torch.tensor(positive); neg = torch.tensor(negative); known = pos | neg
+        stop = offset + len(p)
+        y = torch.tensor(target[offset:stop], dtype=torch.float64)
+        pos = torch.tensor(positive[offset:stop]); neg = torch.tensor(negative[offset:stop]); known = pos | neg
         bce = torch.nn.functional.binary_cross_entropy(p.clamp(1e-5, 1-1e-5), y, reduction='none')
         loss = .5 * ((bce * pos).sum()/max(pos.sum(), 1) + (bce * neg).sum()/max(neg.sum(), 1))
         loss += 1 - (2*(p*y*known).sum()+1)/((p*known).sum()+(y*known).sum()+1)
         result += confidence[vi] / np.count_nonzero(confidence) * float(loss)
+        offset = stop
     return result
 
 
@@ -70,6 +76,23 @@ def test_float32_termination_matches_native_not_float64_product():
     assert t > 1e-4
     actual = render_row(np.array([0, 3]), np.arange(3), alpha, np.ones(3, bool), 0)
     assert actual == np.float32(1)-t
+
+
+def test_view_balanced_objective_with_soft_targets_and_unknown_rows():
+    base = fixture().state_dict()
+    state = dict(base, **{k.replace('views.0.', 'views.1.'): v.clone() for k, v in base.items()})
+    factors = ExtentFactors(state, 4); decoder = ExtentDecision(factors, 4)
+    target = np.array([.9, .1, .05, .95, .9, .7])
+    positive = np.array([1, 0, 0, 1, 1, 0], bool)
+    negative = np.array([0, 1, 1, 0, 0, 0], bool)
+    initial = np.ones(4, bool); cost = np.array([.3, .2, .2, .3]); confidence = np.array([.2, .9])
+    selected, report = decoder.solve(initial, target, positive, negative, confidence, cost)
+    assert abs(report['energy_trace'][0] - reference(factors, initial, target, positive, negative, confidence, cost)) < 1e-7
+    assert abs(report['energy_trace'][-1] - reference(factors, selected, target, positive, negative, confidence, cost)) < 1e-7
+    # Unknown evidence cannot alter the decision by changing its target value.
+    modified = target.copy(); modified[-1] = 0.
+    second, second_report = decoder.solve(initial, modified, positive, negative, confidence, cost)
+    assert np.array_equal(selected, second) and report['energy_trace'] == second_report['energy_trace']
 
 
 def test_extent_field_roundtrip_preserves_parent(tmp_path):
