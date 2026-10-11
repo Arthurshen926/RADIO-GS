@@ -1,44 +1,68 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-11: scope_topology_v1 ALL4/68 PREDICTIONS and scoring
-COMPLETE. Macro actual selected projection seed46.6535, sourceprivileged56.9282,
-matched_positive_scope55.0409 (59.3957/45.6977/62.6259/52.4444), native_complete_scope
-35.0014 (39.2220/23.9494/38.4405/38.3935). Not promoted; no fullfive claim.
-Compilation all4 cold PASS; added279785944bytes; all5756 vsretained5137proposals.
-28relevanttests passed for topology chain. Freeze4dbf90f. Samefield complete
-union-before-morphology graph, initializer/cost/4pass optics unchanged. Nativeprior
-actually recomputed vsfixed<=2e-6/bitdiff0. Scope function still lacks reliableidentity.
-Independent baseaudit RUNNING /tmp/radio_gs_scope_finalize.py session5461 onGPU3,
-logROOT/audit_independent.log. It first created correctedsummary: frozencollector
-incorrectly compared dictionaries including different predictionPNG paths. Corrected
-collector verifies invariant numbers/GT bindings; predictions/scoring unchanged.
-ROOT/collection_correction.json; codecomplete_query_field_scope_topology_results.py.
-Early scheduling failure: originalcoordinator termination also cleaned first2children;
-3partialqueries/scene archived underfailed_attempts, full identicalmethod rerun, noGT
-before68predbarrier. Old sessions95052/77075/19309 are finished and reaped.
-Source-only posthoc atomcapacity audit RUNNING session60345, logROOT/atom_capacity.log:
-exact bestdisjoint-atom union vs16-step proposalunion diagnoses lostinformation vs
-restrictedcomposition. Not targetGT or Gaussianperformance upperbound.
+Active continuation2026-10-12 COMPLETE: TWO full4/68 scope experiments and both
+independent audits PASS. All own prediction/scoring/audit jobs finished; no work to
+resume or duplicate. Standard best remains46.6535%; no newdefault/fullfive/paperclosure.
+ROOT output/query_field_20261011/scope_topology_v1; freeze4dbf90f.
+Actual selected projection macro: seed46.6535, fixedprivilegedreference56.9282,
+matched_positive_scope55.0409, native_complete_scope35.0014. Matchedvsseed+8.3875pp,
+all4up; matchedvsreference-1.8873pp,2up2down, not equivalence. Matched uses privileged
+N/c and source-pseudo matchedP, NOT standard deployment. Native all4regress vsseed;
+P36.0690/R91.3804 vsseed48.7356/85.4985: predominant observed failure is excess
+positives, not general overcontraction. Matched-native20.0396pp also changesN/c;
+not a pure identity causal estimate. Matched Ramenvsreference-9.2468pp shows scope
+precision/conflict remains a real problem even with privileged positive matching.
 
-ADDITIONAL fixed mechanism experiment scope_relative_evidence_v1 RUNNING. Native
-confidence source-only diagnosis: Waldo average.115 vsreference.831; absolute weights
-change data/cost balance. New RelativeEvidenceExtentDecision uses weightedmean
-viewloss +.1normalizedcost via c'=c/max(c),cost'=cost*mean(c');4passes/epsunchanged.
-No newfields or teacher/training. Same native scopes regenerated and requiredBITEXACT
-allqueries; prior gateunchanged. Frozen b0aacb1 beforebase complete/GT availability;
-relative protocol docs/experiments/2026-10-11-relative-evidence-protocol.md.
-Fourrelative testsPASS; atom-capacity exhaustive subset testPASS =>33tests total.
-Original relative scheduler session75116/PID426839 owns predictors0/1/2
-PIDs426881/426882/429817 on0/5/0, respectively; its originalWaldo workerOOM atstart
-because sharedGPU5 gained external16GiBjob. Noquery completed; failurearchived.
-Waldo rerun onGPU3 session34470/PID428939 (parent428796), logpredict_3_attempt1.log.
-Originalscheduler will exit onthatOOM AFTER its otherworkersfinish; doNOTkillparents.
-Finalizer /tmp/radio_gs_relative_finalize.py session currentlyactive waitsall4 then
-scoresGPU0/3 andruns CPUaudit scripts.research.audit_query_field_relative_evidence,
-log relativeROOT/audit_independent.log. Do not duplicate predictors or scorers.
-Next finishBOTH audits and atomcapacity, write finalscope/relative results, update
-ADR0020/method docs and thiscontext, localcommit, verifyoriginalworktreeunchanged.
-No newdefault or paperclosure without actualpositive evidence and shared5benchmark.
+ScopeTopology now stores full query-free atom/proposal incidence, ray neighborhoods,
+native descriptors and retained-domain flags, linked to field A_obs/optics. Union
+BEFORE morphology; emptyacceptance gives no negative, explicitunknown inhibitsN.
+Complete sourcefree native function exists as a FAILED control: weak relevance is
+not proof of wholepositive scope or exhaustiveunion/complementnegative permission.
+No sourceRGB/mask/camera reads/new querySAM/free continuous queryfit/answerbank.
+It retains segmentation relation information: uncompressed functional reference,
+not compactness/novelty from relabeling storedsource information.
+Compilation all4 coldPASS; all431 parenttensors exact. Added279785944bytes(266.825MiB),
+fullfourfield tensors46989495526bytes(43.762GiB); original5756/retained5137proposals.
+35389440 queryfree rayconditions independently bitexact. Nativeprior recomputed
+fromfield+legalquery: <=2e-6/thresholdbitdiff0. All matchedscopes independentNumPy
+replay; actualmaskIoU/P/R allreplayed; cold IO-denial nativeprobe per scenePASS.
+
+Posthoc source-only atomcapacity diagnostic COMPLETE: scene macro retainedgreedy
+82.2556%, fullgreedy84.7519%, exact unrestrictedatomunion87.8886%, native47.7222%.
+376nonemptyreferencequeryviews, NOT targetGT or Gaussianperformance upperbound.
+Atomrelaxation+exactoptimization both change; cannot attribute gap solely to basis.
+No greedycase exhausted16steps. Exhaustive randomsmallcase testPASS.
+
+ROOT output/query_field_20261011/scope_relative_evidence_v1; freezeb0aacb1 before
+parent allpredictions/GTscores complete. Erel=sum(cL)/sum(c)+.1C implemented through
+c'=c/max(c), cost'=cost*mean(c'); same4passes/order/tolerance. No newstate/training.
+All68 native scope target/P/N/c freshly regenerated BITEXACT toparent. All controls
+exact. Native macro35.0014 -> relative34.9523%, delta-.0490pp,2up2down, sceneCI
+[-.5255,+.3686]pp. P35.7989/R92.6982: globalconfidenceunits are not the main fix;
+relativeview reliability/abstention/negativepermission remain untested. All actual
+masks replayed; one independent CPU renderedobjective probe/scene matches<1e-7.
+No promotion.33 relevant testsPASS (28topologychain+4relativeobjective+1atomcapacity).
+
+Failures retained: initialparent cleanup interrupted2scene partialruns (3logs each),
+fully rerun before scoring; relativeWaldo OOM due externalGPU5job at0queries, rerunGPU3.
+Originalscope collector compared PNGpaths; independentcollector instead verifies
+numericmetrics/GTbindings, no predictionschanged. Firstbaseaudit wrongfallbackkey
+fixed tocanonical priorartifact atsamegates. Firstrelativeaudit NumPy/Torch mean
+lastbit mismatch fixed by replaying declaredNumPy reduction; physicalobjective1e-7
+check unchanged. Successful audits audit_independent_attempt1.log in eachROOT.
+Reports docs/experiments/2026-10-11-scope-topology-results.md and
+2026-10-12-relative-evidence-results.md; sibling scope/relative auditJSON and
+2026-10-11-scope-atom-capacity.json. ADR0020 and mechanisms-and-closure updated.
+
+NEXT concentrate on query-conditioned evidence admission and signed atomic scopes:
+separate identityhypothesis, trustedpositive extent, permittednegative andunknown.
+Keep validated composition/A_obs/cost/optics/finitebidirectionalengine fixed; do not
+revive wholeinstanceforest/simplethresholdstack/hardseedfloor/more scalarconfidence
+sweeps. Factorial P/N/c replacements needed to isolate causes; use sourceonly
+functional controls without training onbenchmarkqueryanswers or extra3Dlabels.
+Only actual standard gains justify promotion. Then sharedpublictypedquery chain and
+jointfive/UQIS4 input evaluation, true3DGT/heldout validation and causal mechanism
+ablations. Three candidate contributions, not three established innovations.
 END active scope topology note.
 
 Active continuation2026-10-11 COMPLETE: field-owned full-scene observation lift
