@@ -142,6 +142,9 @@ def main():
             assert not data['selected_by_control'][arm][~data['observed']].any()
         del field,previous,fixed,atomic,prepared,prior;gc.collect()
         metrics={};evaluation=read(out/'evaluation/evaluation.json')
+        baselines=['seed_addition','native_complete_scope'];baseline_masks={b:{} for b in baselines}
+        changes={a:{b:{k:0 for k in ['added_tp','added_fp','removed_tp','removed_fp','beneficial_cases','harmful_cases']}
+                    for b in baselines} for a in NEW_ARMS}
         for arm in ARMS:
             ious=[];ps=[];rs=[]
             for item in evaluation['metrics'][arm]['selected']['objects']:
@@ -150,9 +153,19 @@ def main():
                 tp=int((gt&pred).sum());iou=tp/max(int((gt|pred).sum()),1)
                 assert abs(iou-item['iou'])<1e-12
                 ious.append(iou);ps.append(tp/max(int(pred.sum()),1));rs.append(tp/max(int(gt.sum()),1))
+                key=(item['frame'],item['query'])
+                if arm in baselines:baseline_masks[arm][key]=(pred,iou,item['gt_path'])
+                if arm in NEW_ARMS:
+                    for base in baselines:
+                        before,old_iou,gt_path=baseline_masks[base][key];assert gt_path==item['gt_path']
+                        added=pred&~before;removed=before&~pred;change=changes[arm][base]
+                        change['added_tp']+=int((added&gt).sum());change['added_fp']+=int((added&~gt).sum())
+                        change['removed_tp']+=int((removed&gt).sum());change['removed_fp']+=int((removed&~gt).sum())
+                        change['beneficial_cases']+=int(iou>old_iou);change['harmful_cases']+=int(iou<old_iou)
             metrics[arm]=dict(iou=float(np.mean(ious)),precision=float(np.mean(ps)),recall=float(np.mean(rs)))
             assert abs(metrics[arm]['iou']-summary['per_scene'][arm][scene])<1e-12
         scenes[scene]=dict(metrics=metrics,probes=probes,counts=counts,source_pseudo_agreement=source_agreement,
+                           projected_pixel_changes=changes,
                            inherited_memberships_exact=True,atomic_scope_queries_replayed=len(data['texts']))
         print('audited',scene,{a:metrics[a] for a in NEW_ARMS},flush=True);del data;gc.collect()
     macro={a:{k:sum(s['metrics'][a][k] for s in scenes.values())/4 for k in ['iou','precision','recall']} for a in ARMS}
