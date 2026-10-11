@@ -1,43 +1,71 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12 IN PROGRESS: NVOS reference operator transfer.
-Original 32 predictions/scoring COMPLETE at output/query_field_20261012/reference_extent_v1.
-Primary shared_prior REJECTED: actual IoU86.9550->80.5259, response83.1015->20.5699.
-Lift initializer80.1486 and literal cutoff75.8822. All8 old control sets EXACT.
-Independent all32 metrics and48 reference endpoints checked. Strict footprint float64
-relative2e-5 gate FAILED fortress2.968e-5/trex2.515e-5 (cost similarly). Do notcallauditPASS.
-Post-failure NumPyfloat32 determinant/order replay <=2.355e-7, cost<=3.745e-7;
-allremainingoriginalchecksPASS. Original logs/auditor/failure archived; predictionsunchanged.
-Originalrunner failedexclusivecreationbaselinechecksinside loop AFTER32predictionsbeforeGT;
-recoverye63c817 completedwithout rerun. All original jobs/sessionsreaped.
-Cold fern publicreference oldprimary historicalsceneopen/tensorload denialPASS(dc025c8).
-No currentreferenceRGBread; currentpositive-derivedSAMmask costinherited; NOTrawscribbles.
+Active continuation2026-10-12 COMPLETE: NVOS actual current-reference transfer,
+observation/selected-set loss diagnosis, coupled correction, coldtextcompatibility.
+ALL own predictions/scoring/audits/probes finished andsessionsreaped. No jobsto resume.
+Worktree /root/RADIO-GS-query-field branch codex/query-preserving-gaussian-field.
+OriginalHEADdabcaa9b5fc6d89fa4474bcaea5db52ca7f74030 andindexSHA
+917366f03337f78208f976ee26f4c58f198d2ce78ff64b29f9d7c94c06ad621c unchanged.
 
-Diagnosis (sealed states, noGT): reference R_set IoU91.5035->95.5866 but A_obs S
-IoU91.4826->22.1410, all8 referencefitup andobservedresponsedown. A_obs normalized
-available-domain is NOT legacy observed-only response. Single-view silhouette proxy
-allowsreplace/delete observedmembers. Stronginitializer alonecannotpreservefunction.
-New experimental CoupledExtentDecision: equal-weight A_obs S and R_set losses, shared
-binaryset; observation-onlycontrol; samecurrentinputs/prior/cost/.1penalty/4passes.
-No seedhardlock, teacher, training, freecontinuousqueryfit, extra fieldstate orsourceIO.
-Protocol docs/experiments/2026-10-12-reference-coupled-protocol.md fixed before newGT.
-ROOT output/query_field_20261012/reference_coupled_v1; methodfreeze53bcd82. RUNNING
-coordinatorPID647584/session45160 /tmp/radio_gs_reference_coupled_run.log GPUs0,2,3,4.
-8/16predictionscomplete; no newGTyet. Auditor73731ee mustrun AFTERsummary:
-python -m scripts.research.audit_query_field_reference_coupled run --gpus 0,2,3,4
-then summarize_query_field_reference_coupled. Do NOTpromote inadvance. Developmenton
-same8alreadyassessedcases, notheldoutgeneralization. Oldcontrolssavednotrerun.
+FIRSTSTUDY ROOT output/query_field_20261012/reference_extent_v1; freeze b04ce8b.
+32predictionsbeforeGT, 8requests/7fields/120sourceobservations/currentpositive-derived
+SAMmask&camera (generatingRGB/SAMcostinherited, NOTrawscribbles). Old8composedsetsEXACT.
+SingleR_set primary REJECTED: actual86.9550->80.5259 (1up7down;CI[-9.3591,-2.5716]pp),
+legacyresponse83.1015->20.5699. Liftinitializer80.1486, literalLERFcutoff75.8822.
+A_obs/footprint/R_set instantiatedfromfield+CURRENTlegalcamera, no historicalsourceIO.
+Originalrunner failed exclusive baseline_checks creation inside loop after32predictions
+beforeGT; e63c817 recovery completed all8checks/scoring withoutpredictionreruns/changes.
+Originalrunner loopwrite fixed AFTERaudit; preservedROOT/orchestration_failure.log.
+Originalstrictaudit FAILED float64footprintrelative2e-5 gate fortress2.968e-5/trex2.515e-5
+(cost similarly); DO NOTcalloriginalauditPASS. Preservedstrict_auditor.py/failurelog.
+PosthocindependentNumPyfloat32 operationreplay footprint<=2.355e-7/cost<=3.745e-7 on
+failedcases, allremainingoriginalchecksPASS (32metrics,48reference endpoints). No gatesrelaxed.
+SOURCE/GT-FREE diagnosis: reference R_set91.5035->95.5866 but A_obs S91.4826->22.1410,
+all8referencefitup/observationdown. A_obs available-domain normalization !=legacyobserved.
+Showsstronginitializationdoesnotpreservefinalobservationexplanation. Singleviewproxy
+allowsmemberdeletion/substitutionwithoutretainingobjectfunction; identitynotfullyproven.
+Report docs/experiments/2026-10-12-reference-extent-results.md andJSONaudits/diagnosis.
 
-Sharedkernel cutoff broke publictext JITwarmup (omitted vs explicitfloat overload).
-Fixed extent_runtime warm_extent_kernel explicitCUTOFF AFTER originalauditsealed.
-Coldprocess synthetic queryIOdenial regressionPASS. 15 targetedtestsPASS includes
-24legacy randomexactcases, new24fullobjectivefliptraces, occluded-substitute toy.
-4firstquery coldpublictextprobes RUNNING PID648510/session66005 GPU5 log
-/tmp/radio_gs_text_extent_v2_run.log (first2PASS); allcurrentcodefrozen. Afteritfinishes
-run probe_query_field_reference_coupled GPU5 andfinishalljobs. Previous full68sets exact historical
-strict floatfallbackfailure stillstands; no new68completionpublicclaim.
-Nextfinish allnewjobs/audits beforefinal, updateADR/method/readiness/results,originalHEAD/index.
-ExternalGPU1 PID4002662 DO NOTTOUCH. Branchcodex/query-preserving-gaussian-field.
+SECONDSTUDY ROOT output/query_field_20261012/reference_coupled_v1; freeze53bcd82,
+auditor/probes73731ee. COMPLETE16newpredictions BEFOREnewGT; all8cases2arms; previous
+composed/shared_prior controlssealedNOTRERUN, inputs/prior/cost/optics bindingchecked.
+CoupledExtentDecision equal .5loss(A_obs S)+.5loss(R_set S)+.1cost; observation-only
+controlweight1. Samefourpasses, currentinput, binarySfreelyrevised,nohardseedkeep,no
+newtrain/teacher/fieldstate/querycontinuousfitting/sourcefiles/targetcamerain decoder.
+Coupled actual85.7573 vs R_set80.5259 (+5.2313pp,8up,CI[2.7216,7.3455]); response79.1723
+vs20.5699. Pureobservationactual86.0525,response81.2838. Oldcomposedactual86.9550,
+response83.1015 remainsbestmacro. Coupledvscomposed -1.1978pp(3up5down,CIcrosses0),
+response -3.9293pp(8down); pureobs -0.9025actual(5up3down). NO defaultpromotion,
+wholefive/paperclosure/newgeneralizationclaim; samealreadyassessed8developmentcases.
+Jointvsobs actual -0.2953pp; cannotclaimbothrequired/best. Fixedtotaldataweightchanges
+R_setrelativeweighttoo, notpureeffectofaddingA_obs withunchangedR_setcoefficient.
+Finalreference joint R_set95.2367/A_obs94.8688; pureobs93.9149/95.3406.
+Largestremainingdrop horns_center/trex, orchidsgains. NextHYPOTHESIS coherentinstance
+partproposalsvsfreeGaussian andmatchedrandomgroups; notyetimplemented/nofinalidentityGT.
+
+All16targetIoU/P/R/APindependent;32referenceinitial/finalfullrenderer/objectiveprobesPASS,
+maxalpha9.224e-6,bitsdiff0,maxindependentobjective9.115e-8. FrozenmethodhashesPASS.
+Oldfloat64footprintfailureinheritedandexplicitNOTREPAIRED;newauditbindsfloat32state.
+ColdfernpubliccoupledqueryPASShistoricalscene/outputrootopen&ANYtorch.loaddenied;
+exactvalues/bits; code/compilercacheallowed, notOSsandbox. OriginaloldprimarycoldPASStoo.
+Report docs/experiments/2026-10-12-reference-coupled-results.md; comparison/audit/coldJSONs.
+
+15targetedtestsPASS:24oldrandomexacttraces,new24fullobjectivefliptraces,occluded-substitute
+toy,coldsyntheticIOregression. Sharedexplicitcutoff formerlybroke textwarmup (omitted vs
+explicitfloatNumbaoverload). Fixedwarm_extent_kernel explicitCUTOFF AFTERfirstauditsealed.
+ROOTtext_extent_public_v2:fourfixedfirstquerycoldprocesses allopen/io.open/torch.load
+deniedduringactualquery, membervalues/bits EXACT, noGT. Historicalfull68atomicactualsets
+EXACTbutRamenfallbackcontinuous5.96e-8strictFAILstillstands; no new68completionpublicclaim.
+
+CURRENTDIRECTION: retainnativefunctions,typed P/N/unknown/currentcamera permission,
+A_obs forfinalobservationexplanation plusR_set actualsetoutput;identity/partcoherence
+remainsfunctionresponsibilitynotprovedbygoodreferencefit. Fixedweightsnotinnovationclaim.
+Currentcamera caninstantiategeometry; missingstoredLERFoperatorsdoesNOTmeanall26other
+fieldsneedsourcefactorcompilation. Defaultunchanged; LERFresearchcandidate52.0773 unchanged.
+Stillneeded: coherentinstancefunctionvalidation,rawsignedNVOS,ScanNetexclusive/void,
+UQISall4/commonversion,trueLERF3DGT,independentheldout,genericnovelty/resourceevidence.
+Alljobsclosed; externalGPU1PID4002662 DO NOTTOUCH. DoNOTrerunoldfrozendesignchecksagainst
+post-studycompatibilitysource; receiptsbindtheirhistoricalcommits andrecordedaudits.
 END active reference extent note.
 
 Active continuation2026-10-12 COMPLETE: positive/negative ablations, other-view
