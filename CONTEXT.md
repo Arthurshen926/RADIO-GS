@@ -21,16 +21,21 @@ New experimental CoupledExtentDecision: equal-weight A_obs S and R_set losses, s
 binaryset; observation-onlycontrol; samecurrentinputs/prior/cost/.1penalty/4passes.
 No seedhardlock, teacher, training, freecontinuousqueryfit, extra fieldstate orsourceIO.
 Protocol docs/experiments/2026-10-12-reference-coupled-protocol.md fixed before newGT.
-ROOT output/query_field_20261012/reference_coupled_v1. Needprepare/run full16 beforeGT,
-independent realobjective/render/metric audit, do NOTpromote inadvance. Developmenton
+ROOT output/query_field_20261012/reference_coupled_v1; methodfreeze53bcd82. RUNNING
+coordinatorPID647584/session45160 /tmp/radio_gs_reference_coupled_run.log GPUs0,2,3,4.
+8/16predictionscomplete; no newGTyet. Auditor73731ee mustrun AFTERsummary:
+python -m scripts.research.audit_query_field_reference_coupled run --gpus 0,2,3,4
+then summarize_query_field_reference_coupled. Do NOTpromote inadvance. Developmenton
 same8alreadyassessedcases, notheldoutgeneralization. Oldcontrolssavednotrerun.
 
 Sharedkernel cutoff broke publictext JITwarmup (omitted vs explicitfloat overload).
 Fixed extent_runtime warm_extent_kernel explicitCUTOFF AFTER originalauditsealed.
 Coldprocess synthetic queryIOdenial regressionPASS. 15 targetedtestsPASS includes
 24legacy randomexactcases, new24fullobjectivefliptraces, occluded-substitute toy.
-Need4firstquery coldpublictextprobes currentcode (previous full68sets exact historical
-strict floatfallbackfailure stillstands); no new68completionpublicclaim.
+4firstquery coldpublictextprobes RUNNING PID648510/session66005 GPU5 log
+/tmp/radio_gs_text_extent_v2_run.log (first2PASS); allcurrentcodefrozen. Afteritfinishes
+run probe_query_field_reference_coupled GPU5 andfinishalljobs. Previous full68sets exact historical
+strict floatfallbackfailure stillstands; no new68completionpublicclaim.
 Nextfinish allnewjobs/audits beforefinal, updateADR/method/readiness/results,originalHEAD/index.
 ExternalGPU1 PID4002662 DO NOTTOUCH. Branchcodex/query-preserving-gaussian-field.
 END active reference extent note.
