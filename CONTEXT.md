@@ -1,5 +1,21 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11 IN PROGRESS: canonical v10 subset functional reference,
+NOT another rewritten optimizer. Frozen bd9d991; root output/query_field_20261011/
+canonical_subset_reference_v1; runner run_query_field_canonical_subset_reference.py.
+Four scenes68queries, same geometry EXACT at preparation, current native prior/member domain,
+same18constructionTRAINframes/scene (72total). v10 original candidates5756 vs field5137,
+so NOT identical candidate budget. RAW and canonical detector-conditioned native-density
+ADMITTED inputs; both use unchanged pipeline.subset: source init/confidence-weightedfootprint/
+balancedBCE+overlap/384x512raster with192x256interleaved samples/240steps.
+Save source initializer and joint result per input;3reusedcontrols =>7arms. Main admitted_joint.
+SOURCE ACCESS + transient query fitting explicitly diagnostic only; no deployment/promotion.
+All predictions MUST finish before scoring. GPU2 sequential runner currently alive; first3
+scenes prediction complete, waldo starting. Check run.log/logs before restarting. No new scores
+read yet. Audit script added for exactcontrols, sourcecamera/unknownpartition/initializer/cost
+checks and independent actualmask replay.5targeted testsPASS. Original checkout HEAD/index
+unchanged. Latest standard development best still seed46.6535; fullfive/paper closure pending.
+
 Active continuation2026-10-11 COMPLETE: two full4/68 studies reject pooling-only/identity-gated extensions.
 First8arms: native44844.2674/nativefull44.2394 vs oldconditional44.2876 and seed46.6535.
 Second6arms/2x2: unqualified_addition44.2674/unqualified_seeded44.0126/native_addition44.3600/
