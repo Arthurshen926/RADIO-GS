@@ -40,3 +40,14 @@ def test_invalid_and_empty_confidence():
     x,r=e.solve(*args,np.zeros(2),np.ones(3))
     assert not x.any() and r['fallback']
     with pytest.raises(ValueError):e.solve(*args,np.array([1.1,0]),np.ones(3))
+
+
+def test_nonuniform_objective_matches_independent_rendered_reference():
+    from test_query_field_extent_decision import reference
+    f=factors();e=RelativeEvidenceExtentDecision(f,3)
+    initial=np.array([True,True,True]);y=np.array([1.,0.,1.,0.]);p=y>.5;n=~p
+    c=np.array([.1,.4]);cost=np.array([.2,.4,.3])
+    selected,info=e.solve(initial,y,p,n,c,cost)
+    for bits,value in [(initial,info['weighted_mean_energy_trace'][0]),(selected,info['weighted_mean_energy_trace'][-1])]:
+        expected=reference(f,bits,y,p,n,c/c.mean(),cost)
+        assert abs(expected-value)<2e-6
