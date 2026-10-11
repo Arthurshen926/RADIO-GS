@@ -1,5 +1,30 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11 RUNNING: complete union-before-morphology topology.
+Implementation freeze4dbf90f; independent audit toola80df98. ROOT
+output/query_field_20261011/scope_topology_v1. Runner
+python -m scripts.research.run_query_field_scope_topology run --gpus0,5
+is active (session95052/PID394079). First2 scenes compiled; predictions in progress;
+then remaining2 scenes, all68 prediction barrier BEFORE any GT scoring. Do not start
+a duplicate runner. Full fields inherit extent_preparation_v1/fields unchanged and
+add scope_topology incidence/neighborhood/native descriptors/retained IDs. Full
+query-free native proposals (5756), not just previous5137. Full384x512 binary native
+masks compiled to atom-proposal membership and9-neighbor relation on canonical
+phase rays. Retains query-free segmentation information; no source raster coordinates,
+RGB/camera/query answers, no query source mask access. Uncompressed reference.
+28relevanttests PASS (27+linked1). Construction10 query-free full-raster comparisons
+perview exact, allparentstate cold roundtrip, audit pending for all4.
+Two new4-pass conditions: matched_positive_scope is PRIVILEGED source-pseudo-scope
+16-step greedy candidate positive/target replacement with fixedreference N/c (new
+positive target conflicts turnunknown). native_complete_scope is source-free fixed
+native SigLIP genericmargin admission control, full union P/N+native-positive negative
+permission. Native prior actually recomputed fromfield; vsfixed gate2e-6 andbitdiff0.
+This is capability attribution, not new identity mechanism or default promotion.
+Once finished run scripts.research.audit_query_field_scope_topology on freeCUDA;
+then record actual results/mechanism implications, update ADR0020 and method doc.
+Protocol docs/experiments/2026-10-11-scope-topology-protocol.md. No five-task claim.
+END active scope topology note.
+
 Active continuation2026-10-11 COMPLETE: field-owned full-scene observation lift
 and query-normalized footprint. Implementation b169813; immutable per-query logs
 fixed658b34a. ROOT output/query_field_20261011/extent_preparation_v2; fields remain
