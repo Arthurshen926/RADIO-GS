@@ -110,12 +110,20 @@ def main():
                             positive_rays=int(p.sum()),positive_true=int((p&truth).sum()),
                             negative_rays=int(n.sum()),negative_conflicting=int((n&truth).sum())))
         probes={};counts={a:dict(active_queries=0,active_views=0,conflicts=0) for a in NEW_ARMS}
+        raw_permission=dict(inactive_reference_views=0,newly_active_views=0,newly_active_negative_rays=0)
         for qi,text in enumerate(data['texts']):
             scopes,conflicts=scopes_for(qi,atomic,previous,fixed);row=record['diagnostics'][qi]
             for mixed,matched in zip(scopes[HYBRIDS[2]],previous['matched_positive_scope'][qi]):
                 for key in ['target','positive','negative']:assert torch.equal(mixed[key],matched[key])
             assert row['native_scope_exact'] and row['native_prior_max_error']<=2e-6
             assert conflicts==row['conflicts']
+            for vi,ss in enumerate(scopes[HYBRIDS[1]]):
+                ref=fixed['views'][vi]
+                if not bool(ref['confidence'][qi]>0 and ref['positive'][:,qi].any()):
+                    raw_permission['inactive_reference_views']+=1
+                    if bool(ss['confidence']>0 and ss['positive'].any()):
+                        raw_permission['newly_active_views']+=1
+                        raw_permission['newly_active_negative_rays']+=int(ss['negative'].sum())
             for arm in NEW_ARMS:
                 ss=scopes[arm];pr=prepared[qi][arm];report=row['arms'][arm]
                 active=[vi for vi,s in enumerate(ss) if s['confidence']>0 and s['positive'].any()]
@@ -168,6 +176,7 @@ def main():
             assert abs(metrics[arm]['iou']-summary['per_scene'][arm][scene])<1e-12
         scenes[scene]=dict(metrics=metrics,probes=probes,counts=counts,source_pseudo_agreement=source_agreement,
                            projected_pixel_changes=changes,
+                           raw_reference_negative_permission_coupling=raw_permission,
                            inherited_memberships_exact=True,atomic_scope_queries_replayed=len(data['texts']))
         print('audited',scene,{a:metrics[a] for a in NEW_ARMS},flush=True);del data;gc.collect()
     macro={a:{k:sum(s['metrics'][a][k] for s in scenes.values())/4 for k in ['iou','precision','recall']} for a in ARMS}
@@ -182,6 +191,7 @@ def main():
     result=dict(passed=True,macro=macro,comparisons=comparisons,scenes=scenes,design=receipt(ROOT/'design.json'),code=receipt(__file__),
         all_atomic_scopes_independently_replayed=True,all_actual_mask_ious_replayed=True,
         candidate_source_free=True,hybrids_privileged=HYBRIDS,default_promoted=False,whole_five_task=False)
+    result['raw_negative_intervention_is_not_a_validated_permission_transfer']=True
     write(ROOT/'audit.json',result);write('docs/experiments/2026-10-12-signed-scope-audit.json',result)
     print('PASS',macro,flush=True)
 
