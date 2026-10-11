@@ -79,6 +79,10 @@ def predict(index):
             start = time.monotonic()
             with patch.object(builtins, 'open', denied):
                 values, detail = query_text_region_scope(field, previous['native_query_vectors'][qi], previous['generic_negative_vectors'], **kwargs)
+                # Diagnostic only: a same-instance quality estimate and the
+                # current text identity are different conditional functions.
+                _, native_probability = native_reader(previous['native_query_vectors'][qi], previous['generic_negative_vectors'])
+                detail['admitted_native_probabilities'] = native_probability[detail.get('admitted', [])].tolist()
             for a in CONTROLS[:3]:
                 assert torch.equal(values[a] > .5, previous['selected_by_control'][a][:, qi]), (variant, text, a)
                 assert float((values[a] - members[a][:, qi]).abs().max()) <= 2e-6

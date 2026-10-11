@@ -57,6 +57,7 @@ def main():
         feature_checks = {}
         for variant in VARIANTS:
             detail = r['diagnostics'][variant]
+            native = [v for x in detail['queries'] for v in x['admitted_native_probabilities']]
             assert detail['feature_pairs'] == old_domain['pairs']
             for key, value in detail['feature_medians'].items():
                 if key != 'native_appearance_cosine':
@@ -66,6 +67,7 @@ def main():
                 previous_appearance_median=old_domain['features']['native_appearance_cosine']['actual_median'],
                 training_appearance_median=old_domain['features']['native_appearance_cosine']['training_median'],
                 applied=sum(x['applied'] for x in detail['queries']),
+                admitted_regions=len(native), native_nonpositive_admitted_regions=sum(v <= .5 for v in native),
                 changed_admission_queries=sum(x.get('admitted', []) != y.get('admitted', []) for x, y in zip(detail['queries'], old_query_details)))
         scenes[j['scene']] = dict(metrics=metrics, extension=extension, feature_checks=feature_checks,
             added_members={a: int((data['selected_by_control'][a] & ~initial).sum()) for a in ARMS[2:]},
