@@ -34,6 +34,18 @@ class QueryFieldRuntime:
         from .query_program import text_union
         return text_union(self.field, native_query, generic_negatives, **options)
 
+    def prepare_text_extent(self, *, scope_device='cuda'):
+        """Initialize the explicit text extent path before a file-denied query."""
+        from .extent_runtime import ExtentTextRuntime
+        self._extent_text_runtime=ExtentTextRuntime(self.field,scope_device=scope_device)
+        return self._extent_text_runtime
+
+    def text_extent(self, native_query, generic_negatives, *, scope_rule='atomic'):
+        """One actual set, with no dependency on research-run predictions."""
+        runtime=self.__dict__.get('_extent_text_runtime')
+        if runtime is None:runtime=self.prepare_text_extent()
+        return runtime.query(native_query,generic_negatives,scope_rule=scope_rule)
+
     def signed_regions(self, packet, **options):
         from .signed_regions import query
         return query(self.field, packet, **options)
