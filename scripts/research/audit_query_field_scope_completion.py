@@ -67,6 +67,10 @@ def main():
         del old;gc.collect()
         previous=torch.load(record['parent_scopes']['path'],weights_only=True)['native_complete_scope']
         atomic=torch.load(record['parent_atomic']['path'],weights_only=True)
+        # Post-prediction diagnostic only: never an input to the new method.
+        parent_record=read(PARENT/'predictions'/j['name']/'prediction.json')
+        check(parent_record['reference_scope'])
+        source=torch.load(parent_record['reference_scope']['path'],weights_only=True)
         actual_scopes=torch.load(record['scopes']['path'],weights_only=True)
         prepared=torch.load(record['prepared']['path'],weights_only=True)
         prior=torch.load(CANONICAL/'inputs'/scene/'response.pt',weights_only=True)['semantic_probability']
@@ -77,6 +81,8 @@ def main():
             valid.append(v.valid.numpy())
         counts={a:dict(active_queries=0,active_views=0,conflicts=0) for a in NEW_ARMS};probes={}
         completion=dict(added_positive_rays=0,newly_active_views=0,changed_queries=0)
+        source_completion=dict(nonempty_reference_views=0,added_positive_rays=0,
+                               added_positive_agreeing=0,added_positive_disagreeing=0)
         for qi,row in enumerate(record['diagnostics']):
             ss,info,conflicts=reconstruct(ops,valid,atomic[qi],previous[qi])
             assert info==row['completion'],(scene,qi,'completion diagnostics')
@@ -85,6 +91,18 @@ def main():
             added=sum(x['added_positive_rays'] for x in info);completion['added_positive_rays']+=added
             completion['newly_active_views']+=sum(x['newly_active'] for x in info)
             completion['changed_queries']+=added>0
+            for vi,s in enumerate(ss[CANDIDATE]):
+                base=atomic[qi][vi];ns=previous[qi][vi]
+                assert not (base['positive']&~s['positive']).any()
+                assert not (s['positive']&~ns['positive']).any()
+                assert torch.equal(s['negative'],torch.from_numpy(qualified_negative(base)))
+                truth=source['views'][vi]['target'][:,qi].numpy()>.5
+                if (truth&valid[vi]).any():
+                    added_p=(s['positive']&~base['positive']).numpy()
+                    source_completion['nonempty_reference_views']+=1
+                    source_completion['added_positive_rays']+=int(added_p.sum())
+                    source_completion['added_positive_agreeing']+=int((added_p&truth).sum())
+                    source_completion['added_positive_disagreeing']+=int((added_p&~truth).sum())
             for arm in NEW_ARMS:
                 for vi,(s,actual) in enumerate(zip(ss[arm],actual_scopes[qi][arm])):
                     for key in s:assert torch.equal(s[key],actual[key]),(scene,qi,arm,vi,key)
@@ -107,7 +125,7 @@ def main():
                         assert abs(final['total']-report['energy_trace'][-1])<1e-7
                         probes[arm]=dict(query=data['texts'][qi],initial=initial,final=final,
                             preparation=replay_preparation(field,prior[:,qi],ss[arm],pr))
-        del field,ops,previous,atomic,actual_scopes,prepared,prior;gc.collect()
+        del field,ops,previous,atomic,actual_scopes,prepared,prior,source;gc.collect()
         metrics={};evaluation=read(out/'evaluation/evaluation.json');baseline_masks={b:{} for b in OLD_ARMS}
         changes={a:{b:{k:0 for k in ['added_tp','added_fp','removed_tp','removed_fp','beneficial_cases','harmful_cases']}
                     for b in OLD_ARMS} for a in NEW_ARMS}
@@ -133,6 +151,7 @@ def main():
             assert abs(metrics[arm]['iou']-summary['per_scene'][arm][scene])<1e-12
             if arm in OLD_ARMS:assert metrics[arm]==parent_audit['scenes'][scene]['metrics'][arm]
         scenes[scene]=dict(metrics=metrics,counts=counts,completion=completion,probes=probes,
+            source_completion=source_completion,source_scope=parent_record['reference_scope'],
             projected_pixel_changes=changes,all_scopes_independently_replayed=True,inherited_memberships_exact=True)
         print('audited',scene,{a:metrics[a] for a in NEW_ARMS},flush=True);del data;gc.collect()
     macro={a:{k:sum(s['metrics'][a][k] for s in scenes.values())/4 for k in ['iou','precision','recall']} for a in ARMS}
