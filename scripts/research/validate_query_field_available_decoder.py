@@ -7,5 +7,5 @@ from scripts.research.run_query_field_joint_exclusion_domain import ROOT
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--index',type=int,required=True)
-    a=p.parse_args();torch.set_num_threads(4);torch.cuda.set_per_process_memory_fraction(.45)
+    a=p.parse_args();torch.set_num_threads(4);torch.cuda.set_per_process_memory_fraction(.60)
     base.ROOT=ROOT;base.FIELDS=FIELDS;base.run(a.index)

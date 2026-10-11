@@ -106,7 +106,7 @@ def run(gpus):
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('stage',choices=['prepare','predict','run']);p.add_argument('--index',type=int);p.add_argument('--gpus',default='3');a=p.parse_args();torch.set_num_threads(4)
-    if a.stage=='predict':torch.cuda.set_per_process_memory_fraction(.45)
+    if a.stage=='predict':torch.cuda.set_per_process_memory_fraction(.60)
     if a.stage=='prepare':prepare()
     elif a.stage=='predict':predict(a.index)
     else:run(list(map(int,a.gpus.split(','))))
