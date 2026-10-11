@@ -1,5 +1,16 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11: bidirectional member ENERGY FUNCTION reference added.
+radio_gs/query_field/member_energy.py: bounded discrete +/- updates, reliability-weighted
+positive deficit/negative excess, fixed-prior normalized footprint, prior disagreement.
+No default/API integration or new benchmark claims; caller must supply independent footprint.
+11 new independent tests +5 existing joint regressions PASS (16 total).
+Tests expose omitted-extent loss AND cheaper member-exchange local trap: coordinate convergence
+is NOT full function migration. No evidence retains prior; zero denominator disables footprint.
+NEXT: compile full footprint/extent evidence, bind native reliability, handle bounded exchanges;
+do not pass sampled hit counts off as full footprint or promote this prototype prematurely.
+See docs/experiments/2026-10-11-member-energy-reference.md. Prior full results below remain current.
+
 Active continuation2026-10-11: actual-member-domain correction COMPLETE.
 Worktree /root/RADIO-GS-query-field; codex/query-preserving-gaussian-field only.
 Compiler/relaxed renderer accept explicit domain; historical observed default retained.
