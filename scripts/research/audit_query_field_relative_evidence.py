@@ -50,7 +50,10 @@ def main():
             assert torch.equal(expected,p['confidence'])
             assert not p['cost'][~data['observed']].any()
             if active:
-                maximum=float(expected.max());factor=float((expected[expected>0]/maximum).mean())
+                maximum=float(expected.max())
+                # Check the saved coefficient with its declared NumPy float64
+                # reduction; the rendered objective below remains independent.
+                values=expected.numpy();factor=float((values[values>0]/maximum).mean())
                 assert maximum==r['confidence_maximum'] and factor==r['cost_factor']
                 assert np.max(np.abs(np.array(r['energy_trace'])/factor-r['weighted_mean_energy_trace']))<1e-12
                 assert np.all(np.diff(r['weighted_mean_energy_trace'])<=1e-7)
