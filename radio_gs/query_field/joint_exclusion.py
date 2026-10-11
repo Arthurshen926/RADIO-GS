@@ -109,6 +109,7 @@ class JointExclusionDecoder:
             positive_covered_before=int(np.sum(positive&(before>tau))),positive_coverage_losses=losses,
             negative_covered_before=int(np.sum(negative&(before>tau))),negative_covered_after=int(np.sum(negative&(after>tau))),
             query_parameter_fitting=False,training=False,source_access=False,addition_supported=False,
+            view_confidence_weighted_constraints=False,
             protection_is_sampled_not_full_image=True)
 
 
@@ -124,4 +125,7 @@ def query_text_joint_exclusion(field,query,negatives,*,decoder=None,joint=True,i
     details["initializer"]=initializer
     from dataclasses import replace
     return replace(result,membership_score=member,selected=member>.5,
-                   diagnostics=dict(result.diagnostics,joint_exclusion=details))
+                   diagnostics=dict(result.diagnostics,joint_exclusion=details,
+                       native_view_confidence_preserved=False,
+                       initializer_view_confidence_preserved=initializer=="finite",
+                       coverage_view_confidence_preserved=False))

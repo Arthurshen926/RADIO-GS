@@ -53,11 +53,18 @@ def test_field_decoder_labels_and_public_api(monkeypatch):
     assert result.tolist()==[0.,initial[1].item()] and detail['positive_coverage_losses']==0
     assert torch.equal(initial,torch.tensor([.6,.9]))
     assert torch.equal(decoder.decode(initial,torch.tensor([False]))[0],initial)
-    def native(*args):return ScopeReadout(torch.tensor([.3,.7]),initial.clone(),initial>.5,accepted,{})
+    def native(*args):return ScopeReadout(torch.tensor([.3,.7]),initial.clone(),initial>.5,accepted,{'native_view_confidence_preserved':True})
     monkeypatch.setattr(scope_confidence,'query_text_scope_confident',native)
     output=query_text_joint_exclusion(field,torch.ones(1),torch.ones(1,1),decoder=decoder)
     assert torch.equal(output.membership_score,result) and output.selected.tolist()==[False,True]
+    assert not output.diagnostics['native_view_confidence_preserved']
+    assert output.diagnostics['initializer_view_confidence_preserved']
+    assert not output.diagnostics['coverage_view_confidence_preserved']
+    assert not detail['view_confidence_weighted_constraints']
     semantic=query_text_joint_exclusion(field,torch.ones(1),torch.ones(1,1),decoder=decoder,initializer='semantic')
     assert torch.equal(semantic.membership_score,torch.tensor([.3,.7]))
+    assert not semantic.diagnostics['native_view_confidence_preserved']
+    assert not semantic.diagnostics['initializer_view_confidence_preserved']
+    assert not semantic.diagnostics['coverage_view_confidence_preserved']
     with pytest.raises(ValueError):query_text_joint_exclusion(field,torch.ones(1),torch.ones(1,1),decoder=decoder,initializer='invalid')
     with pytest.raises(ValueError):decoder.decode(torch.ones(2,dtype=torch.bool),accepted)
