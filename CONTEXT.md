@@ -1,5 +1,58 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11 COMPLETE: full-extent field geometry + finite member
+function migration. ROOT output/query_field_20261011/extent_decision_v3; fields
+compiled_extent_factors_v2. Freeze7594535(v1),42058ad(geometry),bc08988(linked execution).
+ALL4/68/4arms predictions before scoring; all independent audits PASS; all jobs finished.
+Actual selected projection IoU: standardseed46.6535, same-source initializer35.0846,
+canonical continuous reference57.5700, NEW4-pass discrete56.9282. Per scene new
+58.7642/54.9445/63.1520/50.8522. New-standard+10.2747pp ALL4up, CI[4.1109,17.9366];
+new-reference-.6418pp ONEup/THREEdown,CI[-2.5282,1.6945],not statistical equivalence.
+NewP/R61.6571/84.0535 vs reference64.4516/82.2279: residual primarily lowerprecision,
+not universal overcontraction. Same-source initial->new+21.8436pp. Semantic responses
+unchanged54.0889/AP82.5249. NOT LERF3D-GT or full-five evaluation.
+CRITICAL boundary: scope,source initializer,normalized footprint STILL PRIVILEGED
+fixed inputs, never stored in field. Numerical decoder sourcefilefree/no gradient
+or continuous query-parameter fitting; NOT a complete standard sourcefree query.
+Standard best still46.6535; no default/v10-full-performance/paper closure claims.
+56active queries,12nativefallbacks exact.4fixed Gaussian-order binary passes allow
+add/delete. Uses canonical decision-alpha,balancedBCE+overlap,+1 smoothing,confidence,
+0.1fixedcost; meanactiveview binary objective NOT 240Adam trajectory/soft-p cost.
+All56 new sets lower than canonical final sets under SAME BINARY AUDIT objective:
+mean .226788->.163005,data .224339->.160777,despite actual3scene regressions.
+Do not equate lower source energy with better actual performance or blindly add
+passes. All56 not at coordinate fixedpoint after4; morepasses effect untested.
+Vsseed pixels added280813TP/804777FP,removed364628TP/3582764FP,133benefit63harm.
+Vsref added406158TP/618721FP,removed69109TP/165815FP,77benefit92harm.
+Vssourceinit added389TP/178084FP,removed344409TP/5706286FP,157benefit12harm.
+These are projected pixel changes,not Gaussian identity truth or causal member-add effects.
+Geometry ALL4/72views/504conditions/24772608ray comparisons EXACT native alpha;
+CPU random50 all72 EXACT.3,538,944 rays,592,820,583 ordered incidences,8.8864GiB
+additional state. Complete192x256 phase of384x512 raster,not all originalimage pixels.
+One fullfield.pt; all269 parent tensors/scene EXACT after coldload. No queries/GT
+used in compilation,no new training/teacher calls; uncompressed functional reference.
+V1 stopped before export/predictions on float64 T near1e-4 crossing: alpha diff
+.00244695,decisiondiff0. V2 native CUDA sigma/expf andfloat32 T fixes; original
+complete-render gate unchanged; old torch footprint crosscheck now indexexact/alpha1e-5.
+Old sparseCoverageView unchanged. V2 complete geometry PASS but slow numeric tasks
+stopped before ANY GT scoring,0completepred/0scores; logs retained. V3 linked selected
+hit traversal keeps all hidden candidates and EXACT policy/order/objective.
+24synthetic conditions allsets/traces/diagnostics EXACT; real554467-row bag allbits/
+trace EXACT,49.50->10.57sec(onecase),three completedv2 querytraces exact. Receipt
+output/query_field_20261011/extent_decision_engine_equivalence_v1.json; reproducible
+scripts/research/check_query_field_extent_engine_equivalence.py --output NEW.json.
+V3 scopes target/P/N/confidence exact vs all4v2 preparation.16relevant testsPASS.
+NEXT retain validated optical/finite decision functions; migrate complete scope
+GENERATION,source-initializer lifting and matching resolution/confidence footprint
+normalization into query-free field construction plus current-query readout.
+Available output optics vs fullscene visibility for initialization are DIFFERENT
+responsibilities; do not reuse old96x128 partialP/N summaries without parity checks.
+Categoryunion/instance/part/attribute and negative/unknown must stay explicit.
+Do not revive failed whole-instance forest/thresholds as generic query scope.
+After these inputs validated, integrate public query path and joint five/UQIS4modes.
+Report docs/experiments/2026-10-11-extent-decision-results.md; full audit siblingJSON.
+END active extent progress note.
+
 Active continuation2026-10-11 COMPLETE: canonical source-assisted reference + isolated
 sampling study, BOTH full4/68/auditPASS. Canonical root output/query_field_20261011/
 canonical_subset_reference_v1, freeze bd9d991.4scenes68queries7arms allpredictionsbefore scores.

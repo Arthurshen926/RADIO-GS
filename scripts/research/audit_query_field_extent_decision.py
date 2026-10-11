@@ -74,6 +74,14 @@ def main():
             assert not data['selected_by_control'][a][~data['observed']].any()
         assert not record['target_labels_opened'] and not record['transient_query_fitting'] and not record['standard_deployment']
         evidence = torch.load(out/'privileged_scope.pt', weights_only=True)
+        execution_evidence_exact = None
+        if ROOT.name == 'extent_decision_v3':
+            earlier = torch.load(ROOT.parent/'extent_decision_v2/predictions'/j['name']/'privileged_scope.pt', weights_only=True)
+            for key in ['texts','source_frames','source_raster','privileged_query_evidence']: assert evidence[key] == earlier[key]
+            for v, previous in zip(evidence['views'], earlier['views']):
+                for key in ['target','positive','negative','confidence']: assert torch.equal(v[key], previous[key])
+            execution_evidence_exact = True
+            del earlier
         states = torch.load(parent/'admitted_optimization_state.pt', weights_only=True)
         decoder = ExtentDecision(field.extent_factors, len(field.xyz)); energies = []
         for qi, text in enumerate(data['texts']):
@@ -118,7 +126,7 @@ def main():
                 beneficial_cases=sum(r['beneficial'] for r in rows), harmful_cases=sum(r['harmful'] for r in rows), rows=rows)
         scenes[j['scene']] = dict(metrics=metrics, changes=changes, objective_comparisons=energies,
             parent_tensors_exact=old_count, compilation=compilation, active_queries=len(states),
-            decisions=record['diagnostics'])
+            decisions=record['diagnostics'], execution_evidence_exact=execution_evidence_exact)
         print('audited', j['scene'], flush=True)
     macro = {a: {k: sum(r['metrics'][a][k] for r in scenes.values())/4 for k in ['iou','precision','recall']} for a in ARMS}
     comparisons = {a: paired({s: r['metrics'][a]['iou'] for s,r in scenes.items()},
