@@ -19,7 +19,9 @@ def run(index, initial_arm="finite"):
         assert not bool((removed&~touched).any())
         rows.append(dict(text=text,initial_selected=int(initial.sum()),initial_observed=int((initial&field.observed).sum()),
             initial_semantic_only=int((initial&~field.observed&available).sum()),initial_factor_touched=int((initial&touched).sum()),
-            removed=int(removed.sum()),remaining_untouched=int((selected&~touched).sum())))
+            removed=int(removed.sum()),removed_observed=int((removed&field.observed).sum()),
+            removed_semantic_only=int((removed&~field.observed&available).sum()),
+            remaining_untouched=int((selected&~touched).sum())))
     report=dict(scene=job['scene'],field_sha256=manifest['files']['field.pt']['sha256'],gaussians=len(field.xyz),
         observed=int(field.observed.sum()),available=int(available.sum()),factor_touched=int(touched.sum()),
         rows=rows,source_images_opened=False,target_labels_opened=False,domain_limit_not_proof_of_error=True)
