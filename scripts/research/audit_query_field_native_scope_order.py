@@ -34,7 +34,7 @@ def main():
     for job in cfg['jobs']:
         scene=job['scene'];root=Path(job['field']);manifest=read(root/'manifest.json')
         assert sha256(root/'field.pt')==manifest['files']['field.pt']['sha256']
-        state=torch.load(root/'field.pt',weights_only=True,mmap=True)
+        state=torch.load(root/'field.pt',weights_only=True)
         prediction=torch.load(PARENT/'predictions'/job['name']/'predictions.pt',weights_only=True)
         fixed=torch.load(REFERENCE/'predictions'/job['name']/'privileged_scope.pt',weights_only=True)
         previous=read(PARENT/'predictions'/job['name']/'prediction.json')
