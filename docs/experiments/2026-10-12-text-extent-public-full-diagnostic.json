@@ -1,0 +1,94 @@
+{
+  "diagnostic_complete": true,
+  "frozen_strict_gate_passed": false,
+  "all_actual_sets_exact": true,
+  "queries": 68,
+  "scenes": [
+    {
+      "scene": "figurines",
+      "queries": 21,
+      "member_values_exact": true,
+      "selected_bit_differences": 0,
+      "differing_values": 0,
+      "max_absolute_difference": 0.0,
+      "differing_queries": [],
+      "record": {
+        "path": "output/query_field_20261012/text_extent_public_full_v1/predictions/figurines/result.json",
+        "sha256": "501c1d97062447f665df8ee52a6567520d3afc6a7e50c564500ac7a6941fdff2"
+      }
+    },
+    {
+      "scene": "ramen",
+      "queries": 15,
+      "member_values_exact": false,
+      "selected_bit_differences": 0,
+      "differing_values": 12797,
+      "max_absolute_difference": 5.960464477539063e-08,
+      "differing_queries": [
+        {
+          "index": 14,
+          "text": "a small piece of food resting on a plate",
+          "fallback": true,
+          "differing_values": 12797,
+          "max_absolute_difference": 5.960464477539063e-08
+        }
+      ],
+      "record": {
+        "path": "output/query_field_20261012/text_extent_public_full_v1/predictions/ramen/result.json",
+        "sha256": "90a08158dc786555c21825606f7159a23d2735b4aa62840bedccc599f253ba62"
+      }
+    },
+    {
+      "scene": "teatime",
+      "queries": 14,
+      "member_values_exact": true,
+      "selected_bit_differences": 0,
+      "differing_values": 0,
+      "max_absolute_difference": 0.0,
+      "differing_queries": [],
+      "record": {
+        "path": "output/query_field_20261012/text_extent_public_full_v1/predictions/teatime/result.json",
+        "sha256": "7fcb9a29fdbbbcbfaa8def1f09a9e81234499fbef97113401a2ffd3095041c04"
+      }
+    },
+    {
+      "scene": "waldo_kitchen",
+      "queries": 18,
+      "member_values_exact": true,
+      "selected_bit_differences": 0,
+      "differing_values": 0,
+      "max_absolute_difference": 0.0,
+      "differing_queries": [],
+      "record": {
+        "path": "output/query_field_20261012/text_extent_public_full_v1/predictions/waldo_kitchen/result.json",
+        "sha256": "1d9ed77e35dbd84adaff28c179eab6ff6f40d00d2f4af9562d7543395c52d783"
+      }
+    }
+  ],
+  "design": {
+    "path": "output/query_field_20261012/text_extent_public_full_v1/design.json",
+    "sha256": "04537c3f572d970ab7a20093ebd041bf85f3edd21384e880cb07321a998d5e18"
+  },
+  "prediction_seal": {
+    "path": "output/query_field_20261012/text_extent_public_full_v1/predictions_complete.json",
+    "sha256": "7c3e2c9b342649ef3c8df04c62fddd3eb2051ec51d659ed73c010586a8acbb1d"
+  },
+  "code": {
+    "path": "/root/RADIO-GS-query-field/scripts/research/audit_query_field_extent_public_parity.py",
+    "sha256": "45a553da62aeedfcc66d6ce1907dc4efd9183e4af2500848d311fd3bd09c5548"
+  },
+  "failed_run_log": {
+    "path": "/tmp/radio_gs_text_extent_public_full_run.log",
+    "sha256": "7aba5bda25427fbae7d180fd3f35e3016349f9d69a3a6ea4c15eeb11af7235d0"
+  },
+  "posthoc_diagnostic": true,
+  "gate_changed": false,
+  "tolerance_accepted": false,
+  "predictions_changed": false,
+  "new_target_scores": false,
+  "numerical_origin": "continuous fallback native prior; exact floating-point cause not established",
+  "raw_encoder_audit": {
+    "path": "docs/experiments/2026-10-12-text-extent-encoder-audit.json",
+    "sha256": "8ff52345bc6830358011c619b0c0270c2d92ecfc3cd3a74288586245bda9d8c0"
+  }
+}

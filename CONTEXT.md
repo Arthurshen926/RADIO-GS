@@ -1,61 +1,84 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12 IN PROGRESS: signed ablations + other-view spatial
-completion. ROOT output/query_field_20261012/scope_completion_v1; freeze1fb9cc2.
-Three SOURCEFREE newarms atomic_positive_native_negative, native_positive_atomic_negative,
-other_view_positive_completion (PRIMARY), controls seed/native_complete/atomic50.8519.
-Allnegativeparts retainoriginpositiveviewpermission beforemixing; conflict->unknown.
-Primary lifts atomicactive cP/cN viaA_obs, forviewv sumsONLYothers(float64), Gaussian
-positive iffpos-neg>1e-8; projectpositivewitness/fullmass, >.5fullmass+1e-8; onlynativeP
-interior&atomicunknown&validrays canbeadded. No selfwitness, no recursivefeedback,
-no newstate/teacher/training/sourcequeryread. AtomicNoriginlicense retained evenwhen
-newPactivatesview. Same c/preparation/cost/R_set/4passes.16testsPASS; independentSciPy
-reconstruction30randomcasesPASS. Mainmethodfrozen; do not alterit basedonnewlogs.
-CoordinatorPID564660(session25775), log/tmp/radio_gs_scope_completion_run.log,
-workers564758(index0GPU0),564760(index1GPU3),564759(index2GPU4),564761(index3GPU5).
-Afterall68x3newpredictionsautomaticscoreall4 thenROOT/summary.json. FinalizerPID567877
-(session15881), /tmp/radio_gs_scope_completion_finalize.py waits summary thenindependent
-scripts.research.audit_query_field_scope_completion (latest3583b62), logROOT/audit_independent.log.
-Audit now alsochecks atomicP<=completedP<=nativeP, N exactlyoriginadmitted; sourcepseudo
-added-positive agreement from376nonemptyreferenceviews (diagnostic only; notinprediction).
-DO NOT kill/restart/duplicateworkers; finishscores/audit/results beforefinalreply.
-No newGTscores read yet. Latest counts3/2/2/5; alljobs running normally.
+Active continuation2026-10-12 COMPLETE: positive/negative ablations, other-view
+completion and full public text replay. All own prediction/scoring/audit jobs
+finished; no jobs to resume or duplicate. Worktree /root/RADIO-GS-query-field,
+branch codex/query-preserving-gaussian-field. Original HEAD/index unchanged.
 
-Public text extent API implemented910032e: QueryFieldRuntime.prepare_text_extent /
-text_extent, radio_gs/query_field/extent_runtime.py. Field+currentlegalvectors only;
-atomicdefaultforTHISexplicitentry, other_view_positive explicitexperimentaloption.
-Existingglobaldefault unchanged. CPUfield/scopeCUDA mirror, query-independentsynthetic
-one-ray JITwarmup beforefiledenial; no storedqueryscope/answer/researchmoduledependency.
-Publiccold first-query-per-scene validation COMPLETE: ROOTtext_extent_public_v1,
-all4firstqueries fullmembervalues+selectedbitsEXACT; no newGT. AuditJSONcommitted99e2eaa.
-Full68 publicvalidation nowrunning: ROOTtext_extent_public_full_v1, freeze5abe900.
-Wrapper /tmp/radio_gs_public_full_after_smoke.py PID572916/session11527; coordinator
-PID574265, log/tmp/radio_gs_text_extent_public_full_run.log. Sequentialscene workers
-GPU2 (currentlyfigurines13/21 lastseen). All68actualpublicpredictionsbeforecomparison;
-no newGTscores. Workerreceivesfield+legalvectorbatch ONLY; referencesonlycontroller
-loads AFTER all4predictions. Pythonbuiltins/io.open+torch.load deniedfullactualquery;
-syntheticone-rayJITwarmup atinitialization. Rawtextencoder NOTrevalidated; no OSsandbox.
-Publicscope_rule atomic defaultonlyfornewexplicitentry, globaldefaultsunchanged.
-Do NOT stop/end whilethisvalidationstillrunning. Reap sessionsaftercompletion.
+NEW measured SOURCEFREE RESEARCH CANDIDATE other_view_positive_completion52.0773%
+vs atomic50.8519 (+1.2254pp,3up1down,sceneCI[-.0840,3.6094]pp CROSSES ZERO),
+vs seed46.6535 (+5.4238pp,all4up). PerScene58.6499/43.8318/59.2565/46.5710.
+P56.5280/R84.7499 vs atomic56.4661/82.1604. R all4up,P onlyRamenup; gains mostlyRamen.
+Same-input privileged discrete56.9282 remains4.8509pphigher; continuous57.5700;
+historicalv1066.9633 separatebudgets/prior/domain. No globaldefaultpromotion,
+wholefive/trueLERF3D-GT/independentgeneralization/paperclosure claim.
 
-Commonextent metadata inventory COMPLETE99e2eaa: 31requests/30uniquefields.
-4LERFpackageshave scope_topology/extent_preparation/extent_factors. 10ScanNet,8NVOS
-requests(7fields),9UQIS allLACKnew3components. ScanNethas10semanticmeasure;UQIS9native
-modes; NVOSneither (doesnotmean nosemantic/localfeatures). Metadata-onlypickleopcode
-inspection, not fullpayload integrity/numericvalidation. Reportcommon-extent-readiness.md/
-JSON. No splicing per-family pastwinners or newfullfiveclaim. Typedcategorypartition,
-signedprompts,currentimagepatches,uncertain2Drays/exactlegal3Dpoints needdistinctscope
-contracts beforecommondecision. Textentrydoesnotimplementtheseadapters.
+ROOT output/query_field_20261012/scope_completion_v1; methodfreeze1fb9cc2;
+auditor3583b62. ALL68x3newpredictions sealed BEFORE scoring; independentauditPASS.
+2x2 same nativec: nativeP/nativeN35.0014; atomicP/nativeN51.6317;
+nativeP/atomicN33.5822; atomicP/atomicN50.8519. N materializesORIGIN P/c permission,
+conflict->unknown; allactualcrossconflicts0. P effects+16.6303/+17.2696pp all4up;
+N effects-1.4191(all4down)/-.7798(1up3down)pp; interaction+.6393pp. Positive
+abstentiondominates; do NOTclaimbothsignscontributeorNuseless. Pchangesactiveview/init/cost.
 
-Primaryliteratureabstractcheck2026-10-12 added to mechanisms doc67b909a: PairGS
-arxiv2607.01140; NormLift2609.18898; GaussDet2606.30638; PostTrainingSemanticLifting
-2610.08756. Existingrelationalhierarchy/reliabilityvoting/signedlifting/errorattribution
-cannotbeclaimednovelalone. Abstractonlyscreen, notexhaustivefullpaperreview. Finalcite
-primaryURLs if discussingtheirclaims; no needduplicate researchjustforstatus.
-NEXT finish mainprediction/scoring/independentaudit AND full68publicparity. No newmethod
-changes or additionalstudies. Writecombinedcompletionresultsreport pluspublicAPIusage/
-parityboundary; updateADR0020/method/context; code/docscommit; originalHEAD/indexverify.
-Oldbaseline50.8519, no newmainGTscoresready/read yet. Mainlastcounts9/9/9/17=44/68.
+Primary cP/cN liftedA_obs in float64; forviewv explicitlysumONLYothers (no totalminusself).
+Gaussianpositive iffpos-neg>1e-8, projected witness>.5FULLavailablemass+1e-8;
+onlyatomicunknown&nativePinterior&validadded. No selfwitness/recursivefeedback/newfield/
+teacher/train/querysourceaccess/freequeryparameterfitting. OldP/N retained; atomicN
+originlicense stays when activatingnewview. Sameconfidence/footprint/R_set/4passes.
+418318addedP,65/68changedscopes,73newactiveviews,688activeviews,67activequeries.
+Ramen smallpiecefoodfallback unchanged. Actualvsatomic108/208improve,91regress,9same;
+added237425TP/678841FP,removed53150TP/401225FP. Source-only376nonemptyrefviews:
+258378addedP,180519agree,77859disagree=69.8662%; Teatime56.6272%. NOTtargetGT,
+notpredictioninput,andnotalladdedrays. No independentnewobservation; biasedviewscanagree.
+AllscopeindependentNumPy/SciPyreplay+boundsPASS; oldmemberships exact; allmaskIoU/P/R
+recomputed;12realCPUinitial/finalobjective+preparationprobesPASS.16testsPASS,
+30independentrandomreconstructioncasesPASS. Allfrozenmethodreceiptsunchanged.
+Report docs/experiments/2026-10-12-scope-completion-results.md; auditJSONsibling.
+
+Public API ExtentTextRuntime via QueryFieldRuntime.prepare_text_extent/text_extent
+implemented910032e. CPUfield+CUDA mirror; query-independentone-rayJITwarmup; no research
+artifact/source reader dependencies. atomicdefaultONLYTHISexplicitentry; other_view_positive
+explicitexperimentaloption. Globalotherinputroutes unchanged. FULL68PUBLICREPLAYFINISHED:
+ROOTtext_extent_public_full_v1 freeze5abe900. ALL68actualsets BITEXACT vsatomicbaseline;
+67queries membervaluesEXACT. FROZENSTRICTMEMBERVALUEGATEFAILED on Ramenfallback qi14
+'a small piece of food resting on a plate':12797values differ,max5.960464477539063e-08,
+selectedbitdiff0. Preservefailure; do NOTclaimfullstrictPASSorallfloatsexact. No gate/tolerance
+changed,predictionsunchanged. Posthocdiagnostic scripts/research/audit_query_field_extent_public_parity.py
+and docs/experiments/2026-10-12-text-extent-public-full-diagnostic.json:
+frozen_strict_gate_passed=false,all_actual_sets_exact=true. SpecificfloatingcauseNOTestablished.
+Failedcoordinatorlog/tmp/radio_gs_text_extent_public_full_run.log archivedROOT/strict_failure.log.
+Fourcoldfirst-queryprobesalreadyPASS, butdoNOTsubstituteforall68. Entirequery Pythonbuiltins/io.open/
+torch.load denied; initializationallowed; notOSsandbox. Referencecomparisons onlyafterall4predictions.
+
+Freshrawencoder68strings+4genericnegatives EXACTfloat32 parity max0 PASS:
+ROOTtext_extent_encoder_v1,script219c38d,auditdocs/experiments/2026-10-12-text-extent-encoder-audit.json.
+NativeQueryEncoder, originalSigLIP2 checkpointstrict1152->1536head; checkpointIOallowed,
+no sceneRGB/targetlabels. Rawvectors unnormalized asoriginal. Composedrawtext->vectors->
+PUBLICACTUALSETS proof preservesatomic50.8519 selectedprojection,NOTnewGTmeasurementor
+monolithicrawstringbenchmark. New52.0773candidate fullpublicreplayNOTDONE (optionexists).
+Report docs/experiments/2026-10-12-text-extent-public-results.md includesstrictfailure.
+
+Commonextent metadata inventoryCOMPLETE:31requests/30uniquefields. Only4LERFhave
+scope_topology/extent_preparation/extent_factors. 10ScanNet,8NVOSrequests(7fields),9UQIS
+lackall3. Metadata-onlypickleopcode inspection,notfullpayload/numericvalidation.
+Reportcommon-extent-readiness.md/JSON includesactualpackagepaths andcodelevelgaps:
+LERFcompilerfixed18views/384x512/semanticdomain; preparationpositiveviewgate mustnot
+silencelegalnegativeprompt; binaryengine lacks categoryexclusive/void andlegal3Dpoint
+constraints. Need26remainingfieldconstructions+typedadapters; cannotsplicepastwinners.
+No newcommonfivepredictions. Currentfourfields43.762GiB stilluncompressed.
+
+Primaryliteratureabstractcheck2026-10-12: PairGS2607.01140,NormLift2609.18898,
+GaussDet2606.30638,PostTrainingSemanticLifting2610.08756 addedmechanismdoc. Relations,
+reliabilityvotes,signedlifting,errorattributionnotnovelalone. Abstractonly,notfullreview.
+
+NEXT: keep52.0773candidate/50.8519publicatomicreference withcaveats. Prioritizeindependent
+sourcepseudoqueries/heldoutspatialidentity+reliableexclusion; addconstructiveinputonlyif
+existingbiasedevidencecannotdisambiguate. Do NOTloopscalarthreshold/loss/seedprotection.
+Buildremainingfields andtypedcommoninputs; allowactivation/multiclass/hardlegalprompt
+enginechanges forverifiedtaskcontracts,notforbenchmarkqueryexceptions. Freezecommonfive
+andUQISall4,thenindependent3DGT/generalization/resources. Newcandidatepublicfullfunctional
+replaystillrequired beforeclaimingitscompletepublictransfer. ADR0020/methoddocupdated.
 END active scope completion note.
 
 Active continuation2026-10-12 COMPLETE: signed atomic scope, corrected negative

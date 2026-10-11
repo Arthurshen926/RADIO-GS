@@ -1,0 +1,927 @@
+{
+  "passed": true,
+  "macro": {
+    "seed_addition": {
+      "iou": 0.46653479254598473,
+      "precision": 0.48735628816598897,
+      "recall": 0.85498484056175
+    },
+    "native_complete_scope": {
+      "iou": 0.3500136776387334,
+      "precision": 0.3606903034956755,
+      "recall": 0.9138043053913856
+    },
+    "native_atomic_abstention": {
+      "iou": 0.5085186329252303,
+      "precision": 0.5646608089188118,
+      "recall": 0.8216044800685562
+    },
+    "atomic_positive_native_negative": {
+      "iou": 0.516316874918771,
+      "precision": 0.5769573655540791,
+      "recall": 0.8027597921670245
+    },
+    "native_positive_atomic_negative": {
+      "iou": 0.3358224122085796,
+      "precision": 0.34296044336705495,
+      "recall": 0.9357822114623071
+    },
+    "other_view_positive_completion": {
+      "iou": 0.5207731085395547,
+      "precision": 0.5652795767094123,
+      "recall": 0.8474992825997283
+    }
+  },
+  "comparisons": {
+    "completion_vs_atomic": {
+      "delta": 0.012254475614324495,
+      "lower": -0.0008399272417870807,
+      "upper": 0.036093987656456245,
+      "improved": 3,
+      "regressed": 1,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    },
+    "completion_vs_seed": {
+      "delta": 0.054238315993569874,
+      "lower": 0.029548659061643653,
+      "upper": 0.08628258427405576,
+      "improved": 4,
+      "regressed": 0,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    },
+    "positive_at_native_negative": {
+      "delta": 0.16630319728003762,
+      "lower": 0.1157285425645222,
+      "upper": 0.216877851995553,
+      "improved": 4,
+      "regressed": 0,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    },
+    "negative_at_native_positive": {
+      "delta": -0.014191265430153775,
+      "lower": -0.016921594374523133,
+      "upper": -0.010889419210578198,
+      "improved": 0,
+      "regressed": 4,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    },
+    "negative_at_atomic_positive": {
+      "delta": -0.007798241993540844,
+      "lower": -0.017758317686919517,
+      "upper": 0.00671157876088832,
+      "improved": 1,
+      "regressed": 3,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    },
+    "positive_at_atomic_negative": {
+      "delta": 0.17269622071665053,
+      "lower": 0.1250261425147634,
+      "upper": 0.21701344703760456,
+      "improved": 4,
+      "regressed": 0,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    }
+  },
+  "scenes": {
+    "figurines": {
+      "metrics": {
+        "seed_addition": {
+          "iou": 0.563150006560616,
+          "precision": 0.5842849721696083,
+          "recall": 0.9279684031135845
+        },
+        "native_complete_scope": {
+          "iou": 0.39222043617005553,
+          "precision": 0.4010138852333879,
+          "recall": 0.9443102081409359
+        },
+        "native_atomic_abstention": {
+          "iou": 0.5884655773698049,
+          "precision": 0.6378386986412676,
+          "recall": 0.8792988032469652
+        },
+        "atomic_positive_native_negative": {
+          "iou": 0.6080545654163226,
+          "precision": 0.6626714160308206,
+          "recall": 0.8630098865825293
+        },
+        "native_positive_atomic_negative": {
+          "iou": 0.3776288564715837,
+          "precision": 0.38313395766427966,
+          "recall": 0.9595523590404086
+        },
+        "other_view_positive_completion": {
+          "iou": 0.5864988694725708,
+          "precision": 0.6252431551636206,
+          "recall": 0.8934113056493185
+        }
+      },
+      "counts": {
+        "atomic_positive_native_negative": {
+          "active_queries": 21,
+          "active_views": 198,
+          "conflicts": 0
+        },
+        "native_positive_atomic_negative": {
+          "active_queries": 21,
+          "active_views": 241,
+          "conflicts": 0
+        },
+        "other_view_positive_completion": {
+          "active_queries": 21,
+          "active_views": 220,
+          "conflicts": 0
+        }
+      },
+      "completion": {
+        "added_positive_rays": 40838,
+        "newly_active_views": 22,
+        "changed_queries": 20
+      },
+      "probes": {
+        "atomic_positive_native_negative": {
+          "query": "bag",
+          "initial": {
+            "data": 0.06469391124368265,
+            "cost": 5.7330699658542096e-05,
+            "total": 0.0647512419433412
+          },
+          "final": {
+            "data": 0.012768427221313041,
+            "cost": 1.785732172426835e-05,
+            "total": 0.01278628454303731
+          },
+          "preparation": {
+            "initial_max_absolute": 1.5226598137907388e-07,
+            "cost_max_relative": 2.1362564956532962e-07
+          }
+        },
+        "native_positive_atomic_negative": {
+          "query": "bag",
+          "initial": {
+            "data": 0.023141373172628696,
+            "cost": 0.013476890673222781,
+            "total": 0.03661826384585148
+          },
+          "final": {
+            "data": 0.014025670336540844,
+            "cost": 0.00025674332896713503,
+            "total": 0.01428241366550798
+          },
+          "preparation": {
+            "initial_max_absolute": 1.5604445569028513e-07,
+            "cost_max_relative": 2.404152656416474e-07
+          }
+        },
+        "other_view_positive_completion": {
+          "query": "bag",
+          "initial": {
+            "data": 0.03738356121184203,
+            "cost": 8.829537306482839e-05,
+            "total": 0.037471856584906864
+          },
+          "final": {
+            "data": 0.006824762203258252,
+            "cost": 2.504748545142377e-05,
+            "total": 0.006849809688709676
+          },
+          "preparation": {
+            "initial_max_absolute": 9.414916435357412e-08,
+            "cost_max_relative": 2.1236305140323608e-07
+          }
+        }
+      },
+      "source_completion": {
+        "nonempty_reference_views": 109,
+        "added_positive_rays": 20893,
+        "added_positive_agreeing": 18627,
+        "added_positive_disagreeing": 2266
+      },
+      "source_scope": {
+        "path": "output/query_field_20261011/extent_decision_v3/predictions/figurines__measure/privileged_scope.pt",
+        "sha256": "1a8c3889d2abdb5727241209701e654c07f4d4891e21def9b2a2bd3f8ce4751d"
+      },
+      "projected_pixel_changes": {
+        "atomic_positive_native_negative": {
+          "seed_addition": {
+            "added_tp": 18468,
+            "added_fp": 127640,
+            "removed_tp": 38831,
+            "removed_fp": 205826,
+            "beneficial_cases": 35,
+            "harmful_cases": 21
+          },
+          "native_complete_scope": {
+            "added_tp": 4341,
+            "added_fp": 23731,
+            "removed_tp": 41758,
+            "removed_fp": 1053253,
+            "beneficial_cases": 50,
+            "harmful_cases": 6
+          },
+          "native_atomic_abstention": {
+            "added_tp": 6575,
+            "added_fp": 14978,
+            "removed_tp": 9566,
+            "removed_fp": 45252,
+            "beneficial_cases": 39,
+            "harmful_cases": 17
+          }
+        },
+        "native_positive_atomic_negative": {
+          "seed_addition": {
+            "added_tp": 32494,
+            "added_fp": 1359476,
+            "removed_tp": 9843,
+            "removed_fp": 146624,
+            "beneficial_cases": 14,
+            "harmful_cases": 42
+          },
+          "native_complete_scope": {
+            "added_tp": 7962,
+            "added_fp": 472126,
+            "removed_tp": 2365,
+            "removed_fp": 210610,
+            "beneficial_cases": 18,
+            "harmful_cases": 38
+          },
+          "native_atomic_abstention": {
+            "added_tp": 42710,
+            "added_fp": 1275155,
+            "removed_tp": 2687,
+            "removed_fp": 14391,
+            "beneficial_cases": 8,
+            "harmful_cases": 48
+          }
+        },
+        "other_view_positive_completion": {
+          "seed_addition": {
+            "added_tp": 25635,
+            "added_fp": 171777,
+            "removed_tp": 21803,
+            "removed_fp": 194453,
+            "beneficial_cases": 31,
+            "harmful_cases": 25
+          },
+          "native_complete_scope": {
+            "added_tp": 6978,
+            "added_fp": 61674,
+            "removed_tp": 20200,
+            "removed_fp": 1035686,
+            "beneficial_cases": 47,
+            "harmful_cases": 9
+          },
+          "native_atomic_abstention": {
+            "added_tp": 24473,
+            "added_fp": 41990,
+            "removed_tp": 3269,
+            "removed_fp": 16754,
+            "beneficial_cases": 28,
+            "harmful_cases": 27
+          }
+        }
+      },
+      "all_scopes_independently_replayed": true,
+      "inherited_memberships_exact": true
+    },
+    "ramen": {
+      "metrics": {
+        "seed_addition": {
+          "iou": 0.3384812231672243,
+          "precision": 0.3703302921724813,
+          "recall": 0.7213445801575534
+        },
+        "native_complete_scope": {
+          "iou": 0.2394943738410462,
+          "precision": 0.24548330304997254,
+          "recall": 0.8311526669017881
+        },
+        "native_atomic_abstention": {
+          "iou": 0.39028851586880686,
+          "precision": 0.4660686138659873,
+          "recall": 0.7196516171516402
+        },
+        "atomic_positive_native_negative": {
+          "iou": 0.3771965216872698,
+          "precision": 0.4564614585251475,
+          "recall": 0.6788178416673506
+        },
+        "native_positive_atomic_negative": {
+          "iou": 0.22995314346435797,
+          "precision": 0.23377264656519248,
+          "recall": 0.8833510491649527
+        },
+        "other_view_positive_completion": {
+          "iou": 0.43831821493952855,
+          "precision": 0.4994786192901087,
+          "recall": 0.7676432046659958
+        }
+      },
+      "counts": {
+        "atomic_positive_native_negative": {
+          "active_queries": 14,
+          "active_views": 142,
+          "conflicts": 0
+        },
+        "native_positive_atomic_negative": {
+          "active_queries": 15,
+          "active_views": 186,
+          "conflicts": 0
+        },
+        "other_view_positive_completion": {
+          "active_queries": 14,
+          "active_views": 156,
+          "conflicts": 0
+        }
+      },
+      "completion": {
+        "added_positive_rays": 107667,
+        "newly_active_views": 14,
+        "changed_queries": 14
+      },
+      "probes": {
+        "atomic_positive_native_negative": {
+          "query": "bowl",
+          "initial": {
+            "data": 0.07096261704847737,
+            "cost": 0.08981838992232892,
+            "total": 0.16078100697080627
+          },
+          "final": {
+            "data": 0.03179334488377667,
+            "cost": 0.004428306297745399,
+            "total": 0.03622165118152207
+          },
+          "preparation": {
+            "initial_max_absolute": 2.441837615441145e-07,
+            "cost_max_relative": 2.839579527762204e-07
+          }
+        },
+        "native_positive_atomic_negative": {
+          "query": "bowl",
+          "initial": {
+            "data": 0.11570064263392937,
+            "cost": 0.09924833681678631,
+            "total": 0.21494897945071567
+          },
+          "final": {
+            "data": 0.03812538129231698,
+            "cost": 0.004264697919856797,
+            "total": 0.04239007921217378
+          },
+          "preparation": {
+            "initial_max_absolute": 3.138387247858532e-07,
+            "cost_max_relative": 2.819814217977707e-07
+          }
+        },
+        "other_view_positive_completion": {
+          "query": "bowl",
+          "initial": {
+            "data": 0.04493345880762646,
+            "cost": 0.09379986160390885,
+            "total": 0.1387333204115353
+          },
+          "final": {
+            "data": 0.01182994106948833,
+            "cost": 0.004647345745357434,
+            "total": 0.016477286814845764
+          },
+          "preparation": {
+            "initial_max_absolute": 3.055494324222252e-07,
+            "cost_max_relative": 2.7804658875007493e-07
+          }
+        }
+      },
+      "source_completion": {
+        "nonempty_reference_views": 131,
+        "added_positive_rays": 77417,
+        "added_positive_agreeing": 59151,
+        "added_positive_disagreeing": 18266
+      },
+      "source_scope": {
+        "path": "output/query_field_20261011/extent_decision_v3/predictions/ramen__measure/privileged_scope.pt",
+        "sha256": "8ed1eab2c8638542fc51254102f062f40c08411c3760ac1faefbf1afae73b99c"
+      },
+      "projected_pixel_changes": {
+        "atomic_positive_native_negative": {
+          "seed_addition": {
+            "added_tp": 66035,
+            "added_fp": 500100,
+            "removed_tp": 195351,
+            "removed_fp": 1270866,
+            "beneficial_cases": 51,
+            "harmful_cases": 20
+          },
+          "native_complete_scope": {
+            "added_tp": 16337,
+            "added_fp": 261129,
+            "removed_tp": 357334,
+            "removed_fp": 4577963,
+            "beneficial_cases": 54,
+            "harmful_cases": 17
+          },
+          "native_atomic_abstention": {
+            "added_tp": 23218,
+            "added_fp": 283160,
+            "removed_tp": 43440,
+            "removed_fp": 284156,
+            "beneficial_cases": 36,
+            "harmful_cases": 34
+          }
+        },
+        "native_positive_atomic_negative": {
+          "seed_addition": {
+            "added_tp": 255272,
+            "added_fp": 4421176,
+            "removed_tp": 7812,
+            "removed_fp": 356905,
+            "beneficial_cases": 21,
+            "harmful_cases": 50
+          },
+          "native_complete_scope": {
+            "added_tp": 46419,
+            "added_fp": 1232770,
+            "removed_tp": 10640,
+            "removed_fp": 714567,
+            "beneficial_cases": 23,
+            "harmful_cases": 48
+          },
+          "native_atomic_abstention": {
+            "added_tp": 374630,
+            "added_fp": 4988565,
+            "removed_tp": 18076,
+            "removed_fp": 154524,
+            "beneficial_cases": 11,
+            "harmful_cases": 59
+          }
+        },
+        "other_view_positive_completion": {
+          "seed_addition": {
+            "added_tp": 97242,
+            "added_fp": 456797,
+            "removed_tp": 133275,
+            "removed_fp": 1198779,
+            "beneficial_cases": 58,
+            "harmful_cases": 13
+          },
+          "native_complete_scope": {
+            "added_tp": 31035,
+            "added_fp": 206560,
+            "removed_tp": 278749,
+            "removed_fp": 4494610,
+            "beneficial_cases": 59,
+            "harmful_cases": 12
+          },
+          "native_atomic_abstention": {
+            "added_tp": 91304,
+            "added_fp": 268173,
+            "removed_tp": 18243,
+            "removed_fp": 240385,
+            "beneficial_cases": 48,
+            "harmful_cases": 18
+          }
+        }
+      },
+      "all_scopes_independently_replayed": true,
+      "inherited_memberships_exact": true
+    },
+    "teatime": {
+      "metrics": {
+        "seed_addition": {
+          "iou": 0.5469459781321133,
+          "precision": 0.5568431669674819,
+          "recall": 0.9752725297845428
+        },
+        "native_complete_scope": {
+          "iou": 0.3844053747974921,
+          "precision": 0.3905631303197713,
+          "recall": 0.9810718280265018
+        },
+        "native_atomic_abstention": {
+          "iou": 0.5898972820412731,
+          "precision": 0.6123480040843082,
+          "recall": 0.9531213479851718
+        },
+        "atomic_positive_native_negative": {
+          "iou": 0.602326949542331,
+          "precision": 0.6279502609408906,
+          "recall": 0.9466172225916413
+        },
+        "native_positive_atomic_negative": {
+          "iou": 0.3667071088642852,
+          "precision": 0.3712284169284118,
+          "recall": 0.9863012001502907
+        },
+        "other_view_positive_completion": {
+          "iou": 0.5925653399114236,
+          "precision": 0.6064408354022095,
+          "recall": 0.9774723196251415
+        }
+      },
+      "counts": {
+        "atomic_positive_native_negative": {
+          "active_queries": 14,
+          "active_views": 126,
+          "conflicts": 0
+        },
+        "native_positive_atomic_negative": {
+          "active_queries": 14,
+          "active_views": 158,
+          "conflicts": 0
+        },
+        "other_view_positive_completion": {
+          "active_queries": 14,
+          "active_views": 150,
+          "conflicts": 0
+        }
+      },
+      "completion": {
+        "added_positive_rays": 198897,
+        "newly_active_views": 24,
+        "changed_queries": 14
+      },
+      "probes": {
+        "atomic_positive_native_negative": {
+          "query": "apple",
+          "initial": {
+            "data": 0.021839604183591734,
+            "cost": 0.009690714836443704,
+            "total": 0.03153031902003544
+          },
+          "final": {
+            "data": 0.003456474882397986,
+            "cost": 0.0012635698501640036,
+            "total": 0.00472004473256199
+          },
+          "preparation": {
+            "initial_max_absolute": 1.7978839428334226e-07,
+            "cost_max_relative": 2.4922874382765443e-07
+          }
+        },
+        "native_positive_atomic_negative": {
+          "query": "apple",
+          "initial": {
+            "data": 0.08312028529519223,
+            "cost": 0.008413039941459033,
+            "total": 0.09153332523665127
+          },
+          "final": {
+            "data": 0.04442781228200303,
+            "cost": 0.001159919610876159,
+            "total": 0.04558773189287919
+          },
+          "preparation": {
+            "initial_max_absolute": 1.8967417070303583e-07,
+            "cost_max_relative": 2.6711770519648397e-07
+          }
+        },
+        "other_view_positive_completion": {
+          "query": "apple",
+          "initial": {
+            "data": 0.020194962952306036,
+            "cost": 0.008074157786708724,
+            "total": 0.02826912073901476
+          },
+          "final": {
+            "data": 0.002251109737144737,
+            "cost": 0.0010583487995631912,
+            "total": 0.0033094585367079285
+          },
+          "preparation": {
+            "initial_max_absolute": 1.8751642560932424e-07,
+            "cost_max_relative": 3.070334241360812e-07
+          }
+        }
+      },
+      "source_completion": {
+        "nonempty_reference_views": 81,
+        "added_positive_rays": 103120,
+        "added_positive_agreeing": 58394,
+        "added_positive_disagreeing": 44726
+      },
+      "source_scope": {
+        "path": "output/query_field_20261011/extent_decision_v3/predictions/teatime__measure/privileged_scope.pt",
+        "sha256": "fad40b4bce2507da7dcf01e12f22afdd485eb45f5e6c86609d4aeee6273f970f"
+      },
+      "projected_pixel_changes": {
+        "atomic_positive_native_negative": {
+          "seed_addition": {
+            "added_tp": 12864,
+            "added_fp": 241324,
+            "removed_tp": 73161,
+            "removed_fp": 683999,
+            "beneficial_cases": 47,
+            "harmful_cases": 12
+          },
+          "native_complete_scope": {
+            "added_tp": 17366,
+            "added_fp": 108992,
+            "removed_tp": 61594,
+            "removed_fp": 1735815,
+            "beneficial_cases": 56,
+            "harmful_cases": 3
+          },
+          "native_atomic_abstention": {
+            "added_tp": 12626,
+            "added_fp": 72347,
+            "removed_tp": 15664,
+            "removed_fp": 129064,
+            "beneficial_cases": 51,
+            "harmful_cases": 8
+          }
+        },
+        "native_positive_atomic_negative": {
+          "seed_addition": {
+            "added_tp": 18806,
+            "added_fp": 1740475,
+            "removed_tp": 27935,
+            "removed_fp": 412502,
+            "beneficial_cases": 8,
+            "harmful_cases": 51
+          },
+          "native_complete_scope": {
+            "added_tp": 19513,
+            "added_fp": 464740,
+            "removed_tp": 12573,
+            "removed_fp": 320915,
+            "beneficial_cases": 9,
+            "harmful_cases": 50
+          },
+          "native_atomic_abstention": {
+            "added_tp": 57229,
+            "added_fp": 1810552,
+            "removed_tp": 9099,
+            "removed_fp": 96621,
+            "beneficial_cases": 1,
+            "harmful_cases": 58
+          }
+        },
+        "other_view_positive_completion": {
+          "seed_addition": {
+            "added_tp": 17051,
+            "added_fp": 335974,
+            "removed_tp": 38045,
+            "removed_fp": 538058,
+            "beneficial_cases": 48,
+            "harmful_cases": 11
+          },
+          "native_complete_scope": {
+            "added_tp": 16810,
+            "added_fp": 144359,
+            "removed_tp": 21735,
+            "removed_fp": 1530591,
+            "beneficial_cases": 55,
+            "harmful_cases": 4
+          },
+          "native_atomic_abstention": {
+            "added_tp": 47185,
+            "added_fp": 297200,
+            "removed_tp": 10920,
+            "removed_fp": 113326,
+            "beneficial_cases": 24,
+            "harmful_cases": 35
+          }
+        }
+      },
+      "all_scopes_independently_replayed": true,
+      "inherited_memberships_exact": true
+    },
+    "waldo_kitchen": {
+      "metrics": {
+        "seed_addition": {
+          "iou": 0.41756196232398557,
+          "precision": 0.4379667213543846,
+          "recall": 0.7953538491913189
+        },
+        "native_complete_scope": {
+          "iou": 0.3839345257463398,
+          "precision": 0.40570089537957016,
+          "recall": 0.898682518496316
+        },
+        "native_atomic_abstention": {
+          "iou": 0.4654231564210358,
+          "precision": 0.542387919083684,
+          "recall": 0.7343461518904477
+        },
+        "atomic_positive_native_negative": {
+          "iou": 0.4776894630291606,
+          "precision": 0.5607463267194576,
+          "recall": 0.7225942178265767
+        },
+        "native_positive_atomic_negative": {
+          "iou": 0.36900054003409166,
+          "precision": 0.38370675231033585,
+          "recall": 0.9139242374935765
+        },
+        "other_view_positive_completion": {
+          "iou": 0.46571000983469574,
+          "precision": 0.5299556969817104,
+          "recall": 0.7514703004584576
+        }
+      },
+      "counts": {
+        "atomic_positive_native_negative": {
+          "active_queries": 18,
+          "active_views": 149,
+          "conflicts": 0
+        },
+        "native_positive_atomic_negative": {
+          "active_queries": 18,
+          "active_views": 194,
+          "conflicts": 0
+        },
+        "other_view_positive_completion": {
+          "active_queries": 18,
+          "active_views": 162,
+          "conflicts": 0
+        }
+      },
+      "completion": {
+        "added_positive_rays": 70916,
+        "newly_active_views": 13,
+        "changed_queries": 17
+      },
+      "probes": {
+        "atomic_positive_native_negative": {
+          "query": "Stainless steel pots",
+          "initial": {
+            "data": 0.029112399369292732,
+            "cost": 0.016729523962219606,
+            "total": 0.04584192333151234
+          },
+          "final": {
+            "data": 0.013098206198667379,
+            "cost": 0.000937960609171995,
+            "total": 0.014036166807839374
+          },
+          "preparation": {
+            "initial_max_absolute": 1.5399947161931493e-07,
+            "cost_max_relative": 1.7171979911751565e-07
+          }
+        },
+        "native_positive_atomic_negative": {
+          "query": "Stainless steel pots",
+          "initial": {
+            "data": 0.006814070747124965,
+            "cost": 0.023695646110354508,
+            "total": 0.030509716857479472
+          },
+          "final": {
+            "data": 0.0020539754137404746,
+            "cost": 0.0011457775773724421,
+            "total": 0.0031997529911129167
+          },
+          "preparation": {
+            "initial_max_absolute": 1.6011405012950064e-07,
+            "cost_max_relative": 2.1942471937007924e-07
+          }
+        },
+        "other_view_positive_completion": {
+          "query": "Stainless steel pots",
+          "initial": {
+            "data": 0.021888192313459585,
+            "cost": 0.019296927038886302,
+            "total": 0.04118511935234589
+          },
+          "final": {
+            "data": 0.0041619901218262235,
+            "cost": 0.00106373190691329,
+            "total": 0.005225722028739514
+          },
+          "preparation": {
+            "initial_max_absolute": 1.5760753691029805e-07,
+            "cost_max_relative": 1.6734939869467942e-07
+          }
+        }
+      },
+      "source_completion": {
+        "nonempty_reference_views": 55,
+        "added_positive_rays": 56948,
+        "added_positive_agreeing": 44347,
+        "added_positive_disagreeing": 12601
+      },
+      "source_scope": {
+        "path": "output/query_field_20261011/extent_decision_v3/predictions/waldo_kitchen__measure/privileged_scope.pt",
+        "sha256": "e4a8cd5f0d5a8c674dd63993110615c576fe771aefbfad345b786061db0e908d"
+      },
+      "projected_pixel_changes": {
+        "atomic_positive_native_negative": {
+          "seed_addition": {
+            "added_tp": 7002,
+            "added_fp": 123488,
+            "removed_tp": 185691,
+            "removed_fp": 650975,
+            "beneficial_cases": 15,
+            "harmful_cases": 6
+          },
+          "native_complete_scope": {
+            "added_tp": 11173,
+            "added_fp": 32130,
+            "removed_tp": 212092,
+            "removed_fp": 1531790,
+            "beneficial_cases": 15,
+            "harmful_cases": 7
+          },
+          "native_atomic_abstention": {
+            "added_tp": 22065,
+            "added_fp": 39958,
+            "removed_tp": 35131,
+            "removed_fp": 67440,
+            "beneficial_cases": 11,
+            "harmful_cases": 9
+          }
+        },
+        "native_positive_atomic_negative": {
+          "seed_addition": {
+            "added_tp": 80902,
+            "added_fp": 1394807,
+            "removed_tp": 51117,
+            "removed_fp": 367511,
+            "beneficial_cases": 10,
+            "harmful_cases": 12
+          },
+          "native_complete_scope": {
+            "added_tp": 20413,
+            "added_fp": 294777,
+            "removed_tp": 12858,
+            "removed_fp": 239654,
+            "beneficial_cases": 6,
+            "harmful_cases": 16
+          },
+          "native_atomic_abstention": {
+            "added_tp": 206189,
+            "added_fp": 1559914,
+            "removed_tp": 10781,
+            "removed_fp": 32613,
+            "beneficial_cases": 6,
+            "harmful_cases": 16
+          }
+        },
+        "other_view_positive_completion": {
+          "seed_addition": {
+            "added_tp": 12457,
+            "added_fp": 159077,
+            "removed_tp": 124335,
+            "removed_fp": 618364,
+            "beneficial_cases": 15,
+            "harmful_cases": 6
+          },
+          "native_complete_scope": {
+            "added_tp": 15101,
+            "added_fp": 47707,
+            "removed_tp": 149209,
+            "removed_fp": 1479167,
+            "beneficial_cases": 15,
+            "harmful_cases": 7
+          },
+          "native_atomic_abstention": {
+            "added_tp": 74463,
+            "added_fp": 71478,
+            "removed_tp": 20718,
+            "removed_fp": 30760,
+            "beneficial_cases": 8,
+            "harmful_cases": 11
+          }
+        }
+      },
+      "all_scopes_independently_replayed": true,
+      "inherited_memberships_exact": true
+    }
+  },
+  "factorial_interaction": {
+    "figurines": -0.004997408348045906,
+    "ramen": 0.02263322455822528,
+    "teatime": 0.0052685984321489965,
+    "waldo_kitchen": 0.002667679104123355
+  },
+  "mean_factorial_interaction": 0.006393023436612931,
+  "design": {
+    "path": "output/query_field_20261012/scope_completion_v1/design.json",
+    "sha256": "14b8a793f33abcd50a0a546476fa0fae596de52330c2d4e4737d21b0426a503d"
+  },
+  "code": {
+    "path": "/root/RADIO-GS-query-field/scripts/research/audit_query_field_scope_completion.py",
+    "sha256": "8923ca47bab097cefee50aded44cd53dfc86ca943d6b923fdd7115b191f0f33f"
+  },
+  "objective_helper": {
+    "path": "scripts/research/audit_query_field_signed_scope.py",
+    "sha256": "368c478f4cf9895280ce5fbb1187929535a8209f81c430a38bc5f1212f6d52cd"
+  },
+  "all_scopes_independently_replayed": true,
+  "all_actual_mask_ious_replayed": true,
+  "all_new_arms_source_free": true,
+  "default_promoted": false,
+  "whole_five_task": false
+}
