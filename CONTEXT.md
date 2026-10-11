@@ -1,23 +1,38 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-11: actual-member-domain coverage correction IN PROGRESS.
-Core02d6cb6; current runners2ad07e8. Worktree /root/RADIO-GS-query-field only.
-Explicit member_domain for compiler/relaxed renderer; legacy observed default retained.
-New construction uses observed OR semantic_measure.supported; source-label domain
-stays observed. Native semantic initializer, scope atoms,16x16 samples,policy unchanged.
-All4/72view construction + source-denied cold reload PASS;648independent conditions;
-actual binary selected_alpha comparison max7.7486e-7;softmax1.8477e-6;
-allrow gradientmax3.9145e-9. AllparenttensorsEXACT;64synthetic decoder cases x2PASS.
-New factors5820653hits/+70143324bytes (old5124669/+61791516); no full-extent guarantee.
-13targetedtestsPASS. Two teatime cold CUDA OOMs on sharedGPU3/0 retained; GPU4passed.
-Field root output/query_field_20261011/compiled_available_coverage_v1.
-Audit docs/experiments/2026-10-11-available-coverage-audit.json PASS.
-Full4/68 domain-only study root output/query_field_20261011/joint_exclusion_domain_v1:
-fivearms semantic_initial/observed_joint/observed_fixed/frozen_visibility/joint_coverage.
-Preparing/running onGPU4; last two names are NEW available-domain arms. Old arms
-are fixed comparisons only; fresh native query inputs drive new predictions.
-Allpredictions must finish before scoring. No new accuracy claim/default promotion
-or whole-five completion yet. Pipeline also requests member audit + cold figurines API.
+Active continuation2026-10-11: actual-member-domain correction COMPLETE.
+Worktree /root/RADIO-GS-query-field; codex/query-preserving-gaussian-field only.
+Compiler/relaxed renderer accept explicit domain; historical observed default retained.
+New factors cover observed OR semantic_measure.supported (native TEXT available domain).
+Source-label observed domain,72views,16x16samples,atoms,acceptance,semantic prior/policy fixed.
+Four-scene68text five-arm actual IoU: semanticinitial42.9498;oldfixed43.9940;
+oldjoint43.5621;NEWfixed45.1953;NEWjoint44.8761(predeclared primary).
+Domain-only fixed+1.2013pp CI[.7302,1.6724],joint+1.3139pp CI[.8987,1.7291],both4up.
+Newjoint vs newfixed-.3192pp,2up2down,CI[-.8471,.2086]; no joint superiority/default promotion.
+All response54.0889/AP82.5249,all68nativeinitialsetsEXACT admission;no training/queryfit.
+648independent conditions/72views,hard selected_alpha max7.7486e-7/soft1.8477e-6;
+allrow gradient3.9145e-9;all4coldreload,parenttensorsEXACT;64decoder conditions x2PASS.
+13testsPASS;full metric auditPASS;coldfigurines21exactsets,max1.1921e-7/source guardPASS.
+Two sharedGPU cold OOMs retained; same gatespassed GPU4;no tolerance changes.
+5820653factorhits/+70143324bytes total4scenes;still sampled uncompressed view-group graph.
+Initial756509selected occurrences:factor-touched476330(62.96%,old56.45%),untouched280179.
+Joint removes49171:43164observed/6007semantic-only. Counts repeated across queries.
+Fullsource756pairs same431809P/2731533N;old threecontrol rendersEXACT.
+Newfixed loses3935P vs old2853;newjoint5548 vs old3917,ALL unsampled;sample losses0.
+Partial-known sourceIoU newjoint52.6264 >newfixed52.3050,despite lowerbenchmark.
+NEXT: keep domain repair+strong prior;do not settle onepass deletion as final architecture.
+Transfer reliability weighting + full extent + fixed-prior normalized footprint cost +
+bidirectional decisions as one member FUNCTION. Current Boolean decoder drops viewconfidence
+from finite evidence path,has no footprintcost/noaddition;4queries no coveredP atinitial.
+No evidence still preserves prior;do not equate partial union with full-object truth.
+Distinguish native acceptance reliability and geometric inference; no eval-answerbank,
+query-time source images/masks/cameras or free per-query fitted parameters.
+Metadata-only fix96624b7 AFTER frozen metric audit: wrapper no longer inherits misleading
+viewconfidence-preserved=True; initializer/coverage capabilities separated;5tests rerunPASS.
+No numerical changes; historical code-hash audit requires its recorded frozen implementation.
+No new whole-five/v10 recovery/paperclosure. Alljobsfinished.
+See docs/experiments/2026-10-11-joint-exclusion-domain-results.md and three audit/diagnostic JSONs.
+Roots output/query_field_20261011/{compiled_available_coverage_v1,joint_exclusion_domain_v1}.
 
 Active continuation2026-10-10: TWO complete4LERF/68text one-pass member studies.
 Frozen22f2a7e(first)/8684c0f(nativeprior); no training/query-parameterfit/source inference.
