@@ -115,3 +115,17 @@ def test_exchange_checks_entire_union_not_only_shared_positive():
 def test_negative_exchange_budget_rejected():
     with pytest.raises(ValueError, match='exchange'):
         solve([[2]], [.9], [True], exchange_candidates=-1)
+
+
+def test_compiled_engine_matches_reference_with_sparse_ties_and_exchanges():
+    rng=np.random.default_rng(31)
+    for budget in [0,1,3,8]:
+        for _ in range(12):
+            a=rng.integers(0,3,(9,13)).astype(float)
+            prior=rng.uniform(.1,.9,13);p=np.arange(9)<4;n=np.arange(9)>5
+            confidence=rng.uniform(0,1,9);f=rng.integers(1,4,13)
+            ref,rd=solve(a,prior,p,n,confidence,f,exchange_candidates=budget)
+            out,od=solve(a,prior,p,n,confidence,f,exchange_candidates=budget,engine='compiled')
+            assert np.array_equal(ref,out)
+            for k in ['passes','flips','exchanges','pairs_evaluated','converged']:assert rd[k]==od[k]
+            np.testing.assert_allclose(rd['energy_trace'],od['energy_trace'],atol=1e-12,rtol=1e-12)

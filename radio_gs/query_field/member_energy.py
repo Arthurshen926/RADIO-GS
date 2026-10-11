@@ -9,7 +9,7 @@ from scipy import sparse
 
 
 def solve_member_energy(matrix, prior, positive, negative, reliability, footprint,
-                        *, cutoff, support_weight=.1, prior_weight=.1, max_passes=8, exchange_candidates=8):
+                        *, cutoff, support_weight=.1, prior_weight=.1, max_passes=8, exchange_candidates=8, engine="reference"):
     """Bounded deterministic coordinate descent on one binary Gaussian set.
 
     E = weighted positive deficit + weighted negative excess (each class
@@ -42,6 +42,8 @@ def solve_member_energy(matrix, prior, positive, negative, reliability, footprin
         raise ValueError('invalid solver policy')
     if not isinstance(exchange_candidates, int) or exchange_candidates < 0:
         raise ValueError('invalid exchange budget')
+    if engine not in {"reference", "compiled"}:
+        raise ValueError("invalid member engine")
     initial = prior > .5
     selected = initial.copy()
     # Normalize by label counts, not confidence sums: uniformly weak evidence
@@ -68,7 +70,13 @@ def solve_member_energy(matrix, prior, positive, negative, reliability, footprin
 
     row_matrix = matrix.tocsr()
     trace = [energy()]; flips = 0; passes = 0; exchanges = 0; pairs_evaluated = 0
-    for _ in range(max_passes):
+    if engine == "compiled":
+        from .member_energy_kernel import execute
+        selected, values, flips, exchanges, pairs_evaluated, passes, changed = execute(
+            matrix,row_matrix,prior,initial,selected,touched,p,n,cost,disagreement,coverage,
+            cutoff,support_weight,prior_weight,max_passes,exchange_candidates)
+        trace = values.tolist()
+    for _ in range(max_passes if engine == "reference" else 0):
         changed = 0; passes += 1
         # Stable row ID order; no query-specific order fitting or threshold tuning.
         for g in np.flatnonzero(touched):
@@ -119,7 +127,7 @@ def solve_member_energy(matrix, prior, positive, negative, reliability, footprin
                     changed += 1; exchanges += 1; flips += 2
         trace.append(energy())
         if not changed: break
-    return selected, dict(energy_trace=trace, passes=passes, flips=flips, exchanges=exchanges,
+    return selected, dict(engine=engine, energy_trace=trace, passes=passes, flips=flips, exchanges=exchanges,
                          exchange_candidates=exchange_candidates, pairs_evaluated=pairs_evaluated,
                          added=int((selected & ~initial).sum()),
                          removed=int((initial & ~selected).sum()),
