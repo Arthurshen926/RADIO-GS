@@ -14,11 +14,11 @@ from radio_gs.query_field.extent_decision_linked import LinkedExtentDecision
 from scripts.research.compile_query_field_extent_factors import phase_pixels, ROOT as PARENT_FIELDS
 from scripts.research.run_query_field_relations import read, write, receipt, check, execute, lanes
 
-ROOT = Path('output/query_field_20261011/extent_preparation_v1')
-FIELDS = ROOT/'fields'
+ROOT = Path('output/query_field_20261011/extent_preparation_v2')
+FIELDS = Path('output/query_field_20261011/extent_preparation_v1/fields')
 PARENT = Path('output/query_field_20261011/extent_decision_v3')
 CANONICAL = Path('output/query_field_20261011/canonical_subset_reference_v1')
-PROTOCOL = Path('docs/experiments/2026-10-11-extent-preparation-protocol.md')
+PROTOCOL = Path('docs/experiments/2026-10-11-extent-preparation-v2-protocol.md')
 CODE = [__file__, 'radio_gs/query_field/extent_preparation.py', 'radio_gs/query_field/field.py',
         'radio_gs/query_field/storage.py', 'radio_gs/query_field/support_footprint.py',
         'radio_gs/query_field/extent_decision.py', 'radio_gs/query_field/extent_decision_linked.py',
@@ -125,7 +125,7 @@ def predict(index):
             refcost=ref['support_cost'];assert torch.equal(cost==0,refcost==0)
             cost_error=float(((cost-refcost).abs()/refcost.abs().clamp_min(1e-30)).max())
             info.update(initial_max_error=initial_error,initial_selection_disagreements=init_diff,cost_max_relative_error=cost_error)
-            write(out/'latest_check.json',dict(query=text,**info))
+            write(out/'checks'/f'{qi:03d}.json',dict(query=text,**info))
             assert initial_error<=d['initializer_atol'] and init_diff==0 and cost_error<=d['cost_rtol'],info
             confidence=np.zeros(len(scopes))
             for vi in active:confidence[vi]=float(scopes[vi]['confidence'])
@@ -139,7 +139,7 @@ def predict(index):
         diff=int(((result[:,qi]>.5)!=old['selected_by_control']['extent_discrete'][:,qi]).sum())
         info.update(query=text,final_selection_disagreements=diff,seconds=time.monotonic()-began)
         details.append(info);prepared.append(dict(initial=initial,cost=cost,active_views=active))
-        write(out/'progress.json',details)
+        write(out/'queries'/f'{qi:03d}.json',info)
         print(scene,qi,text,'difference',diff,'seconds',info['seconds'],flush=True)
         assert diff==d['required_final_selection_disagreements'],info
     torch.save(dict(texts=old['texts'],membership=result,selected=result>.5,prepared=prepared),out/'predictions.pt')
@@ -152,7 +152,9 @@ def predict(index):
 
 def run(gpus):
     def job(i,gpu):
-        execute(['-m','scripts.research.run_query_field_extent_preparation','compile','--index',str(i)],ROOT/'logs'/f'compile_{i}.log',gpu)
+        j=read(ROOT/'prediction_config.json')['jobs'][i]
+        if not (FIELDS/j['scene']/'compilation.json').exists():
+            execute(['-m','scripts.research.run_query_field_extent_preparation','compile','--index',str(i)],ROOT/'logs'/f'compile_{i}.log',gpu)
         execute(['-m','scripts.research.run_query_field_extent_preparation','predict','--index',str(i)],ROOT/'logs'/f'predict_{i}.log',gpu)
     lanes(list(range(4)),gpus,job)
 
