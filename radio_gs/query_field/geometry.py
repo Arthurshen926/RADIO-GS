@@ -43,11 +43,24 @@ def selected_alpha(field, selected, camera, height, width, world_scale=1.):
     return projection(geometry, camera, height, width, world_scale)[2]
 
 
-def relaxed_subset_alpha(field, membership, camera, height, width, world_scale=1.):
+def member_domain_mask(field, member_domain=None):
+    """Validate an explicit geometric selection domain; legacy default is observed.
+
+    This does not expand source labels or certify semantic support as foreground.
+    Callers using semantic-only members must pass their actual available domain.
+    """
+    domain = field.observed if member_domain is None else member_domain
+    if (domain.dtype != torch.bool or domain.shape != (len(field.xyz),)
+            or domain.device != field.xyz.device):
+        raise ValueError('member domain must be a Boolean mask aligned with field rows and device')
+    return domain
+
+
+def relaxed_subset_alpha(field, membership, camera, height, width, world_scale=1., *, member_domain=None):
     """Differentiate a query-selected subset's opacity, keeping geometry frozen.
 
     This is a soft selection surrogate. It is not the full-scene normalized
-    feature renderer and does not change stored Gaussian opacity. Every observed
+    feature renderer and does not change stored Gaussian opacity. Every eligible
     Gaussian may receive a gradient, including ones hidden in the original view.
     Rasterizer alpha clipping/culling remains an approximation to a discrete set.
     """
@@ -59,7 +72,7 @@ def relaxed_subset_alpha(field, membership, camera, height, width, world_scale=1
     intrinsic[1] *= height/camera.height
     # Geometry and base opacity are immutable buffers. Only transient selection
     # comes from the trainable member decoder.
-    opacity = field.opacities.flatten() * membership * field.observed
+    opacity = field.opacities.flatten() * membership * member_domain_mask(field, member_domain)
     _, alpha, _ = rasterization(means=field.xyz, quats=field.quaternions, scales=field.scales,
         opacities=opacity, colors=torch.zeros(len(field.xyz),1,device=field.xyz.device),
         viewmats=camera.world_to_camera.to(field.xyz)[None], Ks=intrinsic[None], width=width,height=height,

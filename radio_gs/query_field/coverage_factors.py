@@ -59,13 +59,15 @@ class CoverageFactors(nn.Module):
 
 
 @torch.no_grad()
-def compile_coverage_view(field, camera, height, width, pixels, atom_ids):
+def compile_coverage_view(field, camera, height, width, pixels, atom_ids, *, member_domain=None):
     """Enumerate ALL footprints at construction samples, including occluded ones.
 
     Use gsplat's own tile intersection list and depth ordering. Do not use its
     early-terminated visible hit list: removal of foreground can expose any
     later member. Original sample indices are returned nowhere in the state.
     """
+    from .geometry import member_domain_mask
+    domain = member_domain_mask(field, member_domain)
     from gsplat import rasterization
     k = camera.intrinsic.to(field.xyz).clone()
     k[0] *= width/camera.width; k[1] *= height/camera.height
@@ -84,6 +86,6 @@ def compile_coverage_view(field, camera, height, width, pixels, atom_ids):
         d=info['means2d'][0,g]-field.xyz.new_tensor([x+.5,y+.5]); c=info['conics'][0,g]
         sigma=.5*(c[:,0]*d[:,0].square()+c[:,2]*d[:,1].square())+c[:,1]*d[:,0]*d[:,1]
         a=info['opacities'][0,g]*torch.exp(-sigma)
-        keep=(sigma>=0)&(a>=1/255)&field.observed[g]
+        keep=(sigma>=0)&(a>=1/255)&domain[g]
         ids.append(g[keep].cpu()); values.append(a[keep].cpu()); pointer.append(pointer[-1]+int(keep.sum()))
     return dict(pointer=torch.tensor(pointer,dtype=torch.long),index=torch.cat(ids),alpha=torch.cat(values),atom=atom_ids.long().cpu())
