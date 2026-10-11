@@ -1,5 +1,23 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11 RUNNING: matched native regional pooling plus identity/seed factorial.
+Branch unchanged; last committed code c127495. Do NOT start duplicate jobs.
+First study output/query_field_20261011/native_region_appearance_v1: native_448 and native_full
+replace ONLY region_carrier.descriptors; same72 training frames total/4scenes, exact proposal binding,
+cold other268 tensors exact and tensor bytes unchanged. First3 scenes finished; waldo last export running.
+Compiler process driver executes all4; pipeline waits for construction/*/complete.json then runs
+run_query_field_native_region_appearance prepare/run (GPU2), audit, then
+run_query_field_identity_scope prepare/run (GPU2), audit. Logs under first study/logs/pipeline_*.
+Second root output/query_field_20261011/query_identity_scope_v1. Protocol/representation fixed
+BEFORE first new scores: native448 only;2x2 native-positive prerequisite / preserved seed base.
+Predeclared primary native_seeded vs seed_addition46.6535. No threshold/model changes.
+Prior label-free admission audit:108/351 quality-admitted regions have native probability<=.5;
+this is NOT proof of false membership. Public identity_scope API and11 targeted tests passed.
+Both studies require all4/68 prediction barriers before scoring, actual-set masks, unchanged controls,
+Python open denied after warmup; no default promotion / five-task closure. NO NEW SCORES YET.
+See native-region-appearance-protocol and query-identity-scope-protocol. Once finished replace this
+RUNNING entry with verified results, preserve old failures. Original checkout must stay untouched.
+
 Active continuation2026-10-11: binary Gaussian region scope full4/68 study COMPLETE.
 Actual-set IoU initial42.9498/fixed45.1953/seed_addition46.6535/conditional_addition44.2876/
 conditional_replace42.3529. Predeclared primary conditional FAILED; no default promotion.
