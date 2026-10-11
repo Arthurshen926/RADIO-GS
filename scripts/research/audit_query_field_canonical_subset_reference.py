@@ -57,21 +57,29 @@ def main():
             assert fit['sampled_raster'] == [192, 256] and fit['interleaved_phases'] == 4
             assert not fit['explicit_tracks'] or all(x is None for x in fit['explicit_tracks'])
             assert not fit['implicit_legacy_query_artifacts_read']
-            normalization_errors = []
+            normalization_errors = []; cpu_float32_errors = []
             for s in state.values():
                 assert len(s['view_indices']) == len(s['confidence']) == len(s['negative'])
                 assert all(0 < c <= 1 for c in s['confidence'])
                 assert all(0 <= i < 18 for i in s['view_indices'])
                 assert not bool(s['support_cost'][~data['observed']].any())
-                error = abs(float(torch.dot(s['support_cost'], s['start_membership'])) - 1.)
+                # CPU float32 reduction over up to 1.8M positive products can
+                # lose ~4e-5 although the stored normalized values are correct.
+                # Audit their mathematical sum in float64, keeping the gate.
+                cpu_float32_errors.append(abs(float(torch.dot(s['support_cost'], s['start_membership'])) - 1.))
+                error = abs(float(torch.dot(s['support_cost'].double(), s['start_membership'].double())) - 1.)
                 assert error <= 2e-5
                 normalization_errors.append(error)
             functional[a] = dict(active_queries=len(state), active_query_views=sum(r['views'] for r in fit['history']),
                 fit_seconds=fit['seconds'], initializers_exact=True,
                 source_footprint_normalization_max_error=max(normalization_errors, default=0.),
+                cpu_float32_normalization_max_error=max(cpu_float32_errors, default=0.),
                 added_gaussian_occurrences=int((data['selected_by_control'][a+'_joint'] & ~data['selected_by_control'][a+'_fusion']).sum()),
                 removed_gaussian_occurrences=int((data['selected_by_control'][a+'_fusion'] & ~data['selected_by_control'][a+'_joint']).sum()))
         admission = read(out / 'identity_evidence/admission.json')
+        identity = read(out / 'identity_record/identity.json')
+        native_matched = sum(m['region_iou'] >= identity['minimum_region_iou']
+            for rows in identity['matches'].values() for query in rows for m in query)
         partition_checks = 0
         for frame in read(ROOT / 'inputs' / j['scene'] / 'binding.json')['source_frames']:
             raw = torch.load(Path(j['teacher_detections']) / f'identity_{frame}.pt', weights_only=True)
@@ -115,6 +123,8 @@ def main():
             original_detections=sum(r['original'] for r in admission['queries']),
             admitted_detections=sum(r['admitted'] for r in admission['queries']),
             rejected_unknown=sum(r['unknown'] for r in admission['queries']),
+            native_matched_detections=native_matched,
+            two_group_favored_queries=sum(m.get('two_probability', 0.) > .5 for m in admission['models']),
             exact_retained_unknown_mask_partitions=partition_checks,
             source_cameras_exact=len(binding['source_frames']), input_binding=binding)
         print('audited', j['scene'], flush=True)
