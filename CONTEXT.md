@@ -15,7 +15,8 @@ Runner coordinator PID497153 (shell497150), execsession80691; predictors
 497249(index0/GPU0),497250(index1/GPU3),497252(index2/GPU4),497251(index3/GPU5).
 Do NOT duplicate/kill these. Logs ROOT/logs/predict_{0..3}.log; coordinator log
 /tmp/radio_gs_signed_scope_run.log. Coordinator automatically scores all4 after
-prediction barrier and writes summary. Audit not started yet; run afterwards:
+prediction barrier and writes summary. Finalizer /tmp/radio_gs_signed_scope_finalize.py PID505183/session66098 waits
+summary then automatically runs audit; do NOT duplicate. Command it owns:
 PYTHONPATH=. OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 /root/miniconda3/envs/cybersim_agent/bin/python
 -m scripts.research.audit_query_field_signed_scope
 Audit independently reconstructs all atomic signs/scopes via NumPy, hybrid
@@ -24,6 +25,11 @@ Firstprior fullstudies remain complete below. New results PENDING; don't claim
 accuracy improvement, native identity recovery or fullfive until measured.
 NEXT finish all predictions/scoring/audit, retain failures if any, write result,
 update ADR0020/method/currentcontext, localcommit, verifyoriginalHEAD/index.
+Source-only native-order threshold capacity audit also RUNNING session78873;
+log ROOT/native_order_capacity_attempt1.log. Exact tied-score prefix upperbound
+on source pseudo masks, not targetGT/deployable policy/Gaussianupperbound. TestPASS.
+Firstattempt failed before anyresults because installed torch lacks mmap keyword;
+removed that loader option only (01379b6), retained originalfailure log.
 END active signed scope note.
 
 Active continuation2026-10-12 COMPLETE: TWO full4/68 scope experiments and both
