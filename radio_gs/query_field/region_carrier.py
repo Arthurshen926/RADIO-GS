@@ -67,7 +67,7 @@ class RegionScopeDecoder:
 
 
 @torch.no_grad()
-def query_text_region_scope(field,query,negatives,*,region_decoder=None,exclusion_decoder=None):
+def query_text_region_scope(field,query,negatives,*,region_decoder=None,exclusion_decoder=None,native_reader=None):
     from .scope_confidence import native_text_evidence,native_scope_confidence
     from .joint_exclusion import JointExclusionDecoder
     if field.region_carrier is None:raise ValueError('field has no Gaussian region carrier')
@@ -75,7 +75,8 @@ def query_text_region_scope(field,query,negatives,*,region_decoder=None,exclusio
     if decoder.carrier is not field.region_carrier:raise ValueError('region decoder belongs to another field')
     exclusion=exclusion_decoder or JointExclusionDecoder(field)
     if exclusion.field is not field:raise ValueError('exclusion decoder belongs to another field')
-    initial,probability=native_text_evidence(field,query,negatives)
+    if native_reader is not None and native_reader.field is not field:raise ValueError('native reader belongs to another field')
+    initial,probability=(native_text_evidence(field,query,negatives) if native_reader is None else native_reader(query,negatives))
     accepted,_=native_scope_confidence(field,initial,probability)
     fixed,_=exclusion.decode(initial,accepted,joint=False)
     scope,detail=decoder.scope(probability)
