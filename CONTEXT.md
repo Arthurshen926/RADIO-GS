@@ -1,5 +1,26 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11: actual extension attribution + conditional quality function transfer COMPLETE.
+Fixed factorial renders208cases/187extended:166harmful,18beneficial,3unchanged;removed pixels0.
+Added pixel micro precision fig2.296%/ramen4.098%/tea0.119%/waldo2.976%;pooled2.963%.
+37harmful cases still have whole-output precision>.5: correct core can hide bad extension.
+This is posthoc GT diagnosis ONLY;no new predictions or benchmark model changes.
+region_quality.py exports historical independent-room 3-output forest to1,831,960bytes tensors;
+27193pairs/8calibration-validation rooms outputs and admission EXACT canonical sklearn n_jobs=1.
+Parallel reference max3.33e-16/0admission differences; Python open denied during cold tensor inference.
+region_admission.py preserves perview merit, seed replacement, eligibility, stable tie and float32votes.
+32 label-free evenly spaced region seeds/4validationrooms:22applied,10fallback; decisions and final
+majority sets EXACT original non-anchor route. Original feature generator reused;not Gaussian transfer.
+8new targeted testsPASS plus prior25regressionsPASS;no default promotion or new five-task scores.
+Current best actual text control45.1953% unchanged;energy/witness candidates remain rejected.
+NEXT: align Gaussian candidate membership/visibility MEASURE with region function before deployment;
+weighted projected evidence is NOT binary mesh membership. Do not plug same-dimensional features blindly.
+Global exported model not yet integrated into CapabilityField; full anchor path not audited this turn.
+Historical model also imperfect (validation scene0597 addedpurity67.16%); equality is not recovery.
+See docs/experiments/2026-10-11-extension-quality-transfer.md and three matching audit JSONs.
+Roots output/query_field_20261011/{extension_quality_audit_v1,region_quality_transfer_v1}.
+All jobs finished; original checkout unchanged. No source fitting/answerbank/GT input to inference.
+
 Active continuation2026-10-11: TWO real member-function studies + causal diagnostics COMPLETE; neither promoted.
 All4/68: initial42.9498/fixed45.1953/joint44.8761; energy33.2131/noexchange31.3874/
 nofootprint35.3066/unitconfidence32.9546. Second witness-energy33.2230/witness-no-penalty34.8089.

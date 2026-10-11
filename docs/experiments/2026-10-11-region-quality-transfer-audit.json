@@ -1,0 +1,190 @@
+{
+  "passed": true,
+  "targets": [
+    "candidate_purity",
+    "candidate_visible_recall",
+    "added_element_purity"
+  ],
+  "scenes": {
+    "scene0237_00": {
+      "split": "calibration",
+      "pairs": 5794,
+      "prediction_exact_canonical": true,
+      "admission_exact_canonical": true,
+      "max_parallel_value_difference": 2.220446049250313e-16,
+      "parallel_admission_disagreements": 0,
+      "admitted_with_known_additions": 1004,
+      "known_added_purity": 0.9307481646537781,
+      "mean_absolute_error": [
+        0.16588454421135052,
+        0.09743860327541636,
+        0.18495155107750266
+      ]
+    },
+    "scene0209_00": {
+      "split": "calibration",
+      "pairs": 3362,
+      "prediction_exact_canonical": true,
+      "admission_exact_canonical": true,
+      "max_parallel_value_difference": 3.3306690738754696e-16,
+      "parallel_admission_disagreements": 0,
+      "admitted_with_known_additions": 349,
+      "known_added_purity": 0.8195569515228271,
+      "mean_absolute_error": [
+        0.19192277736568633,
+        0.11750093833228582,
+        0.23792310860034505
+      ]
+    },
+    "scene0437_00": {
+      "split": "calibration",
+      "pairs": 1900,
+      "prediction_exact_canonical": true,
+      "admission_exact_canonical": true,
+      "max_parallel_value_difference": 2.220446049250313e-16,
+      "parallel_admission_disagreements": 0,
+      "admitted_with_known_additions": 565,
+      "known_added_purity": 0.9226900935173035,
+      "mean_absolute_error": [
+        0.1370814443417313,
+        0.12468778140772037,
+        0.18116112826930095
+      ]
+    },
+    "scene0024_00": {
+      "split": "calibration",
+      "pairs": 2775,
+      "prediction_exact_canonical": true,
+      "admission_exact_canonical": true,
+      "max_parallel_value_difference": 3.3306690738754696e-16,
+      "parallel_admission_disagreements": 0,
+      "admitted_with_known_additions": 365,
+      "known_added_purity": 0.9246953129768372,
+      "mean_absolute_error": [
+        0.18810414587005464,
+        0.12493369788495035,
+        0.2568799341852936
+      ]
+    },
+    "scene0540_00": {
+      "split": "validation",
+      "pairs": 2889,
+      "prediction_exact_canonical": true,
+      "admission_exact_canonical": true,
+      "max_parallel_value_difference": 3.3306690738754696e-16,
+      "parallel_admission_disagreements": 0,
+      "admitted_with_known_additions": 631,
+      "known_added_purity": 0.8756418824195862,
+      "mean_absolute_error": [
+        0.16910728473908507,
+        0.15020441765978293,
+        0.21409596307160164
+      ]
+    },
+    "scene0283_00": {
+      "split": "validation",
+      "pairs": 3399,
+      "prediction_exact_canonical": true,
+      "admission_exact_canonical": true,
+      "max_parallel_value_difference": 3.3306690738754696e-16,
+      "parallel_admission_disagreements": 0,
+      "admitted_with_known_additions": 190,
+      "known_added_purity": 0.9427210092544556,
+      "mean_absolute_error": [
+        0.22378872209790301,
+        0.15069272704541145,
+        0.2705443652010964
+      ]
+    },
+    "scene0508_00": {
+      "split": "validation",
+      "pairs": 4830,
+      "prediction_exact_canonical": true,
+      "admission_exact_canonical": true,
+      "max_parallel_value_difference": 3.3306690738754696e-16,
+      "parallel_admission_disagreements": 0,
+      "admitted_with_known_additions": 224,
+      "known_added_purity": 0.9406500458717346,
+      "mean_absolute_error": [
+        0.20570498650028998,
+        0.10873035362126057,
+        0.255296693550896
+      ]
+    },
+    "scene0597_00": {
+      "split": "validation",
+      "pairs": 2244,
+      "prediction_exact_canonical": true,
+      "admission_exact_canonical": true,
+      "max_parallel_value_difference": 3.3306690738754696e-16,
+      "parallel_admission_disagreements": 0,
+      "admitted_with_known_additions": 265,
+      "known_added_purity": 0.6716450452804565,
+      "mean_absolute_error": [
+        0.24899394071332331,
+        0.15291787877893065,
+        0.3079737202428854
+      ]
+    }
+  },
+  "rows": 27193,
+  "addition_threshold": 0.7902253876138485,
+  "tensor_bytes": 1831960,
+  "trees": 64,
+  "nodes": 32704,
+  "input_features_unchanged": true,
+  "inference_python_open_denied": true,
+  "os_sandbox": false,
+  "training": false,
+  "benchmark_data_used": false,
+  "gaussian_feature_semantics_verified": false,
+  "field_integration": false,
+  "default_promoted": false,
+  "full_region_selection_equivalence": false,
+  "reference": "sklearn original forest, canonical n_jobs=1 tree-order accumulation; n_jobs=4 also checked separately",
+  "source": {
+    "path": "output/learned_instance_additions/conditional_membership.joblib",
+    "sha256": "50054eb8771351bfdfcadb7b55856c5b7a42d135b9a7af8eb7258c52596ed7d0"
+  },
+  "design": {
+    "path": "output/learned_instance_additions/design.json",
+    "sha256": "cc10a01e4ebc21d245bfeaf938ea09f2522205c8b5494e10b3da800a2290d882"
+  },
+  "inputs": [
+    {
+      "path": "output/learned_instance_additions/training/scene0237_00.npz",
+      "sha256": "7ae9c26563072f462137c6284ad0b16077c924ec92eb3e01b33ec2441b10956c"
+    },
+    {
+      "path": "output/learned_instance_additions/training/scene0209_00.npz",
+      "sha256": "5eb2ee893a61e573d4827068a0b3e56545a703d82bf264a2886aea4045025506"
+    },
+    {
+      "path": "output/learned_instance_additions/training/scene0437_00.npz",
+      "sha256": "34eacffcc06f6bb73b2424fff72a2cde4f202421177c098924206c2c42704dda"
+    },
+    {
+      "path": "output/learned_instance_additions/training/scene0024_00.npz",
+      "sha256": "7b5fa79370971a97cf0690f9ce5096bc6c6cc6c6a6be9595c39abc2f6916d607"
+    },
+    {
+      "path": "output/learned_instance_additions/training/scene0540_00.npz",
+      "sha256": "5def002b49d5a61b49bd2051446256faf515c6cae29784ffbc8439b2d5320096"
+    },
+    {
+      "path": "output/learned_instance_additions/training/scene0283_00.npz",
+      "sha256": "ede7bbc63454bb6ad6339cd45f7d87a69ce8b728ad47c4f752e9a5d43a3ed737"
+    },
+    {
+      "path": "output/learned_instance_additions/training/scene0508_00.npz",
+      "sha256": "6ce3fafbb8e3d13beed624f4869926151ddaee6fc2243dc7c258ef102ab8476d"
+    },
+    {
+      "path": "output/learned_instance_additions/training/scene0597_00.npz",
+      "sha256": "9f666ffbc2740a011295453efae0acc66532f999f6045ad1acb0dd35a87acfa1"
+    }
+  ],
+  "export_sha256": "6db8b16ab594a8431c5c9d7f485f372c8e192a2bdea46040923dd6f3a8eaffe5",
+  "code_sha256": "4d1ff7a74ee9ce73ff4d65178217616fa34620eeff493f599678546f36c02b4d",
+  "validator_sha256": "e2c2477c5038e78fd289013231081c58dd0fd7915a08348c722c28b12fe690d6"
+}
