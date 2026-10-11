@@ -25,9 +25,12 @@ Firstprior fullstudies remain complete below. New results PENDING; don't claim
 accuracy improvement, native identity recovery or fullfive until measured.
 NEXT finish all predictions/scoring/audit, retain failures if any, write result,
 update ADR0020/method/currentcontext, localcommit, verifyoriginalHEAD/index.
-Source-only native-order threshold capacity audit also RUNNING session78873;
+Source-only native-order threshold capacity audit COMPLETE, session78873 reaped;
 log ROOT/native_order_capacity_attempt1.log. Exact tied-score prefix upperbound
 on source pseudo masks, not targetGT/deployable policy/Gaussianupperbound. TestPASS.
+Native threshold .5 sourceIoU47.7222%, per-query/view optimal threshold69.1932%,
+proposalgreedy84.7519%. Float64 cosine-order family; exact tied-score prefix
+optimization, original .5 nativeIoUs allreplayed; not CUDA-order bitwise claim.
 Firstattempt failed before anyresults because installed torch lacks mmap keyword;
 removed that loader option only (01379b6), retained originalfailure log.
 END active signed scope note.
