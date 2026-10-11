@@ -3,12 +3,17 @@
 Active continuation2026-10-11 RUNNING: complete union-before-morphology topology.
 Implementation freeze4dbf90f; independent audit toola80df98. ROOT
 output/query_field_20261011/scope_topology_v1. Runner
-Original coordinatorPID394079 terminated ONLY to schedule4 concurrent scenes;
-first2 prediction children396101/396654 continue unchanged. New scheduler
-/tmp/radio_gs_scope_topology_schedule.py session77075 starts scenes2/3 onGPUs0/5
-alongside first2 (no method change), then completes scoring/audit. Schedulingreceipt
-ROOT/scheduling.json. All68 prediction barrier BEFORE any GT scoring. Do not start
-a duplicate runner. Full fields inherit extent_preparation_v1/fields unchanged and
+Original coordinatorPID394079 terminated to schedule4 concurrent scenes, but tool
+session cleanup also ended first2 children396101/396654. Partial3queries/scene
+archived underROOT/failed_attempts, no fullpredictions or GT scoring. Frozen method
+unchanged. Scheduler/tmp/radio_gs_scope_topology_schedule.py session77075/PID400781
+still owns scenes2/3; it will exit with original-worker failure AFTER they finish.
+Recovery /tmp/radio_gs_scope_topology_recover.py session19309 reruns first2 complete
+predictions from compiledfields, then waits2/3, scores and audits. Logs first2 now
+predict_0_attempt1.log/predict_1_attempt1.log. Receipts scheduling.json and
+scheduling_recovery.json. DO NOT kill/reap parent sessions until workers finish.
+All68 prediction barrier BEFORE any GT scoring. Do not start a duplicate runner.
+Full fields inherit extent_preparation_v1/fields unchanged and
 add scope_topology incidence/neighborhood/native descriptors/retained IDs. Full
 query-free native proposals (5756), not just previous5137. Full384x512 binary native
 masks compiled to atom-proposal membership and9-neighbor relation on canonical
