@@ -1,0 +1,213 @@
+{
+  "passed": true,
+  "macro": {
+    "native_complete_scope": {
+      "iou": 0.3500136776387334,
+      "precision": 0.3606903034956755,
+      "recall": 0.9138043053913856
+    },
+    "native_positive_admitted_reference_negative": {
+      "iou": 0.2946396253643363,
+      "precision": 0.30113239804433584,
+      "recall": 0.9493401335563773
+    }
+  },
+  "scenes": {
+    "figurines": {
+      "metrics": {
+        "native_complete_scope": {
+          "iou": 0.39222043617005553,
+          "precision": 0.4010138852333879,
+          "recall": 0.9443102081409359
+        },
+        "native_positive_admitted_reference_negative": {
+          "iou": 0.3055543605330672,
+          "precision": 0.3103257769135304,
+          "recall": 0.9608723695543226
+        }
+      },
+      "permission_rays_removed": 6820113,
+      "all_queries_preparation": {
+        "queries": 21,
+        "initial_max_absolute": 2.50512769528477e-07,
+        "cost_max_relative": 3.7137329739894454e-07
+      },
+      "probe_query": "bag",
+      "independent_objective": {
+        "initial": {
+          "data": 0.0501287214159854,
+          "cost": 0.045827393159231206,
+          "total": 0.0959561145752166
+        },
+        "final": {
+          "data": 0.01240244005821451,
+          "cost": 0.00015806919344981616,
+          "total": 0.012560509251664326
+        }
+      },
+      "other_factorial_arms_effective_scope_exact": true
+    },
+    "ramen": {
+      "metrics": {
+        "native_complete_scope": {
+          "iou": 0.2394943738410462,
+          "precision": 0.24548330304997254,
+          "recall": 0.8311526669017881
+        },
+        "native_positive_admitted_reference_negative": {
+          "iou": 0.21237097392965593,
+          "precision": 0.2169138676954251,
+          "recall": 0.9083728548689045
+        }
+      },
+      "permission_rays_removed": 3821827,
+      "all_queries_preparation": {
+        "queries": 15,
+        "initial_max_absolute": 3.191574869942926e-07,
+        "cost_max_relative": 3.958399936061248e-07
+      },
+      "probe_query": "bowl",
+      "independent_objective": {
+        "initial": {
+          "data": 0.12382577261389763,
+          "cost": 0.09841732287021776,
+          "total": 0.2222430954841154
+        },
+        "final": {
+          "data": 0.03967774129117962,
+          "cost": 0.004082654600757918,
+          "total": 0.04376039589193754
+        }
+      },
+      "other_factorial_arms_effective_scope_exact": true
+    },
+    "teatime": {
+      "metrics": {
+        "native_complete_scope": {
+          "iou": 0.3844053747974921,
+          "precision": 0.3905631303197713,
+          "recall": 0.9810718280265018
+        },
+        "native_positive_admitted_reference_negative": {
+          "iou": 0.31105763897517136,
+          "precision": 0.3164429640296011,
+          "recall": 0.9838311331372149
+        }
+      },
+      "permission_rays_removed": 3830404,
+      "all_queries_preparation": {
+        "queries": 14,
+        "initial_max_absolute": 2.693006900811312e-07,
+        "cost_max_relative": 3.3878769849920124e-07
+      },
+      "probe_query": "apple",
+      "independent_objective": {
+        "initial": {
+          "data": 0.07922693592097667,
+          "cost": 0.006497932423911834,
+          "total": 0.0857248683448885
+        },
+        "final": {
+          "data": 0.043583438940467206,
+          "cost": 0.0009511305303249173,
+          "total": 0.044534569470792124
+        }
+      },
+      "other_factorial_arms_effective_scope_exact": true
+    },
+    "waldo_kitchen": {
+      "metrics": {
+        "native_complete_scope": {
+          "iou": 0.3839345257463398,
+          "precision": 0.40570089537957016,
+          "recall": 0.898682518496316
+        },
+        "native_positive_admitted_reference_negative": {
+          "iou": 0.3495755280194506,
+          "precision": 0.36084698353878664,
+          "recall": 0.9442841766650666
+        }
+      },
+      "permission_rays_removed": 6586438,
+      "all_queries_preparation": {
+        "queries": 18,
+        "initial_max_absolute": 2.3726308495675141e-07,
+        "cost_max_relative": 2.608206542793405e-07
+      },
+      "probe_query": "Stainless steel pots",
+      "independent_objective": {
+        "initial": {
+          "data": 0.007329164969380838,
+          "cost": 0.022350616339016784,
+          "total": 0.029679781308397622
+        },
+        "final": {
+          "data": 0.0014770636915620871,
+          "cost": 0.0011834947488953418,
+          "total": 0.0026605584404574287
+        }
+      },
+      "other_factorial_arms_effective_scope_exact": true
+    }
+  },
+  "comparisons": {
+    "negative_at_native_positive": {
+      "delta": -0.05537405227439713,
+      "lower": -0.08000690572965452,
+      "upper": -0.03074119881913974,
+      "improved": 0,
+      "regressed": 4,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    },
+    "positive_at_admitted_reference_negative": {
+      "delta": 0.27433859583189346,
+      "lower": 0.21294536177211376,
+      "upper": 0.32776063770834296,
+      "improved": 4,
+      "regressed": 0,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    },
+    "permission_correction": {
+      "delta": -0.056490646242343616,
+      "lower": -0.08001396684866188,
+      "upper": -0.03296732563602535,
+      "improved": 0,
+      "regressed": 4,
+      "cases": 4,
+      "clusters": 4,
+      "bootstrap_samples": 2000
+    }
+  },
+  "factorial_interaction": {
+    "figurines": 0.09828017266883388,
+    "ramen": 0.06335643026874074,
+    "teatime": 0.08154498782148129,
+    "waldo_kitchen": 0.04249422159836125
+  },
+  "mean_factorial_interaction": 0.07141895308935428,
+  "design": {
+    "path": "output/query_field_20261012/scope_permission_v1/design.json",
+    "sha256": "b7744a609832acb2c8f56c4ff00b8abf118d2076a863826e3c34249df633b432"
+  },
+  "code": {
+    "path": "/root/RADIO-GS-query-field/scripts/research/audit_query_field_scope_permission.py",
+    "sha256": "22289eac4aa79f606e1ca53051fec9ff4c1aa780622f3be3eecd974f7942d596"
+  },
+  "raw_audit": {
+    "path": "output/query_field_20261012/signed_scope_v1/audit.json",
+    "sha256": "b2dd3469f897d736a664f95f44937d5c9e37c901f6704fda90532f3f1fd4a250"
+  },
+  "helper": {
+    "path": "scripts/research/audit_query_field_signed_scope.py",
+    "sha256": "368c478f4cf9895280ce5fbb1187929535a8209f81c430a38bc5f1212f6d52cd"
+  },
+  "all_actual_mask_ious_replayed": true,
+  "all_preparations_independently_replayed": true,
+  "new_arm_privileged": true,
+  "default_promoted": false,
+  "whole_five_task": false
+}

@@ -1,61 +1,78 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12 IN PROGRESS: TWO studies, keep both running.
-Primary ROOT output/query_field_20261012/signed_scope_v1; freeze73600bc.
-Four new arms: sourcefree native_atomic_abstention and three PRIVILEGED raw
-P-source x N-source interventions, same native c. Atomic min/max covering response:
-min>.5 P, max<.5 N, uncovered/tie/disagreement unknown; signed erosion, sameprior
-protection/c/positiveviewgate/A_obs/cost/4pass. No newfield/default/training.
-23 relevant testsPASS + independent objective smoke. All4/68 x4 before scores.
-CoordinatorPID497153 execsession80691, log/tmp/radio_gs_signed_scope_run.log.
-Predictor only remaining figPID497249/GPU0 as of lastcheck (19/21); others complete.
-Finalizer /tmp/radio_gs_signed_scope_finalize.py PID505183/session66098 waits summary
-then runs scripts.research.audit_query_field_signed_scope, ROOT/audit_independent.log.
-Audit latest052e59c (not732ad3b); now reports raw-N permission coupling, all atomic
-NumPy scopes, masks, additions/removals, independent realinitial/final objectives.
-Do NOT duplicate/kill these workers. No current GT scores read by assistant yet.
+Active continuation2026-10-12 COMPLETE: signed atomic scope, corrected negative
+permission and source-order capacity. BOTH full4/68 prediction/scoring/independent
+audits PASS; all own jobs finished, no sessions/GPU jobs to resume or duplicate.
+Branch codex/query-preserving-gaussian-field, originalcheckout HEAD/index unchanged.
 
-CRITICAL source-contract fix found BEFORE any primary newscore. Raw reference N
-includes INACTIVE origin views, originally suppressed by refc>0 AND refP.any().
-Mixing nativeP/c with rawrefN resurrects unpermitted negative labels. Raw intervention
-remains archived/explicit, cannot call it transfer of v10 effective negativepermission.
-Affected effective rays: fig6820113/ram3821827/tea3830404/waldo6586438.
-Source check all68: the other2 hybrid arms have IDENTICAL EFFECTIVE N after origin
-permission canonicalization; their original results remain valid. Native atomic
-candidate is unaffected. Runtime+independent checks verify this equivalence again.
+NEW best measured SOURCEFREE RESEARCH CANDIDATE native_atomic_abstention50.8519%
+vs old standardseed46.6535% (+4.1984pp, all4up, sceneCI[3.0952,4.9834]pp).
+Per scene58.8466/39.0289/58.9897/46.5423; P56.4661/R82.1604 (old48.7356/85.4985).
+67/68 activequeries,615activeviews; one Ramen nativepriorfallback. 147/208projected
+cases improve,60regress,1same. Added128766TP/1038444FP,removed478114TP/2742089FP.
+No default promotion, no newfullfive/trueLERF3D-GT/independentgeneralization claim.
+Same-input PRIVILEGED discrete56.9282%, gap6.0763pp remains; continuous57.5700 and
+historicalv1066.9633 have separate roles/budgets. Never label privileged as standard.
 
-Correction ROOT output/query_field_20261012/scope_permission_v1; freeze28548e8,
-prepared before rawpredcomplete AND before rawscores (both designflagsfalse).
-One new privileged arm native_positive_admitted_reference_negative: materialize
-originref admission then mix N with nativeP/c; allotherfunctions and nativeactiveviews
-unchanged. scope_activation.py retains canonical gate; not a universal requirement
-for other typed negative-only legal prompts. Two additional testsPASS =>25 relevant.
-CoordinatorPID538170 execsession38459 (shell538167), log/tmp/radio_gs_scope_permission_run.log.
-Predictors538263(index0/GPU0),538266(index1/GPU3),538264(index2/GPU4),538265(index3/GPU5).
-As lastseen early queries all4 executing. Automatic complete scores only2arms after
-all68newpredictions. Newfinalizer /tmp/radio_gs_scope_permission_finalize.py waits
-correctedsummary AND raw independent audit, then runs audit_query_field_scope_permission
-to ROOT/audit_independent.log. Tool session/PID available from tool history/ps.
-Permission audit independently replays ALL68 preparations in float64 sparse batches,
-correctedN/removedcounts, other2arm equivalence, actualmasks and per-scene objectives.
+ROOT output/query_field_20261012/signed_scope_v1, freeze73600bc.
+Atomic min/max allcoveringproposal nativeprobability: min>.5 P, max<.5 N;
+uncovered/tie/disagreement unknown. Signwise3x3erosion, oldnativeprior protection/c/
+positiveviewgate/A_obs/footprint/4pass R_set engine unchanged. Unknown has no data
+label but globalcost still changesmembers; no hardfloor. No newfield/train/teacher.
+Allatomic scopes independentNumPy exact; masksIoU/P/R replay; inheritedcontrols exact;
+per-scene/arm realCPUinitial/finalobjectives<1e-7, onepreparationprobeeach. Frozenreceipts
+PASS. Existingfields still46989495526tensorbytes (43.762GiB), not compactnessclaim.
 
-Source-only native_order_capacity diagnostic COMPLETE, session78873 reaped.
-Fixednative sourceIoU47.7222%, per-query/view optimal threshold69.1932%, proposalgreedy
-84.7519%. Float64 cosine-order family; exact tied-score prefix optimization; original
-.5 sourceIoUs allreplayed, not fullCUDA order bitwise claim. 376nonempty sourcepseudo
-queryviews, not targetGT/deployable policy/Gaussian upperbound. Report
-2026-10-12-native-order-capacity.md/JSON; standalone test passed. Firstmmap-loader
-attempt failed before results (unsupported torch keyword); eager rerun01379b6 passed,
-originalfailure log retained. No predictions altered by this posthoc diagnosis.
+CRITICAL raw-reference-N intervention has PERMISSION COUPLING, found BEFOREnewscore:
+origin refN only licensed when originalrefP.any &refc>0. Later nativeP/c mustnot revive
+unadmitted N. Correction ROOT output/query_field_20261012/scope_permission_v1,
+freeze28548e8; rawpredcompletebeforedesign=false, rawscoresexistbeforedesign=false.
+New privileged native_positive_admitted_reference_negative; allnativeP/c/activeviews
+same. Removes21058782 effective unauthorizedrays. Other2crossedconditions effectiveN
+BITEXACT ALL68 afterqualification; runtime+independentaudit rechecked. Rawarm retained.
+Correctionaudit all68float64preparations: initialmax3.1916e-7, costrel3.9584e-7;
+gates2e-6/2e-5 unchanged. Allmaskmetrics and realobjectives PASS. Eachstudy completed
+allownpredictionsbeforeownscore; correction frozenbeforeprimaryscore, NOT all5newarms
+finishedbeforeANYnewscore (primaryscore/correctionprediction overlap).
 
-Method doc now separates crop-compatibility existence vs universal spatial scope;
-v10 conditional detector precedes density veto, applying same formula to allfixed
-proposals changes conditioningdomain. No new learnedhead implemented/claimed.
-NEXT finish BOTH studies/scoring/audits; fix only evidenced execution issues; report
-valid P/N factorial using CORRECTED N arm, raw intervention separate; atomiccandidate
-vsbest46.6535; update ADR0020/method/context; localcommit; originalHEAD/index verify.
-No new default/fullfive/paperclosure claims before actual positive evidence.
+VALID factorial (same native c):
+  nativeP/nativeN35.0014; matchedP/nativeN55.2933;
+  nativeP/admittedrefN29.4640; matchedP/admittedrefN56.8978.
+P replace+20.2920/+27.4339pp; N replace-5.5374/+1.6045pp; interaction+7.1419pp.
+P changesactiveviews/preparation/cost: operationalfunctioninterventions, notfixedview
+purepixelcauses. Correctingpermission lowersraw35.1130 ->29.4640; correctnessofcontrol
+is NOT accuracygain, and doesnotproveNuseless. WrongP dominates; N needscompatibleP.
+MatchedPN exactlysame, nativec56.8978 ->refc55.0409 (-1.8569pp,1up3down,CIcrosses0).
+Do not continue scalarconfidence/threshold stacking or attributeallgaptoonefunction.
+
+Source-only diagnostics:376nonemptyrefqueryviews, nottargetGT/performanceupperbound.
+Atomic validactive P precision pooled46.4057->80.0577%, P1,418,888->443,850;
+activeviews331->295; effectiveN-conflict70008->18806. Whole targetsourceIoU47.7222->
+41.4264 despiteactualgain: trustworthy partialsupport != exhaustive targetmask.
+Native_order_capacity COMPLETE float64cosine prefix-family exactoptimal69.1932%
+vs fixednative47.7222, greedy84.7519; threshold is sourceansweroracle, notdeployable.
+Original.5 sourceIoUs exact, notfullCUDA orderingbitwise claim. Firstmmapunsupported
+failure beforediagnosticresults, eagerretryonly; logsretained. No predictionschanged.
+
+25relevanttestsPASS (5atomic+1order+2permission+17prior), objectiveindependentsmokePASS.
+Reports docs/experiments/2026-10-12-signed-scope-results.md, sibling signed-scope/
+scope-permission auditJSON, native-order-capacity.md/JSON. ADR0020 and mechanismdoc
+updated. Currentcode audithashes052e59c; methodsfrozen73600bc/28548e8 unchanged.
+
+NEXT retain50.8519 as new researchbaseline (publicdefaultnotchanged). Concentrate
+on query-conditioned spatialscope localization and coherentpositive/negative admission,
+not scalarcalibration/morelosses alone. v10 detectorconditionalidentityveto is NOT same
+function whenappliedtoallqueryfreeROIs; cropcompatibility isexistential, notwholemask
+membership. Sharedlocal/atomreadout NOT implemented; mayextendqueryfreeconstruction
+ifinsufficient. Need independent sourcepseudoqueries/heldoutfunctionalvalidation without
+benchmarkanswertraining/extra3Dlabels; positiveonly/negativeonlyabstentionablations.
+Keep validatedgeometry/decisionfunctions fixed until failureevidence. Then sharedpublic
+typedchain and jointfive/UQISall4, true3DGT/independentgeneralization/resources.
+Mechanism2 now has localactualgain; threecandidatecontributions stillNOT paperclosure.
 END active signed scope note.
+
+Historical continuation snapshots below retain their contemporaneous metrics;
+the latest note above supersedes their current-state and next-step statements.
 
 Active continuation2026-10-12 COMPLETE: TWO full4/68 scope experiments and both
 independent audits PASS. All own prediction/scoring/audit jobs finished; no work to
