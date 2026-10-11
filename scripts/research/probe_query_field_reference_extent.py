@@ -18,9 +18,10 @@ from scripts.research.run_query_field_reference_extent import ROOT,design
 from scripts.research.run_query_field_relations import read,write,receipt,check
 
 
-def main():
-    d=design();j=d['jobs'][0];cfg=read(j['configuration']['path'])
-    job=next(x for x in cfg['jobs'] if x['name'].endswith('__shared_prior'))
+def main(*, design_loader=design, root=ROOT, arm='shared_prior', observation_weight=0.,
+         report_path='docs/experiments/2026-10-12-reference-extent-cold-probe.json'):
+    d=design_loader();j=d['jobs'][0];cfg=read(j['configuration']['path'])
+    job=next(x for x in cfg['jobs'] if x['name'].endswith('__'+arm))
     field,_=load_field(job['field'],'cuda');fixture=torch.load(job['camera_fixture'],weights_only=True)
     camera=SimpleNamespace(**fixture['reference']);h,w=cfg['projection_hw']
     strokes,_=load_strokes(job['positive'],job['negative'],(h,w))
@@ -41,19 +42,20 @@ def main():
             return original(file,*args,**kwargs)
         return call
     with patch('builtins.open',guarded(builtins.open)),patch('io.open',guarded(io.open)),patch('torch.load',side_effect=AssertionError('tensor load during query')):
-        result=QueryFieldRuntime(field).reference_extent(packet,camera,reference,initializer='prior',decision_cutoff=.5)
+        result=QueryFieldRuntime(field).reference_extent(packet,camera,reference,initializer='prior',decision_cutoff=.5,
+            observation_weight=observation_weight)
     # Comparisons only after the independently executed public query.
-    p=ROOT/'predictions'/j['name']/job['name'];record=read(p/'prediction.json')
+    p=root/'predictions'/j['name']/job['name'];record=read(p/'prediction.json')
     check(dict(path=str(p/'predictions.pt'),sha256=record['predictions_sha256']))
     old=torch.load(p/'predictions.pt',weights_only=True)
     assert torch.equal(result.selected.cpu(),old['selected'])
     assert torch.equal(result.membership_scores.cpu(),old['membership'])
-    report=dict(passed=True,case=j['name'],rule='fixed first case shared_prior',member_values_exact=True,
+    report=dict(passed=True,case=j['name'],rule='fixed first case '+arm,observation_weight=observation_weight,member_values_exact=True,
         selected_bits_exact=True,query_scene_file_roots_denied=roots,torch_load_denied=True,
         code_and_compiler_cache_io_allowed=True,os_sandbox=False,cold_process=True,
         actual_query_warmup=False,target_camera_passed_to_decoder=False,reference_rgb_used=False,
         prediction=receipt(p/'prediction.json'),code=receipt(__file__))
-    write(ROOT/'cold_probe.json',report);write('docs/experiments/2026-10-12-reference-extent-cold-probe.json',report)
+    write(root/'cold_probe.json',report);write(report_path,report)
     print('PASS cold current-reference public query',flush=True)
 
 
