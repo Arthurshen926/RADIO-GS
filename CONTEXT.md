@@ -1,5 +1,35 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-11: binary Gaussian region scope full4/68 study COMPLETE.
+Actual-set IoU initial42.9498/fixed45.1953/seed_addition46.6535/conditional_addition44.2876/
+conditional_replace42.3529. Predeclared primary conditional FAILED; no default promotion.
+Seed is NEW DEVELOPMENT CANDIDATE: +1.4582pp,3up1down; paired4-scene CI[.0585,3.0098]pp,
+reused development scenes/posthoc candidate selection NOT independent confirmation.
+Seed precision48.7356/recall85.4985 vs fixed49.1432/83.0460; teatime-.4141pp remains.
+New seed pixels precision53.3481% (199883TP/174794FP),45benefit/63harm cases;
+conditional14.7427% (288973TP/1671133FP),39benefit/107harm. No rendered deletions.
+All4/5arm predictions before scores, old2sets/metrics EXACT, independent saved-mask auditPASS.
+Optional region_carrier owns binary Gaussian association>=.5/reliable visibility/native local mean
+and frozen forest in SAME field.pt. Definition is an adaptation, NOT mesh feature distribution parity.
+Field graph broadly connected, but reliable visible rows only41579/41341/62051/69862 vs
+observed380715/452765/999142/1112269. Do not blame all failures on graph disconnection.
+Actual regional local cosine medians .792-.910 vs training.592; scene fractions/radii much smaller.
+Domains and seed selection differ; these stats are diagnostic NOT isolated causal evidence.
+NEXT concrete function gap: v10 NativeRegionAppearance area-pools raw patch tokens then normalizes;
+current region appearance averages normalized, fused Gaussian local vectors. Recover construction-time
+regional native pooling under matched views/candidates before further scope-policy tuning; separately
+audit global scene-measure semantics. No query source fitting/GT gates/per-scene patches.
+seed_scope.py extracts successful seed-only API WITHOUT quality forest or pair-feature execution.
+All68cold API sets EXACT frozen seed arm with quality/pair decoder denied and Python open denied
+(after first-query Numba warmup;NOT OS sandbox). Research field still contains UNUSED quality buffers.
+All4cold parent253tensors EXACT; new state106072032bytes total. 22distinct targeted testsPASS in runs.
+v1 CPU-native stopped before scoring at ramen/hand:9.24e-7 scores/0initialsets/0accepted changes,
+6fixed members differed; CUDA native mirror repairs all6. Do NOT relax control gate.
+Freeze initial dd79511, final numerical c1b4c3a; seed API extracted after scoring without new predictions.
+Roots output/query_field_20261011/{binary_region_carrier_v1,binary_region_scope_v2}; failed v1 retained.
+See docs/experiments/2026-10-11-binary-region-scope-results.md and audit/domain/seed validation JSONs.
+All jobs FINISHED; original checkout HEAD/index unchanged. No new five-task/v10 restoration/paper closure.
+
 Active continuation2026-10-11: actual extension attribution + conditional quality function transfer COMPLETE.
 Fixed factorial renders208cases/187extended:166harmful,18beneficial,3unchanged;removed pixels0.
 Added pixel micro precision fig2.296%/ramen4.098%/tea0.119%/waldo2.976%;pooled2.963%.

@@ -53,3 +53,22 @@ def test_new_entry_retains_unknown_and_can_complete_weak_initial(monkeypatch):
     assert values['conditional_addition'][2]>.5
     assert values['conditional_replace'][3]==prior[3]
     assert torch.equal(values['semantic_initial'],prior)
+
+
+def test_seed_only_entry_never_executes_quality_or_pair_features(monkeypatch):
+    from radio_gs.query_field.seed_scope import query_text_seed_scope
+    import radio_gs.query_field.seed_scope as module
+    f=small_field(4);f.region_carrier=carrier();f.semantic_measure=SimpleNamespace(supported=torch.ones(4,dtype=torch.bool))
+    prior=torch.tensor([.8,.2,.1,.9]);prob=torch.tensor([.9,.6])
+    monkeypatch.setattr(module,'native_text_evidence',lambda *a:(prior,prob))
+    monkeypatch.setattr(module,'native_scope_confidence',lambda *a:(prob>.5,torch.ones(2)))
+    def denied(*a,**k):raise AssertionError('unused supervised quality/appearance path')
+    monkeypatch.setattr(f.region_carrier.quality,'forward',denied)
+    monkeypatch.setattr(f.region_carrier,'decoder',denied)
+    class Fixed:
+        field=f
+        def decode(self,*a,**k):return prior.clone(),{}
+    result=query_text_seed_scope(f,None,None,exclusion_decoder=Fixed())
+    assert result.selected.tolist()==[True,True,False,True]
+    assert result.diagnostics['added']==1 and not result.diagnostics['conditional_quality_model_used']
+    assert result.membership_score[3]==prior[3]

@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "scenes": [
+    {
+      "scene": "figurines",
+      "queries": 21,
+      "all_selected_exact": true,
+      "python_open_denied": true,
+      "quality_model_and_pair_decoder_denied": true,
+      "os_sandbox": false
+    },
+    {
+      "scene": "ramen",
+      "queries": 15,
+      "all_selected_exact": true,
+      "python_open_denied": true,
+      "quality_model_and_pair_decoder_denied": true,
+      "os_sandbox": false
+    },
+    {
+      "scene": "teatime",
+      "queries": 14,
+      "all_selected_exact": true,
+      "python_open_denied": true,
+      "quality_model_and_pair_decoder_denied": true,
+      "os_sandbox": false
+    },
+    {
+      "scene": "waldo_kitchen",
+      "queries": 18,
+      "all_selected_exact": true,
+      "python_open_denied": true,
+      "quality_model_and_pair_decoder_denied": true,
+      "os_sandbox": false
+    }
+  ],
+  "queries": 68,
+  "post_hoc_entry_extraction": true,
+  "no_new_predictions_or_metrics": true,
+  "default_promoted": false,
+  "note": "Existing comparison fields still contain unused quality buffers; the seed entry does not read/execute them. First query warms Numba before open guard.",
+  "code": {
+    "path": "radio_gs/query_field/seed_scope.py",
+    "sha256": "f8b558becd36314bb4be13e3c701f488439db0ce7aec864ea90db0d81a02f19e"
+  },
+  "validator": {
+    "path": "/root/RADIO-GS-query-field/scripts/research/validate_query_field_seed_scope.py",
+    "sha256": "08bc98e193109d79a78fb077222de72490781fceaf587808ee9fb6aabbcdabc7"
+  }
+}
