@@ -1,20 +1,41 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-11 IN PROGRESS: canonical v10 subset functional reference,
-NOT another rewritten optimizer. Frozen bd9d991; root output/query_field_20261011/
-canonical_subset_reference_v1; runner run_query_field_canonical_subset_reference.py.
-Four scenes68queries, same geometry EXACT at preparation, current native prior/member domain,
-same18constructionTRAINframes/scene (72total). v10 original candidates5756 vs field5137,
-so NOT identical candidate budget. RAW and canonical detector-conditioned native-density
-ADMITTED inputs; both use unchanged pipeline.subset: source init/confidence-weightedfootprint/
-balancedBCE+overlap/384x512raster with192x256interleaved samples/240steps.
-Save source initializer and joint result per input;3reusedcontrols =>7arms. Main admitted_joint.
-SOURCE ACCESS + transient query fitting explicitly diagnostic only; no deployment/promotion.
-All predictions MUST finish before scoring. GPU2 sequential runner currently alive; first3
-scenes prediction complete, waldo starting. Check run.log/logs before restarting. No new scores
-read yet. Audit script added for exactcontrols, sourcecamera/unknownpartition/initializer/cost
-checks and independent actualmask replay.5targeted testsPASS. Original checkout HEAD/index
-unchanged. Latest standard development best still seed46.6535; fullfive/paper closure pending.
+Active continuation2026-10-11 COMPLETE: canonical source-assisted reference + isolated
+sampling study, BOTH full4/68/auditPASS. Canonical root output/query_field_20261011/
+canonical_subset_reference_v1, freeze bd9d991.4scenes68queries7arms allpredictionsbefore scores.
+Rawfusion36.6548/rawjoint57.1333; admittedfusion35.0846/admittedjointPRIMARY57.5700;
+standardseed46.6535. Mainvsseed+10.9166pp ALL4up, CI[5.3262,17.7008]pp. MainP/R64.4516/
+82.2279 vsseed48.7356/85.4985. Vsseed removed3746853FP/678929TPpixels; added258065TP/
+515960FP;143benefit53harm. Sourcefusion->joint+22.4854pp; mainremoves603181Gaussian
+occurrences/adds406. Identityscreenalone+.4367pp 2up2down CIcross0,NOT primary gain.
+Samegeometry,72sourcecameras EXACT; same18trainviews/scene/currentprior/currentmemberdomain.
+Unchanged canonical pipeline.subset restores confidenceweighted sourceinit/footprint,
+balancedBCE+overlap,384x512raster/192x256interleaved samples,240steps. Sourcequerydetections
+read, transientqueryfit; NOT source-free deployment and NOT historicalv10 exactreplay.
+Originalnativecandidates5756 vsfield5137; extraidentityinputs explicit. Raw775instances/459
+activequeryviews ->admitted622/376;153rejectedUNKNOWN.56/68queriesactive,12nativefallback.
+All1224 maskpartitions exact. No fieldupdate or defaultpromotion; responsesfixed54.0889/AP82.5249.
+Auditfirst CPUfloat32 dot error~3.93e-5 stopped; samefrozenstate float64 sum~1e-7 passes SAME
+2e-5gate. No prediction/gate/field changes; failureaudit.log retained, successaudit.attempt1.log.
+Report docs/experiments/2026-10-11-canonical-subset-reference-results.md +auditJSON.
+Isolatedcontrol frozen be99ba8: canonical_sampling_v1; only 16x16supervised points perview,
+samefull384x512renderer/initial/cost/confidence/activevieworder/detections/canonicalsolver.
+Uses original optimization-state-in and query-independent positive_allowed masks; no tracks.
+Sparse47.6829 vsdense57.5700: -9.8871pp ALL4down,CI[-12.2467,-7.6396]pp. SparseP63.1321/
+R67.7437 vsdense64.4516/82.2279; mostlyrecallloss. Vsseed+1.0295pp BUT1up3down/CIcross0.
+Sparsevsdense adds142329TP/309446FPpixels, removes901476TP/446584FP;18benefit151harm.
+Negative samples17436813->90777;onlyintersected,noneadded. All376activequeryviews retained.
+Allinitial/cost/confidence/vieworder EXACT,12nativefallbacks EXACT; allsavedmasks replayPASS.
+Samplingalso changes relativeoverlap+1smoothing scale; missingcoverage vsquadrature/smoothing
+NOT separatelyisolated. NOT exactold96x128factor reproduction,NOT entireoldenergyfailurecause:
+oldenergyP39.3296 vs sparsecanonicalP63.1321; scope/objective/solver differences stillunresolved.
+NEXT: field-owned geometry constraints must preserve actual whole-set decisions,not merely
+alpha/gradient parity on256points. Remove fixed16x16/18viewbudget as architecture premises.
+Fix scopeinputs for nextfunctional transfer,then validate range prediction; doNOT blindly
+promote failedenergy,addpointsalone as completefix,or restartsourcefit in deployment.
+Reports canonical-subset-reference-results.md and canonical-sampling-results.md +twoaudits.
+BothfullpredictionbarriersPASS;7distinct relevant testsPASS in runs. ALLJOBS FINISHED.
+Latest standard best STILL46.6535. No newfive-task/v10 restoration/independentfinal/paperclosure.
 
 Active continuation2026-10-11 COMPLETE: two full4/68 studies reject pooling-only/identity-gated extensions.
 First8arms: native44844.2674/nativefull44.2394 vs oldconditional44.2876 and seed46.6535.
