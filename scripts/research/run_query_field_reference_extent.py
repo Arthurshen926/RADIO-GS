@@ -65,9 +65,9 @@ def run(gpus):
         errors={k:float((old[k]-new[k]).abs().max()) for k in ['membership','response','retained_response']}
         exact=torch.equal(old['selected'],new['selected'])
         baseline.append(dict(case=j['name'],selected_exact=exact,max_errors=errors))
-        write(ROOT/'baseline_checks.json',dict(records=baseline))
         assert exact and max(errors.values())<=1e-6,(j['name'],baseline[-1])
     assert len(records)==32
+    write(ROOT/'baseline_checks.json',dict(records=baseline))
     write(ROOT/'predictions_complete.json',dict(records=records,baseline=baseline))
     from radio_gs.query_field.public_nvos import score
     for j in d['jobs']:

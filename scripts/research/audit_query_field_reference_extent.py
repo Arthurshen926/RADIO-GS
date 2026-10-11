@@ -43,7 +43,7 @@ def mask_metrics(pred,truth):
 
 
 @torch.no_grad()
-def audit(index):
+def audit(index, *, diagnostic=False):
     d=design();j=d['jobs'][index];cfg=read(j['configuration']['path']);name=j['name']
     read(ROOT/'predictions_complete.json');read(ROOT/'scoring_complete.json')
     evaluation=read(ROOT/'predictions'/name/'evaluation.json');scoring=read(j['scoring']['path'])
@@ -93,6 +93,11 @@ def audit(index):
         camera.world_to_camera.to(field.xyz)[None],k[None],w,h,near_plane=.001*field.world_units_per_metre,far_plane=100*field.world_units_per_metre)
     conic=conics[0].double().cpu().numpy();eligible=(radii[0].cpu().numpy()>0)&domain
     footprint=np.zeros(count);footprint[eligible]=2*np.pi*field.opacities.flatten().cpu().numpy()[eligible]/np.sqrt(np.maximum(conic[eligible,0]*conic[eligible,2]-conic[eligible,1]**2,1e-12))
+    # Post-failure diagnostic only: independently replay the declared float32
+    # determinant/subtraction/division order. Keep the original float64 gate.
+    c32=conic.astype(np.float32);canonical_footprint=np.zeros(count,np.float32)
+    determinant=np.maximum(c32[eligible,0]*c32[eligible,2]-np.square(c32[eligible,1]),np.float32(1e-12))
+    canonical_footprint[eligible]=(np.float32(2*np.pi)/np.sqrt(determinant))*field.opacities.flatten().cpu().numpy()[eligible]
     probes={};changes={};prior=data['composed']['selected'].numpy()
     for arm,state in states.items():
         assert np.array_equal(state['domain'].numpy(),domain)
@@ -110,7 +115,9 @@ def audit(index):
         delta=actual-op;lift_error=float(np.max(np.abs(delta.data))) if delta.nnz else 0.
         assert lift_error<=2e-6,(name,arm,'lift',lift_error)
         footprint_error=float(np.max(np.abs(lift['footprint'].numpy()-footprint)/np.maximum(footprint,1e-8)))
-        assert footprint_error<=2e-5,(name,arm,'footprint',footprint_error)
+        canonical_footprint_error=float(np.max(np.abs(lift['footprint'].numpy()-canonical_footprint)/np.maximum(canonical_footprint,1e-8)))
+        if not diagnostic:assert footprint_error<=2e-5,(name,arm,'footprint',footprint_error)
+        assert canonical_footprint_error<=2e-5,(name,arm,'float32 footprint replay',canonical_footprint_error)
         active=bool((valid&(target>0)).any());assert float(state['confidence'][0])==float(active)
         if arm=='shared_lift' and active:
             known=op.T@valid.astype(float);positive=op.T@(valid*target)
@@ -119,7 +126,10 @@ def audit(index):
         initial_error=float(np.max(np.abs(initial-state['initial'].numpy())))
         cost=footprint/max(float(footprint@initial),1e-8) if active else np.zeros(count)
         cost_error=float(np.max(np.abs(cost-state['cost'].numpy())/np.maximum(cost,1e-8)))
-        assert initial_error<=2e-6 and cost_error<=2e-5,(name,arm,'preparation',initial_error,cost_error)
+        canonical_cost=canonical_footprint/max(float(canonical_footprint.astype(float)@initial),1e-8) if active else np.zeros(count)
+        canonical_cost_error=float(np.max(np.abs(canonical_cost-state['cost'].numpy())/np.maximum(canonical_cost,1e-8)))
+        if not diagnostic:assert initial_error<=2e-6 and cost_error<=2e-5,(name,arm,'preparation',initial_error,cost_error)
+        assert initial_error<=2e-6 and canonical_cost_error<=2e-5,(name,arm,'float32 preparation replay',initial_error,canonical_cost_error)
         info=records[arm]['diagnostics']['extent_decision'];endpoints={}
         for endpoint,bits in [('initial',state['initial'].numpy()>.5),('final',state['selected'].numpy())]:
             compiled=render_binary(opt['pointer'].numpy(),opt['index'].numpy(),opt['alpha'].numpy(),bits)
@@ -134,17 +144,22 @@ def audit(index):
             endpoints[endpoint]=dict(objective=value,renderer_objective=physical,alpha_max_error=error,threshold_bit_difference=bits_diff,
                 reference_soft_iou=intersection/max(float(binary.sum()+target.sum()-intersection),1e-12))
         probes[arm]=dict(lift_max_absolute=lift_error,footprint_max_relative=footprint_error,
-                        initial_max_absolute=initial_error,cost_max_relative=cost_error,endpoints=endpoints)
+                        initial_max_absolute=initial_error,cost_max_relative=cost_error,endpoints=endpoints,
+                        canonical_float32_footprint_max_relative=canonical_footprint_error,
+                        canonical_float32_cost_max_relative=canonical_cost_error,
+                        original_numeric_gate_passed=footprint_error<=2e-5 and cost_error<=2e-5)
         added=pix[arm]&~pix['composed'];removed=pix['composed']&~pix[arm]
         changes[arm]={k:int(v) for k,v in dict(added_tp=(added&truth).sum(),added_fp=(added&~truth).sum(),
                     removed_tp=(removed&truth).sum(),removed_fp=(removed&~truth).sum()).items()}
     # Literal and task-aware conditions differ only in decision cutoff.
     for key in ['initial','cost','prior','reference','domain']:
         assert torch.equal(states['shared_prior'][key],states['shared_literal'][key]),(name,key)
-    result=dict(passed=True,case=name,metrics=metrics,probes=probes,pixel_changes=changes,
+    strict_passed=all(v['original_numeric_gate_passed'] for v in probes.values())
+    result=dict(passed=strict_passed,diagnostic_completed=True,post_failure_diagnostic=diagnostic,
+        original_numeric_gate_passed=strict_passed,case=name,metrics=metrics,probes=probes,pixel_changes=changes,
         same_current_input=True,baseline_selection_exact=True,all_binary_memberships=True,
         source_access=False,new_target_scores_selected_model=False)
-    write(ROOT/'audits'/(name+'.json'),result);print('audited',name,flush=True)
+    write(ROOT/('diagnostics' if diagnostic else 'audits')/(name+'.json'),result);print('audited',name,'original gate',strict_passed,flush=True)
 
 
 def run(gpus):
@@ -159,7 +174,30 @@ def run(gpus):
     print('PASS all eight independent reference extent audits',flush=True)
 
 
+def collect_diagnostic():
+    d=design();cases={};records=[]
+    for j in d['jobs']:
+        path=ROOT/'audits'/(j['name']+'.json')
+        if not path.exists():path=ROOT/'diagnostics'/(j['name']+'.json')
+        cases[j['name']]=read(path);records.append(receipt(path))
+    failures=[name for name,c in cases.items() if not c['passed']]
+    assert failures==['fortress','trex'],failures
+    result=dict(passed=False,original_strict_gate_passed=False,audit_completed=True,
+        original_numeric_gate_failed_cases=failures,cases=cases,case_records=records,
+        all_target_metrics_recomputed=True,all_other_original_checks_passed=True,
+        float32_operation_replay_passed=True,original_thresholds_unchanged=True,
+        predictions_unchanged=True,queries=8,conditions=4,predictions=32,
+        summary=receipt(ROOT/'summary.json'),design=receipt(ROOT/'design.json'),
+        strict_auditor=receipt(ROOT/'strict_auditor.py'),failure_log=receipt(ROOT/'strict_audit_failure.log'),
+        code=receipt(__file__),frozen_method_receipts_verified=True,
+        whole_five_task=False,model_promotion=False,raw_scribble=False)
+    write(ROOT/'audit.json',result);write('docs/experiments/2026-10-12-reference-extent-audit.json',result)
+    print('COMPLETE; original strict numeric gate FAILED in fortress and trex',flush=True)
+
+
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('stage',choices=['case','run']);p.add_argument('--index',type=int);p.add_argument('--gpus',default='0,2,3,4')
+    p=argparse.ArgumentParser();p.add_argument('stage',choices=['case','run','collect-diagnostic']);p.add_argument('--index',type=int);p.add_argument('--gpus',default='0,2,3,4');p.add_argument('--diagnostic',action='store_true')
     a=p.parse_args();torch.set_num_threads(4)
-    audit(a.index) if a.stage=='case' else run(list(map(int,a.gpus.split(','))))
+    if a.stage=='case':audit(a.index,diagnostic=a.diagnostic)
+    elif a.stage=='collect-diagnostic':collect_diagnostic()
+    else:run(list(map(int,a.gpus.split(','))))

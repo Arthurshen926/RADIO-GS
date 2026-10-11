@@ -12,7 +12,17 @@ from .atomic_scope import assemble_atomic_scope
 from .scope_topology import assemble_scope
 from .scope_completion import complete_other_view_positive
 from .native_text_device import NativeTextDevice
-from .extent_decision_linked import LinkedExtentDecision, decisions
+from .extent_decision_linked import LinkedExtentDecision, decisions, CUTOFF
+
+
+def warm_extent_kernel(e):
+    # Explicit cutoff must match solve's Numba signature. Warming the omitted
+    # default overload would cause first-query compilation/cache file access.
+    decisions(np.array([0,1],dtype=e.pointer.dtype),np.array([0],dtype=e.index.dtype),
+        np.array([.8],dtype=e.alpha.dtype),np.array([0,1],dtype=e.colptr.dtype),
+        np.array([0],dtype=e.colrows.dtype),np.array([0],dtype=e.colposition.dtype),
+        np.array([0],dtype=e.rowview.dtype),np.array([True]),np.array([1.]),np.array([True]),
+        np.array([.5]),np.array([1.]),np.array([0.]),4,CUTOFF)
 
 
 @dataclass(frozen=True)
@@ -37,12 +47,7 @@ class ExtentTextRuntime:
         self.engine=LinkedExtentDecision(field.extent_factors,len(field.xyz))
         # Query-independent one-ray warmup loads/compiles the numerical kernel.
         # No actual query, source input or stored answer is used to initialize it.
-        e=self.engine
-        decisions(np.array([0,1],dtype=e.pointer.dtype),np.array([0],dtype=e.index.dtype),
-            np.array([.8],dtype=e.alpha.dtype),np.array([0,1],dtype=e.colptr.dtype),
-            np.array([0],dtype=e.colrows.dtype),np.array([0],dtype=e.colposition.dtype),
-            np.array([0],dtype=e.rowview.dtype),np.array([True]),np.array([1.]),np.array([True]),
-            np.array([.5]),np.array([1.]),np.array([0.]),4)
+        warm_extent_kernel(self.engine)
 
     @torch.no_grad()
     def query(self,native_query,generic_negatives,*,scope_rule='atomic'):

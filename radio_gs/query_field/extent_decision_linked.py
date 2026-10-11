@@ -105,7 +105,7 @@ class LinkedExtentDecision(ExtentDecision):
                      max_passes=max_passes, decision_cutoff=decision_cutoff)
 
 
-def solve(self, initial, target, positive, negative, confidence, cost, *, max_passes=4, decision_cutoff=CUTOFF):
+def solve(self, initial, target, positive, negative, confidence, cost, *, max_passes=4, decision_cutoff=CUTOFF, _kernel=decisions):
     initial = np.asarray(initial); target = np.asarray(target, dtype=np.float64)
     positive = np.asarray(positive); negative = np.asarray(negative)
     confidence = np.asarray(confidence, dtype=np.float64); cost = np.asarray(cost, dtype=np.float64)
@@ -128,7 +128,7 @@ def solve(self, initial, target, positive, negative, confidence, cost, *, max_pa
     coefficient = np.zeros(len(target)); weight = confidence/active.sum()
     for vi, (a,b) in enumerate(zip(self.slices[:-1],self.slices[1:])):
         coefficient[a:b] = .5*(positive[a:b]/max(positive[a:b].sum(),1)+negative[a:b]/max(negative[a:b].sum(),1))
-    selected, trace, flips, evaluated, converged = decisions(self.pointer,self.index,self.alpha,self.colptr,
+    selected, trace, flips, evaluated, converged = _kernel(self.pointer,self.index,self.alpha,self.colptr,
         self.colrows,self.colposition,self.rowview,initial,target,known,coefficient,weight,cost,max_passes,decision_cutoff)
     if (np.diff(trace)>1e-8).any(): raise RuntimeError('nonmonotone exact coordinate objective')
     return selected, dict(fallback=False, energy_trace=trace.tolist(),passes=len(trace)-1,flips=flips,

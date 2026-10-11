@@ -36,7 +36,7 @@ def prepare_reference(preparation, prior, scope, initializer):
 
 
 @torch.no_grad()
-def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5,audit_state=None):
+def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5,observation_weight=0.,audit_state=None):
     reference=torch.as_tensor(reference,device=field.xyz.device,dtype=torch.float32)
     if reference.ndim!=2:raise ValueError('reference mask must be a two-dimensional raster')
     base=compose_reference(field,packet,camera,reference,world_scale=field.world_units_per_metre,
@@ -50,16 +50,21 @@ def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5
     prior=base.selected.float();initial,cost,info=prepare_reference(preparation,prior,scope,initializer)
     engine=LinkedExtentDecision(factors,len(field.xyz))
     confidence=np.array([1. if info['active_views'] else 0.])
+    extra={}
+    if observation_weight:
+        from .extent_decision_coupled import CoupledExtentDecision
+        engine=CoupledExtentDecision(factors,preparation,len(field.xyz))
+        extra['observation_weight']=observation_weight
     selected,report=engine.solve((initial>.5).cpu().numpy(),scope['target'].cpu().numpy(),
         scope['positive'].cpu().numpy(),scope['negative'].cpu().numpy(),confidence,cost.cpu().numpy(),
-        max_passes=4,decision_cutoff=decision_cutoff)
+        max_passes=4,decision_cutoff=decision_cutoff,**extra)
     selected=torch.from_numpy(selected).to(field.xyz.device)
     if bool(selected[~domain].any()):raise RuntimeError('reference extent selected an unavailable member')
     if audit_state is not None:
         audit_state.update(optical=optical,lift=lift,scope={k:v.cpu() for k,v in scope.items()},
             prior=prior.cpu(),initial=initial.cpu(),cost=cost.cpu(),confidence=torch.from_numpy(confidence),
             selected=selected.cpu(),reference=reference.cpu(),initializer=initializer,
-            decision_cutoff=decision_cutoff,domain=domain.cpu())
+            decision_cutoff=decision_cutoff,observation_weight=float(observation_weight),domain=domain.cpu())
     return replace(base,membership_scores=selected.float(),selected=selected,
         diagnostics=dict(base.diagnostics,shared_extent_decision=True,extent_initializer=initializer,
             extent_preparation=info,extent_decision=report,decision_alpha_cutoff=float(decision_cutoff),current_query_geometry=True,

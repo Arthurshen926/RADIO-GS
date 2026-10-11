@@ -1,46 +1,38 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12 IN PROGRESS: NVOS explicit current-reference input
-transferred to shared extent engine, full8cases x4conditions. ROOT
-output/query_field_20261012/reference_extent_v1. Methodfreezeb04ce8b; audit/probedc26037.
-Main coordinatorPID622576 session19658 log/tmp/radio_gs_reference_extent_run.log,
-GPUs0,2,3,4; externalGPU1job DO NOTTOUCH. All32predictionsbeforeGT. No newscore read.
-FinalizerPID628958 session54011 /tmp/radio_gs_reference_extent_finish.py waits summary
-then runs scripts.research.audit_query_field_reference_extent run on0,2,3,4,
-logROOT/audit_run.log. Do NOTkill/restart/duplicate; finishallscore/auditbeforefinal.
-Coldsource-denied firstfernprimary probe COMPLETE PASS, session23902 reaped;
-ROOT/cold_probe.json and docs/experiments/2026-10-12-reference-extent-cold-probe.json.
+Active continuation2026-10-12 IN PROGRESS: NVOS reference operator transfer.
+Original 32 predictions/scoring COMPLETE at output/query_field_20261012/reference_extent_v1.
+Primary shared_prior REJECTED: actual IoU86.9550->80.5259, response83.1015->20.5699.
+Lift initializer80.1486 and literal cutoff75.8822. All8 old control sets EXACT.
+Independent all32 metrics and48 reference endpoints checked. Strict footprint float64
+relative2e-5 gate FAILED fortress2.968e-5/trex2.515e-5 (cost similarly). Do notcallauditPASS.
+Post-failure NumPyfloat32 determinant/order replay <=2.355e-7, cost<=3.745e-7;
+allremainingoriginalchecksPASS. Original logs/auditor/failure archived; predictionsunchanged.
+Originalrunner failedexclusivecreationbaselinechecksinside loop AFTER32predictionsbeforeGT;
+recoverye63c817 completedwithout rerun. All original jobs/sessionsreaped.
+Cold fern publicreference oldprimary historicalsceneopen/tensorload denialPASS(dc025c8).
+No currentreferenceRGBread; currentpositive-derivedSAMmask costinherited; NOTrawscribbles.
 
-ARMS composed (fresh previous reference_scope_admitted), shared_prior (PRIMARY),
-shared_lift, shared_literal. Same7fields/8requests,120sourceobservations,currentretained
-positive-derivedSAMmask/camera; inheritedqueryRGB/SAMcost, NOTrawscribbles.
-Newreference_extent.py instantiatesA_obs/footprint/R_set fromfield+CURRENTlegalcamera,
-no historicalsourceRGB/mask/track/targetcamera/freecontinuousqueryfitting. Thisislegal
-input-specificgeometry, not26newstoredsourcefieldcompilations. Full192x256currentraster;
-domainfield.member_available;P=(fractionaltarget>0)&valid,N=(target==0)&valid.
-Explicitfull2DmaskcomplementpermissionNOTlegalforrawsparseprompts. c=1,Pgatefallback.
-shared_prior keepsfreshcomposedbinaryinitializer; shared_lift rebuildsvisibleinitial
-throughA_obs andnormalizescostagainstnewinitial; unknownkeepsprior. Same4passes/.1cost.
-Sharedlinkedkernel nowexplicitdecision_cutoff, LERFdefault10.5/255 exactlegacyfunction;
-NVOS usesexistingconsumerboundary.5, literalcontrol retainsLERFcutoff. NoGTthresholdtuning.
-Public QueryFieldRuntime.reference_extent +public_nvos newtypedroutes implemented.
-All3newconditions save currentquery factors/stateforauditONLY, notdeploymentanswercache.
+Diagnosis (sealed states, noGT): reference R_set IoU91.5035->95.5866 but A_obs S
+IoU91.4826->22.1410, all8 referencefitup andobservedresponsedown. A_obs normalized
+available-domain is NOT legacy observed-only response. Single-view silhouette proxy
+allowsreplace/delete observedmembers. Stronginitializer alonecannotpreservefunction.
+New experimental CoupledExtentDecision: equal-weight A_obs S and R_set losses, shared
+binaryset; observation-onlycontrol; samecurrentinputs/prior/cost/.1penalty/4passes.
+No seedhardlock, teacher, training, freecontinuousqueryfit, extra fieldstate orsourceIO.
+Protocol docs/experiments/2026-10-12-reference-coupled-protocol.md fixed before newGT.
+ROOT output/query_field_20261012/reference_coupled_v1. Needprepare/run full16 beforeGT,
+independent realobjective/render/metric audit, do NOTpromote inadvance. Developmenton
+same8alreadyassessedcases, notheldoutgeneralization. Oldcontrolssavednotrerun.
 
-12targetedtestsPASS, includes24legacyrandomfulltrace/everydecisionexact andindependent
-fullobjectiveflip enumeration at3cutoffs. Firsttestattempt failedonlynewdiagnosticdictkey;
-removedunsolicitedsharedkey, defaultreportsfullyunchanged, rerunPASS. Auditintegralimage
-resampling initiallyusedonearea division differing5.96e-8; fixedbeforeGT todeclaredfloat32
-heightthenwidthdivision. All8currentquerymasksnowBITEXACT independentintegerintegrals;
-no gate relaxation/predictionchange. Thesearea masksarenotGT.
-Auditgates implementedbeforeGT: initial2e-6,costrelative2e-5,A_obs2e-6,footprintrelative2e-5,
-compiledvsindependentfullrendereralpha1e-4 anddecisionbitdiff0, CPUobjective1e-7,
-physicalrendererobjective2e-6. Rebuildallscopes/initial/cost, baselineexact, alltargetIoU/P/R/AP.
-Auditor frozenbeforeGT; ifactualauditfails retainloganddiagnose, nevermasknewscore/regressions.
-Coldprobe deniesalloutput anddatasetroot open/io.open plusanytorch.loadduringwholeactual
-query; legalqueryinputs loadedbefore; code/compiler-cacheIOallowed;notOSsandbox.
-NEXT finish32prediction/scoring/audit. Judgepriorvsvisiblelift vsliteralcutoff andreference
-fitvsheldtarget. UpdateADR0020/method/common-readiness forCURRENT-camera instantiation
-withoutassertingalltasksneedstoredsourcefactors. No default/five/paperpromotion inadvance.
+Sharedkernel cutoff broke publictext JITwarmup (omitted vs explicitfloat overload).
+Fixed extent_runtime warm_extent_kernel explicitCUTOFF AFTER originalauditsealed.
+Coldprocess synthetic queryIOdenial regressionPASS. 15 targetedtestsPASS includes
+24legacy randomexactcases, new24fullobjectivefliptraces, occluded-substitute toy.
+Need4firstquery coldpublictextprobes currentcode (previous full68sets exact historical
+strict floatfallbackfailure stillstands); no new68completionpublicclaim.
+Nextfinish allnewjobs/audits beforefinal, updateADR/method/readiness/results,originalHEAD/index.
+ExternalGPU1 PID4002662 DO NOTTOUCH. Branchcodex/query-preserving-gaussian-field.
 END active reference extent note.
 
 Active continuation2026-10-12 COMPLETE: positive/negative ablations, other-view
