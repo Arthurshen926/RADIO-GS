@@ -1,0 +1,195 @@
+{
+  "historical_readback_not_new_experiment": true,
+  "full_payload_or_prediction_audit_repeated": false,
+  "context": "Avoid repeating source-risk gains as a substitute for functional scope transfer.",
+  "records": {
+    "stage2": {
+      "report": {
+        "path": "output/query_region_evidence_next42/run_20260928_stage2/report.json",
+        "sha256": "be892653447e8501296be8ca4c2c142ddab234dc016506d50abffa2f74b42bcd"
+      },
+      "complete": true,
+      "promotion": false,
+      "source_gate": {
+        "held_view": {
+          "known_brier_gain": 2.008402347565552e-05,
+          "region_brier_gain": 0.00027865471349933224,
+          "known_pass": false,
+          "region_pass": true
+        },
+        "held_phrase": {
+          "known_brier_gain": -5.1451619836329066e-06,
+          "region_brier_gain": 0.0032583460533436304,
+          "known_pass": false,
+          "region_pass": true
+        },
+        "passed": false,
+        "recorded_before_target_evaluation": true,
+        "checkpoints": {
+          "B1": "3c2812ceabcd91a3a51665dabfd7e4a3f29faafac55bb2dace41cf82f66c47ee",
+          "B2": "8729cc8608b8b4999874bf0651e0d0b8b145ffa31d01f101fab4de159b7a35e5"
+        }
+      },
+      "target_screen": {
+        "B1": {
+          "lerf_delta_pp": {
+            "iou": 0.0036613840958293897,
+            "ap": 0.017419090209086496,
+            "selected": -0.009329524421844426
+          },
+          "scannet_delta_pp": {
+            "19": 0.0,
+            "15": 0.0,
+            "10": 0.0
+          },
+          "passed": false
+        },
+        "B2": {
+          "lerf_delta_pp": {
+            "iou": 0.019425611382711816,
+            "ap": 0.013437588318954141,
+            "selected": -0.011663577883870568
+          },
+          "scannet_delta_pp": {
+            "19": 0.0,
+            "15": 0.0,
+            "10": 0.0
+          },
+          "passed": false
+        }
+      },
+      "limitations": [
+        "Source projected P/N/U membership is geometry-conditioned pseudo-supervision, not human GT or physical whole-object evidence.",
+        "Held views were seen by the frozen base map; this is held-out supervision only for the added module.",
+        "Soft target class balancing uses y>=0.5 versus y<0.5 per query-view; single-class and unsupported counts remain explicit.",
+        "Effective area is peak-normalized R M on visible pixels; this intentionally rescales transport mass only for coverage measurement, not for deployed transport.",
+        "B2 region Brier improves meaningfully, but rendered known Brier fails the fixed 1e-4 source gate.",
+        "B2 still admits zero source-untagged regions in these source episodes; removing the architectural shortcut does not prove new untagged recall.",
+        "Qualified negatives can still have zero transport when the parent already assigns lower probability; direct classification gradients remain active independently.",
+        "Matched benchmark prior reuses exact next38 scores to remove float32 GPU drift; separate source cold runtime recomputes the parent without benchmark assets.",
+        "Sparse transport accumulates in float64 then converts once to float32 for exact repeated/cold label-invariance checks; batch tolerance 2e-6.",
+        "Stage1 known_loss aggregation is superseded only in this independent implementation; old Stage1 numbers remain unchanged.",
+        "Single seed and three development scenes; no full benchmark rollout, default promotion, or SOTA claim."
+      ],
+      "conclusion": "Stage2 implemented and six real diagnostics completed. Visual region discrimination improves but source rendered-risk gate and target screen fail; no promotion or tuning."
+    },
+    "stage3": {
+      "report": {
+        "path": "output/query_region_evidence_next42/run_20260928_stage3/report.json",
+        "sha256": "f79286dec54b17be829d9911c387f90ff2e070a6c7c025423ad89459669475b6"
+      },
+      "complete": true,
+      "promotion": false,
+      "source_gate": {
+        "preferred_arm": "B2",
+        "passed": true,
+        "arms": {
+          "B1": {
+            "known_brier": 0.1272416353950701,
+            "negative_fpr": 0.025414885914243117,
+            "negative_fpr_delta": 0.000450486330598264
+          },
+          "B2": {
+            "known_brier": 0.12670439456050508,
+            "negative_fpr": 0.024957955839894696,
+            "negative_fpr_delta": -6.443743750157022e-06
+          }
+        },
+        "parent": {
+          "query_views": 492,
+          "valid_counts": {
+            "view": 492,
+            "query": 492,
+            "known_iou": 492,
+            "positive_recall": 492,
+            "negative_selection": 473,
+            "unknown_selection": 492,
+            "known_brier": 492,
+            "positive_brier": 492,
+            "negative_brier": 473,
+            "closed_mask_iou": 492,
+            "positive_count": 492,
+            "negative_count": 492,
+            "unknown_count": 492,
+            "visible_count": 492,
+            "class_count": 492,
+            "legacy_visible_iou": 492,
+            "unknown_absolute_change": 492,
+            "unknown_selection_change": 492
+          },
+          "view": 12.760162601626016,
+          "query": 477.9573170731707,
+          "known_iou": 0.6206388754038541,
+          "positive_recall": 0.694161741999527,
+          "negative_selection": 0.024964399583644853,
+          "unknown_selection": 0.08816376509302488,
+          "known_brier": 0.12840462687419396,
+          "positive_brier": 0.21988282144177826,
+          "negative_brier": 0.019673007824954677,
+          "closed_mask_iou": 0.516982355281404,
+          "positive_count": 1664.6930894308944,
+          "negative_count": 6265.565040650406,
+          "unknown_count": 3739.60162601626,
+          "visible_count": 11669.859756097561,
+          "class_count": 1.9613821138211383,
+          "legacy_visible_iou": 0.5066554023750786,
+          "unknown_absolute_change": 3.88325090658753e-10,
+          "unknown_selection_change": 0.0,
+          "support": {
+            "positive_count": 819029.0,
+            "negative_count": 3082658.0,
+            "unknown_count": 1839884.0,
+            "visible_count": 5741571.0
+          },
+          "episode_classes": {
+            "0": 0,
+            "1": 19,
+            "2": 473
+          }
+        },
+        "criterion": "minimum combined held-view/held-phrase query-view known Brier among arms with aggregate negative FPR <= parent + .005",
+        "recorded_before_target_evaluation": true,
+        "global_across_scenes": true
+      },
+      "target_screen": {
+        "B1": {
+          "lerf_delta_pp": {
+            "iou": -0.5527089179167444,
+            "ap": 0.5442402862220586,
+            "selected": -0.9175215964180041
+          },
+          "scannet_delta_pp": {
+            "19": -0.5104831025762036,
+            "15": -0.6859112205089946,
+            "10": -1.7356245815844829
+          },
+          "passed": false
+        },
+        "B2": {
+          "lerf_delta_pp": {
+            "iou": -0.8713014582425044,
+            "ap": 0.6977220500824277,
+            "selected": -1.1634769620961105
+          },
+          "scannet_delta_pp": {
+            "19": -1.0713274750374369,
+            "15": -1.267747514140083,
+            "10": -2.4198868025750775
+          },
+          "passed": false
+        }
+      },
+      "limitations": [
+        "Source P/N/U are geometry-conditioned pseudo labels, not GT object errors.",
+        "Base parent has seen held source images; holdouts apply to added head supervision only.",
+        "Opinion pool is convex and bounded, not independent Bayesian inference: parent and groups share source observations.",
+        "No new image/prompt benchmark cohort; nontext identity is tested at runtime.",
+        "Source masks and membership calibration do not establish complete physical object identity.",
+        "Single three-scene development pilot; no full-cohort or SOTA claim.",
+        "At most six deterministic camera-neighbor groups limit confidence but do not prove independence.",
+        "Matched target uses hash-bound next38 predictions; generic cold checks use recomputed source parent without target assets."
+      ],
+      "conclusion": "Stage3 implemented and six real evaluations completed; no preferred arm passes the fixed target screen; no promotion or target tuning."
+    }
+  }
+}

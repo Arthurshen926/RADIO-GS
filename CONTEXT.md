@@ -1,6 +1,8 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12: proposal study COMPLETE; completion public replay RECOVERING.
+Active continuation2026-10-12 COMPLETE: proposal controls + full public completion replay.
+All own study processes finished; no jobs to resume. Final session89745 reaped exit0,
+original53884 reaped exit1(OOM preserved); earlier NVOS sessions already reaped.
 Worktree /root/RADIO-GS-query-field branch codex/query-preserving-gaussian-field.
 NVOS ROOT output/query_field_20261012/reference_proposals_v1, method03c63c3,
 auditor727d684, all32predictions sealedbeforeGT, 32metrics64physicalendpoints PASS,
@@ -28,18 +30,30 @@ UQISnearv10all4 butinherits22trainroomsinstanceforest+3calibrationrooms;NOTpureV
 Previousstrictfloat64footprint andatomicfallbackfloat failures remain unrepaired.
 
 TEXT ROOT output/query_field_20261012/text_extent_completion_public_v1,
-freezemethod1cac233. Originalfull4/68session53884FINISHED exit1, controllerworkersended.
-Figurines21,ramen15,waldo18 successfullysealed. Teatimefailedfirstquery CUDA OOM
-(sharedGPU3 only~9GBfree); nooutput/partialquerysaved. Preserveoriginal logs.
-Recovery scriptcommit e6ea483 onlydispatchesmissingteatime tofreeGPU4, no changed
-method/query/threshold;3existingoutputs+records6receipts preserved. RUNNING session89745,
-log/tmp/radio_gs_text_completion_recovery.log; workerlogROOT/logs/teatime.attempt1.log.
-DO NOTduplicate/restart/modifyfrozencode. Original log/tmp/radio_gs_text_extent_completion_public.log.
-Inputs onlylegalvectors+field. Allqueryopen/io.open/torch.load denied. Referencesonly
-controllerafterall4sealed. Actualsets exactgate AND strictcontinuousfloatgate separate.
-No newGT/accuracy/encoder rerun; bind oldrawencoder audit. Finishrecovery,recordallgates,
-publicresults+recoveryreceipts,updatecurrentmethodtext,CONTEXT,commit. DoNOTclaimstrict
-floatPASSuntilobserved. External GPUjobs DO NOTtouch. OriginalHEAD/index unchanged.
+freezemethod1cac233. Full4scenes68queries COMPLETE: figurines21,ramen15,teatime14,waldo18.
+actual_set_gate_passed=True, 0selectedbitdiffALL68; strict_float_gate_passed=False.
+Ramenindex14 fallback 'a small piece of food resting on a plate': max5.96046448e-8,
+12440continuousvaluesdifferent (oldatomicstudy12797isSEPARATE). Other67exactfloats.
+No tolerancechange/fallbackdrop/oldfailure repair. Same52.0773% researchsets preserved,
+NOT newaccuracy/GTscoring/integratedraw-string/allfive. Oldrawencoder auditboundNOTRERUN.
+Workerslegalvectors+field ONLY; actualqueryopen/io.open/torch.load denied; reference
+onlycontrollerAFTERall4sealed. Query-independentone-raywarmup, notOSsandbox.
+OriginaltwoGPUrun failedteatime firstquery CUDA OOM withnoresult. Originalcontroller
+exited, then recovery e6ea483 retriedONLYteatime onfreeGPU4;3sealedscenes6receiptsunchanged.
+OriginalROOT/logs/teatime.log andattempt1 preserved; recoverydesign/recovery/auditsealed.
+Log/tmp/radio_gs_text_completion_recovery.log, NO activerun. AllstudyhashchecksPASS.
+Report docs/experiments/2026-10-12-text-extent-completion-public-results.md plusaudit/recovery.
+
+Historicalnext42stage2/3READBACKonly (notrerun) bound2reports in
+2026-10-12-historical-scope-head-readback.json. Stage2 source regionriskimproved but
+selected-.0117pp,ScanNetunchanged;stage3sourcegatePASS but selected-1.1635pp,
+ScanNet19/15/10 -1.0713/-1.2677/-2.4199pp. Don'trepeat scalarhead/supervision/transport
+asnewsolution; reuselabel-erasure/gradient/heldsplit/final-functiontests. Notcurrentresults.
+NEXT: retainvalidatedtypedcapabilities, align sharedspatialmemberresponsibilities and
+freezecommonversionforfiveLOCALbenchmarks; prioritizetext/semanticspatiallocalization.
+Stop sameNVOS8 optimization sweeps; doNOTreinterpretsharedAPIasthefinalcommonmodel.
+No jobsneedresume. ExternalGPUjobs DO NOTtouch. OriginalHEAD dabcaa9b5fc6d89fa4474bcaea5db52ca7f74030,
+indexSHA917366f03337f78208f976ee26f4c58f198d2ce78ff64b29f9d7c94c06ad621c unchanged.
 END active proposal/completion note.
 
 Active continuation2026-10-12 COMPLETE: group hypothesis rejected; finite capability edits.

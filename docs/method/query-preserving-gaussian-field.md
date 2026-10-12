@@ -12,6 +12,11 @@ be retained; UQIS inherits the explicitly recorded 22-room instance supervision
 and 3-room calibration. The [current five-task inventory](../experiments/2026-10-12-common-extent-readiness.md)
 separates these functional references from a still-unfinished common version.
 
+The [full public completion replay](../experiments/2026-10-12-text-extent-completion-public-results.md)
+also now preserves all 68 selected sets. Its strict continuous-value gate fails
+one Ramen fallback (max 5.96e-8, zero selected-bit differences); no tolerance
+relaxation, new accuracy score or historical-failure repair is claimed.
+
 2026-10-11: [mechanism and closure design](query-field-mechanisms-and-closure.md)
 supersedes the historical first-implementation diagram below. Whole-phase optics
 and finite member decisions are validated on fixed scopes; the subsequent
