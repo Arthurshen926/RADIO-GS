@@ -1,34 +1,60 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12 IN PROGRESS: finite prior-edit footprint vs no cost.
+Active continuation2026-10-12 COMPLETE: group hypothesis rejected; finite capability edits.
 Worktree /root/RADIO-GS-query-field branch codex/query-preserving-gaussian-field.
-ROOT output/query_field_20261012/reference_edit_v1. Methodfreeze35a0add, audit/probea75b728.
-Full8x2 primary edit vs none; old sealed free and composed controls NOT rerun.
-Same .5A_obs+.5R_set, .1cost coefficient, current legal complete SAM mask/camera,
-120 source observations, four reversible passes; no immutable inferred seeds.
-Edit=.1 sum a_i |S_i-S0_i|; none=data only. All16predictions BEFORE newGT.
-8targetedtestsPASS incl12 independent full XOR flip traces and all prior positives removable.
-MainRUNNING PID1062628 (parent1062541), log/tmp/radio_gs_reference_edit_run.log GPU0,3,4.
-AuditwatchRUNNING parent1065508/session35252, log/tmp/radio_gs_reference_edit_finish.log;
-waits summary then audits0,3,4. Coldfixedfirst fernedit RUNNING session65738/GPU2,
-log/tmp/radio_gs_reference_edit_cold.log. Do NOTduplicate/kill/restart; finishallbeforefinal.
-Audit_design frozen before scoring: direct XOR + independent projection/fullrenderer,
-16metrics/32endpoints. Productionfiles frozen throughout. Existing externalGPUjobs doNOTtouch.
+ALL own prediction/scoring/audit/cold/collector/diagnosis processes finished. No jobs to resume.
+MainPID1062628 exited; knownsessions35252/90814/30180/65738/23856 reaped.
+External GPU jobs unrelated; DO NOTtouch. Original HEAD/index unchanged.
 
-Prior grouping study COMPLETE: ROOT output/query_field_20261012/reference_groups_v1.
-All24predictions,48physical endpoints,independent partitions,coldfirstfern PASS; alljobsreaped.
-Methodc3a3b8c/auditor868ab43; old code hashes now historical due next method changes.
-free85.7573%, parts PRIMARY84.4056%, shuffled87.1961%; composed86.9550%.
-Parts-free -1.3517pp (6up2down,CI[-4.2447,+.8157]pp),trex/horns_left mainfailures.
-Shuffle-free+1.4388pp(7up1down,CI[.5710,2.1501]); shuffle-composed+.2410ppCIcrosses0.
-Reject incidence equality as instance-identity constraint; doNOTpromote randomcontrol.
-Modified members free139596/parts97136/shuffled46830; motivates cost intervention,
-not causal proof of conservatism. Spatiallocality not independentlycontrolled,1fixedseed.
-All8 freshfree bitexact vs priorcoupled. Same init/domain/cost/reference verified.
-16testsPASS. No default/allfive/heldout/identityclosure claim. Oldfloat64 gateFAILnotrepaired.
+PRIMARY NEW RESULT ROOT output/query_field_20261012/reference_edit_v1.
+Methodfreeze35a0add, audit/probea75b728. Full8x2primary edit vs none; 16predictions
+sealed BEFORE newGT. Old composed and fresh reproduced free controls reused, NOT rerun.
+Same .5A_obs+.5R_set, .1physicalcost, current legal complete SAM mask/camera,
+120sourceobservations, four reversible passes, no train/newfield/sourceIO/continuousfit.
+Edit=.1sum a_i |S_i-S0_i|; none=dataonly. No immutable inferred seeds.
+8targetedtestsPASS including12 independent XOR flip traces and all initialpositives removable.
+
+actualIoU/oldresponse/P/R/AP percentages:
+composed86.9550/83.1015/94.6896/91.3060/93.1872;
+free85.7573/79.1723/93.1263/91.8306/93.4671;
+none82.3183/81.6065/87.0439/94.2674/93.8767;
+edit86.8689/83.8238/92.6095/93.6406/94.6101.
+Edit-none actual+4.5506pp all8up CI[2.6204,6.1385]pp;
+edit-free actual+1.1117pp7up1downCI[-.0117,2.0102]ppCROSSES0;
+edit-composedactual-.0861pp5up3downCI[-2.7350,2.0498]pp.
+Edit-free response+4.6516pp8up; edit-composed+.7223pp6up2down.
+Historicalv10 SAMEDEFINEDresponse86.5134% still2.6896pphigher; budgets differ.
+Do NOTcomparev10responsewithactualIoU orclaimfullrecovery/equivalence.
+Edit added34683/removed2451 all8change; none70339/6206; free36485/103111.
+Bothnewconditionsall8notconverged afterfixed4passes; no globaloptimumclaim.
+
+Independent16metrics+32physical endpointsPASS; directXOR not kernelrewriteselfcheck.
+Maxalpha9.224e-6,bits0,independentobjective5.919e-8. FrozenreceiptsPASS.
+ColdferneditPASS source/outputrootopensandANYtorch.loaddenied; code/compilerIOallowed,
+notOSsandbox. Previousfloat64footprintstrictgateFAILstillNOTREPAIRED.
+Posthoclabeldiagnosis onlyAFTERpredictions: trexcomposed->editactual76.1714->67.9022;
+addedTP98145/FP370112,removedTP1182/FP14131. NewGaussian17788/deleted399.
+P82.9117->69.3961,R90.3565->96.9270; referenceRset73.0076->87.4444 despitefailure.
+Observederroris expansion, not loss of initial foreground. Not Gaussianidentitytruth or
+purecausalpermember proof. Next need independent identity/range authorization for additions,
+not furtherhardkeep/removalprotection or percasecostsweep. Keepeditasreferencecandidate,
+NO defaultpromotion/allfive/heldout/paperclosure. LERF52.0773 unchanged.
+Report docs/experiments/2026-10-12-reference-edit-results.md pluscomparison/audit/diagnosis.
+
+Prior grouping study COMPLETE ROOT output/query_field_20261012/reference_groups_v1.
+All24predictions,48physical endpoints,independentpartitions,coldfirstfernPASS;jobsreaped.
+Methodc3a3b8c/auditor868ab43; old codehashes nowhistorical after newmethod changes.
+free85.7573%,partsPRIMARY84.4056%,shuffled87.1961%;composed86.9550%.
+Parts-free -1.3517pp(6up2down,CI[-4.2447,+.8157]pp);trex/horns_leftmainfailures.
+Shuffle-free+1.4388pp(7up1down,CI[.5710,2.1501]);shuffle-composed+.2410ppCIcrosses0.
+Rejectincidenceequalityasinstanceconstraint; doNOTpromoterandomcontrol.
+Modifiedmembers free139596/parts97136/shuffled46830; spatiallocalitynotseparatelycontrolled,
+1fixedseed,nostandaloneidentitytruth. All8freshfreeexact vsoldcoupled. 16targetedtestsPASS.
 Report docs/experiments/2026-10-12-reference-groups-results.md.
-Metadata readiness: relation buffers LERF4/4 ScanNet10/10 NVOS8/8 UQIS0/9;
-not numeric/fullpayload/identity/taskfunction certification.
+Relationmetadatabuffers LERF4/4 ScanNet10/10 NVOS8/8 UQIS0/9; notnumeric/fullpayload/
+identity/taskfunctioncertification. RawNVOS/menuvoid/UQISall4/commonversion/true3D-GT/
+independentheldout stillneeded. Stopaddingincidenceblocks/costsweeps; nexttypedinputand
+additionidentityvalidation. DoNOTrerunoldfrozendesignchecksagainstpoststudyproductioncode.
 END active groups/edit note.
 
 Active continuation2026-10-12 COMPLETE: NVOS actual current-reference transfer,
