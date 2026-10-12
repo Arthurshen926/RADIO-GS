@@ -36,10 +36,12 @@ def prepare_reference(preparation, prior, scope, initializer):
 
 
 @torch.no_grad()
-def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5,observation_weight=0.,grouping=None,regularizer='footprint',audit_state=None):
+def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5,observation_weight=0.,grouping=None,regularizer='footprint',proposals=None,audit_state=None):
     if grouping not in {None,'incidence','shuffled'}:raise ValueError('unknown reference grouping')
     if regularizer not in {'footprint','none','edit'} or (grouping is not None and regularizer!='footprint'):
         raise ValueError('unsupported reference regularizer/grouping')
+    if proposals not in {None,'scope','shuffled','prior_only'} or (proposals is not None and (regularizer!='edit' or initializer!='prior')):
+        raise ValueError('proposal study requires the composed prior and finite edits')
     reference=torch.as_tensor(reference,device=field.xyz.device,dtype=torch.float32)
     if reference.ndim!=2:raise ValueError('reference mask must be a two-dimensional raster')
     base=compose_reference(field,packet,camera,reference,world_scale=field.world_units_per_metre,
@@ -70,6 +72,16 @@ def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5
         from .extent_edit import EditExtentDecision
         engine=EditExtentDecision(factors,preparation,len(field.xyz))
         extra.update(observation_weight=observation_weight,regularizer=regularizer)
+    candidate=allowed=strata=proposal_info=None
+    if proposals is not None:
+        from .extent_proposals import region_union,observation_strata,proposal_domain
+        chosen=np.zeros(len(field.evidence.views),bool);chosen[base.diagnostics['selected_regions']]=True
+        candidate=region_union(field.evidence.positive_pointer.cpu().numpy(),field.evidence.positive_index.cpu().numpy(),
+            chosen,domain.cpu().numpy())
+        strata=observation_strata(len(domain),lift['index'].numpy(),lift['weight'].numpy(),
+            scope['target'].cpu().numpy(),lift['valid'].numpy())
+        allowed,proposal_info=proposal_domain(candidate,(initial>.5).cpu().numpy(),domain.cpu().numpy(),strata,mode=proposals)
+        extra['proposal_domain']=allowed
     selected,report=engine.solve((initial>.5).cpu().numpy(),scope['target'].cpu().numpy(),
         scope['positive'].cpu().numpy(),scope['negative'].cpu().numpy(),confidence,cost.cpu().numpy(),
         max_passes=4,decision_cutoff=decision_cutoff,**extra)
@@ -81,9 +93,12 @@ def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5
             selected=selected.cpu(),reference=reference.cpu(),initializer=initializer,
             decision_cutoff=decision_cutoff,observation_weight=float(observation_weight),regularizer=regularizer,domain=domain.cpu())
         if groups is not None:audit_state['groups']=torch.from_numpy(groups)
+        if allowed is not None:audit_state.update(candidate_domain=torch.from_numpy(candidate),
+            proposal_domain=torch.from_numpy(allowed),proposal_strata=torch.from_numpy(strata),proposal_policy=proposals)
     return replace(base,membership_scores=selected.float(),selected=selected,
         diagnostics=dict(base.diagnostics,shared_extent_decision=True,extent_initializer=initializer,
             extent_grouping=group_info,
+            extent_proposals=proposal_info,
             extent_preparation=info,extent_decision=report,decision_alpha_cutoff=float(decision_cutoff),current_query_geometry=True,
             construction_source_geometry_read=False,reference_composition_diagnostics_are_initializer=True,
             source_access=False,query_parameter_fitting=False,new_field_state_bytes=0))

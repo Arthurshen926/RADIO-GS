@@ -31,7 +31,7 @@ def block_response(head,following,alpha,index,row,group,positions,start,stop,rem
 @njit(cache=True)
 def coupled_decisions(ptr,idx,alpha,colptr,colrows,colposition,rowview,initial,
                       target,known,coefficient,weight,cost,max_passes,decision_cutoff,
-                      optr,orows,oval,observation_weight,block_pointer=None):
+                      optr,orows,oval,observation_weight,block_pointer=None,proposal_domain=None):
     selected=initial.copy();views=len(weight);rows=len(rowview)
     head=np.full(rows,-1,np.int32);following=np.full(len(idx),-1,np.int32)
     prob=np.zeros((2,rows));bce=np.zeros((2,views));mass=np.zeros((2,views))
@@ -62,6 +62,7 @@ def coupled_decisions(ptr,idx,alpha,colptr,colrows,colposition,rowview,initial,
         if step==max_passes or (step>0 and changed==0):break
         changed=0
         for g in range(len(selected)):
+            if proposal_domain is not None and not proposal_domain[g]:continue
             if colptr[g]==colptr[g+1] and optr[g]==optr[g+1] and cost[g]==0:continue
             dm[:]=0.;dt[:]=0.;db[:]=0.;sign=-1. if selected[g] else 1.
             delta=.1*sign*cost[g]
