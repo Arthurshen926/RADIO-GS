@@ -1,5 +1,35 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-12 IN PROGRESS: candidate proposal permission + full text completion replay.
+Worktree /root/RADIO-GS-query-field branch codex/query-preserving-gaussian-field.
+NVOS ROOT output/query_field_20261012/reference_proposals_v1, method03c63c3,
+auditor727d684. Full8x4 free(oldedit exact),scope PRIMARY,matched,prioronly.
+Same input/prior/edit objective/operators/fourpasses. Scope = chosen regional positive
+support union; independent Gaussian edits, no whole-group lock. Matched preserves
+noninitial proposal count in current observed foreground/background/tie/unknown strata,
+seed20261012; prioronly finalsubsetinitial. Not identityGT; candidates can be incomplete.
+No target labels until all32predictions sealed. Freshfree must exact oldedit before GT.
+15targetedtestsPASS incl12 restricted fullobjective traces, allinitialpositives removable,
+full-domain exact equivalence, old coupled/group/edit tests. No defaultpromotion.
+Prior source/GT-free diagnostic: 34536/34683 oldedit added members outside candidateU;
+not proof allwrong. Raw full-mask contract/source budget unchanged; no new state/train.
+MainRUNNING PID1092333(parent1092234),session65524,log/tmp/radio_gs_reference_proposals_run.log.
+GPUs2,3,4 have headroom; externalGPU0/1/5 busy,doNOTtouch. Audit+cold finalizerRUNNING
+parent1093235/session62215,log/tmp/radio_gs_reference_proposals_finish.log; waits summary
+then audit2,3,4 and fixedcoldfern scope on4. DoNOTduplicate/kill/restart.
+
+TEXT ROOT output/query_field_20261012/text_extent_completion_public_v1,
+freezeprepare1cac233; full4scenes68queries other_view_positive public replay.
+RUNNING session53884, log/tmp/radio_gs_text_extent_completion_public.log GPUs3,4.
+Shares ample headroom with small NVOS workers; CPU field+transient CUDA topology mirror.
+Inputs only legal vectors+field. Allqueryopen/io.open/torch.load denied. Reference only
+controller afterall4sealed. Actualsets primary exactgate; strictcontinuousfloatgate ALSO
+recorded exact, no tolerance. Oldatomicfallbackfailure notrepaired by newgate.
+No newGT/accuracy/encoder rerun; bind prior exactrawencoder audit. Finish bothstudies.
+No productionedits while hashes frozen. Record results,comparison,audit,cold,diagnostics,
+updateADR/method/CONTEXT; originalHEAD/index unchanged. OldotherstudiesallCOMPLETE.
+END active proposal/completion note.
+
 Active continuation2026-10-12 COMPLETE: group hypothesis rejected; finite capability edits.
 Worktree /root/RADIO-GS-query-field branch codex/query-preserving-gaussian-field.
 ALL own prediction/scoring/audit/cold/collector/diagnosis processes finished. No jobs to resume.
