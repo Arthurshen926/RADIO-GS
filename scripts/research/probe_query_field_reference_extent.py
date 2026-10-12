@@ -18,7 +18,7 @@ from scripts.research.run_query_field_reference_extent import ROOT,design
 from scripts.research.run_query_field_relations import read,write,receipt,check
 
 
-def main(*, design_loader=design, root=ROOT, arm='shared_prior', observation_weight=0.,grouping=None,regularizer='footprint',
+def main(*, design_loader=design, root=ROOT, arm='shared_prior', observation_weight=0.,grouping=None,regularizer='footprint',proposals=None,
          report_path='docs/experiments/2026-10-12-reference-extent-cold-probe.json'):
     d=design_loader();j=d['jobs'][0];cfg=read(j['configuration']['path'])
     job=next(x for x in cfg['jobs'] if x['name'].endswith('__'+arm))
@@ -43,14 +43,14 @@ def main(*, design_loader=design, root=ROOT, arm='shared_prior', observation_wei
         return call
     with patch('builtins.open',guarded(builtins.open)),patch('io.open',guarded(io.open)),patch('torch.load',side_effect=AssertionError('tensor load during query')):
         result=QueryFieldRuntime(field).reference_extent(packet,camera,reference,initializer='prior',decision_cutoff=.5,
-            observation_weight=observation_weight,grouping=grouping,regularizer=regularizer)
+            observation_weight=observation_weight,grouping=grouping,regularizer=regularizer,proposals=proposals)
     # Comparisons only after the independently executed public query.
     p=root/'predictions'/j['name']/job['name'];record=read(p/'prediction.json')
     check(dict(path=str(p/'predictions.pt'),sha256=record['predictions_sha256']))
     old=torch.load(p/'predictions.pt',weights_only=True)
     assert torch.equal(result.selected.cpu(),old['selected'])
     assert torch.equal(result.membership_scores.cpu(),old['membership'])
-    report=dict(passed=True,case=j['name'],rule='fixed first case '+arm,observation_weight=observation_weight,grouping=grouping,regularizer=regularizer,member_values_exact=True,
+    report=dict(passed=True,case=j['name'],rule='fixed first case '+arm,observation_weight=observation_weight,grouping=grouping,regularizer=regularizer,proposals=proposals,member_values_exact=True,
         selected_bits_exact=True,query_scene_file_roots_denied=roots,torch_load_denied=True,
         code_and_compiler_cache_io_allowed=True,os_sandbox=False,cold_process=True,
         actual_query_warmup=False,target_camera_passed_to_decoder=False,reference_rgb_used=False,
