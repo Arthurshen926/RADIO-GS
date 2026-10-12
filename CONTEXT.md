@@ -1,30 +1,35 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12 IN PROGRESS: reversible region-incidence blocks.
-Worktree /root/RADIO-GS-query-field, branch codex/query-preserving-gaussian-field.
-ROOT output/query_field_20261012/reference_groups_v1. Full8x3conditions free/parts(PRIMARY)/
-shuffled; same currentreference/fields/prior/cost/.5A_obs+.5R_set/4passes. All24sealed
-andfreebit-exact vs previouscoupled BEFOREGT. Do NOTpromote/selectpercase beforeevidence.
-Parts=identicalpositive-regionincidence+initialbit, canonicalminGaussianorder; no-region
-membersSINGLETONS. Shufflefixed20261012 withinsupportedinitialbitstrata, slotsizes/order
-andinitialexact. Bothallowallinitialpositive groupsdeleted; nohardlock/continuousfit.
-Sharedlinkedcoupledkernel handlesmultiplehitsofgroup viaorderedmerge/removal, exact
-Gaussianopticsnotfictitiousgroupopacity. Observation/costsumwithinblock. Source-free.
-15testsPASS including18groupfullobjectivefliptraces(two views,unsupported,repeat hits),
-24oldcoupled+24legacy traces, groupunknown/shufflesize andwholepositivegroupdeletion.
-Current all GPUs haveEXTERNAL tasks (PIDs2038568/1992680/2038591/2040364/2045134/1992704);
-doNOTtouch. NVOSpriorpeak<=3.04GiB, runonlyavailableheadroom0,3,4 withoneworker/device.
-Methodfreezec3a3b8c, audit/probe868ab43; audit_design sealedbeforeGT. MainRUNNING
-PID1045712/session37381 log/tmp/radio_gs_reference_groups_run.log GPUs0,3,4.
-18/24predictionsdone, final2casesrunning. DoNOTkill/restart/duplicate.
-AuditfinalizerRUNNING PID1050809/session55357 log/tmp/radio_gs_reference_groups_finish.log;
-waitsmainPID1045712 summarythenautomaticallyrunsaudit0,3,4. No duplicateaudits.
-Coldfernparts COMPLETE PASS onGPU2, session99527reaped; exactmembers/bits, sourceIOdenied;
-ROOT/cold_probe.json anddocs/experiments/2026-10-12-reference-groups-cold-probe.json.
-16targetedtestsPASS (15suite+1exhaustive24stateopticalearlyexit). Finishalljobsbeforefinal.
-No newGT read yet. Partialevidence groupisNOTcertifiedinstanceidentity; shufflecontrol
-doesnotseparatespatiallocalityfromsemantics. Oldfloat64footprintgateFAILstillinherited.
-END active grouped note.
+Active continuation2026-10-12 IN PROGRESS: finite prior-edit footprint vs no cost.
+Worktree /root/RADIO-GS-query-field branch codex/query-preserving-gaussian-field.
+ROOT output/query_field_20261012/reference_edit_v1. Methodfreeze35a0add, audit/probea75b728.
+Full8x2 primary edit vs none; old sealed free and composed controls NOT rerun.
+Same .5A_obs+.5R_set, .1cost coefficient, current legal complete SAM mask/camera,
+120 source observations, four reversible passes; no immutable inferred seeds.
+Edit=.1 sum a_i |S_i-S0_i|; none=data only. All16predictions BEFORE newGT.
+8targetedtestsPASS incl12 independent full XOR flip traces and all prior positives removable.
+MainRUNNING PID1062628 (parent1062541), log/tmp/radio_gs_reference_edit_run.log GPU0,3,4.
+AuditwatchRUNNING parent1065508/session35252, log/tmp/radio_gs_reference_edit_finish.log;
+waits summary then audits0,3,4. Coldfixedfirst fernedit RUNNING session65738/GPU2,
+log/tmp/radio_gs_reference_edit_cold.log. Do NOTduplicate/kill/restart; finishallbeforefinal.
+Audit_design frozen before scoring: direct XOR + independent projection/fullrenderer,
+16metrics/32endpoints. Productionfiles frozen throughout. Existing externalGPUjobs doNOTtouch.
+
+Prior grouping study COMPLETE: ROOT output/query_field_20261012/reference_groups_v1.
+All24predictions,48physical endpoints,independent partitions,coldfirstfern PASS; alljobsreaped.
+Methodc3a3b8c/auditor868ab43; old code hashes now historical due next method changes.
+free85.7573%, parts PRIMARY84.4056%, shuffled87.1961%; composed86.9550%.
+Parts-free -1.3517pp (6up2down,CI[-4.2447,+.8157]pp),trex/horns_left mainfailures.
+Shuffle-free+1.4388pp(7up1down,CI[.5710,2.1501]); shuffle-composed+.2410ppCIcrosses0.
+Reject incidence equality as instance-identity constraint; doNOTpromote randomcontrol.
+Modified members free139596/parts97136/shuffled46830; motivates cost intervention,
+not causal proof of conservatism. Spatiallocality not independentlycontrolled,1fixedseed.
+All8 freshfree bitexact vs priorcoupled. Same init/domain/cost/reference verified.
+16testsPASS. No default/allfive/heldout/identityclosure claim. Oldfloat64 gateFAILnotrepaired.
+Report docs/experiments/2026-10-12-reference-groups-results.md.
+Metadata readiness: relation buffers LERF4/4 ScanNet10/10 NVOS8/8 UQIS0/9;
+not numeric/fullpayload/identity/taskfunction certification.
+END active groups/edit note.
 
 Active continuation2026-10-12 COMPLETE: NVOS actual current-reference transfer,
 observation/selected-set loss diagnosis, coupled correction, coldtextcompatibility.
