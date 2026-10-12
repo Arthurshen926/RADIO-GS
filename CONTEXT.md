@@ -14,8 +14,14 @@ Gaussianopticsnotfictitiousgroupopacity. Observation/costsumwithinblock. Source-
 24oldcoupled+24legacy traces, groupunknown/shufflesize andwholepositivegroupdeletion.
 Current all GPUs haveEXTERNAL tasks (PIDs2038568/1992680/2038591/2040364/2045134/1992704);
 doNOTtouch. NVOSpriorpeak<=3.04GiB, runonlyavailableheadroom0,3,4 withoneworker/device.
-Need freeze/launchrun_query_field_reference_groups,independentmetric/function/groupaudit,
-coldpublicfirstpartquery,closealljobs,summarizeactualresultsandlimitationsbeforefinal.
+Methodfreezec3a3b8c, audit/probe868ab43; audit_design sealedbeforeGT. MainRUNNING
+PID1045712/session37381 log/tmp/radio_gs_reference_groups_run.log GPUs0,3,4.
+18/24predictionsdone, final2casesrunning. DoNOTkill/restart/duplicate.
+AuditfinalizerRUNNING PID1050809/session55357 log/tmp/radio_gs_reference_groups_finish.log;
+waitsmainPID1045712 summarythenautomaticallyrunsaudit0,3,4. No duplicateaudits.
+Coldfernparts COMPLETE PASS onGPU2, session99527reaped; exactmembers/bits, sourceIOdenied;
+ROOT/cold_probe.json anddocs/experiments/2026-10-12-reference-groups-cold-probe.json.
+16targetedtestsPASS (15suite+1exhaustive24stateopticalearlyexit). Finishalljobsbeforefinal.
 No newGT read yet. Partialevidence groupisNOTcertifiedinstanceidentity; shufflecontrol
 doesnotseparatespatiallocalityfromsemantics. Oldfloat64footprintgateFAILstillinherited.
 END active grouped note.

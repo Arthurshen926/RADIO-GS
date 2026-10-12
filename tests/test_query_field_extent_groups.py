@@ -5,6 +5,7 @@ from radio_gs.query_field.extent_groups import incidence_partition,GroupedExtent
 from radio_gs.query_field.extent_factors import ExtentFactors
 from radio_gs.query_field.extent_preparation import ExtentPreparation
 from radio_gs.query_field.extent_decision import render_binary
+from radio_gs.query_field.extent_decision_coupled import block_response
 
 
 def test_incidence_unknown_and_shuffle_preserve_initial_and_group_sizes():
@@ -77,3 +78,25 @@ def test_group_can_remove_all_initial_positive_members():
     e=GroupedExtentDecision(ExtentFactors({'views.0.'+k:v for k,v in s.items()},2),ExtentPreparation({'views.0.'+k:v for k,v in p.items()},2),2,np.zeros(2,np.int64))
     selected,_=e.solve(np.ones(2,bool),np.zeros(1),np.zeros(1,bool),np.ones(1,bool),np.ones(1),np.ones(2))
     assert not selected.any()
+
+
+def test_block_optics_early_exit_and_subthreshold_hits_in_all_states():
+    group=np.array([0,1,0,2,0],np.int64);alpha=np.array([.999,.9,.0001,.999,.8],np.float32)
+    for state in range(8):
+        chosen=np.array([bool(state&(1<<g)) for g in range(3)])
+        head=np.array([-1],np.int32);following=np.full(5,-1,np.int32)
+        for hit in range(4,-1,-1):
+            if chosen[group[hit]]:following[hit]=head[0];head[0]=hit
+        for g in range(3):
+            positions=np.flatnonzero(group==g).astype(np.int32)
+            actual=block_response(head,following,alpha,group,0,g,positions,0,len(positions),chosen[g])
+            proposal=chosen.copy();proposal[g]=~proposal[g]
+            # Independent original-Gaussian membership, including shader stop
+            # BEFORE the hit that would take transmittance below 1e-4.
+            trans=np.float32(1.)
+            for a,selected in zip(alpha,proposal[group]):
+                if not selected or a<1/255:continue
+                nxt=np.float32(trans*np.float32(1-a))
+                if nxt<=1e-4:break
+                trans=nxt
+            assert actual==np.float32(1)-trans
