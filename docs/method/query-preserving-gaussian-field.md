@@ -1,5 +1,17 @@
 # Query-preserving Gaussian field: implementation and experiment ledger
 
+2026-10-12: [ADR0021](../adr/0021-typed-decisions-with-functional-preservation.md)
+refines the shared member requirement: preserve one field, native functions,
+typed legal input and consistent actual sets, without forcing every type through
+one free binary objective. The [full candidate-permission study](../experiments/2026-10-12-reference-proposals-results.md)
+does not outperform the current-reference composition control. Free refinement,
+incidence grouping and hard proposal domains stay research options, with no default
+promotion. Shared storage/API alone is not proof of a common spatial member function.
+Existing ScanNet menu competition and all-four UQIS native input functions should
+be retained; UQIS inherits the explicitly recorded 22-room instance supervision
+and 3-room calibration. The [current five-task inventory](../experiments/2026-10-12-common-extent-readiness.md)
+separates these functional references from a still-unfinished common version.
+
 2026-10-11: [mechanism and closure design](query-field-mechanisms-and-closure.md)
 supersedes the historical first-implementation diagram below. Whole-phase optics
 and finite member decisions are validated on fixed scopes; the subsequent

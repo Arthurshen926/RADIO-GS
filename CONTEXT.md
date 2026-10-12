@@ -1,33 +1,45 @@
 # RADIO-GS — active system context
 
-Active continuation2026-10-12 IN PROGRESS: candidate proposal permission + full text completion replay.
+Active continuation2026-10-12: proposal study COMPLETE; completion public replay RECOVERING.
 Worktree /root/RADIO-GS-query-field branch codex/query-preserving-gaussian-field.
 NVOS ROOT output/query_field_20261012/reference_proposals_v1, method03c63c3,
-auditor727d684. Full8x4 free(oldedit exact),scope PRIMARY,matched,prioronly.
-Same input/prior/edit objective/operators/fourpasses. Scope = chosen regional positive
-support union; independent Gaussian edits, no whole-group lock. Matched preserves
-noninitial proposal count in current observed foreground/background/tie/unknown strata,
-seed20261012; prioronly finalsubsetinitial. Not identityGT; candidates can be incomplete.
-No target labels until all32predictions sealed. Freshfree must exact oldedit before GT.
-15targetedtestsPASS incl12 restricted fullobjective traces, allinitialpositives removable,
-full-domain exact equivalence, old coupled/group/edit tests. No defaultpromotion.
-Prior source/GT-free diagnostic: 34536/34683 oldedit added members outside candidateU;
-not proof allwrong. Raw full-mask contract/source budget unchanged; no new state/train.
-MainRUNNING PID1092333(parent1092234),session65524,log/tmp/radio_gs_reference_proposals_run.log.
-GPUs2,3,4 have headroom; externalGPU0/1/5 busy,doNOTtouch. Audit+cold finalizerRUNNING
-parent1093235/session62215,log/tmp/radio_gs_reference_proposals_finish.log; waits summary
-then audit2,3,4 and fixedcoldfern scope on4. DoNOTduplicate/kill/restart.
+auditor727d684, all32predictions sealedbeforeGT, 32metrics64physicalendpoints PASS,
+independentU/strata/shuffle PASS, fixedcoldfern scopePASS. All own NVOSjobsfinished.
+15targetedtestsPASS. Eightfreshfree exact vsoldedit; oldcomposed reusedNOTRERUN.
+ActualIoU/oldresponse percentages composed86.9550/83.1015;free86.8689/83.8238;
+scopePRIMARY86.7514/82.5563;matched86.7721/82.6570;prioronly86.9143/82.6708.
+Scope-free -.1176pp 2up6down CI[-2.0902,2.2213]pp; scopecomposed-.2037pp3up5down.
+Matched-scope+.0207pp;prioronly-scope+.1630pp;alltheseCIs cross0,notequivalenceproof.
+Freeadds34683/removes2451;scope356/2204;matched549/2152;prioronly0/2147.
+34536freeadds outsideU;scope9432potentialnewmembers allcurrentreferenceBGmajority,
+noindependentcompleteidentitypool. Trexrecovers,fern/orchidslosecompletion.
+Maxaudit alpha1.35601e-5,bits0,independentobjective5.64282e-8.
+Report docs/experiments/2026-10-12-reference-proposals-results.md plus5JSONs.
+
+Architecturedecision ADR0021: demote single-reference freeoptimization toresearch,
+retainregioncomposition+fullobservationconditioning. No defaultpromotion/randomwinner.
+Sharedfield/nativefunctions/typedlegalinputs/sameactualset remain; universalobjective
+notrequired. Existingtypedpathshavedifferentmemberimplementations,sharedAPI/filealone
+NOTcommonmethodproof. ReuseScanNetcategory_partition,UQISnativeall4,rawsignedadapters;
+donotpretendthesefunctionsdonotexist. StopNVOSsame8candidate/group/costsweeps.
+Priorityconditionaltextlocalization,ScanNetclassspatialdisambiguation,commonfiveversion.
+True3DGT neededfortrue3Dclaim,NOT prerequisite tofinishfiveEXISTINGlocalbenchmarks.
+UQISnearv10all4 butinherits22trainroomsinstanceforest+3calibrationrooms;NOTpureVFM.
+Previousstrictfloat64footprint andatomicfallbackfloat failures remain unrepaired.
 
 TEXT ROOT output/query_field_20261012/text_extent_completion_public_v1,
-freezeprepare1cac233; full4scenes68queries other_view_positive public replay.
-RUNNING session53884, log/tmp/radio_gs_text_extent_completion_public.log GPUs3,4.
-Shares ample headroom with small NVOS workers; CPU field+transient CUDA topology mirror.
-Inputs only legal vectors+field. Allqueryopen/io.open/torch.load denied. Reference only
-controller afterall4sealed. Actualsets primary exactgate; strictcontinuousfloatgate ALSO
-recorded exact, no tolerance. Oldatomicfallbackfailure notrepaired by newgate.
-No newGT/accuracy/encoder rerun; bind prior exactrawencoder audit. Finish bothstudies.
-No productionedits while hashes frozen. Record results,comparison,audit,cold,diagnostics,
-updateADR/method/CONTEXT; originalHEAD/index unchanged. OldotherstudiesallCOMPLETE.
+freezemethod1cac233. Originalfull4/68session53884FINISHED exit1, controllerworkersended.
+Figurines21,ramen15,waldo18 successfullysealed. Teatimefailedfirstquery CUDA OOM
+(sharedGPU3 only~9GBfree); nooutput/partialquerysaved. Preserveoriginal logs.
+Recovery scriptcommit e6ea483 onlydispatchesmissingteatime tofreeGPU4, no changed
+method/query/threshold;3existingoutputs+records6receipts preserved. RUNNING session89745,
+log/tmp/radio_gs_text_completion_recovery.log; workerlogROOT/logs/teatime.attempt1.log.
+DO NOTduplicate/restart/modifyfrozencode. Original log/tmp/radio_gs_text_extent_completion_public.log.
+Inputs onlylegalvectors+field. Allqueryopen/io.open/torch.load denied. Referencesonly
+controllerafterall4sealed. Actualsets exactgate AND strictcontinuousfloatgate separate.
+No newGT/accuracy/encoder rerun; bind oldrawencoder audit. Finishrecovery,recordallgates,
+publicresults+recoveryreceipts,updatecurrentmethodtext,CONTEXT,commit. DoNOTclaimstrict
+floatPASSuntilobserved. External GPUjobs DO NOTtouch. OriginalHEAD/index unchanged.
 END active proposal/completion note.
 
 Active continuation2026-10-12 COMPLETE: group hypothesis rejected; finite capability edits.
