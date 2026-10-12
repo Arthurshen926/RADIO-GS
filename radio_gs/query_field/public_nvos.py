@@ -133,14 +133,15 @@ def predict(config, job, output, device="cuda"):
     registered = time.monotonic()
     program=job.get('query_program','parent')
     extent_state=None
-    if program in {'reference_extent_prior','reference_extent_lifted','reference_extent_literal','reference_extent_coupled','reference_extent_observation'}:
+    if program in {'reference_extent_prior','reference_extent_lifted','reference_extent_literal','reference_extent_coupled','reference_extent_observation','reference_extent_parts','reference_extent_shuffled'}:
         if input_contract!='reference_mask':raise ValueError('reference extent needs an explicit full query mask')
         from .runtime import QueryFieldRuntime
         extent_state={}
         result=QueryFieldRuntime(field).reference_extent(packet,reference,inference_masks[0],
             initializer='lifted' if program=='reference_extent_lifted' else 'prior',
             decision_cutoff=10.5/255 if program=='reference_extent_literal' else config['alpha_threshold'],
-            observation_weight={'reference_extent_coupled':.5,'reference_extent_observation':1.}.get(program,0.),
+            observation_weight={'reference_extent_coupled':.5,'reference_extent_observation':1.,'reference_extent_parts':.5,'reference_extent_shuffled':.5}.get(program,0.),
+            grouping={'reference_extent_parts':'incidence','reference_extent_shuffled':'shuffled'}.get(program),
             audit_state=extent_state)
     elif program in {'reference_scope','reference_scope_visible','reference_scope_conditioned','reference_scope_admitted'}:
         if input_contract!='reference_mask':raise ValueError('composition needs a declared reference mask')

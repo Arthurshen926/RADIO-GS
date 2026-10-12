@@ -36,7 +36,8 @@ def prepare_reference(preparation, prior, scope, initializer):
 
 
 @torch.no_grad()
-def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5,observation_weight=0.,audit_state=None):
+def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5,observation_weight=0.,grouping=None,audit_state=None):
+    if grouping not in {None,'incidence','shuffled'}:raise ValueError('unknown reference grouping')
     reference=torch.as_tensor(reference,device=field.xyz.device,dtype=torch.float32)
     if reference.ndim!=2:raise ValueError('reference mask must be a two-dimensional raster')
     base=compose_reference(field,packet,camera,reference,world_scale=field.world_units_per_metre,
@@ -55,6 +56,14 @@ def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5
         from .extent_decision_coupled import CoupledExtentDecision
         engine=CoupledExtentDecision(factors,preparation,len(field.xyz))
         extra['observation_weight']=observation_weight
+    groups=None;group_info=None
+    if grouping is not None:
+        from .extent_groups import incidence_partition,GroupedExtentDecision
+        groups,group_info=incidence_partition(field.evidence.positive_pointer.cpu().numpy(),
+            field.evidence.positive_index.cpu().numpy(),len(field.evidence.views),domain.cpu().numpy(),
+            (initial>.5).cpu().numpy(),shuffle=grouping=='shuffled')
+        engine=GroupedExtentDecision(factors,preparation,len(field.xyz),groups)
+        extra['observation_weight']=observation_weight
     selected,report=engine.solve((initial>.5).cpu().numpy(),scope['target'].cpu().numpy(),
         scope['positive'].cpu().numpy(),scope['negative'].cpu().numpy(),confidence,cost.cpu().numpy(),
         max_passes=4,decision_cutoff=decision_cutoff,**extra)
@@ -65,8 +74,10 @@ def query(field,packet,camera,reference,*,initializer='prior',decision_cutoff=.5
             prior=prior.cpu(),initial=initial.cpu(),cost=cost.cpu(),confidence=torch.from_numpy(confidence),
             selected=selected.cpu(),reference=reference.cpu(),initializer=initializer,
             decision_cutoff=decision_cutoff,observation_weight=float(observation_weight),domain=domain.cpu())
+        if groups is not None:audit_state['groups']=torch.from_numpy(groups)
     return replace(base,membership_scores=selected.float(),selected=selected,
         diagnostics=dict(base.diagnostics,shared_extent_decision=True,extent_initializer=initializer,
+            extent_grouping=group_info,
             extent_preparation=info,extent_decision=report,decision_alpha_cutoff=float(decision_cutoff),current_query_geometry=True,
             construction_source_geometry_read=False,reference_composition_diagnostics_are_initializer=True,
             source_access=False,query_parameter_fitting=False,new_field_state_bytes=0))

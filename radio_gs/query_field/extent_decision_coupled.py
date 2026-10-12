@@ -12,9 +12,26 @@ from .extent_decision import binary_cross_entropy
 
 
 @njit(cache=True)
+def block_response(head,following,alpha,index,row,group,positions,start,stop,remove):
+    """Merge all added hits, or omit all removed hits, in canonical depth order."""
+    t=np.float32(1.);k=head[row];q=stop if remove else start
+    while k>=0 or q<stop:
+        if q<stop and (k<0 or positions[q]<k):hit=positions[q];q+=1
+        else:
+            hit=k;k=following[k]
+            if remove and index[hit]==group:continue
+        a=min(alpha[hit],np.float32(.999))
+        if a<1/255:continue
+        next_t=np.float32(t*np.float32(np.float32(1)-a))
+        if next_t<=1e-4:break
+        t=next_t
+    return np.float32(1)-t
+
+
+@njit(cache=True)
 def coupled_decisions(ptr,idx,alpha,colptr,colrows,colposition,rowview,initial,
                       target,known,coefficient,weight,cost,max_passes,decision_cutoff,
-                      optr,orows,oval,observation_weight):
+                      optr,orows,oval,observation_weight,block_pointer=None):
     selected=initial.copy();views=len(weight);rows=len(rowview)
     head=np.full(rows,-1,np.int32);following=np.full(len(idx),-1,np.int32)
     prob=np.zeros((2,rows));bce=np.zeros((2,views));mass=np.zeros((2,views))
@@ -51,7 +68,10 @@ def coupled_decisions(ptr,idx,alpha,colptr,colrows,colposition,rowview,initial,
             for k in range(colptr[g],colptr[g+1]):
                 r=colrows[k]
                 if not known[r]:continue
-                v=rowview[r];p=probability_at_cutoff(response(head,following,alpha,r,colposition[k],selected[g]),decision_cutoff)
+                v=rowview[r]
+                if block_pointer is None:a=response(head,following,alpha,r,colposition[k],selected[g])
+                else:a=block_response(head,following,alpha,idx,r,g,colposition,block_pointer[k],block_pointer[k+1],selected[g])
+                p=probability_at_cutoff(a,decision_cutoff)
                 scratch[k-colptr[g]]=p;diff=p-prob[0,r]
                 dm[0,v]+=diff;dt[0,v]+=diff*target[r]
                 db[0,v]+=coefficient[r]*(binary_cross_entropy(p,target[r])-binary_cross_entropy(prob[0,r],target[r]))
@@ -74,17 +94,21 @@ def coupled_decisions(ptr,idx,alpha,colptr,colrows,colposition,rowview,initial,
                 for k in range(colptr[g],colptr[g+1]):
                     r=colrows[k]
                     if not known[r]:continue
-                    prob[0,r]=scratch[k-colptr[g]];position=colposition[k];previous=-1;current=head[r]
-                    while current>=0 and current<position:previous=current;current=following[current]
-                    if selected[g]:
-                        following[position]=current
-                        if previous<0:head[r]=position
-                        else:following[previous]=position
-                    else:
-                        assert current==position
-                        if previous<0:head[r]=following[position]
-                        else:following[previous]=following[position]
-                        following[position]=-1
+                    prob[0,r]=scratch[k-colptr[g]]
+                    start=k if block_pointer is None else block_pointer[k]
+                    stop=k+1 if block_pointer is None else block_pointer[k+1]
+                    for q in range(start,stop):
+                        position=colposition[q];previous=-1;current=head[r]
+                        while current>=0 and current<position:previous=current;current=following[current]
+                        if selected[g]:
+                            following[position]=current
+                            if previous<0:head[r]=position
+                            else:following[previous]=position
+                        else:
+                            assert current==position
+                            if previous<0:head[r]=following[position]
+                            else:following[previous]=following[position]
+                            following[position]=-1
     return selected,trace[:step+1],flips,evaluated,changed==0
 
 

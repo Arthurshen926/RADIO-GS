@@ -1,5 +1,25 @@
 # RADIO-GS — active system context
 
+Active continuation2026-10-12 IN PROGRESS: reversible region-incidence blocks.
+Worktree /root/RADIO-GS-query-field, branch codex/query-preserving-gaussian-field.
+ROOT output/query_field_20261012/reference_groups_v1. Full8x3conditions free/parts(PRIMARY)/
+shuffled; same currentreference/fields/prior/cost/.5A_obs+.5R_set/4passes. All24sealed
+andfreebit-exact vs previouscoupled BEFOREGT. Do NOTpromote/selectpercase beforeevidence.
+Parts=identicalpositive-regionincidence+initialbit, canonicalminGaussianorder; no-region
+membersSINGLETONS. Shufflefixed20261012 withinsupportedinitialbitstrata, slotsizes/order
+andinitialexact. Bothallowallinitialpositive groupsdeleted; nohardlock/continuousfit.
+Sharedlinkedcoupledkernel handlesmultiplehitsofgroup viaorderedmerge/removal, exact
+Gaussianopticsnotfictitiousgroupopacity. Observation/costsumwithinblock. Source-free.
+15testsPASS including18groupfullobjectivefliptraces(two views,unsupported,repeat hits),
+24oldcoupled+24legacy traces, groupunknown/shufflesize andwholepositivegroupdeletion.
+Current all GPUs haveEXTERNAL tasks (PIDs2038568/1992680/2038591/2040364/2045134/1992704);
+doNOTtouch. NVOSpriorpeak<=3.04GiB, runonlyavailableheadroom0,3,4 withoneworker/device.
+Need freeze/launchrun_query_field_reference_groups,independentmetric/function/groupaudit,
+coldpublicfirstpartquery,closealljobs,summarizeactualresultsandlimitationsbeforefinal.
+No newGT read yet. Partialevidence groupisNOTcertifiedinstanceidentity; shufflecontrol
+doesnotseparatespatiallocalityfromsemantics. Oldfloat64footprintgateFAILstillinherited.
+END active grouped note.
+
 Active continuation2026-10-12 COMPLETE: NVOS actual current-reference transfer,
 observation/selected-set loss diagnosis, coupled correction, coldtextcompatibility.
 ALL own predictions/scoring/audits/probes finished andsessionsreaped. No jobsto resume.
