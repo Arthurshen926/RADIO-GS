@@ -1,0 +1,230 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=23mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
+\setlength{\emergencystretch}{2em}
+\title{Query-Conditioned Partial-Evidence Fusion for 3D Scene Queries}
+\author{TMM working manuscript}
+\date{October 16, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Foundation-model responses can identify an object without recovering its complete
+extent. A geometrically aligned observation may refer to the wrong instance,
+while an incomplete region cannot automatically identify its exterior as
+background. We study query-conditioned partial-evidence fusion over frozen
+representations: determine whether an observation applies to a query, which
+locations it may support or exclude, and how its response should enter the
+existing geometric readout. The retained implementation supplies positive
+controlled evidence: query-conditioned admission improves LERF selected-set
+projection IoU from 64.12 to 66.66, and using already admitted observations in
+the semantic response improves IoU from 50.59 to 70.38. These are distinct local
+controls, not additive gains of one new equation. Four complete development
+studies across a 31-job cohort further distinguish evidence admission from
+correction magnitude and reconstruction accuracy. Lower source objectives in
+all 22 source-assisted jobs do not yield consistent task improvements. The
+results support preserving effective identity and extent providers while
+concentrating method development on evidence authority. Functional preservation
+is verified; a common admission rule with cross-teacher and cross-query gains
+remains the central open validation target.
+\end{abstract}
+
+\section{Problem and contribution}
+A region containing a cup handle is useful positive evidence, but may omit the
+rest of the cup. A larger region may include the cup and its supporting table.
+Another region can be geometrically consistent yet correspond to a different
+cup. These situations require different decisions about the evidence. Treating
+all regions as complete masks, or simply fitting them more accurately, need not
+produce a better response to the user's query.
+
+We study one problem: \emph{which observations are entitled to modify an existing
+3D query response, and over what support?} The mechanism is query-conditioned
+partial-evidence fusion. Applicability, spatial authority and geometric fusion
+are successive parts of that mechanism. Teacher representation, feature
+compression, geometry learning and complete-member prediction are held fixed
+so their known capabilities are retained.
+
+The study is organized around three contributions. First, it formulates
+response evidence with separate query applicability, positive support,
+exclusion authority and unknown support. Second, it connects this formulation
+to a working candidate-admission rule and function-preserving extraction of
+existing response stages. Third, it provides controlled evidence separating
+admission, update size and source reconstruction quality. The first two
+historical positive controls support the mechanism locally; the complete
+system reference establishes available capability. Neither substitutes for
+matched cross-provider validation of the common admission rule.
+
+\input{sections/method.tex}
+
+\section{Evaluation contract and retained capability}
+The complete cohort contains 31 jobs: four LERF scenes shared by semantic and
+selected-set projection evaluation, eight NVOS requests, ten ScanNet rooms and
+nine UQIS rooms. UQIS includes 67 targets and four input types, totaling 268
+queries. Table~\ref{tab:system} reports one complete retained recipe, not
+metric-wise or task-wise winners. Its table builder verifies all job identities,
+recomputes macro metrics and binds the results to source hashes.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/system_reference.tex}}
+\caption{Complete retained v10 capability reference. These results belong to
+its actual providers and readouts, not to an unvalidated common refinement rule.}
+\label{tab:system}
+\end{table}
+
+LERF, NVOS and ScanNet use declared source-assisted evidence. NVOS retains a
+positive-derived reference-mask protocol; it is not equated with a different
+signed-scribble protocol. UQIS uses map-only query inputs and inherits a member
+model trained on 22 separate labelled rooms and calibrated on three others.
+The system is therefore not a label-free universal query model. LERF selected
+sets are evaluated by 2D projection, not independent 3D ground truth. Its
+projection IoU is 66.96; ScanNet 19/15/10-class mIoU is 61.01/62.53/72.49.
+UQIS text/image/2D-point/3D-point AP is 26.60/59.31/75.79/75.33.
+
+All four new studies seal the complete cohort's predictions before scoring.
+They reuse opened development scenes; bootstrap intervals describe that cohort
+and are not independent final-test guarantees. Post-refinement studies use
+the retained complete response as an explicit input. Response-stage studies
+instead preserve pre-fusion providers and intervene where the response is
+originally generated. The independent selected-set heads stay fixed. Their
+unchanged scores do not establish an improvement in instance selection.
+
+\section{Evidence for the mechanism}
+\paragraph{Candidate identity before spatial use.}
+The retained text control fixes geometry, features and the set solver, and
+changes the candidate admission rule. Conditioning native-score comparison on
+candidates for the same query improves selected-set projection IoU from 64.12
+to 66.66, with all four scenes improving. The rule avoids treating weak absolute
+native response as sufficient reason to reject a detected part. Its one-versus-two
+score models remain fallible; they do not certify cross-view instance identity.
+
+\paragraph{Admitted evidence must reach the output.}
+A separate control keeps the same admitted evidence, map and actual selected
+sets while changing the continuous response output. Visibility fusion improves
+semantic IoU from 50.59 to 70.38. The large effect establishes that useful
+available evidence was missing from that output. It is not wholly attributable
+to a novel fusion equation, and it cannot be added to the identity-control gain.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/mechanism_evidence.tex}}
+\caption{Historical controlled effects tied to the component actually changed.
+The first two rows support the mechanism locally. The final two justify
+preserving effective identity and complete-extent providers.}
+\label{tab:mechanism}
+\end{table}
+
+\paragraph{Preserving identity and complete extent.}
+UQIS image local correspondence improves actual instance IoU from 30.74 to
+34.88 with teachers, geometry and extent head held fixed. Reusing complete
+membership then reaches 39.90; the latter paired scene interval is
+$[2.40,7.74]$ percentage points, with seven of nine scenes improving.
+These effects justify retaining the providers rather than replacing them with
+a weaker initial similarity. Point membership gains from real observation
+training and ScanNet gains from a second native teacher are also provider
+evidence; their detailed controls and supervision are in the supplement.
+They are not counted as net gains of the shared admission mechanism.
+
+\section{Controlled diagnosis and method decisions}
+\label{sec:stage-study}
+Table~\ref{tab:controls} condenses all completed response controls. Each condition
+uses a fixed rule across the full cohort. No row is assembled from the best
+scene-specific or query-specific outputs. Detailed equations, all metrics and
+per-query diagnosis remain in the accompanying diagnostic supplement.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/condensed_controls.tex}}
+\caption{Complete development controls (\%). L: LERF; N: NVOS; S: ScanNet;
+U: UQIS AP by query type. Post conditions act on the retained final response;
+stage conditions act on frozen pre-fusion providers. $\dagger$: unchanged UQIS
+compatibility output, not a reconstruction intervention. Independent selected
+sets remain fixed throughout.}
+\label{tab:controls}
+\end{table}
+
+\paragraph{Admission is not a one-sign update restriction.}
+The first post-refinement study permits partial foreground support but excludes
+unlicensed negative updates. Active-residual normalization nevertheless lowers
+LERF IoU to 57.62 and degrades all UQIS modalities. Available-domain normalization
+recovers LERF to 70.93, with a mean gain of 0.53 points and descriptive interval
+$[0.18,0.89]$, while AP falls and other tasks still regress. Thus preserving
+confidence and observable capacity matters, but the positive-only restriction
+is insufficient. It is a diagnostic hypothesis, not the final method definition.
+
+\paragraph{Extent agreement must outperform a smaller update.}
+The third study weights admitted observations by agreement with a frozen extent.
+Its matched control preserves each query's positive and negative pre-clipping
+L1 update masses using uniform attenuation. Scope agreement is worse on UQIS
+text/image/2D-point/3D-point AP by 0.50/0.87/0.59/0.88 points. It is not promoted
+as a new module. Earlier evaluator-only diagnosis also finds 65 correctly
+located supported anchors in each point modality, yet 48 and 46 of those
+queries lose AP after refinement. Wrong anchor identity cannot be the sole
+explanation; positive spatial support itself can be inaccurate. Labels in
+this diagnosis never become query-time evidence permissions.
+
+\paragraph{More accurate reconstruction is not sufficient.}
+A source-lineage audit finds that all families already consume the same kind
+of evidence upstream. The fourth study therefore moves the intervention into
+response generation. Diagonal, rendered squared and rendered Huber solvers
+share all admitted targets and weights. Both iterative arms use 120 steps and
+step 0.95; Huber clips residuals at 0.25, inherited from NVOS. ScanNet retains
+both native priors, and UQIS complete membership is unchanged.
+
+Squared source objectives decrease in all 22 source-assisted jobs, with median
+relative reductions of 19.64\%, 20.94\% and 1.50\% for LERF, NVOS and ScanNet.
+Nevertheless LERF AP falls in all four scenes and ScanNet 19-class mIoU falls
+in eight of ten rooms. Huber recovers 0.446 ScanNet points over squared loss,
+improving all ten rooms, but remains 0.286 points below diagonal fusion.
+This isolates an insufficient optimization target, not a proof that the loss
+is caused entirely by identity, partial extent, geometry or view inconsistency.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{figures/stage_source_fit_vs_task.pdf}
+\caption{Per-job source objective reduction and task score change for rendered
+squared reconstruction relative to diagonal consensus. Every source objective
+improves, while downstream effects differ. Panels have separate horizontal
+scales; the two NVOS horns requests are separate points.}
+\label{fig:source-fit}
+\end{figure}
+
+\section{Implementation and remaining validation}
+\paragraph{Estimated identity versus a forced positive.}
+An additional causal audit removes only the positive override at each of the
+67 estimated image anchors. All patches are sealed before scoring all 268 UQIS
+queries. Raw classifier probabilities remain 0.914--0.939, above the frozen 0.35
+threshold, so every actual set is unchanged. Image AP changes by only
+0.00014 percentage points. Of 23 incorrect anchors, 16 lie in selected regions
+that also contain target elements. This evaluator-only stratification motivates
+testing identity transfer within mixed observations, but does not establish a
+causal explanation for all residual error. Other benchmarks are retained
+compatibility references in this audit, not freshly inferred transfer results.
+
+The extracted fusion and reconstruction cores are connected to the original
+production entry points. In the latest 22-source-job replay, original-solver
+threshold/category predictions are unchanged, with maximum response deviations
+$4.77\times10^{-7}$, $4.72\times10^{-5}$ and $7.75\times10^{-7}$ for LERF,
+NVOS and ScanNet. NVOS maximum mean error is $6.78\times10^{-8}$; tiny AP drift
+is retained as numerical variation. Targeted tests cover numerical
+behavior, partial permissions and transient-run recovery. These checks establish
+functional preservation, not the new admission rule's accuracy.
+
+The next decisive experiment must change query-conditioned admission at the
+actual response-generation stage while preserving identity, extent, input
+access and the numerical backend. It must include an unconditioned control and
+an evidence- or update-budget-matched control. UQIS must receive an actual
+legal map-evidence intervention before it counts as transfer, and at least two
+appropriate teacher configurations must be tested without changing the shared
+rule per dataset. New validation scenes must remain untouched until the rule
+is frozen. Improving an independent selected-set output requires a separately
+measured intervention to that output.
+
+The response study's dense predictions are volatile and released after scoring;
+code snapshots, input/output hashes and complete metrics remain. The full study
+occupies about 1.90 GiB under its 2 GiB budget. Storage policy and compatibility
+engineering support reproducibility but are not presented as algorithmic
+contributions. The retained complete recipe remains the performance reference;
+none of the diagnostic alternatives has replaced it as a universal rule.
+
+\input{sections/related_work.tex}
+\end{document}

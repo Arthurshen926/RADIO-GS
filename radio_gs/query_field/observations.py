@@ -13,12 +13,7 @@ from PIL import Image
 import torch
 from torch.nn import functional as F
 
-from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
-from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
-from radio_gs.models.native_region_appearance import NativeRegionAppearance, CHECKPOINT
-from radio_gs.scripts.build_sam3_automatic_mask_cache import unpack_masks
 from .storage import sha256
-from .geometry import projection
 
 
 def erode(mask, radius=1):
@@ -79,6 +74,13 @@ def source_sam_metadata(metadata):
 
 @torch.no_grad()
 def compile_observations(config_path, output, device="cuda"):
+    # Reading cached partial supervision does not require teacher/rasterizer
+    # dependencies. Load these only when constructing new observations.
+    from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
+    from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
+    from radio_gs.models.native_region_appearance import NativeRegionAppearance, CHECKPOINT
+    from radio_gs.scripts.build_sam3_automatic_mask_cache import unpack_masks
+    from .geometry import projection
     config_path = Path(config_path)
     config = json.loads(config_path.read_text())
     scene_path = Path(config["scene"])

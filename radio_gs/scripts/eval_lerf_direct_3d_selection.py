@@ -72,7 +72,10 @@ from radio_gs.models.prompt_conditioned_mask_refinement import (
     filter_refined_mask_by_heatmap_support,
 )
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
-from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.utils.evaluation_checkpoint import (
+    add_inference_checkpoint_arguments, inference_reader_from_args, load_evaluation_checkpoint,
+    evaluation_checkpoint_sha256, evaluation_package_identity,
+)
 from radio_gs.evaluation.openclip_readout import (
     NEGATIVE_PROMPTS,
     load_or_generate_openclip_prompt_ensemble_embeddings,
@@ -4073,8 +4076,11 @@ def _build_point_summary_adapter(
     config: object,
     checkpoint_path: str,
     device: torch.device,
+    *, checkpoint_reader=None,
 ) -> torch.nn.Module:
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
+    ckpt = load_evaluation_checkpoint(checkpoint_path, map_location=device, checkpoint_reader=checkpoint_reader)
+    if checkpoint_reader is not None:
+        config = checkpoint_reader.bind_config(config)
     metadata = ckpt.get("point_summary_adapter_metadata") or {}
     contract = metadata.get("direct_head_contract") if isinstance(metadata, dict) else {}
     context_features = str(
@@ -4243,9 +4249,10 @@ def _load_point_summary_adapter_valid_mask(
     expected_count: int,
     device: torch.device,
     fallback_teacher_cache: str = "",
+    checkpoint_reader=None,
     expected_xyz: Optional[torch.Tensor] = None,
 ) -> Optional[torch.Tensor]:
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    ckpt = load_evaluation_checkpoint(checkpoint_path, map_location="cpu", checkpoint_reader=checkpoint_reader)
     metadata = ckpt.get("point_summary_adapter_metadata") or {}
     teacher_cache = metadata.get("teacher_cache") or fallback_teacher_cache
     if not teacher_cache:
@@ -4276,9 +4283,10 @@ def _load_point_summary_adapter_view_counts(
     expected_count: int,
     device: torch.device,
     fallback_teacher_cache: str = "",
+    checkpoint_reader=None,
     expected_xyz: Optional[torch.Tensor] = None,
 ) -> Optional[torch.Tensor]:
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    ckpt = load_evaluation_checkpoint(checkpoint_path, map_location="cpu", checkpoint_reader=checkpoint_reader)
     metadata = ckpt.get("point_summary_adapter_metadata") or {}
     teacher_cache = metadata.get("teacher_cache") or fallback_teacher_cache
     if not teacher_cache:
@@ -6463,8 +6471,9 @@ def _load_sam3_mask_logit_projector_from_checkpoint(
     checkpoint_path: str | Path,
     *,
     device: torch.device,
+    checkpoint_reader=None,
 ) -> FoundationMaskLogitProjector:
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    ckpt = load_evaluation_checkpoint(checkpoint_path, map_location="cpu", checkpoint_reader=checkpoint_reader)
     state = ckpt.get("foundation_cache_projectors_state_dict")
     if not isinstance(state, dict):
         raise KeyError(
@@ -6510,6 +6519,7 @@ class Sam3MaskHeadRefiner:
         logit_threshold: float,
         min_initial_iou: float,
         max_initial_area_fraction: float,
+        checkpoint_reader=None,
     ) -> None:
         self.model = model
         self.codec = codec
@@ -6522,6 +6532,7 @@ class Sam3MaskHeadRefiner:
         self.projector = _load_sam3_mask_logit_projector_from_checkpoint(
             checkpoint_path,
             device=device,
+            checkpoint_reader=checkpoint_reader,
         )
         self.logit_threshold = float(logit_threshold)
         self.min_initial_iou = float(min_initial_iou)
@@ -6606,6 +6617,7 @@ class PromptConditionedSam3MaskHeadRefiner:
         coarse_threshold: float,
         min_quality: float,
         feature_dir: str = "",
+        checkpoint_reader=None,
     ) -> None:
         self.model = model
         self.codec = codec
@@ -6615,7 +6627,7 @@ class PromptConditionedSam3MaskHeadRefiner:
         self.config = config
         self.is_hybrid = bool(is_hybrid)
         self.device = device
-        ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+        ckpt = load_evaluation_checkpoint(checkpoint_path, map_location="cpu", checkpoint_reader=checkpoint_reader)
         state = ckpt.get("prompt_mask_head_state_dict")
         if not isinstance(state, dict):
             raise KeyError(
@@ -7877,6 +7889,7 @@ def evaluate_scene(
     prediction_receipt_path: str,
     prediction_inventory_path: str,
     device: torch.device,
+    checkpoint_reader=None,
 ) -> Dict:
     print(f"\n{'=' * 72}\nLERF direct 3D object selection: {scene}\n{'=' * 72}")
     if prediction_only:
@@ -7907,10 +7920,11 @@ def evaluate_scene(
         device,
         strict_checkpoint_contract=strict_checkpoint_contract,
         load_ply_rgb_features=False,
+        checkpoint_reader=checkpoint_reader,
     )
     if not is_hybrid:
         logger.warning("Model architecture is explicit; direct readout will use per-Gaussian compact codes")
-    checkpoint_for_status = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    checkpoint_for_status = load_evaluation_checkpoint(checkpoint_path, map_location="cpu", checkpoint_reader=checkpoint_reader)
     ps_metadata = checkpoint_for_status.get("point_summary_adapter_metadata") or {}
     ps_contract = ps_metadata.get("direct_head_contract") if isinstance(ps_metadata, dict) else {}
     point_summary_adapter_context_features = str(
@@ -7924,7 +7938,7 @@ def evaluate_scene(
         or ""
     )
     point_summary_adapter = (
-        _build_point_summary_adapter(config, checkpoint_path, device)
+        _build_point_summary_adapter(config, checkpoint_path, device, checkpoint_reader=checkpoint_reader)
         if use_point_summary_adapter
         else None
     )
@@ -7974,6 +7988,7 @@ def evaluate_scene(
     point_summary_adapter_valid_mask = (
         _load_point_summary_adapter_valid_mask(
             checkpoint_path,
+            checkpoint_reader=checkpoint_reader,
             expected_count=int(model.get_xyz().shape[0]),
             device=device,
             fallback_teacher_cache=fallback_point_summary_teacher_cache,
@@ -7985,6 +8000,7 @@ def evaluate_scene(
     point_summary_adapter_view_counts = (
         _load_point_summary_adapter_view_counts(
             checkpoint_path,
+            checkpoint_reader=checkpoint_reader,
             expected_count=int(model.get_xyz().shape[0]),
             device=device,
             fallback_teacher_cache=fallback_point_summary_teacher_cache,
@@ -8159,6 +8175,7 @@ def evaluate_scene(
             config=config,
             is_hybrid=is_hybrid,
             checkpoint_path=mask_head_checkpoint,
+            checkpoint_reader=checkpoint_reader if not sam3_mask_head_checkpoint else None,
             device=device,
             logit_threshold=sam3_mask_head_logit_threshold,
             min_initial_iou=sam3_mask_head_min_initial_iou,
@@ -8264,6 +8281,8 @@ def evaluate_scene(
         "direct_primitive_confidence_blend": float(direct_primitive_confidence_blend),
         "direct_primitive_opacity_threshold": float(direct_primitive_opacity_threshold),
     }
+    if checkpoint_reader is not None:
+        score_cache_metadata.update(evaluation_package_identity(checkpoint_reader))
     if use_point_summary_adapter:
         score_cache_metadata.update(
             {
@@ -8375,9 +8394,7 @@ def evaluate_scene(
             external_path,
             expected_xyz=model.get_xyz().detach().cpu(),
             expected_query_ids=scene_categories,
-            expected_renderer_geometry_checkpoint_sha256=sha256_file(
-                checkpoint_path
-            ),
+            expected_renderer_geometry_checkpoint_sha256=evaluation_checkpoint_sha256(checkpoint_path, checkpoint_reader, sha256_file),
         )
         readout_input_scores = cache.query_scores
         probability_cache = (
@@ -8426,9 +8443,7 @@ def evaluate_scene(
                 negative_path,
                 expected_xyz=model.get_xyz().detach().cpu(),
                 expected_query_ids=NEGATIVE_PROMPTS,
-                expected_renderer_geometry_checkpoint_sha256=sha256_file(
-                    checkpoint_path
-                ),
+                expected_renderer_geometry_checkpoint_sha256=evaluation_checkpoint_sha256(checkpoint_path, checkpoint_reader, sha256_file),
             )
             if (
                 cache.score_semantics != "raw_independent_normalized_cosine"
@@ -8464,17 +8479,13 @@ def evaluate_scene(
                     Path(ours_secondary_multiscale_query_score_cache_path),
                     expected_xyz=model.get_xyz().detach().cpu(),
                     expected_query_ids=scene_categories,
-                    expected_renderer_geometry_checkpoint_sha256=sha256_file(
-                        checkpoint_path
-                    ),
+                    expected_renderer_geometry_checkpoint_sha256=evaluation_checkpoint_sha256(checkpoint_path, checkpoint_reader, sha256_file),
                 )
                 secondary_negative_cache = load_ours_multiscale_query_score_cache(
                     Path(ours_secondary_multiscale_negative_score_cache_path),
                     expected_xyz=model.get_xyz().detach().cpu(),
                     expected_query_ids=NEGATIVE_PROMPTS,
-                    expected_renderer_geometry_checkpoint_sha256=sha256_file(
-                        checkpoint_path
-                    ),
+                    expected_renderer_geometry_checkpoint_sha256=evaluation_checkpoint_sha256(checkpoint_path, checkpoint_reader, sha256_file),
                 )
                 for secondary_name, secondary_value in (
                     ("valid", secondary_cache.valid),
@@ -8563,9 +8574,7 @@ def evaluate_scene(
                         expected_query_ids=scene_categories,
                         expected_positive_score_cache=external_path,
                         expected_negative_score_cache=negative_path,
-                        expected_renderer_geometry_checkpoint_sha256=sha256_file(
-                            checkpoint_path
-                        ),
+                        expected_renderer_geometry_checkpoint_sha256=evaluation_checkpoint_sha256(checkpoint_path, checkpoint_reader, sha256_file),
                     )
                     if (
                         likelihood_cache.field_checkpoint_sha256
@@ -9257,7 +9266,7 @@ def evaluate_scene(
                 "config": str(Path(config_path).expanduser().resolve()),
                 "config_sha256": sha256_file_if_exists(config_path),
                 "renderer_checkpoint": str(Path(checkpoint_path).expanduser().resolve()),
-                "renderer_checkpoint_sha256": sha256_file_if_exists(checkpoint_path),
+                "renderer_checkpoint_sha256": evaluation_checkpoint_sha256(checkpoint_path, checkpoint_reader, sha256_file_if_exists),
                 "external_query_score_cache": str(external_query_score_cache_path),
                 "external_query_score_cache_sha256": sha256_file_if_exists(
                     external_query_score_cache_path
@@ -9368,6 +9377,8 @@ def evaluate_scene(
         "scene": scene,
         "config": config_path,
         "checkpoint": checkpoint_path,
+        "inference_package": checkpoint_reader is not None,
+        "inference_package_sha256": checkpoint_reader.expected_sha256 if checkpoint_reader is not None else None,
         "score_source": score_source,
         "compact_feature_key": compact_feature_key,
         "canonical_embedding_cache": canonical_embedding_cache if scoring == "relevancy" else "",
@@ -9947,7 +9958,9 @@ def main() -> None:
         help="Save alpha/depth discontinuity maps and per-query boundary-alignment overlays",
     )
     parser.add_argument("--gpu", type=int, default=0, help="GPU id")
+    add_inference_checkpoint_arguments(parser)
     args = parser.parse_args()
+    checkpoint_reader = inference_reader_from_args(args, parser)
     if args.protocol_preset in VALA_BASE_PROTOCOL_PRESETS:
         # Freeze the VALA paper-level 3D protocol after our primitive features
         # are produced.  The repo diagnostic additionally enables its kNN,
@@ -10318,6 +10331,7 @@ def main() -> None:
         protocol_preset=args.protocol_preset,
         config_path=args.config,
         checkpoint_path=args.checkpoint,
+        checkpoint_reader=checkpoint_reader,
         label_dir=args.label_dir,
         output_dir=out_root,
         summary_head=summary_head,
@@ -10798,7 +10812,8 @@ def main() -> None:
                 else ""
             ),
             "sam3_mask_head_checkpoint_sha256": (
-                sha256_file_if_exists(args.sam3_mask_head_checkpoint or args.checkpoint)
+                evaluation_checkpoint_sha256(args.sam3_mask_head_checkpoint or args.checkpoint,
+                    checkpoint_reader if not args.sam3_mask_head_checkpoint else None, sha256_file_if_exists)
                 if args.mask_refinement == "sam3_mask_head"
                 else ""
             ),
@@ -10825,7 +10840,7 @@ def main() -> None:
                     )
                 )
                 if args.ours_multiscale_query_score_cache
-                else sha256_file_if_exists(args.checkpoint)
+                else evaluation_checkpoint_sha256(args.checkpoint, checkpoint_reader, sha256_file_if_exists)
             ),
             "score_cache_sha256": sha256_file_if_exists(args.score_cache) if args.score_cache else "",
             "ours_multiscale_query_score_cache_sha256": (

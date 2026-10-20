@@ -1,0 +1,59 @@
+{
+  "schema": "radio_gs.four_fern_additive_migration.v1",
+  "status": "ready_after_teatime_batch_io_release",
+  "source_payload_sha256_basis": "Fresh full source SHA is recorded by compact for each file. Listed field_checkpoint_sha256 is scientific identity, not source artifact SHA.",
+  "script_sha256": "9bccea8598ca219dfd8aae845cdc383b28e95cb53aa36f05879ef3a2bac08f49",
+  "policy": {
+    "originals_retained": true,
+    "delete_authorized": false,
+    "do_not_expand_to_other_candidates": true,
+    "serial_processes": 1,
+    "torch_threads": 2,
+    "available_ram_min_bytes": 34359738368,
+    "available_disk_min_bytes": 17179869184,
+    "per_file_timeout_seconds": 300,
+    "total_budget_seconds": 1200,
+    "estimated_peak_ram_bytes": 25769803776
+  },
+  "original_total_bytes": 31198462274,
+  "predicted_tensor_reduction_bytes": 18985574400,
+  "candidates": [
+    {
+      "tag": "d192",
+      "source": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_compact_d192_l96_official_dino_sam3_views.pt",
+      "source_bytes": 7799615701,
+      "field_checkpoint_sha256": "38bb873220ce4b8b4c09491a9b19d8b97d248deddcb8c1b46085d205ba4c849f",
+      "destination": "/mnt/pool/sqy/results/RADIO-GS/output/storage_migration_20261012/fern_dense_batch_v1/d192",
+      "support_graph": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_compact_d192_l96_shared_support_graph_k16.pt",
+      "graph_validation_scope": "Compare old and new bank composition against this exact existing graph."
+    },
+    {
+      "tag": "d192_sam1",
+      "source": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_compact_d192_l96_sam1_caploss_official_dino_sam3_views.pt",
+      "source_bytes": 7799615959,
+      "field_checkpoint_sha256": "3cf0f009848fc37b2fad99848a3ccd107f689773824df61e5a902ab46aa8ff8c",
+      "destination": "/mnt/pool/sqy/results/RADIO-GS/output/storage_migration_20261012/fern_dense_batch_v1/d192_sam1",
+      "support_graph": null,
+      "graph_validation_scope": "No matching preexisting graph found among known directory sidecars; no graph equivalence claim."
+    },
+    {
+      "tag": "d256_caploss",
+      "source": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_compact_d256_l128_caploss_official_dino_sam3_views.pt",
+      "source_bytes": 7799615919,
+      "field_checkpoint_sha256": "82c4f44a7d352b0e4727ee5fe4a926d229dde5f8c1b32953a86e073e102ebb60",
+      "destination": "/mnt/pool/sqy/results/RADIO-GS/output/storage_migration_20261012/fern_dense_batch_v1/d256_caploss",
+      "support_graph": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_compact_d256_l128_caploss_shared_support_graph_k16.pt",
+      "graph_validation_scope": "Compare old and new bank composition against this exact existing graph."
+    },
+    {
+      "tag": "d384",
+      "source": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_d384_verified_pose_official_dino_sam3_views.pt",
+      "source_bytes": 7799614695,
+      "field_checkpoint_sha256": "fa0fd00d66d1ed62e7b1ee4a333dc9cf57555841767925d84a006535cbf322a2",
+      "destination": "/mnt/pool/sqy/results/RADIO-GS/output/storage_migration_20261012/fern_dense_batch_v1/d384",
+      "support_graph": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_d384_verified_pose_shared_support_graph_k16.pt",
+      "graph_validation_scope": "Compare old and new bank composition against this exact existing graph."
+    }
+  ],
+  "replay": "New artifact paths must be selected explicitly. Frozen old source hashes/path checks cannot be silently redirected. Raw dense-array scripts require compact-aware reader. Retain historical sidecars and graph files; no historical receipts rewritten."
+}

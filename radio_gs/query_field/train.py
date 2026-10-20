@@ -10,7 +10,7 @@ from torch.nn import functional as F
 from .contracts import Support
 from .field import CapabilityField
 from .observations import training_episode
-from .storage import save_field, sha256
+from .storage import save_field, sha256, deployment_bytes
 from .geometry import relaxed_subset_alpha
 from .support_training import TrainingRays, episode_support
 
@@ -27,7 +27,14 @@ def partial_membership_loss(predicted, positive, negative):
     return torch.stack(terms).mean()
 
 
-def fit(observations, output, config, device="cuda"):
+def fit(observations, output, config, device="cuda", *, save_function=None, legacy_v1=False):
+    """Fit only with an explicit storage writer or an explicit historical v1 request."""
+    if save_function is None and not legacy_v1:
+        raise ValueError("new fits require an explicit save_function for shared v2 storage; "
+                         "use legacy_v1=True only for historical reconstruction")
+    if save_function is not None and legacy_v1:
+        raise ValueError("save_function and legacy_v1 are mutually exclusive")
+    save = save_field if legacy_v1 else save_function
     started = time.monotonic()
     root = Path(observations)
     manifest = json.loads((root / "observations.json").read_text())
@@ -88,7 +95,7 @@ def fit(observations, output, config, device="cuda"):
               world_units_per_metre=manifest['world_units_per_metre']).to(device)
     baseline_path = Path(output) / "untrained"
     trained_path = Path(output) / "trained"
-    baseline_manifest = save_field(field, baseline_path, dict(observations_sha256=sha256(root / "observations.json"),
+    baseline_manifest = save(field, baseline_path, dict(observations_sha256=sha256(root / "observations.json"),
                                     supervision="native source features; random local projection for grouping"))
     @torch.no_grad()
     def fixed_training_diagnostic():
@@ -161,7 +168,7 @@ def fit(observations, output, config, device="cuda"):
     if not geometry_unchanged or not native_unchanged:
         raise RuntimeError("group fitting changed protected geometry/native coordinates")
     final_training_loss = fixed_training_diagnostic()
-    trained_manifest = save_field(field, trained_path, dict(
+    trained_manifest = save(field, trained_path, dict(
             observations_sha256=sha256(root / "observations.json"),
             supervision="source SAM partial masks rendered through frozen Gaussian geometry",
             render_objective=objective,
@@ -181,8 +188,8 @@ def fit(observations, output, config, device="cuda"):
                   fixed_training_partial_loss_before=initial_training_loss,
                   fixed_training_partial_loss_after=final_training_loss,
                   seconds=time.monotonic()-started,
-                  untrained_deployment_bytes=baseline_manifest["files"]["field.pt"]["bytes"],
-                  trained_deployment_bytes=trained_manifest["files"]["field.pt"]["bytes"],
+                  untrained_deployment_bytes=deployment_bytes(baseline_manifest),
+                  trained_deployment_bytes=deployment_bytes(trained_manifest),
                   benchmark_performance_established=False, compact_student=False)
     (Path(output) / "training.json").write_text(json.dumps(report, indent=2)+"\n")
     return report

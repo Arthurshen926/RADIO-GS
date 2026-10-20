@@ -1,0 +1,489 @@
+{
+  "schema": "radio_gs.tmm_response_evidence.v1",
+  "date": "2026-10-17",
+  "paper_focus": "query-conditioned evidence fusion for 3D responses",
+  "method_ownership": "v10 is our implementation; teacher models and external baselines retain their attribution",
+  "historical_control_gains_are_nonadditive": true,
+  "retained_system": "system_v10",
+  "complete_jobs": 31,
+  "all_five_represented": true,
+  "selection": "one retained complete system recipe; no per-scene or per-query winner stitching",
+  "independent_final_test": false,
+  "new_common_core_all_tasks_validated": false,
+  "system_table": [
+    {
+      "task": "LERF2D",
+      "metric": "semantic IoU",
+      "value": 0.7040067569509945,
+      "count": "4 scenes",
+      "mechanism": "identity-admitted source response"
+    },
+    {
+      "task": "LERF3D projection",
+      "metric": "selected-set projection IoU",
+      "value": 0.6696327365836882,
+      "count": "same 4 scenes",
+      "mechanism": "physical set readout; not true-3D GT"
+    },
+    {
+      "task": "NVOS",
+      "metric": "retained positive-reference IoU",
+      "value": 0.865134172141552,
+      "count": "8 cases",
+      "mechanism": "reference evidence and retained response solver"
+    },
+    {
+      "task": "ScanNet OVS",
+      "metric": "19-class point mIoU",
+      "value": 0.6101149054806628,
+      "count": "10 rooms",
+      "mechanism": "dual-native probabilities and visibility vote"
+    },
+    {
+      "task": "UQIS text",
+      "metric": "actual instance IoU",
+      "value": 0.16386530164545418,
+      "ap": 0.2659587047562112,
+      "count": "67 queries / 9 rooms",
+      "mechanism": "native identity and typed extent; points/image inherit supervised member model"
+    },
+    {
+      "task": "UQIS image",
+      "metric": "actual instance IoU",
+      "value": 0.39897960281086925,
+      "ap": 0.5930878179400586,
+      "count": "67 queries / 9 rooms",
+      "mechanism": "native identity and typed extent; points/image inherit supervised member model"
+    },
+    {
+      "task": "UQIS point_2d",
+      "metric": "actual instance IoU",
+      "value": 0.49735675405728724,
+      "ap": 0.7579009711011095,
+      "count": "67 queries / 9 rooms",
+      "mechanism": "native identity and typed extent; points/image inherit supervised member model"
+    },
+    {
+      "task": "UQIS point_3d",
+      "metric": "actual instance IoU",
+      "value": 0.4904698335651834,
+      "ap": 0.7532525076702995,
+      "count": "67 queries / 9 rooms",
+      "mechanism": "native identity and typed extent; points/image inherit supervised member model"
+    }
+  ],
+  "all_system_metrics": {
+    "lerf": {
+      "semantic_iou": 0.7040067569509945,
+      "ap": 0.8761927775455381,
+      "selected_projection_iou": 0.6696327365836882
+    },
+    "nvos": {
+      "iou": 0.865134172141552,
+      "ap": 0.9802224516003604
+    },
+    "scannet": {
+      "miou_19": 0.6101149054806628,
+      "miou_15": 0.6252758904159778,
+      "miou_10": 0.7248606102956524
+    },
+    "uqis": {
+      "text_ap": 0.2659587047562112,
+      "image_ap": 0.5930878179400586,
+      "point_2d_ap": 0.7579009711011095,
+      "point_3d_ap": 0.7532525076702995,
+      "text_selected_iou": 0.16386530164545418,
+      "image_selected_iou": 0.39897960281086925,
+      "point_2d_selected_iou": 0.49735675405728724,
+      "point_3d_selected_iou": 0.4904698335651834
+    }
+  },
+  "paired_effects": [
+    {
+      "name": "Query-conditioned identity admission",
+      "before": 0.6412052138709766,
+      "after": 0.6666165186553114,
+      "delta_pp": 2.541130478433473,
+      "metric": "selected-set projection IoU",
+      "family": "LERF",
+      "scope": "in-house v10 evidence mechanism",
+      "evidence": "conditioned_identity/summary.json",
+      "controlled": "geometry/features/set solver unchanged"
+    },
+    {
+      "name": "Admitted source response fusion",
+      "before": 0.5058849913250704,
+      "after": 0.7037745214306163,
+      "delta_pp": 19.78895301055459,
+      "metric": "semantic IoU",
+      "family": "LERF",
+      "scope": "in-house v10 evidence mechanism",
+      "evidence": "consolidated_response_control/summary.json",
+      "controlled": "same evidence/map/selected set; output integration changes",
+      "cannot_attribute": "entire gain to a novel fusion equation"
+    },
+    {
+      "name": "Native local correspondence",
+      "before": 0.30739161036414187,
+      "after": 0.34876210201064095,
+      "delta_pp": 4.137049164649909,
+      "metric": "actual instance IoU",
+      "family": "UQIS image",
+      "scope": "in-house identity component",
+      "evidence": "local_appearance_study/comparison.json",
+      "controlled": "same teachers/source/geometry/extent head"
+    },
+    {
+      "name": "Complete-carrier membership reuse",
+      "before": 0.34876210201064095,
+      "after": 0.39897960281086925,
+      "delta_pp": 5.02175008002283,
+      "metric": "actual instance IoU",
+      "family": "UQIS image",
+      "scope": "in-house complete extent component",
+      "evidence": "query_conditioned_membership_20261006/image_convergence/comparison.json",
+      "interval95_pp": [
+        2.4038026008054016,
+        7.740549334740286
+      ],
+      "improved_scenes": 7
+    }
+  ],
+  "supporting_provider_effects": [
+    {
+      "name": "Dual-native category probabilities",
+      "before": 0.5526061628561615,
+      "after": 0.5760825440488081,
+      "delta_pp": 2.347638119264661,
+      "metric": "19-class mIoU",
+      "family": "ScanNet three held-out rooms",
+      "scope": "in-house category fusion component",
+      "evidence": "local_element_fusion/summary.json",
+      "cannot_attribute": "additional native teacher capability to response refinement"
+    },
+    {
+      "name": "Real-observation membership point_2d",
+      "before": 0.40117423903706695,
+      "after": 0.49735675405728724,
+      "delta_pp": 9.61825150202203,
+      "metric": "actual instance IoU",
+      "family": "UQIS point_2d",
+      "scope": "in-house complete extent component",
+      "evidence": "real_direct_membership_20261006/comparison.json",
+      "interval95_pp": [
+        6.87538409142353,
+        12.585879348322374
+      ],
+      "improved_scenes": 9,
+      "controlled": "same learner; observation distribution and counts differ",
+      "additional_supervision": "official3D instance labels,22 disjoint rooms; same anchor/sample budget"
+    },
+    {
+      "name": "Real-observation membership point_3d",
+      "before": 0.39429007136294575,
+      "after": 0.4904698335651834,
+      "delta_pp": 9.617976220223767,
+      "metric": "actual instance IoU",
+      "family": "UQIS point_3d",
+      "scope": "in-house complete extent component",
+      "evidence": "real_direct_membership_20261006/comparison.json",
+      "interval95_pp": [
+        6.5300520699455955,
+        12.682079559408571
+      ],
+      "improved_scenes": 9,
+      "controlled": "same learner; observation distribution and counts differ",
+      "additional_supervision": "official3D instance labels,22 disjoint rooms; same anchor/sample budget"
+    }
+  ],
+  "response_alternatives": {
+    "baseline": {
+      "iou": 0.5058849913250704,
+      "ap": 0.8604721759305004,
+      "localization": 0.8784287969729005,
+      "selected_iou": 0.6666165186553114
+    },
+    "native_protected": {
+      "iou": 0.7075294992311884,
+      "ap": 0.8657952243562017,
+      "localization": 0.9105738049250821,
+      "selected_iou": 0.6666165186553114
+    },
+    "source_complement": {
+      "iou": 0.6970124944208347,
+      "ap": 0.8672804036787656,
+      "localization": 0.8974079453609175,
+      "selected_iou": 0.6666165186553114
+    },
+    "fusion": {
+      "iou": 0.7037745214306163,
+      "ap": 0.8764285124454614,
+      "localization": 0.9242043168099506,
+      "selected_iou": 0.6666165186553114
+    },
+    "native_floor": {
+      "iou": 0.6857114981564425,
+      "ap": 0.8910847633507676,
+      "localization": 0.9242043168099506,
+      "selected_iou": 0.6666165186553114
+    }
+  },
+  "negative_evidence": {
+    "pooled_hypothesis_rule": {
+      "lerf": {
+        "native_iou": 0.4508755433653797,
+        "member_iou": 0.16722815162625293,
+        "member_ap": 0.5515736939077006,
+        "subset_iou": 0.10004685606189108
+      },
+      "scannet": {
+        "native": {
+          "19": 0.3657237492560753,
+          "15": 0.37629461814195253,
+          "10": 0.4584649867174114
+        },
+        "member": {
+          "19": 0.23640164499375738,
+          "15": 0.2605321441987,
+          "10": 0.3567288800119259
+        }
+      },
+      "nvos": {
+        "response_iou": 0.6224977605562005,
+        "ap": 0.9426533199169969,
+        "subset_iou": 0.6780571970841387
+      },
+      "uqis": {
+        "text": {
+          "ap": 0.14004849655120777,
+          "subset_iou": 0.07164198978802394,
+          "empty_selections": 0
+        },
+        "image": {
+          "ap": 0.30990593930485283,
+          "subset_iou": 0.18170515678020932,
+          "empty_selections": 0
+        },
+        "point_2d": {
+          "ap": 0.588101502445289,
+          "subset_iou": 0.3062315846552234,
+          "empty_selections": 6
+        },
+        "point_3d": {
+          "ap": 0.5834242250536168,
+          "subset_iou": 0.3055453699925911,
+          "empty_selections": 8
+        }
+      }
+    },
+    "nvos_reference_scope": {
+      "free": {
+        "response_iou": 0.8382384461068773,
+        "selection_iou": 0.8686891528630186,
+        "precision": 0.9260945101828627,
+        "recall": 0.9364060630387327,
+        "ap": 0.9461013304254787
+      },
+      "scope": {
+        "response_iou": 0.8255625109004467,
+        "selection_iou": 0.8675136401951797,
+        "precision": 0.9457598424147983,
+        "recall": 0.9121458763596225,
+        "ap": 0.9331695269737774
+      },
+      "matched": {
+        "response_iou": 0.8265701971801741,
+        "selection_iou": 0.8677205296051784,
+        "precision": 0.9467206735913356,
+        "recall": 0.9115060619812395,
+        "ap": 0.936140943561745
+      },
+      "prioronly": {
+        "response_iou": 0.8267082092583148,
+        "selection_iou": 0.8691433572166464,
+        "precision": 0.9498916893532032,
+        "recall": 0.9101067379349288,
+        "ap": 0.931886871951087
+      }
+    },
+    "not_promoted": true,
+    "report": "docs/experiments/2026-10-15-unified-hypothesis-results.json"
+  },
+  "input_contracts": {
+    "lerf": "source-assisted frozen RGB geometry; selected output uses 2D projection",
+    "nvos": "retained positive-derived reference SAM mask and declared tracks; not raw signed interaction",
+    "scannet": "provided unlabelled mesh and declared source evidence",
+    "uqis": "map-only; official mesh/RGBD construction; member model trained on 22 labelled rooms and calibrated on 3 others"
+  },
+  "source_files": {
+    "/root/RADIO-GS-query-field/configs/pipeline/system_v10.json": {
+      "sha256": "cd6671f81df4a9a43ee2ca73550db13c589971d96731480604f027aca3a56274",
+      "bytes": 23610
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/summary.json": {
+      "sha256": "e7566b45060b853e10602c6c28864002d5215d71d0b7dac681cd7fd599bc4c1c",
+      "bytes": 69350
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/lerf/figurines/result.json": {
+      "sha256": "b2d049623d4ffcdc136e59879d2eed3f1fee3712885673d66ab82cbdef78a2e8",
+      "bytes": 1657
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/lerf/teatime/result.json": {
+      "sha256": "feae6bf0a476a91d1d0e3c6ae7baa08f15eabc7ce6785a9fcc41baaaccbe71fa",
+      "bytes": 1637
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_left/result.json": {
+      "sha256": "0e16e465f73e3d9c70a2c209a85bf8ebeecdc69d86c2ad2485833d2d73a01bbc",
+      "bytes": 1883
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0070_00/result.json": {
+      "sha256": "f2ac34898b660a5dbc44d147110e1a263689a2eecafc78f57a33f2600fd59afc",
+      "bytes": 1627
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0097_00/result.json": {
+      "sha256": "7bd22e5d622e801a2c87aa7aab2ba02e0c09a6b4a8b93d8922864714f44d0d7d",
+      "bytes": 1626
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fortress/result.json": {
+      "sha256": "817473dbad7f413baf11e7e37a87e30b340ab97a81f5b7125b6fd8416da82001",
+      "bytes": 1858
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_center/result.json": {
+      "sha256": "fa468eb034edc669238355f863606c82e6cf704eb54188c9cf9eb655968fce88",
+      "bytes": 1910
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0062_00/result.json": {
+      "sha256": "95d7698918c8bbc403e5ee4eb595d05add9f0b45e842950a31cf81e20cdf13ff",
+      "bytes": 1625
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0400_00/result.json": {
+      "sha256": "faf17b83900888f2f10f3f050a7609e0e4f98cb4791c04f55688665ba7861246",
+      "bytes": 1626
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0590_00/result.json": {
+      "sha256": "4be99ac34e96add021668294a958deb2ae454065d02fe65b0be617e678badde2",
+      "bytes": 1626
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/trex/result.json": {
+      "sha256": "6cbfbb734d780db70c4e80b4bbfde988cd5c6f893ca0af51f299964c9329f6f8",
+      "bytes": 1806
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0000_00/result.json": {
+      "sha256": "417274130d6f51b052898c30b1c21829f94a5b109ec84e7944a66e00b6446d50",
+      "bytes": 1625
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0347_00/result.json": {
+      "sha256": "ac014552c60fd2ec11d03e31ffff0bb764afef771ac453f45d4fe6a0ed4ffd00",
+      "bytes": 1625
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/lerf/ramen/result.json": {
+      "sha256": "194699738816c272b9fd3a14a70fc111e1663812688f2d1ff74981704d23fe17",
+      "bytes": 1627
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0140_00/result.json": {
+      "sha256": "a1f76d89bdd12f36325976d49749145512e2fd95542f1302b6c9133914b047e1",
+      "bytes": 1626
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0200_00/result.json": {
+      "sha256": "142fdae7efe8b7de983bd681dc0c321125e11e4d47f6a6faa0c87e33a9b29d3e",
+      "bytes": 1626
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fern/result.json": {
+      "sha256": "4f9c63ca1cd840d6547a7f3f16481cba1485b7f5a2d5863279b88e162252d228",
+      "bytes": 1806
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/flower/result.json": {
+      "sha256": "406e5db06fd461fbf65345d88b14f1c2377e6c4f5d174b815c58864d888882da",
+      "bytes": 1832
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0645_00/result.json": {
+      "sha256": "bbc94e7b87079ae939f7266d73d36ba974c4b0a79c1882d4a53ee63dc429ec4d",
+      "bytes": 1626
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/lerf/waldo_kitchen/result.json": {
+      "sha256": "5003f7c871db8d51801967b7a01dfd737291449d39555ed17db615625fac394c",
+      "bytes": 1703
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/leaves/result.json": {
+      "sha256": "fafb1d1104abf514c63e37eb780b28e2b90aa65ed43517ca5c49e7b44ff36f68",
+      "bytes": 1832
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/orchids/result.json": {
+      "sha256": "36c7035ec1591b07a88b5a0b0311dcd504308d51b3189e6710e79dce35a6633e",
+      "bytes": 1845
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0030_00/result.json": {
+      "sha256": "1c587361c3d51b63201a6bd5e90eb68da2008a6e639bc01b65284151150be427",
+      "bytes": 1771
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0435_00/result.json": {
+      "sha256": "caab8c217ddae5428ba985369fc44f87a30ee6e9b8c31db96f78b4ca1f2fe0ca",
+      "bytes": 1773
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0203_00/result.json": {
+      "sha256": "1e43b267cfc3593719984baa4396aa3cda82c34f992bdaa3fe523bd87fea605a",
+      "bytes": 1774
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0535_00/result.json": {
+      "sha256": "65237d720464a4e04acbc192974080ad5d43d225a2cb04899f98f75941bd2b79",
+      "bytes": 1772
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0246_00/result.json": {
+      "sha256": "5acbfe3a1879fa464dd1bcb6a83b34eb5510866076964a8ba9ea5557261d9beb",
+      "bytes": 1774
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0700_00/result.json": {
+      "sha256": "664e7b65dceca2e40737f18d8b5d7fcb054c6cfa9622a8deb532b568839b8736",
+      "bytes": 1775
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0249_00/result.json": {
+      "sha256": "b62b39c74021a3b9e933914399cc89e69891e7d7dbfc1fc25f329d210db6f078",
+      "bytes": 1777
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0704_00/result.json": {
+      "sha256": "8c5732b20e71b3bf1d4de8c8510ae06bfaaada9ca913321036bb09bfe27c3d46",
+      "bytes": 1774
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0353_00/result.json": {
+      "sha256": "e40b1b3aeec0d9732937f00c9341a361da99ef057c461f32f85183abd5861435",
+      "bytes": 1775
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/uqis/identity_scope/result.json": {
+      "sha256": "6e3c81fcf83e96955438bcd6a8d87daef2a8702f0ba85bc604fb99e05620cfd0",
+      "bytes": 547289
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/consolidated_response_control/summary.json": {
+      "sha256": "b40923ae0323db5dc70b65c3ad73cb023b8a7df61cc586d33de4e1b1b5b3d26c",
+      "bytes": 7363
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/conditioned_identity/summary.json": {
+      "sha256": "79ebfc837591d49b4b65ad9698440efeb5643589b75501ae8b9686d023b863d2",
+      "bytes": 88536
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/local_appearance_study/comparison.json": {
+      "sha256": "aa77913f97addf60de26fcc91025f65d610a774aa9d1f4b8db7c2f1f0a58665b",
+      "bytes": 790963
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/comparison.json": {
+      "sha256": "fb07e4d45cada20f2b620a8ebaf5589994f5fa4a37de291bf7253f7b641e0702",
+      "bytes": 5493
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/real_direct_membership_20261006/comparison.json": {
+      "sha256": "81f648bc86acf01b1ec38b879fbcc25232c90ba5e33070f2538a2e4e2e585dae",
+      "bytes": 159231
+    },
+    "/mnt/pool/sqy/results/RADIO-GS/output/local_element_fusion/summary.json": {
+      "sha256": "28b435c3183f50cf60fa219f3266784c9274e1ee413dd81b9046370a1e5b15cc",
+      "bytes": 537269
+    },
+    "/root/RADIO-GS-query-field/docs/experiments/2026-10-12-reference-proposals-results.json": {
+      "sha256": "21164b2212c98aef110fc49d1d441fb13d49bb8ba70fb81d93022c2a79fea4de",
+      "bytes": 151252
+    },
+    "/root/RADIO-GS-query-field/docs/experiments/2026-10-15-unified-hypothesis-results.json": {
+      "sha256": "3de7eefd3c3436dc153e512046fb767ec31cc8742b6354c632d3740827201288",
+      "bytes": 44895
+    }
+  },
+  "benchmark_runs_in_this_builder": 0
+}

@@ -14,7 +14,10 @@ from torch.nn import functional as F
 
 from .adapters import scribble_packet, raster_extent_scale
 from .geometry import projection, selected_alpha
-from .storage import load_field, sha256
+from .storage import load_field_versioned, sha256, field_identity, deployment_bytes
+from .research_storage import method_binding
+from .public_uqis import _preflight_v2
+from .public_artifacts import persist
 
 
 def load_strokes(positive_path, negative_path, output_hw):
@@ -67,7 +70,8 @@ def retained_response(field, membership, camera, height, width, world_scale):
 
 
 @torch.no_grad()
-def predict(config, job, output, device="cuda"):
+def predict(config, job, output, device="cuda", *, store_root=None, artifact_writer=None):
+    _preflight_v2(job["field"],store_root)
     if job["mode"] not in {"positive", "signed"}:
         raise ValueError("unknown prompt sign policy")
     out = Path(output) / job["name"]
@@ -75,7 +79,7 @@ def predict(config, job, output, device="cuda"):
     started = time.monotonic()
     if str(device).startswith("cuda"):
         torch.cuda.reset_peak_memory_stats()
-    field, manifest = load_field(job["field"], device)
+    field, manifest = load_field_versioned(job["field"], device, store_root=store_root)
     if str(device).startswith("cuda"):
         torch.cuda.synchronize()
     loaded = time.monotonic()
@@ -183,10 +187,10 @@ def predict(config, job, output, device="cuda"):
     if packet.negative is not None:
         p = packet.negative
         negative_observed = float(p.weights[field.observed[p.indices]].sum() / p.weights.sum())
-    torch.save(dict(selected=result.selected.cpu(), membership=result.membership_scores.cpu(),
-                    response=response, retained_response=normalized), out / "predictions.pt")
+    persist(out / "predictions.pt", dict(selected=result.selected.cpu(), membership=result.membership_scores.cpu(),
+                    response=response, retained_response=normalized), "tensor", artifact_writer)
     report = dict(schema="radio_gs.query_field_nvos_prediction.v1", configuration=config, job=job,
-                  field_sha256=manifest["files"]["field.pt"]["sha256"], field_spec=manifest["spec"],
+                  field_sha256=field_identity(manifest), field_binding=method_binding(job["field"],manifest), field_spec=manifest["spec"],
                   fixture_sha256=sha256(job["camera_fixture"]), positive_sha256=sha256(job["positive"]),
                   negative_sha256=sha256(job["negative"]), predictions_sha256=sha256(out / "predictions.pt"),
                   selected=int(result.selected.sum()), scale_m=result.scale,
@@ -195,7 +199,7 @@ def predict(config, job, output, device="cuda"):
                   negative_observed_mass_fraction=negative_observed,
                   runtime_source_access=False, reference_rgb_opened=False, target_labels_opened=False,
                   negative_used_for_membership=job["mode"] == "signed",
-                  deployment_bytes=manifest["files"]["field.pt"]["bytes"],
+                  deployment_bytes=deployment_bytes(manifest),
                   timing_seconds=dict(load=loaded-started, registration=registered-loaded,
                                       shared_decode=decoded-registered, target_projection=projected-decoded),
                   timing_condition="one run, shared GPU, excludes serialization and prompt-agreement audit",
@@ -204,9 +208,9 @@ def predict(config, job, output, device="cuda"):
                   prompt_policy=("official raw scribbles; uncertain registered rays; signed policy declared in field spec" if input_contract=='raw_scribbles' else
                                  "explicit retained positive-derived SAM reference mask; generating RGB/SAM cost inherited; no tracks"))
     if extent_state is not None:
-        torch.save(extent_state,out/'extent_state.pt')
+        persist(out/'extent_state.pt',extent_state,'tensor',artifact_writer)
         report['extent_state']=dict(path=str(out/'extent_state.pt'),sha256=sha256(out/'extent_state.pt'))
-    (out / "prediction.json").write_text(json.dumps(report, indent=2)+"\n")
+    persist(out / "prediction.json",report,'json',artifact_writer)
     return dict(job=job["name"], selected=report["selected"], scale_m=result.scale,
                 registration=registration)
 
@@ -261,7 +265,7 @@ def score(scoring, output):
     return report
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("stage", choices=["predict", "score"])
     parser.add_argument("--config", required=True)
@@ -269,7 +273,8 @@ def main():
     parser.add_argument("--output", required=True)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--deny-root", action="append", default=[])
-    args = parser.parse_args()
+    parser.add_argument("--store-root")
+    args = parser.parse_args(argv)
     torch.set_num_threads(4)
     if args.deny_root:
         if args.stage != "predict":
@@ -278,7 +283,7 @@ def main():
     config = json.loads(Path(args.config).read_text())
     if args.stage == "predict":
         job = next(j for j in config["jobs"] if j["name"] == args.job)
-        result = predict(config, job, args.output, args.device)
+        result = predict(config, job, args.output, args.device, store_root=args.store_root)
     else:
         result = score(config, args.output)
     print(json.dumps(result, indent=2))

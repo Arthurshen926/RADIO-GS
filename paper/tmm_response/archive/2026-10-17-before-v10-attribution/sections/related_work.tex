@@ -1,0 +1,27 @@
+\section{Related work}
+\paragraph{Language and visual evidence in Gaussian scenes.}
+VALA addresses semantic assignment through visibility-aware lifting and robust
+multi-view aggregation~\cite{vala}. Occam's LGS~\cite{occam} supplies a strong Gaussian
+language baseline; both its published numbers and our retained reproduction
+appear in the comparisons. LUDVIG lifts visual features or masks and uses graph
+diffusion to improve scene queries~\cite{ludvig}. These methods motivate preserving
+effective providers. Our variable is the decision among their complete answers,
+which is separate from improving feature lifting or spatial smoothing.
+
+EviSplat~\cite{evisplat} preserves individual observation features within
+instances and combines query-selected instance evidence with local Gaussian
+support. Query-dependent evidence use is therefore an established direction.
+Our specific question concerns the utility of replacing an already complete
+answer, assessed through intact-candidate and retention controls rather than
+through representation reconstruction.
+
+\paragraph{Verification and selective decisions.}
+Our estimator predicts actual relative answer utility from observable evidence.
+Its scalar candidate potential makes pairwise preferences cycle-consistent;
+the global margin controls when a replacement is accepted. Neither property
+guarantees accurate transfer. The decisive comparisons hold providers and
+candidates fixed while removing query information or retention. Published
+method comparisons supply context, while those matched controls attribute any
+gain to the response decision. Input access, geometry and metric domains are
+listed explicitly because they can differ between published methods and our
+retained providers.

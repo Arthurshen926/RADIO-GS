@@ -1,0 +1,16 @@
+{
+  "run": "nvos_v10_readout_audit_v1",
+  "question": "Does our existing v10 independent set contain useful NVOS capability absent from the reported continuous response?",
+  "arms": ["semantic_response", "independent_set_projection"],
+  "continuous_threshold": 0.5,
+  "set_element_threshold": 0.5,
+  "projection_rule": "floor(clamp(alpha,0,1)*255+0.5)>10; existing evaluator rule, no new tuning",
+  "all_eight_predictions_before_scoring": true,
+  "target_rgb_used": false,
+  "per_task_winner_selection": false,
+  "default_changed": false,
+  "scoring_barrier": "nvos_coverage_evidence_v2/predictions_complete.json",
+  "maximum_volatile_bytes": 134217728,
+  "maximum_new_durable_bytes": 262144,
+  "gpu_memory_fraction": 0.14
+}

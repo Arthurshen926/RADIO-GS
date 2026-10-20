@@ -1,0 +1,52 @@
+{
+  "run": "nvos_reference_delta_v1",
+  "parent_run": "nvos_reference_completion_v1",
+  "arms": [
+    "v10",
+    "static_native",
+    "constrained_memory_native",
+    "probability_image",
+    "probability_native",
+    "log_odds_image",
+    "log_odds_native"
+  ],
+  "primary_arm": "probability_native",
+  "native_wh": [
+    1008,
+    756
+  ],
+  "source_hw": [
+    384,
+    512
+  ],
+  "solver_steps": 120,
+  "threshold": 0.5,
+  "footprint_backend": "gsplat_cuda",
+  "gpu_memory_fraction": 0.38,
+  "maximum_volatile_prediction_bytes": 268435456,
+  "maximum_new_durable_bytes": 1048576,
+  "gt_tracks": [
+    "retained_gt_gt127",
+    "ludvig_gt_maximum"
+  ],
+  "metrics": [
+    "iou",
+    "precision",
+    "recall",
+    "accuracy",
+    "average_precision"
+  ],
+  "negative_scribble_used": true,
+  "target_rgb_used": true,
+  "target_gt_used_for_prediction": false,
+  "per_task_winners": false,
+  "independent_test": false,
+  "study_root": "output/tmm_response_20261018/study",
+  "storage_policy": {
+    "study_bytes": 8388608,
+    "run_bytes": 2097152,
+    "artifact_bytes": 1048576,
+    "reserve_bytes": 1073741824
+  },
+  "maximum_parent_link_bytes": 134217728
+}

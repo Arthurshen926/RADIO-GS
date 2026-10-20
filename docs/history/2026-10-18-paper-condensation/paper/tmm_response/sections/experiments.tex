@@ -1,0 +1,377 @@
+\section{Experiments}
+\label{sec:experiments}
+\subsection{Datasets, metrics and comparison protocol}
+We use one fixed in-house method recipe across 31 scene jobs. Four LERF scenes yield
+two outputs, so the cohort comprises five evaluation tasks rather than five
+independent datasets. All reported numbers are percentages. The existing
+benchmark rooms have been used during development; they are not an untouched
+final test. Scene-level intervals describe this cohort rather than certify
+generalization after repeated research feedback.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{lp{.25\linewidth}p{.43\linewidth}}
+\toprule
+Task & Cohort and primary metric & Input and evaluation contract \\
+\midrule
+LERF-2D & 4 scenes, 208 observations; mIoU and localization & Source-assisted text; semantic response rendered before thresholding. \\
+LERF-3D selection & Same scenes; projection mIoU and Acc.@0.25 & Independent selected Gaussians rendered to 2D GT; not volumetric GT IoU. \\
+ScanNet OVS & Paper8 Gaussian mIoU/mAcc; internal10 mesh mIoU & Fixed 19/15/10 menus; Gaussian and mesh domains reported separately. \\
+NVOS & 8 tasks, 7 scene clusters; IoU & Retained positive-reference, cached-source variant; external prompt/RGB access declared. \\
+UQIS & 9 rooms, 67 instances, 268 queries; set IoU and AP & Text, image, 2D point and 3D point; map-only query-time access. \\
+\bottomrule
+\end{tabular}
+\caption{Evaluation units. LERF and UQIS average within scenes then across
+scenes; NVOS averages eight tasks, with three seeds per task for LUDVIG.}
+\label{tab:protocols}
+\end{table}
+
+\paragraph{Published results and verified reproductions.}
+We reuse values reported in VALA Tables 1--2 and LUDVIG Tables 1/D, including
+their cited baseline results~\cite{vala,ludvig}. No new external baseline training
+is needed. Every local reproduction is linked to its frozen result hashes;
+four-scene, eight-scene and eight-task aggregates are recomputed from the
+original reports. Table origins are \textbf{P}: published, \textbf{R}: locally
+reproduced, \textbf{O}: our implemented method (v10 or a named internal control), and \textbf{M}: our method with a named measured extension.
+Missing extension results remain pending in the registry; they do not erase the evaluated v10 method results.
+We do not bold a global winner across different input contracts.
+
+\subsection{Implementation and supervision}
+The fixed v10 recipe includes native teacher matching, source evidence, fixed
+geometry and typed task readouts. SAM3~\cite{sam3} source masks and native
+SigLIP2~\cite{siglip2} scores support LERF. ScanNet combines original SigLIP2
+and Mask-Adapter~\cite{maskadapter} priors with
+literal-category SAM3 evidence. NVOS uses positive-prompt SAM3 reference tracks
+and a robust rendered response. All nine UQIS maps use SigLIP2 giant and
+DINOv2 ViT-B/14~\cite{dinov2} for image matching;
+complete membership inherits supervision on 22 labelled rooms and calibration
+on three other rooms. These room identities are disjoint from benchmark rooms.
+The original feature fields and teacher weights are not retrained in this study.
+
+The optional L11 selector additionally uses independent text/image/category
+utility supervision. Its 22 fit, three calibration and four development rooms
+provide 629/207/175 text expressions, 237/28/25 image queries and 116 category
+episodes. Only 88 fit-room category episodes enter training; calibration and
+development use full maps. Query-image views and neighbors are excluded from
+their candidate observations; full-scan geometry remains available. One margin
+(0.15052) protects 15 calibration room/output cells. Five room folds fit a
+64-tree structural prior plus a 64-tree query residual. All 19 ScanNet/UQIS jobs
+are predicted before scoring. These are extension settings, not prerequisites
+for the v10 main results. Development and calibration informed model design.
+
+\subsection{Comparison with existing methods}
+\paragraph{LERF semantic segmentation and projected selection.}
+Tables~\ref{tab:lerf2d}--\ref{tab:lerf3d} reuse the published context and verified
+Occam/VALA reproductions. The VALA reproduction follows its semantic and
+evaluation path on compatible Occam RGB geometry, rather than retraining the
+entire original geometry pipeline. The v10 values are our method results. The optional shared replacement has
+not yet been measured on these two outputs. In particular, semantic-response improvements cannot be substituted
+for independent selected-set improvements.
+Our method includes SAM3 text-conditioned source evidence and native SigLIP2
+matching; external VALA scores are not matched-teacher controls. An independent
+CPU audit exactly reproduces all 208 retained selected-set mask IoUs. Semantic
+IoU/localization records are reaggregated, without a fresh semantic render in
+that audit.
+
+\begin{table}[ht]
+\centering\small\input{tables/comparison_lerf2d.tex}
+\caption{LERF-2D. P values are reported in VALA Table 1~\cite{vala}.
+Localization is peak-in-box accuracy, not ranking AP. O uses source-assisted
+full teachers; these are v10 method results, not new replacement gains.}
+\label{tab:lerf2d}
+\end{table}
+\begin{table}[ht]
+\centering\small\input{tables/comparison_lerf3d.tex}
+\caption{LERF selected-Gaussian projection. P values are reported in VALA
+Table 1~\cite{vala}; Acc.@0.25 counts projected masks with IoU above 0.25.
+VALA's published value is 58.02/82.85; 43.29/64.30 belongs to Dr. Splat.
+The local VALA R row uses compatible RGB geometry.}
+\label{tab:lerf3d}
+\end{table}
+
+\paragraph{ScanNet open-vocabulary segmentation.}
+Table~\ref{tab:scannet} separates the paper-eight Gaussian metric from the
+original ten-room mesh metric. For the metric bridge, we score unchanged v10
+labels with the existing VALA evaluator: anisotropic Mahalanobis pseudo labels,
+five-scale radius, top-1000 class-balanced votes and opacity--volume weights.
+All eight scene predictions are hashed before opening their target labels.
+This aligns the metric and scene list, but not the input carrier: v10 uses
+provided unlabelled mesh geometry, while VALA uses optimized RGB Gaussians.
+The bridge is a protocol diagnostic, not an additional learned gain. The
+replacement policy retains every original menu on the internal ten-room track.
+Independent scoring reproduces all ten mesh scenes and all eight Gaussian
+scenes. All 1,134,207 pseudo labels agree, including 256 checks with the released
+VALA code. On the same eight rooms, 19-class mesh mIoU is 61.0567 versus
+66.9480 for Gaussian scoring: this 5.8913-point change is metric-dependent.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/comparison_scannet.tex}}
+\caption{ScanNet OVS. P rows from VALA Table 2~\cite{vala}, R and the metric
+bridge use paper8 Gaussian scoring. Rows marked 10-mesh use the original
+ten-room mesh evaluation and cannot be ranked against the paper8 rows.
+The metric bridge still differs in geometry and teacher access.}
+\label{tab:scannet}
+\end{table}
+
+\paragraph{NVOS.}
+Table~\ref{tab:nvos} includes the complete three-seed LUDVIG-SAM reproduction.
+Its positive scribbles, all-view RGB geometry and online target-RGB access
+follow the released implementation. Our original v10 method uses a
+positive-derived reference SAM mask and cached source tracks, without online
+target RGB. These are contextual method comparisons with declared access
+differences. Later image-conditioned extensions explicitly permit observed
+target RGB; they retain the original geometry and are reported separately.
+The audit also finds a GT boundary convention difference: our retained scorer
+uses $g>127$, while LUDVIG uses integer division by the mask maximum. Applying
+only its GT convention changes our score from 86.5134 to 86.6835; historical
+values remain unchanged. Switching bilinear implementations changes less than
+0.00002 points. Borrowing its min--max and fixed 0.25 response threshold yields
+86.6085 on our GT convention, and is not a full LUDVIG reproduction. Flower,
+trex and orchids account for 78.04\% of the gap to the local 91.2577 reproduction.
+Flower/orchids primarily miss foreground; trex also activates background.
+N04 pairs reconstructed and observed RGB at the same camera, with identical
+response-derived prompts and frozen image decoder. Observed RGB increases
+IoU from 87.5575 to 89.0636 for direct image responses, and from 86.9242 to
+88.3201 after actual 3D writeback. This isolates an image-access intervention
+within this decoder; it does not explain the entire difference to LUDVIG.
+The 0.7435-point loss between direct image and 3D outputs leaves transport,
+observation pooling, geometry and the fitting objective to be separated.
+The 3D candidate raises IoU by 1.8067 points over v10 but lowers AP, so it is
+not a uniform improvement across metrics. Source-teacher residuals also rise;
+this is a view-conditioned update, not a demonstrated query-global field.
+N05 finds that discarding negative dense hints loses 2.6331 IoU points against
+the matched signed-hint control. Sparse hints recover flower but admit another
+object in horns-center. Complete prompt controls and both GT conventions are
+reported in the diagnostic supplement; no per-task winners are combined.
+N07's reference-memory transfer does not exceed the static image-conditioned
+mean. N08 fixes all three image-evidence arrays and fits responses on the native
+1008-by-756 ray grid instead of 512-by-384. The predeclared sequence-memory
+primary arm reaches 88.1124 IoU. The static secondary arm reaches 88.8424,
+up 0.5223 points over its coarse control with all eight tasks improved, leaving
+a 0.2212-point gap to its unchanged direct image evidence. An accompanying
+CUDA arithmetic correction changes matched coarse-grid mean IoU by less than
+0.000006 points. These results support resolution-consistent transport, not
+a benefit from memory itself. N09 replays this static control with identical
+per-task binary counts in both GT tracks and measures 96.5817 AP, below v10's
+98.0222. The static image arrays match exactly; the native continuous arrays
+are not bitwise identical to N08. Neither run certifies SOTA.
+
+N09 adds frozen DINOv2 descriptors and the official negative reference scribbles
+to test complete query transfer beyond the initial mask. Signed-scribble authority
+and reference-mask/complement authority use matched inputs and downstream
+operations. Their native IoUs are 81.5803 and 86.0812. Signed evidence recovers
+missing regions in flower and orchids, but confuses other instances in
+horns-center and leaves. Its source leave-one-out accuracy of 99.80--100\%
+therefore does not establish target-instance correctness. N10 writes the exact
+affinity probabilities directly to 3D, yielding 77.7307 and 84.2098 IoU;
+omitting SAM does not recover the static mean. All 72 N09 and 48 N10 predictions
+are sealed before their respective scoring. Detailed paired controls, AP and
+full-cohort error maps appear in the diagnostic supplement. The added teacher
+and negative-prompt access are disclosed; no per-task branch selection is used.
+
+N11 fixes those image proposals and compares unrestricted additive completion,
+v10-response anchoring and signed-scribble geometry anchoring. Their actual 3D
+IoUs are 83.5805, 89.9673 and 89.9734. The predeclared geometry primary gains
+1.1310 points over static native writeback (six tasks improve, two regress),
+but loses 0.1540 AP points. Flower improves from 85.9782 to 94.9302, while
+instance constraints prevent the unrestricted branch's severe horns-center
+and leaves regressions. Orchids remains 73.5362: the rule rejects most of the
+proposal's missing-flower recovery. The 0.0061-point difference between the
+two anchor policies does not establish superiority of geometric witnesses.
+All 72 predictions precede scoring. N11 is a development improvement, not a
+SOTA certification or a common improvement across all five benchmarks.
+N12 moves the intervention to the reference image. Original, semantic-completed
+and signed-constrained reference masks enter identical two-frame memory and
+native fitting, giving 88.2002, 88.5226 and 91.4774 IoU. Constrained completion
+raises orchids to 94.5224 but harms horns-left by modifying a reference mask
+that already agrees with all original scribbles. N13 instead transfers the
+paired memory difference around the static response: probability and log-odds
+variants give 90.7469 and 89.4416. The probability residual harms all eight tasks
+versus its matched complete replacement, so it is not retained as a required
+method stage.
+
+N14 fixes two source-only admission rules after this N12 development diagnosis.
+Feasibility admission (primary) reaches 92.9424 IoU / 98.8599 AP; source-quality
+admission (secondary) reaches 93.1730 / 98.9451. Their LUDVIG-GT IoUs are 92.9852
+and 93.2104. Quality exceeds static native writeback by 4.3305 points and N11
+by 3.1996, improving five and harming three tasks in either comparison. It
+improves only trex against feasibility, while harming fern and horns-center;
+five tasks tie. Thus the aggregate does not establish a universally better
+quality criterion. Flower, orchids and horns-left reach 96.7139, 95.6011 and
+94.8079. The quality image output is 93.4971, with 0.3241 mean loss after actual
+3D fitting; internal background leakage and fine structures remain limiting.
+
+All 72/56/56 N12/N13/N14 outputs respectively precede their GT scoring. N14
+freshly replays selected teacher responses and verifies exact parent hashes,
+then fits and re-scores actual 3D outputs; it does not substitute cached
+per-task maxima. Original negative scribbles, DINOv2 and target RGB are shared
+with N11 but extend the original v10 input contract. The other 23 jobs remain
+unchanged references. This is adaptive development evidence, without a matched
+external SOTA certification or all-five default promotion.
+
+N15 freezes the N14 reference-quality decision and transports both original and
+completed references to all 318 authorized source views. Matched source-only
+fusion reaches 88.0061 and 92.7461 IoU, respectively: completion gains 4.7400
+points with no target-image evidence in either field. Equal-group fusion with
+the N14 target response reaches 93.0302 IoU / 98.9797 AP, versus the replayed
+N14 control's 93.1730 / 98.9451. It reduces false positives but also true
+foreground on every task; precision increases while recall falls. Both GT
+conventions retain the same mean-IoU ordering. The predeclared joint candidate
+therefore fails the higher-IoU, non-decreasing-AP criterion, and this fusion
+branch is stopped. All 48 outputs precede scoring, and the three N14/v10
+controls reproduce the original binary counts. The source-only result supports
+transfer of reference-completion capability; it does not establish that more
+source constraints improve the strongest target-conditioned output.
+
+N16 re-decodes the exact complete N14 target response once, using either the
+full target image or a response-derived crop with 25 percent context per side.
+The same crop transforms RGB and prior; outside probabilities are retained
+before native fitting. Full-frame decoding gives 93.0998 IoU / 98.2626 AP.
+The local primary reaches 93.2805 / 98.4663, versus the replayed N14 control's
+93.1730 / 98.9450. Thus the highest observed native IoU increases by 0.1075
+points, while AP loses 0.4787. Four tasks improve and four regress. Local
+decoding exceeds its matched full-frame control by 0.1806 IoU and 0.2037 AP
+points, but does not retain the N14 ranking quality. Fern and horns-center
+receive full-frame windows under the fixed rule and have identical predictions
+in the two controls. Both GT conventions show the tradeoff; omitting the whole
+horns scene removes the mean-IoU gain over N14. All 56 predictions precede
+scoring. The branch fails its predeclared joint-metric criterion and is stopped;
+N16 remains a measured IoU/AP tradeoff, while N14 remains the retained balanced
+recipe. Neither result certifies an external same-protocol SOTA ranking.
+An exact eight-task score audit (A24, diagnostics) preserves all hard masks and
+changes mean image AP by less than 0.002 points under higher-precision probability
+interpolation; it does not overturn the N16 stopping decision or alter 3D scores.
+
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/comparison_nvos.tex}}
+\caption{NVOS IoU. Our rows use all eight tasks. P denotes published values from
+LUDVIG Tables 1/D~\cite{ludvig}, VCAR Table 1~\cite{vcar}, LEGO Table 1~\cite{lego}, WildSeg3D Table 1~\cite{wildseg3d}, and Trace3D Table 4~\cite{trace3d}.
+VCAR uses seven targets; LEGO reports seven scenes, without a verified matching
+target roster. These recent rows are contextual, not same-protocol reproductions.
+R averages all three seeds in each task. O uses our declared reference/source
+contract. New NVOS evidence variants are reported as controlled extensions.}
+\label{tab:nvos}
+\end{table}
+
+\paragraph{Multimodal UQIS.}
+UQIS is the local ScanNet-UQIS9 v0.3.1 protocol; no external published row in
+the cited papers evaluates these same 268 queries. Table~\ref{tab:uqis} therefore
+reports all modalities and a retained regional-readout baseline. The difference
+between regional readout and v10 measures our complete-decoder capability;
+the optional selector has its own separate comparison. The matched v10-to-replacement comparison isolates the
+response decision. The full
+shared policy improves image IoU by 1.088 points and AP by 1.268 points. One
+query improves and none are harmed. Text and both actual-point outputs remain
+unchanged; the point rows verify preservation rather than learned improvements.
+All reported outputs use the same policy, without choosing a different winning
+variant for text, images or categories.
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/comparison_uqis.tex}}
+\caption{UQIS matched comparison. T/I/P2/P3 denote text, image, 2D point and 3D
+point. Actual selected-set IoU and continuous-response AP are distinct metrics.}
+\label{tab:uqis}
+\end{table}
+
+\subsection{Historical component controls within our method}
+Tables~\ref{tab:core-components}--\ref{tab:extent-components} connect v10's
+capability to actual interventions. They are historical experiments on the
+stated cohorts, not newly invented leave-one-out scores of the final system.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/mechanism_evidence.tex}}
+\caption{Our matched identity, response-use and image-extent controls.
+First two rows use LERF selected projection and semantic IoU respectively;
+last two use actual UQIS image instance IoU. Different controls are non-additive.}
+\label{tab:core-components}
+\end{table}
+Query admission changes candidate rejection with geometry, features and the set
+solver fixed. Response-use control holds evidence, map and independent set
+fixed while changing how admitted observations enter the semantic output; its
+19.79-point gain is not attributed to a newly invented averaging equation.
+Image local correspondence changes matching with the same teachers and extent
+head. Complete-carrier reuse changes complete membership from the same identity
+condition. These controls support different links of the same response process.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/provider_evidence.tex}}
+\caption{Additional in-house component controls. Dual-native fusion uses three
+held-out ScanNet rooms; point rows use UQIS actual-set IoU. Point supervision
+changes observation distribution and sample counts, not only a formula.}
+\label{tab:extent-components}
+\end{table}
+The 2.35-point category gain includes a second native teacher's capability.
+Real-observation membership controls change training-observation distribution
+and counts under the same learner. They must not be attributed solely to an
+evidence-weighting rule or reported as zero-supervision results.
+
+Four later full-cohort controls preserve these capabilities while testing
+partial/complement permissions, available-domain normalization, scope agreement
+and response solvers. No candidate produces common gains across all scored
+outputs. Squared reconstruction reduces source loss in all 22 source-assisted
+jobs, but downstream quality is mixed. These negative controls support keeping
+effective typed operators; they are detailed in the diagnostic supplement.
+
+\IfFileExists{tables/nvos_coverage.tex}{\input{sections/nvos_coverage.tex}}{}
+\IfFileExists{tables/nvos_source_readout.tex}{\input{sections/nvos_source_readout.tex}}{}
+\IfFileExists{tables/nvos_local_credit.tex}{\input{sections/nvos_local_credit_summary.tex}}{}
+
+\subsection{Optional complete-response replacement controls}
+
+All rows in Table~\ref{tab:ablations} retain the same teachers, complete
+candidates, supervision rooms and output definitions. The query-blind arm returns only the fitted structural prior (64 trees,
+versus 128 in the full model); it therefore also changes capacity. Permutation
+instead uses the fitted full model and
+shuffles all teacher scores jointly within each view. It preserves their
+multisets and correlations. Removing the null constraint retains the same
+64+64-tree capacity and total fit weight, replacing permuted training examples
+with duplicates of aligned examples. Each trained control uses the same
+calibration procedure. The zero-margin control uses the full fitted model and
+changes only the acceptance margin. These are response-level ablations.
+
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/mechanism_ablations.tex}}
+\caption{Matched controls on all ten ScanNet rooms and 268 UQIS queries.
+S19/15/10 are mesh mIoU. Repair/harm counts concern actual UQIS set IoU;
+unchanged actual points are included in the denominator. This is one coupled
+policy comparison, not a collection of per-benchmark best runs.}
+\label{tab:ablations}
+\end{table}
+
+The image gain over query-blind and permuted controls is respectively 0.725 and
+1.088 points; descriptive nine-room bootstrap intervals are [0,2.174] and
+[0,3.264]. They do not establish a robust query-specific advantage. The full
+and no-null arms make identical choices in all 144 text/image/menu decisions,
+so the null constraint has no demonstrated accuracy contribution. Removing the
+positive margin improves text and image IoU, but reduces ScanNet mIoU, including
+a 0.869-point loss on the ten-class menu. Retention prevents some damage while
+also rejecting useful instance replacements. Neither the full policy nor the
+zero-margin variant is promoted to replace the reference system.
+
+\subsection{Candidate capacity and failure attribution}
+For a fixed candidate pool, let $G_0$ be gain under zero-margin selection and
+$G_\tau$ gain under calibrated retention. The exact diagnostic is
+\[
+G_{\rm pool}=R_{\rm rank}+(G_0-G_\tau)+G_\tau.
+\]
+The middle term is signed: it is negative when retention prevents damage.
+This identity prevents attributing all unused candidate capacity to the margin.
+For text, 15.395 points of available IoU gain decompose into 9.615 ranking regret,
+5.780 retention cost and zero actual gain. For images, 9.492 available points
+decompose into 8.224 ranking regret, 0.180 retention cost and 1.088 actual gain.
+Thus image ranking is the dominant measured bottleneck; lowering the margin
+cannot recover most of the unused capacity. Category mean-menu capacity is
+only 0.913 points, and its negative retention cost indicates prevented damage.
+These label-oracle diagnostics are computed after prediction and are never
+automatic method results.
+
+\paragraph{Five-task coverage and remaining evidence.}
+The implemented v10 method covers every task. Positive component controls cover
+LERF identity/response use, ScanNet native priors and UQIS identity/extent;
+NVOS requires evidence and geometry attribution beyond scorer equivalence.
+The optional selector has separate missing LERF/NVOS transfer cells. These two
+kinds of completion must not be conflated. Independent teacher configurations
+and unseen scenes remain needed for broader claims; no feature-dimension or
+compression sweep is required for this response-focused paper.

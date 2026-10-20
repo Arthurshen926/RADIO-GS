@@ -1,0 +1,68 @@
+\section{Supervision for the L11 extension}
+The optional L11 selector additionally uses independent text/image/category
+utility supervision. Its 22 fit, three calibration and four development rooms
+provide 629/207/175 text expressions, 237/28/25 image queries and 116 category
+episodes. Only 88 fit-room category episodes enter training; calibration and
+development use full maps. Query-image views and neighbors are excluded from
+their candidate observations; full-scan geometry remains available. One margin
+(0.15052) protects 15 calibration room/output cells. Five room folds fit a
+64-tree structural prior plus a 64-tree query residual. All 19 ScanNet/UQIS jobs
+are predicted before scoring. These are extension settings, not prerequisites
+for the v10 main results. Development and calibration informed model design.
+
+\section{Measured optional replacement controls}
+
+All rows in Table~\ref{tab:ablations} retain the same teachers, complete
+candidates, supervision rooms and output definitions. The query-blind arm returns only the fitted structural prior (64 trees,
+versus 128 in the full model); it therefore also changes capacity. Permutation
+instead uses the fitted full model and
+shuffles all teacher scores jointly within each view. It preserves their
+multisets and correlations. Removing the null constraint retains the same
+64+64-tree capacity and total fit weight, replacing permuted training examples
+with duplicates of aligned examples. Each trained control uses the same
+calibration procedure. The zero-margin control uses the full fitted model and
+changes only the acceptance margin. These are response-level ablations.
+
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/mechanism_ablations.tex}}
+\caption{Matched controls on all ten ScanNet rooms and 268 UQIS queries.
+S19/15/10 are mesh mIoU. Repair/harm counts concern actual UQIS set IoU;
+unchanged actual points are included in the denominator. This is one coupled
+policy comparison, not a collection of per-benchmark best runs.}
+\label{tab:ablations}
+\end{table}
+
+The image gain over query-blind and permuted controls is respectively 0.725 and
+1.088 points; descriptive nine-room bootstrap intervals are [0,2.174] and
+[0,3.264]. They do not establish a robust query-specific advantage. The full
+and no-null arms make identical choices in all 144 text/image/menu decisions,
+so the null constraint has no demonstrated accuracy contribution. Removing the
+positive margin improves text and image IoU, but reduces ScanNet mIoU, including
+a 0.869-point loss on the ten-class menu. Retention prevents some damage while
+also rejecting useful instance replacements. Neither the full policy nor the
+zero-margin variant is promoted to replace the reference system.
+
+\section{Candidate capacity and failure attribution}
+For a fixed candidate pool, let $G_0$ be gain under zero-margin selection and
+$G_\tau$ gain under calibrated retention. The exact diagnostic is
+\[
+G_{\rm pool}=R_{\rm rank}+(G_0-G_\tau)+G_\tau.
+\]
+The middle term is signed: it is negative when retention prevents damage.
+This identity prevents attributing all unused candidate capacity to the margin.
+For text, 15.395 points of available IoU gain decompose into 9.615 ranking regret,
+5.780 retention cost and zero actual gain. For images, 9.492 available points
+decompose into 8.224 ranking regret, 0.180 retention cost and 1.088 actual gain.
+Thus image ranking is the dominant measured bottleneck; lowering the margin
+cannot recover most of the unused capacity. Category mean-menu capacity is
+only 0.913 points, and its negative retention cost indicates prevented damage.
+These label-oracle diagnostics are computed after prediction and are never
+automatic method results.
+
+
+\begin{center}
+\resizebox{\linewidth}{!}{\input{tables/comparison_uqis.tex}}
+\end{center}
+The complete UQIS comparison retains the established method and the optional
+selector as separate rows. The selector does not explain the established
+method's historical component gains.

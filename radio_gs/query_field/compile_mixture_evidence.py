@@ -13,13 +13,19 @@ from .contracts import Support
 from .element_relation_training import view_transfer
 from .mixture_paired_evidence import KIND, MixturePairedEvidence
 from .relation_training import SourceRelations
-from .storage import load_field, sha256
+from .storage import load_field_versioned, sha256, field_identity, deployment_bytes
+from .research_storage import research_writer,method_binding,tensor_state_identity,storage_binding
 
 
 @torch.no_grad()
-def compile_field(parent, observations, output, *, confidence_weighted=False):
-    output = Path(output); output.mkdir(parents=True, exist_ok=False)
-    started = time.monotonic(); field, manifest = load_field(parent)
+def compile_field(parent, observations, output, *, confidence_weighted=False, store_root=None, legacy_v1=False):
+    writer=research_writer(store_root=store_root,legacy_v1=legacy_v1)
+    output = Path(output)
+    if output.exists():raise FileExistsError(output)
+    started = time.monotonic(); field, manifest = load_field_versioned(parent,store_root=store_root)
+    parent_binding=method_binding(parent,manifest)
+    original_tensor_identity=tensor_state_identity(field)
+    output.mkdir(parents=True, exist_ok=False)
     if field.evidence_kind != 'soft_partial_view_evidence_v1':
         raise ValueError('matched soft reference required')
     source_path = Path(observations) / 'observations.json'
@@ -86,18 +92,34 @@ def compile_field(parent, observations, output, *, confidence_weighted=False):
             positive_error=errors[0], negative_error=errors[1], coefficient_error=coefficient_error,
             known_elements=int(((actual[0] + actual[1]) > 0).sum()),
             admitted_views=int(torch.unique(relation.views[coefficient > 0]).numel())))
-    # The experiment changes a function, not one tensor. Independent byte copy
-    # keeps the export standalone and proves exact state retention by SHA256.
-    destination = output / 'field'; destination.mkdir()
-    shutil.copyfile(Path(parent) / 'field.pt', destination / 'field.pt')
-    if sha256(destination / 'field.pt') != manifest['files']['field.pt']['sha256']:
-        raise ValueError('copied payload differs')
-    exported = copy.deepcopy(manifest); exported['spec']['evidence_kind'] = evidence_kind
-    exported['provenance'].update(support_lookup='mixture of confidence-weighted partial associations',
-                                  benchmark_queries_used=False, additional_3d_labels=False)
-    (destination / 'manifest.json').write_text(json.dumps(exported, indent=2) + '\n')
-    report = dict(parent_sha256=manifest['files']['field.pt']['sha256'],
-        export_sha256=exported['files']['field.pt']['sha256'], exact_tensor_payload=True,
+    # A function change keeps all tensor bytes but needs its own scientific spec.
+    # Constructors may normalize dtypes; retain each original buffer exactly.
+    for name,value in field.evidence.named_buffers():
+        module=relation
+        parts=name.split(".")
+        for part in parts[:-1]:module=getattr(module,part)
+        module._buffers[parts[-1]]=value
+    field.evidence=relation;field.evidence_kind=evidence_kind
+    if tensor_state_identity(field)!=original_tensor_identity:
+        raise ValueError("mixture function changed original tensor state")
+    provenance=copy.deepcopy(manifest['provenance'])
+    provenance.update(support_lookup='mixture of confidence-weighted partial associations',
+                      benchmark_queries_used=False,additional_3d_labels=False)
+    destination=output/'field'
+    if legacy_v1 and manifest["schema"].endswith(".v1"):
+        destination.mkdir()
+        shutil.copyfile(Path(parent)/'field.pt',destination/'field.pt')
+        if sha256(destination/'field.pt')!=manifest['files']['field.pt']['sha256']:raise ValueError('copied payload differs')
+        exported=copy.deepcopy(manifest);exported['spec']['evidence_kind']=evidence_kind;exported['provenance']=provenance
+        (destination/'manifest.json').write_text(json.dumps(exported,indent=2)+'\n')
+    else:
+        exported=writer(field,destination,provenance)
+    report = dict(parent_sha256=field_identity(manifest),
+        parent_binding=parent_binding,export_binding=method_binding(destination,exported),
+        storage=storage_binding(store_root=store_root,legacy_v1=legacy_v1),
+        tensor_state_identity=original_tensor_identity,field_schema=exported['schema'],
+        complete_field_bytes=deployment_bytes(exported),
+        export_sha256=field_identity(exported), exact_tensor_payload=True,
         protected_state_unchanged=True, source_frames=[v['frame'] for v in source.views],
         source_regions=sum(len(v['scales']) for v in source.views), training_steps=0,
         field_tensor_bytes=exported['tensor_bytes'], additional_tensor_bytes=0,

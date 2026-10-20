@@ -1,0 +1,501 @@
+{
+  "schema": "radio_gs.tmm_paper_experiments.v1",
+  "checked_on": "2026-10-18",
+  "sources": {
+    "vala_lerf": {
+      "url": "https://arxiv.org/html/2509.05515v1",
+      "paper": "VALA",
+      "version": "arXiv 2509.05515v1",
+      "table": "1",
+      "citation": "vala",
+      "also_checked_same_values": "https://arxiv.org/html/2509.05515v2 Table 1"
+    },
+    "vala_scannet": {
+      "url": "https://arxiv.org/html/2509.05515v1",
+      "paper": "VALA",
+      "version": "arXiv 2509.05515v1",
+      "table": "2",
+      "citation": "vala"
+    },
+    "ludvig_nvos": {
+      "url": "https://arxiv.org/html/2410.14462v5",
+      "paper": "LUDVIG",
+      "version": "arXiv 2410.14462v5",
+      "table": "1 and D",
+      "citation": "ludvig"
+    },
+    "vcar_nvos": {
+      "url": "https://arxiv.org/html/2608.30870v1",
+      "paper": "VCAR",
+      "version": "2608.30870v1",
+      "table": "1 and 3",
+      "citation": "vcar"
+    },
+    "lego_nvos": {
+      "url": "https://arxiv.org/html/2608.10057v1",
+      "paper": "LEGO",
+      "version": "2608.10057v1",
+      "table": "1",
+      "citation": "lego"
+    },
+    "wildseg3d_nvos": {
+      "url": "https://openaccess.thecvf.com/content/ICCV2025/papers/Guo_WildSeg3D_Segment_Any_3D_Objects_in_the_Wild_from_2D_ICCV_2025_paper.pdf",
+      "paper": "WildSeg3D",
+      "version": "ICCV 2025",
+      "table": "1",
+      "citation": "wildseg3d"
+    },
+    "trace3d_nvos": {
+      "url": "https://arxiv.org/html/2508.03227v1",
+      "paper": "Trace3D",
+      "version": "arXiv 2508.03227v1",
+      "table": "4",
+      "citation": "trace3d"
+    }
+  },
+  "metrics": {
+    "lerf2d": [
+      "miou",
+      "localization_accuracy"
+    ],
+    "lerf3d": [
+      "miou",
+      "accuracy_at_iou_0p25"
+    ],
+    "scannet": [
+      "miou_19",
+      "macc_19",
+      "miou_15",
+      "macc_15",
+      "miou_10",
+      "macc_10"
+    ],
+    "nvos": [
+      "iou"
+    ],
+    "uqis": [
+      "text_selected_iou",
+      "text_ap",
+      "image_selected_iou",
+      "image_ap",
+      "point_2d_selected_iou",
+      "point_2d_ap",
+      "point_3d_selected_iou",
+      "point_3d_ap"
+    ]
+  },
+  "published_rows": [
+    {
+      "benchmark": "lerf2d",
+      "method": "LERF",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 37.4,
+        "localization_accuracy": 73.6
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf2d",
+      "method": "LangSplat",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 51.4,
+        "localization_accuracy": 84.3
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf2d",
+      "method": "GAGS",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 54.1,
+        "localization_accuracy": 81.7
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf2d",
+      "method": "LangSplatV2",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 59.9,
+        "localization_accuracy": 84.1
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf2d",
+      "method": "Occam's LGS",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 61.3,
+        "localization_accuracy": 82.5
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf2d",
+      "method": "VALA",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 61.7,
+        "localization_accuracy": 86.4
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf3d",
+      "method": "OpenGaussian",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 38.36,
+        "accuracy_at_iou_0p25": 51.43
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf3d",
+      "method": "Dr. Splat",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 43.29,
+        "accuracy_at_iou_0p25": 64.3
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf3d",
+      "method": "InstanceGaussian",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 43.87,
+        "accuracy_at_iou_0p25": 61.09
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf3d",
+      "method": "CAGS",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 50.79,
+        "accuracy_at_iou_0p25": 69.62
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf3d",
+      "method": "VoteSplat",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 50.1,
+        "accuracy_at_iou_0p25": 67.38
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf3d",
+      "method": "Occam's LGS",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 47.22,
+        "accuracy_at_iou_0p25": 74.84
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "lerf3d",
+      "method": "VALA",
+      "kind": "published",
+      "source": "vala_lerf",
+      "metrics_percent": {
+        "miou": 58.02,
+        "accuracy_at_iou_0p25": 82.85
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "scannet",
+      "method": "LangSplat",
+      "kind": "published",
+      "source": "vala_scannet",
+      "metrics_percent": {
+        "miou_19": 2.45,
+        "macc_19": 8.59,
+        "miou_15": 3.45,
+        "macc_15": 13.21,
+        "miou_10": 6.48,
+        "macc_10": 21.89
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "scannet",
+      "method": "OpenGaussian",
+      "kind": "published",
+      "source": "vala_scannet",
+      "metrics_percent": {
+        "miou_19": 27.73,
+        "macc_19": 42.01,
+        "miou_15": 29.67,
+        "macc_15": 46.15,
+        "miou_10": 39.93,
+        "macc_10": 57.34
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "scannet",
+      "method": "Dr. Splat",
+      "kind": "published",
+      "source": "vala_scannet",
+      "metrics_percent": {
+        "miou_19": 29.31,
+        "macc_19": 47.68,
+        "miou_15": 33.25,
+        "macc_15": 54.33,
+        "miou_10": 44.19,
+        "macc_10": 65.19
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "scannet",
+      "method": "Occam's LGS",
+      "kind": "published",
+      "source": "vala_scannet",
+      "metrics_percent": {
+        "miou_19": 31.93,
+        "macc_19": 48.93,
+        "miou_15": 34.25,
+        "macc_15": 53.71,
+        "miou_10": 45.16,
+        "macc_10": 64.39
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "scannet",
+      "method": "VALA",
+      "kind": "published",
+      "source": "vala_scannet",
+      "metrics_percent": {
+        "miou_19": 32.11,
+        "macc_19": 50.05,
+        "miou_15": 35.1,
+        "macc_15": 54.77,
+        "miou_10": 46.21,
+        "macc_10": 65.61
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "NVOS",
+      "kind": "published",
+      "source": "ludvig_nvos",
+      "metrics_percent": {
+        "iou": 70.1
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "SA3D-TRF",
+      "kind": "published",
+      "source": "ludvig_nvos",
+      "metrics_percent": {
+        "iou": 90.3
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "SA3D-GS",
+      "kind": "published",
+      "source": "ludvig_nvos",
+      "metrics_percent": {
+        "iou": 92.2
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "SAGA",
+      "kind": "published",
+      "source": "ludvig_nvos",
+      "metrics_percent": {
+        "iou": 92.6
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "OmniSeg3D",
+      "kind": "published",
+      "source": "ludvig_nvos",
+      "metrics_percent": {
+        "iou": 91.7
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "LUDVIG-DINOv2",
+      "kind": "published",
+      "source": "ludvig_nvos",
+      "metrics_percent": {
+        "iou": 92.4
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "LUDVIG-SAM",
+      "kind": "published",
+      "source": "ludvig_nvos",
+      "metrics_percent": {
+        "iou": 91.3
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "LUDVIG-SAM2",
+      "kind": "published",
+      "source": "ludvig_nvos",
+      "metrics_percent": {
+        "iou": 91.3
+      },
+      "input_contract": "original published method; not a matched-provider ablation"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "VCAR",
+      "kind": "published",
+      "source": "vcar_nvos",
+      "metrics_percent": {
+        "iou": 93.5
+      },
+      "input_contract": "published seven-target result; released prompts, geometry and alpha readout differ; no matched local reproduction"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "LEGO",
+      "kind": "published",
+      "source": "lego_nvos",
+      "metrics_percent": {
+        "iou": 94.2
+      },
+      "input_contract": "published result on seven scenes; exact target roster and paper-reproduction settings not independently verified; released code resizes GT to render grid and supports two readouts; no matched local reproduction"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "WildSeg3D",
+      "kind": "published",
+      "source": "wildseg3d_nvos",
+      "metrics_percent": {
+        "iou": 94.1
+      },
+      "input_contract": "original published protocol with different geometry and response generation; no matched local reproduction"
+    },
+    {
+      "benchmark": "nvos",
+      "method": "Trace3D",
+      "kind": "published",
+      "source": "trace3d_nvos",
+      "metrics_percent": {
+        "iou": 92.5
+      },
+      "input_contract": "original published protocol with different geometry and response generation; no matched local reproduction"
+    }
+  ],
+  "freeze": "paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+  "freeze_keys": [
+    "concept_lerf2d_occamlgs",
+    "concept_lerf3d_vala",
+    "concept_scannet_ovs_vala_paper8",
+    "spatial_nvos_ludvig"
+  ],
+  "system_summary": "output/query_conditioned_membership_20261006/image_convergence/system/summary.json",
+  "residual_feedback": "paper/tmm_response/residual_utility_feedback.json",
+  "bridge": "output/tmm_response_20261016/study/scannet_paper8_metric_bridge_v1/summary.json",
+  "corrections": [
+    {
+      "id": "VALA_LERF3D_PUBLISHED_ATTRIBUTION",
+      "old_source": "paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+      "old_key": "canonical_tasks.concept_lerf3d_vala.headline.paper_percent",
+      "old_values": [
+        43.29,
+        64.3
+      ],
+      "actual_old_method": "Dr. Splat",
+      "correct_values": [
+        58.02,
+        82.85
+      ],
+      "correct_method": "VALA",
+      "source": "vala_lerf",
+      "action": "override only active paper citation; preserve historical freeze and local raw metrics"
+    }
+  ],
+  "aggregation": {
+    "lerf2d": "equal four-scene mean of object means",
+    "lerf3d": "equal four-scene mean of selected-set 2D projections",
+    "scannet": "paper8 Gaussian opacity-volume metric; internal10 mesh metric separately",
+    "nvos": "equal eight-task mean; reproduction averages three seeds first",
+    "uqis": "equal nine-room mean per modality; 67 queries each"
+  },
+  "current_policy": "L11 full residual utility; one checkpoint and one margin",
+  "coverage": {
+    "lerf2d": {
+      "implemented_method": "evaluated v10",
+      "optional_replacement": "provider reference available; learned transfer pending"
+    },
+    "lerf3d": {
+      "implemented_method": "evaluated v10",
+      "optional_replacement": "provider reference available; independent selection transfer pending"
+    },
+    "scannet": {
+      "implemented_method": "evaluated v10",
+      "optional_replacement": "learned full10 scored; all menus retained"
+    },
+    "nvos": {
+      "implemented_method": "evaluated v10",
+      "optional_replacement": "provider reference available; learned transfer pending"
+    },
+    "uqis": {
+      "implemented_method": "evaluated v10",
+      "optional_replacement": "all268 scored; text/image decision applied; point outputs preserved"
+    }
+  },
+  "rules": [
+    "Published rows cite the reporting paper, not an assertion all numbers were rerun by its authors.",
+    "No benchmark-wise or metric-wise selection among learned policies.",
+    "Do not fill pending mechanism results with provider scores.",
+    "UQIS is a local protocol; no external paper numbers exist in this registry.",
+    "No teacher-feature-dimension or representation-system ablation is required for this paper."
+  ],
+  "method_ownership": "v10 and historical component controls are our method; L11 is an optional extension",
+  "extension_coverage": {
+    "lerf2d": "provider reference available; learned transfer pending",
+    "lerf3d": "provider reference available; independent selection transfer pending",
+    "scannet": "learned full10 scored; all menus retained",
+    "nvos": "provider reference available; learned transfer pending",
+    "uqis": "all268 scored; text/image decision applied; point outputs preserved"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "question": "Does early low-resolution erosion discard useful thin/partial target evidence?",
+  "run": "nvos_coverage_evidence_v2",
+  "solver_backend": "CPU CSR for all arms; legacy-low checked against retained GPU v10 fields",
+  "arms": {
+    "legacy_low": {"scale": 1, "evidence": "legacy"},
+    "coverage_low": {"scale": 1, "evidence": "coverage"},
+    "legacy_high": {"scale": 2, "evidence": "legacy"},
+    "coverage_high": {"scale": 2, "evidence": "coverage"}
+  },
+  "solver": {"steps": 120, "huber_clip": 0.25, "step_size": 0.95},
+  "legacy_erosion_radius": "2 times grid scale; same normalized image footprint",
+  "teacher": "unchanged retained SAM3 source tracks",
+  "geometry": "unchanged per-task v10 frozen geometry",
+  "target_rgb_used": false,
+  "target_gt_used_for_prediction": false,
+  "official_positive_prompt_unchanged": true,
+  "threshold": 0.5,
+  "gt_tracks": ["retained_gt_gt127", "ludvig_gt_maximum"],
+  "predictions_sealed_for_all_eight_before_scoring": true,
+  "per_scene_winner_selection": false,
+  "independent_final_test": false,
+  "default_changed": false,
+  "other_benchmarks": "unchanged outputs bound by hashes; no newly claimed intervention",
+  "maximum_new_durable_bytes": 2097152,
+  "maximum_volatile_prediction_bytes": 536870912,
+  "gpu_memory_fraction": 0.23
+}

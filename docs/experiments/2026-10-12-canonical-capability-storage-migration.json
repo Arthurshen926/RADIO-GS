@@ -1,0 +1,71 @@
+{
+  "schema": "radio_gs.canonical_capability_storage_migration_plan.v1",
+  "date_utc": "2026-10-12",
+  "status": "additive_pilot_validated_final_compatibility_artifact_pending",
+  "source": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_compact_d192_l96_caploss_official_dino_sam3_views.pt",
+  "source_sha256": "32726f656a2d3dec836d737b770fd97eb46e201dc8e58a2e66db3a9f12099f05",
+  "source_bytes": 7799615909,
+  "source_allocated_bytes": 7804953088,
+  "pilot": "/mnt/pool/sqy/results/RADIO-GS/output/storage_migration_20261012/fern_caploss_v1/nvos_fern_compact_d192_l96_caploss_official_dino_sam3_views.pt",
+  "pilot_sha256": "cd1b846de79fdf65ee448d50b6462df1dd686fb49e8bcd7886be5c0bec4debff",
+  "pilot_bytes": 3053221463,
+  "pilot_allocated_bytes": 3224408576,
+  "current_net_reclaimed_bytes": 0,
+  "temporary_added_allocated_bytes": 3224408576,
+  "projected_net_allocated_reclaim_after_approved_final_retirement": 4580544512,
+  "pilot_validation": {
+    "source_retained": true,
+    "source_fingerprint_unchanged": true,
+    "xyz_exact": true,
+    "valid_exact": true,
+    "global_rows_exact": true,
+    "all_valid_descriptor_values_exact": true,
+    "signatures_exact": true,
+    "embedded_metadata_and_sidecar_verified": true,
+    "full_historical_consumer_equivalence": false
+  },
+  "compatibility": {
+    "first_pilot_note": "Adds primitive_row_authority, so existing authority-free support graph rejects composition. First pilot and original are both retained.",
+    "final_code_policy": "Preserve original primitive_row_authority presence/absence and values; record independently verified authority in migration receipt. No original authority removed.",
+    "test_result": "22 passed: nine migration tests plus 13 existing capability-cache tests, including real small ZIP large-reader branch and both authority-free/authority-present existing support graph composition.",
+    "final_real_artifact_generated": false,
+    "compatible_shared_readers": [
+      "load_canonical_capability_bank",
+      "load_canonical_support_graph after optional authority preservation",
+      "build_canonical_support_graph compact row mapping"
+    ],
+    "historical_dense_or_frozen_consumers": [
+      "augment_primary_support_graph.py indexes full-domain tensors directly and needs reader adaptation for replay",
+      "train_registered_evidence_to_unary_clean_pilot.py dense assumptions need replay review",
+      "validate_scannet_canonical_mpr_v3_paper8_stage.py binds historical graph source path and receipt hashes; migrated replay must use new explicit paths/receipts"
+    ]
+  },
+  "current_mainline_scope": {
+    "old_tree": "/root/RADIO-GS codex/surface-object-memory-v4, v10 config does not reference canonical_query_features",
+    "active_tree": "/root/RADIO-GS-query-field codex/query-preserving-gaussian-field; public_lerf/public_nvos use exported CapabilityField, no lookup of this capability file",
+    "searched_exact_filename_no_matches": [
+      "both trees configs",
+      "both trees radio_gs/scripts",
+      "query-field docs/experiments"
+    ],
+    "known_historical_dependency": "canonical_query_features/nvos_fern_compact_d192_l96_caploss_shared_support_graph_k16.pt.json records capability_cache pointing to the original"
+  },
+  "deletion_gate": {
+    "approved": false,
+    "original_deleted": false,
+    "requirements": [
+      "Generate final compatibility-preserving compact artifact in a separately isolated I/O window",
+      "Verify final file and existing graph combination, retain old sidecar and both file hashes",
+      "Disclose that historical direct-dense/frozen-hash replay needs explicit new reader/path/receipt",
+      "Obtain explicit approval for exact original payload retirement; do not delete source field/MPR, support graph, sidecar or other variants"
+    ],
+    "loss": "Exact original serialized bytes and old file path disappear on approved removal; mathematical valid descriptor values and provenance remain in new artifact/receipt."
+  },
+  "batch_metadata_inventory": {
+    "scope": "19 old dense canonical capability sidecars in one known canonical_query_features directory; 172819 bytes of JSON read",
+    "projected_payload_reduction_bytes": 40973004800,
+    "payload_hashes_verified_except_pilot": false,
+    "migration_started_except_pilot": false,
+    "warning": "Projection is not observed disk reclamation. No blanket deletion approved."
+  }
+}

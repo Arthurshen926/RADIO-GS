@@ -1,0 +1,69 @@
+{
+  "schema": "radiogs.study_normalization.validation.v1",
+  "date": "2026-10-16",
+  "branch": "codex/tmm-query-response",
+  "scope": "repository entry points, report integrity, method attribution and reproduction limits; no fresh scientific inference",
+  "tests": {
+    "command": "python -m radio_gs.response_study test",
+    "passed": 56,
+    "failed": 0,
+    "seconds": 3.2
+  },
+  "stdlib_only_verification_passed": true,
+  "documentation_links_verified": true,
+  "original_document_snapshots_verified": true,
+  "dry_replay_plans_verified": [
+    "E03",
+    "E04"
+  ],
+  "new_inference_jobs": 0,
+  "new_dense_predictions_bytes": 0,
+  "complete_studies_checked": 4,
+  "prediction_reports_checked": 124,
+  "historical_sources_checked": 42,
+  "normalized_candidate_metric_rows": 128,
+  "missing_source_version_receipts": 8,
+  "missing_distinct_source_versions": 5,
+  "method_provider_maps_checked": 9,
+  "core_admission_transfer_still_open": true,
+  "study_logical_bytes": 2042518591,
+  "study_budget_bytes": 2147483648,
+  "environment": {
+    "python": "3.9.12",
+    "packages": {
+      "torch": "2.0.1+cu118",
+      "numpy": "1.26.4",
+      "scipy": "1.13.1",
+      "scikit-learn": "1.2.2",
+      "matplotlib": "3.9.4",
+      "pytest": "8.4.2",
+      "pypdf": "6.10.2"
+    },
+    "full_environment_reproduction_certified": false
+  },
+  "source_sha256": {
+    "configs/research/tmm_response.json": "2441a23385aa115934ffe34d107d9b5cbf53be55bacfadbfb04922b64299f8b1",
+    "radio_gs/response_study/__init__.py": "fe235b2c1594de57bab66452fdfd033f80f6ebbaace54216191f85cfa3de979f",
+    "radio_gs/response_study/__main__.py": "d463b749f550c8879ba7f9da9ba21f524c865357547a43126a3b19bf5ffe61f2",
+    "radio_gs/response_study/registry.py": "648a7341fb2499347b900fe0f1be29f068e8b4b1145d119cb70d235ab8a6ef33",
+    "scripts/research/build_tmm_method.py": "5621f770db6a6be9e444b9fd2b916a4966c6f4caf2690c2f8c2134a7dbac7318",
+    "README.md": "83d0e8294dd8d23b9122b65a9b70933f9fe5744ac56323d0401fc53dcc2b923f",
+    "CONTEXT.md": "7fdd2e2307aec27bd630071ef3a7d1c2320c12446732f766b707b49f8e0f909d",
+    "paper/tmm_response/README.md": "8d01bf455e7d1f2a9de82e8e6c55ae6de3950647836685f5b933b2e3b984905e",
+    "paper/tmm_response/sections/method.tex": "bc0aed3bcd7303bba03eb26659b4816b55e64ee12ce3bfbe1111d1061fd825ec",
+    "paper/tmm_response/method_manifest.json": "5bd9d7ae1d9ae38d7ab67e46b5bf11ebb1fdab9a8f2d4453ef4fa7d2b3036a88",
+    "paper/tmm_response/method_validation.json": "f950b22a8c2367ad39e10ff2f441d3fc6953dcea7f7c50939327205d56637b4c",
+    "paper/tmm_response/artifacts/study_catalog.json": "273230301bb3294bd37ae43eeb67fe3d2401caf09b58bb9c03cdb688391b80fc",
+    "paper/tmm_response/artifacts/metrics.csv": "89acc344eeb5b583861a40bc503177549316074f90dfca7ead18c6d84e666fd2",
+    "tests/test_response_refinement.py": "65f06bd49b5dc7c6922d90e32c6988d958b50da69fb8197aef4a47d75525b8cc",
+    "tests/test_response_permissions.py": "2ec3421948f2c7dd124084dc6e6bab98a77b5741aeb3630f4939e1cfada9e4f8",
+    "tests/test_response_study_lerf_scoring.py": "bf9064f19f71aaacfb8d4ddc72598583b5c8c4c52f2cb0e71cc03c7baba9b0c6",
+    "tests/test_visibility_refinement.py": "2155fba566d2674793c516417b1d3dbe8f64a99f251cd0b2bb5d565b7ad17844",
+    "tests/test_support_agreement.py": "09d1a454d807622c180b64ea409a54dda5998410913b66e890da81a5872c6aae",
+    "tests/test_transient_response_predictions.py": "f8e182774739b239753ce1468802235435f3041289c6f89976a28f5193f42b24",
+    "tests/test_response_reconstruction.py": "adc62aeeb624c55bf42f8d40be3c933681c41dbba05bbac41b5bf2a12a2238b2",
+    "tests/test_tmm_transient_runtime.py": "5854b19956e6bb88b8463797d42c22241241593f7385661c90a8b277d190e4f8",
+    "tests/test_tmm_ram_predictions.py": "67fb75fcdc3d5c3670792a9db512d0af556f6b7285ec4e97a2d838c9567c36e1",
+    "tests/test_response_study_registry.py": "fffa3e9c516e2c4d019b40c1412888a1566522fe330691e3c2512dddbc845dc0"
+  }
+}

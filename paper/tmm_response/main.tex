@@ -1,0 +1,40 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=23mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
+\setlength{\emergencystretch}{2em}
+\title{From Partial Evidence to Complete 3D Responses:\\Query-Conditioned Evidence Fusion}
+\author{TMM working manuscript --- controlled validation in progress}
+\date{October 18, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Visual teachers provide local evidence for scene queries, but a strong match
+does not establish an object's complete extent or authorize exclusion of its
+surroundings. We study how such evidence can form a complete three-dimensional
+response without conflating missing information with background. We formulate
+query-conditioned evidence fusion: determine which observations refer to the
+target, assign their support and exclusion scope, and combine admitted responses
+through geometry with an output-appropriate objective. An ambiguity argument,
+an exact consensus-attenuation result and an occlusion counterexample explain
+why evidence scope and output semantics matter even with fixed features and
+geometry. The method retains native teacher matching and provides typed
+semantic and complete-membership realizations. For reference queries, it
+completes and admits the reference response before cross-view transport.
+Evaluation covers five task outputs and 31 scene jobs. Matched component
+controls support identity admission, response integration and complete extent;
+in an eight-task NVOS source-only control, reference completion improves IoU
+from 88.01\% to 92.75\% under the same downstream fusion. A separately declared
+target-image-conditioned extension reaches 92.94\% with its primary feasibility
+policy and 93.17\% IoU with 98.95\% AP using its fixed source-quality secondary
+policy. Lower source loss alone does not consistently improve task accuracy.
+Input differences and the opened development cohort delimit the empirical
+claims; the analysis does not guarantee correctness of estimated evidence scope.
+\end{abstract}
+\input{sections/introduction.tex}
+\input{sections/related_work.tex}
+\input{sections/problem_analysis.tex}
+\input{sections/method.tex}
+\input{sections/experiments.tex}
+\input{sections/discussion.tex}
+\input{sections/references.tex}
+\end{document}

@@ -1,0 +1,23 @@
+{
+  "run": "nvos_signed_affinity_v1",
+  "arms": ["v10", "static_image", "static_native", "signed_affinity", "pseudo_affinity", "signed_image", "pseudo_image", "signed_native", "pseudo_native"],
+  "primary_arm": "signed_native",
+  "native_wh": [1008, 756],
+  "source_hw": [384, 512],
+  "solver_steps": 120,
+  "threshold": 0.5,
+  "image_checkpoint": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+  "dino_repository": "/root/.cache/torch/hub/facebookresearch_dinov2_main",
+  "dino_checkpoint": "/root/.cache/torch/hub/checkpoints/dinov2_vitb14_pretrain.pth",
+  "footprint_backend": "gsplat_cuda",
+  "gpu_memory_fraction": 0.38,
+  "maximum_volatile_prediction_bytes": 268435456,
+  "maximum_new_durable_bytes": 1310720,
+  "gt_tracks": ["retained_gt_gt127", "ludvig_gt_maximum"],
+  "metrics": ["iou", "precision", "recall", "accuracy", "average_precision"],
+  "negative_scribble_used": true,
+  "target_rgb_used": true,
+  "target_gt_used_for_prediction": false,
+  "per_task_winners": false,
+  "independent_test": false
+}

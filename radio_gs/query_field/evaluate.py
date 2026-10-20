@@ -13,7 +13,7 @@ from .adapters import pixel_support
 from .contracts import QueryPacket, Support
 from .geometry import selected_alpha
 from .observations import erode, partial_mask_target
-from .storage import load_field, sha256
+from .storage import load_field_versioned, sha256, field_identity, deployment_bytes
 from .train import partial_membership_loss
 
 
@@ -54,7 +54,7 @@ def _summarize(rows):
 
 
 @torch.no_grad()
-def evaluate(output, device="cuda", stages=("untrained", "trained")):
+def evaluate(output, device="cuda", stages=("untrained", "trained"), *, store_root=None):
     root = Path(output)
     target = root / "development.json"
     if target.exists():
@@ -87,7 +87,7 @@ def evaluate(output, device="cuda", stages=("untrained", "trained")):
         raise ValueError('unknown evaluation stage')
     for stage in stages:
         started = time.monotonic()
-        field, export = load_field(root / "models" / stage, device)
+        field, export = load_field_versioned(root / "models" / stage, device, store_root=store_root)
         if str(device).startswith("cuda"):
             torch.cuda.reset_peak_memory_stats()
         rows = []
@@ -151,7 +151,7 @@ def evaluate(output, device="cuda", stages=("untrained", "trained")):
                     print("evaluate", stage, view["frame"], index, "/", len(view["masks"]), flush=True)
             del operator
         payload = dict(summary=_summarize(rows), rows=rows, seconds=time.monotonic()-started,
-            field_sha256=export["files"]["field.pt"]["sha256"], deployment_bytes=export["files"]["field.pt"]["bytes"],
+            field_sha256=field_identity(export), field_schema=export["schema"], deployment_bytes=deployment_bytes(export),
             peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated() if str(device).startswith("cuda") else None)
         (root / f"development_{stage}.json").write_text(json.dumps(payload, indent=2)+"\n")
         report["stages"][stage] = {k:v for k,v in payload.items() if k != "rows"}

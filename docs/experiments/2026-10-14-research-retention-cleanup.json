@@ -1,0 +1,62 @@
+{
+  "schema": "radio_gs.research_retention_cleanup.v1",
+  "status": "completed",
+  "client_date": "2026-10-14",
+  "user_policy": "Preserve new-roadmap baselines, teachers and key controls; obsolete experiments retain code/config/log/results, and their unique weights need not be individually recovered.",
+  "allocated_bytes_removed": 524765953536,
+  "allocated_GiB_removed": 488.7263789176941,
+  "unique_files_deleted": 512,
+  "duplicate_archives_shared": 95,
+  "duplicate_paths_preserved": 140,
+  "actions": [
+    {
+      "kind": "retired_query_field_controls_and_small_caches",
+      "files": 387,
+      "GiB": 223.30279684066772
+    },
+    {
+      "kind": "retired_legacy_ScanNet_VPR_sweeps",
+      "files": 125,
+      "GiB": 78.71025705337524
+    },
+    {
+      "kind": "byte_identical_archive_sharing",
+      "groups": 45,
+      "extra_copies": 95,
+      "GiB": 186.71332502365112
+    }
+  ],
+  "preserved": {
+    "obsolete_control_representative_weights": 20,
+    "legacy_baseline_and_ancestor_weights": 132,
+    "current_v10_reference_paths_checked": 1465,
+    "new_missing_v10_paths": [],
+    "teacher_asset_inventory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_cleanup_20261014/retained_teacher_presence.json",
+    "retention_policy": "/mnt/pool/sqy/results/RADIO-GS/output/storage_cleanup_20261014/research_retention_policy.json",
+    "all_experiment_configs_logs_predictions_and_scientific_reports": true
+  },
+  "validation": {
+    "duplicate_archives_full_sha256": 140,
+    "duplicate_manifests_unchanged": 140,
+    "atomic_replacement_tests_passed": 3,
+    "retained_UQIS_v2_CPU_cold_load": "passed",
+    "benchmark_metrics_not_rerun": true,
+    "large_unique_retired_weights_not_rehashed": true
+  },
+  "irreversible_limit": "Exact obsolete weights deleted under the user-approved retention policy are not guaranteed reproducible. Their saved predictions/reports do not substitute for those original weights.",
+  "sharing_limit": "Frozen identical archives are hardlinked and read-only; each manifest and path remains. Future training must use fresh output directories; do not edit shared archives in place. Logical deployment model size is unchanged.",
+  "prior_retirement_note": "UQIS scene0535_00 measure archive was already retired on 2026-10-13; explicit v2 package/store mapping is recorded and current CPU loading passed.",
+  "disk_usage_final": {
+    "total": 47827539460096,
+    "used": 46453502246912,
+    "free": 1374037213184
+  },
+  "accounting_limit": "File allocated blocks removed are reported. Shared NFS/backend free space changes and snapshots are not exclusively attributable. The whole-output du was stopped before completion and is not used for before/after totals.",
+  "artifact_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_cleanup_20261014",
+  "executed_plans": [
+    "/mnt/pool/sqy/results/RADIO-GS/output/storage_cleanup_20261014/retirement_plan.json",
+    "/mnt/pool/sqy/results/RADIO-GS/output/storage_cleanup_20261014/legacy_sweep_retirement_plan_v2.json"
+  ],
+  "superseded_unexecuted_plan": "/mnt/pool/sqy/results/RADIO-GS/output/storage_cleanup_20261014/legacy_sweep_retirement_plan.json",
+  "finished_unix": 1791951475.7959514
+}

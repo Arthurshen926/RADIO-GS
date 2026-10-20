@@ -1,0 +1,47 @@
+{
+  "schema": "radiogs.region_provenance_validation.v1",
+  "date": "2026-10-19",
+  "component_audit": {
+    "path": "docs/experiments/2026-10-19-shared-core-component-audit-v6.json",
+    "sha256": "a1996b713eee8da8177c7f035ebb53e6d1b6682797c9a58200c971bd9a56309a",
+    "jobs": 31,
+    "comparisons": 349
+  },
+  "recovery": {
+    "path": "output/shared_evidence_20261018/region_provenance_20261019_v1/report.json",
+    "sha256": "9b813b44d8028911db01d73bc5f780f7b9326d448fb48437809b761d4e7f0019",
+    "fields": 20,
+    "source_views": 1158,
+    "native_regions": 73905,
+    "metadata_bytes": 3728810,
+    "compared_logits": 59659050,
+    "original_assets_rewritten": false,
+    "replacement_encoder_replayed": false,
+    "source_mask_pixels_replayed": false,
+    "independent_visibility_recovered": false
+  },
+  "tests": {
+    "legacy": {
+      "passed": 239,
+      "skipped": 1,
+      "skip_reason": "CUDA/NVCC renderer test; CUDA_VISIBLE_DEVICES empty",
+      "command": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. RADIO_GS_EVIDENCE_CORE=legacy /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.response_study test"
+    },
+    "shared_v1": {
+      "passed": 239,
+      "skipped": 1,
+      "skip_reason": "CUDA/NVCC renderer test; CUDA_VISIBLE_DEVICES empty",
+      "command": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. RADIO_GS_EVIDENCE_CORE=shared_v1 /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.response_study test"
+    }
+  },
+  "preflight": {
+    "path": "output/shared_evidence_20261018/region_provenance_preflight_20261019_v1/manifest.json",
+    "sha256": "39b8be62fe99aae78f1fadd0d4b5f48a6e75ac906773dfa3af34659b679cd59a",
+    "ready_gpus": [],
+    "inference_started": false
+  },
+  "source_bindings_current": true,
+  "full_benchmark_evaluation": false,
+  "new_mechanism_effect_validated": false,
+  "default_promoted": false
+}

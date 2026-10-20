@@ -1,0 +1,33 @@
+{
+  "schema": "radio_gs.unified_compact_pilot.v1",
+  "observations": "output/query_field_20261007/five_benchmark_v1/scannet/scene0062_00/observations",
+  "arms": ["reconstruction", "functional"],
+  "latent_dim": 96,
+  "hidden_dim": 64,
+  "seed": 20261015,
+  "steps": 600,
+  "learning_rate": 0.001,
+  "pairs": 32,
+  "reconstruction_rows": 512,
+  "pca_rows": 4096,
+  "validation_every": 100,
+  "validation_episodes": 48,
+  "functional_weight": 1.0,
+  "membership_weight": 0.25,
+  "checkpoint_budget_bytes": 201326592,
+  "export_budget_bytes": 134217728,
+  "storage": {
+    "study_bytes": 8589934592,
+    "run_bytes": 1073741824,
+    "artifact_bytes": 268435456,
+    "reserve_bytes": 21474836480
+  },
+  "supervision": {
+    "semantic": "frozen SigLIP2 legal mapping observations",
+    "appearance": "frozen DINOv2 legal mapping observations",
+    "membership": "SAM query-free partial masks; unknown pixels excluded",
+    "extra_3d_labels": false,
+    "benchmark_queries_for_training": false
+  },
+  "status": "source-disjoint-view development pilot; not five-benchmark closure"
+}

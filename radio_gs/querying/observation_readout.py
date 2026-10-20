@@ -13,7 +13,8 @@ def native_identity(descriptors, queries):
 
 def project_observations(operator, values):
     """Project evidence with the declared mesh or rendering-derived operator."""
-    return operator @ values
+    from radio_gs import evidence_core
+    return evidence_core.project(operator, values) if evidence_core.enabled() else operator @ values
 
 
 def positive_support_rank(native_rank, support):

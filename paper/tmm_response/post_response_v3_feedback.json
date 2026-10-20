@@ -1,0 +1,695 @@
+{
+  "schema": "tmm.response_refinement.all_five_feedback.v1",
+  "run": "post_response_v3",
+  "rows": [
+    {
+      "family": "lerf",
+      "metric": "semantic_iou",
+      "label": "LERF2D IoU",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 70.40067569509945,
+        "scope": 70.54744676600673,
+        "matched": 70.54321291602656
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.14677107090727837,
+          "scene_bootstrap95_pp": [
+            0.09292211187045263,
+            0.2023606297587438
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 0,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": 0.1425372209271275,
+          "scene_bootstrap95_pp": [
+            0.08656694179173807,
+            0.19850750006251694
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 0,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": 0.004233849980150861,
+        "scene_bootstrap95_pp": [
+          0.00118223297131681,
+          0.0075953405067635815
+        ],
+        "improved_scenes": 4,
+        "degraded_scenes": 0,
+        "scene_count": 4,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "lerf",
+      "metric": "ap",
+      "label": "LERF2D AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 87.61927775455382,
+        "scope": 87.62608973278073,
+        "matched": 87.60362964937866
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.006811978226922699,
+          "scene_bootstrap95_pp": [
+            -0.06616116569233554,
+            0.08648982250142045
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 2,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -0.015648105175156135,
+          "scene_bootstrap95_pp": [
+            -0.07111013136183175,
+            0.0421481363133247
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 3,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": 0.022460083402078834,
+        "scene_bootstrap95_pp": [
+          -0.0022399644973580823,
+          0.04716013130151575
+        ],
+        "improved_scenes": 2,
+        "degraded_scenes": 2,
+        "scene_count": 4,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "lerf",
+      "metric": "selected_projection_iou",
+      "label": "LERF selected projection IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 66.96327365836882,
+        "scope": 66.96327365836882,
+        "matched": 66.96327365836882
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "matched": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "metric": "iou",
+      "label": "NVOS IoU",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 86.5134172141552,
+        "scope": 86.49444505572319,
+        "matched": 86.49449497461319
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": -0.018972158432006836,
+          "scene_bootstrap95_pp": [
+            -0.07823895130838668,
+            0.014726056584290052
+          ],
+          "improved_scenes": 5,
+          "degraded_scenes": 2,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -0.018922239542007446,
+          "scene_bootstrap95_pp": [
+            -0.07816519056047712,
+            0.01487044617533681
+          ],
+          "improved_scenes": 5,
+          "degraded_scenes": 2,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": -4.991888999938965e-05,
+        "scene_bootstrap95_pp": [
+          -0.0001685959952218192,
+          6.159146626790364e-05
+        ],
+        "improved_scenes": 2,
+        "degraded_scenes": 3,
+        "scene_count": 7,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "nvos",
+      "metric": "ap",
+      "label": "NVOS AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 98.02224516003605,
+        "scope": 98.00641825329754,
+        "matched": 98.00642329343665
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": -0.015826906738514168,
+          "scene_bootstrap95_pp": [
+            -0.03301554621772396,
+            -0.003011002090534077
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 5,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -0.01582186659938728,
+          "scene_bootstrap95_pp": [
+            -0.0329994617823709,
+            -0.003038025519078494
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 5,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": -5.040139126888388e-06,
+        "scene_bootstrap95_pp": [
+          -7.949522850627031e-05,
+          3.6069865924602526e-05
+        ],
+        "improved_scenes": 3,
+        "degraded_scenes": 4,
+        "scene_count": 7,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_19",
+      "label": "ScanNet mIoU19",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 61.011490548066284,
+        "scope": 61.11270586465374,
+        "matched": 61.03112597241386
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.10121531658746186,
+          "scene_bootstrap95_pp": [
+            -0.1892099965066707,
+            0.45858168934805815
+          ],
+          "improved_scenes": 5,
+          "degraded_scenes": 5,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": 0.019635424347571595,
+          "scene_bootstrap95_pp": [
+            -0.2571724184624007,
+            0.3306446385533951
+          ],
+          "improved_scenes": 5,
+          "degraded_scenes": 5,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": 0.08157989223989026,
+        "scene_bootstrap95_pp": [
+          -0.020197111936952974,
+          0.21709578209726826
+        ],
+        "improved_scenes": 6,
+        "degraded_scenes": 4,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_15",
+      "label": "ScanNet mIoU15",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 62.527589041597786,
+        "scope": 62.54679475815863,
+        "matched": 62.45670236922993
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.019205716560852237,
+          "scene_bootstrap95_pp": [
+            -0.26054686487624584,
+            0.379760272324259
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 6,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -0.0708866723678514,
+          "scene_bootstrap95_pp": [
+            -0.37594503062834533,
+            0.2495105149245665
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 6,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": 0.09009238892870364,
+        "scene_bootstrap95_pp": [
+          -0.031932695163516406,
+          0.25957397767241847
+        ],
+        "improved_scenes": 4,
+        "degraded_scenes": 6,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_10",
+      "label": "ScanNet mIoU10",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 72.48606102956524,
+        "scope": 72.155081157193,
+        "matched": 72.09782810077449
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": -0.33097987237223125,
+          "scene_bootstrap95_pp": [
+            -0.6989565888588875,
+            -0.08311442806259395
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 8,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -0.38823292879072824,
+          "scene_bootstrap95_pp": [
+            -0.8169660692346785,
+            -0.10668411304339981
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 8,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": 0.057253056418496984,
+        "scene_bootstrap95_pp": [
+          0.016321312529563314,
+          0.12268504205355338
+        ],
+        "improved_scenes": 8,
+        "degraded_scenes": 1,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "text_ap",
+      "label": "UQIS text AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 26.595870475621116,
+        "scope": 26.096890791728793,
+        "matched": 26.594086290336698
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": -0.49897968389231806,
+          "scene_bootstrap95_pp": [
+            -1.0745230480398467,
+            -0.0073401386724997
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 7,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -0.0017841852844148619,
+          "scene_bootstrap95_pp": [
+            -0.03389936119359264,
+            0.04051877284939455
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 5,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": -0.49719549860790324,
+        "scene_bootstrap95_pp": [
+          -1.0957426085776956,
+          0.017620717621634883
+        ],
+        "improved_scenes": 3,
+        "degraded_scenes": 6,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "text_selected_iou",
+      "label": "UQIS text actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 16.386530164545416,
+        "scope": 16.386530164545416,
+        "matched": 16.386530164545416
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "matched": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "image_ap",
+      "label": "UQIS image AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 59.308781794005874,
+        "scope": 57.499577369772936,
+        "matched": 58.372376221487364
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": -1.8092044242329193,
+          "scene_bootstrap95_pp": [
+            -3.0153930101972155,
+            -0.6818334722756395
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -0.9364055725184939,
+          "scene_bootstrap95_pp": [
+            -1.515884118389564,
+            -0.2987778827038942
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": -0.8727988517144255,
+        "scene_bootstrap95_pp": [
+          -1.6106679310220964,
+          -0.2544959235859429
+        ],
+        "improved_scenes": 1,
+        "degraded_scenes": 8,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "image_selected_iou",
+      "label": "UQIS image actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 39.897960281086924,
+        "scope": 39.897960281086924,
+        "matched": 39.897960281086924
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "matched": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_2d_ap",
+      "label": "UQIS point_2d AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 75.79009711011095,
+        "scope": 73.33585327294497,
+        "matched": 73.92805727416103
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": -2.4542438371659827,
+          "scene_bootstrap95_pp": [
+            -4.235887929698704,
+            -0.99047354857794
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -1.8620398359499124,
+          "scene_bootstrap95_pp": [
+            -3.5983982075781267,
+            -0.5759192715847822
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": -0.5922040012160702,
+        "scene_bootstrap95_pp": [
+          -0.9354526550270029,
+          -0.28237087353266066
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 9,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_2d_selected_iou",
+      "label": "UQIS point_2d actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 49.73567540572873,
+        "scope": 49.73567540572873,
+        "matched": 49.73567540572873
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "matched": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_3d_ap",
+      "label": "UQIS point_3d AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 75.32525076702996,
+        "scope": 73.02673876296244,
+        "matched": 73.91050290941881
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": -2.2985120040675198,
+          "scene_bootstrap95_pp": [
+            -3.7361794963928143,
+            -0.9554654646194504
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "matched": {
+          "delta_pp": -1.4147478576111427,
+          "scene_bootstrap95_pp": [
+            -2.8157318068910664,
+            -0.38022092046151673
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 7,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "scope_vs_matched": {
+        "delta_pp": -0.883764146456377,
+        "scene_bootstrap95_pp": [
+          -1.559628910492141,
+          -0.30619764301385805
+        ],
+        "improved_scenes": 2,
+        "degraded_scenes": 7,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_3d_selected_iou",
+      "label": "UQIS point_3d actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 49.04698335651834,
+        "scope": 49.04698335651834,
+        "matched": 49.04698335651834
+      },
+      "effects": {
+        "scope": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "matched": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    }
+  ],
+  "corrections": {
+    "lerf": {
+      "scope": {
+        "corrected": 7370,
+        "harmed": 6348
+      },
+      "matched": {
+        "corrected": 7320,
+        "harmed": 6160
+      }
+    },
+    "nvos": {
+      "scope": {
+        "corrected": 4414,
+        "harmed": 8617
+      },
+      "matched": {
+        "corrected": 4420,
+        "harmed": 8624
+      }
+    },
+    "scannet": {
+      "scope": {
+        "corrected": 6074,
+        "harmed": 5422
+      },
+      "matched": {
+        "corrected": 6201,
+        "harmed": 5835
+      }
+    }
+  },
+  "correction_units": {
+    "lerf": "query pixels",
+    "nvos": "pixels",
+    "scannet": "valid19-class points"
+  },
+  "summary_sha256": "38e91a02da7fa28ecb1a24c616d3a9680a07fd9b0c83e7e44454eb96e738ee45",
+  "independent_test": false,
+  "default_changed": false,
+  "query_or_task_winner_selection": false,
+  "experimental_input": "retained frozen v10 responses; no fresh end-to-end claim",
+  "controlled_intervention": "spatial allocation of a matched signed correction budget",
+  "confidence_intervals": "opened development cohort; descriptive paired scene bootstrap",
+  "nvos_scene_cluster_note": "resample seven scene clusters; two horns requests stay together; weighted estimate retains eight-request mean"
+}

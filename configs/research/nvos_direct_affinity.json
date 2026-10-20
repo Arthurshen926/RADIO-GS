@@ -1,0 +1,38 @@
+{
+  "run": "nvos_direct_affinity_v2",
+  "parent_run": "nvos_signed_affinity_v1",
+  "arms": [
+    "v10",
+    "static_native",
+    "signed_native",
+    "pseudo_native",
+    "signed_direct_native",
+    "pseudo_direct_native"
+  ],
+  "primary_arm": "signed_direct_native",
+  "native_wh": [
+    1008,
+    756
+  ],
+  "source_hw": [
+    384,
+    512
+  ],
+  "solver_steps": 120,
+  "threshold": 0.5,
+  "footprint_backend": "gsplat_cuda",
+  "gpu_memory_fraction": 0.38,
+  "maximum_volatile_prediction_bytes": 268435456,
+  "maximum_new_durable_bytes": 524288,
+  "gt_tracks": [
+    "retained_gt_gt127",
+    "ludvig_gt_maximum"
+  ],
+  "metrics": [
+    "iou",
+    "precision",
+    "recall",
+    "accuracy",
+    "average_precision"
+  ]
+}

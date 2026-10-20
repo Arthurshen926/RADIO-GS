@@ -14,12 +14,12 @@ import torch
 
 from radio_gs.query_field.cold_check import outputs
 from radio_gs.query_field.runtime import QueryFieldRuntime
-from radio_gs.query_field.storage import load_field, sha256
+from radio_gs.query_field.storage import load_field, load_field_versioned, sha256
 from scripts.research.run_query_field_relations import ROOT, ARMS, read, write, receipt, check
 
 
-def results(field_path, fixture, mode):
-    field, _ = load_field(field_path, 'cuda')
+def results(field_path, fixture, mode, *, store_root=None, device='cuda'):
+    field, _ = load_field_versioned(field_path, device, store_root=store_root)
     runtime = QueryFieldRuntime(field) if mode == 'common_program' else field
     answer = outputs(runtime, fixture)
     if mode == 'common_program':

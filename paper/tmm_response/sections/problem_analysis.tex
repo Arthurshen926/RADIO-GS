@@ -1,0 +1,83 @@
+\section{Problem formulation and analysis}
+\label{sec:analysis}
+Let $\mathcal C=\{1,\ldots,N\}$ be a fixed scene carrier and $q$ a query.
+The ideal response $r_q^*$ specifies target membership or semantic relevance
+over that carrier. An observation supplies a bounded response $y_e$, a geometric
+observation operator $A_e$, and query-dependent information about its scope.
+A deployed answer is $\widehat a_q=\mathcal R_t(r_q)$, where the output type $t$
+determines the readout $\mathcal R_t$. The evidence-to-response problem is to
+estimate $r_q$ from the legally available observations without silently adding
+negative information or changing the meaning of $\mathcal R_t$.
+
+We distinguish \emph{applicability}, whether an observation refers to the
+requested identity, from \emph{spatial authority}, the locations at which it
+can provide support or exclusion. Reliability weights the strength of already
+admitted evidence. These quantities need not be calibrated probabilities.
+Unknown locations supply neither positive nor negative labels; an output
+adapter may still need a declared default where no observation is available.
+
+\paragraph{Proposition 1: partial scope does not identify complete extent.}
+Suppose the only constraints on binary membership are $r_i^*=1$ for $i\in P$
+and $r_i^*=0$ for $i\in N$, with disjoint $P,N$ and a nonempty unknown set
+$U=\mathcal C\setminus(P\cup N)$. If no other observation or constraint
+distinguishes assignments on $U$, complete membership is not identifiable.
+
+\emph{Proof.} Pick $j\in U$. Two assignments can agree everywhere except at
+$j$, taking values zero and one there, while satisfying every supplied
+constraint. An estimator given identical evidence returns the same answer
+for both and cannot be correct on both. $\square$
+
+This elementary ambiguity result does not assert that the full RGB input is
+uninformative. Additional image evidence, native correspondence or learned
+membership can resolve an ambiguity. It shows why the complement of a partial
+positive observation is not, by itself, an observed negative. Our estimated
+completion supplies a hypothesis about that missing scope, not a proof of it.
+
+\paragraph{Proposition 2: false exclusion attenuates direct consensus.}
+For one carrier element, let the effective evidence and fixed-prior mass be
+$D>0$, numerator $S$, and response $r=S/D\in[0,1]$. Add incorrectly authorized
+negative evidence with response zero and total effective mass $u\geq0$,
+holding all previous weights, priors and correspondences fixed. Then
+\begin{equation}
+ r'=\frac{S}{D+u},\qquad r-r'=\frac{ru}{D+u}.
+ \label{eq:attenuation}
+\end{equation}
+If a positive decision uses $r\geq\tau>0$, it flips to negative exactly when
+$u>D(r/\tau-1)$.
+
+\emph{Proof.} Zero-valued evidence adds $u$ to the denominator and nothing to
+the numerator. Subtraction gives Equation~\ref{eq:attenuation}; rearranging
+$S/(D+u)<\tau$ gives the threshold condition. $\square$
+
+The result applies to the direct consensus operator with fixed existing mass,
+not to every robust solver or learned member decoder. It holds with correct
+geometry: better alignment cannot repair invalid exclusion authority. It also
+does not justify deleting valid negatives. Signed-hint controls test that
+separate issue empirically.
+
+\paragraph{Counterexample: membership and semantic rendering do not commute.}
+Consider a ray with an unselected front Gaussian of opacity $a\in(0,1)$ and
+a selected rear Gaussian of opacity $b\in(0,1)$. The normalized full-scene
+member response and the opacity of the selected set are respectively
+\begin{equation}
+ s_{\mathrm{full}}=\frac{(1-a)b}{a+(1-a)b},\qquad
+ \alpha_{\mathrm{selected}}=b.
+ \label{eq:readout-counterexample}
+\end{equation}
+With $a=0.9,b=0.2$, they are approximately $0.0217$ and $0.2$.
+They produce different answers under the retained semantic threshold $0.5$
+and selected-opacity threshold $10/255$. Removing the front Gaussian changes
+transmittance; it is not just thresholding a value in the original renderer.
+Thus preserving a selection capability requires preserving its objective and
+readout, not only its underlying features. This is a constructive counterexample,
+not an accuracy guarantee or a claim that all rays disagree.
+
+\paragraph{Consequences for method and evaluation.}
+These statements motivate three linked decisions within one mechanism:
+admit evidence for the requested identity, estimate its support/exclusion
+scope, and form the response with a compatible forward model and readout.
+They predict that reconstructing incorrect evidence more accurately can retain
+or amplify its errors. They do not predict the sign or magnitude of a benchmark
+gain. We test the corresponding design choices with fixed-evidence solver
+controls, matched reference-scope interventions and separate semantic/selection
+evaluation, rather than treating lower source loss as evidence of correctness.

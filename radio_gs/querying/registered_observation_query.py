@@ -114,15 +114,20 @@ def public_queries(path, scene):
 
 
 @torch.inference_mode()
-def run(map_root, public, output, device='cuda',scope_transfer=False,instance_scope=False):
+def run(map_root, public, output, device='cuda',scope_transfer=False,instance_scope=False,member_chunk_size=None):
     started=time.monotonic();torch.set_num_threads(4)
     spec=json.loads((map_root/'map.json').read_text());scene=spec['scene_id']
     xyz=np.load(map_root/'mesh_xyz.npy');tree=cKDTree(xyz);surface=local_surface(xyz,tree)
     descriptors=np.load(map_root/'descriptors.npy').astype(np.float32)
     descriptors/=np.maximum(np.linalg.norm(descriptors,axis=1,keepdims=True),1e-8)
     transfer=sparse.load_npz(map_root/'transfer.npz')
-    membership=sparse.load_npz(map_root/'membership.npz');visibility=sparse.load_npz(map_root/'visibility.npz')
-    region_frames=np.repeat(np.arange(visibility.shape[1]),np.diff(np.load(map_root/'region_offsets.npy')))
+    from radio_gs import evidence_core
+    if evidence_core.enabled():
+        from radio_gs.evidence_core.store import EvidenceStore
+        membership,visibility,region_frames=EvidenceStore.open(map_root/'map.json').registered_relations()
+    else:
+        membership=sparse.load_npz(map_root/'membership.npz');visibility=sparse.load_npz(map_root/'visibility.npz')
+        region_frames=np.repeat(np.arange(visibility.shape[1]),np.diff(np.load(map_root/'region_offsets.npy')))
     positive_membership=sparse.load_npz(map_root/spec['positive_membership']) if spec.get('positive_membership') else None
     surface_consistency=None
     if spec.get('surface_consistency'):
@@ -161,7 +166,7 @@ def run(map_root, public, output, device='cuda',scope_transfer=False,instance_sc
     if instance_scope and spec.get('direct_anchor_membership'):
         from .direct_anchor_membership import DirectAnchorMembership
         direct_anchor_reader=DirectAnchorMembership(membership,visibility,region_frames,xyz,
-            descriptors,transfer,spec['direct_anchor_membership']['checkpoint'])
+            descriptors,transfer,spec['direct_anchor_membership']['checkpoint'],chunk_size=member_chunk_size)
     query_member_reader=None
     if instance_scope and spec.get('query_conditioned_membership'):
         from .query_conditioned_membership import QueryConditionedMembership
@@ -169,6 +174,13 @@ def run(map_root, public, output, device='cuda',scope_transfer=False,instance_sc
             descriptors,transfer,spec['query_conditioned_membership']['checkpoint'])
     supported=transfer.getnnz(axis=1)>0
     queries,public=public_queries(public,scene)
+    crop_paths={}
+    if evidence_core.enabled():
+        from radio_gs.evidence_core.query_contracts import validate_public_query,authorized_crop_path
+        for query in queries:
+            validate_public_query(query)
+            if query['modality']=='image':
+                crop_paths[query['query_id']]=authorized_crop_path(public,query)
     encodings={}; anchors={}; details={};appearance_encodings={};query_patches={};query_patch_weights={}
     dual_image=spec.get('image_identity_fusion')=='equal_rank'
     text_queries=[q for q in queries if q['modality']=='text']
@@ -215,7 +227,7 @@ def run(map_root, public, output, device='cuda',scope_transfer=False,instance_sc
             encoder=NativeRegionAppearance(spec['image_native']['encoder'],device=device,repository=spec['image_native']['repository'])
         else:encoder=NativeSiglip2Runtime.load(Path(spec['native_encoder']),device=torch.device(device))
         for q in image_queries:
-            image=Image.open(public/q['crop_rgb_path']).convert('RGB')
+            image=Image.open(crop_paths.get(q['query_id'],public/q['crop_rgb_path'])).convert('RGB')
             if spec.get('image_native'):
                 if spec.get('image_local_match'):
                     local,valid=encoder.patches(image)
@@ -232,7 +244,7 @@ def run(map_root, public, output, device='cuda',scope_transfer=False,instance_sc
         if dual_image:
             encoder=NativeSiglip2Runtime.load(Path(spec['native_encoder']),device=torch.device(device))
             for q in image_queries:
-                image=Image.open(public/q['crop_rgb_path']).convert('RGB').resize((384,384),Image.Resampling.BICUBIC)
+                image=Image.open(crop_paths.get(q['query_id'],public/q['crop_rgb_path'])).convert('RGB').resize((384,384),Image.Resampling.BICUBIC)
                 pixels=torch.from_numpy(np.array(image,copy=True)).permute(2,0,1).float()[None]/255
                 encodings[q['query_id']]=encoder.encode(pixels)[0].cpu().numpy()
             del encoder;torch.cuda.empty_cache()
@@ -510,7 +522,9 @@ def main():
     p.add_argument('--public',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
     p.add_argument('--scope-transfer',action='store_true')
     p.add_argument('--instance-scope',action='store_true')
-    a=p.parse_args();run(a.map,a.public,a.output,scope_transfer=a.scope_transfer,instance_scope=a.instance_scope)
+    p.add_argument('--member-chunk-size',type=int,help='Temporary member feature rows; all elements remain in the output')
+    a=p.parse_args();run(a.map,a.public,a.output,scope_transfer=a.scope_transfer,instance_scope=a.instance_scope,
+                        member_chunk_size=a.member_chunk_size)
 
 
 if __name__=='__main__':main()

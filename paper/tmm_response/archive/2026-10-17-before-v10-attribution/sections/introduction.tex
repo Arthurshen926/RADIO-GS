@@ -1,0 +1,34 @@
+\section{Introduction}
+Open-vocabulary scene models support language, reference-image and spatial
+queries by connecting semantic evidence to a three-dimensional scene. Their
+outputs must satisfy both identity and extent: locating the right object does
+not ensure that its complete support is recovered. A response that agrees
+better with one observation may omit occluded parts, merge distractors or
+replace a correct answer unnecessarily. Preserving teacher features alone
+therefore does not preserve a system's effective query abilities.
+
+We investigate a focused question: \emph{given an existing complete answer and
+alternative answers from fixed providers, which observable evidence justifies
+replacement?} This moves the research variable to the final decision. We retain
+native teacher matching, geometric carriers and complete decoders, and predict
+relative task utility rather than interpreting teacher similarity as answer
+quality. The incumbent is an explicit candidate; acceptance returns an intact
+alternative rather than a patchwork of elements from different answers.
+
+The proposed mechanism has three connected steps. It constructs complete
+candidates with their continuous response and actual selection; summarizes
+query association and regional overlap in teacher-order-invariant coordinates;
+and applies one shared utility comparison with calibrated retention. We also
+derive an exact finite-candidate decomposition of performance into available
+gain and decision regret. This decomposition makes failures testable: inadequate
+candidates, incorrect ranking and excessive or beneficial retention have
+different implications for the next experiment.
+
+Our contribution claims are tied to tests. The complete-answer formulation
+establishes a common intervention without changing representations. The
+query-conditioned decision must outperform controls that remove or permute
+query correspondence. Selective retention must improve the repair--harm tradeoff
+relative to the same model without a positive margin. These tests require no
+feature-dimension, compression or combinatorial system ablations. The present
+paper reports the completed comparisons and controls, while identifying the
+remaining experiments needed to establish the central empirical claim.

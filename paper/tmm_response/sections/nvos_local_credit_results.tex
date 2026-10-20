@@ -1,0 +1,5 @@
+The predeclared held-local arm obtains 87.5538\% IoU and 98.2704\% AP on retained GT.
+Relative to the original v10, its mean IoU change is +1.0403 points (8 improved, 0 harmed), with a descriptive seven-scene bootstrap interval [+0.6636, +1.5292].
+Relative to coverage, its mean IoU change is -0.2238 points (1 improved, 7 harmed), with a descriptive seven-scene bootstrap interval [-0.5000, -0.0479].
+Relative to matched uniform attenuation, its mean IoU change is +0.3209 points (7 improved, 1 harmed), with a descriptive seven-scene bootstrap interval [+0.0750, +0.6771].
+On the final fields, the common-source Huber objective is below the anchor for 8/8 held-local and 8/8 matched-uniform outputs. These fields use all source constraints, so this objective is not an independent validation score. The teacher-source criterion and target quality must be assessed separately.

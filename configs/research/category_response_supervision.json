@@ -1,0 +1,16 @@
+{
+  "source": "output/native_phrase_binding_20261006",
+  "raw_source": "output/real_referent_grounding_20261005",
+  "target_run": "cross_task_targets_v1",
+  "class_ids": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 24, 28, 33, 34, 36],
+  "teachers": ["original SigLIP2 giant", "original pretrained Mask-Adapter ConvNeXt CLIP", "literal-category SAM3 source evidence"],
+  "region_carrier": "all original query-independent regions and views; exact original order",
+  "native_cache": "float32 region-by-19-class cosine responses only; original descriptor/query fp16 storage round trip",
+  "image_input": "original RGB from registered .sens, with original SAM masks in normalized image coordinates; original Mask-Adapter 800/1333 preprocessing",
+  "query_text": "exact 19 class names; no templates or synonyms",
+  "new_representation_training": false,
+  "benchmark_answers_read": false,
+  "benchmark_labels_read": false,
+  "default_changed": false,
+  "native_stage_is_full_source_supervision": false
+}

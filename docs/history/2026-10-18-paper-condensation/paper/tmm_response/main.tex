@@ -1,0 +1,44 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=23mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
+\setlength{\emergencystretch}{2em}
+\title{Query-Conditioned Evidence Fusion for Reliable 3D Scene Responses}
+\author{TMM working manuscript --- controlled validation in progress}
+\date{October 17, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Strong visual teachers provide useful but incomplete evidence for scene queries.
+Matching an observed region does not determine whether its surroundings are
+background or whether it contains the complete requested object. We study how
+query evidence should be admitted and combined into a three-dimensional response.
+Our method separates query applicability, spatial evidence authority and
+geometric aggregation, with typed semantic and complete-instance readouts. It
+preserves native matching without requiring a new common feature representation.
+The v10 system is our implementation, evaluated across five outputs in 31 scene
+jobs. It obtains 70.40\% LERF semantic IoU, 66.96\% selected-set projection IoU,
+61.01\% ScanNet 19-class mesh mIoU and 86.51\% NVOS IoU, with four query modalities
+evaluated on UQIS. Historical paired controls connect identity admission,
+admitted-response use, local image correspondence and complete membership to
+their measured effects. Input and metric differences are disclosed for external
+comparisons. Further controls show why lower source loss and response replacement
+alone do not ensure better answers. A fixed eight-task NVOS study improves IoU
+from 86.51\% to 87.78\% by changing source evidence construction and sampling,
+with the original teachers, geometry and output threshold retained. An explicitly
+image-conditioned extension that completes and admits reference responses reaches
+93.17\% after native-ray 3D writeback, with 98.95\% AP; its direct image output
+reaches 93.50\%. This is the fixed source-quality secondary policy; the declared
+source-feasibility primary reaches 92.94\% 3D IoU. Both are measured on all eight
+tasks, with original negative scribbles and frozen DINOv2 explicitly added.
+These are separate access
+conditions, not a single input-identical improvement. The framework has effective typed
+implementations; one learned rule with gains across every query type is not
+established by the present evidence.
+\end{abstract}
+\input{sections/introduction.tex}
+\input{sections/related_work.tex}
+\input{sections/method.tex}
+\input{sections/experiments.tex}
+\input{sections/discussion.tex}
+\input{sections/references.tex}
+\end{document}

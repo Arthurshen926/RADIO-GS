@@ -1,0 +1,22 @@
+{
+  "schema": "radio_gs.unified_five_benchmark.v1",
+  "cohort": "configs/query_field/five_benchmark_v1/cohort.json",
+  "training_recipe": "configs/query_field/unified_compact_pilot.json",
+  "study_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_five_20261015/study",
+  "architecture": "unified_compact_v1",
+  "arm": "functional",
+  "all_teachers": ["SigLIP2", "DINOv2", "SAM"],
+  "benchmark_gate": ["lerf2d", "lerf3d_local_projection", "nvos", "scannet_ovs", "uqis"],
+  "source_supervision_only": true,
+  "allow_benchmark_specific_recipe": false,
+  "train_python": "/tmp/radiogs-unified-env/bin/python",
+  "predict_python": "/root/miniconda3/envs/cybersim_agent/bin/python",
+  "cuda_memory_fraction": 0.45,
+  "storage": {
+    "study_bytes": 17179869184,
+    "run_bytes": 8589934592,
+    "artifact_bytes": 3221225472,
+    "reserve_bytes": 21474836480
+  },
+  "status": "One frozen common baseline for full-cohort diagnosis; no mechanism promotion before all five task families are scored. Per-scene weights, common architecture and recipe."
+}

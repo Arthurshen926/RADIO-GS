@@ -1,0 +1,34 @@
+\section{Resolution-consistent response transport}
+N08 keeps every image probability from N07 fixed and changes the writeback ray grid from 512-by-384 to the native 1008-by-756 output grid. The Gaussian geometry and observed domain, initial v10 field, absolute-margin confidence, 120 Huber steps and 0.5 threshold are unchanged. The three original coarse writebacks are exact frozen controls. All 56 responses precede target scoring; both GT conventions are reported. The primary arm is sequence-memory native writeback. This design was registered before any N07 scores. AP is not measured. Results remain view-conditioned development evidence.
+\begin{center}\small\input{tables/nvos_native_writeback.tex}\end{center}
+static image: native writeback changes IoU by +0.5223 points (8 improved, 0 harmed tasks).
+pair memory: native writeback changes IoU by +0.2553 points (7 improved, 1 harmed tasks).
+sequence memory: native writeback changes IoU by +0.2272 points (7 improved, 1 harmed tasks).
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & v10 & Static native & Pair native & Sequence native \\\midrule
+fern & 82.19 & 83.92 & 84.06 & 84.33 \\
+flower & 86.53 & 85.98 & 89.25 & 87.91 \\
+fortress & 97.23 & 97.36 & 97.66 & 97.56 \\
+horns\_center & 95.73 & 97.30 & 95.47 & 97.79 \\
+horns\_left & 92.70 & 93.68 & 94.80 & 94.86 \\
+leaves & 94.08 & 95.61 & 95.68 & 95.53 \\
+orchids & 68.14 & 73.17 & 70.59 & 70.59 \\
+trex & 75.51 & 83.71 & 78.09 & 76.33 \\
+\bottomrule\end{tabular}\end{center}
+\begin{figure}[ht]\centering\includegraphics[width=\linewidth,height=.78\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_native_spatial_v2/errors.png}
+\caption{N08 complete cohort: green = TP, red = FP, blue = FN. The sequence coarse column uses the exact N07 response.}\end{figure}
+\paragraph{Readout capacity, not a method result.}
+An exhaustive threshold curve refines the earlier A15 grid diagnosis. Equal scores are kept together. Even one GT-optimal threshold per task is a nondeployable upper bound on scalar-threshold decisions of unchanged v10 responses. It is not an upper bound on new spatially conditioned responses, and no oracle threshold is exported.
+\begin{center}\small\begin{tabular}{lrrr}\toprule
+Task & Fixed v10 IoU & GT-oracle IoU & AP \\\midrule
+fern & 82.19 & 83.41 & 94.70 \\
+flower & 86.53 & 91.34 & 99.32 \\
+fortress & 97.23 & 98.47 & 99.98 \\
+horns\_center & 95.73 & 96.21 & 99.78 \\
+horns\_left & 92.70 & 93.05 & 98.87 \\
+leaves & 94.08 & 96.00 & 99.79 \\
+orchids & 68.14 & 85.83 & 97.83 \\
+trex & 75.51 & 76.56 & 93.91 \\
+Mean & 86.51 & 90.11 & 98.02 \\
+\bottomrule\end{tabular}\end{center}
+The optional CUDA footprint backend corrects eager arithmetic cancellation on thin conics; this is an implementation correction, not a new segmentation mechanism. The matched coarse-grid backend control changes cohort IoU by at most 0.0000053 percentage points. The full native run retains the original renderer-consistency tolerance.

@@ -1,0 +1,353 @@
+{
+  "outputs": [
+    {
+      "output": "lerf_semantic2d",
+      "reference_percent": {
+        "semantic_iou": 70.40067569509945,
+        "ap": 87.61927775455382
+      },
+      "status": "transfer_pending",
+      "values_percent": {},
+      "delta_pp": {},
+      "intervention_scope": "not yet implemented"
+    },
+    {
+      "output": "lerf_selected_set_projection2d",
+      "reference_percent": {
+        "selected_projection_iou": 66.96327365836882
+      },
+      "status": "transfer_pending",
+      "values_percent": {},
+      "delta_pp": {},
+      "intervention_scope": "not yet implemented"
+    },
+    {
+      "output": "nvos",
+      "reference_percent": {
+        "iou": 86.5134172141552,
+        "ap": 98.02224516003604
+      },
+      "status": "transfer_pending",
+      "values_percent": {},
+      "delta_pp": {},
+      "intervention_scope": "not yet implemented"
+    },
+    {
+      "output": "scannet_ovs",
+      "reference_percent": {
+        "miou_19": 61.011490548066284,
+        "miou_15": 62.52758904159778,
+        "miou_10": 72.48606102956524
+      },
+      "status": "freshly_scored",
+      "values_percent": {
+        "baseline": {
+          "miou_19": 61.011490548066284,
+          "miou_15": 62.527589041597786,
+          "miou_10": 72.48606102956524
+        },
+        "full": {
+          "miou_19": 61.011490548066284,
+          "miou_15": 62.527589041597786,
+          "miou_10": 72.48606102956524
+        },
+        "query_blind": {
+          "miou_19": 61.011490548066284,
+          "miou_15": 62.527589041597786,
+          "miou_10": 72.48606102956524
+        },
+        "permuted": {
+          "miou_19": 61.011490548066284,
+          "miou_15": 62.527589041597786,
+          "miou_10": 72.48606102956524
+        },
+        "unrestricted": {
+          "miou_19": 60.11794811851775,
+          "miou_15": 61.94581683590285,
+          "miou_10": 71.40941921371639
+        },
+        "fixed_dual_native": {
+          "miou_19": 58.7369405644904,
+          "miou_15": 59.74849588479433,
+          "miou_10": 69.88454165896529
+        },
+        "fixed_source_readout": {
+          "miou_19": 55.06892021666909,
+          "miou_15": 56.916115402415954,
+          "miou_10": 69.98116380249776
+        }
+      },
+      "delta_pp": {
+        "full": {
+          "miou_19": 0.0,
+          "miou_15": 1.1102230246251565e-14,
+          "miou_10": -1.1102230246251565e-14
+        },
+        "query_blind": {
+          "miou_19": 0.0,
+          "miou_15": 1.1102230246251565e-14,
+          "miou_10": -1.1102230246251565e-14
+        },
+        "permuted": {
+          "miou_19": 0.0,
+          "miou_15": 1.1102230246251565e-14,
+          "miou_10": -1.1102230246251565e-14
+        },
+        "unrestricted": {
+          "miou_19": -0.8935424295485328,
+          "miou_15": -0.5817722056949193,
+          "miou_10": -1.0766418158488444
+        },
+        "fixed_dual_native": {
+          "miou_19": -2.27454998357588,
+          "miou_15": -2.779093156803447,
+          "miou_10": -2.6015193705999473
+        },
+        "fixed_source_readout": {
+          "miou_19": -5.9425703313971905,
+          "miou_15": -5.611473639181819,
+          "miou_10": -2.504897227067482
+        }
+      },
+      "intervention_scope": "one complete 19-class menu shared across submenus"
+    },
+    {
+      "output": "uqis",
+      "reference_percent": {
+        "text_ap": 26.59587047562112,
+        "image_ap": 59.30878179400586,
+        "point_2d_ap": 75.79009711011095,
+        "point_3d_ap": 75.32525076702996,
+        "text_selected_iou": 16.38653016454542,
+        "image_selected_iou": 39.897960281086924,
+        "point_2d_selected_iou": 49.73567540572873,
+        "point_3d_selected_iou": 49.04698335651834
+      },
+      "status": "freshly_scored",
+      "values_percent": {
+        "baseline": {
+          "text_ap": 26.595870475621116,
+          "image_ap": 59.308781794005874,
+          "point_2d_ap": 75.79009711011095,
+          "point_3d_ap": 75.32525076702996,
+          "text_selected_iou": 16.386530164545416,
+          "image_selected_iou": 39.897960281086924,
+          "point_2d_selected_iou": 49.73567540572873,
+          "point_3d_selected_iou": 49.04698335651834
+        },
+        "full": {
+          "text_ap": 26.595870475621116,
+          "image_ap": 60.45943342840789,
+          "point_2d_ap": 75.79009711011095,
+          "point_3d_ap": 75.32525076702996,
+          "text_selected_iou": 16.386530164545416,
+          "image_selected_iou": 40.866814365714596,
+          "point_2d_selected_iou": 49.73567540572873,
+          "point_3d_selected_iou": 49.04698335651834
+        },
+        "query_blind": {
+          "text_ap": 26.595870475621116,
+          "image_ap": 59.50429795103368,
+          "point_2d_ap": 75.79009711011095,
+          "point_3d_ap": 75.32525076702996,
+          "text_selected_iou": 16.386530164545416,
+          "image_selected_iou": 40.26125805787652,
+          "point_2d_selected_iou": 49.73567540572873,
+          "point_3d_selected_iou": 49.04698335651834
+        },
+        "permuted": {
+          "text_ap": 26.595870475621116,
+          "image_ap": 60.272369840314035,
+          "point_2d_ap": 75.79009711011095,
+          "point_3d_ap": 75.32525076702996,
+          "text_selected_iou": 16.386530164545416,
+          "image_selected_iou": 40.50703759945035,
+          "point_2d_selected_iou": 49.73567540572873,
+          "point_3d_selected_iou": 49.04698335651834
+        },
+        "unrestricted": {
+          "text_ap": 34.229601622748646,
+          "image_ap": 58.13504478432942,
+          "point_2d_ap": 75.79009711011095,
+          "point_3d_ap": 75.32525076702996,
+          "text_selected_iou": 21.640990074130073,
+          "image_selected_iou": 38.68564408995084,
+          "point_2d_selected_iou": 49.73567540572873,
+          "point_3d_selected_iou": 49.04698335651834
+        }
+      },
+      "delta_pp": {
+        "full": {
+          "text_ap": -5.551115123125783e-15,
+          "image_ap": 1.1506516344020334,
+          "point_2d_ap": 0.0,
+          "point_3d_ap": 0.0,
+          "text_selected_iou": -2.7755575615628914e-15,
+          "image_selected_iou": 0.9688540846276739,
+          "point_2d_selected_iou": 0.0,
+          "point_3d_selected_iou": 0.0
+        },
+        "query_blind": {
+          "text_ap": -5.551115123125783e-15,
+          "image_ap": 0.19551615702781966,
+          "point_2d_ap": 0.0,
+          "point_3d_ap": 0.0,
+          "text_selected_iou": -2.7755575615628914e-15,
+          "image_selected_iou": 0.3632977767895951,
+          "point_2d_selected_iou": 0.0,
+          "point_3d_selected_iou": 0.0
+        },
+        "permuted": {
+          "text_ap": -5.551115123125783e-15,
+          "image_ap": 0.9635880463081725,
+          "point_2d_ap": 0.0,
+          "point_3d_ap": 0.0,
+          "text_selected_iou": -2.7755575615628914e-15,
+          "image_selected_iou": 0.6090773183634268,
+          "point_2d_selected_iou": 0.0,
+          "point_3d_selected_iou": 0.0
+        },
+        "unrestricted": {
+          "text_ap": 7.633731147127526,
+          "image_ap": -1.1737370096764344,
+          "point_2d_ap": 0.0,
+          "point_3d_ap": 0.0,
+          "text_selected_iou": 5.254459909584655,
+          "image_selected_iou": -1.2123161911360814,
+          "point_2d_selected_iou": 0.0,
+          "point_3d_selected_iou": 0.0
+        }
+      },
+      "intervention_scope": "text/image; original point answers exactly retained"
+    }
+  ],
+  "default_changed": false,
+  "independent_final_test": false,
+  "all_five_transfer_complete": false,
+  "category_pools_ready": true,
+  "model_fitted": true,
+  "fresh_joint_transfer_complete": true,
+  "stages": {
+    "category_multitask_program_v1": {
+      "status": "complete",
+      "completed_phases": [
+        {
+          "phase": "source",
+          "exit_code": 0,
+          "log_bytes": 13947,
+          "discarded_log_bytes": 0
+        },
+        {
+          "phase": "fit",
+          "exit_code": 0,
+          "log_bytes": 3414,
+          "discarded_log_bytes": 0
+        },
+        {
+          "phase": "refresh",
+          "exit_code": 0,
+          "log_bytes": 3581,
+          "discarded_log_bytes": 0
+        },
+        {
+          "phase": "verify",
+          "exit_code": 0,
+          "log_bytes": 2551,
+          "discarded_log_bytes": 0
+        }
+      ]
+    },
+    "multitask_transfer_program_v2": {
+      "status": "complete",
+      "completed_phases": [
+        {
+          "phase": "transfer",
+          "exit_code": 0,
+          "log_bytes": 19286,
+          "discarded_log_bytes": 0
+        },
+        {
+          "phase": "diagnosis",
+          "exit_code": 0,
+          "log_bytes": 908,
+          "discarded_log_bytes": 0
+        },
+        {
+          "phase": "refresh",
+          "exit_code": 0,
+          "log_bytes": 3613,
+          "discarded_log_bytes": 0
+        },
+        {
+          "phase": "verify",
+          "exit_code": 0,
+          "log_bytes": 2579,
+          "discarded_log_bytes": 0
+        }
+      ]
+    }
+  },
+  "source_rooms_complete": 29,
+  "source_rooms_required": 29,
+  "mechanism": "one set-conditioned utility and one calibrated margin; intact answers only",
+  "limitations": [
+    "opened benchmark/development data; no untouched final test",
+    "mesh versus Gaussian carrier and full versus region-covered visibility domains differ",
+    "six category calibration classes absent; AP and independent LERF set not supervised"
+  ],
+  "receipts": {
+    "output/tmm_response_20261016/study/category_transfer_inputs_v2/summary.json": "79ca3663c37a4c1d3bf6611ee635780e548c8cdaaac2b4b67d0d7245bc46a1ae",
+    "output/tmm_response_20261016/study/response_value_multitask_v1/summary.json": "cadf819bec374c05bd65b7ec7f071120c5462ff9fba83d39efa50c3b6fb82056",
+    "output/tmm_response_20261016/study/response_value_multitask_transfer_v1/summary.json": "c56caed798bc202e858fb3b06fbca84952b1726bf1069ba01e8fa6146bd91272",
+    "output/tmm_response_20261016/study/response_value_multitask_diagnosis_v1/summary.json": "a9cabefbb4b7b711675011cc6f00bb68748d1a4684aa948313098214b6ad2e08"
+  },
+  "prepared": {
+    "scenes": 10,
+    "views": 1158,
+    "regions": 73905,
+    "maximum_replay_error": 7.152557373046875e-07,
+    "changed_original_labels": 0,
+    "volatile_prediction_bytes": 357954300,
+    "durable_dense_prediction_bytes": 0,
+    "prediction_bank_currently_available": false,
+    "release_receipt_exists": true
+  },
+  "diagnosis": {
+    "category_macro": {
+      "capacity": {
+        "available_mean_gain": 0.009130550781425,
+        "decision_mean_regret": 0.009130550781425,
+        "selected_mean_gain": 0.0
+      },
+      "protected_capacity": {
+        "available_mean_gain": 0.008479755372125513,
+        "decision_mean_regret": 0.008479755372125513,
+        "selected_mean_gain": 0.0
+      }
+    },
+    "instance_macro": {
+      "text": {
+        "baseline_iou": 0.16386530164545413,
+        "selected_iou": 0.16386530164545413,
+        "oracle_iou": 0.317812796883042,
+        "fixed_provider_iou": 0.20098308726264758,
+        "available_gain": 0.15394749523758786,
+        "decision_regret": 0.15394749523758786,
+        "same_choice_as_blind": 67,
+        "same_choice_as_permuted": 67
+      },
+      "image": {
+        "baseline_iou": 0.39897960281086925,
+        "selected_iou": 0.408668143657146,
+        "oracle_iou": 0.4939029140345695,
+        "fixed_provider_iou": 0.34876210201064095,
+        "available_gain": 0.09492331122370028,
+        "decision_regret": 0.08523477037742355,
+        "same_choice_as_blind": 65,
+        "same_choice_as_permuted": 65
+      }
+    },
+    "category_same_choice_as_blind": 10,
+    "category_same_choice_as_permuted": 10
+  }
+}

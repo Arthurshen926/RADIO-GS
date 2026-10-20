@@ -11,7 +11,8 @@ from .compiled_forest import compile_forest, CompiledForest
 from .compile_paired_evidence import csr_state
 from .contracts import Support
 from .joint_observation import JointObservationEvidence, KIND
-from .storage import load_field, save_field, sha256
+from .storage import load_field_versioned, sha256, field_identity, deployment_bytes
+from .research_storage import research_writer, export_receipt
 
 
 def observation_state(membership, visibility, frames, descriptors):
@@ -43,13 +44,14 @@ def observation_state(membership, visibility, frames, descriptors):
 
 
 @torch.no_grad()
-def compile_scene(job, output, budgets, checkpoint, excluded_frames):
+def compile_scene(job, output, budgets, checkpoint, excluded_frames, *, store_root=None, legacy_v1=False):
     """Each budget yields two independent exports differing only in the head."""
+    save=research_writer(store_root=store_root,legacy_v1=legacy_v1)
     import joblib
     from radio_gs.querying.direct_anchor_membership import DirectAnchorEvidence, FEATURE_NAMES
     from radio_gs.querying.anchor_observation_evidence import anchor_membership
     out = Path(output); out.mkdir(parents=True,exist_ok=False); started=time.monotonic()
-    field, parent = load_field(job['protected_parent'])
+    field, parent = load_field_versioned(job['protected_parent'],store_root=store_root)
     if field.evidence is not None: raise ValueError('reference requires the protected prior without relation payload')
     before = {k: v.detach().clone() for k,v in field.state_dict().items()}
     observation = json.loads((Path(job['observations'])/'observations.json').read_text())
@@ -115,8 +117,8 @@ def compile_scene(job, output, budgets, checkpoint, excluded_frames):
             arm=budget+'_'+decision
             field.evidence=relation; field.evidence_kind=KIND
             relation.forest=CompiledForest(forest) if decision=='supervised' else None
-            exported=save_field(field,out/arm/'field',dict(
-                parent_field_sha256=parent['files']['field.pt']['sha256'],
+            exported=save(field,out/arm/'field',dict(
+                parent_field_sha256=field_identity(parent),
                 source_map_sha256=sha256(job['legacy_map']), source_frames=frames,
                 development_frames_excluded=excluded_frames, evidence_function='exact binary joint observation',
                 membership_decision='compiled independent-room forest' if decision=='supervised' else 'visible conditional co-membership',
@@ -131,7 +133,8 @@ def compile_scene(job, output, budgets, checkpoint, excluded_frames):
             if any(not torch.equal(field.state_dict()[k],value) for k,value in before.items()):
                 raise ValueError('compiler rewrote parent native/geometry state')
             reports.append(dict(arm=arm,frames=frames,regions=len(regions),source_replay=source_replay,
-                tensor_bytes=exported['tensor_bytes'],export=exported['files']['field.pt'],
+                tensor_bytes=exported['tensor_bytes'],export=export_receipt(exported),
+                field_schema=exported['schema'],deployment_bytes=deployment_bytes(exported),
                 parent_state_unchanged=True,complete_carrier_rows=len(ids),extra_supervision=decision=='supervised'))
             print('exported joint function',job['scene'],arm,len(frames),len(regions),flush=True)
         field.evidence=None; field.evidence_kind='none'

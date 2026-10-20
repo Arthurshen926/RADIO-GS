@@ -1,0 +1,225 @@
+{
+  "schema": "radio_gs.unified_compact_progress.v1",
+  "date": "2026-10-15",
+  "branch": "codex/unified-compact-multiteacher",
+  "base_commit": "9363333eba24bb9d3f707293928edeb40c52f511",
+  "status": "implemented_and_completed_one_scene_pilot_and_readout_diagnostic",
+  "study_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study",
+  "architecture": {
+    "frozen_geometry": true,
+    "one_learned_vector_per_gaussian": true,
+    "latent_dim": 96,
+    "latent_storage_dtype": "float32",
+    "teachers": [
+      "SigLIP2 semantic",
+      "DINOv2 appearance",
+      "SAM partial membership"
+    ],
+    "shared_native_readout_heads": true,
+    "shared_member_across_query_modalities": true,
+    "shared_parameters_across_scenes": false,
+    "full_native_multimode_function_transfer": false,
+    "temporary_teacher_features_at_query": false,
+    "old_benchmark_defaults_changed": false,
+    "supersedes": "Independent persistent semantic/local/group feature maps are reference teachers, not the target student representation. ADR0021 typed input/output contracts remain applicable."
+  },
+  "experiment": {
+    "scene": "scene0062_00",
+    "train_views": 18,
+    "development_views": [
+      180,
+      560
+    ],
+    "seed": 20261015,
+    "steps": 600,
+    "source_only": true,
+    "benchmark_labels_for_training": false,
+    "independent_final_test": false,
+    "same_initialization": true,
+    "same_model_budget": true,
+    "native_miou": {
+      "reconstruction": {
+        "19": 0.4277017390134898,
+        "15": 0.42822239609553964,
+        "10": 0.4509835840375209
+      },
+      "functional": {
+        "19": 0.43327344717686733,
+        "15": 0.4342608579007136,
+        "10": 0.4933429046365884
+      },
+      "native_mean_reference": {
+        "19": 0.39366156554789117,
+        "15": 0.39423080245043995,
+        "10": 0.42112079702225064
+      }
+    },
+    "raw_member_miou": {
+      "reconstruction": {
+        "19": 0.27208512261946466,
+        "15": 0.2691158667981467,
+        "10": 0.3044635772352051
+      },
+      "functional": {
+        "19": 0.29466628806115924,
+        "15": 0.2980850766438982,
+        "10": 0.41250945759361296
+      }
+    },
+    "fixed_v10_derived_category_readout_miou": {
+      "reconstruction": {
+        "19": 0.4512724263195027,
+        "15": 0.4521458100276701,
+        "10": 0.4771398881817399
+      },
+      "functional": {
+        "19": 0.452704260794786,
+        "15": 0.4529609794928158,
+        "10": 0.5164527951081554
+      }
+    },
+    "source_validation": {
+      "reconstruction": {
+        "native": {
+          "semantic": {
+            "kl": 0.06089745989690224,
+            "pair_agreement": 0.7864583333333334
+          },
+          "local": {
+            "kl": 0.13066397824150044,
+            "pair_agreement": 0.9140625
+          }
+        },
+        "known_ray_membership_bce": 0.22038014233112335,
+        "sampled_known_domain_iou": 0.8846387370977535,
+        "episodes": 48,
+        "frames": [
+          180,
+          560
+        ],
+        "selection_score": 0.15087575465198216,
+        "complete_object_accuracy": false,
+        "benchmark_accuracy": false
+      },
+      "functional": {
+        "native": {
+          "semantic": {
+            "kl": 0.04222181346267462,
+            "pair_agreement": 0.837890625
+          },
+          "local": {
+            "kl": 0.09777434782396692,
+            "pair_agreement": 0.9427083333333334
+          }
+        },
+        "known_ray_membership_bce": 0.22286496761565408,
+        "sampled_known_domain_iou": 0.8750758035172832,
+        "episodes": 48,
+        "frames": [
+          180,
+          560
+        ],
+        "selection_score": 0.1257143225472343,
+        "complete_object_accuracy": false,
+        "benchmark_accuracy": false
+      }
+    },
+    "selected_steps": {
+      "reconstruction": 600,
+      "functional": 600
+    },
+    "caveat": "Readout intervention was frozen after the first development results; no thresholds or parameters were searched. One scene/seed is not a generalization claim."
+  },
+  "findings": [
+    "At equal 96D storage, functional distillation improves native category mIoU by 0.5571/0.6039/4.2359 percentage points over reconstruction on this scene.",
+    "Known-ray partial membership improves during training but direct inter-class member competition remains substantially worse than native semantic competition.",
+    "The existing bounded positive-support category rule restores native competition and raises the functional student to 45.2704/45.2961/51.6453 percent; this is a fixed development diagnostic, not a default promotion.",
+    "One compact vector is feasible for this pilot; complete multimode teacher migration, scene-shared parameters, actual selected-set rendering, and five-task end-to-end acceptance remain open."
+  ],
+  "historical_reference": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/semantic_measure_functions_v2/predictions/scene0062_00/evaluation.json",
+    "sha256": "4cb9b2be1301b8bb6307452f3da7aa32cb5b0db5264f0a230d89cdfa04eea81a",
+    "recomputed": false,
+    "primary": "reliable_typed",
+    "miou": {
+      "19": 0.47565225476976364,
+      "15": 0.47774813579406034,
+      "10": 0.5654507041622105
+    },
+    "source_frames": 35,
+    "student_source_frames": 18,
+    "teacher_supported_gaussians": 50143,
+    "student_observed_gaussians": 46199,
+    "direct_same_budget_comparison_valid": false
+  },
+  "storage": {
+    "policy": {
+      "study_bytes": 8589934592,
+      "run_bytes": 1073741824,
+      "artifact_bytes": 268435456,
+      "reserve_bytes": 21474836480
+    },
+    "field_payload_bytes": {
+      "reconstruction": 23733439,
+      "functional": 23733435
+    },
+    "shared_text_encoder_parameter_bytes": 1416451296,
+    "text_query_deployment_bytes": {
+      "reconstruction": 1440184735,
+      "functional": 1440184731
+    },
+    "teacher_initial_file_bytes": 240762895,
+    "study_actual_bytes_before_this_report": 75188642,
+    "retained_rolling_checkpoints": 0,
+    "final_exports": 2,
+    "geometry_shared": true,
+    "teacher_cache_copies": 0,
+    "historical_deletions": 0,
+    "bounded_entrypoints_only": true,
+    "legacy_writers_globally_migrated": false,
+    "isolated_dependency_environment_excluded": true
+  },
+  "validation": {
+    "targeted_cpu_tests": 44,
+    "full_benchmarks": false,
+    "cold_export_tensor_equality": true,
+    "native_query_packet_file_denial_all_four_types": true,
+    "raw_image_encoder_and_camera_rasterizer_covered_by_cold_test": false,
+    "tests": "tests/test_unified_compact.py tests/test_unified_training_pipeline.py tests/test_query_field_shared_storage.py tests/test_query_field_training_storage_seams.py; -k not cuda",
+    "environment": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/closure/environment.json"
+  },
+  "next_acceptance": [
+    {
+      "priority": 1,
+      "task": "Transfer complete-menu semantic and local-patch query functions from the retained high-capacity references into the same latent.",
+      "constraints": "Match teacher source/view/coverage budgets. Query-conditioned or transient mode readouts allowed; no extra persistent per-Gaussian teacher fields. Preserve current reconstruction and pair-functional controls."
+    },
+    {
+      "priority": 2,
+      "task": "Separate identity localization, inferred support uncertainty, and extent completion.",
+      "constraints": "Do not average incompatible inferred instances into an assumed certain prototype; distinguish supplied ray/3D prompts. Retain native category competition and report shared-member contribution separately."
+    },
+    {
+      "priority": 3,
+      "task": "Train shared readout/member parameters across training scenes and adapt only scene latent on held-out scenes.",
+      "constraints": "Current scene-specific PCA/readout pilot is not cross-scene sharing. No benchmark-name dispatch or per-scene winning recipe."
+    },
+    {
+      "priority": 4,
+      "task": "Run one frozen version through LERF2D, LERF selected-set projection, ScanNet OVS, NVOS and UQIS four inputs.",
+      "constraints": "Keep native-response and actual-selected-set metrics distinct. Pin baselines/teachers; preflight larger-scene memory/storage before any training or cache construction."
+    },
+    {
+      "priority": 5,
+      "task": "Extend bounded writes to each new common training/evaluation entrypoint.",
+      "constraints": "Do not launch unmigrated old writers as new defaults; keep one latest and one best, shared immutable assets, dependency-aware cache retention, and whole-study quotas."
+    }
+  ],
+  "receipts": {
+    "comparison": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/comparison_attempt2/summary.json",
+    "readout": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/category_readout_diagnostic/results.json",
+    "cold": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/closure/cold_query_receipts.json",
+    "storage": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/closure/storage_audit.json",
+    "source": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/closure/source_snapshot.json"
+  }
+}

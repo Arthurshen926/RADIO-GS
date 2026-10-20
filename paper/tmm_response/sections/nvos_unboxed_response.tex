@@ -1,0 +1,21 @@
+\section{Query identity without inherited extent}
+N06 keeps identical response-derived positive points and compares a box prompt, unboxed points, and unboxed points with signed dense log-odds. The primary candidate is unboxed sparse guidance with actual 3D writeback. It tests whether the old extent constrains completion. No new annotated clicks or target-dependent switch is used.
+\begin{center}\small\input{tables/nvos_unboxed_response.tex}\end{center}
+All eight tasks use the same observed RGB, frozen SAM3, original Gaussian geometry, 120 Huber steps, 512-by-384 lifting grid and 0.5 threshold. All 56 predictions precede scoring. Both GT conventions are reported; AP is not measured. This is a development comparison and view-conditioned update, not a query-global field.
+The primary candidate changes mean IoU by -2.3610 points relative to v10 (4 improved and 4 harmed tasks).
+The primary candidate changes mean IoU by +0.4927 points relative to the boxed sparse control (3 improved and 5 harmed tasks).
+The primary candidate changes mean IoU by -3.0088 points relative to the unboxed signed control (2 improved and 6 harmed tasks).
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & v10 & Box + 3D & No box + 3D & Signed, no box + 3D \\\midrule
+fern & 82.19 & 77.20 & 83.28 & 83.45 \\
+flower & 86.53 & 95.03 & 72.12 & 85.41 \\
+fortress & 97.23 & 96.51 & 96.01 & 96.76 \\
+horns\_center & 95.73 & 72.03 & 95.25 & 96.53 \\
+horns\_left & 92.70 & 93.28 & 93.00 & 92.75 \\
+leaves & 94.08 & 94.81 & 94.77 & 94.78 \\
+orchids & 68.14 & 67.04 & 58.65 & 71.24 \\
+trex & 75.51 & 73.38 & 80.15 & 76.37 \\
+\bottomrule\end{tabular}\end{center}
+\IfFileExists{../../output/tmm_response_20261016/study/nvos_unboxed_image_spatial_v1/errors.png}{
+\begin{figure}[ht]\centering\includegraphics[width=\linewidth,height=.78\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_unboxed_image_spatial_v1/errors.png}
+\caption{All eight N06 tasks. Green: true positive; red: false positive; blue: false negative. No task-specific prompt switch is used.}\end{figure}}{}

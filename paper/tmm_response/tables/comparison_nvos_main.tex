@@ -1,0 +1,23 @@
+\begin{tabular}{llrr}
+\toprule
+Method & Origin & IoU & AP \\
+\midrule
+NVOS \cite{ludvig} & P & 70.10 & -- \\
+SA3D-TRF \cite{ludvig} & P & 90.30 & -- \\
+SA3D-GS \cite{ludvig} & P & 92.20 & -- \\
+SAGA \cite{ludvig} & P & 92.60 & -- \\
+OmniSeg3D \cite{ludvig} & P & 91.70 & -- \\
+LUDVIG-DINOv2 \cite{ludvig} & P & 92.40 & -- \\
+LUDVIG-SAM \cite{ludvig} & P & 91.30 & -- \\
+LUDVIG-SAM2 \cite{ludvig} & P & 91.30 & -- \\
+VCAR \cite{vcar} & P & 93.50 & -- \\
+LEGO \cite{lego} & P & 94.20 & -- \\
+WildSeg3D \cite{wildseg3d} & P & 94.10 & -- \\
+Trace3D \cite{trace3d} & P & 92.50 & -- \\
+LUDVIG-SAM & R & 91.26 & -- \\
+Ours (v10) & O & 86.51 & 98.02 \\
+Ours + reference admission (primary) & M & 92.94 & 98.86 \\
+Ours + reference admission (secondary) & M & 93.17 & 98.95 \\
+Ours + local decoding (tradeoff) & M & 93.28 & 98.47 \\
+\bottomrule
+\end{tabular}

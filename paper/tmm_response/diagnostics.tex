@@ -1,0 +1,498 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=23mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
+\setlength{\emergencystretch}{2em}
+\title{Supplement: Controlled Response Experiments and Diagnostics}
+\author{TMM working manuscript}
+\date{October 18, 2026}
+\begin{document}
+\maketitle
+These experiments explain the development and limits of the condensed method.
+They are not extra modules attached to its inference pipeline. All results are
+from the opened development cohort; complete protocols and negative results are
+retained here rather than omitted during condensation.
+\section{Directional post-refinement controls}
+\paragraph{Directional post-refinement hypotheses.}
+Let $r_0\in[0,1]^{N\times Q}$ denote initial element responses. Observation $e$
+provides a fixed nonnegative row-normalized observation operator $A_e$, target
+response $y_e$, bounded confidence $c_e\in[0,1]$, query compatibility $g_e$,
+disjoint positive and exclusion permissions $p_e,n_e$, and an available
+normalization domain $v_e\supseteq p_e\cup n_e$. Providers declare the provenance and allowed input
+of these quantities. Scores are mapped to bounded responses by a frozen
+provider; raw similarities from different teachers are not directly averaged.
+
+Define $d_e=y_e-A_e r_0$ and
+\begin{align}
+ a_e^+ &= c_e g_e p_e\,\mathbf{1}[d_e>0], &
+ a_e^- &= c_e g_e n_e\,\mathbf{1}[d_e<0],\\
+ m &= \sum_e A_e^\top(a_e^++a_e^-), &
+ b &= \sum_e A_e^\top[(a_e^++a_e^-)d_e].
+\end{align}
+The second post-refinement candidate uses the available geometric capacity
+$D=\sum_e A_e^\top(g_e v_e)$ and performs one update:
+\begin{equation}
+ r^*_i=\begin{cases}
+ \operatorname{clip}_{[0,1]}(r_{0,i}+b_i/\max(D_i,\epsilon)),&m_i>\epsilon,\\
+ r_{0,i},&m_i\leq\epsilon,
+ \end{cases}\qquad \epsilon=10^{-8}.
+\end{equation}
+All residuals use the original response; there is no iterative reuse of the
+current prediction as new evidence. With nonnegative correspondences, positive
+evidence alone cannot reduce the response. Explicit exclusion can reduce a
+high initial response. Compatible unknown and zero-residual observations may
+contribute normalization capacity, but unknown observations contribute no
+gradient and rejected observations contribute neither. The available domain is
+declared by the adapter; it is not every unobserved pixel in the scene.
+These are algebraic properties, not guarantees of correctness of admitted
+evidence or nondecreasing benchmark accuracy. Confidence scales the correction
+without cancelling in its denominator; it is not a calibrated probability.
+The first prototype used $D=m$. With one positive observation and nine unknown
+observations of a scalar response 0.2, it can raise the response to 1.0;
+the available-domain rule raises it only to 0.28. Both rules leave unknown
+observations without an exclusion gradient. This is a normalization control
+within the same admission mechanism, not a new feature representation.
+
+The scientific focus is admission, not the weighted residual formula.
+Query compatibility uses fixed native matching or explicit prompt support.
+Missing detections, occlusion and rejected identities do not automatically
+permit exclusion. A full reference mask and a partial detected region have
+different exclusion authority. An inferred image anchor is not a hard 3D click.
+The adapters now implement explicit permissions: LERF detections supply partial
+positives; NVOS additionally permits exclusion from the retained reference-mask
+estimate in its reference frame; the complete ScanNet category menu permits
+exclusion from an unambiguous rival foreground. The latter two are fallible
+provider estimates, not ground-truth negative prompts. UQIS uses frozen map
+observations and identity only, averaging nested masks once per view. An anchor
+inside a region is currently sufficient for positive support, an assumption
+challenged by the diagnosis below.
+
+For functional preservation, the implementation also exposes the retained
+visibility fusion rule
+\[
+ r_{\mathrm{fusion}} = \frac{\sum_e A_e^\top(w_e y_e)}{\sum_e A_e^\top w_e},
+\]
+falling back to $r_0$ where there is no support. Its existing LERF entry point now calls
+this extracted core. This compatibility path retains the original admission
+policy and is distinct from the directional prototype above.
+
+\section{Matched response studies and diagnosis}
+Each study predicts all 31 jobs before scoring. The first three declare frozen
+v10 responses as experimental inputs; the fourth uses the original pre-fusion
+providers for source-assisted tasks. These are stage interventions, not fresh
+end-to-end system runs. The baseline metrics reproduce the retained results.
+The first study changes exclusion permission alone: partial evidence versus
+allowing the available exterior as negative, with identical operators, targets
+and confidence. Both use $D=m$. After inspecting this complete development
+feedback, the second study preserves partial permissions and changes to $D$.
+This latter control jointly changes normalization coverage and prevents
+confidence cancellation; it does not separately identify their effects.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/response_control_comparison.tex}}
+\caption{All-cohort response controls on opened development scenes. Active
+partial and complement use active-mass normalization; observable uses the same
+partial permissions with available-domain normalization. No per-task selection.}
+\label{tab:response-controls}
+\end{table}
+
+Active partial refinement severely harms LERF: it corrects 159,951 query pixels
+but harms 2,185,722. Observable normalization reduces these to 36,202 and 35,192
+and improves scene-macro IoU in all four scenes. The gain over v10 is 0.53 points
+with a descriptive paired scene-bootstrap interval $[0.18,0.89]$; AP falls by
+0.23 points. NVOS IoU changes by $-0.02$ points and ScanNet 19-class mIoU by
+$-0.42$. UQIS text/image/2D-point/3D-point AP still falls by
+0.62/2.12/3.86/3.24 points. Thus the normalization failure is actionable, but
+the complete operator is not an accepted replacement.
+
+LERF selected-set projection IoU remains 66.96. UQIS actual selected-set IoUs
+remain 16.39, 39.90, 49.74 and 49.05 because the independent set heads are frozen.
+UQIS sets are freshly rescored; LERF projection retains its unchanged control
+score. These rows provide no evidence of improved set prediction.
+
+Post-scoring evaluator-only diagnosis examines all 268 UQIS queries without
+changing predictions. Both point modalities have 65 supported anchors correctly
+located on the target instance, yet AP declines for 48 and 46 of these queries.
+Non-target vertices receive 35.89\% and 30.62\% of their summed positive response
+increments. This sum is a score-distribution diagnostic, not an error rate.
+Even 35 of 44 image queries with correct estimated anchors lose AP. These
+observations rule out wrong anchor identity as the sole explanation: a region
+containing the target anchor can still supply inaccurate positive extent.
+They motivate testing evidence admission at region and element level while
+preserving the effective complete-membership provider. Labels used for this
+diagnosis must never become query-time permissions.
+
+\section{Scope agreement and further validation}
+\paragraph{Scope agreement with a matched update budget.}
+The third study keeps the previous permissions and capacity normalization.
+Let $S$ denote the frozen provider's selected extent, or the full-menu category
+argmax. A positive observation receives weight
+$\rho_e^+=\sum (g_ep_e)(A_eS)/\max(\sum g_ep_e,1)$, computed per query;
+negative observations analogously use $g_en_e$ and $1-A_eS$. The weight applies to
+the whole observation, so support may still extend outside $S$. The guide does
+not create negative permissions. A control uniformly attenuates the original
+positive and negative update fields to match their respective per-query,
+pre-clipping L1 masses. This controls total update size, not the number of
+updated elements; clipping may change the final mass.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/support_agreement_control.tex}}
+\caption{Third full-cohort study: extent agreement versus uniform attenuation
+with matched signed correction budgets. Independent selected-set heads remain
+fixed. Observable is the previous candidate, not a per-task fallback.}
+\label{tab:support-agreement}
+\end{table}
+
+Scope agreement exceeds its matched control by only 0.004 LERF IoU points and
+0.082 ScanNet 19-class mIoU points. On UQIS, text, image, 2D-point and 3D-point AP
+are lower by 0.50, 0.87, 0.59 and 0.88 points. The image and point descriptive
+scene-bootstrap intervals exclude zero. Thus improved accuracy relative to the
+previous candidate cannot be assigned to scope-aware allocation alone. We do
+not promote this candidate or assemble task-specific winners.
+
+\paragraph{Where the intervention belongs.}
+An audit of all 31 retained producer records finds that LERF and NVOS responses
+already integrate the same masks, ScanNet already integrates source moments with
+both native priors, and UQIS complete membership already uses anchor co-observation
+features. The post-refinement studies therefore test reuse of consumed evidence.
+This establishes information dependence, not the fraction of loss caused by
+double counting. The fourth study therefore moves to response generation at
+fixed inputs, preserving the two ScanNet teachers and UQIS complete
+membership. Replacing a strong provider with raw similarity would not preserve
+the functional baseline.
+
+\paragraph{Matched intervention inside response generation.}
+A fourth, predeclared control replaces response reconstruction itself rather
+than adding another update to its output. All admitted targets and weights
+$w_e$, native-positive vetoes, confidence scaling, teachers and independent
+selected-set heads remain fixed. The diagonal consensus is
+\begin{equation}
+ r_{\mathrm{diag}}=
+ \frac{\sum_e A_e^\top(w_e y_e)+\lambda\bar r}
+ {\sum_e A_e^\top w_e+\lambda},
+\end{equation}
+with the original unsupported response retained when source mass is zero.
+The rendered controls instead fit
+\begin{equation}
+ J(r)=\sum_{e,p,q}w_{e,pq}\rho\!\left(y_{e,pq}-(A_er)_{pq}\right)
+       +\tfrac12\sum_{i,q}\lambda_{iq}(r_{iq}-\bar r_{iq})^2.
+\end{equation}
+One uses $\rho(t)=t^2/2$; the other uses a Huber derivative clipped at $0.25$.
+Both take 120 bounded, visibility-preconditioned updates with step $0.95$,
+inherited from the NVOS solver, without tuning on new scores. The squared
+comparison separates diagonal assignment from forward mixture modeling;
+the Huber comparison separately changes robustness. ScanNet retains its
+original $\lambda=0.1$ times visible mass and the mean of both native priors;
+other source protocols have no explicit prior penalty. LERF initializes from
+its pre-fusion native response and NVOS from $0.5$. These inherited contracts
+are disclosed rather than presented as a new universal calibration rule.
+The prior penalty is evaluated on source-supported elements; other elements
+remain fixed. The original solver is replayed alongside each intervention before evaluation.
+UQIS has no corresponding raster reconstruction stage, so all its complete
+membership outputs are explicitly unchanged compatibility controls. It cannot
+establish transfer of this solver intervention to point or image membership.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/stage_reconstruction_v4.tex}}
+\caption{Fourth complete development study (\%): identical admitted source
+observations and frozen providers, three reconstruction rules. All UQIS outputs
+are unchanged compatibility controls; all independent selected sets are fixed.
+No task-wise solver selection is applied.}
+\label{tab:stage-reconstruction}
+\end{table}
+
+\paragraph{Fitting accuracy versus query quality.}
+All 31 prediction reports were sealed and checked before scoring
+(Table~\ref{tab:stage-reconstruction}). Squared reconstruction reduces the source
+objective relative to diagonal consensus for all 22 source-assisted jobs.
+Median relative reductions are 19.64\% for LERF, 20.94\% for NVOS, and 1.50\%
+for ScanNet, whose objective includes its unchanged native-prior penalty.
+LERF IoU increases in all four scenes by a mean 0.399 percentage points
+(descriptive paired interval $[0.307,0.491]$), but AP decreases in all four
+by a mean 0.616 points. NVOS changes are small: relative to diagonal consensus,
+squared reconstruction changes IoU by $-0.057$ points, with interval
+$[-0.198,0.105]$. ScanNet 19-class mIoU decreases by 0.732 points
+($[-1.052,-0.386]$), with eight of ten rooms degrading. All ten rooms lose
+10-class mIoU. Thus lower source objective is insufficient for improved target
+quality even when the effective providers are preserved.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{figures/stage_source_fit_vs_task.pdf}
+\caption{Per-job source objective reduction and task score change, both relative
+to diagonal consensus. Every source objective improves, but downstream changes
+differ. Panels have separate horizontal scales and a common vertical scale;
+the two NVOS horns requests are plotted separately. These are development data,
+not independent validation.}
+\label{fig:source-fit}
+\end{figure}
+
+Huber reconstruction recovers 0.446 ScanNet 19-class points over squared loss,
+improving all ten rooms ($[0.302,0.601]$), but remains 0.286 points below
+diagonal consensus. Its LERF IoU advantage over squared loss is only 0.023
+points, with an interval spanning zero, while AP falls by another 0.422 points.
+These results do not support declaring one more elaborate solver universally
+better. An additive decomposition of the ScanNet scene-macro squared-loss
+change finds negative contributions from 15 of the 18 classes present in
+these rooms. Door, cabinet and wall contribute $-0.104$, $-0.101$ and $-0.074$
+macro points, respectively. These are contributions to the macro change,
+not the individual class IoU drops. They localize affected outputs but cannot
+identify whether source identity, partial extent, geometry or view inconsistency
+caused them. The next admission control must distinguish these hypotheses
+without choosing observations using evaluation labels.
+
+\paragraph{Further validation.}
+The evaluation unit is the complete five-benchmark cohort. Each candidate
+uses a fixed rule across scenes, preserves declared inputs, and seals its
+predictions before aggregate scoring. The primary comparisons hold the teacher,
+map and available evidence fixed: original response, existing simple fusion,
+and the common refinement. Mechanism controls remove query admission, treat
+unknown evidence as negative, restrict to positive evidence, or use matched
+random rejection. Report final IoU/AP, harmful corrections, successful
+corrections and unsupported-response abstention together.
+
+Transfer experiments use at least two appropriate teacher configurations and
+text, reference-image and point inputs. A teacher is only tested for modalities
+it actually supports. UQIS 2D clicks cannot acquire source RGB, depth or masks
+when attaching the refiner. A task that simply returns its prior is a valid
+compatibility result, not evidence of improvement. New scenes must be held
+apart from rule design; scene-level uncertainty and query latency/memory are
+reported. Representation redesign and combinatorial system ablations are not
+required for this response-level question.
+
+\paragraph{Implementation status.}
+The common core, protocol adapters and compatibility paths are implemented;
+Targeted tests cover the numerical contracts. The production LERF fusion and NVOS robust solver call
+extracted shared cores; ScanNet exposes its actual dual-teacher observations
+through an opt-in capture interface. Default scientific rules are preserved.
+In the fourth study, replaying each original solver gives maximum response
+differences of $4.77\times10^{-7}$ for LERF, $4.72\times10^{-5}$ for NVOS and
+$7.75\times10^{-7}$ for ScanNet. NVOS mean error never exceeds
+$6.78\times10^{-8}$. There are no element-level threshold crossings at 0.5;
+the original LERF/NVOS threshold predictions and ScanNet category predictions
+are unchanged. Tiny AP drift from floating-point ranking is reported rather
+than claimed as an improvement. A separate source-only audit compares the
+literal old and extracted NVOS solvers within $1.08\times10^{-6}$ and confirms
+318 source targets exactly match retained targets. The historical raster
+operators were not retained, so the remaining historical discrepancy is not
+uniquely attributed to CUDA accumulation.
+
+Four complete studies and their paired feedback are available. The latest
+study retains 1.98 GB of dense predictions only in volatile memory, releases
+them after complete scoring, and adds approximately 5.6 MB of persistent
+reports including failed, unscored attempts. The cumulative study remains
+within its 2 GiB disk budget. Code snapshots, input identities, output hashes
+and all results are retained; reproducing discarded arrays requires inference
+again. Hashes bind the arrays scored in the run, not bitwise determinism across
+GPU executions. Cross-teacher matched tests, random admission controls, improved
+actual sets and an untouched validation cohort remain open. The retained v10
+route remains the complete performance reference; the solver comparison is
+an attribution experiment, not the final shared mechanism.
+
+\section{Additional frozen-provider evidence}
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/provider_evidence.tex}}
+\caption{Additional evidence for frozen providers. The ScanNet comparison uses
+three rooms held out during that historical study. Point membership uses the
+same learner with different observation distributions and counts, and inherits
+labelled-room supervision. These are not gains of the new shared operator.}
+\end{table}
+
+The point-membership contrast improves both point modalities in all nine
+rooms. Its scene-bootstrap intervals are $[6.88,12.59]$ and $[6.53,12.68]$
+percentage points for 2D and 3D points respectively. Keeping this provider
+prevents the response study from discarding already demonstrated complete-object
+capability. Its supervision and observation changes remain explicit.
+
+The highest historical LERF semantic IoU in this response control is 70.75
+from inverse rendering, with AP 86.58. Simple fusion achieves 70.38/87.64;
+a native-response floor yields 68.57/89.11. We retain all variants and do not
+stitch their metric-wise maxima into one method. Existing NVOS scope filtering
+does not beat matched random filtering. ScanNet gains from an additional native
+teacher are input-capability gains, not evidence for the new common operator.
+
+\section{Estimated-anchor authority: a sparse causal control}
+The effective image provider reuses the actual-point classifier and explicitly
+sets its estimated anchor to one. We remove only this assignment, keeping the
+conditioning anchor, model, inputs and calibrated threshold unchanged. All 67
+image patches are fixed and hashed before evaluator access; all 268 UQIS queries
+are then scored, including separate actual selections. No dense predictions are
+saved. The remaining benchmark metrics are retained compatibility references,
+not new inference or evidence of common-rule transfer.
+
+Raw probabilities at the 67 anchors range from 0.91403 to 0.93902, all above
+the frozen threshold 0.35. Exactly 67 score entries and zero selected elements
+change. Image AP moves from 59.308782\% to 59.308926\%; the paired nine-scene
+effect is +0.000144 points, with descriptive 95\% interval
+$[-0.000759,0.001192]$. Actual image IoU remains 39.897960\%; text and actual
+point scores and sets are exact. The override is therefore not a useful repair
+target by itself on this cohort.
+
+After prediction sealing, label-based diagnosis finds 44 correct and 23 incorrect
+estimated anchors. Their image-IoU query means are 55.05\% and 9.89\%; conditional
+scene means are 55.09\% across nine rooms and 10.75\% across eight rooms, respectively.
+Sixteen incorrect anchors come from regions containing target elements; seven
+selected regions contain none. Four correctly anchored queries still have IoU
+below 0.25. These conditional comparisons neither constitute causal effects nor
+justify an oracle switch. They distinguish the single-vertex override from the
+more consequential, still unresolved identity condition of a complete response.
+The raw self-member score has descriptive identity-correctness AUROC 0.5316 on
+these 67 queries; its means are 0.9253 for correct and 0.9243 for incorrect anchors.
+This analysis fits no threshold and supplies no query-time identity labels.
+It indicates that this inherited confidence should not simply be reused as the
+missing query-applicability estimate.
+
+\section{Query witnesses before complete membership}
+Q01 tests a query-conditioned identity interface while preserving the full-teacher
+seed region and the complete classifier. It excludes the seed view, applies the
+existing native-density identity gate to supported regions in other views,
+normalizes their admitted weights per view, and chooses an actual seed member
+nearest the resulting weighted coordinate median. The complete classifier and
+threshold remain fixed. A control permutes the same regional weights within
+each view, preserving the source-weight multiset and budget. This is one fixed
+permutation, not a random-control seed sweep. The extra witness uses native
+SigLIP cosine; original joint SigLIP/local-DINO seed selection is retained.
+The candidate population differs from detector-conditioned LERF proposals.
+
+All 67 original image responses replay exactly. Both intervention arms are
+sealed before scoring all 268 queries. Other modalities remain exact; the
+remaining benchmarks are historical references, not fresh all-31 inference.
+\begin{table}[ht]
+\centering\small
+\input{tables/query_witness_anchor.tex}
+\caption{Q01: targeted identity-conditioning control on the opened development
+cohort. No arm is promoted. Actual selections are re-evaluated.}
+\end{table}
+
+The query-conditioned arm changes 55 anchors and loses 1.1306 image-IoU points,
+with descriptive nine-scene interval $[-2.4180,-0.1772]$; seven scenes decline.
+Its advantage over the permutation control is only 0.0191 points, interval
+$[-0.3648,0.4363]$. AP changes by $-0.5349$ points relative to v10, interval
+$[-2.1267,0.5196]$. These results do not demonstrate query-specific benefit.
+After sealing, one wrong anchor becomes correct and one correct anchor becomes
+wrong. Among the 43 queries whose anchor stays on the target, query-mean IoU
+falls from 55.8545\% to 54.3421\%. This conditional diagnosis is not a causal
+comparison; it shows why correct-anchor count alone cannot verify preservation
+of the complete response. The classifier is also sensitive to position and
+observation evidence within the same instance. We retire this weighted-center
+construction as a default candidate without threshold searches. Q01 retains
+2.12 MB of reports and releases 117.81 MB of volatile prediction arrays.
+
+\section{Verification among preserved complete responses}
+Q02 keeps the original joint-teacher image answer and adds the SigLIP and local
+DINO identity winners, each decoded by the same frozen complete classifier.
+Cached equal-rank fusion is inverted on its checked half-integer rank lattice;
+no DINO cosine magnitudes are reconstructed. A verifier compares the candidates'
+co-visible regional IoU with query percentile evidence. In each common view,
+it subtracts the IoU-complement-weighted query mean from the IoU-weighted mean.
+The union of all proposal views is excluded. All candidates use the same
+remaining informative views; no common evidence or a tie keeps the original.
+One negative control permutes the same query percentiles within each view.
+Both rules select one whole response without modifying it.
+
+All 67 original image outputs replay exactly, and all proposals and choices
+seal before scoring 268 queries. Other modalities remain exact; other benchmark
+values are retained references. This is another targeted study, not a fifth
+all-31 shared-method trial.
+\begin{table}[ht]
+\centering\small
+\input{tables/complete_response_verification.tex}
+\caption{Q02: preserving complete proposals does not by itself guarantee a
+correct identity-verification decision. Neither automatic rule is promoted.}
+\end{table}
+
+Image AP rises by 0.2602 points while actual IoU falls by 1.6816 points; the
+latter descriptive nine-scene interval is $[-5.2721,2.1612]$. Relative to the
+permutation control, IoU is higher by 1.7300 points, interval
+$[-3.9031,6.6658]$, which does not establish a reliable query-specific effect.
+The verifier repairs three wrong anchors but damages five formerly correct ones.
+It retains the joint answer 30 times and chooses the other teachers 37 times.
+
+After sealing, labels select a finite-pool best IoU of 45.0975\%; 27 queries
+have a better proposal. This is a diagnostic, never an automatic score or an
+upper bound on other proposal families. The exact scene-macro identity is
+\begin{equation}
+ I_{\rm automatic}=I_{\rm baseline}+G_{\rm pool}-R_{\rm selection},
+\end{equation}
+with 5.1995 points of available gain and 6.8811 points of selection regret.
+Choosing the SigLIP or DINO winner globally gives only 33.5887\% and 31.1768\%.
+Thus the finite candidates have useful diversity but the current verifier
+cannot exploit it reliably. We retain the complete-proposal interface as
+research infrastructure and reject its uncalibrated selector as a default.
+Any calibrated replacement decision needs separate data and must measure both
+repair and damage. Q02 stores 2.18 MB of reports and releases 294.52 MB of
+volatile predictions; no new teacher weights or durable dense arrays are added.
+
+\IfFileExists{figures/nvos_source_criteria.pdf}{
+\section{Source-only NVOS decision calibration}
+\begin{figure}[ht]
+\centering\includegraphics[width=\linewidth]{figures/nvos_source_criteria.pdf}
+\caption{N02 source criteria, not target-GT curves. Both estimators use the same
+teacher targets and common pixels on every fourth source view. Fit-source
+responses include those views in reconstruction; held-source responses exclude
+their constraints. Dots denote the estimated thresholds and dashed vertical
+lines denote 0.5. The final target response field is shared by all readout arms.}
+\end{figure}
+This criterion estimates a decision using source teacher evidence. Its maximum
+does not certify target-view IoU or teacher correctness. Geometry and tracking
+remain shared across the reconstruction split. The main manuscript reports the
+complete eight-task results, including the fixed readout and both estimators.
+}{}
+\IfFileExists{../../output/tmm_response_20261016/study/nvos_score_changes_v1/errors.png}{
+\section{Foreground and background score changes}
+Let $O$ and $C$ be v10 and coverage responses. For diagnostic purposes only,
+$P$ uses new scores on GT foreground and old scores on background; $N$ does the
+opposite. We split the AP difference symmetrically:
+\begin{align}
+\Delta_{\rm fg}&=\tfrac12[\mathrm{AP}(P)-\mathrm{AP}(O)+\mathrm{AP}(C)-\mathrm{AP}(N)],\\
+\Delta_{\rm bg}&=\tfrac12[\mathrm{AP}(N)-\mathrm{AP}(O)+\mathrm{AP}(C)-\mathrm{AP}(P)].
+\end{align}
+Their sum equals $\mathrm{AP}(C)-\mathrm{AP}(O)$ and divides the interaction
+equally. These GT hybrids are not inference procedures. This is a descriptive
+score-space attribution, not an upstream teacher or geometry causal ablation.
+\begin{table}[ht]
+\centering\small\input{tables/nvos_score_changes.tex}
+\caption{All eight tasks; AP in percent and score-group contributions in
+percentage points. Actual response scores and GT are unchanged between audits.}
+\end{table}
+\clearpage
+\section{Spatial changes on the complete NVOS cohort}
+\begin{figure}[ht]
+\centering\includegraphics[width=\linewidth,height=.79\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_score_changes_v1/errors.png}
+\caption{All eight NVOS tasks, using retained GT. The continuous field is freshly
+rendered for v10; coverage and source-readout columns use the exact N02 response
+images. Green denotes true positives, red false positives and blue false
+negatives. The source-readout rule is fixed before target scoring. Display
+resizing is for visualization only; metrics use the original GT resolution.}
+\end{figure}
+}{}
+\IfFileExists{tables/nvos_local_credit.tex}{\input{sections/nvos_local_credit.tex}}{}
+\IfFileExists{tables/nvos_image_response.tex}{\input{sections/nvos_image_response.tex}}{}
+\IfFileExists{tables/nvos_partial_response.tex}{\input{sections/nvos_partial_response.tex}}{}
+\IfFileExists{tables/nvos_unboxed_response.tex}{\input{sections/nvos_unboxed_response.tex}}{}
+\IfFileExists{tables/nvos_memory_response.tex}{\input{sections/nvos_memory_response.tex}}{}
+\IfFileExists{tables/nvos_native_writeback.tex}{\input{sections/nvos_native_writeback.tex}}{}
+\IfFileExists{tables/nvos_signed_affinity.tex}{\input{sections/nvos_signed_affinity.tex}}{}
+\IfFileExists{tables/nvos_direct_affinity.tex}{\input{sections/nvos_direct_affinity.tex}}{}
+\IfFileExists{tables/nvos_instance_extent.tex}{\input{sections/nvos_instance_extent.tex}\input{sections/nvos_instance_extent_formulation.tex}}{}
+\IfFileExists{tables/nvos_reference_completion.tex}{\input{sections/nvos_reference_completion.tex}}{}
+\IfFileExists{tables/nvos_reference_delta.tex}{\input{sections/nvos_reference_delta.tex}}{}
+\IfFileExists{tables/nvos_reference_admission.tex}{\input{sections/nvos_reference_admission.tex}}{}
+\IfFileExists{tables/nvos_multiview_completion.tex}{\input{sections/nvos_multiview_completion.tex}}{}
+\IfFileExists{sections/nvos_target_redecode.tex}{\input{sections/nvos_target_redecode.tex}}{}
+\IfFileExists{sections/nvos_score_precision.tex}{\input{sections/nvos_score_precision.tex}}{}
+\clearpage
+\section{Complete NVOS experiment catalog}
+The main paper uses a compact editorial view. This table preserves every
+registered NVOS comparison, including failed or superseded variants and the
+independent selected-set readout. P/R/O/M denote published, reproduced, our
+established implementation and measured extensions. Teacher, prompt, target-RGB
+and evaluation contracts differ as stated in the individual study sections;
+these rows are not an input-identical ranking.
+\begin{center}\small\input{tables/comparison_nvos.tex}\end{center}
+\input{sections/static_image_control_method.tex}
+\input{sections/references.tex}
+\end{document}

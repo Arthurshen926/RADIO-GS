@@ -15,11 +15,10 @@ from radio_gs.rendering.contribution_compositor import rasterize_single_view_con
 from radio_gs.querying.typed_evidence import visible_operator,solve_rendered_evidence
 from scripts.research.decode_expanded_extent_next72 import sample_operator_rows
 from radio_gs.querying.finite_evidence import combine_with_native,source_strength
+from radio_gs.querying.response_refinement import fuse_admitted_evidence
 
-@torch.no_grad()
-def main():
-    p=argparse.ArgumentParser();p.add_argument('--finite-evidence',action='store_true');p.add_argument('--evidence-strength',choices=['confidence','positive_logit'],default='confidence');p.add_argument('--inputs',required=True);p.add_argument('--readout',required=True);p.add_argument('--output',required=True);p.add_argument('--steps',type=int,default=120);p.add_argument('--solver',choices=['rendered','backprojection'],default='rendered');p.add_argument('--policies',nargs='+',choices=['native_protected','source_complement'],default=['native_protected','source_complement']);a=p.parse_args();torch.set_num_threads(4);start=time.monotonic()
-    inputs=json.loads(Path(a.inputs).read_text());scene=json.loads(Path(inputs['scene']).read_text());data=torch.load(a.readout,map_location='cpu',weights_only=False);b=data['semantic_geometry'];geo=FrozenGaussianGeometry.load(b['path'],expected_sha256=b['sha256'],device='cuda');gp=MogeGeometryPrior(scene['camera_report'],scene['camera_report_sha256']);observed=data['semantic_observed'].cuda();prior=data['scores'].cuda();h,w=192,256;views=[];active=torch.zeros(prior.shape[1],dtype=torch.long);out=Path(a.output);out.mkdir(parents=True,exist_ok=True)
+def iter_source_response_views(inputs, scene, data, geo, gp, observed, prior, h=192, w=256):
+    """Unchanged legacy observation construction, also used by numerical replay."""
     for i,frame in enumerate(scene['source_frames']):
         evidence=torch.load(Path(inputs['detections'])/f'identity_{frame}.pt',map_location='cpu',weights_only=False)
         if evidence['queries']!=data['texts']:raise ValueError('Evidence and explicit query order differ')
@@ -29,9 +28,16 @@ def main():
         for qi,r in enumerate(evidence['instances']):
             rejected=r.get('unknown_masks')
             if rejected is not None and len(rejected):neg[:,qi]&=~(F.interpolate(rejected.float().amax(0)[None,None].cuda(),size=(h,w),mode='bilinear',align_corners=False)[0,0].flatten()>.5)
-        confidence=torch.tensor([float(r['scores'].max()) if len(r['scores']) else 0. for r in evidence['instances']],device='cuda');active+=(confidence>0).cpu()
+        confidence=torch.tensor([float(r['scores'].max()) if len(r['scores']) else 0. for r in evidence['instances']],device='cuda')
         phase=i%4;pixels=torch.arange(h*w,device='cuda').reshape(h,w)[phase//2::2,phase%2::2].flatten();op=sample_operator_rows(op,pixels);pos=pos[pixels];neg=neg[pixels];target=target[pixels];native_positive=torch.sparse.mm(op,prior)>.5
-        views.append((op,target,pos,neg,native_positive,confidence))
+        yield op,target,pos,neg,native_positive,confidence
+
+@torch.no_grad()
+def main():
+    p=argparse.ArgumentParser();p.add_argument('--finite-evidence',action='store_true');p.add_argument('--evidence-strength',choices=['confidence','positive_logit'],default='confidence');p.add_argument('--inputs',required=True);p.add_argument('--readout',required=True);p.add_argument('--output',required=True);p.add_argument('--steps',type=int,default=120);p.add_argument('--solver',choices=['rendered','backprojection'],default='rendered');p.add_argument('--policies',nargs='+',choices=['native_protected','source_complement'],default=['native_protected','source_complement']);a=p.parse_args();torch.set_num_threads(4);start=time.monotonic()
+    inputs=json.loads(Path(a.inputs).read_text());scene=json.loads(Path(inputs['scene']).read_text());data=torch.load(a.readout,map_location='cpu',weights_only=False);b=data['semantic_geometry'];geo=FrozenGaussianGeometry.load(b['path'],expected_sha256=b['sha256'],device='cuda');gp=MogeGeometryPrior(scene['camera_report'],scene['camera_report_sha256']);observed=data['semantic_observed'].cuda();prior=data['scores'].cuda();out=Path(a.output);out.mkdir(parents=True,exist_ok=True);h,w=192,256
+    views=list(iter_source_response_views(inputs,scene,data,geo,gp,observed,prior,h,w))
+    active=sum(((v[5]>0).cpu().long() for v in views),torch.zeros(prior.shape[1],dtype=torch.long))
     strength=source_strength([v[5]*(v[2].any(0)) for v in views],a.evidence_strength)
     results={}
     for policy in a.policies:
@@ -41,10 +47,7 @@ def main():
             known=(pos|admitted).float()*confidence[None];observations.append((op,target,known,1.))
         if a.solver=='rendered':values,mass=solve_rendered_evidence(prior,observations,steps=a.steps)
         else:
-            mass=torch.zeros_like(prior);positive=torch.zeros_like(prior)
-            for op,target,known,weight in observations:
-                mass+=torch.sparse.mm(op.T,known);positive+=torch.sparse.mm(op.T,known*target)
-            values=torch.where(mass>1e-8,positive/mass.clamp_min(1e-8),prior)
+            values,mass=fuse_admitted_evidence(prior,((op,target,known) for op,target,known,weight in observations))
         if a.finite_evidence:values=combine_with_native(values,prior,strength[None])
         values[~observed]=0
         dest=out/policy;dest.mkdir(exist_ok=True);torch.save(dict(data,scores=values.cpu(),response_evidence=a.inputs,response_policy=policy),dest/'typed_readout.pt')

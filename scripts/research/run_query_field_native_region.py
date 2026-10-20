@@ -3,7 +3,8 @@ import argparse,copy,subprocess
 from pathlib import Path
 import torch
 from scripts.research.run_query_field_relations import read,write,receipt,check,execute,lanes
-from radio_gs.query_field.storage import load_field
+from radio_gs.query_field.storage import load_field_versioned
+from radio_gs.query_field.research_storage import storage_binding,verify_storage_binding,runner_storage_args
 from radio_gs.query_field.part_conditioning import prepare_parts,read_parts,native_region_probability
 from radio_gs.query_field.compile_region_semantic import compile_field
 
@@ -14,7 +15,8 @@ ARMS=['admission','pooled_parts','pooled_protected','native_parts','native_prote
 PROTOCOL=Path('docs/experiments/2026-10-10-native-region-protocol.md')
 
 
-def prepare():
+def prepare(*,store_root=None,legacy_v1=False):
+    binding=storage_binding(store_root=store_root,legacy_v1=legacy_v1)
     ROOT.mkdir(parents=True,exist_ok=False)
     cfg=copy.deepcopy(read(BASE/'prediction_config.json'));cfg['status']='fixed all-case part conditioning; prior query fixtures; no promotion'
     for j in cfg['jobs']:
@@ -29,21 +31,23 @@ def prepare():
                   SOURCE/'predictions'/j['name']/'prediction.json',SOURCE/'predictions'/j['name']/'predictions.pt',
                   BASE/'predictions'/j['name']/'prediction.json',BASE/'predictions'/j['name']/'predictions.pt']:
             records.append(receipt(p))
-    write(ROOT/'design.json',dict(configuration=receipt(ROOT/'prediction_config.json'),protocol=receipt(PROTOCOL),
+    write(ROOT/'design.json',dict(storage=binding,configuration=receipt(ROOT/'prediction_config.json'),protocol=receipt(PROTOCOL),
         inputs=records,code=[receipt(p) for p in sorted(Path('radio_gs/query_field').glob('*.py'))]+[receipt(__file__)],
         arms=ARMS,primary=ARMS[-1],implementation_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         current_query_fixtures_reused=True,training_steps=0,new_state='exact region_semantic buffer; bytes reported per compilation',whole_five_task=False))
 
 
-def design(verify_inputs=True):
+def design(verify_inputs=True,*,store_root=None,legacy_v1=False):
+    storage_binding(store_root=store_root,legacy_v1=legacy_v1)
     d=read(ROOT/'design.json')
+    verify_storage_binding(d,store_root=store_root,legacy_v1=legacy_v1)
     for r in d['code']+[d['configuration'],d['protocol']]+(d['inputs'] if verify_inputs else []):check(r)
     return d
 
 
 @torch.no_grad()
-def predict(index):
-    d=design(verify_inputs=False);cfg=read(d['configuration']['path']);j=cfg['jobs'][index]
+def predict(index,*,store_root=None,legacy_v1=False):
+    d=design(verify_inputs=False,store_root=store_root,legacy_v1=legacy_v1);cfg=read(d['configuration']['path']);j=cfg['jobs'][index]
     current={str(Path(j['parent_field'])/'manifest.json'),j['queries'],
         str(Path(j['observations'])/'observations.json'),j['construction'],str(Path(j['construction']).parent/'field/manifest.json')}
     current.update(str(root/'predictions'/j['name']/name) for root in [SOURCE,BASE] for name in ['prediction.json','predictions.pt'])
@@ -53,8 +57,8 @@ def predict(index):
     # a worker need not repeatedly hash all unrelated scene tensors.
     data=torch.load(SOURCE/'predictions'/j['name']/'predictions.pt',map_location='cpu',weights_only=True)
     baseline=torch.load(BASE/'predictions'/j['name']/'predictions.pt',map_location='cpu',weights_only=True)
-    compile_field(j['parent_field'],j['observations'],j['construction'],ROOT/'fits'/j['scene'])
-    field,_=load_field(j['field'],'cuda');available=field.observed|field.semantic_measure.supported
+    compile_field(j['parent_field'],j['observations'],j['construction'],ROOT/'fits'/j['scene'],store_root=store_root,legacy_v1=legacy_v1)
+    field,_=load_field_versioned(j['field'],'cuda',store_root=store_root);available=field.observed|field.semantic_measure.supported
     assert data['texts']==[x['text'] for x in read(j['queries'])['queries']]
     for k,v in data['geometry'].items():assert torch.equal(v,getattr(field,k).cpu())
     scores={'admission':baseline['scores']['admission_preserving']};diagnostics=[]
@@ -83,9 +87,9 @@ def predict(index):
         prior_query_fixture=receipt(SOURCE/'predictions'/j['name']/'predictions.pt'),baseline_reused=True))
 
 
-def run(gpus):
-    d=design();cfg=read(d['configuration']['path'])
-    def action(i,g):execute(['-m','scripts.research.run_query_field_native_region','predict','--index',str(i)],ROOT/'logs'/('predict_'+str(i)+'.log'),g)
+def run(gpus,*,store_root=None,legacy_v1=False):
+    d=design(store_root=store_root,legacy_v1=legacy_v1);cfg=read(d['configuration']['path'])
+    def action(i,g):execute(['-m','scripts.research.run_query_field_native_region','predict','--index',str(i)]+runner_storage_args(ROOT,store_root=store_root,legacy_v1=legacy_v1),ROOT/'logs'/('predict_'+str(i)+'.log'),g)
     lanes(list(range(4)),gpus,action)
     records=[]
     for j in cfg['jobs']:
@@ -111,10 +115,27 @@ def run(gpus):
             m=result[a];per[a][j['scene']]=dict(response_iou=m['iou'],selection_iou=m['selected']['miou'],ap=m['ap'])
     report=dict(complete=True,per_scene=per,macro={a:{k:sum(x[k] for x in per[a].values())/4 for k in next(iter(per[a].values()))} for a in ARMS},
         baseline_scores_exact=True,implementation_commit=d['implementation_commit'],whole_five_task=False,model_promotion=False)
-    write(ROOT/'summary.json',report);write('docs/experiments/2026-10-10-native-region-results.json',report);print(report,flush=True)
+    write(ROOT/'summary.json',report)
+    if legacy_v1:write('docs/experiments/2026-10-10-native-region-results.json',report)
+    print(report,flush=True)
 
-if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('stage',choices=['prepare','predict','run']);p.add_argument('--index',type=int);p.add_argument('--gpus',default='5');a=p.parse_args();torch.set_num_threads(4)
-    if a.stage=='prepare':prepare()
-    elif a.stage=='predict':predict(a.index)
-    else:run(list(map(int,a.gpus.split(','))))
+def main(argv=None):
+    global ROOT
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('stage',choices=['prepare','predict','run'])
+    p.add_argument('--index',type=int);p.add_argument('--gpus',default='5')
+    p.add_argument('--root',type=Path,help='Fresh run output root; required for shared v2')
+    p.add_argument('--store-root',type=Path,help='Explicit shared v2 store for inputs and outputs')
+    p.add_argument('--legacy-v1',action='store_true',help='Explicit historical full-package replay')
+    a=p.parse_args(argv)
+    if a.legacy_v1 and a.store_root is not None:p.error('--legacy-v1 and --store-root are mutually exclusive')
+    if not a.legacy_v1 and (a.root is None or a.store_root is None):p.error('new research runs require --root and --store-root before computation')
+    if a.root is not None:ROOT=a.root
+    torch.set_num_threads(4)
+    options=dict(store_root=a.store_root,legacy_v1=a.legacy_v1)
+    if a.stage=='prepare':prepare(**options)
+    elif a.stage=='predict':predict(a.index,**options)
+    else:run(list(map(int,a.gpus.split(','))),**options)
+
+
+if __name__=='__main__':main()

@@ -1,0 +1,21 @@
+\section{Positive identity and uncertain exclusion in image prompts}
+N05 keeps the same response-derived box and eight deterministic inferred positive points for three image prompts: signed dense log-odds, positive-only dense log-odds (negative values become zero), and no dense prior. Point selection uses confidence, foreground interior distance and distance to previous points. These are estimated identity hints, not extra annotated clicks. The positive-only prompt with 3D writeback is the predeclared primary candidate. Neutral dense values are an operational SAM input, not a calibrated uncertainty estimate.
+\begin{center}\small\input{tables/nvos_partial_response.tex}\end{center}
+All eight tasks use observed target RGB and the same frozen SAM3, original geometry, 512-by-384 lifting grid, 120 Huber steps and 0.5 threshold. Every prediction precedes scoring. N05 measures IoU, precision, recall and pixel accuracy under both GT conventions; AP is not measured. Results do not establish query-global multi-view consistency.
+The primary candidate changes mean IoU by -1.1305 points relative to v10 (2 improved and 6 harmed tasks).
+The primary candidate changes mean IoU by -2.6331 points relative to the signed dense control (0 improved and 8 harmed tasks).
+The primary candidate changes mean IoU by +1.7232 points relative to the sparse-only control (3 improved and 5 harmed tasks).
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & v10 & Signed + 3D & Positive + 3D & Sparse + 3D \\\midrule
+fern & 82.19 & 83.78 & 83.45 & 77.20 \\
+flower & 86.53 & 85.55 & 85.17 & 95.03 \\
+fortress & 97.23 & 96.96 & 95.92 & 96.51 \\
+horns\_center & 95.73 & 96.82 & 95.33 & 72.03 \\
+horns\_left & 92.70 & 92.87 & 92.20 & 93.28 \\
+leaves & 94.08 & 94.90 & 93.04 & 94.81 \\
+orchids & 68.14 & 72.13 & 68.81 & 67.04 \\
+trex & 75.51 & 81.11 & 69.13 & 73.38 \\
+\bottomrule\end{tabular}\end{center}
+\IfFileExists{../../output/tmm_response_20261016/study/nvos_partial_image_spatial_v1/errors.png}{
+\begin{figure}[ht]\centering\includegraphics[width=\linewidth,height=.78\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_partial_image_spatial_v1/errors.png}
+\caption{All eight N05 tasks. Green: true positive; red: false positive; blue: false negative. No task-specific prompt switch is used.}\end{figure}}{}

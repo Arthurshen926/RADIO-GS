@@ -22,6 +22,8 @@ def main():
     parser.add_argument('--plan', action='store_true')
     parser.add_argument('--scope-transfer', action='store_true', help='Experimental one-hop physical scope correspondence on registered maps')
     parser.add_argument('--instance-scope', action='store_true', help='Experimental native region identity followed by physical instance scope')
+    parser.add_argument('--member-chunk-size',type=int,help='Temporary member feature rows, without reducing output elements')
+    parser.add_argument('--reference-completion',help='Explicit N14 signed-reference and target-RGB profile; source-only default unchanged')
     args = parser.parse_args()
     plan_only = args.plan
     del args.plan

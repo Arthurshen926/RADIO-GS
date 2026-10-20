@@ -20,6 +20,11 @@ class QueryFieldRuntime:
     def load(cls, directory, device="cpu"):
         return cls(*load_field(directory, device))
 
+    @classmethod
+    def load_v2(cls, directory, device="cpu", *, store_root=None):
+        from .shared_storage import load_field_v2
+        return cls(*load_field_v2(directory, device, store_root=store_root))
+
     def __getattr__(self, name):
         # Geometry and native spaces are shared with the registered adapters.
         return getattr(self.field, name)

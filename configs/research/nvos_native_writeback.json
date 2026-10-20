@@ -1,0 +1,43 @@
+{
+  "run": "nvos_native_writeback_v3",
+  "parent_run": "nvos_memory_response_v2",
+  "arms": [
+    "v10",
+    "static_image_lift",
+    "pair_memory_lift",
+    "sequence_memory_lift",
+    "static_image_native",
+    "pair_memory_native",
+    "sequence_memory_native"
+  ],
+  "primary_arm": "sequence_memory_native",
+  "solver_steps": 120,
+  "native_wh": [
+    1008,
+    756
+  ],
+  "source_hw": [
+    384,
+    512
+  ],
+  "threshold": 0.5,
+  "gpu_memory_fraction": 0.28,
+  "metrics": [
+    "iou",
+    "precision",
+    "recall",
+    "accuracy"
+  ],
+  "gt_tracks": [
+    "retained_gt_gt127",
+    "ludvig_gt_maximum"
+  ],
+  "maximum_new_durable_bytes": 1048576,
+  "maximum_volatile_prediction_bytes": 268435456,
+  "target_rgb_used": true,
+  "target_gt_used_for_prediction": false,
+  "per_task_winners": false,
+  "independent_test": false,
+  "registration_context": "Registered before any N07 target scores; all three evidence providers fixed.",
+  "footprint_backend": "gsplat_cuda"
+}

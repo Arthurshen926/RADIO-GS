@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-10-14T12:20:00Z",
+  "host": "eden-container",
+  "mode": "read_only_audit_with_report_artifact",
+  "target": {
+    "bytes": 50000000000,
+    "GB": 50,
+    "GiB": 46.566128730773926
+  },
+  "execution": {
+    "deleted": false,
+    "moved": false,
+    "environment_changed": false,
+    "gpu_work_started": false,
+    "full_payload_sha_performed": false
+  },
+  "measurement": {
+    "allocated_bytes_excluding_codex": 89441210368,
+    "allocated_GiB_excluding_codex": 83.29861831665039,
+    "unknown_component": "Entire /root/.codex excluded. Do not interpret this measured lower bound as a complete /root total.",
+    "method": "du -sx -B1 --exclude=/root/.codex /root; no symlink following; same filesystem only. Sensitive directories measured as aggregate metadata only.",
+    "actual_total_expression": "89,441,210,368 bytes + unknown excluded /root/.codex allocation",
+    "minimum_reduction_to_target_bytes": 39441210368,
+    "filesystem": "overlay",
+    "overlay_df_used_bytes": 698639585280,
+    "overlay_df_available_bytes": 201032663040,
+    "overlay_caveat": "df is filesystem/backing-store utilization, not /root. Merged-view du does not identify unique overlay upper-layer bytes. Future deletion benefit must be checked against df and du.",
+    "shared_mount": "/mnt/pool",
+    "shared_df_used_bytes": 46472852668416,
+    "shared_df_available_bytes": 1354684694528,
+    "shared_use_percent": 98,
+    "root_measurement_at_utc": "2026-10-14T12:15:00Z",
+    "shared_refreshed_at_utc": "2026-10-14T12:19:00Z",
+    "shared_df_available_bytes_refreshed": 1476835409920,
+    "shared_use_percent_refreshed": 97,
+    "shared_refreshed_note": "Earlier 98% and free 1,354,684,694,528 bytes were the pre-other-task-cleanup snapshot. Later df reports 97% and 1,476,835,409,920 bytes free. Shared-pool usage can change concurrently.",
+    "excluded_shared_links": {
+      "/root/from_zjl": "/mnt/pool/sqy/from_zjl",
+      "/root/RADIO-GS/output": "/mnt/pool/sqy/results/RADIO-GS/output",
+      "/root/RADIO-GS-query-field/output": "/mnt/pool/sqy/results/RADIO-GS/output"
+    }
+  },
+  "largest_directories_bytes": {
+    "/root/.cache": 46089547776,
+    "/root/miniconda3": 22674325504,
+    "/root/RADIO-GS": 4475928576,
+    "/root/.vscode-server": 3824926720,
+    "/root/RLVO": 3038646272,
+    "/root/.cc-switch": 1679867904,
+    "/root/.local": 1548152832,
+    "/root/.copilot": 1211060224,
+    "/root/.npm": 964788224,
+    "/root/.nvm": 946126848,
+    "/root/.bun": 621756416,
+    "/root/RADIO-GS-query-field": 612114432
+  },
+  "model_dependencies": [
+    {
+      "path": "/root/.cache/huggingface/hub/models--Qwen--Qwen3-VL-8B-Instruct",
+      "bytes": 17546002432,
+      "status": "preserve runtime dependency",
+      "evidence": [
+        "radio_gs/models/referent_language.py:11-12,41-62 uses Qwen3 local_files_only and qwen3_env Python",
+        "radio_gs/querying/registered_observation_query.py:175-184 invokes parser for missing text_identity referent plans",
+        "scripts/research/run_source_referent_verifier.py:11-12"
+      ]
+    },
+    {
+      "path": "/root/.cache/huggingface/hub/models--google--siglip2-giant-opt-patch16-384",
+      "bytes": 7526510592,
+      "status": "preserve official text encoder and evaluation dependencies",
+      "evidence": [
+        "radio_gs/scripts/eval_text_response_fidelity_gate.py:52-53 pins model and revision",
+        "radio_gs/querying/registered_observation_query.py:191 uses native SigLIP text loader",
+        "/root/RADIO/examples/common/model_loader.py:471"
+      ]
+    },
+    {
+      "path": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-VL-3B-Instruct",
+      "bytes": 7520956416,
+      "status": "preserve research verifier dependencies",
+      "evidence": [
+        "scripts/research/verify_region_identity_next85.py:29",
+        "scripts/research/verify_track_identity_next98.py:17",
+        "scripts/research/verify_source_referents.py:19",
+        "scripts/research/resolve_query_referents.py:27"
+      ]
+    },
+    {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "logical_bytes": 1681320675,
+      "status": "preserve RADIO teacher/backbone required by many scripts"
+    }
+  ],
+  "environment_retention": {
+    "total_allocated_bytes": 22674325504,
+    "environment_attribution_bytes": {
+      "cybersim_agent": 8955572224,
+      "sam3": 8395063296,
+      "iclpose": 4453064704
+    },
+    "evidence": [
+      "radio_gs/scripts/run_repo_python.sh:19-37 chooses legacy CPython or cybersim_agent fallback and iclpose site-packages",
+      "radio_gs/scripts/run_repo_python.sh:69-76 uses cybersim_agent and iclpose runtime libraries",
+      "/root/.cache/radio_gs/qwen3_env/bin/python is symlink to /root/miniconda3/envs/sam3/bin/python"
+    ],
+    "warning": "Do not remove any of the three environments or blanket-clean conda/pkgs. Existing legacy CPython path referenced by wrapper is absent; fallback is needed.",
+    "conda_package_cache": {
+      "unique_file_allocation_bytes": 1295994880,
+      "single_link_file_allocation_bytes": 352428032,
+      "multi_link_file_allocation_bytes": 943566848,
+      "note": "Standalone cache size is not additive to root/env totals; most package bytes have hard links. Prior du traversal attributes some shared inodes to environments first."
+    }
+  },
+  "activity": {
+    "observed_training_or_model_service": "No training/model Python process observed in process snapshot; only audit Python plus shells/watch processes, editor and Codex/WebCodex services. This does not prove caches are obsolete.",
+    "active_preserve": [
+      "/root/.nvm/versions/node/v24.15.0",
+      "/root/.vscode-server",
+      "/root/RADIO-GS (WebCodex runner working directory)"
+    ],
+    "model_cache_open_files": "No non-private /root model-cache open file observed in /proc fd metadata snapshot.",
+    "recent_cache_writes": "No cache file modified in preceding 60 minutes in inspected HF/torch/CLIP/ODISE/pip/npm candidate paths.",
+    "open_deleted_log_allocated_bytes": 413696,
+    "no_restart_recommended": true
+  },
+  "batches": [
+    {
+      "id": "A",
+      "status": "candidate only; approval and fresh in-use check before cleaning",
+      "description": "Re-downloadable package download caches and installer archive; preserve environments and runtime binaries.",
+      "items": [
+        {
+          "path": "/root/.cache/pip/http-v2",
+          "bytes": 323731456
+        },
+        {
+          "path": "/root/.cache/pip/wheels",
+          "bytes": 913408
+        },
+        {
+          "path": "/root/.npm/_cacache",
+          "bytes": 828665856
+        },
+        {
+          "path": "/root/.nvm/.cache",
+          "bytes": 31182848
+        },
+        {
+          "path": "/root/vscode_cli.tar.gz",
+          "bytes": 11272192
+        }
+      ],
+      "allocated_candidate_bytes": 1195765760,
+      "expected_audited_root_after_bytes": 88245444608,
+      "caveat": "Logical allocated-byte candidate estimate, not a measured df reduction. Re-download/build costs remain. Actual root still includes unmeasured .codex."
+    },
+    {
+      "id": "B",
+      "status": "migration proposal only; not authorized or executed",
+      "description": "Move model caches to a dedicated Eden-owned shared-cache directory; preserve original absolute paths using top-level symlinks. Do not merge concurrently writable caches from other machines.",
+      "items": [
+        {
+          "path": "/root/.cache/huggingface/hub",
+          "bytes": 38054367232
+        },
+        {
+          "path": "/root/.cache/torch/hub/checkpoints",
+          "bytes": 4433305600
+        },
+        {
+          "path": "/root/.cache/clip",
+          "bytes": 1866870784
+        },
+        {
+          "path": "/root/.cache/odise_checkpoints",
+          "bytes": 224878592
+        }
+      ],
+      "allocated_migration_bytes": 44579422208,
+      "shared_consumption_increase_bytes": 44579422208,
+      "shared_space_freed_bytes": 0,
+      "expected_audited_root_after_A_and_B_bytes": 43666022400,
+      "maximum_unknown_codex_bytes_for_50GB": 6333977600,
+      "requirements": [
+        "Obtain explicit migration/removal approval.",
+        "First coordinate shared-pool headroom; avoid migration while pool remains under emergency pressure.",
+        "Recheck activity, scheduled loads and model download locks immediately before cutover.",
+        "Copy first to an Eden-specific destination; retain internal snapshot-to-blob symlinks and any hard links; no cross-filesystem hard-link dedup assumptions.",
+        "HF hub has 51 internal symlinks and no external symlinks; all observed model regular files have nlink=1.",
+        "ODISE has an external symlink to /root/.cache/sd_checkpoints/v1-5-pruned-emaonly.ckpt. Preserve its target string and audit resolution before cutover; do not follow it during copying.",
+        "Keep ~/.cache/huggingface token/config and non-model caches untouched; do not move the entire .cache directory.",
+        "Validate files/byte counts, revisions and snapshot links plus offline config/tokenizer/model-path resolution before removing old bytes.",
+        "Account for NFS latency/availability and shared cache concurrency; other root projects use the same default model paths.",
+        "Keep a rollback path through cutover; source cleanup must occur only after validation and explicit approval."
+      ]
+    },
+    {
+      "id": "C",
+      "status": "not approved for deletion",
+      "description": "VS Code old server builds, conda package cache, git history and research artifacts need separate compatibility/retention review; no savings credited.",
+      "potential_vscode_server_build_bytes": 3386118144,
+      "git_objects_count": 8895,
+      "git_object_loose_KiB": 154608,
+      "git_pack_KiB": 206183,
+      "git_garbage_count": 0
+    }
+  ],
+  "repository_retention": {
+    "note": "Both RADIO worktrees are dirty and share /root/RADIO-GS/.git. Preserve uncommitted source, untracked experiment/audit documents and histories; untracked is not trash. Shared output symlinks were not followed.",
+    "query_field_untracked_regular_files": 2270,
+    "query_field_untracked_allocated_bytes": 22818816,
+    "radio_gs_untracked_regular_files": 1583,
+    "radio_gs_untracked_allocated_bytes": 28123136,
+    "large_checkpoints": {
+      "/root/RADIO-GS/checkpoints": 3579097088,
+      "/root/RADIO-GS/checkpoints/sam3_modelscope": 3450101760
+    },
+    "unique_best_inputs_and_results": "Retain. No run output, checkpoint, input, best model, environment, live file, source or git history selected for deletion."
+  },
+  "shared_existing_copy_check": {
+  "scope": "Bounded metadata comparison of /mnt/pool/sqy/hf_cache/hub, huggingface_cache/hub, .cache/huggingface/hub, and torch_cache/hub/checkpoints; not a global shared-pool search.",
+  "large_models": "No Qwen3-VL-8B, Qwen2.5-VL-3B, SigLIP2 giant or matching local torch checkpoint names found in these known shared caches.",
+  "reuse_candidate": {
+    "local": "/root/.cache/huggingface/hub/models--Ruicheng--moge-3-vitl",
+    "shared": "/mnt/pool/sqy/hf_cache/hub/models--Ruicheng--moge-3-vitl",
+    "local_allocated_bytes": 1481359360,
+    "weight_file_logical_bytes": 1481333394,
+    "snapshot_revision": "a96e58bad16a94c9a3c193a5d4cd75b4b6906c94",
+    "blob_basename": "9b41b7b9f65ad80aab7ad686f5e9cc0d1fd33f1964022618dfbcd52fc1fb7925",
+    "evidence": "Both have same snapshot-relative model.pt symlink, same hash-named blob and same byte count. Shared tree additionally contains one small regular file.",
+    "content_equality_verified": false,
+    "no_full_hash": true,
+    "status": "Potential existing-copy reuse, not credited as a proven deletion. Verify content provenance and offline resolution under separate authorization before replacing local model directory with a shared symlink.",
+    "maximum_new_shared_bytes_after_successful_reuse": 43098062848
+  },
+  "noncandidate": "DA3-BASE local cache only has a tiny refs file, no model weight payload; shared copy is not meaningful local-space savings."
+},
+  "conservative_buffer": {
+  "preferred_total_root_bytes": 45000000000,
+  "buffer_below_50GB_bytes": 5000000000,
+  "post_A_B_audited_bytes": 43666022400,
+  "maximum_unmeasured_codex_bytes_for_45GB": 1333977600,
+  "note": "A five-GB growth buffer is recommended. The current restricted audit cannot certify that unmeasured .codex fits this budget; do not declare the 50GB target achieved. Environment splitting is not inherently required if model relocation and total accounting fit, but no environment removal is authorized or recommended."
+},
+  "conclusion": "Ordinary cache cleanup alone cannot reach 50 GB. Preserving current methods requires keeping model weights or relocating them. With batch A plus 44.579 GB of model migration, the audited remainder is 43.666 GB plus the unknown excluded .codex allocation. Therefore 50 GB is conditionally feasible without tearing down environments, but cannot be certified from this restricted audit. If migration is disallowed and model/runtime functionality must remain intact, no safe <=50 GB plan is established."
+}

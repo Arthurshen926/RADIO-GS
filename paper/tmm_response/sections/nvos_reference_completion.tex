@@ -1,0 +1,21 @@
+\section{Signed reference completion before instance transport}
+N12 compares the original reference mask, a frozen-DINO signed-affinity response decoded on the reference image, and the same completion with original positive/negative scribble points plus exact annotation constraints. All three use identical frozen two-frame SAM3 memory and native-ray 3D fitting. The primary constrained branch is fixed for all eight tasks; all 72 predictions precede either target GT convention. Reference annotation agreement is not complete-object ground truth. Original negative scribbles and target RGB are explicitly declared inputs. Other four benchmarks remain unchanged references.
+\begin{center}\small\resizebox{\linewidth}{!}{\input{tables/nvos_reference_completion.tex}}\end{center}
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & Static & Legacy memory & Semantic memory & Constrained memory \\\midrule
+fern & 83.92 & 84.06 & 83.20 & 83.25 \\
+flower & 85.98 & 89.25 & 96.71 & 96.60 \\
+fortress & 97.36 & 97.66 & 98.00 & 97.80 \\
+horns\_center & 97.30 & 95.47 & 95.69 & 97.12 \\
+horns\_left & 93.68 & 94.80 & 94.81 & 84.48 \\
+leaves & 95.61 & 95.68 & 57.63 & 94.84 \\
+orchids & 73.17 & 70.59 & 95.60 & 94.52 \\
+trex & 83.71 & 78.09 & 86.54 & 83.21 \\
+\bottomrule\end{tabular}\end{center}
+constrained memory native vs static native: +2.6350 IoU points, +2.1944 AP points; 3 improved and 5 harmed tasks.
+constrained memory native vs legacy memory native: +3.2772 IoU points, +0.4211 AP points; 5 improved and 3 harmed tasks.
+constrained memory native vs semantic memory native: +2.9548 IoU points, +2.4814 AP points; 3 improved and 5 harmed tasks.
+semantic memory native vs legacy memory native: +0.3224 IoU points, -2.0603 AP points; 6 improved and 2 harmed tasks.
+constrained memory native vs constrained memory image: -0.2046 IoU points, -0.2275 AP points; 2 improved and 6 harmed tasks.
+\begin{figure}[ht]\centering\includegraphics[width=.85\linewidth,height=.75\textheight,keepaspectratio]{../../output/tmm_response_20261018/study/nvos_reference_completion_spatial_v1/errors.png}
+\caption{All eight N12 tasks. Green TP, red FP, blue FN; native-grid display resizing only. Scores use original GT resolution.}\end{figure}

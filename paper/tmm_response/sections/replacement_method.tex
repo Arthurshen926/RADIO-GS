@@ -1,0 +1,109 @@
+\paragraph{One problem and one mechanism.}
+An alternative answer can have stronger teacher agreement while having worse
+instance extent. Conversely, preserving a strong member decoder cannot correct
+the wrong identity supplied to it. We estimate the \emph{relative task utility}
+of replacing an existing answer, retaining that answer as an explicit option.
+Teachers, representations, geometry and complete-response providers remain
+fixed. Query applicability and partial-evidence observations become inputs to
+one decision, rather than additional independently optimized networks.
+
+\paragraph{Complete candidates.}
+For legal query $q$ and observations $\mathcal E$, frozen providers produce
+\[
+ \mathcal H_q=\{h_0,h_1,\ldots,h_K\},\qquad h_k=(r_k,S_k),
+\]
+where $h_0$ is the incumbent, $r_k$ its continuous response and $S_k$ its actual
+selected set. These need not be related by a universal threshold. The first
+implementation keeps four regional identities, including the original and
+the available teachers' winners, and decodes each with both retained complete
+providers. Duplicate identities are removed before decoding. The same incumbent
+probabilities and set are preserved exactly. Only one whole candidate is returned;
+there is no element-wise oracle or per-query benchmark winner in inference.
+
+\paragraph{Observable response signatures.}
+Let $M_{ir}$ indicate regional membership, $V_{if}$ visibility, and $f(r)$ a
+region's view. For a complete candidate, its co-visible regional agreement is
+\[
+ t_{kr}=\frac{\sum_i M_{ir}\mathbf1[i\in S_k]}
+ {\sum_i M_{ir}+\sum_i V_{i,f(r)}\mathbf1[i\in S_k]
+                   -\sum_i M_{ir}\mathbf1[i\in S_k]}.
+\]
+Zero-mass ratios are zero. Each teacher contributes its own query-score ranks,
+so no raw feature coordinates or teacher cosine scales are averaged.
+The signature $x_k=\phi(q,\mathcal E,h_k)$ contains response/visibility summaries,
+query association inside and outside regional overlap, and query-weighted
+overlap precision and recall. Teacher statistics are averaged within a view;
+view means, standard deviations and lower quartiles have a fixed dimension.
+All candidates share the exclusion of the union of their proposal views.
+This removes their direct proposal views from verification, but does not make
+the remaining observations independent of the complete providers. Exterior
+query association is a diagnostic feature, not verified negative membership.
+
+\paragraph{Set-consistent replacement utility.}
+Independent labelled training scenes provide actual complete-answer utilities
+$u_k$. We assign one scalar value to each intact answer in a common candidate-set
+context, using a fixed-size tree ensemble without retraining any element decoder:
+\[
+ \bar x=K_q^{-1}\sum_{k=0}^{K_q-1}x_k,\qquad
+ z_k=g_\theta(x_k,\bar x,x_k-\bar x),\qquad
+ \widehat\Delta_k=z_k-z_0.
+\]
+Here $K_q$ counts all candidates including the incumbent. Targets are
+$t_k=u_k-\bar u$ and squared-error weights are equal per room, modality, query
+and candidate. Removing $\bar u$ prevents query difficulty from becoming an
+irrelevant target offset. Indeed, writing $e_k=z_k-u_k$, pairwise squared error
+is $2K_q\sum_k(e_k-\bar e)^2$; squared error to the centered targets additionally
+penalizes a common predicted offset. The forest implementation fits those
+centered targets directly. It does not claim to optimize a new representation.
+
+The set mean makes this construction equivariant to candidate permutation, and
+differences of a common value satisfy
+$\Delta_{ab}+\Delta_{bc}+\Delta_{ca}=0$. This supplies consistency, not a
+guarantee of correct ranking. The evaluated residual parameterization uses
+\[
+ z_k=b_\psi(S_k^{\rm feat})+r_\theta(X_k),\qquad
+ X_k=(x_k,\bar x,x_k-\bar x),
+\]
+where $S_k^{\rm feat}$ denotes the structural coordinates of $X_k$.
+Five room-grouped folds produce an out-of-room structural prediction
+$b^{-f}(S_k^{\rm feat})$. The residual target is
+$(u_k-\bar u)-b^{-f}(S_k^{\rm feat})$; the final structural prior is fitted
+on all fit rooms. A matched within-view permutation of query scores receives
+zero residual target, while its complete candidate is unchanged. This imposes
+a query-evidence regularization assumption, not zero true utility. The two
+forests form one scalar utility and one decision; the no-null experiment tests
+whether this extra constraint contributes to accuracy.
+
+\paragraph{Selective replacement.}
+Let $k^*=\arg\max_k\widehat\Delta_k$, with stable incumbent-first ties. Return
+$h_{k^*}$ only if $\widehat\Delta_{k^*}>\tau$ and verification evidence exists;
+otherwise return $h_0$. One global margin is selected on three separate
+calibration rooms. The joint protocol maximizes room/output macro utility
+subject to nonnegative mean change in each calibration cell.
+The SAME margin applies to all outputs; modality is not an estimator input.
+A reject-all policy is included. This is an
+empirical guard, not a distribution-free risk guarantee or a guarantee under
+query/provider shift.
+
+For joint category/instance supervision, each category candidate is one complete
+19-class menu and its training utility is mean mIoU across the 19/15/10 outputs.
+All submenus use the SAME candidate. The single calibration margin must protect
+text IoU, image IoU and all three menu outputs in each room: 15 cells in total.
+Task identity defines weighting and calibration groups but is never a model
+input. Continuous AP is measured separately and is not guaranteed by this guard.
+
+\paragraph{Two precise properties.}
+If a particular query satisfies
+$|\widehat\Delta_k-(u_k-u_0)|\leq\epsilon$ for every candidate and
+$\tau\geq\epsilon$, any accepted replacement improves utility, because
+$u_{k^*}-u_0\geq\widehat\Delta_{k^*}-\epsilon>\tau-\epsilon\geq0$.
+The actual calibration rule does not certify this uniform-error premise.
+Separately, finite-pool performance has the exact decomposition
+\[
+ u_{\hat k}=u_0+
+ \underbrace{(\max_k u_k-u_0)}_{\text{available proposal gain}}-
+ \underbrace{(\max_k u_k-u_{\hat k})}_{\text{decision regret}}.
+\]
+The labelled maximum is used only after prediction for diagnosis. It is not an
+automatic result or an upper bound on different proposal families. Reporting
+both quantities separates proposal failure from decision failure.

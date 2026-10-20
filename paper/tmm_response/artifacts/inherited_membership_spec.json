@@ -1,0 +1,102 @@
+{
+  "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/real_direct_membership_20261006/real/model.joblib",
+  "checkpoint_sha256": "77b8551bcf1e35796c46e02742671f08e63e45052b741a3c473a0615dc88053c",
+  "feature_names": [
+    "anchor_nested_mask_vote",
+    "anchor_any_mask_view_fraction",
+    "anchor_all_masks_view_fraction",
+    "anchor_granularity_disagreement",
+    "anchor_joint_visibility_fraction",
+    "anchor_has_joint_visibility",
+    "anchor_observed_view_fraction",
+    "element_observed_view_fraction",
+    "signed_dx_m_bounded",
+    "signed_dy_m_bounded",
+    "signed_dz_m_bounded",
+    "distance_m_bounded",
+    "horizontal_distance_m_bounded",
+    "native_anchor_response",
+    "has_native_element_support"
+  ],
+  "fit": [
+    "scene0271_00",
+    "scene0059_00",
+    "scene0226_00",
+    "scene0167_00",
+    "scene0211_00",
+    "scene0532_00",
+    "scene0611_00",
+    "scene0057_00",
+    "scene0344_00",
+    "scene0374_00",
+    "scene0483_00",
+    "scene0390_00",
+    "scene0074_00",
+    "scene0065_00",
+    "scene0117_00",
+    "scene0577_00",
+    "scene0547_00",
+    "scene0331_00",
+    "scene0168_00",
+    "scene0465_00",
+    "scene0463_00",
+    "scene0317_00"
+  ],
+  "calibration": [
+    "scene0209_00",
+    "scene0437_00",
+    "scene0024_00"
+  ],
+  "threshold": 0.35000000000000003,
+  "condition": "independent3D instance supervision;22 real observation rooms;actual geometric anchor",
+  "estimator_type": "ExtraTreesClassifier",
+  "estimator_parameters": {
+    "n_estimators": 64,
+    "max_leaf_nodes": 512,
+    "min_samples_leaf": 32,
+    "random_state": 20261005
+  },
+  "benchmark_split_overlap": [],
+  "active_maps": {
+    "scene0030_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0030_00/map.json",
+      "sha256": "ef2cd7b55d38fab61fa745eccd535a067f262aa0f50407f815b4a9d991c38730"
+    },
+    "scene0203_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0203_00/map.json",
+      "sha256": "2a61e981fcf170835de5ec6f5138b7a96a65bdb7a737db5a87c24a818f05af02"
+    },
+    "scene0246_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0246_00/map.json",
+      "sha256": "27d42a8279d391e778a49a373eb10abb8c459e20c5ca1861bfda04fc20c4ab46"
+    },
+    "scene0249_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0249_00/map.json",
+      "sha256": "6c71552b9c3d0a56eb33712e0e768bbdbe5daf9f6339820f13ca23cb67d702c1"
+    },
+    "scene0353_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0353_00/map.json",
+      "sha256": "11c7cc357478ab7304a23dc0226097bea02396b38689dcad8280eb5c2d743e33"
+    },
+    "scene0435_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0435_00/map.json",
+      "sha256": "54cde30eac65e28dd73834366c3361bd1a8e7b0ba001325d6f2245d965235c91"
+    },
+    "scene0535_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0535_00/map.json",
+      "sha256": "dd96afd326867af10d65c08f0f703900912df0bec83b3689977ec3d894b752e0"
+    },
+    "scene0700_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0700_00/map.json",
+      "sha256": "39a56413a638002288ae99a43eeb4d78eded5e8109e9dabb6924f233bb7055e9"
+    },
+    "scene0704_00": {
+      "path": "output/query_conditioned_membership_20261006/image_convergence/maps/scene0704_00/map.json",
+      "sha256": "cad4fb4530dc34c8564e00a8074628c24434a1ce82485ad2da87e37cb3bd25a7"
+    }
+  },
+  "image_anchor_rule": "actual region member nearest coordinate-wise 3D median; active caller passes no region_identity",
+  "image_matching": "equal ranks of native SigLIP and local DINOv2 Chamfer; native feature fields unchanged",
+  "new_training": false,
+  "new_performance_claim": false
+}

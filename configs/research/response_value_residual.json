@@ -1,0 +1,15 @@
+{
+  "method": "query-evidence residual utility over an out-of-room structural prior",
+  "parent_training_run": "response_value_multitask_v1",
+  "room_folds": 5,
+  "null_weight": 0.5,
+  "null_target": "zero query correction; not zero candidate utility",
+  "control": "same prior and residual capacity; duplicate aligned examples instead of matched query nulls",
+  "estimator": "parent 64-tree capacity per component; 128 total for full and no-null control",
+  "unchanged": ["all applicable teachers", "complete candidate pools", "39 signature coordinates", "22/3/4 split", "room/task/query/candidate weights", "single 15-cell calibration margin"],
+  "benchmark_feedback_in_design": "previous L08 and A10 already opened; no new benchmark selection or threshold search",
+  "calibration_previously_opened": true,
+  "development_previously_opened": true,
+  "independent_final_test": false,
+  "default_changed": false
+}

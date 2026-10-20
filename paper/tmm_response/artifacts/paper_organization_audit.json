@@ -1,0 +1,92 @@
+{
+  "date": "2026-10-18",
+  "purpose": "Scientific manuscript reorganization; no new benchmark inference",
+  "branch": "codex/tmm-query-response",
+  "scientific_default_changed": false,
+  "new_benchmark_scores": false,
+  "theory_checks": {
+    "exact_rational_consensus_cases": 180,
+    "partial_scope_ambiguity_witness": true,
+    "readout_counterexample": {
+      "full_scene": 0.021739130434782608,
+      "selected_alpha": 0.2
+    },
+    "scope": "algebra checks, not empirical validation or a formal proof checker"
+  },
+  "implementation_tests": {
+    "passed": 192,
+    "warnings": 2,
+    "command": "python -m radio_gs.response_study test"
+  },
+  "manuscript": {
+    "previous_main_pages": 17,
+    "main_pages": 12,
+    "pdfs": {
+      "main": {
+        "pages": 12,
+        "bytes": 313890,
+        "sha256": "5862f829b512784fac40a6a5eb340eae2ed351bab9b3ac21cfe80de3efccb090",
+        "unresolved_references": false,
+        "latex_warnings": false
+      },
+      "diagnostics": {
+        "pages": 37,
+        "bytes": 2946636,
+        "sha256": "0d559d238b04b221284a8975bde2f512941f716ee7d6a5cf263bbaa8e28974be",
+        "unresolved_references": false,
+        "latex_warnings": false
+      },
+      "replacement": {
+        "pages": 4,
+        "bytes": 188675,
+        "sha256": "adcf8833b5658d421d676f6cdd5c7c0e18ccc8389d57f2bb2365719ad8deb391",
+        "unresolved_references": false,
+        "latex_warnings": false
+      }
+    },
+    "all_main_sections_hash_bound": true,
+    "method_source_bindings": 1932,
+    "code_bindings": 52
+  },
+  "experiment_catalog": {
+    "rows": 66,
+    "verified_files": 1082,
+    "main_view": {
+      "nvos": [
+        "NVOS",
+        "SA3D-TRF",
+        "SA3D-GS",
+        "SAGA",
+        "OmniSeg3D",
+        "LUDVIG-DINOv2",
+        "LUDVIG-SAM",
+        "LUDVIG-SAM2",
+        "VCAR",
+        "LEGO",
+        "WildSeg3D",
+        "Trace3D",
+        "LUDVIG-SAM",
+        "Ours (v10)",
+        "Ours + source feasibility admission (N14)",
+        "Ours + source quality admission (N14 secondary)",
+        "Ours + query-local target decoding (N16)"
+      ],
+      "uqis": [
+        "Ours (regional readout)",
+        "Ours (v10)"
+      ],
+      "policy": "editorial view; full catalog preserved; no per-task winner selection"
+    },
+    "historical_results_preserved": true
+  },
+  "prior_source_snapshot": "docs/history/2026-10-18-paper-condensation/manifest.json",
+  "source_version_warnings": [
+    "E01: 8 source-version receipts lack matching current/archive text; exact replay not certified"
+  ],
+  "receipts": {
+    "paper/tmm_response/method_manifest.json": "a72d2360da2ae5cdbe5f797b0568665a1a6c431d8272342635d361ab3dfc7a3c",
+    "paper/tmm_response/method_validation.json": "d472896d29731852168fde7820ad85a46f2574e05f0a9f38bd3e3c3b2472818f",
+    "paper/tmm_response/paper_experiments.json": "4587b991751d1f8c0e59b3781ed0ec327720dd23bd024938b2ff39b0788a2989",
+    "docs/history/2026-10-18-paper-condensation/manifest.json": "7250274554ca7209abe775f1207238c78b1193efdbd8441e4e49a1edaeefdd1d"
+  }
+}

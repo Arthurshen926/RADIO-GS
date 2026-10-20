@@ -1,0 +1,94 @@
+\subsection{NVOS: evidence construction versus source resolution}
+We test a fixed $2\times2$ design on all eight tasks. The old evidence recipe
+bilinearly samples logits, thresholds their sigmoid probabilities at 0.5, and erodes positive and
+negative interiors. The alternative pools native probability $p$ with confidence
+$c=|2p-1|$, using target $\operatorname{area}(cp)/\operatorname{area}(c)$ and
+weight $\operatorname{area}(c)$. Zero confidence contributes no evidence.
+Both use original tracked negative reliability and geometry visibility.
+This changes pooling, boundary authority and confidence weighting together;
+it does not isolate one of those factors individually.
+
+Source grids are $256\times192$ and $512\times384$. The old recipe's erosion
+radius scales from two to four pixels to retain its normalized image footprint.
+Changing the grid changes contribution sampling and observed support, with
+geometry parameters fixed. Teachers, tracks, prompts, legal frames, 120 Huber
+updates and final threshold 0.5 are shared. A CPU CSR solver first reproduces
+the retained low-resolution field and its final IoU. Every task/arm is predicted
+before scoring. Other benchmark outputs are unchanged hash-verified references.
+
+\begin{table}[ht]
+\centering\small
+\input{tables/nvos_coverage.tex}
+\caption{Fixed NVOS factorial study. Each column applies one recipe to all
+eight tasks. Task rows use retained GT; mean rows separately report both GT boundary
+conventions, followed by AP on the exact same response images. The two horns tasks share one scene. No per-task winners or
+GT-selected thresholds are used.}
+\label{tab:nvos-coverage}
+\end{table}
+
+The cohort has already informed development, so prediction sealing does not
+make this an independent final test. Results and source erosion statistics
+are retained per task; uncertainty estimates resample seven scene clusters.
+These are candidate experiments, not an automatic change to the v10 default.
+
+Coverage at the finer grid raises mean IoU from 86.5134 to 87.7776
+(+1.2642 points), improving seven tasks and decreasing horns-center by 0.1731.
+Mean AP increases from 98.0222 to 98.1527. Increasing resolution alone decreases
+IoU on every task (mean 85.6138); coverage alone at the coarse grid gives 86.7069.
+The factorial interaction is +1.9703 points. Thus finer sampling is useful
+with the changed evidence construction, not a sufficient explanation by itself.
+The seven-scene cluster bootstrap gives a descriptive 95\% interval of
+[0.7381, 2.0202] points for the combined change; this is not an independent-test
+confidence guarantee after development on this cohort.
+
+Trex improves by 3.2386 IoU and 2.2656 AP points; orchids improves by 1.9049 IoU
+but loses 2.0161 AP points. The latter warns that foreground recovery at a fixed
+threshold does not ensure improved global ranking. Flower remains at 87.3824 IoU,
+so missed foreground extent is not resolved. Using LUDVIG's GT convention gives
+87.9280, versus its local three-seed reproduction at 91.2577, with the previously
+declared input and geometry differences. No target-RGB benefit is isolated here.
+
+\IfFileExists{tables/nvos_inherited_readouts.tex}{
+\paragraph{Recovering the full capability of v10.}
+The stored v10 output includes an independently fitted selection in addition
+to the continuous response used in its original NVOS main score. We freshly
+render both retained outputs for all eight tasks using their existing fixed
+readout rules, without fitting a new model. Table~\ref{tab:nvos-inherited}
+reports both. The evaluation quantity remains binary-mask IoU on the same GT;
+the output operator changes from a full-scene response to a selected-set alpha
+projection. Their difference measures existing output capability, not the
+gain of the new coverage construction or the optional selector.
+The inherited independent set obtains 85.2245 IoU, below the original continuous
+response at 86.5134; no higher aggregate was hidden by reporting only that response.
+\begin{table}[ht]
+\centering\small\input{tables/nvos_inherited_readouts.tex}
+\caption{Our two existing v10 NVOS outputs, scored on all eight tasks. One
+fixed output rule is used throughout each column. The historical continuous
+response score remains preserved; no scene-wise output switching is used.}
+\label{tab:nvos-inherited}
+\end{table}
+}{}
+
+\IfFileExists{tables/nvos_readout_factorial.tex}{
+A field-by-readout control further crosses the two stored fields with the two
+output operators. All eight geometries and observed-support masks are identical
+between the two fields. The continuous operator retains threshold 0.5; the
+selected-alpha operator retains its existing membership and alpha thresholds.
+This separates the effect of the fitted member field from the composite output
+operation (including its fixed readout threshold). All arms are declared and
+predicted before scoring, with no newly optimized field.
+\begin{table}[ht]
+\centering\small\input{tables/nvos_readout_factorial.tex}
+\caption{Inherited field versus output operator, macro over all eight NVOS tasks
+using retained GT. Crossed readouts are diagnostic controls, not task-wise winners.}
+\label{tab:nvos-readout-factorial}
+\end{table}
+With the semantic field fixed, selected-alpha projection raises recall from
+90.0997 to 96.6960 but reduces precision from 95.6980 to 87.1647 and IoU to
+84.3934. Conversely, the independently fitted member field is not calibrated
+as a full-scene semantic response: that crossed readout gives 6.9147 IoU despite
+94.3836 AP. Its intended selected-alpha readout recovers 85.2245 IoU.
+These controls demonstrate an objective/readout compatibility requirement,
+not a failure of the existing member field at its intended task. Restoring
+complete output capability requires preserving this pairing.
+}{}

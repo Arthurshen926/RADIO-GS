@@ -1,0 +1,23 @@
+\section{Related work}
+\paragraph{Language and visual evidence in Gaussian scenes.}
+VALA studies visibility-aware semantic lifting and robust multi-view
+aggregation~\cite{vala}. Occam's LGS~\cite{occam} provides a Gaussian language
+baseline. LUDVIG lifts features or masks and uses graph diffusion for scene
+queries~\cite{ludvig}. Their published results and our retained local
+reproductions provide comparison context. We do not claim visibility weighting,
+robust aggregation or native matching individually as new operations.
+
+EviSplat~\cite{evisplat} preserves observation features within instances and
+combines query-selected evidence with local Gaussian support. Query-dependent
+evidence use is therefore established. Our focus is the authority of a
+query-conditioned observation to support or exclude a response, and its
+interaction with complete extent across typed tasks. Matched controls establish
+measured contributions. Teacher and geometry differences limit causal
+attribution of gains over published methods.
+
+\paragraph{Response verification.}
+Our optional complete-response selector predicts actual answer utility from
+observable evidence and uses a shared acceptance margin. Consistent ordering
+and conservative retention do not guarantee accurate transfer. This extension
+is evaluated with fixed candidates and query/retention controls; it is distinct
+from the fusion and membership that produce our v10 answers.

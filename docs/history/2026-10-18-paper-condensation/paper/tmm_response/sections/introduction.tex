@@ -1,0 +1,53 @@
+\section{Introduction}
+A scene query asks for an identity and its spatial extent. Text may name an
+object, an image may show one of its parts, and a point may identify one visible
+surface. A useful three-dimensional response must connect that evidence to the
+requested object while rejecting distractors and recovering members beyond the
+observed region. Strong teacher features provide valuable correspondences, but
+a high match score alone does not specify the extent of a correct answer.
+
+Two decisions are easily conflated. First, an observation may or may not refer
+to the requested identity. Second, even a correctly matched observation may
+support only part of that identity's extent. Treating its exterior as background
+can erase unseen object parts; accepting an unrelated region can propagate
+false positives through otherwise accurate geometry. The problem is therefore
+not only how to aggregate evidence, but which evidence is entitled to support
+or exclude each part of the response.
+
+We study \emph{query-conditioned evidence fusion}: native observations are
+admitted according to their applicability to the query, assigned spatial
+support and exclusion authority, and combined through a fixed scene carrier.
+Rejected or unavailable evidence remains unknown. Text applicability uses
+candidate-relative native matching; reference tracks, categorical competition
+and explicit points retain their respective conditioning semantics. This
+response-level interface uses existing teacher representations without learning
+a common latent feature field.
+
+Evidence formation must also preserve the intended output capability.
+Continuous semantic responses and complete selected instances have different
+optimization objectives and readouts. We retain both, using geometric response
+fusion for semantic evidence and complete-membership mechanisms for actual
+selection. This avoids interpreting silhouette membership as a calibrated
+semantic probability, or assuming that a better score field automatically
+improves an independent selected set. The shared evidence contract has typed
+implementations; it does not require an identical solver for every query type.
+
+Our implementation, recorded as v10 for reproducibility, covers LERF semantic
+segmentation and selected-set projection, ScanNet open-vocabulary segmentation,
+NVOS reference segmentation and multimodal UQIS. Controlled component studies
+connect identity admission, admitted-response use, local image correspondence
+and complete membership to measured improvements. Further matched experiments
+separate changes in evidence construction, reconstruction, response decisions
+and output interpretation. These controls also expose cases where better source
+fit fails to improve target answers. External comparisons retain their declared
+teacher, geometry and input-access differences.
+
+Our contributions are threefold. First, we formulate a query-conditioned
+evidence contract that separates identity applicability, spatial support,
+exclusion and missing information. Second, we implement this contract in a
+scene-query method that combines native evidence through geometry while
+preserving both semantic response and complete selection. Third, we evaluate
+five task outputs with matched component controls, protocol checks and complete
+positive and negative feedback. Optional response-replacement and NVOS
+extensions are evaluated separately from the established system, so their
+measured effects can be attributed to the operations they actually change.

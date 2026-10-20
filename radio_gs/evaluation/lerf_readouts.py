@@ -11,7 +11,8 @@ def evaluate_lerf_readouts(*, scene, out, texts, scores, selection_scores,
                           selection_geo, selection_observed, camera_report,
                           camera_report_sha256, pipeline=True,
                           label_root='/mnt/pool/sqy/3d_understanding/lerf_ovs/label',
-                          selected_gt_root='output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt'):
+                          selected_gt_root='output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/eval_gt',
+                          score_selected=True, report_writer=None, comparison_reference=None):
     from gsplat import rasterization
     from sklearn.metrics import average_precision_score
     from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
@@ -22,9 +23,16 @@ def evaluate_lerf_readouts(*, scene, out, texts, scores, selection_scores,
     prior=MogeGeometryPrior(camera_report,camera_report_sha256)
     frames=load_lerf_objects(Path(label_root)/scene,frames=SCENE_GT_FRAMES[scene])
     rows={name:[] for name in scores}
+    if comparison_reference is not None and comparison_reference not in scores:
+        raise ValueError('comparison reference must be one of the supplied responses')
+    names=list(scores)
+    if comparison_reference is not None:
+        names.remove(comparison_reference); names.insert(0,comparison_reference)
     for frame,objects in frames.items():
         h,w=objects[0].mask.shape;cam=prior.cameras[int(frame.split('_')[-1])];k=cam.intrinsic.cuda().clone();k[0]*=w/cam.width;k[1]*=h/cam.height
-        for name,values in scores.items():
+        reference_masks={}
+        for name in names:
+            values=scores[name]
             for obj in objects:
                 response_geo=semantic_geo if name=='hierarchical_pipeline' else geo
                 response_observed=semantic_observed if name=='hierarchical_pipeline' else default_observed
@@ -35,6 +43,14 @@ def evaluate_lerf_readouts(*, scene, out, texts, scores, selection_scores,
                 record=dict(frame=frame,query=obj.query,ap=float(average_precision_score(obj.mask.flatten(),result.numpy().flatten())),localization_hit=_localization_hit(torch.nonzero(result==result.max()),obj.bboxes))
                 if pipeline:
                     record['iou']=_mask_iou(torch.from_numpy(obj.mask),result>.5)
+                    if comparison_reference is not None:
+                        binary=result>.5; truth=torch.from_numpy(obj.mask).bool()
+                        if name==comparison_reference:reference_masks[id(obj)]=binary
+                        else:
+                            baseline=reference_masks[id(obj)]
+                            record.update(corrected_pixels=int(((binary==truth)&(baseline!=truth)).sum()),
+                                          harmed_pixels=int(((binary!=truth)&(baseline==truth)).sum()))
+                if pipeline and score_selected:
                     set_geo=selection_geo if name=='hierarchical_pipeline' else geo
                     set_observed=selection_observed if name=='hierarchical_pipeline' else default_observed
                     selected=(selection_scores[name][:,texts.index(obj.query)]>.5)&set_observed
@@ -50,6 +66,10 @@ def evaluate_lerf_readouts(*, scene, out, texts, scores, selection_scores,
     if pipeline:
         for name,values in rows.items():
             metrics[name]['iou']=float(np.mean([r['iou'] for r in values]))
-            metrics[name]['selected']=asdict(evaluate_scene(Path(selected_gt_root)/scene/'gt',out/name,scene,threshold=10))
-    (out/'query_results.json').write_text(json.dumps(rows,indent=2)+'\n')
+            if score_selected:
+                metrics[name]['selected']=asdict(evaluate_scene(Path(selected_gt_root)/scene/'gt',out/name,scene,threshold=10))
+    if report_writer is None:
+        (out/'query_results.json').write_text(json.dumps(rows,indent=2)+'\n')
+    else:
+        report_writer('query_results.json',rows)
     return metrics

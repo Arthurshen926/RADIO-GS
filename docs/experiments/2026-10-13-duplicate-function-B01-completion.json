@@ -1,0 +1,115 @@
+{
+  "schema": "radio_gs.B01_completion.v1",
+  "status": "completed_non_destructive_independent_review_pass",
+  "scope": [
+    "G49",
+    "G48"
+  ],
+  "completed_utc": "2026-10-13T11:28:00Z",
+  "plan": {
+    "path": "docs/experiments/2026-10-13-duplicate-function-B01-plan-v2.json",
+    "sha256": "f5a872c568702f922dbd15dfd2369b6b58f4be2421b6d70653413cdf84408dd1"
+  },
+  "code": {
+    "shared_storage": "918dbd0b503016ed841fbeeb62c9ef45fd12aeeba83adcb2fcca9436fcc4b2d9",
+    "batch_script": "28d6f814f40bca5f8138c5cf1b3547a94003338d650b0cc32ebaf5f44c13e7ce",
+    "test": "36088a7eb75470b7b04d55ec5ba3a4f1226d88fe0a2b2b8c7e55e3b409bf3028"
+  },
+  "runtime_recovery": {
+    "current": "docs/experiments/duplicate_function_B01_final_sources",
+    "earlier_B01": "docs/experiments/duplicate_function_B01_sources",
+    "pre_cache_pilot": "docs/experiments/duplicate_function_pilot_20261013_recovery_final_sources",
+    "instructions": "Use preserved runtime and its exact plan; do not rewrite old design or silently inherit code hashes. Existing outputs are exclusive publications; do not blindly rerun migrate/finalize into existing directories."
+  },
+  "tests": {
+    "owner_job": "wc_job_IY1HbSlDgsZfXPTL",
+    "owner_passed": 61,
+    "owner_seconds": 39.74,
+    "independent_job": "wc_job__FEaxOdCiL26LpOF",
+    "independent_passed": 16,
+    "independent_seconds": 16.48
+  },
+  "jobs": [
+    {
+      "group": "G49",
+      "stage": "migrate",
+      "job": "wc_job_H6vt-TvIwxkV8f58",
+      "seconds": 392.7554160375148,
+      "exit_code": 0
+    },
+    {
+      "group": "G49",
+      "stage": "cold",
+      "job": "wc_job_U8cmNGn0ODBsGsPH",
+      "seconds": 214.41134371049702,
+      "exit_code": 0
+    },
+    {
+      "group": "G48",
+      "stage": "migrate",
+      "job": "wc_job_fJgMeZZ1-MK3c-Md",
+      "seconds": 314.85330324433744,
+      "exit_code": 0
+    },
+    {
+      "group": "G48",
+      "stage": "cold",
+      "job": "wc_job_qO3KRvRv_Lwgk71Z",
+      "seconds": 181.7960726711899,
+      "exit_code": 0
+    },
+    {
+      "stage": "finalize",
+      "job": "wc_job_QK1_nWsPyko6kjYe",
+      "exit_code": 0
+    }
+  ],
+  "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/duplicate_functions_B01",
+  "store_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+  "receipts": {
+    "final_summary_sha256": "b389c2ed7bf68f09dc05036b2608596744e3c94e159fb5b90343c3e6bf8a21a2",
+    "consumer_overlay_sha256": "bc76ba9903344d1bccd0f7687bfc9f3e93137a11633519c15f36a15710a1e33c",
+    "settled_retirement_proposal_sha256": "0af12f1f366b61e6f167ce729df1386eb362e97a00bf49383a9041262b6676e7"
+  },
+  "cost": {
+    "original_logical": 52477524486,
+    "original_allocated": 56082963456,
+    "full_blob_union": 17492494280,
+    "new_unique_blobs": 1780996984,
+    "reused_existing": 15711497296,
+    "application_IO": 54258493706,
+    "data_stage_seconds": 1103.8161356635392,
+    "peak_rss": 19329114112,
+    "freed_now": 0,
+    "interpretation": "Application bytes, not backend NFS traffic. Incremental NFS costs exclude local source snapshots. Shared df variation is not attributable exclusively to this task."
+  },
+  "scientific_acceptance": {
+    "methods": 6,
+    "independent_group_cold_processes": 2,
+    "old_source_negative_tests": 52,
+    "cpu_output_probes": 12,
+    "full_tensor_dtype_equality": true,
+    "restricted_default_migration": "Only missing native_mode_rule and semantic_measure_rule become explicit string none; all other typed canonical spec exact.",
+    "full_GPU_benchmark_rerun": false
+  },
+  "consumer_replay": {
+    "configs": "consumer_configs/{soft_paired_function,mixture_function,confidence_mixture_function}.json",
+    "execution_cwd": "/root/RADIO-GS-query-field",
+    "command": "python -m radio_gs.query_field.public_lerf predict --config NEW_CONFIG --job teatime|waldo_kitchen --output FRESH_OUTPUT --store-root EXPLICIT_STORE",
+    "scope": "Six selected jobs. Only field paths changed; old scientific config/queries and result status retained. Mixture has no historical prediction/evaluation for these scenes. No automatic legacy path redirect."
+  },
+  "next_request": {
+    "path": "docs/experiments/2026-10-13-duplicate-exact11-retirement-request.json",
+    "sha256": "ea6b8ae9847e04c16ab04302ef04476b6e2c49c272bfcfb0360d14ae160a08e0",
+    "count": 11,
+    "authorization": "PENDING explicit user confirmation",
+    "originals_retained": true,
+    "old_logical": 55733175627,
+    "old_allocated": 59521127936,
+    "new_logical": 3247301644,
+    "new_allocated": 3444298240,
+    "prospective_logical_net": 52485873983,
+    "prospective_allocated_net": 56076829696
+  },
+  "stopping_boundary": "B01 complete; no later five batches, ten historical groups, previous twenty plus export retirement, new deletion, GPU or commit."
+}

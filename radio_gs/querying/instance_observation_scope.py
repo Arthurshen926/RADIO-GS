@@ -51,17 +51,24 @@ class InstanceObservationScope:
     def decode(self, identity, semantic_rank, seed, weights, confidence,completeness=None):
         """Read a selected set of view-exclusive observations on any carrier."""
         seed_frame=int(self.frames[seed])
-        positive=np.asarray(project_observations(self.positive_membership,weights)).reshape(-1)
-        known=np.asarray(project_observations(self.visibility,confidence)).reshape(-1)
-        if self.exclusion_policy=='covisible_completeness' and completeness is not None:
-            # A partial observation cannot exclude portions it failed to cover.
-            # Only exclusion mass is discounted; no new positive, association,
-            # semantic response or unseen geometry is invented. The degree of
-            # incompleteness is measured in the other view's shared domain.
-            exclusion=np.asarray(project_observations(self.visibility,confidence*completeness)).reshape(-1)
-            exclusion-=np.asarray(project_observations(self.positive_membership,weights*completeness[self.frames])).reshape(-1)
-            known=positive+np.maximum(exclusion,0)
-        probability=np.divide(positive,known,out=np.zeros_like(positive),where=known>0)
+        from radio_gs import evidence_core
+        if evidence_core.enabled():
+            probability, known = evidence_core.scope_response(
+                self.positive_membership, self.visibility, weights, confidence,
+                region_frames=self.frames, completeness=(completeness
+                    if self.exclusion_policy == 'covisible_completeness' else None))
+        else:
+            positive=np.asarray(project_observations(self.positive_membership,weights)).reshape(-1)
+            known=np.asarray(project_observations(self.visibility,confidence)).reshape(-1)
+            if self.exclusion_policy=='covisible_completeness' and completeness is not None:
+                # A partial observation cannot exclude portions it failed to cover.
+                # Only exclusion mass is discounted; no new positive, association,
+                # semantic response or unseen geometry is invented. The degree of
+                # incompleteness is measured in the other view's shared domain.
+                exclusion=np.asarray(project_observations(self.visibility,confidence*completeness)).reshape(-1)
+                exclusion-=np.asarray(project_observations(self.positive_membership,weights*completeness[self.frames])).reshape(-1)
+                known=positive+np.maximum(exclusion,0)
+            probability=np.divide(positive,known,out=np.zeros_like(positive),where=known>0)
         surface_detail=None
         scope_selection=probability>.5
         if self.surface is not None:

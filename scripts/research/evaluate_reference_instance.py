@@ -1,4 +1,4 @@
-"""Frozen positive-only NVOS readout and scoring, separate from inference."""
+"""Frozen NVOS readout and scoring, with explicit source-only or N14 access."""
 import argparse,json
 from pathlib import Path
 import cv2,numpy as np,torch
@@ -13,6 +13,8 @@ from radio_gs.training.retrieval_metrics import binary_ranking_metrics
 def main():
     p=argparse.ArgumentParser();p.add_argument('--scene',required=True);p.add_argument('--evaluation',required=True);p.add_argument('--field',required=True);p.add_argument('--subset-field',action='store_true');p.add_argument('--typed-readout',action='store_true');p.add_argument('--selected-subset',action='store_true',help='Supplementary actual extracted-set silhouette; never replaces the retained response metric');p.add_argument('--output',required=True);a=p.parse_args()
     torch.set_num_threads(4);scene=json.loads(Path(a.scene).read_text());evaluation=json.loads(Path(a.evaluation).read_text());d=torch.load(a.field,map_location='cpu',weights_only=False)
+    from radio_gs.evaluation.reference_response import readout_permissions, score_response_tracks
+    permissions=readout_permissions(d,evaluation,selected_subset=a.selected_subset)
     if a.selected_subset:
         binding=d['selection_geometry'];values=d['selection_scores'];observed=d['selection_observed']
     elif a.typed_readout:
@@ -34,7 +36,16 @@ def main():
     binary=((resized.clamp(0,1)*255+.5).floor()>10) if a.selected_subset else resized>=evaluation['threshold']
     union=(binary|truth).sum();metrics=dict(iou=float((binary&truth).sum()/union) if union else 1.,**binary_ranking_metrics(resized.flatten(),truth.flatten()))
     operator='selected-set alpha, 8-bit alpha > 10; supplementary projection diagnostic' if a.selected_subset else 'full-scene observed-support-normalized response'
-    (out/'evaluation.json').write_text(json.dumps(dict(scene=scene['scene'],metrics=metrics,protocol=evaluation['protocol'],field=a.field,target_rgb_used=False,output_operator=operator,subset_trained=a.subset_field,typed_readout=a.typed_readout,selected_subset=a.selected_subset,development=True),indent=2)+'\n');print(scene['scene'],metrics,flush=True)
+    report=dict(scene=scene['scene'],metrics=metrics,protocol=evaluation['protocol'],field=a.field,
+        target_rgb_used=permissions['target_rgb'],negative_scribble_used=permissions['negative_scribble'],
+        input_permissions=permissions,output_operator=operator,subset_trained=a.subset_field,
+        typed_readout=a.typed_readout,selected_subset=a.selected_subset,development=True)
+    if d.get('reference_completion') and not a.selected_subset:
+        report['protocol']='N14 signed reference and observed target RGB; original continuous native-ray readout'
+        report['reference_completion']=d['reference_completion']
+        report['tracks']=score_response_tracks(response.numpy(),gt,evaluation['threshold'])
+        report['direct_image_tracks']=score_response_tracks(d['view_conditioned_image_response'].numpy(),gt,evaluation['threshold'])
+    (out/'evaluation.json').write_text(json.dumps(report,indent=2)+'\n');print(scene['scene'],metrics,flush=True)
 
 
 if __name__=='__main__':main()

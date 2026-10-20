@@ -1,0 +1,45 @@
+{
+  "schema": "radio_gs.canonical_retirement_proposal.v1",
+  "status": "awaiting_exact_user_deletion_approval",
+  "official_job": "wc_job_QDEnyfLhAC2hJ_cr",
+  "started_utc": "2026-10-12T19:01:13.680802Z",
+  "ended_utc": "2026-10-12T19:01:52.108945Z",
+  "delete_payloads_only": [
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_query_features/nvos_fern_compact_d192_l96_caploss_official_dino_sam3_views.pt",
+      "sha256": "32726f656a2d3dec836d737b770fd97eb46e201dc8e58a2e66db3a9f12099f05",
+      "hash_basis": "validated first migration, unchanged original fingerprint",
+      "logical_bytes": 7799615909,
+      "allocated_bytes_last_observed": 7804953088
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_migration_20261012/fern_caploss_v1/nvos_fern_compact_d192_l96_caploss_official_dino_sam3_views.pt",
+      "sha256": "cd1b846de79fdf65ee448d50b6462df1dd686fb49e8bcd7886be5c0bec4debff",
+      "hash_basis": "fresh complete SHA during finalization",
+      "logical_bytes": 3053221463,
+      "allocated_bytes_last_observed": 3224408576
+    }
+  ],
+  "keep_final": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_migration_20261012/fern_caploss_v2/nvos_fern_compact_d192_l96_caploss_official_dino_sam3_views.pt",
+    "sha256": "8cdabdeb9c4e21795fc5e8ead06aed0546a5043527daaabc11ac4277c0de3c51",
+    "logical_bytes": 3053221463
+  },
+  "keep": "All original/pilot/final sidecars and migration receipts, old support graph, original field, MPR/raw source, both mainline dependency closures",
+  "validation": {
+    "all_payload_tensors_exact": true,
+    "all_reader_tensors_exact": true,
+    "original_metadata_semantics_restored": true,
+    "existing_support_graph_composes": true
+  },
+  "delete_batch_logical_bytes": 10852837372,
+  "net_logical_saved_vs_before_migration": 4746394446,
+  "actual_reclaimed_bytes": 0,
+  "allocation_observed_utc": "2026-10-12T19:03:00.312090Z",
+  "final_allocated_bytes_last_observed": 2437726720,
+  "delete_batch_allocated_bytes_last_observed": 11029361664,
+  "net_allocated_difference_vs_before_migration": 5367226368,
+  "dependencies": "Bounded search found no exact current runtime reference in both mainline configs and scripts. Historical frozen-path/hash replay and raw dense-array consumers are not drop-in compatible and must explicitly select new path/compact-aware reader. No historical receipt is rewritten.",
+  "consequence": "Original serialized dense bytes, invalid-row descriptors and old exact artifact hash cannot be reconstructed from compact. All deployed-reader valid descriptors, full xyz/valid/global-row order and scientific signatures are preserved exactly. Old source-path consumers will need migration; no symlink redirect assumed.",
+  "allocation_note": "NFS st_blocks is client-observed allocation, not backend reclaim guarantee; newly-written final allocation may settle. Logical reduction is exact; no files deleted."
+}

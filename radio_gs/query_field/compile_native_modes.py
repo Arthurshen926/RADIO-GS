@@ -8,14 +8,17 @@ import torch
 from torch.nn import functional as F
 
 from .native_modes import NativeModes
-from .storage import load_field,save_field,sha256
+from .storage import load_field_versioned,sha256,field_identity, deployment_bytes
+from .research_storage import research_writer,method_binding,tensor_state_identity,storage_binding,export_receipt
 
 
-def compile_scene(job,parent,out):
+def compile_scene(job,parent,out,*,store_root=None,legacy_v1=False,device='cuda'):
+    writer=research_writer(store_root=store_root,legacy_v1=legacy_v1)
+    if Path(out).exists():raise FileExistsError(out)
     root=Path(job['legacy_map']).parent;spec=json.loads((root/'map.json').read_text())
     if not spec['query_independent'] or spec['labels_used'] or spec['query_manifest_read']:
         raise ValueError('source modes are not query independent')
-    field,manifest=load_field(parent);before={k:v.detach().clone() for k,v in field.state_dict().items()}
+    field,manifest=load_field_versioned(parent,store_root=store_root);before={k:v.detach().clone() for k,v in field.state_dict().items()}
     source=json.loads((Path(job['observations'])/'observations.json').read_text())
     geometry=torch.load(source['geometry']['path'],map_location='cpu',weights_only=True)
     ids=geometry['source_vertex_ids'].numpy();xyz=np.load(root/'mesh_xyz.npy')
@@ -46,7 +49,7 @@ def compile_scene(job,parent,out):
         atoms=atoms,pointer=torch.from_numpy(weights.indptr.astype(np.int64)),
         index=torch.from_numpy(weights.indices.astype(np.int64)),mass=torch.from_numpy(weights.data.astype(np.float32)),
         mean=torch.from_numpy(np.asarray(weights@atoms.numpy(),np.float32)),relation_columns=torch.from_numpy(mode_ids))
-    modes=NativeModes(state,len(ids)).cuda()
+    modes=NativeModes(state,len(ids)).to(device)
     # Fixed source pseudoqueries, never benchmark crops, prompts or labels.
     from radio_gs.querying.local_appearance_match import match_regions
     replay=[];probes=[];masses=[]
@@ -58,9 +61,9 @@ def compile_scene(job,parent,out):
     reference_offsets=np.r_[0,np.cumsum(np.bincount(groups[valid],minlength=len(chosen)))]
     reference_patches=np.r_[0,np.cumsum([patch_offsets[i+1]-patch_offsets[i] for i in chosen])]
     reference_raw=np.asarray(np.load(root/'patch_features.npy',mmap_mode='r')[patches],np.float32)
-    expected=match_regions(reference_raw,reference_weights,reference_patches,reference_offsets,probes,masses)['chamfer']
+    expected=match_regions(reference_raw,reference_weights,reference_patches,reference_offsets,probes,masses,device=device)['chamfer']
     for i,(q,m) in enumerate(zip(probes,masses)):
-        actual=modes.local_scores(torch.from_numpy(q).cuda(),torch.from_numpy(m).cuda()).cpu().numpy()
+        actual=modes.local_scores(torch.from_numpy(q).to(device),torch.from_numpy(m).to(device)).cpu().numpy()
         error=float(np.abs(actual-expected[:,i]).max());replay.append(dict(query=i,modes=len(mode_ids),maximum_error=error))
         if error>2e-6:raise ValueError('native measure function replay failed')
     modes=modes.cpu();field.native_modes=modes
@@ -68,12 +71,14 @@ def compile_scene(job,parent,out):
     for rule in ['mean','measure']:
         field.native_mode_rule=rule
         if any(not torch.equal(field.state_dict()[k],v) for k,v in before.items()):raise ValueError('native compiler changed parent')
-        saved=save_field(field,Path(out)/rule/'field',dict(parent_manifest=manifest['files'],
+        saved=writer(field,Path(out)/rule/'field',dict(parent_manifest=manifest.get('files'),parent_binding=method_binding(parent,manifest),
             source_views=job['budgets']['full'],extra_instance_supervision=True,
             native_mode_function=rule,uncompressed_measure_reference=True,source_layout_retained=False,
             supported_modes=len(mode_ids),supported_atoms=len(raw),training_steps=0,queries_used=False,labels_used=False))
-        reports.append(dict(rule=rule,tensor_bytes=saved['tensor_bytes'],field=saved['files']))
-    result=dict(scene=job['scene'],modes=len(mode_ids),atoms=len(raw),removed_unbound_modes=int((~valid).sum()),
+        reports.append(dict(rule=rule,tensor_bytes=saved['tensor_bytes'],field=export_receipt(saved),
+            export_binding=method_binding(Path(out)/rule/'field',saved),tensor_state_identity=tensor_state_identity(field),
+            complete_field_bytes=deployment_bytes(saved)))
+    result=dict(storage=storage_binding(store_root=store_root,legacy_v1=legacy_v1),parent_binding=method_binding(parent,manifest),scene=job['scene'],modes=len(mode_ids),atoms=len(raw),removed_unbound_modes=int((~valid).sum()),
         removed_unbound_atoms=len(patches)-len(raw),source_anchor_differences=source_anchor_differences,
         source_replay=replay,parent_unchanged=True,records=reports,source_frames=job['budgets']['full'],
         source_receipts=[dict(path=str(root/p),sha256=sha256(root/p)) for p in

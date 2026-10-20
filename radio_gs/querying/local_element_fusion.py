@@ -7,8 +7,13 @@ category-partition reader does not apply to overlapping parts or instances.
 import json,math,time
 from pathlib import Path
 import torch
+from radio_gs import evidence_core
 from radio_gs.querying.typed_evidence import visible_operator,view_evidence
 from radio_gs.querying.instance_reliability import instance_reliability
+
+def _transport(operator, values):
+    return evidence_core.project(operator, values) if evidence_core.enabled() else torch.sparse.mm(operator, values)
+
 
 FEATURE_NAMES=['native_probability','native_log_odds','native_competitor','native_entropy',
     'source_probability','source_log_odds','source_competitor','source_entropy',
@@ -24,7 +29,8 @@ def competition(p):
     return competitor,entropy.expand_as(p)
 
 @torch.no_grad()
-def compile_local_evidence(prior_logits,observed,scene,texts,auxiliary_logits=None):
+def compile_local_evidence(prior_logits,observed,scene,texts,auxiliary_logits=None, *, capture_observations=False):
+    captured=[] if capture_observations else None
     device=prior_logits.device;spec=scene['source_evidence'];h,w=spec['raster_hw']
     records=[torch.load(v['identity'],map_location='cpu') for v in spec['views']]
     ids=[records[0]['queries'].index(t) for t in texts];c=len(ids)
@@ -57,10 +63,11 @@ def compile_local_evidence(prior_logits,observed,scene,texts,auxiliary_logits=No
                     from torch.nn import functional as F
                     excluded=F.interpolate(unknown.float().amax(0)[None,None].to(device),size=(h,w),mode='bilinear',align_corners=False)[0,0].flatten()>.5
                     negative[:,j]*=~excluded
-        pn+=torch.sparse.mm(e.adjoint,probability*positive);pd+=torch.sparse.mm(e.adjoint,positive)
-        nn+=torch.sparse.mm(e.adjoint,probability*negative);nd+=torch.sparse.mm(e.adjoint,negative)
-        second+=torch.sparse.mm(e.adjoint,probability.square()*(positive+negative))
-        visibility+=torch.sparse.mm(e.adjoint,e.visible.float());old+=(known*confidence).sum(0)
+        if captured is not None:captured.append((op,probability,positive+negative))
+        pn+=_transport(e.adjoint,probability*positive);pd+=_transport(e.adjoint,positive)
+        nn+=_transport(e.adjoint,probability*negative);nd+=_transport(e.adjoint,negative)
+        second+=_transport(e.adjoint,probability.square()*(positive+negative))
+        visibility+=_transport(e.adjoint,e.visible.float());old+=(known*confidence).sum(0)
         det+=(positive+negative).sum(0) if local_reliability else (known*detector).sum(0)
     ratio=(old/det.clamp_min(1e-8) if not local_reliability or scene.get('instance_evidence_mass')=='matched'
            else torch.ones_like(old))
@@ -79,8 +86,14 @@ def compile_local_evidence(prior_logits,observed,scene,texts,auxiliary_logits=No
         features.extend([auxiliary,auxiliary_logits/10,ac,ae])
         p=(num+strength*(prior+auxiliary)*.5)/(mass+strength).clamp_min(1e-8)
         average=torch.where(mass>0,p.clamp(1e-6,1-1e-6).logit(),prior_logits)
-    return dict(features=torch.stack(features,-1),base_logits=base,average_logits=average,
+    result=dict(features=torch.stack(features,-1),base_logits=base,average_logits=average,
         active=(mass>0)&observed[:,None],source_views=len(records))
+    if captured is not None:
+        # Opt-in experiment view of the SAME production admission and weights.
+        result['reconstruction']=dict(observations=[(op,y,k,ratio[None]) for op,y,k in captured],
+            prior=prior if auxiliary_logits is None else (prior+auxiliary_logits.sigmoid())*.5,
+            strength=strength,initial=prior,mass=mass)
+    return result
 
 def make_local_head(dimension):
     return torch.nn.Sequential(torch.nn.Linear(dimension,32),torch.nn.SiLU(),torch.nn.Linear(32,1))

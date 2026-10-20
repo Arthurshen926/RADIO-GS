@@ -1,0 +1,157 @@
+--- v5/scripts/audits/pilot_duplicate_function_storage.py
++++ v6/scripts/audits/pilot_duplicate_function_storage.py
+@@ -42,6 +42,12 @@
+  available=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))*1024
+  if available<plan['minimum_ram_bytes']:raise ValueError('RAM gate')
+  return dict(df=df(root),ram_available=available,torch_threads=torch.get_num_threads())
++def group_root(plan,group_id):
++ group=next(g for g in plan['groups'] if g['group_id']==group_id)
++ name=group.get('artifact_directory',group_id)
++ if name not in {group_id,group_id+'_attempt2'}:raise ValueError('unapproved group directory')
++ return Path(plan['new_root'])/name
++def content_fp(value):return {k:v for k,v in value.items() if k!='allocated'}
+ def check_input_budget(plan):
+  tensor_total=0;representative_tensors=0
+  for group in plan['groups']:
+@@ -135,7 +141,7 @@
+   answer[str(p)]=s
+  return answer
+ def current_new_usage(plan):
+- root=Path(plan['new_root']);new={}
++ root=Path(plan['new_root']);new={};allocation_observations={}
+  if root.exists():
+   for record in root.glob('*/intent_*.json'):
+    for item in read(record)['missing_blobs']:
+@@ -146,18 +152,24 @@
+      new[str(p)]=dict(path=str(p),stat=s)
+   for record in root.glob('*/publish_*.json'):
+    for item in read(record)['new_blobs']:
+-    if item['path'] in new and new[item['path']]['stat']!=item['stat']:raise ValueError('completed blob fingerprint changed')
+-    new[item['path']]=item
++    if item['path'] in new and content_fp(new[item['path']]['stat'])!=content_fp(item['stat']):raise ValueError('completed blob fingerprint changed')
++    current=fp(item['path'])
++    if content_fp(current)!=content_fp(item['stat']):raise ValueError('published blob changed')
++    if current['allocated']!=item['stat']['allocated']:
++     allocation_observations[item['path']]=dict(published_allocated=item['stat']['allocated'],current_allocated=current['allocated'])
++    new[item['path']]=dict(path=item['path'],stat=current)
+  for path,item in new.items():
+-  if fp(path)!=item['stat']:raise ValueError('published blob changed')
++  latest=fp(path)
++  if content_fp(latest)!=content_fp(item['stat']):raise ValueError('published blob changed')
++  item['stat']=latest
+  metadata=metadata_files(root) if root.exists() else {}
+- return dict(new_blobs=new,metadata=metadata,
++ return dict(new_blobs=new,metadata=metadata,observed_utc=now(),allocation_observations=allocation_observations,
+   logical=sum(x['stat']['bytes'] for x in new.values())+sum(x['bytes'] for x in metadata.values())+plan.get('prior_attempt_artifact_logical_bytes',0),
+   allocated=sum(x['stat']['allocated'] for x in new.values())+sum(x['allocated'] for x in metadata.values())+plan.get('prior_attempt_artifact_allocated_bytes',0))
+ def check_cap(plan,usage):
+  if max(usage['logical'],usage['allocated'])>plan['max_total_new_bytes']:raise ValueError('pilot cumulative new-disk cap exceeded')
+ def migrate(plan,group):
+- root=Path(plan['new_root']);destination=root/group['group_id'];destination.mkdir(parents=True,exist_ok=False)
++ root=Path(plan['new_root']);destination=group_root(plan,group['group_id']);destination.mkdir(parents=True,exist_ok=False)
+  started=time.monotonic();resources=gate(plan);check_input_budget(plan)
+  sources=checked_sources(plan,group,hash_payload=True);process=no_refs([s for s,_,_ in sources])
+  # Only one raw archive load per group; all original archives were freshly hashed.
+@@ -214,7 +226,7 @@
+  group_id,index=key.split(':')
+  group=next(g for g in plan['groups'] if g['group_id']==group_id)
+  if index not in [str(i) for i in range(len(group['source_members']))]:raise ValueError('unknown variant')
+- migration_path=Path(plan['new_root'])/group_id/'migration_complete.json'
++ migration_path=group_root(plan,group_id)/'migration_complete.json'
+  if sha256(migration_path)!=migration_sha256:raise ValueError('migration receipt changed')
+  record_path=Path(plan['new_root'])/group_id/('publish_'+index+'.json')
+  migration=read(migration_path);record_sha=sha256(record_path)
+@@ -267,7 +279,7 @@
+  root=Path(plan['new_root']);entries=[];union={};new={};read_bytes=plan.get('prior_attempt_application_read_bytes',0);write_bytes=0
+  for group in plan['groups']:
+   checked_sources(plan,group)
+-  migration=read(root/group['group_id']/'migration_complete.json')
++  migration=read(group_root(plan,group['group_id'])/'migration_complete.json')
+   read_bytes+=migration['application_read_bytes'];write_bytes+=migration['application_write_bytes']
+   for index,source in enumerate(group['source_members']):
+    record=read(root/group['group_id']/('publish_'+str(index)+'.json'))
+@@ -288,7 +300,7 @@
+   p=Path(plan['store_root'])/(h+'.bin')
+   if not p.is_file() or p.stat().st_size!=d['bytes']:raise ValueError('closure missing')
+  overlay=dict(schema='radio_gs.function_variant_consumer_overlay.v1',plan_identity=digest(plan),code=plan.get('code',[]),entries=entries,consumers=plan['consumers'],
+-  metadata_bindings=plan.get('metadata_bindings',[]),
++  metadata_bindings=plan.get('metadata_bindings',[]),inherited_acceptance=plan.get('inherited_acceptance',{}),
+   interpretation='Explicit old path + archive SHA + manifest SHA to new package; not automatic old field.pt interception',
+   history='Original design/config/cache untouched; mixture ScanNet never completed, no new benchmark result asserted')
+  publish(root/'consumer_overlay.json',overlay)
+@@ -300,13 +312,14 @@
+   complete_union_blob_bytes=sum(d['bytes'] for d in union.values()),
+   complete_union_allocated_bytes=sum(fp(Path(plan['store_root'])/(h+'.bin'))['allocated'] for h in union),
+   new_unique_blob_bytes=sum(x['stat']['bytes'] for x in new.values()),
+-  new_unique_blob_allocated_bytes=sum(x['stat']['allocated'] for x in new.values()),
++  new_unique_blob_allocated_bytes=sum(fp(x['path'])['allocated'] for x in new.values()),
+   pilot_artifact_logical_bytes=sum(x['bytes'] for x in usage['metadata'].values()),
+   pilot_artifact_allocated_bytes=sum(x['allocated'] for x in usage['metadata'].values()),
+   total_new_logical_bytes=usage['logical'],total_new_allocated_bytes=usage['allocated'],
+   application_read_bytes=read_bytes,application_write_bytes=write_bytes,
+   prior_attempt_application_read_bytes=plan.get('prior_attempt_application_read_bytes',0),
+   accounting='Operation-size application byte estimates, not backend NFS measurements; small metadata IO separately bounded16MiB',
++  allocation_observation_utc=usage['observed_utc'],allocation_changes=usage['allocation_observations'],
+   observed_df=df(plan['output_root']),freed_now_bytes=0,overlay_sha256=sha256(root/'consumer_overlay.json'),
+   retirement='Not authorized; all original payloads retained')
+  result['artifact_accounting_excludes_this_summary']=True
+--- v5/tests/test_duplicate_function_pilot.py
++++ v6/tests/test_duplicate_function_pilot.py
+@@ -38,15 +38,16 @@
+ @pytest.mark.parametrize('historical',[False,True])
+ def test_real_two_groups_and_independent_denied_cold(tmp_path,historical):
+  plan=fixture_plan(tmp_path,historical)
++ if historical:plan['groups'][1]['artifact_directory']='G14_attempt2'
+  for group in plan['groups']:pilot.migrate(plan,group)
+  config=tmp_path/'plan.json';config.write_text(json.dumps(plan))
+  for group in plan['groups']:
+-  records=[json.loads(p.read_text()) for p in (Path(plan['new_root'])/group['group_id']).glob('publish_*.json')]
++  records=[json.loads(p.read_text()) for p in pilot.group_root(plan,group['group_id']).glob('publish_*.json')]
+   assert len({r['state_identity'] for r in records})==len(records)
+   assert len({pilot.digest(r['tensor_descriptors']) for r in records})==1
+   for i in range(len(group['source_members'])):
+    result=subprocess.run([sys.executable,'-m','scripts.audits.pilot_duplicate_function_storage','--plan',str(config),
+-    '--plan-sha256',sha256(config),'cold','--key',group['group_id']+':'+str(i),'--migration-sha256',sha256(Path(plan['new_root'])/group['group_id']/'migration_complete.json')],capture_output=True,text=True,timeout=45)
++    '--plan-sha256',sha256(config),'cold','--key',group['group_id']+':'+str(i),'--migration-sha256',sha256(pilot.group_root(plan,group['group_id'])/'migration_complete.json')],capture_output=True,text=True,timeout=45)
+    assert result.returncode==0,result.stderr
+    receipt=json.loads(result.stdout.strip().splitlines()[-1]);assert receipt['source_open_negative_tests']==12 and not receipt['forbidden_runtime_attempts']
+  pilot.finalize(plan)
+@@ -94,3 +95,38 @@
+  monkeypatch.setattr(torch,'load',lambda *a,**k:pytest.fail('must not load over budget'))
+  with pytest.raises(ValueError,match='IO budget'):pilot.migrate(plan,plan['groups'][0])
+ 
++def usage_fixture(tmp_path):
++ root=tmp_path/'pilot';group=root/'G01';group.mkdir(parents=True)
++ blob=tmp_path/'blob.bin';blob.write_bytes(b'hello')
++ recorded=pilot.fp(blob);recorded['allocated']=0
++ (group/'intent_0.json').write_text(json.dumps({'missing_blobs':[{'path':str(blob),'descriptor':{'bytes':5}}]}))
++ (group/'publish_0.json').write_text(json.dumps({'new_blobs':[{'path':str(blob),'stat':recorded}]}))
++ return {'new_root':str(root),'max_total_new_bytes':1024**2},blob,recorded
++
++def test_only_allocation_change_uses_fresh_cost(tmp_path):
++ plan,blob,recorded=usage_fixture(tmp_path)
++ usage=pilot.current_new_usage(plan)
++ assert usage['new_blobs'][str(blob)]['stat']['allocated']==pilot.fp(blob)['allocated']>0
++ assert usage['allocation_observations'][str(blob)]['published_allocated']==0
++ assert json.loads((Path(plan['new_root'])/'G01/publish_0.json').read_text())['new_blobs'][0]['stat']==recorded
++ plan['max_total_new_bytes']=usage['allocated']-1
++ with pytest.raises(ValueError,match='cap'):pilot.check_cap(plan,usage)
++
++@pytest.mark.parametrize('key',['ino','mtime_ns','ctime_ns','nlink','mode','dev','bytes'])
++def test_non_allocation_fingerprint_change_refused(tmp_path,key):
++ plan,blob,recorded=usage_fixture(tmp_path)
++ path=Path(plan['new_root'])/'G01/publish_0.json';entry=json.loads(path.read_text())
++ entry['new_blobs'][0]['stat'][key]='changed'
++ path.write_text(json.dumps(entry))
++ with pytest.raises(ValueError,match='fingerprint|changed'):pilot.current_new_usage(plan)
++
++def test_failed_group_preserved_and_explicit_resume_directory(tmp_path):
++ plan=fixture_plan(tmp_path);group=plan['groups'][0]
++ abandoned=Path(plan['new_root'])/'G01';abandoned.mkdir(parents=True);(abandoned/'failed.json').write_text('retained')
++ group['artifact_directory']='G01_attempt2';pilot.migrate(plan,group)
++ assert (abandoned/'failed.json').read_text()=='retained'
++ assert (pilot.group_root(plan,'G01')/'migration_complete.json').is_file()
++ with pytest.raises(FileExistsError):pilot.migrate(plan,group)
++ group['artifact_directory']='../outside'
++ with pytest.raises(ValueError,match='directory'):pilot.group_root(plan,'G01')
++

@@ -1,0 +1,383 @@
+{
+  "schema": "tmm.response_refinement.all_five_feedback.v1",
+  "run": "post_response_v2",
+  "rows": [
+    {
+      "family": "lerf",
+      "metric": "semantic_iou",
+      "label": "LERF2D IoU",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 70.40067569509945,
+        "observable": 70.93191302012214
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": 0.5312373250227043,
+          "scene_bootstrap95_pp": [
+            0.1752002006203235,
+            0.887274449425085
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 0,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "lerf",
+      "metric": "ap",
+      "label": "LERF2D AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 87.61927775455382,
+        "observable": 87.38742229777726
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -0.23185545677654185,
+          "scene_bootstrap95_pp": [
+            -0.562777491211025,
+            0.05829432819990932
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 3,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "lerf",
+      "metric": "selected_projection_iou",
+      "label": "LERF selected projection IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 66.96327365836882,
+        "observable": 66.96327365836882
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "metric": "iou",
+      "label": "NVOS IoU",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 86.5134172141552,
+        "observable": 86.48964017629623
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -0.023777037858963013,
+          "scene_bootstrap95_pp": [
+            -0.14227937108704022,
+            0.06213337182998657
+          ],
+          "improved_scenes": 5,
+          "degraded_scenes": 2,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "metric": "ap",
+      "label": "NVOS AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 98.02224516003605,
+        "observable": 97.99264227031337
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -0.02960288972266717,
+          "scene_bootstrap95_pp": [
+            -0.058212210761190195,
+            -0.006523747063452166
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 5,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_19",
+      "label": "ScanNet mIoU19",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 61.011490548066284,
+        "observable": 60.59111841917473
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -0.42037212889155134,
+          "scene_bootstrap95_pp": [
+            -1.2160074767569498,
+            0.26251476671235885
+          ],
+          "improved_scenes": 3,
+          "degraded_scenes": 7,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_15",
+      "label": "ScanNet mIoU15",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 62.527589041597786,
+        "observable": 61.87861767866257
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -0.6489713629352067,
+          "scene_bootstrap95_pp": [
+            -1.1974435879443774,
+            -0.15599645022478323
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 9,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_10",
+      "label": "ScanNet mIoU10",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 72.48606102956524,
+        "observable": 72.0284747444541
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -0.45758628511111343,
+          "scene_bootstrap95_pp": [
+            -0.9885433440210215,
+            -0.12661834147798673
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 9,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "text_ap",
+      "label": "UQIS text AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 26.595870475621116,
+        "observable": 25.980645061728424
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -0.615225413892689,
+          "scene_bootstrap95_pp": [
+            -1.4073666231562865,
+            -0.016774158962152702
+          ],
+          "improved_scenes": 3,
+          "degraded_scenes": 6,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "text_selected_iou",
+      "label": "UQIS text actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 16.386530164545416,
+        "observable": 16.386530164545416
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "image_ap",
+      "label": "UQIS image AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 59.308781794005874,
+        "observable": 57.18717739801118
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -2.1216043959946838,
+          "scene_bootstrap95_pp": [
+            -3.426062294404919,
+            -0.8923576771749578
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "image_selected_iou",
+      "label": "UQIS image actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 39.897960281086924,
+        "observable": 39.897960281086924
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_2d_ap",
+      "label": "UQIS point_2d AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 75.79009711011095,
+        "observable": 71.92747270697531
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -3.862624403135653,
+          "scene_bootstrap95_pp": [
+            -5.875306305896737,
+            -2.040794044518689
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_2d_selected_iou",
+      "label": "UQIS point_2d actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 49.73567540572873,
+        "observable": 49.73567540572873
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_3d_ap",
+      "label": "UQIS point_3d AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 75.32525076702996,
+        "observable": 72.08655946513437
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": -3.23869130189558,
+          "scene_bootstrap95_pp": [
+            -4.8451499427454445,
+            -1.74044589033666
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_3d_selected_iou",
+      "label": "UQIS point_3d actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 49.04698335651834,
+        "observable": 49.04698335651834
+      },
+      "effects": {
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    }
+  ],
+  "corrections": {
+    "lerf": {
+      "observable": {
+        "corrected": 36202,
+        "harmed": 35192
+      }
+    },
+    "nvos": {
+      "observable": {
+        "corrected": 10605,
+        "harmed": 16709
+      }
+    },
+    "scannet": {
+      "observable": {
+        "corrected": 7116,
+        "harmed": 8900
+      }
+    }
+  },
+  "correction_units": {
+    "lerf": "query pixels",
+    "nvos": "pixels",
+    "scannet": "valid19-class points"
+  },
+  "summary_sha256": "ea4cacaa2877b51f7a868bd753ff5b982af8d4b3c555d77ab50d38ec11d091eb",
+  "independent_test": false,
+  "default_changed": false,
+  "query_or_task_winner_selection": false,
+  "experimental_input": "retained frozen v10 responses; no fresh end-to-end claim",
+  "controlled_intervention": "observable assignment normalization; same partial permissions and targets as post_response_v1",
+  "confidence_intervals": "opened development cohort; descriptive paired scene bootstrap",
+  "nvos_scene_cluster_note": "resample seven scene clusters; two horns requests stay together; weighted estimate retains eight-request mean"
+}

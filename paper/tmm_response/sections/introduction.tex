@@ -1,0 +1,69 @@
+\section{Introduction}
+A scene query specifies both an identity and the spatial extent to be returned.
+A text description may match several observations, a reference image may expose
+only part of an object, and a point identifies one surface rather than every
+member. Modern visual teachers provide strong local correspondences. Turning
+these correspondences into a complete three-dimensional answer still requires
+deciding what each observation actually establishes.
+
+A reliable match and a complete observation are different properties. A mask
+may correctly identify a flower while omitting its leaves. Transporting that
+mask accurately can reproduce the omission across views; treating its exterior
+as background can actively suppress the missing members. Conversely, expanding
+the response without preserving identity can capture a neighboring object.
+The scientific question is therefore: \emph{when does partial query evidence
+justify support or exclusion, and how should this evidence form a complete
+response under the intended output semantics?}
+
+We address this question with \emph{query-conditioned evidence fusion} (QCEF).
+The central mechanism assigns evidence authority before aggregation: identity
+applicability determines which observations can act, and spatial scope
+determines where they can support, exclude or leave the response unknown.
+Native teacher scores remain in their own matching spaces. Admitted responses
+then enter a geometric fusion or conditional-membership operator appropriate
+to the requested output. This is a shared evidence-to-response formulation
+with typed realizations, not a claim that every modality uses one network or
+one inverse solver.
+
+Reference queries make the mechanism particularly concrete. We complete the
+reference response using signed query evidence, select between whole reference
+candidates using reference-side feasibility or predicted quality, and only then
+transport the selected response to other views. This changes the scope of the
+transmitted evidence rather than asking a stronger reconstruction objective to
+repair incomplete targets. For map-only image and point queries, the analogous
+extent requirement is implemented by conditional membership over the complete
+carrier. Complete here describes the output domain and intended capability;
+it does not imply that every predicted object is recovered without error.
+
+The analysis distinguishes three obstacles. Partial labels alone need not
+identify complete extent. Incorrect negative authority attenuates a weighted
+response even when correspondences are correct. Finally, rendering a selected
+set and averaging membership in the full scene can disagree under occlusion.
+These statements motivate scope estimation and typed objectives, without
+turning fallible teacher predictions into guaranteed semantic truth.
+
+Our implementation includes the established system recorded as v10 and the
+reference-completion extension. Its evidence spans LERF semantic segmentation
+and projected selection, ScanNet open-vocabulary segmentation, NVOS reference
+segmentation and multimodal UQIS. Historical controls isolate identity,
+response-use and membership capabilities. Matched reference interventions show
+that completing scope before transport is useful even without target-image
+evidence; stronger source fitting alone has mixed effects. Published results
+and verified local reproductions provide comparison context with their input
+and metric differences retained.
+
+Our contributions are:
+\begin{enumerate}
+\item A response-level formulation of partial-evidence authority, with scoped
+analysis of extent ambiguity, negative-evidence attenuation and output
+non-equivalence. It separates the information required to identify an object
+from the evidence needed to recover its members.
+\item A query-conditioned fusion method that retains native matching while
+combining admitted evidence through typed geometric and membership operators.
+Reference completion and whole-response admission before transport provide a
+concrete mechanism for repairing incomplete query scope.
+\item Five-output evaluation with matched component interventions, protocol
+audits and counterexamples to stronger-fitting explanations. The evidence
+connects measured gains to specific capabilities and records where the shared
+formulation has not yet yielded a universally effective admission rule.
+\end{enumerate}

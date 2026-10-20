@@ -1,0 +1,48 @@
+\section{Discussion and limitations}
+The current evidence supports preserving complete functional responses and
+measuring candidate capacity separately from selection quality. It does not
+yet show that the learned decision consistently exploits query correspondence.
+Its strongest current gain is confined to one image query; the matched null
+constraint control is identical. This limits the empirical claim even though
+the method has a common mathematical and software interface.
+
+The next substantive experiment must address the failure sites identified by
+the controls. Instance transfer needs a better ranking signal over useful
+intact candidates. Category transfer has a smaller measured candidate ceiling.
+NVOS has only one retained target region per view, so within-view competition
+alone supplies no verification signal. LERF requires preserving the distinction
+between semantic response and independent selected-set projection. These
+interface limitations must be resolved and then evaluated with the same
+complete five-task protocol; increasingly conservative retention is not a
+substitute for effective transfer.
+The NVOS protocol audit further separates weak complete-target responses from
+thin-structure/background confusion. A GT-selected 99-threshold grid reaches
+90.0921\% mean IoU, but is strictly diagnostic and cannot be promoted. A single
+borrowed threshold harms trex, so this evidence does not justify per-scene
+threshold tuning or attribute the full external gap to RGB access.
+
+The current fit/calibration/development rooms are disjoint from the benchmarks,
+but calibration and development feedback and repeated benchmark inspection have
+informed model design. New untouched rooms, broader calibration class coverage,
+matched cross-teacher tests and full query latency measurements remain necessary.
+Reusing published method comparisons is appropriate for context, while causal
+claims depend on the matched-input mechanism ablations. The supplied-mesh and
+source-assisted tracks must not be represented as RGB-only or map-only results.
+
+\paragraph{Reproducibility.}
+One registry defines publication sources, metric names, cohorts and the citation
+correction ledger. Builders verify raw reproduction hashes and recompute local
+aggregates before generating tables. Code/configuration, model seals, candidate
+hashes, per-query metrics and compact reports persist; teachers and maps are
+referenced in place. Dense arrays are transient. The complete chronological
+research record and negative results remain archived separately from the main
+argument. Publication-table generation does not run training or inference.
+
+\section{Conclusion}
+We formulate query-response refinement as selective replacement of an intact
+answer, with frozen providers, query-conditioned utility and one shared
+retention rule. Five-task comparisons and matched controls provide a coherent
+evaluation framework. The measured results preserve established capability but
+do not yet close the intended cross-task contribution. The finite-pool
+decomposition identifies ranking error and candidate limitations as concrete
+targets for completing that contribution.

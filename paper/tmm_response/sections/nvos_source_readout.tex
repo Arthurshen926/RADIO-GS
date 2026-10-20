@@ -1,0 +1,72 @@
+\subsection{NVOS: source-calibrated response decisions}
+N02 asks whether foreground is already ranked well but missed by a fixed
+decision threshold. All three arms use the same final coverage/high field from
+N01, reproduced with the same 120 updates. Every fourth sorted eligible source
+view is a calibration view. One estimator renders these views with the all-source
+field; another uses a field fitted without their reconstruction constraints.
+Both use identical teacher targets, confidence weights and their common supported
+pixels. The latter field is used only to estimate a threshold, not for target
+prediction. Geometry and teacher tracking are shared: this is a reconstruction
+holdout, not independent teacher or scene validation.
+
+For source response $r_j$, soft target $y_j$ and weight $w_j$, we maximize
+\begin{equation}
+\widehat J(t)=\frac{\sum_j w_j y_j [r_j\geq t]}
+{\sum_j w_j y_j+\sum_j w_j(1-y_j)[r_j\geq t]}.
+\end{equation}
+This is a ratio of soft expected counts, not expected IoU. It assumes teacher
+evidence is useful for estimating a decision, without claiming calibrated
+teacher correctness. All queries use the fixed grid $t=k/512$, $k=1,\ldots,511$;
+ties prefer the value nearest 0.5 and then smaller $k$. Zero positive mass falls
+back to 0.5. Excluding zero keeps unsupported zero responses negative.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/nvos_source_readout.tex}}
+\caption{Same NVOS continuous field, three decision rules. Thresholds are
+estimated from source evidence before any target labels are read. All eight
+responses and 24 decisions are sealed jointly. Continuous-response AP is
+unchanged across these arms; no per-task winning rule is selected.}
+\label{tab:nvos-source-readout}
+\end{table}
+
+This deliberately changes N01's fixed-threshold contract only for the declared
+calibrated arms. Other benchmark outputs remain unchanged references. The known
+cohort remains development data, and source improvement alone is insufficient
+to establish better target responses.
+
+The fixed readout reproduces N01 at 87.7776 IoU. Fit-source calibration obtains
+87.5151 and reconstruction-holdout calibration 87.5836. The latter improves six
+tasks but harms leaves and trex, with a mean change of $-0.1940$ points
+(descriptive seven-scene bootstrap interval $[-1.2740,0.5191]$). All source
+criteria improve at their selected thresholds, yet target precision decreases
+from 95.8301 to 94.8640 while recall rises from 91.4323 to 92.2555.
+Using the alternate GT convention gives 87.9280, 87.5762 and 87.6462 respectively;
+the held-source arm then improves four tasks and harms four.
+
+At trex, threshold 0.40234 recovers 30,527 foreground pixels but introduces
+118,640 additional false positives, decreasing IoU by 3.3978 points. At orchids,
+threshold 0.41797 recovers 20,859 foreground pixels with 1,013 additional false
+positives, increasing IoU by 1.0537 points. At leaves, threshold 0.59375 removes
+648 false positives but loses 4,375 foreground pixels. These counts are at native
+GT resolution. This source-estimated scalar decision does not distinguish the
+beneficial and harmful spatial changes in these cases. The reconstruction holdout does
+not resolve the source-to-target mismatch in this experiment. We retain the
+fixed N01 readout; source-estimated thresholds are not promoted, and per-task
+winners are not substituted into the method score.
+
+\paragraph{Foreground recovery versus background ranking.}
+A separate post-seal audit uses the exact same coverage responses and freshly
+renders all eight v10 responses. Changing foreground and background score groups
+separately, then symmetrizing their marginal AP effects, gives an exact
+score-space decomposition of the AP change. The GT-dependent hybrid scores are
+diagnostics only, never deployable outputs. For orchids, the foreground change
+contributes +0.2212 AP points and the background change $-2.2373$, totaling
+$-2.0161$. Background pixels in $[0.01,0.05)$ increase from 94,415 to 197,928,
+while binary false positives change only from 1,222 to 1,265. Thus a check only
+at threshold 0.5 misses substantial ranking contamination. Trex's AP gain is
+primarily associated with foreground score changes (+2.0713 points).
+The full-cohort decomposition and error images are in the supplement. These
+observations motivate spatially selective correction that preserves background
+rejection; they do not yet isolate which upstream teacher or geometry operation
+causes the score shifts.

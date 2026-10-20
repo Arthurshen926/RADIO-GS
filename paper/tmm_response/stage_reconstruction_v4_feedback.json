@@ -1,0 +1,1023 @@
+{
+  "schema": "tmm.response_refinement.all_five_feedback.v1",
+  "run": "stage_reconstruction_v4",
+  "rows": [
+    {
+      "family": "lerf",
+      "metric": "semantic_iou",
+      "label": "LERF2D IoU",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 70.40067569509945,
+        "diagonal": 70.40067569509945,
+        "rendered_squared": 70.80011953070505,
+        "rendered_huber": 70.8229222331817
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": 0.3994438356056007,
+          "scene_bootstrap95_pp": [
+            0.307497718322558,
+            0.4913899528886434
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 0,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": 0.4222465380822604,
+          "scene_bootstrap95_pp": [
+            0.2606658886506297,
+            0.6038957626208097
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 0,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": true,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": 0.3994438356056007,
+        "scene_bootstrap95_pp": [
+          0.307497718322558,
+          0.4913899528886434
+        ],
+        "improved_scenes": 4,
+        "degraded_scenes": 0,
+        "scene_count": 4,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.02280270247665972,
+        "scene_bootstrap95_pp": [
+          -0.0614329807641506,
+          0.1184014842527531
+        ],
+        "improved_scenes": 2,
+        "degraded_scenes": 2,
+        "scene_count": 4,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "lerf",
+      "metric": "ap",
+      "label": "LERF2D AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 87.61927775455382,
+        "diagonal": 87.6192776851806,
+        "rendered_squared": 87.00314275645239,
+        "rendered_huber": 86.58074920014352
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": -6.937319885214066e-08,
+          "scene_bootstrap95_pp": [
+            -2.504954438320439e-07,
+            2.590507697242117e-07
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 3,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": -0.6161349981014197,
+          "scene_bootstrap95_pp": [
+            -1.0070398458179197,
+            -0.22523015038491967
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 4,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": -1.0385285544103007,
+          "scene_bootstrap95_pp": [
+            -1.8241220694402704,
+            -0.2529350393803309
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 4,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": true,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": -0.6161349287282208,
+        "scene_bootstrap95_pp": [
+          -1.0070399426397036,
+          -0.22522991481673804
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 4,
+        "scene_count": 4,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": -0.422393556308881,
+        "scene_bootstrap95_pp": [
+          -0.8170822236223507,
+          -0.027704888995411237
+        ],
+        "improved_scenes": 1,
+        "degraded_scenes": 3,
+        "scene_count": 4,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "lerf",
+      "metric": "selected_projection_iou",
+      "label": "LERF selected projection IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 66.96327365836882,
+        "diagonal": 66.96327365836882,
+        "rendered_squared": 66.96327365836882,
+        "rendered_huber": 66.96327365836882
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      },
+      "intervention_applied": false
+    },
+    {
+      "family": "nvos",
+      "metric": "iou",
+      "label": "NVOS IoU",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 86.5134172141552,
+        "diagonal": 86.57485842704773,
+        "rendered_squared": 86.51797324419022,
+        "rendered_huber": 86.5134172141552
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.06144121289253235,
+          "scene_bootstrap95_pp": [
+            -0.09564757347106934,
+            0.1991218990749783
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 3,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": 0.004556030035018921,
+          "scene_bootstrap95_pp": [
+            -0.00026017427444457997,
+            0.011552231652396066
+          ],
+          "improved_scenes": 3,
+          "degraded_scenes": 3,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": true,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": -0.05688518285751343,
+        "scene_bootstrap95_pp": [
+          -0.19833087921142578,
+          0.10544354362147185
+        ],
+        "improved_scenes": 3,
+        "degraded_scenes": 4,
+        "scene_count": 7,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": -0.004556030035018921,
+        "scene_bootstrap95_pp": [
+          -0.011552231652396066,
+          0.00026017427444457195
+        ],
+        "improved_scenes": 3,
+        "degraded_scenes": 3,
+        "scene_count": 7,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "nvos",
+      "metric": "ap",
+      "label": "NVOS AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 98.02224516003605,
+        "diagonal": 98.10899664265227,
+        "rendered_squared": 98.0192224901165,
+        "rendered_huber": 98.02225365933887
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.08675148261621385,
+          "scene_bootstrap95_pp": [
+            -0.24192496714806705,
+            0.3201434304125353
+          ],
+          "improved_scenes": 5,
+          "degraded_scenes": 2,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": -0.0030226699195293194,
+          "scene_bootstrap95_pp": [
+            -0.009391271029904176,
+            0.0012476246999023049
+          ],
+          "improved_scenes": 3,
+          "degraded_scenes": 4,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": 8.499302828202104e-06,
+          "scene_bootstrap95_pp": [
+            8.418115411095479e-08,
+            2.825883163046613e-05
+          ],
+          "improved_scenes": 5,
+          "degraded_scenes": 1,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": true,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": -0.08977415253574317,
+        "scene_bootstrap95_pp": [
+          -0.32891407371510445,
+          0.2400224372736808
+        ],
+        "improved_scenes": 2,
+        "degraded_scenes": 5,
+        "scene_count": 7,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.0030311692223575215,
+        "scene_bootstrap95_pp": [
+          -0.0012472137797532867,
+          0.009391591583646457
+        ],
+        "improved_scenes": 4,
+        "degraded_scenes": 3,
+        "scene_count": 7,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_19",
+      "label": "ScanNet mIoU19",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 61.011490548066284,
+        "diagonal": 61.011490548066284,
+        "rendered_squared": 60.27957082641567,
+        "rendered_huber": 60.72526245733364
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": -0.7319197216506208,
+          "scene_bootstrap95_pp": [
+            -1.0523105685726641,
+            -0.38602295404837483
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 8,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": -0.2862280907326481,
+          "scene_bootstrap95_pp": [
+            -0.6087571040236387,
+            0.05706768042667422
+          ],
+          "improved_scenes": 3,
+          "degraded_scenes": 7,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": true,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": -0.7319197216506208,
+        "scene_bootstrap95_pp": [
+          -1.0523105685726641,
+          -0.38602295404837483
+        ],
+        "improved_scenes": 2,
+        "degraded_scenes": 8,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.4456916309179726,
+        "scene_bootstrap95_pp": [
+          0.30233863312770065,
+          0.6012960700844467
+        ],
+        "improved_scenes": 10,
+        "degraded_scenes": 0,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_15",
+      "label": "ScanNet mIoU15",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 62.527589041597786,
+        "diagonal": 62.527589041597786,
+        "rendered_squared": 61.66719648973654,
+        "rendered_huber": 62.146322793335926
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": -0.8603925518612405,
+          "scene_bootstrap95_pp": [
+            -1.1830983512900657,
+            -0.4846522959627348
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 9,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": -0.3812662482618412,
+          "scene_bootstrap95_pp": [
+            -0.7570083651520483,
+            -0.008550097889616337
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 8,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": true,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": -0.8603925518612405,
+        "scene_bootstrap95_pp": [
+          -1.1830983512900657,
+          -0.4846522959627348
+        ],
+        "improved_scenes": 1,
+        "degraded_scenes": 9,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.47912630359939923,
+        "scene_bootstrap95_pp": [
+          0.2804410009835047,
+          0.6972279150787353
+        ],
+        "improved_scenes": 9,
+        "degraded_scenes": 1,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_10",
+      "label": "ScanNet mIoU10",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 72.48606102956524,
+        "diagonal": 72.48606102956524,
+        "rendered_squared": 71.20787956536184,
+        "rendered_huber": 71.54906377985368
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": -1.2781814642033882,
+          "scene_bootstrap95_pp": [
+            -2.1188835127925087,
+            -0.6821725005834636
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 10,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": -0.9369972497115509,
+          "scene_bootstrap95_pp": [
+            -1.7129396437824205,
+            -0.3648391489408719
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 9,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": true,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": -1.2781814642033882,
+        "scene_bootstrap95_pp": [
+          -2.1188835127925087,
+          -0.6821725005834636
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 10,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.34118421449183756,
+        "scene_bootstrap95_pp": [
+          0.11009301660374768,
+          0.5703412466483749
+        ],
+        "improved_scenes": 8,
+        "degraded_scenes": 2,
+        "scene_count": 10,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "text_ap",
+      "label": "UQIS text AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 26.595870475621116,
+        "diagonal": 26.595870475621116,
+        "rendered_squared": 26.595870475621116,
+        "rendered_huber": 26.595870475621116
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": false,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": 0.0,
+        "scene_bootstrap95_pp": [
+          0.0,
+          0.0
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 0,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.0,
+        "scene_bootstrap95_pp": [
+          0.0,
+          0.0
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 0,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "text_selected_iou",
+      "label": "UQIS text actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 16.386530164545416,
+        "diagonal": 16.386530164545416,
+        "rendered_squared": 16.386530164545416,
+        "rendered_huber": 16.386530164545416
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      },
+      "intervention_applied": false
+    },
+    {
+      "family": "uqis",
+      "metric": "image_ap",
+      "label": "UQIS image AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 59.308781794005874,
+        "diagonal": 59.308781794005874,
+        "rendered_squared": 59.308781794005874,
+        "rendered_huber": 59.308781794005874
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": false,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": 0.0,
+        "scene_bootstrap95_pp": [
+          0.0,
+          0.0
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 0,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.0,
+        "scene_bootstrap95_pp": [
+          0.0,
+          0.0
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 0,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "image_selected_iou",
+      "label": "UQIS image actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 39.897960281086924,
+        "diagonal": 39.897960281086924,
+        "rendered_squared": 39.897960281086924,
+        "rendered_huber": 39.897960281086924
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      },
+      "intervention_applied": false
+    },
+    {
+      "family": "uqis",
+      "metric": "point_2d_ap",
+      "label": "UQIS point_2d AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 75.79009711011095,
+        "diagonal": 75.79009711011095,
+        "rendered_squared": 75.79009711011095,
+        "rendered_huber": 75.79009711011095
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": false,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": 0.0,
+        "scene_bootstrap95_pp": [
+          0.0,
+          0.0
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 0,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.0,
+        "scene_bootstrap95_pp": [
+          0.0,
+          0.0
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 0,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_2d_selected_iou",
+      "label": "UQIS point_2d actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 49.73567540572873,
+        "diagonal": 49.73567540572873,
+        "rendered_squared": 49.73567540572873,
+        "rendered_huber": 49.73567540572873
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      },
+      "intervention_applied": false
+    },
+    {
+      "family": "uqis",
+      "metric": "point_3d_ap",
+      "label": "UQIS point_3d AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 75.32525076702996,
+        "diagonal": 75.32525076702996,
+        "rendered_squared": 75.32525076702996,
+        "rendered_huber": 75.32525076702996
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "scene_bootstrap95_pp": [
+            0.0,
+            0.0
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 0,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      },
+      "intervention_applied": false,
+      "rendered_squared_vs_diagonal": {
+        "delta_pp": 0.0,
+        "scene_bootstrap95_pp": [
+          0.0,
+          0.0
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 0,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      },
+      "huber_vs_squared": {
+        "delta_pp": 0.0,
+        "scene_bootstrap95_pp": [
+          0.0,
+          0.0
+        ],
+        "improved_scenes": 0,
+        "degraded_scenes": 0,
+        "scene_count": 9,
+        "unit": "scene; horns requests clustered together",
+        "samples": 2000
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_3d_selected_iou",
+      "label": "UQIS point_3d actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 49.04698335651834,
+        "diagonal": 49.04698335651834,
+        "rendered_squared": 49.04698335651834,
+        "rendered_huber": 49.04698335651834
+      },
+      "effects": {
+        "diagonal": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_squared": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "rendered_huber": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      },
+      "intervention_applied": false
+    }
+  ],
+  "corrections": {
+    "lerf": {
+      "diagonal": {
+        "corrected": 0,
+        "harmed": 0
+      },
+      "rendered_squared": {
+        "corrected": 55629,
+        "harmed": 65368
+      },
+      "rendered_huber": {
+        "corrected": 49964,
+        "harmed": 59082
+      }
+    },
+    "nvos": {
+      "diagonal": {
+        "corrected": 115525,
+        "harmed": 116981
+      },
+      "rendered_squared": {
+        "corrected": 6339,
+        "harmed": 5211
+      },
+      "rendered_huber": {
+        "corrected": 0,
+        "harmed": 0
+      }
+    },
+    "scannet": {
+      "diagonal": {
+        "corrected": 0,
+        "harmed": 0
+      },
+      "rendered_squared": {
+        "corrected": 15069,
+        "harmed": 20894
+      },
+      "rendered_huber": {
+        "corrected": 15520,
+        "harmed": 17453
+      }
+    }
+  },
+  "correction_units": {
+    "lerf": "query pixels",
+    "nvos": "pixels",
+    "scannet": "valid19-class points"
+  },
+  "summary_sha256": "7403156482e161c10f49019c0eba97d4aa9fa50c81714f161b8e3d51013ad94a",
+  "independent_test": false,
+  "default_changed": false,
+  "query_or_task_winner_selection": false,
+  "experimental_input": "frozen pre-fusion providers for source families; unchanged complete UQIS outputs",
+  "controlled_intervention": "diagonal transport versus rendered squared fit; separate rendered Huber control",
+  "confidence_intervals": "opened development cohort; descriptive paired scene bootstrap",
+  "nvos_scene_cluster_note": "resample seven scene clusters; two horns requests stay together; weighted estimate retains eight-request mean"
+}

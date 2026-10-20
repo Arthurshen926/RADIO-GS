@@ -1,0 +1,20 @@
+{
+  "run": "nvos_score_precision_v2",
+  "parent_run": "nvos_target_redecode_v1",
+  "study_root": "output/tmm_response_20261018/study",
+  "arms": [
+    "quality_image",
+    "full_image",
+    "crop_image"
+  ],
+  "diagnostic_only": true,
+  "gpu_memory_fraction": 0.38,
+  "maximum_volatile_prediction_bytes": 268435456,
+  "maximum_new_durable_bytes": 1048576,
+  "storage_policy": {
+    "study_bytes": 8388608,
+    "run_bytes": 2097152,
+    "artifact_bytes": 1048576,
+    "reserve_bytes": 1073741824
+  }
+}

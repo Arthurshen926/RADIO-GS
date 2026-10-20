@@ -1,0 +1,21 @@
+{
+  "method": "one set-consistent utility for complete instance and category-menu answers",
+  "parent_config": "configs/research/response_replacement_joint.json",
+  "text_run": "response_replacement_train_v2",
+  "image_run": "response_replacement_images_v2",
+  "category_run": "category_utility_supervision_v1",
+  "fit_category_episodes": "full map and three fixed view-disjoint folds, equally weighted within each room",
+  "calibration_development_category_episodes": "full-map episode only; no fold chosen by utility",
+  "category_training_target": "mean of complete-menu mIoU on 19/15/10 submenus; same candidate for all",
+  "balancing": "equal room and task; equal query within a room/task; equal candidate within a query",
+  "calibration": "one shared margin; protect each room/output cell: text IoU, image IoU, category mIoU19/15/10; 15 cells total; maximize equal-cell gain",
+  "features": "same 39-component signature; category signature averages all 19 classes without labels; task and provider IDs never enter learner",
+  "learner_capacity": "unchanged from parent; set-conditioned scalar value, centered actual utility target",
+  "controls": ["query_blind", "joint query permutation", "unrestricted margin zero"],
+  "development_previously_opened": true,
+  "calibration_previously_opened": true,
+  "calibration_missing_classes_not_repaired": true,
+  "benchmark_gaussian_renderer_equivalence": false,
+  "five_benchmark_transfer_pending": true,
+  "default_changed": false
+}

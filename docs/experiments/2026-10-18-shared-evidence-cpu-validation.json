@@ -1,0 +1,27 @@
+{
+  "schema": "radiogs.cpu_architecture_validation.v1",
+  "stage1_checkpoint": "5674e4b3fe5b3115103be9560fd5963337d2cd40",
+  "component_audit": "docs/experiments/2026-10-18-shared-core-component-audit-v5.json",
+  "component_audit_sha256": "c756f0a9333bb43c044d651849a06a166f2eab80d7ed7fd7d9edfdbd6d7ad0bc",
+  "jobs": 31,
+  "comparisons": 309,
+  "tests": {
+    "legacy": {
+      "passed": 224,
+      "skipped": 1,
+      "skip_reason": "CUDA/NVCC renderer test; CUDA_VISIBLE_DEVICES empty",
+      "command": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. RADIO_GS_EVIDENCE_CORE=legacy /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.response_study test"
+    },
+    "shared_v1": {
+      "passed": 224,
+      "skipped": 1,
+      "skip_reason": "CUDA/NVCC renderer test; CUDA_VISIBLE_DEVICES empty",
+      "command": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. RADIO_GS_EVIDENCE_CORE=shared_v1 /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.response_study test"
+    }
+  },
+  "full_benchmark_evaluation": false,
+  "new_model_mechanism_effect_validated": false,
+  "default_promoted": false,
+  "storage_budget_changes_inference": false,
+  "checkpoint_weights_or_static_maps_duplicated": false
+}

@@ -1,0 +1,14 @@
+{
+  "method": "set-conditioned complete-response utility",
+  "parent_supervision_config": "configs/research/response_replacement_joint.json",
+  "image_run": "response_replacement_images_v2",
+  "decision_rule": "set_value",
+  "features": "candidate signature, mean candidate signature, difference from that mean; candidate-order equivariant",
+  "target": "actual complete-set IoU minus the mean candidate IoU within the same query",
+  "prediction": "one set-conditioned potential per candidate; replacement gain is potential(candidate) minus potential(incumbent)",
+  "unchanged": ["supervision split and examples", "39 signature components", "all complete candidates", "original providers and teachers", "learner capacity and seed", "one six-cell calibration margin"],
+  "hypothesis": "consistent set-relative utility generalizes better than unconstrained ordered-pair regression; calibration ordering motivates the test, not a proved causal explanation",
+  "design_trigger": "joint pairwise model calibrated to reject all because its highest predicted image gain was harmful on separate calibration data",
+  "new_benchmark_feedback_used_for_design": false,
+  "default_changed": false
+}

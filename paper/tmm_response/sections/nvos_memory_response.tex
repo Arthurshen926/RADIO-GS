@@ -1,0 +1,21 @@
+\section{Reference memory response transport}
+N07 carries the original positive-only reference mask through a frozen SAM3 tracker. Two-frame memory uses the reference and observed target image; sequence memory also uses the ordered source views between them. The primary arm is sequence memory with actual 3D writeback. The source mask is fallible, and temporal memory is an existing external teacher capability, not a claimed new tracker.
+\begin{center}\small\input{tables/nvos_memory_response.tex}\end{center}
+The static N04 image response is freshly replayed. Each arm uses the same image checkpoint, image preprocessing, original Gaussian geometry, 120 Huber updates, 512-by-384 lifting grid and 0.5 threshold. All 56 predictions precede both GT scorings. AP is not measured. No task-wise switching is allowed. These are development results with observed target RGB; the updated fields are view-conditioned, not query-global.
+The primary candidate changes mean IoU by +1.3718 points relative to v10 (7 improved and 1 harmed tasks).
+The primary candidate changes mean IoU by -0.4349 points relative to the static control (5 improved and 3 harmed tasks).
+The primary candidate changes mean IoU by -0.0597 points relative to two-frame memory (3 improved and 4 harmed tasks).
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & v10 & Static + 3D & Pair + 3D & Sequence + 3D \\\midrule
+fern & 82.19 & 83.62 & 83.89 & 84.21 \\
+flower & 86.53 & 85.60 & 88.75 & 87.51 \\
+fortress & 97.23 & 96.99 & 97.32 & 97.21 \\
+horns\_center & 95.73 & 96.79 & 95.18 & 97.38 \\
+horns\_left & 92.70 & 93.21 & 94.52 & 94.55 \\
+leaves & 94.08 & 95.10 & 95.26 & 95.01 \\
+orchids & 68.14 & 72.67 & 70.02 & 70.02 \\
+trex & 75.51 & 82.59 & 78.63 & 77.18 \\
+\bottomrule\end{tabular}\end{center}
+\IfFileExists{../../output/tmm_response_20261016/study/nvos_memory_spatial_v1/errors.png}{
+\begin{figure}[ht]\centering\includegraphics[width=\linewidth,height=.78\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_memory_spatial_v1/errors.png}
+\caption{All eight N07 tasks. Green: true positive; red: false positive; blue: false negative. Original reference identity is transferred with the same rule across tasks.}\end{figure}}{}

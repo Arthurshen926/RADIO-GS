@@ -1,0 +1,18 @@
+\section{Response-score numerical audit}
+A24 exactly replays all 24 N14/N16 image probability arrays and decoder decisions, while observing raw logits. All eight tasks are sealed before scoring on both GT conventions. The original float32 probability readout is reproduced, not replaced. Float64 evaluates the same sigmoid and bilinear operation at higher precision. The stable-mixture score independently interpolates positive and complementary probabilities, then takes their log ratio. It preserves fine upper-tail differences without changing to logit interpolation. Native-grid AP uses separately nearest-resized GT and remains diagnostic only.
+\begin{center}\small\input{tables/nvos_score_precision.tex}\end{center}
+These are numerical diagnostics of image responses, not new 3D method scores. Actual 3D predictions are not recomputed; the N16 native AP loss and predeclared stopping decision remain unchanged.
+quality image: stable minus original AP +0.0019 points; relative to matched N14 image AP, original +0.0000, stable +0.0000 points. Stable-readout hard-mask changes: 0 pixels across all tasks.
+full image: stable minus original AP -0.0001 points; relative to matched N14 image AP, original -1.9905, stable -1.9925 points. Stable-readout hard-mask changes: 0 pixels across all tasks.
+crop image: stable minus original AP -0.0002 points; relative to matched N14 image AP, original -2.2103, stable -2.2124 points. Stable-readout hard-mask changes: 0 pixels across all tasks.
+\begin{center}\small\begin{tabular}{lrrr}\toprule
+Task & N14 AP correction & Full AP correction & Local AP correction \\\midrule
+fern & +0.0151 & +0.0000 & +0.0000 \\
+flower & +0.0000 & -0.0000 & -0.0008 \\
+fortress & +0.0000 & +0.0000 & +0.0000 \\
+horns\_center & +0.0000 & +0.0000 & +0.0000 \\
+horns\_left & +0.0000 & -0.0007 & -0.0008 \\
+leaves & +0.0000 & +0.0000 & +0.0000 \\
+orchids & +0.0000 & -0.0000 & -0.0000 \\
+trex & +0.0000 & -0.0003 & -0.0001 \\
+\bottomrule\end{tabular}\end{center}

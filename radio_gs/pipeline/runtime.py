@@ -27,6 +27,8 @@ class PipelineConfig:
     identity_admission: bool = True
     scope_transfer: bool = False
     instance_scope: bool = False
+    member_chunk_size: int | None = None
+    reference_completion: str | None = None
 
 
 def _read(path):
@@ -46,6 +48,13 @@ def _absolute(path):
 def build_plan(config):
     """Describe all providers before execution; no model or result cache is read."""
     scene = _read(config.scene)
+    if config.reference_completion:
+        from .reference_completion_contract import validate_profile
+        queries = _queries(config.queries)
+        if (config.access != 'source-assisted' or len(queries) != 1 or
+                scene.get('runtime_provider') or scene.get('schema') == 'registered_native_observation_map_v1'):
+            raise ValueError('signed reference completion requires one source-assisted reference query')
+        validate_profile(_read(config.reference_completion),scene,queries[0])
     if scene.get('schema') == 'registered_native_observation_map_v1':
         if config.access != 'map-only':
             raise ValueError('Registered observation maps use the declared map-only query contract')
@@ -57,6 +66,10 @@ def build_plan(config):
             command.append('--scope-transfer')
         if config.instance_scope:
             command.append('--instance-scope')
+        if config.member_chunk_size is not None:
+            if type(config.member_chunk_size) is not int or config.member_chunk_size <= 0:
+                raise ValueError('member chunk size must be positive')
+            command.extend(['--member-chunk-size',str(config.member_chunk_size)])
         return dict(access=config.access, runtime_provider='registered_native_observation_map',
             scene=config.scene, queries=config.queries, commands=[command], groups=[],
             source_rgb_allowed=False, target_rgb_allowed=False, query_reference_crop_allowed=True,
@@ -161,11 +174,20 @@ def build_plan(config):
         groups.append(dict(kind='reference_instance', queries=[query], tracks=tracks if not config.reference_evidence else None,
                            evidence=_absolute(config.reference_evidence) if config.reference_evidence else None,
                            readout=str(branch / 'typed_readout.pt')))
+    assembled = output / ('base_readout.pt' if config.reference_completion else 'typed_readout.pt')
     commands.append([config.native_python, '-m', 'radio_gs.pipeline.assemble',
-                     '--plan', str(output / 'execution.json'), '--output', str(output / 'typed_readout.pt')])
+                     '--plan', str(output / 'execution.json'), '--output', str(assembled)])
+    if config.reference_completion:
+        commands.append([config.native_python,'-m','radio_gs.pipeline.reference_completion',
+            '--scene',normalized_scene,'--query',str(output/'inputs/reference_0.query.json'),
+            '--profile',_absolute(config.reference_completion),'--initial',str(assembled),
+            '--output',str(output/'reference_completion'),'--final-output',str(output/'typed_readout.pt'),
+            '--sam-python',config.sam_python])
     return dict(access=config.access, scene=config.scene, queries=config.queries,
                 query_modalities=[q['modality'] for q in queries], commands=commands, groups=groups,
-                source_rgb_allowed=True, target_rgb_allowed=False, inherited_query_predictions=False,
+                source_rgb_allowed=True, target_rgb_allowed=bool(config.reference_completion), inherited_query_predictions=False,
+                reference_completion_profile=_absolute(config.reference_completion) if config.reference_completion else None,
+                reference_completion_permissions=_read(config.reference_completion)['permissions'] if config.reference_completion else None,
                 source_evidence_replayed=bool(config.source_evidence),
                 native_query_response_replayed=bool(config.native_response),
                 reference_tracks_replayed=bool(config.reference_tracks),

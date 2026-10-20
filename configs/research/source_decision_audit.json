@@ -1,0 +1,16 @@
+{
+  "role": "cross-task attribution audit, not a promoted accuracy method",
+  "candidate_source": "post_response_v2",
+  "candidates": ["baseline", "observable"],
+  "evidence": "mean over views of confidence-weighted authorized Brier loss; unknown excluded",
+  "decision": "choose one intact candidate with positive mean loss reduction; exact ties retain incumbent",
+  "decision_units": {"lerf": "query shared across all evaluation frames", "nvos": "whole reference response", "scannet": "whole category menu shared across 19/15/10 splits"},
+  "control": "joint permutation of target, permissions and confidence among visible operator rows per view; seed 20261016",
+  "evidence_reused_by_candidate_construction": true,
+  "independent_validation_evidence": false,
+  "benchmark_labels_used_for_choices": false,
+  "historical_capacity_runs": ["post_response_v1", "post_response_v2", "post_response_v3", "stage_reconstruction_v4"],
+  "capacity_oracle": "diagnostic only; choose by query-mean IoU or whole-menu 19-class mIoU; other metrics use same candidate",
+  "new_dense_predictions": false,
+  "default_changed": false
+}

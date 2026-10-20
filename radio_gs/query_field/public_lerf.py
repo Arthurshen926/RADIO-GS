@@ -13,7 +13,10 @@ import torch
 
 from .adapters import NativeQueryEncoder
 from .contracts import QueryPacket
-from .storage import load_field,sha256
+from .storage import load_field_versioned,sha256,field_identity
+from .research_storage import method_binding
+from .public_uqis import _preflight_v2
+from .public_artifacts import persist
 
 
 def selection_scores(data, device):
@@ -29,7 +32,8 @@ def selection_scores(data, device):
 
 
 @torch.no_grad()
-def predict(config,job,output,device='cuda'):
+def predict(config,job,output,device='cuda',*,store_root=None,artifact_writer=None):
+    _preflight_v2(job['field'],store_root)
     out=Path(output)/job['name'];out.mkdir(parents=True,exist_ok=False)
     queries=json.loads(Path(job['queries']).read_text())['queries']
     if any(q['modality']!='text' for q in queries):raise ValueError('probe requires text queries')
@@ -40,7 +44,7 @@ def predict(config,job,output,device='cuda'):
     negatives=torch.stack([encoder.text(text).semantic.cpu().float() for text in config['generic_negative_texts']])
     del encoder;gc.collect()
     if str(device).startswith('cuda'):torch.cuda.empty_cache()
-    field,manifest=load_field(job['field'],device)
+    field,manifest=load_field_versioned(job['field'],device,store_root=store_root)
     background=field.semantic.score(negatives).max(1).values
     native=[];members=[];selection=[];diagnostics=[]
     for text,vector in zip(texts,vectors):
@@ -54,13 +58,13 @@ def predict(config,job,output,device='cuda'):
     payload=dict(texts=texts,geometry=geometry,observed=field.observed.cpu(),
         scores=dict(native_generic_relevance=torch.stack(native,1),shared_membership=torch.stack(members,1)),
         selected=torch.stack(selection,1),native_query_vectors=vectors,generic_negative_vectors=negatives)
-    torch.save(payload,out/'predictions.pt')
+    persist(out/'predictions.pt',payload,'tensor',artifact_writer)
     report=dict(schema='radio_gs.query_field_lerf_prediction.v1',job=job,
-        field_sha256=manifest['files']['field.pt']['sha256'],query_file_sha256=sha256(job['queries']),
+        field_sha256=field_identity(manifest),field_binding=method_binding(job['field'],manifest),query_file_sha256=sha256(job['queries']),
         predictions_sha256=sha256(out/'predictions.pt'),queries=len(texts),runtime_source_access=False,
         legacy_calibration_reused=False,configuration=config,diagnostics=diagnostics,
         geometry_source='exported field only',evaluation_scene_opened_by_predictor=False)
-    (out/'prediction.json').write_text(json.dumps(report,indent=2)+'\n')
+    persist(out/'prediction.json',report,'json',artifact_writer)
     return {key:report[key] for key in ['job','queries','predictions_sha256','runtime_source_access','legacy_calibration_reused']}
 
 
@@ -104,14 +108,14 @@ def score(config,job,output,device='cuda'):
     return report
 
 
-def main():
+def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('stage',choices=['predict','score']);parser.add_argument('--config',required=True)
     parser.add_argument('--job',required=True);parser.add_argument('--output',required=True)
-    parser.add_argument('--device',default='cuda');args=parser.parse_args();torch.set_num_threads(4)
+    parser.add_argument('--device',default='cuda');parser.add_argument('--store-root');args=parser.parse_args(argv);torch.set_num_threads(4)
     config=json.loads(Path(args.config).read_text());job=next(j for j in config['jobs'] if j['name']==args.job)
     function=predict if args.stage=='predict' else score
-    print(json.dumps(function(config,job,args.output,args.device),indent=2))
+    print(json.dumps(function(config,job,args.output,args.device,**({'store_root':args.store_root} if args.stage=='predict' else {})),indent=2))
 
 
 if __name__=='__main__':main()

@@ -7,6 +7,7 @@ This module consumes no query strings or GT; it solves element membership.
 from dataclasses import dataclass
 from enum import Enum
 import torch
+from radio_gs import evidence_core
 from torch.nn import functional as F
 
 
@@ -51,6 +52,10 @@ def view_evidence(op, evidence_op, visible, probability, detected, frame, height
     positive=(-F.max_pool2d(-binary,kernel,1,boundary_radius)>.5).flatten(1).T
     negative=(F.max_pool2d(binary,kernel,1,boundary_radius)<.5).flatten(1).T
     active=visible&detected[None]
+    if evidence_core.enabled():
+        domains=evidence_core.compile_domains(positive, negative, visible=visible,
+            applicable=detected[None], negative_origin='model_complement')
+        positive, negative = domains.positive, domains.negative
     return ViewEvidence(op,evidence_op.T.coalesce(),evidence_op,probability,positive&active,negative&active,active,frame,torch.ones(1,probability.shape[1],device=probability.device) if confidence is None else confidence[None])
 
 
@@ -147,18 +152,5 @@ def solve_rendered_evidence(initial, observations, steps=120):
     define a bounded Huber inverse-rendering objective. Unsupported elements
     keep their supplied initialization; callers decide the abstention policy.
     """
-    terms=[]
-    mass=torch.zeros_like(initial)
-    for operator,target,known,weight in observations:
-        adjoint=operator.T.coalesce()
-        reliability=known.float()*weight
-        terms.append((operator,adjoint,target,reliability))
-        mass+=torch.sparse.mm(adjoint,reliability)
-    value=initial.clone()
-    for _ in range(steps):
-        gradient=torch.zeros_like(value)
-        for operator,adjoint,target,reliability in terms:
-            residual=(target-torch.sparse.mm(operator,value)).clamp(-.25,.25)
-            gradient+=torch.sparse.mm(adjoint,residual*reliability)
-        value.add_(.95*gradient/mass.clamp_min(1e-8)).clamp_(0,1)
-    return value,mass
+    from .response_reconstruction import solve_rendered_evidence as reconstruct
+    return reconstruct(initial, observations, steps=steps)

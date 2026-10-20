@@ -1,0 +1,21 @@
+\paragraph{Instance-constrained extent proposals.}
+The N11 extension preserves the static image response $p_t$ while admitting
+additional regions from a fixed signed-reference proposal $q_t$. For reference
+view $r$ and raw visible Gaussian contributions $C_r$, original signed scribbles
+$P,N$ give $b^+=C_r^\top P/(C_r^\top\mathbf1)$ and
+$b^-=C_r^\top N/(C_r^\top\mathbf1)$, with zero where the denominator is empty.
+Unmarked reference coverage supplies neither sign. Restricting to the original
+observed domain, render $W_t^\pm=\bar A_t b^\pm$. For each eight-connected
+component $M_k$ of $q_t\geq0.5$, define
+\[
+ a_k=\mathbf1\!\left[\sum_{u\in M_k}W_t^+(u)>
+ \sum_{u\in M_k}W_t^-(u),\quad \sum_{u\in M_k}W_t^+(u)>10^{-8}\right].
+\]
+Accepted pixels take $\max(p_t,q_t)$; all other pixels retain $p_t$. This
+changes image support authority before the same native-ray fit; it guarantees
+no image-score decrease, not monotonic 3D predictions. Unrestricted admission
+and $W_t^+=z_t^0,W_t^-=1-z_t^0$ are matched controls. Original negative scribbles
+and frozen DINOv2 descriptors are declared additions to the v10 input contract.
+The experiments support instance constraints, but do not establish an advantage
+of this geometric witness over the retained v10 response anchor.
+

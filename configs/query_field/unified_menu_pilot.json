@@ -1,0 +1,33 @@
+{
+  "schema": "radio_gs.unified_menu_pilot.v2",
+  "observations": "output/query_field_20261007/five_benchmark_v1/scannet/scene0062_00/observations",
+  "teacher": "output/query_field_20261009/semantic_measure_functions_v2/fits/scene0062_00/field",
+  "teacher_manifest_sha256": "ccde85ea3690104376827139edb284b3ed38e7132c746bac6aab39ebeff397bb",
+  "base_run": "scene0062_00_functional",
+  "base_state_identity": "b3e7d1dca769de9153359fe72126cda9dbaef58de147f66e3985af62fb3d4a5c",
+  "arms": ["mean", "reliable"],
+  "mode_count": 4,
+  "mode_initial_noise": 0.01,
+  "temperature": 100.0,
+  "seed": 20261016,
+  "steps": 1000,
+  "learning_rate": 0.0005,
+  "training_rows": 512,
+  "menu_sizes": [3, 5, 10, 19],
+  "pairs": 32,
+  "validation_every": 200,
+  "validation_menus": 32,
+  "validation_rows": 1024,
+  "validation_episodes": 48,
+  "preservation_weight": 0.25,
+  "membership_weight": 0.25,
+  "checkpoint_budget_bytes": 201326592,
+  "export_budget_bytes": 134217728,
+  "storage": {
+    "study_bytes": 8589934592,
+    "run_bytes": 1073741824,
+    "artifact_bytes": 268435456,
+    "reserve_bytes": 21474836480
+  },
+  "status": "paired single-scene development control; no benchmark labels or text menus in training"
+}

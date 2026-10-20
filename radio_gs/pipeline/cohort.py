@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import time
 
 PYTHON='/root/miniconda3/envs/cybersim_agent/bin/python'
 
@@ -16,15 +17,28 @@ def main():
     parser.add_argument('--output',required=True)
     parser.add_argument('--gpus',default='0,1,2,3,4,5')
     parser.add_argument('--benchmarks',nargs='+',help='Explicit subset of a declared recipe')
+    parser.add_argument('--evidence-core',choices=['legacy','shared_v1'],
+                        default=os.environ.get('RADIO_GS_EVIDENCE_CORE','legacy'))
+    parser.add_argument('--scannet-paper8',action='store_true',
+                        help='Also score the frozen paper-eight Gaussian metric on fresh outputs')
     args=parser.parse_args()
     recipe=json.loads(Path(args.recipe).read_text())
     root=Path(args.output);root.mkdir(parents=True,exist_ok=True)
     gpus=args.gpus.split(',')
     jobs=[j for j in recipe['jobs'] if not args.benchmarks or j['benchmark'] in args.benchmarks]
+    paper8=[]
+    if args.scannet_paper8:
+        import yaml
+        freeze=yaml.safe_load(Path('paper/artifacts/evaluation_protocol_freeze_20260801.yaml').read_text())
+        paper8=freeze['canonical_tasks']['concept_scannet_ovs_vala_paper8']['cohort']['scenes']
+        supplied={j['name'] for j in jobs if j['benchmark']=='scannet'}
+        if not set(paper8)<=supplied:
+            raise ValueError('paper-eight scoring requires the complete frozen cohort')
 
     def predict(index):
         results=[]
         for job in jobs[index::len(gpus)]:
+            started=time.monotonic()
             out=root/job['benchmark']/job['name'];out.mkdir(parents=True,exist_ok=True)
             command=[PYTHON,'-m','radio_gs.pipeline','--scene',job['scene'],
                      '--queries',job['queries'],'--access',job.get('access','source-assisted'),
@@ -33,19 +47,28 @@ def main():
                 command.extend(['--source-evidence',job['source_evidence']])
             if job.get('reference_tracks'):
                 command.extend(['--reference-tracks',job['reference_tracks']])
+            if job.get('reference_completion'):
+                command.extend(['--reference-completion',job['reference_completion']])
             for option in ['scope_transfer','instance_scope']:
                 if job.get(option):command.append('--'+option.replace('_','-'))
-            env=dict(os.environ,PYTHONPATH='.',CUDA_VISIBLE_DEVICES=gpus[index],OPENBLAS_NUM_THREADS='1')
+            env=dict(os.environ,PYTHONPATH='.',CUDA_VISIBLE_DEVICES=gpus[index],OPENBLAS_NUM_THREADS='1',
+                     RADIO_GS_EVIDENCE_CORE=args.evidence_core,
+                     RADIO_GS_EVIDENCE_TRACE_DIR=str((out/'core_trace').resolve()))
             with (out/'query.log').open('w') as log:
                 subprocess.run(command,env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
-            results.append(dict(job=job,commands=[command]))
+            results.append(dict(job=job,commands=[command],evidence_core=args.evidence_core,
+                                query_seconds=time.monotonic()-started))
             print('predicted',job['benchmark'],job['name'],flush=True)
         return results
 
     with ThreadPoolExecutor(len(gpus)) as pool:
         predicted=[r for group in pool.map(predict,range(len(gpus))) for r in group]
     (root/'predictions_complete.json').write_text(json.dumps(dict(recipe=args.recipe,jobs=len(predicted),
+        evidence_core=args.evidence_core,scannet_paper8=paper8,
         all_predictions_before_scoring=True,historical_answers_read=False),indent=2)+'\n')
+    from radio_gs.pipeline.prediction_receipts import prediction_seals
+    (root/'prediction_seal.json').write_text(json.dumps(dict(
+        outputs=prediction_seals(root,dict(jobs=jobs)),sealed_before_scoring=True),indent=2)+'\n')
 
     public=[r for r in predicted if r['job']['benchmark']!='uqis']
     def evaluate(index):
@@ -63,7 +86,8 @@ def main():
             else:
                 evaluate=[PYTHON,'scripts/research/evaluate_scannet_runtime.py',
                           '--readout',str(out/'query/category/typed_readout.pt'),
-                          '--evaluation',job['evaluation'],'--output',str(out/'evaluation'),'--point-only']
+                          '--evaluation',job['evaluation'],'--output',str(out/'evaluation')]
+                if job['name'] not in paper8:evaluate.append('--point-only')
             with (out/'evaluation.log').open('w') as log:
                 subprocess.run(evaluate,env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
             if job['benchmark']=='lerf':
@@ -114,12 +138,22 @@ def main():
         group=[r['metrics'] for r in rows if r['job']['benchmark']==name]
         macro[name]={k:sum(r[k] for r in group)/len(group) for k in group[0]}
     summary=dict(recipe=args.recipe,completed=len(rows),rows=rows,macro=macro,
+                 evidence_core=args.evidence_core,
                  source_teacher_caches_reused=True,historical_query_predictions_read=False,
                  all_predictions_before_scoring=True,
                  uqis_readouts={n:{m:v['scene_macro'] for m,v in d['modalities'].items()} for n,d in uqis_readouts.items()},
                  uqis_selections={n:{m:v['scene_macro'] for m,v in d['explicit_selection']['modalities'].items()}
                                   for n,d in uqis_readouts.items() if 'explicit_selection' in d},
                  independent_test=False,official_sota_equivalence_verified=False)
+    if paper8:
+        gaussian={name:json.loads((root/'scannet'/name/'evaluation/report.json').read_text())[
+            'gaussian_volume_pseudolabel_metrics']['source'] for name in paper8}
+        summary['scannet_paper8']=dict(scenes=paper8,
+            macro={split:{metric:sum(gaussian[n][split][metric] for n in paper8)/len(paper8)
+                for metric in ['miou','macc']} for split in ['19','15','10']},
+            metric='Mahalanobis pseudo labels; opacity-volume weighting; equal scene mean',
+            input_track='provided unlabelled mesh; source-assisted teachers',
+            exact_vala_input_equivalence=False,shared_fresh_predictions_with_internal10=True)
     (root/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     print(json.dumps(macro,indent=2),flush=True)
 

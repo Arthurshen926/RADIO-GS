@@ -7,6 +7,7 @@ import argparse,json,time
 from pathlib import Path
 from types import SimpleNamespace
 import torch
+from radio_gs import evidence_core
 import cv2,numpy as np
 from torch.nn import functional as F
 from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
@@ -61,6 +62,13 @@ def main(argv=None):
                 positive_weight,negative_weight=instance_reliability(observation,(h,w),y.device,
                     complement='view' if scene.get('instance_evidence_reliability')=='positive_local' else 'minimum')
                 known=(pos*positive_weight.flatten()[:,None]+neg*negative_weight)*(total[:,None]>1e-8)
+            if evidence_core.enabled():
+                domains=evidence_core.compile_domains(pos, neg, visible=total[:,None]>1e-8,
+                    negative_origin='model_complement')
+                pw=positive_weight.flatten()[:,None] if local_reliability else 1.
+                nw=negative_weight if local_reliability else float(record.get('negative_reliability',1.))
+                positive, negative=evidence_core.signed_weights(domains, pw, nw)
+                known=positive+negative
             observations.append((op,y.flatten()[:,None],known,1.));positive_terms.append((pos,neg));active.append(frame)
             instance=dict(scores=torch.ones(1),masks=y[0].cpu())
             if local_reliability:

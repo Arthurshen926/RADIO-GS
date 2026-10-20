@@ -1,0 +1,22 @@
+\section{Image-conditioned query responses and 3D writeback}
+N04 pairs a fixed v10 response with reconstructed RGB or observed RGB at the same camera. The former uses only source-trained appearance; the latter explicitly changes input access. SAM3 receives a response-derived box, optionally with dense log-odds. Single-mask decoding has no ground-truth candidate selection. Both dense-prior outputs are additionally written to the original observed Gaussian domain by 120 Huber updates and rendered again. Unsupported elements retain v10. The primary arm, observed RGB with dense prior and 3D writeback, was specified before scoring.
+\begin{center}\small\input{tables/nvos_image_response.tex}\end{center}
+All 56 predictions precede target scoring. This is the opened development cohort, not an independent test. Neither target RGB nor the inferred image mask is target GT. A view-conditioned 3D update is not evidence of one query-global field or improved cross-view consistency. Source losses below compare against fallible original teacher tracks and are distinct from target accuracy.
+The primary arm changes mean IoU by +1.8067 points versus v10 (6 improved, 2 harmed; descriptive seven-scene interval [+0.3180,+3.8393]).
+The primary arm changes mean IoU by +1.3959 points versus the matched rendered-RGB arm (7 improved, 1 harmed; descriptive seven-scene interval [+0.6421,+2.3483]).
+The primary arm changes mean IoU by -0.7435 points versus the direct image output (0 improved, 8 harmed; descriptive seven-scene interval [-1.0165,-0.5535]).
+\begin{center}\small\begin{tabular}{lrrrrr}\toprule
+Task & v10 IoU & RGB + 3D IoU & Source loss: v10 & Render + 3D & RGB + 3D \\\midrule
+fern & 82.185 & 83.624 & 0.002636 & 0.009481 & 0.008375 \\
+flower & 86.527 & 85.600 & 0.000511 & 0.003665 & 0.004451 \\
+fortress & 97.230 & 96.985 & 0.000188 & 0.000728 & 0.000710 \\
+horns\_center & 95.728 & 96.788 & 0.000441 & 0.002636 & 0.002938 \\
+horns\_left & 92.698 & 93.212 & 0.000240 & 0.000451 & 0.000436 \\
+leaves & 94.085 & 95.097 & 0.000202 & 0.000858 & 0.000974 \\
+orchids & 68.141 & 72.669 & 0.000631 & 0.002021 & 0.003098 \\
+trex & 75.513 & 82.586 & 0.002153 & 0.004970 & 0.004429 \\
+\bottomrule\end{tabular}\end{center}
+Implementation checks reproduce v10 binary outputs exactly, compare the sparse compositor and normalized response operator with gsplat, and bind RGB parameters to the exact geometry. Both GT conventions use continuous-score bilinear resizing before thresholding. An independent confusion-matrix implementation and scikit-learn AP check all arms. Other benchmark outputs are unchanged references, not fresh inference.
+\IfFileExists{../../output/tmm_response_20261016/study/nvos_image_response_spatial_v2/errors.png}{
+\begin{figure}[ht]\centering\includegraphics[width=\linewidth,height=.78\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_image_response_spatial_v2/errors.png}
+\caption{All eight N04 tasks. Green: true positive; red: false positive; blue: false negative. GT-conditioned diagnostics never enter inference.}\end{figure}}{}

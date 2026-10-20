@@ -1,0 +1,42 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=23mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
+\setlength{\emergencystretch}{2em}
+\title{Learning to Preserve and Replace Complete Responses to 3D Scene Queries}
+\author{TMM working manuscript --- empirical closure in progress}
+\date{October 16, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+Refining a scene-query response can improve teacher agreement while damaging
+an already correct answer. We study when an existing complete response should
+be retained or replaced. Frozen providers supply an incumbent and intact
+alternatives; query--response signatures describe their observable agreement.
+A shared utility estimator and one calibrated margin choose a whole answer,
+without retraining teacher representations or complete membership decoders.
+We organize evaluation around five outputs: LERF semantic segmentation and
+projected 3D selection, ScanNet open-vocabulary segmentation, NVOS and multimodal
+UQIS. Published comparisons and previously verified local reproductions establish
+the reference context. Matched mechanism controls currently cover ten ScanNet
+rooms and all 268 UQIS queries. The latest shared policy raises UQIS image set
+IoU from 39.90 to 40.99\%, with one improved query and no harmed queries, while
+preserving the other scored outputs. Removing its null-query constraint yields
+identical decisions, and LERF/NVOS transfer remains open. The resulting evidence
+separates useful candidate capacity from ranking error and the cost of retention;
+it does not yet establish universal improvement across the five outputs.
+\end{abstract}
+\input{sections/introduction.tex}
+\input{sections/related_work.tex}
+\section{Complete-response replacement}
+\label{sec:method}
+\begin{figure}[ht]
+\centering\includegraphics[width=\linewidth]{figures/replacement_overview.pdf}
+\caption{One decision over frozen complete responses. Independent fit rooms
+provide candidate utilities; calibration rooms determine one shared margin.
+Benchmark labels are used only for scoring and subsequent diagnosis.}
+\end{figure}
+\input{sections/replacement_method.tex}
+\input{sections/experiments.tex}
+\input{sections/discussion.tex}
+\input{sections/references.tex}
+\end{document}

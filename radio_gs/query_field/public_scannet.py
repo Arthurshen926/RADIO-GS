@@ -7,16 +7,19 @@ import numpy as np
 import torch
 
 from .adapters import NativeQueryEncoder
-from .storage import load_field, sha256
+from .storage import load_field_versioned, sha256, field_identity, deployment_bytes
+from .research_storage import method_binding
+from .public_artifacts import persist
 
 
 @torch.no_grad()
-def predict(field_path, query_path, output, encoder_path, device='cuda', query_program='original'):
+def predict(field_path, query_path, output, encoder_path, device='cuda', query_program='original', *, field_loader=None, store_root=None, artifact_writer=None):
     from .query_program import PROGRAM
     if query_program not in {'original', PROGRAM}: raise ValueError('unknown query program')
     root=Path(output);root.mkdir(parents=True,exist_ok=False)
     queries=json.loads(Path(query_path).read_text())['queries']
-    field,manifest=load_field(field_path,device)
+    field,manifest=(load_field_versioned(field_path,device,store_root=store_root)
+                    if field_loader is None else field_loader(field_path,device))
     encoder=NativeQueryEncoder(encoder_path,device)
     native,members,receipts,vectors=[],[],[],[]
     for query in queries:
@@ -40,15 +43,16 @@ def predict(field_path, query_path, output, encoder_path, device='cuda', query_p
             payload['measure_prior']=prior
             payload['typed']=positive_support_rank(prior,payload['member'])
             payload['observed']=payload['observed'] | field.semantic_measure.supported.cpu()
-    torch.save(payload,root/'predictions.pt')
-    report=dict(field_sha256=manifest['files']['field.pt']['sha256'],query_sha256=sha256(query_path),
+    persist(root/'predictions.pt',payload,'tensor',artifact_writer)
+    report=dict(field_sha256=field_identity(manifest),field_binding=method_binding(field_path,manifest),field_schema=manifest['schema'],
+                complete_field_payload_bytes=deployment_bytes(manifest),query_sha256=sha256(query_path),
                 predictions_sha256=sha256(root/'predictions.pt'),queries=receipts,
                 query_program=query_program,
                 primary=('bounded native/member category evidence' if query_program == PROGRAM else
                          'shared member union per category followed by complete-menu argmax'),
                 native_control='plain native class-name cosine argmax',
                 source_access=False,benchmark_labels_opened=False,field_spec=manifest['spec'],encoder=encoder_path)
-    (root/'prediction.json').write_text(json.dumps(report,indent=2)+'\n')
+    persist(root/'prediction.json',report,'json',artifact_writer)
     return report
 
 
@@ -85,13 +89,20 @@ def score(predictions,evaluation,output):
     return report
 
 
-if __name__=='__main__':
+def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('stage',choices=['predict','score'])
     parser.add_argument('--field');parser.add_argument('--queries');parser.add_argument('--evaluation');parser.add_argument('--encoder')
     parser.add_argument('--predictions');parser.add_argument('--output',required=True)
     parser.add_argument('--query-program',default='original')
-    args=parser.parse_args();torch.set_num_threads(4)
-    result=(predict(args.field,args.queries,args.output,args.encoder,query_program=args.query_program) if args.stage=='predict'
+    parser.add_argument("--store-root", help="Explicit v2 shared blob store; v1 remains readable")
+    parser.add_argument("--device", default="cuda")
+    args=parser.parse_args(argv);torch.set_num_threads(4)
+    result=(predict(args.field,args.queries,args.output,args.encoder,device=args.device,
+                    query_program=args.query_program,store_root=args.store_root) if args.stage=='predict'
             else score(args.predictions,args.evaluation,args.output))
     print(json.dumps(result,indent=2))
+
+
+if __name__=="__main__":
+    main()

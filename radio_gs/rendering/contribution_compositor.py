@@ -326,6 +326,7 @@ def gaussian_footprint_alphas(
     opacities: torch.Tensor,
     *,
     width: int,
+    backend: str = "torch",
 ) -> torch.Tensor:
     """Reproduce gsplat's accepted per-hit footprint alpha for one camera.
 
@@ -362,6 +363,12 @@ def gaussian_footprint_alphas(
         or int(gids.max()) >= opacity.shape[0]
     ):
         raise ValueError("gaussian id outside projected geometry")
+    if backend == "gsplat_cuda":
+        from .gsplat_footprint_cuda import accepted_hit_alphas
+        return accepted_hit_alphas(gids.contiguous(), pids.contiguous(), means.contiguous(),
+                                   conic.contiguous(), opacity.contiguous(), int(width))
+    if backend != "torch":
+        raise ValueError("unknown footprint backend")
     # A high-overdraw view can contain hundreds of millions of accepted hits.
     # The footprint equation is pointwise, so evaluate it in fixed chunks
     # instead of materializing x/y/delta/conic arrays for every hit at once.
@@ -398,6 +405,7 @@ def rasterize_single_view_contributions(
     width: int,
     opacity_scale: torch.Tensor | None = None,
     include_depths: bool = True,
+    footprint_backend: str = "torch",
 ) -> dict[str, torch.Tensor]:
     """Return exact accepted 3DGS hits and front-to-back contributions.
 
@@ -485,6 +493,7 @@ def rasterize_single_view_contributions(
         info["conics"],
         info["opacities"],
         width=int(width),
+        backend=footprint_backend,
     )
     order, grouped_pids, weights, accumulated = front_to_back_weights(
         pids, hit_alphas, num_pixels=int(height) * int(width)

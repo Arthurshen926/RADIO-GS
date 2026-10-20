@@ -1,0 +1,23 @@
+\section{Complete-query target re-decoding}
+N16 replays N14 reference-quality completion and transport. The full-frame control uses that complete target response as one additional frozen SAM3 dense-logit and box prompt. The local primary applies the same operation to the response extent with 25 percent context on each side. RGB and prior share the same crop, and all outside probabilities are preserved before identical native 3D fitting. No extra annotations, candidate selection, recursive decoding or crop-size search is used. All 56 predictions precede both GT tracks. This is development on the opened eight-task cohort, with the other four benchmarks unchanged.
+\begin{center}\small\input{tables/nvos_target_redecode.tex}\end{center}
+\begin{center}\small\begin{tabular}{lrrr}\toprule
+Task & N14 native & Full native & Local native \\\midrule
+fern & 83.20 & 83.68 & 83.68 \\
+flower & 96.71 & 96.00 & 96.02 \\
+fortress & 98.00 & 97.54 & 97.62 \\
+horns\_center & 95.69 & 97.42 & 97.42 \\
+horns\_left & 94.81 & 93.82 & 94.01 \\
+leaves & 94.84 & 95.63 & 95.54 \\
+orchids & 95.60 & 95.73 & 95.88 \\
+trex & 86.54 & 84.98 & 86.08 \\
+\bottomrule\end{tabular}\end{center}
+The fixed window covers the full image on fern, horns\_center; local and full-frame image predictions there have identical hashes. These tasks do not test an image-scale change.
+full native vs quality native: -0.0732 IoU points, -0.6824 AP points; 4 improved and 4 harmed tasks.
+crop native vs quality native: +0.1075 IoU points, -0.4787 AP points; 4 improved and 4 harmed tasks.
+crop native vs full native: +0.1806 IoU points, +0.2037 AP points; 5 improved and 1 harmed tasks.
+full image vs quality image: -0.1367 IoU points, -1.9905 AP points; 4 improved and 4 harmed tasks.
+crop image vs quality image: +0.0680 IoU points, -2.2103 AP points; 4 improved and 4 harmed tasks.
+The fixed stopping criterion requires higher mean IoU without lower AP on both GT tracks. No arm qualifies; this target-refinement branch is stopped and N14 is retained. This does not establish a universal performance ceiling.
+\begin{figure}[ht]\centering\includegraphics[width=.85\linewidth,height=.75\textheight,keepaspectratio]{../../output/tmm_response_20261018/study/nvos_target_redecode_spatial_v1/errors.png}
+\caption{All eight N16 tasks: green TP, red FP, blue FN. Display resizing only; metrics use original GT resolution.}\end{figure}

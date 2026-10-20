@@ -1,0 +1,31 @@
+\section{Related work}
+\paragraph{Lifting visual evidence to scene representations.}
+VALA~\cite{vala} uses visibility-aware feature lifting and robust multi-view
+aggregation for open-vocabulary Gaussian segmentation. LUDVIG~\cite{ludvig}
+aggregates lifted visual features and applies graph diffusion; Occam's
+LGS~\cite{occam} provides an efficient Gaussian language representation.
+These approaches establish the value of correspondences, visibility and
+aggregation. We keep the available teacher representations and focus on
+forming query responses from them. Neither weighted averaging, robust fitting
+nor frozen native features alone is claimed as our contribution.
+
+\paragraph{Query-dependent evidence and complete extent.}
+EviSplat~\cite{evisplat} preserves observation features in class-agnostic
+instances and combines query-selected evidence with local Gaussian support.
+Query-dependent use of preserved evidence is therefore prior art. Our focus is
+the distinction between identity applicability and authority to support or
+exclude spatial extent, including completion of reference scope before
+transport and compatibility of response objectives with actual selection.
+The distinction is evaluated through matched interventions; the formulation
+does not establish that our scope estimates are universally more accurate.
+
+\paragraph{Teacher capabilities and response-level adaptation.}
+SAM3~\cite{sam3}, SigLIP2~\cite{siglip2}, DINOv2~\cite{dinov2} and
+Mask-Adapter~\cite{maskadapter} supply attributed segmentation or matching
+capabilities. We study how their evidence is used, not a new foundation model.
+For reference queries, frozen image decoding and tracking are combined with
+reference-side admission and geometric response fitting. For map-only queries,
+complete membership includes independent labelled-room supervision. Published
+method comparisons and retained local reproductions are contextual when
+teacher access, prompts, geometry or evaluation domains differ; our component
+controls provide the narrower causal evidence.

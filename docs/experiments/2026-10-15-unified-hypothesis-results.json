@@ -1,0 +1,1688 @@
+{
+  "schema": "radio_gs.unified_hypothesis_results.v1",
+  "five_benchmarks_complete": true,
+  "rules": [
+    "peak",
+    "pooled"
+  ],
+  "macro": {
+    "baseline": {
+      "lerf": {
+        "native_iou": 0.4508755433653797,
+        "member_iou": 0.19492090849552723,
+        "member_ap": 0.698281075477734,
+        "subset_iou": 0.11266641835490268
+      },
+      "scannet": {
+        "native": {
+          "19": 0.3657237492560753,
+          "15": 0.37629461814195253,
+          "10": 0.4584649867174114
+        },
+        "member": {
+          "19": 0.2440311757768529,
+          "15": 0.2520992109467278,
+          "10": 0.30726928556526667
+        }
+      },
+      "nvos": {
+        "response_iou": 0.6224977605562005,
+        "ap": 0.9426533199169969,
+        "subset_iou": 0.6780571970841387
+      },
+      "uqis": {
+        "text": {
+          "ap": 0.19910506828790192,
+          "subset_iou": 0.09778956696763887,
+          "empty_selections": 0
+        },
+        "image": {
+          "ap": 0.3141484956475582,
+          "subset_iou": 0.18433159058735488,
+          "empty_selections": 0
+        },
+        "point_2d": {
+          "ap": 0.588101502445289,
+          "subset_iou": 0.3062315846552234,
+          "empty_selections": 6
+        },
+        "point_3d": {
+          "ap": 0.5834242250536168,
+          "subset_iou": 0.3055453699925911,
+          "empty_selections": 8
+        }
+      }
+    },
+    "peak": {
+      "lerf": {
+        "native_iou": 0.4508755433653797,
+        "member_iou": 0.1960765855033227,
+        "member_ap": 0.7394573700758699,
+        "subset_iou": 0.10982184776453532
+      },
+      "scannet": {
+        "native": {
+          "19": 0.3657237492560753,
+          "15": 0.37629461814195253,
+          "10": 0.4584649867174114
+        },
+        "member": {
+          "19": 0.25151520420404283,
+          "15": 0.27585562765501265,
+          "10": 0.3643567301309882
+        }
+      },
+      "nvos": {
+        "response_iou": 0.6224977605562005,
+        "ap": 0.9426533199169969,
+        "subset_iou": 0.6780571970841387
+      },
+      "uqis": {
+        "text": {
+          "ap": 0.19910506828790192,
+          "subset_iou": 0.09778956696763887,
+          "empty_selections": 0
+        },
+        "image": {
+          "ap": 0.3141484956475582,
+          "subset_iou": 0.18433159058735488,
+          "empty_selections": 0
+        },
+        "point_2d": {
+          "ap": 0.588101502445289,
+          "subset_iou": 0.3062315846552234,
+          "empty_selections": 6
+        },
+        "point_3d": {
+          "ap": 0.5834242250536168,
+          "subset_iou": 0.3055453699925911,
+          "empty_selections": 8
+        }
+      }
+    },
+    "pooled": {
+      "lerf": {
+        "native_iou": 0.4508755433653797,
+        "member_iou": 0.16722815162625293,
+        "member_ap": 0.5515736939077006,
+        "subset_iou": 0.10004685606189108
+      },
+      "scannet": {
+        "native": {
+          "19": 0.3657237492560753,
+          "15": 0.37629461814195253,
+          "10": 0.4584649867174114
+        },
+        "member": {
+          "19": 0.23640164499375738,
+          "15": 0.2605321441987,
+          "10": 0.3567288800119259
+        }
+      },
+      "nvos": {
+        "response_iou": 0.6224977605562005,
+        "ap": 0.9426533199169969,
+        "subset_iou": 0.6780571970841387
+      },
+      "uqis": {
+        "text": {
+          "ap": 0.14004849655120777,
+          "subset_iou": 0.07164198978802394,
+          "empty_selections": 0
+        },
+        "image": {
+          "ap": 0.30990593930485283,
+          "subset_iou": 0.18170515678020932,
+          "empty_selections": 0
+        },
+        "point_2d": {
+          "ap": 0.588101502445289,
+          "subset_iou": 0.3062315846552234,
+          "empty_selections": 6
+        },
+        "point_3d": {
+          "ap": 0.5834242250536168,
+          "subset_iou": 0.3055453699925911,
+          "empty_selections": 8
+        }
+      }
+    }
+  },
+  "paired_differences": {
+    "peak_minus_baseline": [
+      {
+        "task": "lerf",
+        "metric": "member_iou",
+        "delta_pp": 0.11556770077954456,
+        "interval95_pp": [
+          -2.3183749232781463,
+          4.337820635863912
+        ],
+        "scenes": 4,
+        "improved": 1,
+        "regressed": 3,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "lerf",
+        "metric": "member_ap",
+        "delta_pp": 4.117629459813579,
+        "interval95_pp": [
+          -1.9970045629345985,
+          11.611630500340715
+        ],
+        "scenes": 4,
+        "improved": 3,
+        "regressed": 1,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "lerf",
+        "metric": "subset_iou",
+        "delta_pp": -0.284457059036735,
+        "interval95_pp": [
+          -1.9384428940042921,
+          1.905312620581013
+        ],
+        "scenes": 4,
+        "improved": 1,
+        "regressed": 3,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "response_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_19",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_15",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_10",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "text",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "text",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "image",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "image",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_2d",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_2d",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_3d",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_3d",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      }
+    ],
+    "pooled_minus_baseline": [
+      {
+        "task": "lerf",
+        "metric": "member_iou",
+        "delta_pp": -2.7692756869274318,
+        "interval95_pp": [
+          -5.214173632157211,
+          0.3732858349631482
+        ],
+        "scenes": 4,
+        "improved": 1,
+        "regressed": 3,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "lerf",
+        "metric": "member_ap",
+        "delta_pp": -14.670738157003344,
+        "interval95_pp": [
+          -25.56509995145345,
+          0.09010202758473612
+        ],
+        "scenes": 4,
+        "improved": 1,
+        "regressed": 3,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "lerf",
+        "metric": "subset_iou",
+        "delta_pp": -1.2619562293011592,
+        "interval95_pp": [
+          -2.506956661646664,
+          -0.04754908972542642
+        ],
+        "scenes": 4,
+        "improved": 1,
+        "regressed": 3,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "response_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_19",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_15",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_10",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "text",
+        "metric": "ap",
+        "delta_pp": -5.905657173669415,
+        "interval95_pp": [
+          -12.544024350772503,
+          0.5308606685142802
+        ],
+        "scenes": 9,
+        "improved": 2,
+        "regressed": 7,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "text",
+        "metric": "subset_iou",
+        "delta_pp": -2.614757717961491,
+        "interval95_pp": [
+          -6.47572068687061,
+          1.165818273296158
+        ],
+        "scenes": 9,
+        "improved": 2,
+        "regressed": 5,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "image",
+        "metric": "ap",
+        "delta_pp": -0.4242556342705391,
+        "interval95_pp": [
+          -3.089781500541442,
+          1.7170412580012155
+        ],
+        "scenes": 9,
+        "improved": 5,
+        "regressed": 4,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "image",
+        "metric": "subset_iou",
+        "delta_pp": -0.2626433807145558,
+        "interval95_pp": [
+          -1.501669322757329,
+          1.2193434275174
+        ],
+        "scenes": 9,
+        "improved": 3,
+        "regressed": 6,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_2d",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_2d",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_3d",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_3d",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      }
+    ],
+    "pooled_minus_peak": [
+      {
+        "task": "lerf",
+        "metric": "member_iou",
+        "delta_pp": -2.884843387706977,
+        "interval95_pp": [
+          -4.021620322097866,
+          -1.1637968497022393
+        ],
+        "scenes": 4,
+        "improved": 0,
+        "regressed": 4,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "lerf",
+        "metric": "member_ap",
+        "delta_pp": -18.788367616816924,
+        "interval95_pp": [
+          -26.129477847856247,
+          -11.741274916732886
+        ],
+        "scenes": 4,
+        "improved": 0,
+        "regressed": 4,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "lerf",
+        "metric": "subset_iou",
+        "delta_pp": -0.9774991702644241,
+        "interval95_pp": [
+          -2.245403121956771,
+          0.29738121456483557
+        ],
+        "scenes": 4,
+        "improved": 1,
+        "regressed": 3,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "response_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "nvos",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 8,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_19",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_15",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "scannet",
+        "metric": "native_miou_10",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 10,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "text",
+        "metric": "ap",
+        "delta_pp": -5.905657173669415,
+        "interval95_pp": [
+          -12.544024350772503,
+          0.5308606685142802
+        ],
+        "scenes": 9,
+        "improved": 2,
+        "regressed": 7,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "text",
+        "metric": "subset_iou",
+        "delta_pp": -2.614757717961491,
+        "interval95_pp": [
+          -6.47572068687061,
+          1.165818273296158
+        ],
+        "scenes": 9,
+        "improved": 2,
+        "regressed": 5,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "image",
+        "metric": "ap",
+        "delta_pp": -0.4242556342705391,
+        "interval95_pp": [
+          -3.089781500541442,
+          1.7170412580012155
+        ],
+        "scenes": 9,
+        "improved": 5,
+        "regressed": 4,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "image",
+        "metric": "subset_iou",
+        "delta_pp": -0.2626433807145558,
+        "interval95_pp": [
+          -1.501669322757329,
+          1.2193434275174
+        ],
+        "scenes": 9,
+        "improved": 3,
+        "regressed": 6,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_2d",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_2d",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_3d",
+        "metric": "ap",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      },
+      {
+        "task": "uqis",
+        "modality": "point_3d",
+        "metric": "subset_iou",
+        "delta_pp": 0.0,
+        "interval95_pp": [
+          0.0,
+          0.0
+        ],
+        "scenes": 9,
+        "improved": 0,
+        "regressed": 0,
+        "bootstrap_samples": 2000,
+        "bootstrap_unit": "scene (case for NVOS)",
+        "independent_test": false
+      }
+    ]
+  },
+  "identity": {
+    "peak": {
+      "text": {
+        "queries": 67,
+        "candidate_recall_count": 32,
+        "chosen_target_count": 14,
+        "dominant_target_count": 12,
+        "correct_anchor_wrong_extent": 3
+      },
+      "image": {
+        "queries": 67,
+        "candidate_recall_count": 41,
+        "chosen_target_count": 26,
+        "dominant_target_count": 20,
+        "correct_anchor_wrong_extent": 11
+      },
+      "point_2d": {
+        "queries": 67,
+        "candidate_recall_count": 61,
+        "chosen_target_count": 61,
+        "dominant_target_count": 43,
+        "correct_anchor_wrong_extent": 18
+      },
+      "point_3d": {
+        "queries": 67,
+        "candidate_recall_count": 59,
+        "chosen_target_count": 59,
+        "dominant_target_count": 43,
+        "correct_anchor_wrong_extent": 16
+      }
+    },
+    "pooled": {
+      "text": {
+        "queries": 67,
+        "candidate_recall_count": 32,
+        "chosen_target_count": 7,
+        "dominant_target_count": 8,
+        "correct_anchor_wrong_extent": 1
+      },
+      "image": {
+        "queries": 67,
+        "candidate_recall_count": 41,
+        "chosen_target_count": 23,
+        "dominant_target_count": 19,
+        "correct_anchor_wrong_extent": 10
+      },
+      "point_2d": {
+        "queries": 67,
+        "candidate_recall_count": 61,
+        "chosen_target_count": 61,
+        "dominant_target_count": 43,
+        "correct_anchor_wrong_extent": 18
+      },
+      "point_3d": {
+        "queries": 67,
+        "candidate_recall_count": 59,
+        "chosen_target_count": 59,
+        "dominant_target_count": 43,
+        "correct_anchor_wrong_extent": 16
+      }
+    }
+  },
+  "source_hash": "28a404191b55e1b8a5340d0a914d37cefb32b6d05f4891f7ef73d6a37254b24f",
+  "design": {
+    "rules": [
+      "peak",
+      "pooled"
+    ],
+    "candidate_count": 8,
+    "radius_m": 0.05,
+    "margin": 0.02,
+    "source_hashes": {
+      "/root/RADIO-GS-query-field/radio_gs/query_field/unified_hypothesis_study.py": "541fa21e3d7c880b768440c50f65bdcec37520ca334f6bf8c6510735891587de",
+      "/root/RADIO-GS-query-field/radio_gs/query_field/unified_hypotheses.py": "80ef01b2edec86dffe5682494856bc295588c78ccb18ddccb757c72090657488"
+    },
+    "baseline_plan_sha256": "b5b872744de790c00ee13ff5bce86df33f61e6af6eb60e63b10fd541270d2283",
+    "baseline_summary_sha256": "54e210596a5aba06829ed83371a99b74756c8e0cbc3eb7539cbc72c3760db9e5",
+    "parameters_inherited": "count8 and identity margin0.02 from pre-existing hypothesis policy; radius explicitly normalized to0.05m here (legacy raw-coordinate NMS was not unit-normalized); not swept",
+    "difference": "pooled vs peak ranks the SAME transient member-aware candidate hypotheses",
+    "baseline_contrast": "changes both candidate discovery and candidate composition; not a one-factor contrast to v1",
+    "no_parameter_update": true,
+    "no_new_model_bytes": true,
+    "common_rule_all_benchmarks": true,
+    "explicit_inputs_unchanged": true,
+    "category_native_partition_unchanged": true,
+    "independent_final_test": false,
+    "accuracy_promotion": false,
+    "all_five_before_feedback": true,
+    "benchmark_labels_used_for_new_prediction": false
+  },
+  "all_prediction_barrier_sha256": "ec436f19153425d493d46fd9e0b6d911e85f9f90fafc9fbebd639e8841443b82",
+  "new_model_bytes": 0,
+  "matched_candidates_and_component_statistics_verified": true,
+  "study_bytes": 10583840773,
+  "accuracy_promotion": false,
+  "independent_final_test": false,
+  "per_scene": {
+    "baseline": {
+      "lerf": [
+        {
+          "scene": "figurines",
+          "native_iou": 0.4577868263170655,
+          "member_iou": 0.18793423410638102,
+          "member_ap": 0.804678849632449,
+          "subset_iou": 0.06858276100194442
+        },
+        {
+          "scene": "ramen",
+          "native_iou": 0.4557857551205326,
+          "member_iou": 0.15676508148030285,
+          "member_ap": 0.6454902509364604,
+          "subset_iou": 0.09172158416151246
+        },
+        {
+          "scene": "teatime",
+          "native_iou": 0.46359237715980767,
+          "member_iou": 0.1977152169003325,
+          "member_ap": 0.7738216427536916,
+          "subset_iou": 0.10345323154823485
+        },
+        {
+          "scene": "waldo_kitchen",
+          "native_iou": 0.42633721486411313,
+          "member_iou": 0.23726910149509256,
+          "member_ap": 0.5691335585883351,
+          "subset_iou": 0.18690809670791894
+        }
+      ],
+      "nvos": [
+        {
+          "scene": "fern",
+          "response_iou": 0.7637326866621651,
+          "ap": 0.9381765165687797,
+          "subset_iou": 0.804746536140173
+        },
+        {
+          "scene": "flower",
+          "response_iou": 0.918232418982917,
+          "ap": 0.9868922492207236,
+          "subset_iou": 0.9380354347731245
+        },
+        {
+          "scene": "fortress",
+          "response_iou": 0.2938500138106789,
+          "ap": 0.966809817133203,
+          "subset_iou": 0.4795386922905377
+        },
+        {
+          "scene": "horns_center",
+          "response_iou": 0.6739633810173229,
+          "ap": 0.964323577562322,
+          "subset_iou": 0.7192479311926933
+        },
+        {
+          "scene": "horns_left",
+          "response_iou": 0.736526965138711,
+          "ap": 0.9540808270686274,
+          "subset_iou": 0.6124390143546617
+        },
+        {
+          "scene": "leaves",
+          "response_iou": 0.8434480610290365,
+          "ap": 0.9674847700934196,
+          "subset_iou": 0.9069645559782387
+        },
+        {
+          "scene": "orchids",
+          "response_iou": 0.2742407043977323,
+          "ap": 0.9486203273482255,
+          "subset_iou": 0.41234424639720096
+        },
+        {
+          "scene": "trex",
+          "response_iou": 0.47598785341104133,
+          "ap": 0.8148384743406734,
+          "subset_iou": 0.5511411655464798
+        }
+      ],
+      "scannet": [
+        {
+          "scene": "scene0070_00",
+          "native": {
+            "19": 0.2846889439960604,
+            "15": 0.3312107135487301,
+            "10": 0.4232803280614808
+          },
+          "member": {
+            "19": 0.13412372611223777,
+            "15": 0.21448707184216353,
+            "10": 0.22884716274419
+          }
+        },
+        {
+          "scene": "scene0097_00",
+          "native": {
+            "19": 0.43941006330335713,
+            "15": 0.3843151120247872,
+            "10": 0.5421723379991668
+          },
+          "member": {
+            "19": 0.27466427437565616,
+            "15": 0.21777904152235258,
+            "10": 0.25457833410717406
+          }
+        },
+        {
+          "scene": "scene0062_00",
+          "native": {
+            "19": 0.4331945701970052,
+            "15": 0.4341809913388943,
+            "10": 0.49337735222867735
+          },
+          "member": {
+            "19": 0.29466628806115924,
+            "15": 0.2980850766438982,
+            "10": 0.41250945759361296
+          }
+        },
+        {
+          "scene": "scene0400_00",
+          "native": {
+            "19": 0.47142782830251306,
+            "15": 0.47154128964293035,
+            "10": 0.4766328679529621
+          },
+          "member": {
+            "19": 0.3083680401847228,
+            "15": 0.3143127555465384,
+            "10": 0.3560812035636678
+          }
+        },
+        {
+          "scene": "scene0590_00",
+          "native": {
+            "19": 0.35427506749157495,
+            "15": 0.4167154352934051,
+            "10": 0.5606359577686572
+          },
+          "member": {
+            "19": 0.21049995385631645,
+            "15": 0.22815737070266692,
+            "10": 0.39374791617402854
+          }
+        },
+        {
+          "scene": "scene0000_00",
+          "native": {
+            "19": 0.3211107698839245,
+            "15": 0.3077554058596323,
+            "10": 0.39484513199293514
+          },
+          "member": {
+            "19": 0.23671849812673068,
+            "15": 0.20495117905039303,
+            "10": 0.23715959571959105
+          }
+        },
+        {
+          "scene": "scene0347_00",
+          "native": {
+            "19": 0.48532096550414044,
+            "15": 0.49866978269528256,
+            "10": 0.573345203401313
+          },
+          "member": {
+            "19": 0.36945361643327695,
+            "15": 0.35536042947926866,
+            "10": 0.37431638214988866
+          }
+        },
+        {
+          "scene": "scene0140_00",
+          "native": {
+            "19": 0.2673079305624382,
+            "15": 0.3064020054758006,
+            "10": 0.3601450261717795
+          },
+          "member": {
+            "19": 0.17301303715151528,
+            "15": 0.15714140255683914,
+            "10": 0.20389445436919865
+          }
+        },
+        {
+          "scene": "scene0200_00",
+          "native": {
+            "19": 0.31029806106707114,
+            "15": 0.31026425048388945,
+            "10": 0.3773672727511861
+          },
+          "member": {
+            "19": 0.26081728395114745,
+            "15": 0.30979772384283355,
+            "10": 0.37720825421232557
+          }
+        },
+        {
+          "scene": "scene0645_00",
+          "native": {
+            "19": 0.2902032922526683,
+            "15": 0.3018911950561736,
+            "10": 0.3828483888459573
+          },
+          "member": {
+            "19": 0.17798703951576678,
+            "15": 0.22092005828032357,
+            "10": 0.23435009501898957
+          }
+        }
+      ]
+    },
+    "peak": {
+      "lerf": [
+        {
+          "scene": "figurines",
+          "native_iou": 0.4577868263170655,
+          "member_iou": 0.1740733794161185,
+          "member_ap": 0.82079000105284,
+          "subset_iou": 0.06472902655608528
+        },
+        {
+          "scene": "ramen",
+          "native_iou": 0.4557857551205326,
+          "member_iou": 0.13572472335383767,
+          "member_ap": 0.6059788242905653,
+          "subset_iou": 0.07047315135161285
+        },
+        {
+          "scene": "teatime",
+          "native_iou": 0.46359237715980767,
+          "member_iou": 0.17238807656123475,
+          "member_ap": 0.812475740173993,
+          "subset_iou": 0.08593280647804863
+        },
+        {
+          "scene": "waldo_kitchen",
+          "native_iou": 0.42633721486411313,
+          "member_iou": 0.3021201626820998,
+          "member_ap": 0.718584914786081,
+          "subset_iou": 0.21815240667239452
+        }
+      ],
+      "nvos": [
+        {
+          "scene": "fern",
+          "response_iou": 0.7637326866621651,
+          "ap": 0.9381765165687797,
+          "subset_iou": 0.804746536140173
+        },
+        {
+          "scene": "flower",
+          "response_iou": 0.918232418982917,
+          "ap": 0.9868922492207236,
+          "subset_iou": 0.9380354347731245
+        },
+        {
+          "scene": "fortress",
+          "response_iou": 0.2938500138106789,
+          "ap": 0.966809817133203,
+          "subset_iou": 0.4795386922905377
+        },
+        {
+          "scene": "horns_center",
+          "response_iou": 0.6739633810173229,
+          "ap": 0.964323577562322,
+          "subset_iou": 0.7192479311926933
+        },
+        {
+          "scene": "horns_left",
+          "response_iou": 0.736526965138711,
+          "ap": 0.9540808270686274,
+          "subset_iou": 0.6124390143546617
+        },
+        {
+          "scene": "leaves",
+          "response_iou": 0.8434480610290365,
+          "ap": 0.9674847700934196,
+          "subset_iou": 0.9069645559782387
+        },
+        {
+          "scene": "orchids",
+          "response_iou": 0.2742407043977323,
+          "ap": 0.9486203273482255,
+          "subset_iou": 0.41234424639720096
+        },
+        {
+          "scene": "trex",
+          "response_iou": 0.47598785341104133,
+          "ap": 0.8148384743406734,
+          "subset_iou": 0.5511411655464798
+        }
+      ],
+      "scannet": [
+        {
+          "scene": "scene0070_00",
+          "native": {
+            "19": 0.2846889439960604,
+            "15": 0.3312107135487301,
+            "10": 0.4232803280614808
+          },
+          "member": {
+            "19": 0.1676035054186218,
+            "15": 0.20654212992605617,
+            "10": 0.3573628563391642
+          }
+        },
+        {
+          "scene": "scene0097_00",
+          "native": {
+            "19": 0.43941006330335713,
+            "15": 0.3843151120247872,
+            "10": 0.5421723379991668
+          },
+          "member": {
+            "19": 0.29557862528467843,
+            "15": 0.287802609178196,
+            "10": 0.28328304563218926
+          }
+        },
+        {
+          "scene": "scene0062_00",
+          "native": {
+            "19": 0.4331945701970052,
+            "15": 0.4341809913388943,
+            "10": 0.49337735222867735
+          },
+          "member": {
+            "19": 0.1906672406131182,
+            "15": 0.22189887230675812,
+            "10": 0.35300560443803486
+          }
+        },
+        {
+          "scene": "scene0400_00",
+          "native": {
+            "19": 0.47142782830251306,
+            "15": 0.47154128964293035,
+            "10": 0.4766328679529621
+          },
+          "member": {
+            "19": 0.3553884181376475,
+            "15": 0.36286139558740504,
+            "10": 0.4275068359057801
+          }
+        },
+        {
+          "scene": "scene0590_00",
+          "native": {
+            "19": 0.35427506749157495,
+            "15": 0.4167154352934051,
+            "10": 0.5606359577686572
+          },
+          "member": {
+            "19": 0.30574828283274286,
+            "15": 0.31698263408853206,
+            "10": 0.5005976945768199
+          }
+        },
+        {
+          "scene": "scene0000_00",
+          "native": {
+            "19": 0.3211107698839245,
+            "15": 0.3077554058596323,
+            "10": 0.39484513199293514
+          },
+          "member": {
+            "19": 0.2528747099986269,
+            "15": 0.25811958773515387,
+            "10": 0.28054011201273116
+          }
+        },
+        {
+          "scene": "scene0347_00",
+          "native": {
+            "19": 0.48532096550414044,
+            "15": 0.49866978269528256,
+            "10": 0.573345203401313
+          },
+          "member": {
+            "19": 0.21686216958327867,
+            "15": 0.2173395192760721,
+            "10": 0.3073785873150192
+          }
+        },
+        {
+          "scene": "scene0140_00",
+          "native": {
+            "19": 0.2673079305624382,
+            "15": 0.3064020054758006,
+            "10": 0.3601450261717795
+          },
+          "member": {
+            "19": 0.22777504869523144,
+            "15": 0.2627722213154002,
+            "10": 0.3308503453774824
+          }
+        },
+        {
+          "scene": "scene0200_00",
+          "native": {
+            "19": 0.31029806106707114,
+            "15": 0.31026425048388945,
+            "10": 0.3773672727511861
+          },
+          "member": {
+            "19": 0.2581698797571734,
+            "15": 0.3501235973705925,
+            "10": 0.44695866192082084
+          }
+        },
+        {
+          "scene": "scene0645_00",
+          "native": {
+            "19": 0.2902032922526683,
+            "15": 0.3018911950561736,
+            "10": 0.3828483888459573
+          },
+          "member": {
+            "19": 0.24448416171930948,
+            "15": 0.27411370976596017,
+            "10": 0.3560835577918402
+          }
+        }
+      ]
+    },
+    "pooled": {
+      "lerf": [
+        {
+          "scene": "figurines",
+          "native_iou": 0.4577868263170655,
+          "member_iou": 0.13693420820875093,
+          "member_ap": 0.5233093907300683,
+          "subset_iou": 0.053901753442915
+        },
+        {
+          "scene": "ramen",
+          "native_iou": 0.4557857551205326,
+          "member_iou": 0.10348163473478873,
+          "member_ap": 0.4532415413446302,
+          "subset_iou": 0.06161091239675639
+        },
+        {
+          "scene": "teatime",
+          "native_iou": 0.46359237715980767,
+          "member_iou": 0.16925050896766075,
+          "member_ap": 0.5953260214026955,
+          "subset_iou": 0.09350698037663653
+        },
+        {
+          "scene": "waldo_kitchen",
+          "native_iou": 0.42633721486411313,
+          "member_iou": 0.25924625459381123,
+          "member_ap": 0.6344178221534084,
+          "subset_iou": 0.1911677780312564
+        }
+      ],
+      "nvos": [
+        {
+          "scene": "fern",
+          "response_iou": 0.7637326866621651,
+          "ap": 0.9381765165687797,
+          "subset_iou": 0.804746536140173
+        },
+        {
+          "scene": "flower",
+          "response_iou": 0.918232418982917,
+          "ap": 0.9868922492207236,
+          "subset_iou": 0.9380354347731245
+        },
+        {
+          "scene": "fortress",
+          "response_iou": 0.2938500138106789,
+          "ap": 0.966809817133203,
+          "subset_iou": 0.4795386922905377
+        },
+        {
+          "scene": "horns_center",
+          "response_iou": 0.6739633810173229,
+          "ap": 0.964323577562322,
+          "subset_iou": 0.7192479311926933
+        },
+        {
+          "scene": "horns_left",
+          "response_iou": 0.736526965138711,
+          "ap": 0.9540808270686274,
+          "subset_iou": 0.6124390143546617
+        },
+        {
+          "scene": "leaves",
+          "response_iou": 0.8434480610290365,
+          "ap": 0.9674847700934196,
+          "subset_iou": 0.9069645559782387
+        },
+        {
+          "scene": "orchids",
+          "response_iou": 0.2742407043977323,
+          "ap": 0.9486203273482255,
+          "subset_iou": 0.41234424639720096
+        },
+        {
+          "scene": "trex",
+          "response_iou": 0.47598785341104133,
+          "ap": 0.8148384743406734,
+          "subset_iou": 0.5511411655464798
+        }
+      ],
+      "scannet": [
+        {
+          "scene": "scene0070_00",
+          "native": {
+            "19": 0.2846889439960604,
+            "15": 0.3312107135487301,
+            "10": 0.4232803280614808
+          },
+          "member": {
+            "19": 0.19591634423372628,
+            "15": 0.25079227426301487,
+            "10": 0.4224188474445571
+          }
+        },
+        {
+          "scene": "scene0097_00",
+          "native": {
+            "19": 0.43941006330335713,
+            "15": 0.3843151120247872,
+            "10": 0.5421723379991668
+          },
+          "member": {
+            "19": 0.24954472439873795,
+            "15": 0.24347123239433485,
+            "10": 0.28175072816383473
+          }
+        },
+        {
+          "scene": "scene0062_00",
+          "native": {
+            "19": 0.4331945701970052,
+            "15": 0.4341809913388943,
+            "10": 0.49337735222867735
+          },
+          "member": {
+            "19": 0.18652503572663914,
+            "15": 0.21463599081428253,
+            "10": 0.3388740859320444
+          }
+        },
+        {
+          "scene": "scene0400_00",
+          "native": {
+            "19": 0.47142782830251306,
+            "15": 0.47154128964293035,
+            "10": 0.4766328679529621
+          },
+          "member": {
+            "19": 0.3611267653027333,
+            "15": 0.36596559066835205,
+            "10": 0.4500089953215622
+          }
+        },
+        {
+          "scene": "scene0590_00",
+          "native": {
+            "19": 0.35427506749157495,
+            "15": 0.4167154352934051,
+            "10": 0.5606359577686572
+          },
+          "member": {
+            "19": 0.30003962028416276,
+            "15": 0.3239826296458148,
+            "10": 0.49215563343766144
+          }
+        },
+        {
+          "scene": "scene0000_00",
+          "native": {
+            "19": 0.3211107698839245,
+            "15": 0.3077554058596323,
+            "10": 0.39484513199293514
+          },
+          "member": {
+            "19": 0.2239203272143706,
+            "15": 0.213088266502589,
+            "10": 0.24756855753399357
+          }
+        },
+        {
+          "scene": "scene0347_00",
+          "native": {
+            "19": 0.48532096550414044,
+            "15": 0.49866978269528256,
+            "10": 0.573345203401313
+          },
+          "member": {
+            "19": 0.2178343956319278,
+            "15": 0.22150982990577742,
+            "10": 0.31431011837841033
+          }
+        },
+        {
+          "scene": "scene0140_00",
+          "native": {
+            "19": 0.2673079305624382,
+            "15": 0.3064020054758006,
+            "10": 0.3601450261717795
+          },
+          "member": {
+            "19": 0.20485098744994146,
+            "15": 0.23046120859719538,
+            "10": 0.3057775152428208
+          }
+        },
+        {
+          "scene": "scene0200_00",
+          "native": {
+            "19": 0.31029806106707114,
+            "15": 0.31026425048388945,
+            "10": 0.3773672727511861
+          },
+          "member": {
+            "19": 0.18590681354515776,
+            "15": 0.2587999013425111,
+            "10": 0.35377311388126015
+          }
+        },
+        {
+          "scene": "scene0645_00",
+          "native": {
+            "19": 0.2902032922526683,
+            "15": 0.3018911950561736,
+            "10": 0.3828483888459573
+          },
+          "member": {
+            "19": 0.23835143615017673,
+            "15": 0.28261451785312813,
+            "10": 0.3606512047831143
+          }
+        }
+      ]
+    }
+  }
+}

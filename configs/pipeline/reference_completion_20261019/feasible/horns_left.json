@@ -1,0 +1,57 @@
+{
+  "native_wh": [
+    1008,
+    756
+  ],
+  "solver_steps": 120,
+  "threshold": 0.5,
+  "footprint_backend": "gsplat_cuda",
+  "points_per_sign": 16,
+  "gpu_memory_fraction": 0.38,
+  "schema": "radiogs.signed_reference_completion.v1",
+  "policy": "feasible",
+  "target_frame": 8,
+  "inputs": {
+    "reference_rgb": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/llff_undistorted/horns_undistort/images/DJI_20200223_163055_437.jpg",
+      "sha256": "02b6b890199937014896f812abe4994af64898e02b4a025ff20ca3e37a62464a"
+    },
+    "reference_mask": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_positive_queries_20260918/horns_left/reference_sam_mask.png",
+      "sha256": "9f643ab2727bc1897376cb702c2bd3f9c7d430b6b6521446476b5b2407e444c9"
+    },
+    "positive_scribble": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/horns_left/pos_0_horns.png",
+      "sha256": "1b4ef9a1b28322bb8c28c2293f767603c08644fd2d784e5e9ccf97503730ef51"
+    },
+    "negative_scribble": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/horns_left/neg_0_horns.png",
+      "sha256": "03fa4a98a919aa4daaf248628a38d84c778dc33f7cd1e8fb0a892bc4710f16cc"
+    },
+    "target_rgb": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/llff_undistorted/horns_undistort/images/DJI_20200223_163024_597.jpg",
+      "sha256": "0172aaf594a1b0ab415f74615c194d3dd622dd34a2b3e75534fc7d30a4503b5b"
+    }
+  },
+  "permissions": {
+    "reference_rgb": true,
+    "target_rgb": true,
+    "positive_scribble": true,
+    "negative_scribble": true,
+    "reference_gt": false,
+    "target_gt": false
+  },
+  "dino_repository": "/root/.cache/torch/hub/facebookresearch_dinov2_main",
+  "image_checkpoint": {
+    "path": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+    "sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"
+  },
+  "dino_checkpoint": {
+    "path": "/root/.cache/torch/hub/checkpoints/dinov2_vitb14_pretrain.pth",
+    "sha256": "0b8b82f85de91b424aded121c7e1dcc2b7bc6d0adeea651bf73a13307fad8c73"
+  },
+  "geometry_fit": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_carrier_next72/adaptive_allrgb/horns_center/fit.json",
+    "sha256": "549295826cf92e31f29186066f405b422d15cacdbbb4364f81cf579c0a98f943"
+  }
+}

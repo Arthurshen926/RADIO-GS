@@ -1,6 +1,22 @@
 # RADIO-GS manuscripts and current research claims
 
-The current implementation is documented in
+**Active paper (2026-10-18):** [TMM query-conditioned evidence fusion](tmm_response/README.md).
+Our v10 implementation and its paired component controls form the main method.
+Complete-response replacement is an optional extension, not the whole contribution.
+See [ADR0024](../docs/adr/0024-v10-method-ownership-and-nvos-evidence.md).
+
+The current scientific organization is **partial evidence -> authorized scope
+-> complete response**. See the [question, theory and evidence outline](../docs/experiments/2026-10-18-paper-scientific-organization.md)
+and [ADR0041](../docs/adr/0041-scientific-question-and-evidence-led-paper.md).
+The main paper follows three mechanism questions; chronological NVOS variants
+and optional replacement controls remain in separate supplements.
+
+The manuscript is `tmm_response/main.tex`, with generated comparisons, historical
+component controls and NVOS experiments. Representation reconstruction, dimension
+and compression are outside scope. Reuse verified external reproductions.
+Different input/metric domains and historical/new gains remain explicit.
+
+The earlier broad system implementation is documented in
 [SYSTEM_IMPLEMENTATION.md](../docs/SYSTEM_IMPLEMENTATION.md), with scientific
 acceptance criteria in [CVPR_RESEARCH_PLAN.md](CVPR_RESEARCH_PLAN.md).
 The current source-assisted native field is not the compact RADIO reconstruction

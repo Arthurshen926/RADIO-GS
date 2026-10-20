@@ -24,14 +24,23 @@ def compiled_observation_prior(scene, query, observed, fallback_logits, temperat
     path = Path(scene['native_observation_field'])
     if field is None:
         field = torch.load(path, map_location='cpu', weights_only=False)
+    if scene.get('native_observation_provenance'):
+        from radio_gs.evidence_core.provenance import attach_provenance
+        field = attach_provenance(field, path, scene['native_observation_provenance'],
+                                  source_frames=scene.get('source_frames'))
     descriptor = F.normalize(field['descriptors'].float().to(query.device), dim=-1)
     identity=native_identity(descriptor,query)
     if 'member_identity_descriptors' in field:
         member=F.normalize(field['member_identity_descriptors'].float().to(query.device),dim=-1)
         identity=corroborate_identity(identity,native_identity(member,query),field['member_identity_coverage'].to(query.device))
     response = torch.softmax(temperature * identity, dim=-1)
-    transfer = torch.sparse_csr_tensor(field['crow'].to(query.device), field['columns'].to(query.device),
-                                     field['weights'].to(query.device), size=field['shape'])
+    from radio_gs import evidence_core
+    if evidence_core.enabled():
+        from radio_gs.evidence_core.store import CompiledRegionEvidence
+        transfer = CompiledRegionEvidence.from_payload(field).transfer(query.device)
+    else:
+        transfer = torch.sparse_csr_tensor(field['crow'].to(query.device), field['columns'].to(query.device),
+                                         field['weights'].to(query.device), size=field['shape'])
     probability = project_observations(transfer, response)
     reliability_report = None
     if scene.get('native_observation_reliability'):
@@ -47,7 +56,8 @@ def compiled_observation_prior(scene, query, observed, fallback_logits, temperat
         cameras_read=False, historical_query_answers_read=False, learned_compact_field=False,
         query_independent_compilation=True, seconds=time.monotonic()-start,
         field_deserialization_included=not supplied_by_caller, reliability=reliability_report,
-        member_identity=field.get('member_identity_build'))
+        member_identity=field.get('member_identity_build'),
+        region_provenance=field.get('region_provenance'))
 
 
 @torch.inference_mode()

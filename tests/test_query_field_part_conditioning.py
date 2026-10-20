@@ -95,13 +95,13 @@ def test_compiler_checks_source_indices_and_preserves_parent_state(tmp_path):
         splits=dict(train_frames=[3,7],development_frames=[9]))))
     parent=tmp_path/'parent';save_field(field,parent/'field',dict(observations_sha256=sha256(source/'observations.json')))
     construction=parent/'construction.json';construction.write_text(json.dumps(dict(source_records=records)))
-    compile_field(parent/'field',source,construction,tmp_path/'export')
+    compile_field(parent/'field',source,construction,tmp_path/'export',legacy_v1=True)
     loaded,_=load_field(tmp_path/'export/field')
     assert torch.equal(loaded.evidence.region_semantic,torch.cat(expected))
     for key,value in field.state_dict().items():assert torch.equal(value,loaded.state_dict()[key])
     records[0]['frame']=9;construction.write_text(json.dumps(dict(source_records=records)))
     with pytest.raises(ValueError,match='illegal source frame'):
-        compile_field(parent/'field',source,construction,tmp_path/'illegal')
+        compile_field(parent/'field',source,construction,tmp_path/'illegal',legacy_v1=True)
 
 
 def test_native_half_storage_uses_float32_query_function():

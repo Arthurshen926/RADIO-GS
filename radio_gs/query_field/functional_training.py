@@ -15,8 +15,7 @@ from torch import nn
 from torch.nn import functional as F
 
 from .observations import training_episode
-from .relation_training import buffer_digests
-from .storage import load_field, save_field, sha256
+from .storage import load_field, save_field, sha256, field_identity, deployment_bytes
 
 
 class NativeResidual(nn.Module):
@@ -107,6 +106,7 @@ class FunctionalSource:
 
 
 def unchanged_state(field):
+    from .relation_training import buffer_digests
     buffers = {k: v for k, v in buffer_digests(field).items() if k not in {'semantic.codes', 'local.codes'}}
     parameters = {k: p.detach().clone() for k, p in field.named_parameters()}
     return buffers, parameters
@@ -130,10 +130,12 @@ def source_audit(field, maps, source, device, seed=20261010):
 
 
 def fit(parent, observations, output, *, epochs=2, seed=20261009, learning_rate=.0001,
-        pairs=64, device='cuda'):
+        pairs=64, device='cuda', field_loader=None, save_function=None):
     output = Path(output); output.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
-    field, manifest = load_field(parent, 'cpu')
+    loader = load_field if field_loader is None else field_loader
+    writer = save_field if save_function is None else save_function
+    field, manifest = loader(parent, 'cpu')
     source_digest = sha256(Path(observations) / 'observations.json')
     if manifest['provenance']['observations_sha256'] != source_digest:
         raise ValueError('functional source and parent construction differ')
@@ -195,18 +197,21 @@ def fit(parent, observations, output, *, epochs=2, seed=20261009, learning_rate=
     if after != before or any(not torch.equal(p, dict(field.named_parameters())[k]) for k, p in parameters.items()):
         raise ValueError('functional fit modified protected field state')
     torch.save({k: v.cpu() for k, v in maps.state_dict().items()}, output / 'construction_maps.pt')
-    exported = save_field(field, output / 'field', dict(parent_field_sha256=manifest['files']['field.pt']['sha256'],
+    exported = writer(field, output / 'field', dict(parent_field_sha256=manifest['files']['field.pt']['sha256'],
         observations_sha256=source_digest, supervision='source-only native pair preferences',
         construction='full-dimensional affine residuals baked into native Gaussian coordinates',
         benchmark_queries_used=False, additional_3d_labels=False))
     report = dict(parent=str(parent), parent_sha256=manifest['files']['field.pt']['sha256'],
+        parent_source_schema=manifest['schema'],
         observations=str(observations), observations_sha256=source_digest, epochs=epochs, seed=seed,
         learning_rate=learning_rate, pairs=pairs, temperature=.1, trust_weight=1., weight_decay=.01,
         steps=steps, training_regions=len(source.examples), each_region_visits=epochs,
         source_frames=[v['frame'] for v in source.views], history=history, source_development=audit,
         mean_direction_drift=drift, protected_state_unchanged=True,
         construction_maps_sha256=sha256(output / 'construction_maps.pt'),
-        export_sha256=exported['files']['field.pt']['sha256'], seconds=time.monotonic() - started,
+        export_sha256=field_identity(exported), field_schema=exported['schema'],
+        export_state_identity=exported.get('state_identity'), deployment_bytes=deployment_bytes(exported),
+        seconds=time.monotonic() - started,
         source_access_at_query=False, benchmark_queries_used=False)
     (output / 'training.json').write_text(json.dumps(report, indent=2) + '\n')
     return report

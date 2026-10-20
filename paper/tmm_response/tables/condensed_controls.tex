@@ -1,0 +1,15 @@
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Condition & L-IoU & L-AP & N-IoU & S-mIoU19 & U-text & U-image & U-2D & U-3D \\
+\midrule
+Retained v10 & 70.40 & 87.62 & 86.51 & 61.01 & 26.60 & 59.31 & 75.79 & 75.33 \\
+Post: active partial & 57.62 & 80.10 & 86.36 & 58.30 & 24.13 & 54.37 & 67.18 & 67.07 \\
+Post: exterior negative & 69.78 & 87.15 & 86.51 & 58.07 & 22.34 & 50.81 & 64.16 & 64.00 \\
+Post: available domain & 70.93 & 87.39 & 86.49 & 60.59 & 25.98 & 57.19 & 71.93 & 72.09 \\
+Post: scope agreement & 70.55 & 87.63 & 86.49 & 61.11 & 26.10 & 57.50 & 73.34 & 73.03 \\
+Post: matched budget & 70.54 & 87.60 & 86.49 & 61.03 & 26.59 & 58.37 & 73.93 & 73.91 \\
+Stage: diagonal & 70.40 & 87.62 & 86.57 & 61.01 & 26.60$^\dagger$ & 59.31$^\dagger$ & 75.79$^\dagger$ & 75.33$^\dagger$ \\
+Stage: squared & 70.80 & 87.00 & 86.52 & 60.28 & 26.60$^\dagger$ & 59.31$^\dagger$ & 75.79$^\dagger$ & 75.33$^\dagger$ \\
+Stage: Huber & 70.82 & 86.58 & 86.51 & 60.73 & 26.60$^\dagger$ & 59.31$^\dagger$ & 75.79$^\dagger$ & 75.33$^\dagger$ \\
+\bottomrule
+\end{tabular}

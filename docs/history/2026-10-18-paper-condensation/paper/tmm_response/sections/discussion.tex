@@ -1,0 +1,90 @@
+\section{Discussion and limitations}
+The experiments support a distinction between identifying evidence, authorizing
+its spatial effect, and recovering a complete task output. Identity admission
+and complete-membership controls show that these capabilities affect accuracy;
+reconstruction and response-decision controls show that better source agreement
+alone is insufficient. Their interventions and cohorts differ, so their gains
+cannot be added. The contribution is the evidence-to-response design and its
+measured behavior, built with native correspondence and established fusion
+operations.
+
+The common contract has typed implementations. Current evidence does not show
+one admission rule or selector improving every task and teacher configuration.
+The L11 null constraint has no demonstrated accuracy effect. The benchmark
+cohort has informed development, and new NVOS variants are development
+experiments rather than independent final tests. More teacher configurations
+and unseen scenes are needed for broad transfer claims.
+
+Source access, teacher strength and carrier geometry differ from some published
+baselines. Gaussian versus mesh score differences are not method gains. LERF
+selection uses projected GT, UQIS is a local protocol, and original NVOS v10 differs from
+LUDVIG in target-RGB access and GT boundaries. The image-conditioned extension
+explicitly changes that access, but keeps source-trained geometry and produces
+view-conditioned updates. Early static image refinement improved IoU while
+reducing AP; completing the original signed reference response subsequently
+improves both. The N12--N14 variants nevertheless increase residuals against
+their original source teachers on all eight tasks. Target-view improvements therefore
+do not establish a universally improved or query-global 3D field.
+
+The controls localize three distinct limitations. First, memory transport of
+an incomplete original reference mask does not restore missing query scope.
+Completing that reference before transport recovers the missing orchid flowers.
+Second, source annotation agreement does not establish either complete extent
+or accurate target boundaries: unconditional extra prompting can enlarge an
+already adequate reference response. Source feasibility and predicted quality
+are thus measured separately, with fixed decisions for every task. Third,
+native-ray fitting reduces transport loss but cannot remove false positives
+already present in the image response; fern and trex still expose internal
+background leakage and thin-structure loss. N15 tests cross-view consistency:
+completed-reference source-only fusion recovers 92.7461 IoU, but equally
+weighting these sources with target evidence lowers N14's IoU by 0.1428 points
+while increasing AP by 0.0346. Completed-source Huber residual falls from
+0.004626 to 0.000748, yet foreground recall also falls. This controlled result
+separates source-teacher consistency from task accuracy. The fusion branch is
+stopped without a post-hoc weight search; it does not establish a universal
+performance ceiling. The unchanged v10 threshold oracle (90.1098) diagnoses only that
+original score field, not an upper bound on new spatial responses.
+
+N16 shows that one extra target decode is also insufficient as a uniform
+repair rule. Its local control modestly improves thresholded IoU but lowers AP;
+the tradeoff already appears in direct image responses, before 3D fitting.
+Its mean-IoU gain over N14 disappears when the correlated horns queries are
+omitted together. This descriptive sensitivity is not a new validation split.
+The new maximum IoU is retained in the tables rather than hidden, but the
+extra decoding stage is not required by the recommended method. These stopped
+branches support an empirical stopping decision for the current refinement
+recipes, not a claim that no stronger evidence or architecture can help.
+The subsequent A24 numerical audit exactly replays all 24 image responses.
+Evaluating the same probability interpolation with float64 and a stable
+complement-based ranking changes mean AP by less than 0.002 points and changes
+no hard masks. The local image response remains 2.2124 AP points below matched
+N14. Thus the suspected final sigmoid/interpolation precision effect does not
+explain the observed ranking loss. This audit does not recompute 3D results.
+
+The N11 geometric and v10-response anchors were nearly tied, so a distinct
+geometric-admission advantage was not established. N13's paired probability
+residual loses IoU on all eight tasks against its matched complete replacement.
+Its exact no-intervention property is therefore insufficient evidence for a
+better response rule. These alternatives remain diagnostic controls, not
+mandatory stages of the current reference-completion pipeline. New admission
+rules were developed after inspecting N12; they are explicitly development
+results, without scene-name routing or target-score selection at inference.
+Independent scorer checks reduce
+known implementation concerns but do not prove that every possible bias has
+been excluded.
+
+\paragraph{Reproducibility.}
+Versioned recipes, source/input hashes, per-task scores, protocol audits and
+component controls bind claims to code and outputs. Teachers, maps and geometry
+are referenced in place. New dense predictions are bounded and transient;
+source snapshots, small models and reports persist. Table generation does not
+run inference. Incomplete historical source archives remain explicitly marked.
+
+\section{Conclusion}
+Query-conditioned evidence fusion connects native evidence to geometric
+responses while preserving distinct semantic and complete-selection outputs.
+Our v10 system supplies the five-task implementation and main measurements.
+Matched controls identify effective identity, response-use and extent operations;
+negative controls show that better source fit alone is insufficient. NVOS
+evidence experiments and optional response replacement are specific extensions,
+with their effects separated from established method capability.

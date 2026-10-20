@@ -1,0 +1,21 @@
+\section{Source-conditioned reference admission}
+N14 is an adaptive development study designed after N12 analysis. A fixed feasibility policy retains semantic completion when it satisfies every original signed annotation, otherwise using constrained completion. A source-quality control instead chooses the larger SAM-predicted reference mask quality, with deterministic semantic-first ties. Both use only reference evidence, without scene names or target scores. Each selected target prediction is freshly replayed and hash-checked against N12, then actually fitted and re-rendered in 3D. All 56 predictions precede scoring. This is not an independent final test or a task-wise oracle. Other four benchmarks remain unchanged references.
+\begin{center}\small\resizebox{\linewidth}{!}{\input{tables/nvos_reference_admission.tex}}\end{center}
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & v10 & Static & Feasibility & Source quality \\\midrule
+fern & 82.19 & 83.92 & 83.25 & 83.20 \\
+flower & 86.53 & 85.98 & 96.71 & 96.71 \\
+fortress & 97.23 & 97.36 & 98.00 & 98.00 \\
+horns\_center & 95.73 & 97.30 & 97.12 & 95.69 \\
+horns\_left & 92.70 & 93.68 & 94.81 & 94.81 \\
+leaves & 94.08 & 95.61 & 94.84 & 94.84 \\
+orchids & 68.14 & 73.17 & 95.60 & 95.60 \\
+trex & 75.51 & 83.71 & 83.21 & 86.54 \\
+\bottomrule\end{tabular}\end{center}
+feasible native vs static native: +4.0999 IoU points, +2.2782 AP points; 4 improved and 4 harmed tasks.
+quality native vs static native: +4.3305 IoU points, +2.3634 AP points; 5 improved and 3 harmed tasks.
+quality native vs feasible native: +0.2306 IoU points, +0.0852 AP points; 1 improved and 2 harmed tasks.
+feasible native vs feasible image: -0.2776 IoU points, -0.2173 AP points; 1 improved and 7 harmed tasks.
+quality native vs quality image: -0.3241 IoU points, -0.1882 AP points; 1 improved and 7 harmed tasks.
+\begin{figure}[ht]\centering\includegraphics[width=.85\linewidth,height=.75\textheight,keepaspectratio]{../../output/tmm_response_20261018/study/nvos_reference_admission_spatial_v1/errors.png}
+\caption{All eight N14 tasks. Green TP, red FP, blue FN; native-grid display resizing only. Scores use original GT resolution.}\end{figure}

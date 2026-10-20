@@ -35,7 +35,10 @@ from radio_gs.models.proposal_memory import (
     propagate_logits_with_proposals,
 )
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
-from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.utils.evaluation_checkpoint import (
+    add_inference_checkpoint_arguments, inference_reader_from_args,
+    load_evaluation_checkpoint, initialize_package_geometry,
+)
 from radio_gs.evaluation.openclip_readout import load_or_generate_openclip_prompt_ensemble_embeddings
 from radio_gs.scannet_constants import (
     NYU40_ID_TO_NAME,
@@ -351,7 +354,11 @@ def _apply_query_opacity_label_filter(
     }
 
 
-def _build_hybrid_model(config, checkpoint_path: str, device: torch.device):
+def _build_hybrid_model(config, checkpoint_path: str, device: torch.device, *, checkpoint_reader=None):
+    ckpt = None
+    if checkpoint_reader is not None:
+        ckpt = load_evaluation_checkpoint(checkpoint_path, checkpoint_reader=checkpoint_reader)
+        config = checkpoint_reader.bind_config(config)
     if getattr(config, "architecture", "hybrid") != "hybrid":
         raise ValueError("Direct point query currently requires architecture: hybrid")
     model = HybridFeatureGaussian(
@@ -376,11 +383,17 @@ def _build_hybrid_model(config, checkpoint_path: str, device: torch.device):
             config, "hybrid_semantic_adaptor_use_depth_guidance", False
         ),
         semantic_adaptor_residual=getattr(config, "hybrid_semantic_adaptor_residual", True),
+        **({"use_quality_head": getattr(config, "hybrid_quality_head", False),
+            "use_visibility_head": getattr(config, "hybrid_visibility_head", False)}
+           if checkpoint_reader is not None else {}),
     )
     ply_path = getattr(config, "ply_path", "")
-    if not ply_path:
-        raise ValueError("Config must define ply_path for direct point query")
-    model.load_from_ply(ply_path)
+    if checkpoint_reader is not None:
+        initialize_package_geometry(model, ckpt["model_state_dict"])
+    else:
+        if not ply_path:
+            raise ValueError("Config must define ply_path for direct point query")
+        model.load_from_ply(ply_path)
     model = model.to(device).eval()
 
     codec = build_feature_codec(
@@ -397,7 +410,12 @@ def _build_hybrid_model(config, checkpoint_path: str, device: torch.device):
         ),
     ).to(device).eval()
 
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
+    if ckpt is None:
+        ckpt = load_evaluation_checkpoint(checkpoint_path, map_location=device)
+    if checkpoint_reader is not None:
+        model.load_state_dict(ckpt["model_state_dict"], strict=True)
+        codec.load_state_dict(ckpt["codec_state_dict"], strict=True)
+        return model, codec
     _load_state_or_raise(
         model,
         ckpt["model_state_dict"],
@@ -527,7 +545,14 @@ def _project_compact_with_summary_adapter(
     return F.normalize(adapter(compact.float()).float(), dim=-1)
 
 
-def _build_point_summary_adapter(config, checkpoint_path: str, device: torch.device):
+def _build_point_summary_adapter(config, checkpoint_path: str, device: torch.device, *, checkpoint_reader=None):
+    if checkpoint_reader is not None:
+        config = checkpoint_reader.bind_config(config)
+        metadata = checkpoint_reader.load(checkpoint_path).get("point_summary_adapter_metadata") or {}
+        contract = metadata.get("direct_head_contract") or {}
+        context = contract.get("point_summary_adapter_context_features", metadata.get("point_summary_adapter_context_features", getattr(config, "point_summary_adapter_context_features", "")))
+        if context:
+            raise ValueError("ScanNet inference-package adapter context is not supported by this evaluator")
     adapter = CompactToSummaryAdapter(
         input_dim=getattr(config, "bottleneck_dim", getattr(config, "hybrid_output_dim", 128)),
         output_dim=1536,
@@ -535,7 +560,7 @@ def _build_point_summary_adapter(config, checkpoint_path: str, device: torch.dev
         num_layers=getattr(config, "point_summary_adapter_num_layers", 2),
         dropout=getattr(config, "point_summary_adapter_dropout", 0.0),
     ).to(device)
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
+    ckpt = load_evaluation_checkpoint(checkpoint_path, map_location=device, checkpoint_reader=checkpoint_reader)
     state = ckpt.get("point_summary_adapter_state_dict")
     if state is None:
         raise KeyError(
@@ -1195,6 +1220,7 @@ def evaluate_scene(
     proposal_confidence_threshold: float = 0.0,
     proposal_consensus_threshold: float = 0.0,
     text_encoder: str = "siglip2",
+    checkpoint_reader=None,
 ) -> dict:
     if query_mode not in QUERY_MODES:
         raise ValueError(f"query_mode must be one of: {', '.join(QUERY_MODES)}")
@@ -1231,9 +1257,9 @@ def evaluate_scene(
         raise ValueError("point_summary_adapter_blend_alpha must be in [0, 1]")
 
     config = load_config(config_path)
-    model, codec = _build_hybrid_model(config, checkpoint_path, device)
+    model, codec = _build_hybrid_model(config, checkpoint_path, device, checkpoint_reader=checkpoint_reader)
     point_summary_adapter = (
-        _build_point_summary_adapter(config, checkpoint_path, device)
+        _build_point_summary_adapter(config, checkpoint_path, device, checkpoint_reader=checkpoint_reader)
         if use_point_summary_adapter
         else None
     )
@@ -2003,7 +2029,11 @@ def main() -> None:
         ),
     )
     parser.add_argument("--device", default="cuda")
+    add_inference_checkpoint_arguments(parser)
     args = parser.parse_args()
+    checkpoint_reader = inference_reader_from_args(args, parser)
+    if args.inference_package and (args.scene == "all" or args.scene_list):
+        parser.error("inference-package mode currently requires one --scene")
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     prepared_root = Path(args.prepared_root)
@@ -2114,6 +2144,7 @@ def main() -> None:
             scene=scene,
             config_path=_format_scene_path(args.config, scene),
             checkpoint_path=_format_scene_path(args.checkpoint, scene),
+            checkpoint_reader=checkpoint_reader,
             label_ply=label_ply,
             projection=projection,
             split_text_embeddings=split_text_embeddings,

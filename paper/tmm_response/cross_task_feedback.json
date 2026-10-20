@@ -1,0 +1,4416 @@
+{
+  "complete": true,
+  "diagnostic_only": true,
+  "source_audit": {
+    "complete": true,
+    "diagnostic_only": true,
+    "default_changed": false,
+    "source_jobs": 22,
+    "rows": [
+      {
+        "job": {
+          "benchmark": "lerf",
+          "name": "figurines",
+          "scene": "output/system_map_rebuild/figurines/complete/scene.json",
+          "queries": "configs/consolidated/figurines.queries.json",
+          "source_evidence": "output/research_consolidation/source_run/figurines/detections",
+          "outputs": [
+            "semantic_2d",
+            "selected_gaussian_projection_2d"
+          ],
+          "input_track": "frozen_declared_rgb_geometry",
+          "access": "source-assisted",
+          "task": "text_union"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "semantic_iou": 0.76725420009877,
+            "ap": 0.9230640992298842
+          },
+          "observable": {
+            "semantic_iou": 0.7753528486937284,
+            "ap": 0.9248875225319804
+          },
+          "full": {
+            "semantic_iou": 0.7753528486937284,
+            "ap": 0.9248875225319804
+          },
+          "permuted": {
+            "semantic_iou": 0.7753528486937284,
+            "ap": 0.9248875225319804
+          },
+          "two_candidate_oracle": {
+            "semantic_iou": 0.7755658916596856,
+            "ap": 0.9255100854286393
+          },
+          "historical_pool_oracle": {
+            "semantic_iou": 0.7880652421819312,
+            "ap": 0.9473725448132911
+          }
+        },
+        "units": [
+          {
+            "query": "bag",
+            "baseline": 0.0,
+            "alternative": 0.0,
+            "evidence_gain": 0.03282077745957808,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "query": "green apple",
+            "baseline": 0.9316969662904739,
+            "alternative": 0.9339657574892044,
+            "evidence_gain": 0.002080143138926516,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.9316969662904739,
+              0.2715289816260338,
+              0.932968407869339,
+              0.9339657574892044,
+              0.9327370226383209,
+              0.93253955245018,
+              0.9316969662904739,
+              0.934544250369072,
+              0.9343931525945663
+            ]
+          },
+          {
+            "query": "green toy chair",
+            "baseline": 0.8545340001583099,
+            "alternative": 0.8685737252235413,
+            "evidence_gain": 0.001699924823783693,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.8545340001583099,
+              0.9000106155872345,
+              0.8678310811519623,
+              0.8685737252235413,
+              0.8610391914844513,
+              0.8611542880535126,
+              0.8545340001583099,
+              0.8863458335399628,
+              0.8830015957355499
+            ]
+          },
+          {
+            "query": "jake",
+            "baseline": 0.8653740088144938,
+            "alternative": 0.8657365043958029,
+            "evidence_gain": 9.956213673858932e-05,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.8653740088144938,
+              0.8051823973655701,
+              0.8717085520426432,
+              0.8657365043958029,
+              0.8655512730280558,
+              0.8655512730280558,
+              0.8653740088144938,
+              0.8762171467145284,
+              0.876178503036499
+            ]
+          },
+          {
+            "query": "miffy",
+            "baseline": 0.8575322031974792,
+            "alternative": 0.859250396490097,
+            "evidence_gain": 0.0014643448997627604,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.8575322031974792,
+              0.2521847262978554,
+              0.8516337871551514,
+              0.859250396490097,
+              0.8587841689586639,
+              0.858561635017395,
+              0.8575322031974792,
+              0.8114396035671234,
+              0.8380099236965179
+            ]
+          },
+          {
+            "query": "old camera",
+            "baseline": 0.8034899036089579,
+            "alternative": 0.8877966006596884,
+            "evidence_gain": 0.009591075625732868,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.8034899036089579,
+              0.9082272052764893,
+              0.8233750661214193,
+              0.8877966006596884,
+              0.8129066030184428,
+              0.8137865662574768,
+              0.8034899036089579,
+              0.8012306491533915,
+              0.8368359009424845
+            ]
+          },
+          {
+            "query": "pikachu",
+            "baseline": 0.5183450281620026,
+            "alternative": 0.5189789533615112,
+            "evidence_gain": 0.0005150046199560165,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 8
+            },
+            "candidate_utility": [
+              0.5183450281620026,
+              0.37760205566883087,
+              0.5132877230644226,
+              0.5189789533615112,
+              0.5185207724571228,
+              0.5185207724571228,
+              0.5183450281620026,
+              0.5196636915206909,
+              0.5216848254203796
+            ]
+          },
+          {
+            "query": "pink ice cream",
+            "baseline": 0.8288899858792623,
+            "alternative": 0.8336361050605774,
+            "evidence_gain": 0.0015563205128810444,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.8288899858792623,
+              0.9305856227874756,
+              0.6910647451877594,
+              0.8336361050605774,
+              0.8300333619117737,
+              0.8301878372828165,
+              0.8288899858792623,
+              0.8454041878382365,
+              0.8447293440500895
+            ]
+          },
+          {
+            "query": "pirate hat",
+            "baseline": 0.7489687353372574,
+            "alternative": 0.7496652454137802,
+            "evidence_gain": 0.0015718455391901512,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.7489687353372574,
+              0.4393569827079773,
+              0.7567514330148697,
+              0.7496652454137802,
+              0.7492392212152481,
+              0.7492392212152481,
+              0.7489687353372574,
+              0.7275511175394058,
+              0.7415708005428314
+            ]
+          },
+          {
+            "query": "porcelain hand",
+            "baseline": 0.7663577993710836,
+            "alternative": 0.7713214755058289,
+            "evidence_gain": 0.011232384226538918,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.7663577993710836,
+              0.46958762407302856,
+              0.7768744428952535,
+              0.7713214755058289,
+              0.7671438654263815,
+              0.7669090032577515,
+              0.7663577993710836,
+              0.8004282911618551,
+              0.7789366443951925
+            ]
+          },
+          {
+            "query": "pumpkin",
+            "baseline": 0.984071671962738,
+            "alternative": 0.9827154278755188,
+            "evidence_gain": 0.0013571032881736756,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.984071671962738,
+              0.8246278762817383,
+              0.9832409024238586,
+              0.9827154278755188,
+              0.9838259220123291,
+              0.9838259220123291,
+              0.984071671962738,
+              0.984140932559967,
+              0.983971118927002
+            ]
+          },
+          {
+            "query": "red apple",
+            "baseline": 0.9161075949668884,
+            "alternative": 0.9225134452184042,
+            "evidence_gain": 0.002858828753232956,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.9161075949668884,
+              0.6528711418310801,
+              0.918165385723114,
+              0.9225134452184042,
+              0.919214685757955,
+              0.919347902139028,
+              0.9161075949668884,
+              0.9160474936167399,
+              0.9165284633636475
+            ]
+          },
+          {
+            "query": "red toy chair",
+            "baseline": 0.8727207183837891,
+            "alternative": 0.8819291591644287,
+            "evidence_gain": 0.0012830766488094718,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 8
+            },
+            "candidate_utility": [
+              0.8727207183837891,
+              0.8597438335418701,
+              0.8838624358177185,
+              0.8819291591644287,
+              0.8754857778549194,
+              0.8753655552864075,
+              0.8727207183837891,
+              0.8869370818138123,
+              0.8871219158172607
+            ]
+          },
+          {
+            "query": "rubber duck with buoy",
+            "baseline": 0.6351128419240316,
+            "alternative": 0.6315881212552389,
+            "evidence_gain": 0.004053084896161006,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.6351128419240316,
+              0.5084042251110077,
+              0.35020021597544354,
+              0.6315881212552389,
+              0.6337082783381144,
+              0.6338825027147929,
+              0.6351128419240316,
+              0.650477945804596,
+              0.645509680112203
+            ]
+          },
+          {
+            "query": "rubber duck with hat",
+            "baseline": 0.5414635837078094,
+            "alternative": 0.5464734360575676,
+            "evidence_gain": 0.0023295058797827752,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.5414635837078094,
+              0.22461943700909615,
+              0.5479286685585976,
+              0.5464734360575676,
+              0.5423950925469398,
+              0.5422319993376732,
+              0.5414635837078094,
+              0.5432123020291328,
+              0.5440265983343124
+            ]
+          },
+          {
+            "query": "rubics cube",
+            "baseline": 0.9185362656911215,
+            "alternative": 0.922371506690979,
+            "evidence_gain": 0.0016372195639453092,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.9185362656911215,
+              0.9300706187884012,
+              0.9258801341056824,
+              0.922371506690979,
+              0.9192171891530355,
+              0.9192296266555786,
+              0.9185362656911215,
+              0.9247349500656128,
+              0.9236280719439188
+            ]
+          },
+          {
+            "query": "spatula",
+            "baseline": 0.8470176259676615,
+            "alternative": 0.8498558402061462,
+            "evidence_gain": 0.003820400027667775,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.8470176259676615,
+              0.8278459310531616,
+              0.8491004705429077,
+              0.8498558402061462,
+              0.8483482400576273,
+              0.8485107421875,
+              0.8470176259676615,
+              0.854234536488851,
+              0.8527257045110067
+            ]
+          },
+          {
+            "query": "tesla door handle",
+            "baseline": 0.2141481563448906,
+            "alternative": 0.2141481563448906,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.2141481563448906,
+              0.2141481563448906,
+              0.2141481563448906,
+              0.2141481563448906,
+              0.2141481563448906,
+              0.2141481563448906,
+              0.2141481563448906,
+              0.2141481563448906,
+              0.2141481563448906
+            ]
+          },
+          {
+            "query": "toy cat statue",
+            "baseline": 0.7786521712938944,
+            "alternative": 0.7964013616243998,
+            "evidence_gain": 0.006661420359331018,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.7786521712938944,
+              0.1289807359377543,
+              0.7936141689618429,
+              0.7964013616243998,
+              0.7836339672406515,
+              0.7830414772033691,
+              0.7786521712938944,
+              0.8067753513654073,
+              0.7949817577997843
+            ]
+          },
+          {
+            "query": "toy elephant",
+            "baseline": 0.950866182645162,
+            "alternative": 0.9561793605486552,
+            "evidence_gain": 0.0013233337012476891,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.950866182645162,
+              0.4416486422220866,
+              0.9559965133666992,
+              0.9561793605486552,
+              0.9531785845756531,
+              0.9530345400174459,
+              0.950866182645162,
+              0.9580403566360474,
+              0.9579745729764303
+            ]
+          },
+          {
+            "query": "waldo",
+            "baseline": 0.8001979192097982,
+            "alternative": 0.8001979192097982,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.8001979192097982,
+              0.8001979192097982,
+              0.8001979192097982,
+              0.8001979192097982,
+              0.8001979192097982,
+              0.8001979192097982,
+              0.8001979192097982,
+              0.8001979192097982,
+              0.8001979192097982
+            ]
+          }
+        ],
+        "primary_metric": "semantic_iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_lerf_figurines/query_results.json": "2700315a3c3fa18b771e7f31e9a413b824658117f4209b104e405738bfcc0235",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_lerf_figurines/query_results.json": "fc5eec3ed2ab0e9d646e2ccc49e408735815093aa1c7387c689a2cebd40acc06",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_lerf_figurines/query_results.json": "dd2a53d8faaddefabb2bebcf7c68f8d9168b9e878310a2f815a463502c621b55",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_lerf_figurines/query_results.json": "755c30feb1e8ab840f498d1cccf5013280483aee2e67dca197ef25eca8cb86fa"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "lerf",
+          "name": "ramen",
+          "scene": "output/system_map_rebuild/ramen/complete/scene.json",
+          "queries": "configs/consolidated/ramen.integration-queries.json",
+          "source_evidence": "output/research_consolidation/source_evidence/ramen",
+          "outputs": [
+            "semantic_2d",
+            "selected_gaussian_projection_2d"
+          ],
+          "input_track": "frozen_declared_rgb_geometry",
+          "access": "source-assisted",
+          "task": "text_union"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "semantic_iou": 0.5940802355139503,
+            "ap": 0.8122121183970293
+          },
+          "observable": {
+            "semantic_iou": 0.5964200107288927,
+            "ap": 0.8090736216187372
+          },
+          "full": {
+            "semantic_iou": 0.5964200107288927,
+            "ap": 0.8090736216187372
+          },
+          "permuted": {
+            "semantic_iou": 0.5964200107288927,
+            "ap": 0.8090736216187372
+          },
+          "two_candidate_oracle": {
+            "semantic_iou": 0.5973008124905468,
+            "ap": 0.8129696046704461
+          },
+          "historical_pool_oracle": {
+            "semantic_iou": 0.6010075576642764,
+            "ap": 0.8105489883344731
+          }
+        },
+        "units": [
+          {
+            "query": "bowl",
+            "baseline": 0.9056564092636108,
+            "alternative": 0.906993854045868,
+            "evidence_gain": 0.0073218559319118285,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.9056564092636108,
+              0.7887468576431275,
+              0.9079814910888672,
+              0.906993854045868,
+              0.9061015129089356,
+              0.9060537457466126,
+              0.9056564092636108,
+              0.9089327335357666,
+              0.9080350995063782
+            ]
+          },
+          {
+            "query": "chopsticks",
+            "baseline": 0.8624440942491803,
+            "alternative": 0.8667880892753601,
+            "evidence_gain": 0.022792636402069577,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.8624440942491803,
+              0.581662254674094,
+              0.8614749908447266,
+              0.8667880892753601,
+              0.8627208982195173,
+              0.8626544305256435,
+              0.8624440942491803,
+              0.8614157864025661,
+              0.861943142754691
+            ]
+          },
+          {
+            "query": "corn",
+            "baseline": 0.3027108162641525,
+            "alternative": 0.29363183081150057,
+            "evidence_gain": 0.049590496789841426,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 4
+            },
+            "candidate_utility": [
+              0.3027108162641525,
+              0.055057932436466214,
+              0.29649663865566256,
+              0.29363183081150057,
+              0.30661886036396024,
+              0.30595221519470217,
+              0.3027108162641525,
+              0.2894522100687027,
+              0.295696958899498
+            ]
+          },
+          {
+            "query": "egg",
+            "baseline": 0.9486581938607352,
+            "alternative": 0.9526705486433846,
+            "evidence_gain": 0.0022362203825087774,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.9486581938607352,
+              0.7006272503307888,
+              0.9491592049598694,
+              0.9526705486433846,
+              0.9507943136351449,
+              0.9507987754685538,
+              0.9486581938607352,
+              0.9495901891163417,
+              0.9490220120974949
+            ]
+          },
+          {
+            "query": "glass of water",
+            "baseline": 0.902317076921463,
+            "alternative": 0.9020706713199615,
+            "evidence_gain": 0.005161429289728403,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 4
+            },
+            "candidate_utility": [
+              0.902317076921463,
+              0.7351700067520142,
+              0.8975120186805725,
+              0.9020706713199615,
+              0.9078066051006317,
+              0.9076923429965973,
+              0.902317076921463,
+              0.9031702876091003,
+              0.894290417432785
+            ]
+          },
+          {
+            "query": "hand",
+            "baseline": 0.6002352833747864,
+            "alternative": 0.6017772555351257,
+            "evidence_gain": 0.0270928984338587,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 8
+            },
+            "candidate_utility": [
+              0.6002352833747864,
+              0.5752550363540649,
+              0.5989518761634827,
+              0.6017772555351257,
+              0.6011896729469299,
+              0.6008711457252502,
+              0.6002352833747864,
+              0.5983136296272278,
+              0.6069793105125427
+            ]
+          },
+          {
+            "query": "kamaboko",
+            "baseline": 0.27996833622455597,
+            "alternative": 0.27996833622455597,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.27996833622455597,
+              0.27996833622455597,
+              0.27996833622455597,
+              0.27996833622455597,
+              0.27996833622455597,
+              0.27996833622455597,
+              0.27996833622455597,
+              0.27996833622455597,
+              0.27996833622455597
+            ]
+          },
+          {
+            "query": "napkin",
+            "baseline": 0.5000966366380453,
+            "alternative": 0.5265648707747459,
+            "evidence_gain": 0.017532987672774517,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.5000966366380453,
+              0.44829844683408737,
+              0.5428103029727935,
+              0.5265648707747459,
+              0.5013386439532042,
+              0.5017881698906421,
+              0.5000966366380453,
+              0.5551804512739181,
+              0.5421806424856186
+            ]
+          },
+          {
+            "query": "nori",
+            "baseline": 0.933306872844696,
+            "alternative": 0.9363333781560262,
+            "evidence_gain": 0.0017071784269518967,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.933306872844696,
+              0.938749223947525,
+              0.9385525286197662,
+              0.9363333781560262,
+              0.9340638120969137,
+              0.9340658585230509,
+              0.933306872844696,
+              0.9346077640851339,
+              0.9362745881080627
+            ]
+          },
+          {
+            "query": "onion segments",
+            "baseline": 0.0,
+            "alternative": 0.0,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "query": "plate",
+            "baseline": 0.887391984462738,
+            "alternative": 0.8884661048650742,
+            "evidence_gain": 0.01152297274933921,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.887391984462738,
+              0.2583526149392128,
+              0.8864952772855759,
+              0.8884661048650742,
+              0.8873552829027176,
+              0.8872917145490646,
+              0.887391984462738,
+              0.8835103362798691,
+              0.8826009333133698
+            ]
+          },
+          {
+            "query": "sake cup",
+            "baseline": 0.024390963139012456,
+            "alternative": 0.024390963139012456,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.024390963139012456,
+              0.024390963139012456,
+              0.024390963139012456,
+              0.024390963139012456,
+              0.024390963139012456,
+              0.024390963139012456,
+              0.024390963139012456,
+              0.024390963139012456,
+              0.024390963139012456
+            ]
+          },
+          {
+            "query": "spoon",
+            "baseline": 0.684633880853653,
+            "alternative": 0.6763092875480652,
+            "evidence_gain": 0.013233163356781007,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 4
+            },
+            "candidate_utility": [
+              0.684633880853653,
+              0.4362562298774719,
+              0.6817777752876282,
+              0.6763092875480652,
+              0.6852637231349945,
+              0.6851923763751984,
+              0.684633880853653,
+              0.6729221940040588,
+              0.6822819411754608
+            ]
+          },
+          {
+            "query": "wavy noodles",
+            "baseline": 0.8471415553774152,
+            "alternative": 0.8481616462979998,
+            "evidence_gain": 0.009510478754153198,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.8471415553774152,
+              0.7060005579675946,
+              0.8565802914755685,
+              0.8481616462979998,
+              0.8498203243528094,
+              0.8498116220746722,
+              0.8471415553774152,
+              0.8496580294200352,
+              0.8430480871881757
+            ]
+          }
+        ],
+        "primary_metric": "semantic_iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_lerf_ramen/query_results.json": "a5e17928635c85f4a6ec48a1bb220a6c44a045226c3048ab2a5d2cefc0169142",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_lerf_ramen/query_results.json": "e676de688c5562a93aaab37c693d364098b3722522f7552e2263f242f13c7a01",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_lerf_ramen/query_results.json": "38985d28ad82821ff733d9a3cddedbbcf2f135ef2b744154b99fb503fe8e315b",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_lerf_ramen/query_results.json": "d7a2f5d20881ded5ed464bfe228e6d8a3f741095fa98ac7e011b32beb0f4bd21"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "lerf",
+          "name": "teatime",
+          "scene": "output/system_map_rebuild/teatime/complete/scene.json",
+          "queries": "configs/consolidated/teatime.queries.json",
+          "source_evidence": "output/research_consolidation/source_run/teatime/detections",
+          "outputs": [
+            "semantic_2d",
+            "selected_gaussian_projection_2d"
+          ],
+          "input_track": "frozen_declared_rgb_geometry",
+          "access": "source-assisted",
+          "task": "text_union"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "semantic_iou": 0.7619751593319036,
+            "ap": 0.8901337368688932
+          },
+          "observable": {
+            "semantic_iou": 0.7631393881293677,
+            "ap": 0.8894505695008151
+          },
+          "full": {
+            "semantic_iou": 0.7631393881293677,
+            "ap": 0.8894505695008151
+          },
+          "permuted": {
+            "semantic_iou": 0.7631393881293677,
+            "ap": 0.8894506725372155
+          },
+          "two_candidate_oracle": {
+            "semantic_iou": 0.7634722539934061,
+            "ap": 0.8902825704489002
+          },
+          "historical_pool_oracle": {
+            "semantic_iou": 0.7769342357829466,
+            "ap": 0.8935144147584647
+          }
+        },
+        "units": [
+          {
+            "query": "apple",
+            "baseline": 0.9047176599502563,
+            "alternative": 0.9127220034599304,
+            "evidence_gain": 0.00347742547349232,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.9047176599502563,
+              0.9330814957618714,
+              0.9107746958732605,
+              0.9127220034599304,
+              0.9091991186141968,
+              0.909199333190918,
+              0.9047176599502563,
+              0.919263732433319,
+              0.9184908032417297
+            ]
+          },
+          {
+            "query": "bag of cookies",
+            "baseline": 0.9629425168037414,
+            "alternative": 0.9623987793922424,
+            "evidence_gain": 0.0045730911933623995,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 8
+            },
+            "candidate_utility": [
+              0.9629425168037414,
+              0.6234755218029022,
+              0.9636003017425537,
+              0.9623987793922424,
+              0.9629702806472779,
+              0.9629325151443482,
+              0.9629425168037414,
+              0.962998902797699,
+              0.963607132434845
+            ]
+          },
+          {
+            "query": "bear nose",
+            "baseline": 0.43801231185595196,
+            "alternative": 0.43878400325775146,
+            "evidence_gain": 0.002770146429538727,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.43801231185595196,
+              0.47150049606959027,
+              0.11344429602225621,
+              0.43878400325775146,
+              0.4380754927794139,
+              0.4380852282047272,
+              0.43801231185595196,
+              0.4356478452682495,
+              0.43277785181999207
+            ]
+          },
+          {
+            "query": "coffee",
+            "baseline": 0.08006505854427814,
+            "alternative": 0.07709722127765417,
+            "evidence_gain": 0.033486738204956054,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.08006505854427814,
+              0.025067929178476334,
+              0.06814273819327354,
+              0.07709722127765417,
+              0.080503661185503,
+              0.07947466615587473,
+              0.08006505854427814,
+              0.08204874210059643,
+              0.07927834708243608
+            ]
+          },
+          {
+            "query": "coffee mug",
+            "baseline": 0.8960508584976197,
+            "alternative": 0.8977223992347717,
+            "evidence_gain": 0.012493593939419451,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.8960508584976197,
+              0.723704731464386,
+              0.9030143022537231,
+              0.8977223992347717,
+              0.8977261662483216,
+              0.8977810621261597,
+              0.8960508584976197,
+              0.9050388216972352,
+              0.9046928405761718
+            ]
+          },
+          {
+            "query": "dall-e brand",
+            "baseline": 0.296332448720932,
+            "alternative": 0.296332448720932,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.296332448720932,
+              0.296332448720932,
+              0.296332448720932,
+              0.296332448720932,
+              0.296332448720932,
+              0.296332448720932,
+              0.296332448720932,
+              0.296332448720932,
+              0.296332448720932
+            ]
+          },
+          {
+            "query": "hooves",
+            "baseline": 0.08339433744549751,
+            "alternative": 0.08561268076300621,
+            "evidence_gain": 0.0286827412518588,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 8
+            },
+            "candidate_utility": [
+              0.08339433744549751,
+              0.03236303571611643,
+              0.08741368725895882,
+              0.08561268076300621,
+              0.08438068628311157,
+              0.08373173698782921,
+              0.08339433744549751,
+              0.08500825986266136,
+              0.08849823847413063
+            ]
+          },
+          {
+            "query": "paper napkin",
+            "baseline": 0.8304213762283326,
+            "alternative": 0.8304213762283326,
+            "evidence_gain": 6.931542884558439e-06,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.8304213762283326,
+              0.8320227980613708,
+              0.8310752153396607,
+              0.8304213762283326,
+              0.8304213762283326,
+              0.8304213762283326,
+              0.8304213762283326,
+              0.8316853642463684,
+              0.8316853642463684
+            ]
+          },
+          {
+            "query": "plate",
+            "baseline": 0.9359583854675293,
+            "alternative": 0.9351606766382853,
+            "evidence_gain": 0.0007620793581008911,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.9359583854675293,
+              0.9259196917215983,
+              0.9356996715068817,
+              0.9351606766382853,
+              0.9357030987739563,
+              0.9357178807258606,
+              0.9359583854675293,
+              0.9353164732456207,
+              0.9352296193440756
+            ]
+          },
+          {
+            "query": "sheep",
+            "baseline": 0.967739537358284,
+            "alternative": 0.9676738381385803,
+            "evidence_gain": 0.0006198278687735821,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.967739537358284,
+              0.9591502547264099,
+              0.96622434258461,
+              0.9676738381385803,
+              0.9677193313837051,
+              0.9677356779575348,
+              0.967739537358284,
+              0.9638174772262573,
+              0.963700532913208
+            ]
+          },
+          {
+            "query": "stuffed bear",
+            "baseline": 0.9718689322471619,
+            "alternative": 0.9729487419128418,
+            "evidence_gain": 0.0017146358887354532,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.9718689322471619,
+              0.9196898341178894,
+              0.9723875164985657,
+              0.9729487419128418,
+              0.9720518589019775,
+              0.9720775485038757,
+              0.9718689322471619,
+              0.9695056796073913,
+              0.9722507715225219
+            ]
+          },
+          {
+            "query": "tea in a glass",
+            "baseline": 0.722444474697113,
+            "alternative": 0.7251719832420349,
+            "evidence_gain": 0.0034094554621998856,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.722444474697113,
+              0.2063088541229566,
+              0.73438361287117,
+              0.7251719832420349,
+              0.7230918010075887,
+              0.723045696814855,
+              0.722444474697113,
+              0.7380385299523672,
+              0.7364512085914612
+            ]
+          },
+          {
+            "query": "three cookies",
+            "baseline": 0.8262854913870493,
+            "alternative": 0.828103095293045,
+            "evidence_gain": 0.0013815375237629332,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.8262854913870493,
+              0.8145607511202494,
+              0.9040185213088989,
+              0.828103095293045,
+              0.8269680639108022,
+              0.8269880215326945,
+              0.8262854913870493,
+              0.8402481079101562,
+              0.8401191929976145
+            ]
+          },
+          {
+            "query": "yellow pouf",
+            "baseline": 0.9536886811256409,
+            "alternative": 0.9542163610458374,
+            "evidence_gain": 0.003961116927010673,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.9536886811256409,
+              0.9528073668479919,
+              0.9533088803291321,
+              0.9542163610458374,
+              0.9537352919578552,
+              0.9536946415901184,
+              0.9536886811256409,
+              0.9529992938041687,
+              0.9527153372764587
+            ]
+          }
+        ],
+        "primary_metric": "semantic_iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_lerf_teatime/query_results.json": "6e4c1dcc96a902154ece1b4728d52fbebfc4f64f137990d5e9ea38be9c07e5c4",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_lerf_teatime/query_results.json": "e5f98f120db04af7bc7cee18d044fe125a7f9ad6e73d80b0da7b1c4961a471d4",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_lerf_teatime/query_results.json": "03568512562c676374826fb750cc2f0781333c8dee9e5bad0b02bdaf190fe6a7",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_lerf_teatime/query_results.json": "fb16fedf561a26a3321aabd613f86cfd0d730e58d376ba983867a8d58e40c2bc"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "lerf",
+          "name": "waldo_kitchen",
+          "scene": "output/system_map_rebuild/waldo_kitchen/complete/scene.json",
+          "queries": "configs/consolidated/waldo_kitchen.queries.json",
+          "source_evidence": "output/research_consolidation/source_run/waldo_kitchen/detections",
+          "outputs": [
+            "semantic_2d",
+            "selected_gaussian_projection_2d"
+          ],
+          "input_track": "frozen_declared_rgb_geometry",
+          "access": "source-assisted",
+          "task": "text_union"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "semantic_iou": 0.6927174328593537,
+            "ap": 0.8793611556863458
+          },
+          "observable": {
+            "semantic_iou": 0.702364273252897,
+            "ap": 0.8720851782595581
+          },
+          "full": {
+            "semantic_iou": 0.702364273252897,
+            "ap": 0.8720851782595581
+          },
+          "permuted": {
+            "semantic_iou": 0.702364273252897,
+            "ap": 0.8720851782595581
+          },
+          "two_candidate_oracle": {
+            "semantic_iou": 0.7040929434164851,
+            "ap": 0.8756755802034047
+          },
+          "historical_pool_oracle": {
+            "semantic_iou": 0.7201938580573451,
+            "ap": 0.8828763310704791
+          }
+        },
+        "units": [
+          {
+            "query": "Stainless steel pots",
+            "baseline": 0.763403058052063,
+            "alternative": 0.7684280276298523,
+            "evidence_gain": 0.00240456685423851,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.763403058052063,
+              0.7813094258308411,
+              0.768168032169342,
+              0.7684280276298523,
+              0.763588011264801,
+              0.763683021068573,
+              0.763403058052063,
+              0.7498108148574829,
+              0.7515839338302612
+            ]
+          },
+          {
+            "query": "cabinet",
+            "baseline": 0.9278445839881897,
+            "alternative": 0.9420114159584045,
+            "evidence_gain": 0.011613323921110572,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.9278445839881897,
+              0.9766417145729065,
+              0.9322872161865234,
+              0.9420114159584045,
+              0.9286782741546631,
+              0.9288838505744934,
+              0.9278445839881897,
+              0.9414008259773254,
+              0.9403736591339111
+            ]
+          },
+          {
+            "query": "dark cup",
+            "baseline": 0.8888443112373352,
+            "alternative": 0.8923764228820801,
+            "evidence_gain": 0.001776547481616338,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.8888443112373352,
+              0.8891748189926147,
+              0.8996809124946594,
+              0.8923764228820801,
+              0.8899962902069092,
+              0.8899996876716614,
+              0.8888443112373352,
+              0.8878147006034851,
+              0.8874818682670593
+            ]
+          },
+          {
+            "query": "frog cup",
+            "baseline": 0.8643954992294312,
+            "alternative": 0.8628060817718506,
+            "evidence_gain": 0.0009944023421177496,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.8643954992294312,
+              0.8111900687217712,
+              0.8894448280334473,
+              0.8628060817718506,
+              0.8637298345565796,
+              0.8637585043907166,
+              0.8643954992294312,
+              0.8844956755638123,
+              0.8852381110191345
+            ]
+          },
+          {
+            "query": "ketchup",
+            "baseline": 0.6956993341445923,
+            "alternative": 0.6956993341445923,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.6956993341445923,
+              0.6956993341445923,
+              0.6956993341445923,
+              0.6956993341445923,
+              0.6956993341445923,
+              0.6956993341445923,
+              0.6956993341445923,
+              0.6956993341445923,
+              0.6956993341445923
+            ]
+          },
+          {
+            "query": "knife",
+            "baseline": 0.5234891772270203,
+            "alternative": 0.5241243640581766,
+            "evidence_gain": 0.02614540953031728,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.5234891772270203,
+              0.3825589120388031,
+              0.5315427780151367,
+              0.5241243640581766,
+              0.5265693465868632,
+              0.5259507695833842,
+              0.5234891772270203,
+              0.5261114637056986,
+              0.5286499659220377
+            ]
+          },
+          {
+            "query": "ottolenghi",
+            "baseline": 0.0023130301851779222,
+            "alternative": 0.0023130301851779222,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.0023130301851779222,
+              0.0023130301851779222,
+              0.0023130301851779222,
+              0.0023130301851779222,
+              0.0023130301851779222,
+              0.0023130301851779222,
+              0.0023130301851779222,
+              0.0023130301851779222,
+              0.0023130301851779222
+            ]
+          },
+          {
+            "query": "plastic ladle",
+            "baseline": 0.1947324126958847,
+            "alternative": 0.36017897725105286,
+            "evidence_gain": 0.03628404811024666,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.1947324126958847,
+              0.2108771651983261,
+              0.24260027706623077,
+              0.36017897725105286,
+              0.22611375153064728,
+              0.2280750870704651,
+              0.1947324126958847,
+              0.2351660281419754,
+              0.2448979616165161
+            ]
+          },
+          {
+            "query": "plate",
+            "baseline": 0.801579624414444,
+            "alternative": 0.7861670255661011,
+            "evidence_gain": 0.014092746708128188,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.801579624414444,
+              0.6873194873332977,
+              0.7917912304401398,
+              0.7861670255661011,
+              0.7999721169471741,
+              0.7996272146701813,
+              0.801579624414444,
+              0.7855282425880432,
+              0.786066859960556
+            ]
+          },
+          {
+            "query": "pot",
+            "baseline": 0.9462092518806458,
+            "alternative": 0.9480137825012207,
+            "evidence_gain": 0.0033264970779418946,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.9462092518806458,
+              0.7988265156745911,
+              0.9430354237556458,
+              0.9480137825012207,
+              0.9468290209770203,
+              0.9467755556106567,
+              0.9462092518806458,
+              0.9457764029502869,
+              0.9457038640975952
+            ]
+          },
+          {
+            "query": "pour-over vessel",
+            "baseline": 0.5577824115753174,
+            "alternative": 0.5577824115753174,
+            "evidence_gain": 0.0,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.5577824115753174,
+              0.5577824115753174,
+              0.5577824115753174,
+              0.5577824115753174,
+              0.5577824115753174,
+              0.5577824115753174,
+              0.5577824115753174,
+              0.5577824115753174,
+              0.5577824115753174
+            ]
+          },
+          {
+            "query": "red cup",
+            "baseline": 0.8892689347267151,
+            "alternative": 0.8926109671592712,
+            "evidence_gain": 0.002471522206351871,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.8892689347267151,
+              0.8829747438430786,
+              0.8391713500022888,
+              0.8926109671592712,
+              0.8893675804138184,
+              0.8893648982048035,
+              0.8892689347267151,
+              0.887730062007904,
+              0.8880684971809387
+            ]
+          },
+          {
+            "query": "refrigerator",
+            "baseline": 0.7435964345932007,
+            "alternative": 0.7949535250663757,
+            "evidence_gain": 0.00023701736846795448,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.7435964345932007,
+              0.9785126447677612,
+              0.6267452836036682,
+              0.7949535250663757,
+              0.7457161545753479,
+              0.7459497451782227,
+              0.7435964345932007,
+              0.7182877659797668,
+              0.7182087898254395
+            ]
+          },
+          {
+            "query": "sink",
+            "baseline": 0.882543295621872,
+            "alternative": 0.8803642988204956,
+            "evidence_gain": 0.007245676743017661,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.882543295621872,
+              0.7591581344604492,
+              0.8671387434005737,
+              0.8803642988204956,
+              0.8822925686836243,
+              0.882348507642746,
+              0.882543295621872,
+              0.8783605396747589,
+              0.8788155317306519
+            ]
+          },
+          {
+            "query": "spatula",
+            "baseline": 0.6664056181907654,
+            "alternative": 0.6677103638648987,
+            "evidence_gain": 0.0003082816644261281,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.6664056181907654,
+              0.6770306825637817,
+              0.6701836585998535,
+              0.6677103638648987,
+              0.667580246925354,
+              0.6671887040138245,
+              0.6664056181907654,
+              0.7142857313156128,
+              0.7142857313156128
+            ]
+          },
+          {
+            "query": "spoon",
+            "baseline": 0.30255812406539917,
+            "alternative": 0.30477964878082275,
+            "evidence_gain": 0.06430931993432946,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.30255812406539917,
+              0.06739966571331024,
+              0.31670281291007996,
+              0.30477964878082275,
+              0.31099799275398254,
+              0.31059974431991577,
+              0.30255812406539917,
+              0.32010582089424133,
+              0.30843737721443176
+            ]
+          },
+          {
+            "query": "toaster",
+            "baseline": 0.9658625721931458,
+            "alternative": 0.9660178422927856,
+            "evidence_gain": 0.0005677022971212863,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.9658625721931458,
+              0.8202969431877136,
+              0.9655876755714417,
+              0.9660178422927856,
+              0.9659776091575623,
+              0.9659776091575623,
+              0.9658625721931458,
+              0.9642665386199951,
+              0.9650139808654785
+            ]
+          },
+          {
+            "query": "yellow desk",
+            "baseline": 0.8921545743942261,
+            "alternative": 0.8908964395523071,
+            "evidence_gain": 0.001150248572230339,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 8
+            },
+            "candidate_utility": [
+              0.8921545743942261,
+              0.8834134340286255,
+              0.8919436931610107,
+              0.8908964395523071,
+              0.8921482563018799,
+              0.8920261859893799,
+              0.8921545743942261,
+              0.8986275792121887,
+              0.8987932801246643
+            ]
+          }
+        ],
+        "primary_metric": "semantic_iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_lerf_waldo_kitchen/query_results.json": "4a0676c8a25aa0029e82a4dba4a1ad0ffc65614dff4c80673dc92a84e80a5024",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_lerf_waldo_kitchen/query_results.json": "e64ef574a948528841a990f25e3d1bd2f9fc83d07a26c97e3566668bdaa927bf",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_lerf_waldo_kitchen/query_results.json": "c5427062980f15774660f8c3178f50006ba5e911db195b8c8ad5627d5d2918a5",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_lerf_waldo_kitchen/query_results.json": "6c12ebb68348e31e4ae0c19b454d6ce2db26f913ecb91d2c6e4ab8c66af14f58"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "fern",
+          "scene": "configs/pipeline/nvos_all_sources/fern.scene.json",
+          "queries": "configs/consolidated/nvos/fern.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fern/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/fern.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "iou": 0.8218514323234558,
+            "ap": 0.9470451039613963
+          },
+          "observable": {
+            "iou": 0.8220348954200745,
+            "ap": 0.9462235885190762
+          },
+          "full": {
+            "iou": 0.8220348954200745,
+            "ap": 0.9462235885190762
+          },
+          "permuted": {
+            "iou": 0.8220348954200745,
+            "ap": 0.9462235885190762
+          },
+          "two_candidate_oracle": {
+            "iou": 0.8220348954200745,
+            "ap": 0.9462235885190762
+          },
+          "historical_pool_oracle": {
+            "iou": 0.8220348954200745,
+            "ap": 0.9462235885190762
+          }
+        },
+        "units": [
+          {
+            "query": "fern",
+            "baseline": 0.8218514323234558,
+            "alternative": 0.8220348954200745,
+            "evidence_gain": 6.703095584127463e-05,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 3
+            },
+            "candidate_utility": [
+              0.8218514323234558,
+              0.8200845718383789,
+              0.8215262293815613,
+              0.8220348954200745,
+              0.8219191431999207,
+              0.8219180107116699,
+              0.8216210603713989,
+              0.8219393491744995,
+              0.8218514323234558
+            ]
+          }
+        ],
+        "primary_metric": "iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_nvos_fern/evaluation.json": "0e0a64323782b7419c77afe146247bb1f3059d6af9ffb181fe39a61603033b4f",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_nvos_fern/evaluation.json": "9fb72498037e342936415d6311250823b94cb5ba9ddc7da3a99b4eac5295c420",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_nvos_fern/evaluation.json": "5cc353ca4782283ba89d10507e2e1b37b28144b5f3388602a9ba10de4f84a11a",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_nvos_fern/evaluation.json": "b05c5bfbb738521fad461921babe6bc4e7a1079755faecbe2673e47eb1ebc0ac"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "flower",
+          "scene": "configs/pipeline/nvos_all_sources/flower.scene.json",
+          "queries": "configs/consolidated/nvos/flower.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/flower/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/flower.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "iou": 0.8652698397636414,
+            "ap": 0.9932169493177497
+          },
+          "observable": {
+            "iou": 0.8656805753707886,
+            "ap": 0.993174422834469
+          },
+          "full": {
+            "iou": 0.8652698397636414,
+            "ap": 0.9932169493177497
+          },
+          "permuted": {
+            "iou": 0.8656805753707886,
+            "ap": 0.993174422834469
+          },
+          "two_candidate_oracle": {
+            "iou": 0.8656805753707886,
+            "ap": 0.993174422834469
+          },
+          "historical_pool_oracle": {
+            "iou": 0.8716935515403748,
+            "ap": 0.9914897901834223
+          }
+        },
+        "units": [
+          {
+            "query": "flower",
+            "baseline": 0.8652698397636414,
+            "alternative": 0.8656805753707886,
+            "evidence_gain": -2.70981510049861e-06,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.8652698397636414,
+              0.8716935515403748,
+              0.8654364943504333,
+              0.8656805753707886,
+              0.8654242157936096,
+              0.8654220700263977,
+              0.8644468784332275,
+              0.8653544783592224,
+              0.8652698397636414
+            ]
+          }
+        ],
+        "primary_metric": "iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_nvos_flower/evaluation.json": "6d91a76172a0b75af3c2bdf7891e865b2a5e7d7e23a12d7ce1dcf638634f5082",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_nvos_flower/evaluation.json": "d2ea9840cdc6271f30d508ab7aeb855f283506875ad788dd7df3917a1dd68377",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_nvos_flower/evaluation.json": "3db96b664285505b3eb3977ebd69704ccb836f110bd1a499721bc10c0b6749b2",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_nvos_flower/evaluation.json": "3e61ad5ead6beb965a83a7a2be2bf9be2d712361b9f5d2d36f0d60035288dc15"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "fortress",
+          "scene": "configs/pipeline/nvos_all_sources/fortress.scene.json",
+          "queries": "configs/consolidated/nvos/fortress.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fortress/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/fortress.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "iou": 0.9723036885261536,
+            "ap": 0.9997674380162311
+          },
+          "observable": {
+            "iou": 0.97231525182724,
+            "ap": 0.999770093787286
+          },
+          "full": {
+            "iou": 0.97231525182724,
+            "ap": 0.999770093787286
+          },
+          "permuted": {
+            "iou": 0.97231525182724,
+            "ap": 0.999770093787286
+          },
+          "two_candidate_oracle": {
+            "iou": 0.97231525182724,
+            "ap": 0.999770093787286
+          },
+          "historical_pool_oracle": {
+            "iou": 0.9725390672683716,
+            "ap": 0.9997621472642594
+          }
+        },
+        "units": [
+          {
+            "query": "fortress",
+            "baseline": 0.9723036885261536,
+            "alternative": 0.97231525182724,
+            "evidence_gain": 1.7548001512584118e-07,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 6
+            },
+            "candidate_utility": [
+              0.9723036885261536,
+              0.9723528623580933,
+              0.972309947013855,
+              0.97231525182724,
+              0.9723103642463684,
+              0.9723103642463684,
+              0.9725390672683716,
+              0.9723014831542969,
+              0.9723036885261536
+            ]
+          }
+        ],
+        "primary_metric": "iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_nvos_fortress/evaluation.json": "5f311a4f89823ea0960f1babf5a31a25d9ac0bad15628f78c3179be29b92ee28",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_nvos_fortress/evaluation.json": "ffbbb889cc205b52945b9983f8682f01d54afb2b981ce36c53e379bb782031ef",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_nvos_fortress/evaluation.json": "9a897a9b7e88a37f4a6b981f60bbaca61868cd449913fe04ea7a6ea0cb854efd",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_nvos_fortress/evaluation.json": "287b8bb91dc4e3b0c13bf606abe1076eef5bd494e95a6460256b2ac9caf9be10"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "horns_center",
+          "scene": "configs/pipeline/nvos_all_sources/horns_center.scene.json",
+          "queries": "configs/consolidated/nvos/horns_center.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_center/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/horns_center.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "iou": 0.9572755098342896,
+            "ap": 0.9977812086259378
+          },
+          "observable": {
+            "iou": 0.9570916295051575,
+            "ap": 0.9977910618352048
+          },
+          "full": {
+            "iou": 0.9570916295051575,
+            "ap": 0.9977910618352048
+          },
+          "permuted": {
+            "iou": 0.9570916295051575,
+            "ap": 0.9977910618352048
+          },
+          "two_candidate_oracle": {
+            "iou": 0.9572755098342896,
+            "ap": 0.9977812086259378
+          },
+          "historical_pool_oracle": {
+            "iou": 0.9582724571228027,
+            "ap": 0.9977527981647781
+          }
+        },
+        "units": [
+          {
+            "query": "horns_center",
+            "baseline": 0.9572755098342896,
+            "alternative": 0.9570916295051575,
+            "evidence_gain": 2.1781098692998534e-05,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 6
+            },
+            "candidate_utility": [
+              0.9572755098342896,
+              0.9484891891479492,
+              0.9572619199752808,
+              0.9570916295051575,
+              0.9572098255157471,
+              0.9572098255157471,
+              0.9582724571228027,
+              0.9572774171829224,
+              0.9572755098342896
+            ]
+          }
+        ],
+        "primary_metric": "iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_nvos_horns_center/evaluation.json": "f2fe0116e16a9ebff735272992b0b70894f7e3b79aedb7f31e097a7ca7fbadea",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_nvos_horns_center/evaluation.json": "2f0f53f154afd1b868141cc47c460ddd60b3295b1a4e3123dfde44d84cb4aea3",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_nvos_horns_center/evaluation.json": "03a10bef93b2ba745a011ff09fc601dec42230d4fabdc8a21a9bb9863dcdfecf",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_nvos_horns_center/evaluation.json": "0805422b36650de3c98c4563c91b2a760d6cd123e0ac893c5da35dfdf5ac43d8"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "horns_left",
+          "scene": "configs/pipeline/nvos_all_sources/horns_left.scene.json",
+          "queries": "configs/consolidated/nvos/horns_left.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_left/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/horns_left.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "iou": 0.9269843697547913,
+            "ap": 0.988662000282143
+          },
+          "observable": {
+            "iou": 0.9269880652427673,
+            "ap": 0.9883567483093012
+          },
+          "full": {
+            "iou": 0.9269880652427673,
+            "ap": 0.9883567483093012
+          },
+          "permuted": {
+            "iou": 0.9269880652427673,
+            "ap": 0.9883567483093012
+          },
+          "two_candidate_oracle": {
+            "iou": 0.9269880652427673,
+            "ap": 0.9883567483093012
+          },
+          "historical_pool_oracle": {
+            "iou": 0.9300852417945862,
+            "ap": 0.9929267286396731
+          }
+        },
+        "units": [
+          {
+            "query": "horns_left",
+            "baseline": 0.9269843697547913,
+            "alternative": 0.9269880652427673,
+            "evidence_gain": 0.00010703835392096003,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 6
+            },
+            "candidate_utility": [
+              0.9269843697547913,
+              0.9186261892318726,
+              0.9270010590553284,
+              0.9269880652427673,
+              0.9269636869430542,
+              0.9269636869430542,
+              0.9300852417945862,
+              0.9269516468048096,
+              0.9269843697547913
+            ]
+          }
+        ],
+        "primary_metric": "iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_nvos_horns_left/evaluation.json": "8c3de33a7e1e9c70daa101c61c8be7ee8dd8ab8c70f88de9a61a5868ccac5dbe",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_nvos_horns_left/evaluation.json": "f77b2ae6381b809e4101cd56c73ef0d43a0b976ca52b5b4fddc4697ce4d27537",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_nvos_horns_left/evaluation.json": "ea0bfc719264df12fdb52b5ece47a75038fb2bf4a6cd71fbdb41188c3eb67db0",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_nvos_horns_left/evaluation.json": "e5003906a521bb3a9435e165c65ffd89b15ee8927e8bdb550994dd6384460d38"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "leaves",
+          "scene": "configs/pipeline/nvos_all_sources/leaves.scene.json",
+          "queries": "configs/consolidated/nvos/leaves.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/leaves/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/leaves.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "iou": 0.9408482313156128,
+            "ap": 0.9979117338412364
+          },
+          "observable": {
+            "iou": 0.9409183859825134,
+            "ap": 0.9979200831908039
+          },
+          "full": {
+            "iou": 0.9409183859825134,
+            "ap": 0.9979200831908039
+          },
+          "permuted": {
+            "iou": 0.9409183859825134,
+            "ap": 0.9979200831908039
+          },
+          "two_candidate_oracle": {
+            "iou": 0.9409183859825134,
+            "ap": 0.9979200831908039
+          },
+          "historical_pool_oracle": {
+            "iou": 0.9415841698646545,
+            "ap": 0.9982144317243484
+          }
+        },
+        "units": [
+          {
+            "query": "leaves",
+            "baseline": 0.9408482313156128,
+            "alternative": 0.9409183859825134,
+            "evidence_gain": 3.3033993531716985e-07,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 6
+            },
+            "candidate_utility": [
+              0.9408482313156128,
+              0.9411179423332214,
+              0.940846860408783,
+              0.9409183859825134,
+              0.9408867955207825,
+              0.9408895373344421,
+              0.9415841698646545,
+              0.9408482313156128,
+              0.9408482313156128
+            ]
+          }
+        ],
+        "primary_metric": "iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_nvos_leaves/evaluation.json": "2b7aef018d0f10c80d5b1651026b87984cc6191491607e85cb2ccf0c27d6e1f6",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_nvos_leaves/evaluation.json": "cc091a31758ae17a72b2a3abdefda88d44e8b1bbd2740819d8d6f5e658bb77e7",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_nvos_leaves/evaluation.json": "4a91cce4da637ec5458a06cc63dd0d3559d651674ad3ed3c41700d113f0980ad",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_nvos_leaves/evaluation.json": "464ef481b16c9115ce8a6355fc805fae73aa4665ed1f6dc7fe91d16f5f742606"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "orchids",
+          "scene": "configs/pipeline/nvos_all_sources/orchids.scene.json",
+          "queries": "configs/consolidated/nvos/orchids.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/orchids/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/orchids.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "iou": 0.6814108490943909,
+            "ap": 0.9782980182226543
+          },
+          "observable": {
+            "iou": 0.6829258799552917,
+            "ap": 0.9780975847022387
+          },
+          "full": {
+            "iou": 0.6814108490943909,
+            "ap": 0.9782980182226543
+          },
+          "permuted": {
+            "iou": 0.6829258799552917,
+            "ap": 0.9780975847022387
+          },
+          "two_candidate_oracle": {
+            "iou": 0.6829258799552917,
+            "ap": 0.9780975847022387
+          },
+          "historical_pool_oracle": {
+            "iou": 0.7002002596855164,
+            "ap": 0.9621232353480713
+          }
+        },
+        "units": [
+          {
+            "query": "orchids",
+            "baseline": 0.6814108490943909,
+            "alternative": 0.6829258799552917,
+            "evidence_gain": -3.889543343878662e-05,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 0,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 1
+            },
+            "candidate_utility": [
+              0.6814108490943909,
+              0.7002002596855164,
+              0.6816053986549377,
+              0.6829258799552917,
+              0.6817151308059692,
+              0.6817177534103394,
+              0.6854557991027832,
+              0.6813971996307373,
+              0.6814108490943909
+            ]
+          }
+        ],
+        "primary_metric": "iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_nvos_orchids/evaluation.json": "689c6e623bb6828417c4ebf2e81fb631c0f04809db88d824da37af1e76d0914e",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_nvos_orchids/evaluation.json": "76f10a7ecf343d50a7c925553a21797ea68c31a70a683e925214611adc1ead95",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_nvos_orchids/evaluation.json": "9141b54afec2339d778e06890757b4e9a0ef3cd06ae931a4f656a64b0adfe362",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_nvos_orchids/evaluation.json": "e6add1e5c39371353dcc41f1ff0016fb859b35ec7887796081638312c2d6cf6b"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "trex",
+          "scene": "configs/pipeline/nvos_all_sources/trex.scene.json",
+          "queries": "configs/consolidated/nvos/trex.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/trex/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/trex.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "iou": 0.7551294565200806,
+            "ap": 0.9390971605355347
+          },
+          "observable": {
+            "iou": 0.7512165307998657,
+            "ap": 0.9380777984466901
+          },
+          "full": {
+            "iou": 0.7512165307998657,
+            "ap": 0.9380777984466901
+          },
+          "permuted": {
+            "iou": 0.7512165307998657,
+            "ap": 0.9380777984466901
+          },
+          "two_candidate_oracle": {
+            "iou": 0.7551294565200806,
+            "ap": 0.9390971605355347
+          },
+          "historical_pool_oracle": {
+            "iou": 0.7553680539131165,
+            "ap": 0.938877795859801
+          }
+        },
+        "units": [
+          {
+            "query": "trex",
+            "baseline": 0.7551294565200806,
+            "alternative": 0.7512165307998657,
+            "evidence_gain": 1.835095032152754e-05,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 7
+            },
+            "candidate_utility": [
+              0.7551294565200806,
+              0.7360378503799438,
+              0.7546088695526123,
+              0.7512165307998657,
+              0.7531264424324036,
+              0.7531283497810364,
+              0.7519840002059937,
+              0.7553680539131165,
+              0.7551294565200806
+            ]
+          }
+        ],
+        "primary_metric": "iou",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_nvos_trex/evaluation.json": "a0735dd7a74465ac04e155fb404695793c3a30e03fa69e5a4f5843b9a2dc809e",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_nvos_trex/evaluation.json": "fca048da17aa09b724d180fdfec9be7ce27819708c5e5c442044e9c4aff12d6f",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_nvos_trex/evaluation.json": "c41806201cae69f5d0cf0564c0793795f131bde485783ff31c0a043f32a9b2a5",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_nvos_trex/evaluation.json": "d7523468d4682a4910a561599cb317321195133863137e6dea6b20c12c9a3c2e"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0000_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0000_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0000_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0000_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.5350768048374911,
+            "miou_15": 0.5152063011464776,
+            "miou_10": 0.682831075829415
+          },
+          "observable": {
+            "miou_19": 0.5219079333634317,
+            "miou_15": 0.5015065175911089,
+            "miou_10": 0.6804119516883581
+          },
+          "full": {
+            "miou_19": 0.5219079333634317,
+            "miou_15": 0.5015065175911089,
+            "miou_10": 0.6804119516883581
+          },
+          "permuted": {
+            "miou_19": 0.5350768048374911,
+            "miou_15": 0.5152063011464776,
+            "miou_10": 0.682831075829415
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.5350768048374911,
+            "miou_15": 0.5152063011464776,
+            "miou_10": 0.682831075829415
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.5350768048374911,
+            "miou_15": 0.5152063011464776,
+            "miou_10": 0.682831075829415
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.5350768048374911,
+            "alternative": 0.5219079333634317,
+            "evidence_gain": 0.0018877389183181161,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.5350768048374911,
+              0.500653768745319,
+              0.5013320499870139,
+              0.5219079333634317,
+              0.5333419056392423,
+              0.5333201002288963,
+              0.5350768048374911,
+              0.5293140796926634,
+              0.5335756287899097
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0000_00/evaluation.json": "1f30fa1218006ffd61ac0b3fc2de6124e2d484abb3b93574618688f59a96c01f",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0000_00/evaluation.json": "1e97e4b0b5207c554f486a28fd56b78502e999322e44faa8802dd7963c9ef989",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0000_00/evaluation.json": "e4313d1c0bc534c5df4f6d001470a6194c75b5e5e60b4590b6ff24ec8f75a87f",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0000_00/evaluation.json": "951b5678eedae404436f6c65741117266fcf9e4e86f66f431cabdae961cb6ad4"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0062_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0062_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0062_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0062_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.7223403938755731,
+            "miou_15": 0.724146653179461,
+            "miou_10": 0.8722136249428882
+          },
+          "observable": {
+            "miou_19": 0.7313149327841896,
+            "miou_15": 0.7330764823395118,
+            "miou_10": 0.8732496676316251
+          },
+          "full": {
+            "miou_19": 0.7313149327841896,
+            "miou_15": 0.7330764823395118,
+            "miou_10": 0.8732496676316251
+          },
+          "permuted": {
+            "miou_19": 0.7223403938755731,
+            "miou_15": 0.724146653179461,
+            "miou_10": 0.8722136249428882
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.7313149327841896,
+            "miou_15": 0.7330764823395118,
+            "miou_10": 0.8732496676316251
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.7365824284883065,
+            "miou_15": 0.7383330766329093,
+            "miou_10": 0.8732496676316251
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.7223403938755731,
+            "alternative": 0.7313149327841896,
+            "evidence_gain": 0.0008170091219850488,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 4
+            },
+            "candidate_utility": [
+              0.7223403938755731,
+              0.6863342509558947,
+              0.6950480029500078,
+              0.7313149327841896,
+              0.7365824284883065,
+              0.7334972602963704,
+              0.7223403938755731,
+              0.7225445855220851,
+              0.7297253041067028
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0062_00/evaluation.json": "9962a493d70f81586fe5ec68ebdda26275b8dac895683b178bd206f8b215bfd4",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0062_00/evaluation.json": "fa17697ef9fe3f0913ad7ae7c62e4ba1d58def478a5938b427b75b073692f44e",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0062_00/evaluation.json": "f34742b2e5af41417b6fe76543c6b1e783d700593d1f98b994f22b3c1ab525af",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0062_00/evaluation.json": "4f977f52404d5313657b0c98e80d61c90a96f4566f9290fdf05ef518215a791b"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0070_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0070_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0070_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0070_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.41181059030434436,
+            "miou_15": 0.4625610788161084,
+            "miou_10": 0.6051633804048397
+          },
+          "observable": {
+            "miou_19": 0.4157087524266051,
+            "miou_15": 0.46069094450409986,
+            "miou_10": 0.5781421529996675
+          },
+          "full": {
+            "miou_19": 0.4157087524266051,
+            "miou_15": 0.46069094450409986,
+            "miou_10": 0.5781421529996675
+          },
+          "permuted": {
+            "miou_19": 0.4157087524266051,
+            "miou_15": 0.46069094450409986,
+            "miou_10": 0.5781421529996675
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.4157087524266051,
+            "miou_15": 0.46069094450409986,
+            "miou_10": 0.5781421529996675
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.4179885691080725,
+            "miou_15": 0.4654102220226789,
+            "miou_10": 0.5196387244710461
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.41181059030434436,
+            "alternative": 0.4157087524266051,
+            "evidence_gain": 0.006106063056347975,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 3,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.41181059030434436,
+              0.4055193150257879,
+              0.4179885691080725,
+              0.4157087524266051,
+              0.41749031696299516,
+              0.41639868978110034,
+              0.41181059030434436,
+              0.40104029159559984,
+              0.4044759115710803
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0070_00/evaluation.json": "498856151638fbf3136746508c4007923efcf6b1116dd09c87b19ac1f4c66519",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0070_00/evaluation.json": "ad7b61c018c3347da5d053e4918c490f6fd296218328ea16cf4cbe6386784eca",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0070_00/evaluation.json": "ea5cc8b9962f333ee76c580804057237fa782c46e5a44254eef048741e7d18fa",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0070_00/evaluation.json": "aa1f497a5d0c06d54e748f7cbfea3220a61cb1459d3ef22966a8d8cd411c75b5"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0097_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0097_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0097_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0097_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.6227969443915035,
+            "miou_15": 0.6117856123314694,
+            "miou_10": 0.6594159263690635
+          },
+          "observable": {
+            "miou_19": 0.5926826270861618,
+            "miou_15": 0.58801066940187,
+            "miou_10": 0.659393654435822
+          },
+          "full": {
+            "miou_19": 0.5926826270861618,
+            "miou_15": 0.58801066940187,
+            "miou_10": 0.659393654435822
+          },
+          "permuted": {
+            "miou_19": 0.6227969443915035,
+            "miou_15": 0.6117856123314694,
+            "miou_10": 0.6594159263690635
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.6227969443915035,
+            "miou_15": 0.6117856123314694,
+            "miou_10": 0.6594159263690635
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.6245688459275734,
+            "miou_15": 0.6140295191087699,
+            "miou_10": 0.6600051905714793
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.6227969443915035,
+            "alternative": 0.5926826270861618,
+            "evidence_gain": 0.0004660978815273235,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 4
+            },
+            "candidate_utility": [
+              0.6227969443915035,
+              0.5487056533436144,
+              0.5454825562191884,
+              0.5926826270861618,
+              0.6245688459275734,
+              0.6245165474043518,
+              0.6227969443915035,
+              0.6103806537525965,
+              0.612269674149933
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0097_00/evaluation.json": "d0a19dfe0e7b868370ca4c105781af4c416eee62f51f8474787ad1ffd1543d06",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0097_00/evaluation.json": "dca4d2cfce139ad8c7b46d3edcf29e743fa0eb3d6945d394d92fef881e8727b9",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0097_00/evaluation.json": "4a43bf6e773448ec9aa9c27e4f2f1bfc39de81a79cf89ef9721c2758d16caa5a",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0097_00/evaluation.json": "2f9714b2e1b0d98cdaabef4fa2e367196b4fb8fa9a8d623360103792c6aeb17e"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0140_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0140_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0140_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0140_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.6331003979272848,
+            "miou_15": 0.6685467165262015,
+            "miou_10": 0.7293411937868065
+          },
+          "observable": {
+            "miou_19": 0.6322223587989402,
+            "miou_15": 0.6658069221156485,
+            "miou_10": 0.7266653367494063
+          },
+          "full": {
+            "miou_19": 0.6322223587989402,
+            "miou_15": 0.6658069221156485,
+            "miou_10": 0.7266653367494063
+          },
+          "permuted": {
+            "miou_19": 0.6331003979272848,
+            "miou_15": 0.6685467165262015,
+            "miou_10": 0.7293411937868065
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.6331003979272848,
+            "miou_15": 0.6685467165262015,
+            "miou_10": 0.7293411937868065
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.6349669066243163,
+            "miou_15": 0.6690298347258716,
+            "miou_10": 0.7267038627009832
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.6331003979272848,
+            "alternative": 0.6322223587989402,
+            "evidence_gain": 0.0004730111984319465,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 5
+            },
+            "candidate_utility": [
+              0.6331003979272848,
+              0.6134815171706216,
+              0.5861528311825636,
+              0.6322223587989402,
+              0.6344532200983143,
+              0.6349669066243163,
+              0.6331003979272848,
+              0.6182159316211058,
+              0.6268832989275598
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0140_00/evaluation.json": "23daec943943f7ba947aec05f65fe51b046c26fea773923a9a6f01872800abbc",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0140_00/evaluation.json": "2b8e619f84bd4767e05f4bac65862b5793160c44c327adfc755348fe64b6f873",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0140_00/evaluation.json": "c1619001295a0d8601b0240176183d33359a604f075e8c74c57a2eecf82771eb",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0140_00/evaluation.json": "f5de72892c6233bde4ae1ae35aacf19f7e1f5a48a513420152f8e6a226645337"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0200_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0200_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0200_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0200_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.6650432024412236,
+            "miou_15": 0.6648072070421769,
+            "miou_10": 0.6971404693063304
+          },
+          "observable": {
+            "miou_19": 0.6625199496411286,
+            "miou_15": 0.6622812461897369,
+            "miou_10": 0.692737573313996
+          },
+          "full": {
+            "miou_19": 0.6625199496411286,
+            "miou_15": 0.6622812461897369,
+            "miou_10": 0.692737573313996
+          },
+          "permuted": {
+            "miou_19": 0.6650432024412236,
+            "miou_15": 0.6648072070421769,
+            "miou_10": 0.6971404693063304
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.6650432024412236,
+            "miou_15": 0.6648072070421769,
+            "miou_10": 0.6971404693063304
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.6650432024412236,
+            "miou_15": 0.6648072070421769,
+            "miou_10": 0.6971404693063304
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.6650432024412236,
+            "alternative": 0.6625199496411286,
+            "evidence_gain": 0.0012709349393844604,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.6650432024412236,
+              0.637210718293094,
+              0.6394504704276713,
+              0.6625199496411286,
+              0.6639033952060494,
+              0.6640259345314129,
+              0.6650432024412236,
+              0.6533819630205848,
+              0.6571540460192473
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0200_00/evaluation.json": "a291876ef4a46bfc441c527e0c5ed5ff4b7245cbfd8bf430dfa288e5cfc93def",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0200_00/evaluation.json": "7f9816005c828c221cc90dd690f5f3aba25c6150d2404488ac452e574f1167fc",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0200_00/evaluation.json": "d189c47983ae0b52e2b7ff5c045fcd423b681439637b1ce450fcba00b888f593",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0200_00/evaluation.json": "b9f5154f898fa023e8c66a5e9828bde496246c4f645f5351f2baa6dddb1beb3f"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0347_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0347_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0347_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0347_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.626481964898848,
+            "miou_15": 0.6018009767944041,
+            "miou_10": 0.7370185147751059
+          },
+          "observable": {
+            "miou_19": 0.6140829716497985,
+            "miou_15": 0.5886306753411409,
+            "miou_10": 0.7358398669112103
+          },
+          "full": {
+            "miou_19": 0.6140829716497985,
+            "miou_15": 0.5886306753411409,
+            "miou_10": 0.7358398669112103
+          },
+          "permuted": {
+            "miou_19": 0.626481964898848,
+            "miou_15": 0.6018009767944041,
+            "miou_10": 0.7370185147751059
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.626481964898848,
+            "miou_15": 0.6018009767944041,
+            "miou_10": 0.7370185147751059
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.6271232836119568,
+            "miou_15": 0.6027683680990327,
+            "miou_10": 0.7359886146795208
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.626481964898848,
+            "alternative": 0.6140829716497985,
+            "evidence_gain": 0.0008607882730386875,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 4
+            },
+            "candidate_utility": [
+              0.626481964898848,
+              0.5858349629308466,
+              0.5659572691458382,
+              0.6140829716497985,
+              0.6271232836119568,
+              0.6269804377700025,
+              0.626481964898848,
+              0.6229299009062881,
+              0.6239133292852423
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0347_00/evaluation.json": "2d397e4bf686327f375b0b1bf0347322128d3d2cc9d39a45306233fe9e0d8760",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0347_00/evaluation.json": "cb9e5ab683d283d4a5b7fdd78074301b6504a4b37de7da0b70e91b292fb5d3a0",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0347_00/evaluation.json": "98d17dc6eef3a3a8eee4a7698ac1bd073bc497ccfcb214de6ada777b3bd6146c",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0347_00/evaluation.json": "eb22c269a06bd4a8f350528e06d4c028edbc2b141b9b9253a07c3726104fd3b9"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0400_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0400_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0400_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0400_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.7460258954700337,
+            "miou_15": 0.7467522400298648,
+            "miou_10": 0.7642779655228775
+          },
+          "observable": {
+            "miou_19": 0.7422243025120133,
+            "miou_15": 0.7430013749163834,
+            "miou_10": 0.7604951831917296
+          },
+          "full": {
+            "miou_19": 0.7422243025120133,
+            "miou_15": 0.7430013749163834,
+            "miou_10": 0.7604951831917296
+          },
+          "permuted": {
+            "miou_19": 0.7460258954700337,
+            "miou_15": 0.7467522400298648,
+            "miou_10": 0.7642779655228775
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.7460258954700337,
+            "miou_15": 0.7467522400298648,
+            "miou_10": 0.7642779655228775
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.7505443262634134,
+            "miou_15": 0.7509782520921355,
+            "miou_10": 0.7653288727649018
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.7460258954700337,
+            "alternative": 0.7422243025120133,
+            "evidence_gain": 0.0002085310025293319,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 8
+            },
+            "candidate_utility": [
+              0.7460258954700337,
+              0.7120915557978373,
+              0.7259097094017788,
+              0.7422243025120133,
+              0.7422236786880493,
+              0.7422904950651298,
+              0.7460258954700337,
+              0.7480717965519943,
+              0.7505443262634134
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0400_00/evaluation.json": "68aee7cc14d1dd2970ef5dbd265d72f70541df53c0c83e9b5a17c6cf11a16510",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0400_00/evaluation.json": "60592928dd3f52e4f1c40ff8c159dcdf1654e8275814ea581c987e91690de444",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0400_00/evaluation.json": "3f1b411b67d2faac69af3724249f1a6e2aa675f21a72203c14f196e5ad61c683",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0400_00/evaluation.json": "13fa148fb0331966c2edf0dd468c571e469e73fea36b51c80368c3ffda79451e"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0590_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0590_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0590_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0590_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.5869001612825626,
+            "miou_15": 0.6497870406232482,
+            "miou_10": 0.7805535445756188
+          },
+          "observable": {
+            "miou_19": 0.5815449856189046,
+            "miou_15": 0.6432785459890452,
+            "miou_10": 0.7793367321539453
+          },
+          "full": {
+            "miou_19": 0.5815449856189046,
+            "miou_15": 0.6432785459890452,
+            "miou_10": 0.7793367321539453
+          },
+          "permuted": {
+            "miou_19": 0.5869001612825626,
+            "miou_15": 0.6497870406232482,
+            "miou_10": 0.7805535445756188
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.5869001612825626,
+            "miou_15": 0.6497870406232482,
+            "miou_10": 0.7805535445756188
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.5869001612825626,
+            "miou_15": 0.6497870406232482,
+            "miou_10": 0.7805535445756188
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.5869001612825626,
+            "alternative": 0.5815449856189046,
+            "evidence_gain": 0.0007069110870361328,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 0,
+              "historical_pool_oracle": 0
+            },
+            "candidate_utility": [
+              0.5869001612825626,
+              0.5678613302621605,
+              0.5566773587066882,
+              0.5815449856189046,
+              0.5810061169941102,
+              0.5821683798931154,
+              0.5869001612825626,
+              0.5746740111604464,
+              0.5818459866936061
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0590_00/evaluation.json": "9c025f29d1da23f8697e463a5b31b4fb61307a952014efff5fc4230d68adf3b4",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0590_00/evaluation.json": "64aa1bddf366be390fab0aa3787f7114bbd7712c4163c6a84f7b11c0c60dd823",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0590_00/evaluation.json": "681c0c1a589fbda2d792b516ec768cbf44889ddf83f91e6aaaf49d58ec4338d6",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0590_00/evaluation.json": "bc8abab6fe7c674662101188d87644bfcf767a4e726e390b124a545662703cb5"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0645_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0645_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0645_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0645_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "candidate_names": [
+          "baseline",
+          "post_response_v1/partial",
+          "post_response_v1/complement",
+          "post_response_v2/observable",
+          "post_response_v3/scope",
+          "post_response_v3/matched",
+          "stage_reconstruction_v4/diagonal",
+          "stage_reconstruction_v4/rendered_squared",
+          "stage_reconstruction_v4/rendered_huber"
+        ],
+        "metrics": {
+          "baseline": {
+            "miou_19": 0.5515726993777639,
+            "miou_15": 0.6073650776703657,
+            "miou_10": 0.7206504074435773
+          },
+          "observable": {
+            "miou_19": 0.5649030280363002,
+            "miou_15": 0.6015783894777116,
+            "miou_10": 0.7165753553696516
+          },
+          "full": {
+            "miou_19": 0.5649030280363002,
+            "miou_15": 0.6015783894777116,
+            "miou_10": 0.7165753553696516
+          },
+          "permuted": {
+            "miou_19": 0.5515726993777639,
+            "miou_15": 0.6073650776703657,
+            "miou_10": 0.7206504074435773
+          },
+          "two_candidate_oracle": {
+            "miou_19": 0.5649030280363002,
+            "miou_15": 0.6015783894777116,
+            "miou_10": 0.7165753553696516
+          },
+          "historical_pool_oracle": {
+            "miou_19": 0.5725753813452642,
+            "miou_15": 0.58300826067948,
+            "miou_10": 0.6963656129420436
+          }
+        },
+        "units": [
+          {
+            "query": "whole_menu",
+            "baseline": 0.5515726993777639,
+            "alternative": 0.5649030280363002,
+            "evidence_gain": 0.0009276605153505781,
+            "choices": {
+              "baseline": 0,
+              "observable": 3,
+              "full": 3,
+              "permuted": 0,
+              "two_candidate_oracle": 3,
+              "historical_pool_oracle": 2
+            },
+            "candidate_utility": [
+              0.5515726993777639,
+              0.5724093523216447,
+              0.5725753813452642,
+              0.5649030280363002,
+              0.5505773948487775,
+              0.5449478456466901,
+              0.5515726993777639,
+              0.5474038688182024,
+              0.5521387399266691
+            ]
+          }
+        ],
+        "primary_metric": "miou_19",
+        "cached_score_hashes": {
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v1_scannet_scene0645_00/evaluation.json": "48f48fdedc82520c550d55fe4b1092d6fb0aeb7a97953ee53f5bf42a456fb9a0",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v2_scannet_scene0645_00/evaluation.json": "3fc513bcc4286ae35dc25dcbb5a5d6b61a24124363fafd5fbc748460d7647730",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/post_response_v3_scannet_scene0645_00/evaluation.json": "3513ab54fe4c85b1f8a6cb0f4bc8037b0083848f425bc3d01a9e8e14b91d7c5f",
+          "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/stage_reconstruction_v4_scannet_scene0645_00/evaluation.json": "bc92433077e129fe2e4dad449af7fee1a0580945cc44592ecf1aec93368678a3"
+        },
+        "metric_status": "exact whole-response choice from previously scored frozen predictions; no fresh target rendering",
+        "historical_pool_dense_replay": false
+      }
+    ],
+    "macro": {
+      "lerf": {
+        "baseline": {
+          "semantic_iou": 0.7040067569509945,
+          "ap": 0.8761927775455381
+        },
+        "observable": {
+          "semantic_iou": 0.7093191302012214,
+          "ap": 0.8738742229777726
+        },
+        "full": {
+          "semantic_iou": 0.7093191302012214,
+          "ap": 0.8738742229777726
+        },
+        "permuted": {
+          "semantic_iou": 0.7093191302012214,
+          "ap": 0.8738742487368728
+        },
+        "two_candidate_oracle": {
+          "semantic_iou": 0.7101079753900309,
+          "ap": 0.8761094601878475
+        },
+        "historical_pool_oracle": {
+          "semantic_iou": 0.7215502234216249,
+          "ap": 0.883578069744177
+        }
+      },
+      "nvos": {
+        "baseline": {
+          "iou": 0.865134172141552,
+          "ap": 0.9802224516003604
+        },
+        "observable": {
+          "iou": 0.8648964017629623,
+          "ap": 0.9799264227031337
+        },
+        "full": {
+          "iou": 0.8646556809544563,
+          "ap": 0.9799567927035958
+        },
+        "permuted": {
+          "iou": 0.8648964017629623,
+          "ap": 0.9799264227031337
+        },
+        "two_candidate_oracle": {
+          "iou": 0.8654085025191307,
+          "ap": 0.980052611313081
+        },
+        "historical_pool_oracle": {
+          "iou": 0.8689722120761871,
+          "ap": 0.9784213144629288
+        }
+      },
+      "scannet": {
+        "baseline": {
+          "miou_19": 0.6101149054806628,
+          "miou_15": 0.6252758904159779,
+          "miou_10": 0.7248606102956523
+        },
+        "observable": {
+          "miou_19": 0.6059111841917475,
+          "miou_15": 0.6187861767866257,
+          "miou_10": 0.7202847474445412
+        },
+        "full": {
+          "miou_19": 0.6059111841917475,
+          "miou_15": 0.6187861767866257,
+          "miou_10": 0.7202847474445412
+        },
+        "permuted": {
+          "miou_19": 0.6105047216928889,
+          "miou_15": 0.6250888769847769,
+          "miou_10": 0.722158487555135
+        },
+        "two_candidate_oracle": {
+          "miou_19": 0.6127352084496043,
+          "miou_15": 0.6254031910815165,
+          "miou_10": 0.7218545866166162
+        },
+        "historical_pool_oracle": {
+          "miou_19": 0.6151369909930181,
+          "miou_15": 0.6253358082172782,
+          "miou_10": 0.7137805635472965
+        }
+      }
+    },
+    "decisions": {
+      "lerf": {
+        "units": 67,
+        "available_improvements": 43,
+        "full": {
+          "replacements": 58,
+          "improved": 43,
+          "harmed": 13
+        },
+        "permuted": {
+          "replacements": 57,
+          "improved": 43,
+          "harmed": 13
+        }
+      },
+      "nvos": {
+        "units": 8,
+        "available_improvements": 6,
+        "full": {
+          "replacements": 6,
+          "improved": 4,
+          "harmed": 2
+        },
+        "permuted": {
+          "replacements": 8,
+          "improved": 6,
+          "harmed": 2
+        }
+      },
+      "scannet": {
+        "units": 10,
+        "available_improvements": 3,
+        "full": {
+          "replacements": 10,
+          "improved": 3,
+          "harmed": 7
+        },
+        "permuted": {
+          "replacements": 1,
+          "improved": 1,
+          "harmed": 0
+        }
+      }
+    },
+    "uqis_capacity_reference": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/response_replacement_capacity_v1/summary.json",
+      "sha256": "28e8a3650d4796b22884a6fa9220005f08ac1a4cd3084e644188942e12767254",
+      "macro": {
+        "text": {
+          "baseline_iou": 0.16386530164545415,
+          "fixed_provider_iou": 0.20098308726264755,
+          "selected_iou": 0.24349785115870665,
+          "oracle_iou": 0.317812796883042,
+          "available_gain": 0.15394749523758783,
+          "decision_regret": 0.07431494572433534,
+          "learned_minus_fixed_provider": 0.0425147638960591
+        },
+        "image": {
+          "baseline_iou": 0.39897960281086925,
+          "fixed_provider_iou": 0.34876210201064095,
+          "selected_iou": 0.34724382195814185,
+          "oracle_iou": 0.4939029140345695,
+          "available_gain": 0.09492331122370024,
+          "decision_regret": 0.14665909207642763,
+          "learned_minus_fixed_provider": -0.0015182800524990991
+        }
+      },
+      "fresh_inference": false,
+      "pools_exactly_verified_by": "A07 and L06"
+    },
+    "lerf_selected_projection": {
+      "status": "one frozen independent selection; no alternative supplied by E01-E04",
+      "iou": 0.6696327365836882,
+      "finite_pool_gain": 0.0,
+      "fresh_scoring": false
+    },
+    "no_five_task_new_method_claim": true,
+    "evidence_held_out": false,
+    "dense_prediction_bytes": 0,
+    "study_bytes": 2093703076
+  },
+  "historical_joint_metric_oracle": {
+    "macro": {
+      "lerf": {
+        "semantic_iou": 0.7174409648716609,
+        "ap": 0.8863535132066587
+      },
+      "nvos": {
+        "iou": 0.8656152188777924,
+        "ap": 0.9807937118518226
+      },
+      "scannet": {
+        "miou_19": 0.6121681421748811,
+        "miou_15": 0.6273415246452798,
+        "miou_10": 0.72512823170897
+      }
+    },
+    "rows": [
+      {
+        "job": {
+          "benchmark": "lerf",
+          "name": "figurines",
+          "scene": "output/system_map_rebuild/figurines/complete/scene.json",
+          "queries": "configs/consolidated/figurines.queries.json",
+          "source_evidence": "output/research_consolidation/source_run/figurines/detections",
+          "outputs": [
+            "semantic_2d",
+            "selected_gaussian_projection_2d"
+          ],
+          "input_track": "frozen_declared_rgb_geometry",
+          "access": "source-assisted",
+          "task": "text_union"
+        },
+        "metrics": {
+          "semantic_iou": 0.7790693111185517,
+          "ap": 0.9499649666367963
+        },
+        "choices": {
+          "bag": 0,
+          "green apple": 8,
+          "green toy chair": 7,
+          "jake": 7,
+          "miffy": 4,
+          "old camera": 3,
+          "pikachu": 8,
+          "pink ice cream": 3,
+          "pirate hat": 0,
+          "porcelain hand": 7,
+          "pumpkin": 7,
+          "red apple": 3,
+          "red toy chair": 8,
+          "rubber duck with buoy": 7,
+          "rubber duck with hat": 2,
+          "rubics cube": 0,
+          "spatula": 0,
+          "tesla door handle": 0,
+          "toy cat statue": 8,
+          "toy elephant": 7,
+          "waldo": 0
+        }
+      },
+      {
+        "job": {
+          "benchmark": "lerf",
+          "name": "ramen",
+          "scene": "output/system_map_rebuild/ramen/complete/scene.json",
+          "queries": "configs/consolidated/ramen.integration-queries.json",
+          "source_evidence": "output/research_consolidation/source_evidence/ramen",
+          "outputs": [
+            "semantic_2d",
+            "selected_gaussian_projection_2d"
+          ],
+          "input_track": "frozen_declared_rgb_geometry",
+          "access": "source-assisted",
+          "task": "text_union"
+        },
+        "metrics": {
+          "semantic_iou": 0.5988576233741159,
+          "ap": 0.8134094061879783
+        },
+        "choices": {
+          "bowl": 2,
+          "chopsticks": 0,
+          "corn": 0,
+          "egg": 0,
+          "glass of water": 4,
+          "hand": 0,
+          "kamaboko": 0,
+          "napkin": 2,
+          "nori": 1,
+          "onion segments": 0,
+          "plate": 3,
+          "sake cup": 0,
+          "spoon": 0,
+          "wavy noodles": 2
+        }
+      },
+      {
+        "job": {
+          "benchmark": "lerf",
+          "name": "teatime",
+          "scene": "output/system_map_rebuild/teatime/complete/scene.json",
+          "queries": "configs/consolidated/teatime.queries.json",
+          "source_evidence": "output/research_consolidation/source_run/teatime/detections",
+          "outputs": [
+            "semantic_2d",
+            "selected_gaussian_projection_2d"
+          ],
+          "input_track": "frozen_declared_rgb_geometry",
+          "access": "source-assisted",
+          "task": "text_union"
+        },
+        "metrics": {
+          "semantic_iou": 0.774124572211403,
+          "ap": 0.8972197223078479
+        },
+        "choices": {
+          "apple": 0,
+          "bag of cookies": 2,
+          "bear nose": 1,
+          "coffee": 4,
+          "coffee mug": 2,
+          "dall-e brand": 0,
+          "hooves": 8,
+          "paper napkin": 7,
+          "plate": 0,
+          "sheep": 0,
+          "stuffed bear": 0,
+          "tea in a glass": 7,
+          "three cookies": 2,
+          "yellow pouf": 0
+        }
+      },
+      {
+        "job": {
+          "benchmark": "lerf",
+          "name": "waldo_kitchen",
+          "scene": "output/system_map_rebuild/waldo_kitchen/complete/scene.json",
+          "queries": "configs/consolidated/waldo_kitchen.queries.json",
+          "source_evidence": "output/research_consolidation/source_run/waldo_kitchen/detections",
+          "outputs": [
+            "semantic_2d",
+            "selected_gaussian_projection_2d"
+          ],
+          "input_track": "frozen_declared_rgb_geometry",
+          "access": "source-assisted",
+          "task": "text_union"
+        },
+        "metrics": {
+          "semantic_iou": 0.7177123527825725,
+          "ap": 0.8848199576940124
+        },
+        "choices": {
+          "Stainless steel pots": 1,
+          "cabinet": 7,
+          "dark cup": 2,
+          "frog cup": 2,
+          "ketchup": 0,
+          "knife": 2,
+          "ottolenghi": 0,
+          "plastic ladle": 3,
+          "plate": 0,
+          "pot": 0,
+          "pour-over vessel": 0,
+          "red cup": 3,
+          "refrigerator": 1,
+          "sink": 0,
+          "spatula": 7,
+          "spoon": 0,
+          "toaster": 3,
+          "yellow desk": 8
+        }
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "fern",
+          "scene": "configs/pipeline/nvos_all_sources/fern.scene.json",
+          "queries": "configs/consolidated/nvos/fern.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fern/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/fern.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "metrics": {
+          "iou": 0.8218514323234558,
+          "ap": 0.9470451039613963
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "flower",
+          "scene": "configs/pipeline/nvos_all_sources/flower.scene.json",
+          "queries": "configs/consolidated/nvos/flower.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/flower/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/flower.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "metrics": {
+          "iou": 0.8652698397636414,
+          "ap": 0.9932169493177497
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "fortress",
+          "scene": "configs/pipeline/nvos_all_sources/fortress.scene.json",
+          "queries": "configs/consolidated/nvos/fortress.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fortress/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/fortress.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "metrics": {
+          "iou": 0.97231525182724,
+          "ap": 0.999770093787286
+        },
+        "choice": 3
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "horns_center",
+          "scene": "configs/pipeline/nvos_all_sources/horns_center.scene.json",
+          "queries": "configs/consolidated/nvos/horns_center.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_center/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/horns_center.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "metrics": {
+          "iou": 0.9572755098342896,
+          "ap": 0.9977812086259378
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "horns_left",
+          "scene": "configs/pipeline/nvos_all_sources/horns_left.scene.json",
+          "queries": "configs/consolidated/nvos/horns_left.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_left/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/horns_left.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "metrics": {
+          "iou": 0.9300852417945862,
+          "ap": 0.9929267286396731
+        },
+        "choice": 6
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "leaves",
+          "scene": "configs/pipeline/nvos_all_sources/leaves.scene.json",
+          "queries": "configs/consolidated/nvos/leaves.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/leaves/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/leaves.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "metrics": {
+          "iou": 0.9415841698646545,
+          "ap": 0.9982144317243484
+        },
+        "choice": 6
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "orchids",
+          "scene": "configs/pipeline/nvos_all_sources/orchids.scene.json",
+          "queries": "configs/consolidated/nvos/orchids.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/orchids/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/orchids.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "metrics": {
+          "iou": 0.6814108490943909,
+          "ap": 0.9782980182226543
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "nvos",
+          "name": "trex",
+          "scene": "configs/pipeline/nvos_all_sources/trex.scene.json",
+          "queries": "configs/consolidated/nvos/trex.query.json",
+          "reference_tracks": "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/trex/tracks.pt",
+          "evaluation": "configs/consolidated/nvos/trex.evaluation.json",
+          "prompt_contract": "retained official-positive-derived reference SAM mask; cached authorized-source tracks",
+          "input_track": "frozen_declared_geometry_no_target_rgb",
+          "access": "source-assisted",
+          "task": "reference_instance"
+        },
+        "metrics": {
+          "iou": 0.7551294565200806,
+          "ap": 0.9390971605355347
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0000_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0000_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0000_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0000_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.5350768048374911,
+          "miou_15": 0.5152063011464776,
+          "miou_10": 0.682831075829415
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0062_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0062_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0062_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0062_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.7365824284883065,
+          "miou_15": 0.7383330766329093,
+          "miou_10": 0.8732496676316251
+        },
+        "choice": 4
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0070_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0070_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0070_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0070_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.41181059030434436,
+          "miou_15": 0.4625610788161084,
+          "miou_10": 0.6051633804048397
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0097_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0097_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0097_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0097_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.6245688459275734,
+          "miou_15": 0.6140295191087699,
+          "miou_10": 0.6600051905714793
+        },
+        "choice": 4
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0140_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0140_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0140_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0140_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.6331003979272848,
+          "miou_15": 0.6685467165262015,
+          "miou_10": 0.7293411937868065
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0200_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0200_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0200_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0200_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.6650432024412236,
+          "miou_15": 0.6648072070421769,
+          "miou_10": 0.6971404693063304
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0347_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0347_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0347_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0347_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.626481964898848,
+          "miou_15": 0.6018009767944041,
+          "miou_10": 0.7370185147751059
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0400_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0400_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0400_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0400_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.7505443262634134,
+          "miou_15": 0.7509782520921355,
+          "miou_10": 0.7653288727649018
+        },
+        "choice": 8
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0590_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0590_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0590_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0590_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.5869001612825626,
+          "miou_15": 0.6497870406232482,
+          "miou_10": 0.7805535445756188
+        },
+        "choice": 0
+      },
+      {
+        "job": {
+          "benchmark": "scannet",
+          "name": "scene0645_00",
+          "scene": "configs/pipeline/scannet_dual_native/scene0645_00.scene.json",
+          "queries": "configs/consolidated/scannet_native/scene0645_00.queries.json",
+          "evaluation": "configs/consolidated/scannet_native/scene0645_00.evaluation.json",
+          "input_track": "provided_unlabelled_mesh",
+          "outputs": [
+            "point_miou_19_15_10"
+          ],
+          "access": "source-assisted",
+          "task": "category_partition"
+        },
+        "metrics": {
+          "miou_19": 0.5515726993777639,
+          "miou_15": 0.6073650776703657,
+          "miou_10": 0.7206504074435773
+        },
+        "choice": 0
+      }
+    ],
+    "rule": "label oracle restricted to candidates that do not harm ANY reported metric within a decision unit",
+    "uses_evaluation_labels": true,
+    "inference_policy": false,
+    "no_claim_of_uniform_achievability": true
+  },
+  "independent_target_preparation": {
+    "complete": true,
+    "target_manifests_ready": true,
+    "utility_training_ready": false,
+    "rooms": 29,
+    "complete_menu_targets": 29,
+    "cross_view_menu_episodes": 87,
+    "binary_union_targets": 551,
+    "room_counts": {
+      "fit": 22,
+      "calibration": 3,
+      "validation": 4
+    },
+    "class_room_coverage": {
+      "fit": {
+        "1": 21,
+        "2": 22,
+        "3": 12,
+        "4": 4,
+        "5": 18,
+        "6": 6,
+        "7": 16,
+        "8": 16,
+        "9": 16,
+        "10": 3,
+        "11": 7,
+        "12": 4,
+        "14": 5,
+        "16": 6,
+        "24": 7,
+        "28": 1,
+        "33": 1,
+        "34": 6,
+        "36": 1
+      },
+      "calibration": {
+        "1": 2,
+        "2": 3,
+        "3": 2,
+        "4": 1,
+        "5": 3,
+        "6": 1,
+        "7": 2,
+        "8": 2,
+        "9": 1,
+        "10": 0,
+        "11": 2,
+        "12": 0,
+        "14": 1,
+        "16": 1,
+        "24": 1,
+        "28": 0,
+        "33": 0,
+        "34": 0,
+        "36": 0
+      },
+      "validation": {
+        "1": 4,
+        "2": 4,
+        "3": 2,
+        "4": 0,
+        "5": 3,
+        "6": 0,
+        "7": 3,
+        "8": 2,
+        "9": 2,
+        "10": 0,
+        "11": 1,
+        "12": 2,
+        "14": 0,
+        "16": 0,
+        "24": 2,
+        "28": 0,
+        "33": 0,
+        "34": 2,
+        "36": 0
+      }
+    },
+    "report_hashes": {
+      "scene0271_00.json": "a3b7fa29cf01032f27b9533a76e436bd4aa8f68299aff8e16739890ea26ea716",
+      "scene0059_00.json": "e859811ae807c41784c115af68bd0eac18e2209345960bc8fe29a51bd1a9737a",
+      "scene0226_00.json": "b8c49c388cca04009c3c0131914187d4484b969846cf9df6246c7f6bca020d56",
+      "scene0167_00.json": "0d440e455ca2ac8d554b09d73b3e839a10567bd184dd4c589ec1f3ffb0c82535",
+      "scene0211_00.json": "bf407b57d2dd34a500518eca12f50d0206e7fa335c635f7788f4bd72610dbe61",
+      "scene0532_00.json": "0d635f3f817ec81baf0e6f9739e11782b9dda70aaf4f367b41a7796ea6f42b35",
+      "scene0611_00.json": "61726f202ed6f68906b58f3f677f7fafc941835b5d8b3109a5d0f288cb27cc5e",
+      "scene0057_00.json": "da9b270d2372ba860dbc2c7bb64ba6f2629f5ae7603207915e3fe7ee19461fbb",
+      "scene0344_00.json": "cd1fd47b51ce07e6dc58b5835f4185baefd3f9a1caf377184abcfd81b5c11c0f",
+      "scene0374_00.json": "6864acacb58f88007395d75eda729a1e821f84d28024f9af9edc3e2f3d4966fc",
+      "scene0483_00.json": "23cc96f9e8d176132dda24757945bbb2582a0183490c48a518d8492eb9c94f3f",
+      "scene0390_00.json": "53181e2f676bbdf7c1abd2a76222cee5a9f2a15c280fa308ba70cea258d12fff",
+      "scene0074_00.json": "eb8a53bf0bc16cabde27ac3546682ef5f320a0d27f4b79c6b373945e54a08887",
+      "scene0065_00.json": "993ac1bbc69a3212b85665da7ee20ce5d465edc4809b4e6441dbbabb5e728bdc",
+      "scene0117_00.json": "8b6080fc92ff63f9dec67d1e4c3d4041c19a064e8bd73cd1750c129bf28fa601",
+      "scene0577_00.json": "be3e8c0767f1e2fdc0130e5b7781f98cd15da66bb9e970e17c8aa153acee9d77",
+      "scene0547_00.json": "63f9204f27af7a56405b26559d81707b388c94a90b81a4dab1c6f0a9340d0837",
+      "scene0331_00.json": "872cb1c38c2d4fdb74d56acd0d6f0d9e6ec012a81a487dacfd1c1df25e898aba",
+      "scene0168_00.json": "ade155af34f5992530b339376a80730e48652c4d28a2e079f2ec5b3cd5ceb5ee",
+      "scene0465_00.json": "de284d4cc1478153c91c9d8e0fc6064ed608208b8d91ef6d08257665fafee7c5",
+      "scene0463_00.json": "9640f5ca373c68d5fe16b4a985a33944e4956123af4c819e0e7be3e57c503daf",
+      "scene0317_00.json": "fa795ebd2e9ca8da1a30a52080dc238fc6840aea4700af504ecb59e17120aff2",
+      "scene0209_00.json": "ca778a84b7fdf0514d669eabf564df4f942063e1b7b22d757a46da9ecadb529c",
+      "scene0437_00.json": "c0dd7136ae54a449b351058e0fc9189fde3b50069128d9171f3e292c36daee7d",
+      "scene0024_00.json": "404295acf96d26019070682905cddcaf3f00d0d9732e4af88c8c04721931eddf",
+      "scene0540_00.json": "e906b35709bee6a699cb6ed7bf4e51003360be64358002d27ec6a7f86b94ae40",
+      "scene0283_00.json": "d99b424ad9f9ec50520f91aa1b50d2a70c5cb67a69c5eca70ceca58b360dff79",
+      "scene0508_00.json": "fc041cd85b9abdd42cc17303827a94e668f8e235c401e3ac80383d6d101184a1",
+      "scene0597_00.json": "b9102efae09d4a03f689ac96efcb2160a01e813bfd8baacec2e81130143e21e3"
+    },
+    "missing_fit_classes": [],
+    "missing_calibration_classes": [
+      "10",
+      "12",
+      "28",
+      "33",
+      "34",
+      "36"
+    ],
+    "dense_artifact_bytes": 0,
+    "study_bytes": 2094575914,
+    "independent_final_test": false,
+    "calibration_and_development_previously_opened": true,
+    "default_changed": false
+  },
+  "source_hashes": {
+    "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/source_decision_audit_v1/summary.json": "5db687d4e6d16ece0fb819a7933243905d8e02a2e920ee4073cbb6dbb8127c43",
+    "/mnt/pool/sqy/results/RADIO-GS/output/tmm_response_20261016/study/cross_task_targets_v1/summary.json": "6cd99a25545f7472f9a439a963f0b6087bec0b4e42d1af7230737191901196b6"
+  },
+  "default_changed": false,
+  "source_candidate_replay": "E02 dense candidates verified exactly; larger historical pool uses retained scoring receipts",
+  "uqis_fresh_inference": false
+}

@@ -1,0 +1,694 @@
+{
+  "schema": "tmm.response_refinement.control_comparison.v1",
+  "rows": [
+    {
+      "family": "lerf",
+      "metric": "semantic_iou",
+      "label": "LERF2D IoU",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 70.40067569509945,
+        "partial": 57.62178827061044,
+        "complement": 69.78384183976678,
+        "observable": 70.93191302012214
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -12.778887424489008,
+          "scene_bootstrap95_pp": [
+            -18.466452975840856,
+            -7.534223486384357
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 4,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -0.6168338553326658,
+          "scene_bootstrap95_pp": [
+            -1.4184779088412036,
+            0.10997756701350281
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 3,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": 0.5312373250227043,
+          "scene_bootstrap95_pp": [
+            0.1752002006203235,
+            0.887274449425085
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 0,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "lerf",
+      "metric": "ap",
+      "label": "LERF2D AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 87.61927775455382,
+        "partial": 80.1015986096294,
+        "complement": 87.14806899447694,
+        "observable": 87.38742229777726
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -7.517679144924421,
+          "scene_bootstrap95_pp": [
+            -12.365499775068264,
+            -4.106029692117391
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 4,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -0.47120876007686885,
+          "scene_bootstrap95_pp": [
+            -1.718730973731708,
+            0.4733724043552934
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 3,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -0.23185545677654185,
+          "scene_bootstrap95_pp": [
+            -0.562777491211025,
+            0.05829432819990932
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 3,
+          "scene_count": 4,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "lerf",
+      "metric": "selected_projection_iou",
+      "label": "LERF selected projection IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 66.96327365836882,
+        "partial": 66.96327365836882,
+        "complement": 66.96327365836882,
+        "observable": 66.96327365836882
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "complement": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "metric": "iou",
+      "label": "NVOS IoU",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 86.5134172141552,
+        "partial": 86.35753020644188,
+        "complement": 86.5074597299099,
+        "observable": 86.48964017629623
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -0.15588700771331787,
+          "scene_bootstrap95_pp": [
+            -0.8459590375423431,
+            0.725632905960083
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 3,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -0.005957484245300293,
+          "scene_bootstrap95_pp": [
+            -0.023487210273742676,
+            0.008791300157705908
+          ],
+          "improved_scenes": 4,
+          "degraded_scenes": 3,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -0.023777037858963013,
+          "scene_bootstrap95_pp": [
+            -0.14227937108704022,
+            0.06213337182998657
+          ],
+          "improved_scenes": 5,
+          "degraded_scenes": 2,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "metric": "ap",
+      "label": "NVOS AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 98.02224516003605,
+        "partial": 97.70420189348319,
+        "complement": 97.98845649140395,
+        "observable": 97.99264227031337
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -0.3180432665528504,
+          "scene_bootstrap95_pp": [
+            -0.7742170352182454,
+            -0.07709133492253561
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 6,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -0.03378866863208568,
+          "scene_bootstrap95_pp": [
+            -0.0817550602815083,
+            0.005030164971187294
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 5,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -0.02960288972266717,
+          "scene_bootstrap95_pp": [
+            -0.058212210761190195,
+            -0.006523747063452166
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 5,
+          "scene_count": 7,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_19",
+      "label": "ScanNet mIoU19",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 61.011490548066284,
+        "partial": 58.30102424846822,
+        "complement": 58.06574198474086,
+        "observable": 60.59111841917473
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -2.7104662995980795,
+          "scene_bootstrap95_pp": [
+            -4.244709496804841,
+            -1.3108758124524653
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 9,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -2.9457485633254175,
+          "scene_bootstrap95_pp": [
+            -4.649804556398915,
+            -1.2650052584810936
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 8,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -0.42037212889155134,
+          "scene_bootstrap95_pp": [
+            -1.2160074767569498,
+            0.26251476671235885
+          ],
+          "improved_scenes": 3,
+          "degraded_scenes": 7,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_15",
+      "label": "ScanNet mIoU15",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 62.527589041597786,
+        "partial": 59.27538858065311,
+        "complement": 59.13648916274119,
+        "observable": 61.87861767866257
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -3.2522004609446697,
+          "scene_bootstrap95_pp": [
+            -4.030625454433271,
+            -2.5381584536835278
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 10,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -3.3910998788565885,
+          "scene_bootstrap95_pp": [
+            -4.682707091022562,
+            -2.2676475834917764
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 9,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -0.6489713629352067,
+          "scene_bootstrap95_pp": [
+            -1.1974435879443774,
+            -0.15599645022478323
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 9,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "metric": "miou_10",
+      "label": "ScanNet mIoU10",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 72.48606102956524,
+        "partial": 70.29909101237519,
+        "complement": 69.9335684255951,
+        "observable": 72.0284747444541
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -2.1869700171900393,
+          "scene_bootstrap95_pp": [
+            -4.000867049956088,
+            -0.7428327149106356
+          ],
+          "improved_scenes": 2,
+          "degraded_scenes": 8,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -2.5524926039701237,
+          "scene_bootstrap95_pp": [
+            -4.113101738950201,
+            -1.3872258773113657
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 10,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -0.45758628511111343,
+          "scene_bootstrap95_pp": [
+            -0.9885433440210215,
+            -0.12661834147798673
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 9,
+          "scene_count": 10,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "text_ap",
+      "label": "UQIS text AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 26.595870475621116,
+        "partial": 24.130476611717356,
+        "complement": 22.33513337011452,
+        "observable": 25.980645061728424
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -2.4653938639037625,
+          "scene_bootstrap95_pp": [
+            -4.835523507502302,
+            -0.7392813370114917
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -4.2607371055065935,
+          "scene_bootstrap95_pp": [
+            -5.435814566926228,
+            -3.1227954424662143
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -0.615225413892689,
+          "scene_bootstrap95_pp": [
+            -1.4073666231562865,
+            -0.016774158962152702
+          ],
+          "improved_scenes": 3,
+          "degraded_scenes": 6,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "text_selected_iou",
+      "label": "UQIS text actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 16.386530164545416,
+        "partial": 16.386530164545416,
+        "complement": 16.386530164545416,
+        "observable": 16.386530164545416
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "complement": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "image_ap",
+      "label": "UQIS image AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 59.308781794005874,
+        "partial": 54.36582699927974,
+        "complement": 50.80869500135553,
+        "observable": 57.18717739801118
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -4.942954794726122,
+          "scene_bootstrap95_pp": [
+            -7.441174095115704,
+            -2.8007795459929317
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -8.500086792650334,
+          "scene_bootstrap95_pp": [
+            -10.154339639303313,
+            -6.90103793519313
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -2.1216043959946838,
+          "scene_bootstrap95_pp": [
+            -3.426062294404919,
+            -0.8923576771749578
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "image_selected_iou",
+      "label": "UQIS image actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 39.897960281086924,
+        "partial": 39.897960281086924,
+        "complement": 39.897960281086924,
+        "observable": 39.897960281086924
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "complement": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_2d_ap",
+      "label": "UQIS point_2d AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 75.79009711011095,
+        "partial": 67.18263659843134,
+        "complement": 64.1557338846188,
+        "observable": 71.92747270697531
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -8.607460511679617,
+          "scene_bootstrap95_pp": [
+            -11.080079661858186,
+            -5.9545994553243515
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -11.634363225492159,
+          "scene_bootstrap95_pp": [
+            -13.244795215947178,
+            -9.974440921252008
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -3.862624403135653,
+          "scene_bootstrap95_pp": [
+            -5.875306305896737,
+            -2.040794044518689
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_2d_selected_iou",
+      "label": "UQIS point_2d actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 49.73567540572873,
+        "partial": 49.73567540572873,
+        "complement": 49.73567540572873,
+        "observable": 49.73567540572873
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "complement": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_3d_ap",
+      "label": "UQIS point_3d AP",
+      "independent_set_head_frozen": false,
+      "values_percent": {
+        "baseline": 75.32525076702996,
+        "partial": 67.06732159489864,
+        "complement": 63.996735003972645,
+        "observable": 72.08655946513437
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": -8.257929172131309,
+          "scene_bootstrap95_pp": [
+            -10.673771142937138,
+            -5.800469423945184
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "complement": {
+          "delta_pp": -11.328515763057306,
+          "scene_bootstrap95_pp": [
+            -12.993750264477296,
+            -9.575611449981968
+          ],
+          "improved_scenes": 0,
+          "degraded_scenes": 9,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        },
+        "observable": {
+          "delta_pp": -3.23869130189558,
+          "scene_bootstrap95_pp": [
+            -4.8451499427454445,
+            -1.74044589033666
+          ],
+          "improved_scenes": 1,
+          "degraded_scenes": 8,
+          "scene_count": 9,
+          "unit": "scene; horns requests clustered together",
+          "samples": 2000
+        }
+      }
+    },
+    {
+      "family": "uqis",
+      "metric": "point_3d_selected_iou",
+      "label": "UQIS point_3d actual IoU",
+      "independent_set_head_frozen": true,
+      "values_percent": {
+        "baseline": 49.04698335651834,
+        "partial": 49.04698335651834,
+        "complement": 49.04698335651834,
+        "observable": 49.04698335651834
+      },
+      "effects": {
+        "partial": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "complement": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        },
+        "observable": {
+          "delta_pp": 0.0,
+          "status": "unchanged independent selected-set output"
+        }
+      }
+    }
+  ],
+  "source_sha256": {
+    "paper/tmm_response/post_response_v1_feedback.json": "62ded188ce22cabd718703e272a456e23e8786eea31f8ceccce2754bfad8119d",
+    "paper/tmm_response/post_response_v2_feedback.json": "742f52dfb938cc1366c983f76afeecfcf53779831938b46b372f78e40be2ab03"
+  },
+  "independent_test": false,
+  "default_changed": false,
+  "task_winner_selection": false,
+  "second_candidate_designed_after_first_feedback": true,
+  "selection_heads_frozen": true
+}

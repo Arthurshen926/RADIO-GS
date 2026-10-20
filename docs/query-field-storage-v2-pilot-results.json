@@ -1,0 +1,104 @@
+{
+  "status": "validated",
+  "observed_completion_utc": "2026-10-12T19:06:34Z",
+  "execution_job": "wc_job_UXlkcjtKuGXVQDo7",
+  "execution_seconds": 200.5726364199072,
+  "root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views",
+  "receipt": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/pilot_execution_receipt.json",
+  "artifacts": {
+    "untrained": {
+      "source_field_sha256": "ae60a46be5769e47a23d0e21aa1ca9d51bafa2ba5d48be861c387e4ce3507920",
+      "manifest_file_sha256": "bc95428e05ccf6358b4328e9a4f197f55aa96aa92eea8787bb75dc56476bb638",
+      "state_identity": "d59fc50fca585720bca89b5a31aebdb249ae60ba826c2878f6a8deb547a428bb",
+      "new_blob_bytes": 2657560467
+    },
+    "trained": {
+      "source_field_sha256": "e926257bb3ee3c924246c779a0f640f98e8b4d7a8ddb77289036469cb54dbe8f",
+      "manifest_file_sha256": "7f630c1a718d032a68ba6ac25952cc897404d4ec7bc35c548d7a1eec22fe02da",
+      "state_identity": "8d85eb7d5e070a52cf221da00899ea76a6e5081f8a9c2534365fa976a5518558",
+      "new_blob_bytes": 70971912
+    }
+  },
+  "verification": {
+    "source_sha256_recomputed": true,
+    "raw_state_key_dtype_shape_value_exact": true,
+    "normalized_science_spec_exact": true,
+    "shared_keys": [
+      "local.codes",
+      "normals",
+      "observed",
+      "opacities",
+      "quaternions",
+      "scales",
+      "semantic.codes",
+      "xyz"
+    ],
+    "unique_blobs": 16,
+    "independent_v1_export": true,
+    "export_field_pt_sha256_matches_original_trained": true,
+    "cold_new_process_state_exact": true,
+    "cold_query_file_access_denied": true,
+    "cold_query_scores_and_selection_exact": true,
+    "original_source_stat_unchanged": true
+  },
+  "storage": {
+    "old_pair_field_pt": {
+      "logical_bytes": 5315127242,
+      "allocated_bytes": 5665829888
+    },
+    "old_pair_complete_packages": {
+      "logical_bytes": 5315129218,
+      "allocated_bytes": 5665839104
+    },
+    "new_pair_required_closure": {
+      "logical_bytes": 2728540869,
+      "allocated_bytes": 2915525632,
+      "files": 18
+    },
+    "new_all_pilot_files_including_logs_receipts": {
+      "logical_bytes": 2728556585,
+      "allocated_bytes": 2915557376,
+      "files": 24
+    },
+    "model_pair_comparison_potential_reduction": {
+      "logical_bytes": 2586588349,
+      "allocated_bytes": 2750313472
+    },
+    "old_payload_retirement_minus_entire_new_pilot_cost": {
+      "logical_bytes": 2586570657,
+      "allocated_bytes": 2750272512
+    },
+    "actual_freed_bytes": 0,
+    "originals_preserved": true,
+    "local_standalone_export": {
+      "path": "/tmp/radiogs-v2-real-deploy-20261012",
+      "field_pt_bytes": 2657563621,
+      "field_pt_sha256": "e926257bb3ee3c924246c779a0f640f98e8b4d7a8ddb77289036469cb54dbe8f",
+      "preserved": true
+    }
+  },
+  "retirement_proposal": {
+    "status": "NOT_EXECUTED_REQUIRES_EXACT_CONFIRMATION_AND_LEGACY_REPLAY_DECISION",
+    "payload_candidates": [
+      "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/figurines_18views_v1/models/untrained/field.pt",
+      "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/figurines_18views_v1/models/trained/field.pt"
+    ],
+    "retain": "Original manifests, provenance and scientific receipts; both v2 manifests and all 16 addressed blobs. Do not alter frozen results.",
+    "legacy_direct_readers": [
+      "configs/query_field/supported_anchor_control.json:7",
+      "configs/query_field/lerf_two_scene_probe.json:16",
+      "configs/query_field/figurines_native_transfer.json:4",
+      "configs/query_field/lerf_readout_study.json:7",
+      "configs/query_field/figurines_support_audit.json:2"
+    ],
+    "risk": "Removing original field.pt breaks direct old v1 loads until on-demand standalone rehydration or versioned reader/config migration. Original trained field.pt was reconstructed with its exact original SHA, but no legacy defaults were redirected.",
+    "scope_limit": "Only local source/config/docs reference scan performed. No complete output provenance dependency graph scan.",
+    "temporary_export_candidate": "The local /tmp standalone duplicate is preserved; it can be separately cleaned after confirmation, since v2 regenerates it exactly."
+  },
+  "limitations": [
+    "No scientific accuracy claim or new training run.",
+    "Only these two existing variants migrated; other legacy runners remain v1.",
+    "No original payload, source or temporary standalone deployment deleted.",
+    "Actual physical free-space recovery remains zero while both originals are retained."
+  ]
+}

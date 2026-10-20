@@ -1,0 +1,20 @@
+\section{Matched reference-intervention residuals}
+N13 was fixed before N12 target scores. It reuses the exact static response b and paired original/completed-reference memory responses p and q. The primary response is clip(b+q-p,0,1); a fixed secondary uses the equivalent log-odds difference. Unchanged paired teacher values retain b exactly. The intervention may add or remove foreground and does not guarantee correctness. All branches undergo actual native-ray 3D fitting; 56 predictions precede target GT. Full N12 replacement is the matched control; earlier N11 is a separate candidate, not an additive causal comparison.
+\begin{center}\small\resizebox{\linewidth}{!}{\input{tables/nvos_reference_delta.tex}}\end{center}
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & Static & Replacement & Probability delta & Log-odds delta \\\midrule
+fern & 83.92 & 83.25 & 83.14 & 81.07 \\
+flower & 85.98 & 96.60 & 94.51 & 94.57 \\
+fortress & 97.36 & 97.80 & 97.52 & 97.59 \\
+horns\_center & 97.30 & 97.12 & 96.57 & 94.78 \\
+horns\_left & 93.68 & 84.48 & 83.71 & 83.29 \\
+leaves & 95.61 & 94.84 & 94.71 & 94.63 \\
+orchids & 73.17 & 94.52 & 94.40 & 88.63 \\
+trex & 83.71 & 83.21 & 81.41 & 80.98 \\
+\bottomrule\end{tabular}\end{center}
+probability native vs static native: +1.9045 IoU points, +0.4596 AP points; 3 improved and 5 harmed tasks.
+probability native vs constrained memory native: -0.7305 IoU points, -1.7347 AP points; 0 improved and 8 harmed tasks.
+probability native vs log odds native: +1.3053 IoU points, +0.3000 AP points; 6 improved and 2 harmed tasks.
+probability native vs probability image: -0.1680 IoU points, +1.3063 AP points; 1 improved and 7 harmed tasks.
+\begin{figure}[ht]\centering\includegraphics[width=.85\linewidth,height=.75\textheight,keepaspectratio]{../../output/tmm_response_20261018/study/nvos_reference_delta_spatial_v1/errors.png}
+\caption{All eight N13 tasks. Green TP, red FP, blue FN; native-grid display resizing only. Scores use original GT resolution.}\end{figure}

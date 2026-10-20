@@ -1,0 +1,604 @@
+{
+  "schema": "radio_gs.unified_menu_function_transfer.v1",
+  "date": "2026-10-15",
+  "branch": "codex/unified-compact-multiteacher",
+  "worktree": "/root/RADIO-GS-query-field",
+  "status": "completed source-development pilots; no public-default promotion; not five-benchmark closure",
+  "architecture": {
+    "per_gaussian_trainable_state": "one FP32 96D latent, shared by semantic/local/member heads",
+    "scene_shared_native_decoder_basis": [
+      64,
+      1536
+    ],
+    "native_basis_bytes": 393216,
+    "per_row_native_mode_mass": "computed transiently from z; never exported",
+    "query_rule": "native basis competition followed by entropy-reliability-weighted integration",
+    "frozen_geometry": true,
+    "shared_across_scenes": false,
+    "non_category_readout": "v1 native heads and soft-prototype member retained, not complete mode transfer"
+  },
+  "controls": {
+    "arms": [
+      "mean",
+      "reliable_no_mass",
+      "reliable"
+    ],
+    "teacher_views": 35,
+    "auxiliary_views": 18,
+    "held_views": [
+      180,
+      560
+    ],
+    "training_query_directions": 2656,
+    "development_query_directions": 176,
+    "benchmark_class_names_for_training": false,
+    "observed_gaussians": 46199,
+    "total_gaussians": 51610,
+    "source_and_capacity_matched_within_dictionary_study": true,
+    "basis_exact_across_arms": true,
+    "free_modes_vs_dictionary_not_single_factor_ablation": true,
+    "model_selection": "held-view menu KL + 0.25 partial membership BCE + 0.25 native preservation",
+    "all_predictions_sealed_before_target_labels": true,
+    "reporting": "complete declared 19-class menu followed by 19/15/10 subset restriction; nearest Gaussian centre; unobserved void remains in denominator",
+    "independent_final_test": false
+  },
+  "config": {
+    "path": "/root/RADIO-GS-query-field/configs/query_field/unified_dictionary_pilot.json",
+    "sha256": "9f324f58b3b11bd2b37fadddbf0be959855524447c4a8561531bdd33e067ef4b"
+  },
+  "metrics_percent": {
+    "mean": {
+      "native": {
+        "19": 48.39067358410108,
+        "15": 48.342135238750686,
+        "10": 49.23013647530319
+      },
+      "member": {
+        "19": 29.236743499291247,
+        "15": 29.0741093459402,
+        "10": 41.836648144417836
+      },
+      "typed": {
+        "19": 50.54232479438695,
+        "15": 50.45331208803342,
+        "10": 51.75763123216207
+      }
+    },
+    "reliable": {
+      "native": {
+        "19": 47.39014742639395,
+        "15": 47.27364510164293,
+        "10": 47.73447828628785
+      },
+      "member": {
+        "19": 28.562775753375806,
+        "15": 28.278621977739583,
+        "10": 39.475463878269935
+      },
+      "typed": {
+        "19": 48.998709528727886,
+        "15": 48.83559211998347,
+        "10": 49.743651362956825
+      }
+    },
+    "reliable_no_mass": {
+      "native": {
+        "19": 47.9117940415394,
+        "15": 47.81167018358235,
+        "10": 48.169767968782104
+      },
+      "member": {
+        "19": 34.803692708539906,
+        "15": 34.3518446842356,
+        "10": 44.70615944785354
+      },
+      "typed": {
+        "19": 50.023796324665305,
+        "15": 49.88098939807461,
+        "10": 50.73814966388057
+      }
+    },
+    "base_v1": {
+      "native": {
+        "19": 43.327344717686735,
+        "15": 43.42608579007136,
+        "10": 49.33429046365884
+      },
+      "member": {
+        "19": 29.466628806115924,
+        "15": 29.808507664389822,
+        "10": 41.250945759361294
+      },
+      "typed": {
+        "19": 45.2704260794786,
+        "15": 45.296097949281574,
+        "10": 51.64527951081554
+      }
+    },
+    "teacher_same_domain": {
+      "native": {
+        "19": 45.82740092030133,
+        "15": 45.790579619060296,
+        "10": 50.6865009265169
+      },
+      "member": {
+        "19": 29.466628806115924,
+        "15": 29.808507664389822,
+        "10": 41.250945759361294
+      },
+      "typed": {
+        "19": 46.36198970337003,
+        "15": 46.33638801160678,
+        "10": 51.98640550486737
+      }
+    },
+    "basis_oracle": {
+      "native": {
+        "19": 47.884388094222814,
+        "15": 47.78253690099514,
+        "10": 47.87063145259992
+      },
+      "member": {
+        "19": 29.466628806115924,
+        "15": 29.808507664389822,
+        "10": 41.250945759361294
+      },
+      "typed": {
+        "19": 49.055217256428335,
+        "15": 48.92908257840256,
+        "10": 49.927206545440015
+      }
+    }
+  },
+  "free_mode_negative_result_percent": {
+    "mean": {
+      "native": {
+        "19": 15.851950411106873,
+        "15": 20.679927061012318,
+        "10": 34.21515701830352
+      },
+      "member": {
+        "19": 25.980128521732254,
+        "15": 25.334987253847054,
+        "10": 34.4559594744942
+      },
+      "typed": {
+        "19": 21.550344826150607,
+        "15": 26.83349043281848,
+        "10": 42.823516824506264
+      }
+    },
+    "reliable": {
+      "native": {
+        "19": 27.241319780563206,
+        "15": 34.6559888524656,
+        "10": 44.533082515076586
+      },
+      "member": {
+        "19": 29.768374622324206,
+        "15": 29.483702556038732,
+        "10": 37.66308432717802
+      },
+      "typed": {
+        "19": 31.051452271684894,
+        "15": 38.440188946252654,
+        "10": 48.58008711559385
+      }
+    },
+    "base_v1": {
+      "native": {
+        "19": 43.327344717686735,
+        "15": 43.42608579007136,
+        "10": 49.33429046365884
+      },
+      "member": {
+        "19": 29.466628806115924,
+        "15": 29.808507664389822,
+        "10": 41.250945759361294
+      },
+      "typed": {
+        "19": 45.2704260794786,
+        "15": 45.296097949281574,
+        "10": 51.64527951081554
+      }
+    },
+    "teacher_same_domain": {
+      "native": {
+        "19": 45.82740092030133,
+        "15": 45.790579619060296,
+        "10": 50.6865009265169
+      },
+      "member": {
+        "19": 29.466628806115924,
+        "15": 29.808507664389822,
+        "10": 41.250945759361294
+      },
+      "typed": {
+        "19": 46.36198970337003,
+        "15": 46.33638801160678,
+        "10": 51.98640550486737
+      }
+    }
+  },
+  "text_menu_function_diagnostics": {
+    "menu_comparison": {
+      "mean": {
+        "text_menu_kl": 0.9482889175415039,
+        "text_menu_top1_agreement": 0.1456308513879776
+      },
+      "reliable": {
+        "text_menu_kl": 0.3664570152759552,
+        "text_menu_top1_agreement": 0.4436459541320801
+      },
+      "base_v1": {
+        "text_menu_kl": 0.26643043756484985,
+        "text_menu_top1_agreement": 0.7297560572624207
+      },
+      "teacher_same_domain": {
+        "text_menu_kl": 0.0,
+        "text_menu_top1_agreement": 1.0
+      }
+    },
+    "dictionary_comparison": {
+      "mean": {
+        "text_menu_kl": 0.20603640377521515,
+        "text_menu_top1_agreement": 0.7210112810134888
+      },
+      "reliable": {
+        "text_menu_kl": 0.09405506402254105,
+        "text_menu_top1_agreement": 0.7908612489700317
+      },
+      "reliable_no_mass": {
+        "text_menu_kl": 0.10789363831281662,
+        "text_menu_top1_agreement": 0.7861858606338501
+      },
+      "base_v1": {
+        "text_menu_kl": 0.26643043756484985,
+        "text_menu_top1_agreement": 0.7297560572624207
+      },
+      "teacher_same_domain": {
+        "text_menu_kl": 0.0,
+        "text_menu_top1_agreement": 1.0
+      },
+      "basis_oracle": {
+        "text_menu_kl": 0.08326501399278641,
+        "text_menu_top1_agreement": 0.8010563254356384
+      }
+    }
+  },
+  "source_development": {
+    "mean": {
+      "selected_step": 1400,
+      "selected": {
+        "menu_kl": 1.0560852913185954,
+        "menu_top1_agreement": 0.64111328125,
+        "menu_l1": 0.6415594215504825,
+        "native_fidelity_to_base": {
+          "semantic": 0.9964433908462524,
+          "local": 0.9902911186218262
+        },
+        "membership": {
+          "native": {
+            "semantic": {
+              "kl": 0.0377869913354516,
+              "pair_agreement": 0.8678385416666666
+            },
+            "local": {
+              "kl": 0.10425836090386535,
+              "pair_agreement": 0.921875
+            }
+          },
+          "known_ray_membership_bce": 0.14379208026609072,
+          "sampled_known_domain_iou": 0.903012048192771,
+          "episodes": 48,
+          "frames": [
+            180,
+            560
+          ],
+          "selection_score": 0.10697069618618116,
+          "complete_object_accuracy": false,
+          "benchmark_accuracy": false
+        },
+        "native_basis_oracle_menu_kl": 0.19179634645115584,
+        "selection_score": 1.0936914977016083,
+        "held_view_query_directions": true,
+        "held_out_scene": false
+      },
+      "same_weights_swapped_integration": {
+        "menu_kl": 0.22755470941774547,
+        "menu_top1_agreement": 0.744354248046875,
+        "menu_l1": 0.40307790925726295,
+        "native_fidelity_to_base": {
+          "semantic": 0.9964433908462524,
+          "local": 0.9902911186218262
+        },
+        "membership": {
+          "native": {
+            "semantic": {
+              "kl": 0.0377869913354516,
+              "pair_agreement": 0.8678385416666666
+            },
+            "local": {
+              "kl": 0.10425836090386535,
+              "pair_agreement": 0.921875
+            }
+          },
+          "known_ray_membership_bce": 0.14379208026609072,
+          "sampled_known_domain_iou": 0.903012048192771,
+          "episodes": 48,
+          "frames": [
+            180,
+            560
+          ],
+          "selection_score": 0.10697069618618116,
+          "complete_object_accuracy": false,
+          "benchmark_accuracy": false
+        },
+        "native_basis_oracle_menu_kl": 0.19179634691681713,
+        "selection_score": 0.26516091580075835,
+        "held_view_query_directions": true,
+        "held_out_scene": false
+      }
+    },
+    "reliable_no_mass": {
+      "selected_step": 1600,
+      "selected": {
+        "menu_kl": 0.2072090646252036,
+        "menu_top1_agreement": 0.7659912109375,
+        "menu_l1": 0.3737563295289874,
+        "native_fidelity_to_base": {
+          "semantic": 0.9967564940452576,
+          "local": 0.9915366768836975
+        },
+        "membership": {
+          "native": {
+            "semantic": {
+              "kl": 0.038900355187555156,
+              "pair_agreement": 0.8645833333333334
+            },
+            "local": {
+              "kl": 0.10710926060467803,
+              "pair_agreement": 0.919921875
+            }
+          },
+          "known_ray_membership_bce": 0.13272647260843465,
+          "sampled_known_domain_iou": 0.9099153567110037,
+          "episodes": 48,
+          "frames": [
+            180,
+            560
+          ],
+          "selection_score": 0.10618642604822526,
+          "complete_object_accuracy": false,
+          "benchmark_accuracy": false
+        },
+        "native_basis_oracle_menu_kl": 0.19179634714964777,
+        "selection_score": 0.24185403641119288,
+        "held_view_query_directions": true,
+        "held_out_scene": false
+      },
+      "same_weights_swapped_integration": {
+        "menu_kl": 1.0332196610979736,
+        "menu_top1_agreement": 0.658447265625,
+        "menu_l1": 0.625952091999352,
+        "native_fidelity_to_base": {
+          "semantic": 0.9967564940452576,
+          "local": 0.9915366768836975
+        },
+        "membership": {
+          "native": {
+            "semantic": {
+              "kl": 0.038900355187555156,
+              "pair_agreement": 0.8645833333333334
+            },
+            "local": {
+              "kl": 0.10710926060467803,
+              "pair_agreement": 0.919921875
+            }
+          },
+          "known_ray_membership_bce": 0.13272647260843465,
+          "sampled_known_domain_iou": 0.9099153567110037,
+          "episodes": 48,
+          "frames": [
+            180,
+            560
+          ],
+          "selection_score": 0.10618642604822526,
+          "complete_object_accuracy": false,
+          "benchmark_accuracy": false
+        },
+        "native_basis_oracle_menu_kl": 0.19179634749889374,
+        "selection_score": 1.067864632883963,
+        "held_view_query_directions": true,
+        "held_out_scene": false
+      }
+    },
+    "reliable": {
+      "selected_step": 1600,
+      "selected": {
+        "menu_kl": 0.1939155263826251,
+        "menu_top1_agreement": 0.7764892578125,
+        "menu_l1": 0.3523938092403114,
+        "native_fidelity_to_base": {
+          "semantic": 0.995262622833252,
+          "local": 0.9868643879890442
+        },
+        "membership": {
+          "native": {
+            "semantic": {
+              "kl": 0.03913608410706123,
+              "pair_agreement": 0.869140625
+            },
+            "local": {
+              "kl": 0.10611022982629947,
+              "pair_agreement": 0.9244791666666666
+            }
+          },
+          "known_ray_membership_bce": 0.13605695388590297,
+          "sampled_known_domain_iou": 0.8992805755395683,
+          "episodes": 48,
+          "frames": [
+            180,
+            560
+          ],
+          "selection_score": 0.10663739543815609,
+          "complete_object_accuracy": false,
+          "benchmark_accuracy": false
+        },
+        "native_basis_oracle_menu_kl": 0.19179634714964777,
+        "selection_score": 0.23016388850131383,
+        "held_view_query_directions": true,
+        "held_out_scene": false
+      },
+      "same_weights_swapped_integration": {
+        "menu_kl": 1.0128792338073254,
+        "menu_top1_agreement": 0.66375732421875,
+        "menu_l1": 0.6163391983136535,
+        "native_fidelity_to_base": {
+          "semantic": 0.995262622833252,
+          "local": 0.9868643879890442
+        },
+        "membership": {
+          "native": {
+            "semantic": {
+              "kl": 0.03913608410706123,
+              "pair_agreement": 0.869140625
+            },
+            "local": {
+              "kl": 0.10611022982629947,
+              "pair_agreement": 0.9244791666666666
+            }
+          },
+          "known_ray_membership_bce": 0.13605695388590297,
+          "sampled_known_domain_iou": 0.8992805755395683,
+          "episodes": 48,
+          "frames": [
+            180,
+            560
+          ],
+          "selection_score": 0.10663739543815609,
+          "complete_object_accuracy": false,
+          "benchmark_accuracy": false
+        },
+        "native_basis_oracle_menu_kl": 0.1917963468004018,
+        "selection_score": 1.049127595926014,
+        "held_view_query_directions": true,
+        "held_out_scene": false
+      }
+    }
+  },
+  "attribution": [
+    "自由原生模式：区域描述子菜单KL改善，但真实文本菜单KL及类别mIoU退步；原开发查询分布不足以验收文本能力迁移。",
+    "固定原生模式后，可靠性汇总学生文本菜单KL从基线0.26643降至0.09406，19/15类精度提高；可通过共享小解码基保留能力，无须复制逐Gaussian教师字段。",
+    "可靠性学生10类native mIoU为47.7345，同域教师50.6865，固定基底+教师原权重参考47.8706；主要损失已存在于基底压缩阶段，继续增加学生训练步数不是主要修复方向。",
+    "可靠性读出更忠实于教师函数，但均值对照的类别任务精度更高；函数保真和任务最优读出不可等同。",
+    "同基底消融中，权重分布约束改善文本函数KL(0.10789到0.09406)，却未改善类别mIoU或源部分成员IoU；不把该额外约束当作已验证的精度贡献。",
+    "基底原权重参考在19类也优于未压缩教师，表明其是量化参考而非任务精度的数学上界；教师函数与GT目标本身有差异。"
+  ],
+  "decisions": {
+    "new_default_promoted": false,
+    "per_benchmark_or_split_winner_routing": false,
+    "free_mode_decoder_promoted": false,
+    "main_direction": "single latent with constrained native function decoder; retain both integration controls until cross-scene validation",
+    "new_independent_contributions_claimed": false
+  },
+  "limitations": [
+    "single repeatedly used ScanNet development scene, one seed",
+    "cross-scene shared heads not trained",
+    "image patch functions and multi-object scope not yet migrated",
+    "current member still averages inferred global top candidates",
+    "native packet cold checks exclude raw image/text encoders and camera rasterization",
+    "not complete v10 recovery or five-task common-version evaluation"
+  ],
+  "next_steps": [
+    "separate native-basis quantization error from latent prediction error on another scene before changing capacity or compression objective",
+    "retain category integration as a global declared method choice, not a scene/split winner router",
+    "migrate patch correspondence and separate identity hypotheses before soft union; validate actual object extent",
+    "freeze a common implementation and evaluate all five local task contracts with size-aware bounded output plans"
+  ],
+  "storage": {
+    "full_scene_payload_bytes": {
+      "mean": 24152026,
+      "reliable": 24152034,
+      "reliable_no_mass": 24152042
+    },
+    "full_scene_mib": {
+      "mean": 23.033166885375977,
+      "reliable": 23.033174514770508,
+      "reliable_no_mass": 23.03318214416504
+    },
+    "shared_text_encoder_parameter_bytes": 1416451296,
+    "total_text_deployment_bytes": {
+      "mean": 1440603322,
+      "reliable": 1440603330,
+      "reliable_no_mass": 1440603338
+    },
+    "study_file_bytes": 374604505,
+    "study_allocated_bytes": 380476416,
+    "prior_pilot_approx_mib": 71.71,
+    "policy": {
+      "study_bytes": 8589934592,
+      "run_bytes": 1073741824,
+      "artifact_bytes": 268435456,
+      "reserve_bytes": 21474836480
+    },
+    "teacher_files_copied": 0,
+    "historical_files_deleted": 0,
+    "rolling_checkpoints_remaining": 0,
+    "model_exports": 10,
+    "initial_dictionary_runs": "source-validation-only; independent clustering float differences retained; authoritative results use exact frozen basis"
+  },
+  "validation": {
+    "targeted_suite_passed": 51,
+    "focused_tests_after_basis_binding_passed": 7,
+    "actual_fixed_basis_exports_cold_reloaded": 3,
+    "exact_native_four_packet_outputs": true,
+    "query_source_io_denied": true,
+    "tests_cover_seal_before_scoring": true
+  },
+  "evidence": {
+    "dictionary_comparison/summary.json": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/dictionary_comparison/summary.json",
+      "sha256": "9b3dc489d1b29327d2329af9b1e297dfda9a555857cf073bb1db0504dee06af8"
+    },
+    "dictionary_comparison/prediction_barrier.json": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/dictionary_comparison/prediction_barrier.json",
+      "sha256": "3867dedd93f7c876731d4d6dd1ef230f1d1d1616f31d8f1b57ca7d10a431b45c"
+    },
+    "menu_comparison/summary.json": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/menu_comparison/summary.json",
+      "sha256": "d2ad1e484a96acdef96a6030c9400ffa8e995cc269d8f4032d7606d72e266c59"
+    },
+    "menu_transfer_closure/cold_query_receipts.json": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/menu_transfer_closure/cold_query_receipts.json",
+      "sha256": "b9dec5ddb1c52814dff77e8ac87a7c98e4fbe2a06f9b475d014e5381ddb1165b"
+    },
+    "menu_transfer_closure/text_function_diagnostics.json": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/menu_transfer_closure/text_function_diagnostics.json",
+      "sha256": "434d433c95034ddc831731432feff70f08f05724e7e782c6728b68b7b000cd3b"
+    },
+    "menu_transfer_closure/source_snapshot.json": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/menu_transfer_closure/source_snapshot.json",
+      "sha256": "998f246e86acb7913c91e299d00a80244ff16441daab364d1267ccebc425f68c"
+    },
+    "menu_transfer_closure/storage_audit.json": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/menu_transfer_closure/storage_audit.json",
+      "sha256": "e61fb23a3a1566874a3eba3ffa59585e8737d19e38011e3710339d52a78d1ff0"
+    },
+    "dictionary_basis/construction.json": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study/dictionary_basis/construction.json",
+      "sha256": "37de975ae4a2076d9318b88b74ea8d3638980abaf3d10376cea9c3230d5c57c9"
+    }
+  },
+  "reproduction": {
+    "python": "/tmp/radiogs-unified-env/bin/python",
+    "study_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_compact_20261015/study",
+    "training": "OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 <python> -m radio_gs.query_field.unified_menu_training --config configs/query_field/unified_dictionary_pilot.json --arm <mean|reliable_no_mass|reliable> --study-root <study> --run-name <new-unique-run> --device cuda:4",
+    "evaluation_module": "radio_gs.query_field.unified_menu_evaluation",
+    "source_snapshots": [
+      "menu_free_modes_closure/source_snapshot.json",
+      "dictionary_basis/initial_attempt_source_snapshot.json",
+      "menu_transfer_closure/source_snapshot.json"
+    ]
+  }
+}

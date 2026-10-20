@@ -1,0 +1,41 @@
+{
+  "run": "nvos_unboxed_image_response_v1",
+  "arms": [
+    "v10",
+    "boxed_sparse",
+    "unboxed_sparse",
+    "unboxed_signed",
+    "boxed_sparse_lift",
+    "unboxed_sparse_lift",
+    "unboxed_signed_lift"
+  ],
+  "primary_arm": "unboxed_sparse_lift",
+  "source_hw": [
+    384,
+    512
+  ],
+  "solver_steps": 120,
+  "threshold": 0.5,
+  "point_budget": 8,
+  "point_rule": "greedy confidence times interior distance times distance to previous points; inferred positive points only",
+  "image_checkpoint": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+  "image_backbone_resolution": 1008,
+  "target_rgb_used": true,
+  "target_gt_used_for_prediction": false,
+  "per_task_winners": false,
+  "independent_test": false,
+  "maximum_new_durable_bytes": 4194304,
+  "maximum_volatile_prediction_bytes": 268435456,
+  "gpu_memory_fraction": 0.5,
+  "gt_tracks": [
+    "retained_gt_gt127",
+    "ludvig_gt_maximum"
+  ],
+  "metrics": [
+    "iou",
+    "precision",
+    "recall",
+    "accuracy"
+  ],
+  "registration_context": "Complete N05 all-eight scores and spatial audit known; N04 all-eight binary scores known and AP scoring pending. Before all N06 predictions."
+}

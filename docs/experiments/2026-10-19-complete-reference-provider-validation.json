@@ -1,0 +1,57 @@
+{
+  "schema": "radiogs.complete_reference_provider_validation.v1",
+  "date": "2026-10-19",
+  "component_audit": {
+    "path": "docs/experiments/2026-10-19-shared-core-component-audit-v7.json",
+    "sha256": "bcc1551cea6b472afd1d9ed4199bf12fed40c56827c76a8718073dfb4ca02735",
+    "jobs": 31,
+    "comparisons": 349
+  },
+  "extension_audit": {
+    "path": "docs/experiments/2026-10-19-reference-completion-cpu-audit-v1.json",
+    "sha256": "c97fdb6a9d2d8aea4f2e7f9f9416138873d8ed41030d9cd2049455d010830f0c",
+    "profiles": 16,
+    "source_decisions_exact": true,
+    "worker_function_ast_equal": true
+  },
+  "normalized_input_check": {
+    "path": "docs/experiments/2026-10-19-reference-completion-input-preparation.json",
+    "sha256": "1640c8b0eac3652ee0da80d3b41e0d2b203ae82629860225e38062a37fff9f78",
+    "profiles": 16
+  },
+  "tests": {
+    "legacy": {
+      "passed": 253,
+      "skipped": 1,
+      "skip_reason": "CUDA/NVCC renderer check; CUDA_VISIBLE_DEVICES empty",
+      "command": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. RADIO_GS_EVIDENCE_CORE=legacy /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.response_study test"
+    },
+    "shared_v1": {
+      "passed": 253,
+      "skipped": 1,
+      "skip_reason": "CUDA/NVCC renderer check; CUDA_VISIBLE_DEVICES empty",
+      "command": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. RADIO_GS_EVIDENCE_CORE=shared_v1 /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.response_study test"
+    }
+  },
+  "preflights": {
+    "quality": {
+      "path": "output/shared_evidence_20261018/n14_quality_pipeline_preflight_20261019_v1/manifest.json",
+      "sha256": "36a1ff9cb9ebd97adb8ea7284436354e5986b899a39353ae5d2895f5f8864a43",
+      "ready_gpus": [],
+      "inference_started": false
+    },
+    "feasible": {
+      "path": "output/shared_evidence_20261018/n14_feasible_pipeline_preflight_20261019_v1/manifest.json",
+      "sha256": "00cd4f7f5362e804f48f90cb93f415ef1edfe99fa7e9209f1751da0530ba4a40",
+      "ready_gpus": [
+        "1"
+      ],
+      "inference_started": false
+    }
+  },
+  "new_profile_and_preparation_bytes": 155634,
+  "no_gpu_inference_launched": true,
+  "gpu_end_to_end_validated": false,
+  "fresh_benchmark_scores": false,
+  "default_promoted": false
+}

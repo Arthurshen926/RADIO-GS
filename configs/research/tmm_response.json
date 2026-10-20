@@ -1,0 +1,678 @@
+{
+  "schema": "radiogs.response_study.registry.v1",
+  "method": "Query-conditioned evidence fusion for 3D responses",
+  "branch": "codex/tmm-query-response",
+  "recipe": "configs/pipeline/system_v10.json",
+  "reference_summary": "output/query_conditioned_membership_20261006/image_convergence/system/summary.json",
+  "study_root": "output/tmm_response_20261016/study",
+  "paper_root": "paper/tmm_response",
+  "cohort": {
+    "lerf": 4,
+    "nvos": 8,
+    "scannet": 10,
+    "uqis": 9
+  },
+  "uqis_queries": 268,
+  "active_research_decision": "docs/adr/0024-v10-method-ownership-and-nvos-evidence.md",
+  "learning_studies": [
+    {
+      "id": "L01",
+      "run": "response_replacement_train_v2",
+      "stage": "training",
+      "runner": "scripts/research/train_tmm_response_replacement.py"
+    },
+    {
+      "id": "L02",
+      "run": "response_replacement_transfer_v1",
+      "stage": "transfer",
+      "runner": "scripts/research/evaluate_tmm_response_replacement.py"
+    },
+    {
+      "id": "D01",
+      "run": "response_replacement_images_v2",
+      "stage": "supervision",
+      "runner": "scripts/research/compile_tmm_image_supervision.py"
+    },
+    {
+      "id": "L03",
+      "run": "response_replacement_joint_v1",
+      "stage": "joint_training",
+      "runner": "scripts/research/train_tmm_joint_replacement.py"
+    },
+    {
+      "id": "L04",
+      "run": "response_replacement_joint_transfer_v1",
+      "stage": "transfer",
+      "runner": "scripts/research/evaluate_tmm_response_replacement.py"
+    },
+    {
+      "id": "L05",
+      "run": "response_value_train_v1",
+      "stage": "joint_training",
+      "runner": "scripts/research/train_tmm_response_value.py"
+    },
+    {
+      "id": "L06",
+      "run": "response_value_transfer_v1",
+      "stage": "transfer",
+      "runner": "scripts/research/evaluate_tmm_response_replacement.py"
+    },
+    {
+      "id": "D02",
+      "run": "category_native_responses_v1",
+      "stage": "native_category_responses",
+      "runner": "scripts/research/compile_tmm_category_native.py"
+    },
+    {
+      "id": "D03",
+      "run": "category_utility_supervision_v1",
+      "stage": "category_supervision",
+      "runner": "scripts/research/compile_tmm_category_utility.py"
+    },
+    {
+      "id": "L07",
+      "run": "response_value_multitask_v1",
+      "stage": "multitask_training",
+      "runner": "scripts/research/train_tmm_multitask_value.py"
+    },
+    {
+      "id": "D04",
+      "run": "category_transfer_inputs_v2",
+      "stage": "category_preparation",
+      "runner": "scripts/research/prepare_tmm_category_transfer.py"
+    },
+    {
+      "id": "L08",
+      "run": "response_value_multitask_transfer_v1",
+      "stage": "category_instance_transfer",
+      "runner": "scripts/research/evaluate_tmm_multitask_transfer.py"
+    },
+    {
+      "id": "A10",
+      "run": "response_value_multitask_diagnosis_v1",
+      "stage": "transfer_diagnosis",
+      "runner": "scripts/research/diagnose_tmm_multitask_transfer.py"
+    },
+    {
+      "id": "L09",
+      "run": "response_value_centered_v1",
+      "stage": "multitask_training",
+      "runner": "scripts/research/train_tmm_centered_value.py"
+    },
+    {
+      "id": "A11",
+      "run": "multitask_utility_audit_v1",
+      "stage": "utility_diagnosis",
+      "runner": "scripts/research/audit_tmm_multitask_utility.py"
+    },
+    {
+      "id": "L10",
+      "run": "response_value_residual_v1",
+      "stage": "multitask_training",
+      "runner": "scripts/research/train_tmm_residual_value.py"
+    },
+    {
+      "id": "D05",
+      "run": "category_transfer_inputs_v3",
+      "stage": "category_preparation",
+      "runner": "scripts/research/prepare_tmm_category_transfer.py"
+    },
+    {
+      "id": "L11",
+      "run": "response_value_residual_transfer_v1",
+      "stage": "category_instance_transfer",
+      "runner": "scripts/research/evaluate_tmm_multitask_transfer.py"
+    },
+    {
+      "id": "A12",
+      "run": "response_value_residual_diagnosis_v1",
+      "stage": "transfer_diagnosis",
+      "runner": "scripts/research/diagnose_tmm_multitask_transfer.py"
+    },
+    {
+      "id": "A13",
+      "run": "residual_utility_audit_v1",
+      "stage": "residual_diagnosis",
+      "runner": "scripts/research/audit_tmm_residual_value.py"
+    }
+  ],
+  "storage": {
+    "study_bytes": 2147483648,
+    "run_bytes": 268435456,
+    "artifact_bytes": 16777216,
+    "reserve_bytes": 1073741824
+  },
+  "experiments": [
+    {
+      "id": "E01",
+      "run": "post_response_v1",
+      "phase": "post_response",
+      "question": "Does restricting exclusion permission suffice?",
+      "arms": [
+        "partial",
+        "complement"
+      ],
+      "status": "completed_not_promoted",
+      "uqis_intervention": true,
+      "prediction_storage": "persistent_columns",
+      "runner": "scripts/research/run_tmm_response_study.py",
+      "runner_args": [
+        "--control",
+        "permission_pair"
+      ],
+      "launch_enabled": false,
+      "launch_note": "Historical code versions need recovery/review; original dense writer exceeds remaining study capacity.",
+      "report": "docs/experiments/2026-10-16-tmm-response-permissions-and-normalization.md"
+    },
+    {
+      "id": "E02",
+      "run": "post_response_v2",
+      "phase": "post_response",
+      "question": "Does available-domain normalization preserve confidence and coverage?",
+      "arms": [
+        "observable"
+      ],
+      "status": "completed_not_promoted",
+      "uqis_intervention": true,
+      "prediction_storage": "persistent_columns",
+      "runner": "scripts/research/run_tmm_response_study.py",
+      "runner_args": [
+        "--control",
+        "observable"
+      ],
+      "launch_enabled": false,
+      "launch_note": "Use retained source snapshot for historical replay; original dense writer exceeds remaining study capacity.",
+      "report": "docs/experiments/2026-10-16-tmm-response-permissions-and-normalization.md"
+    },
+    {
+      "id": "E03",
+      "run": "post_response_v3",
+      "phase": "post_response",
+      "question": "Does extent agreement help beyond a matched signed update budget?",
+      "arms": [
+        "scope",
+        "matched"
+      ],
+      "status": "completed_not_promoted",
+      "uqis_intervention": true,
+      "prediction_storage": "volatile_released",
+      "runner": "scripts/research/run_tmm_support_agreement.py",
+      "runner_args": [],
+      "launch_enabled": true,
+      "launch_note": "Full-cohort replay from current hash-matched source; predictions only survive while worker is alive.",
+      "report": "docs/experiments/2026-10-16-tmm-support-agreement-and-lineage.md"
+    },
+    {
+      "id": "E04",
+      "run": "stage_reconstruction_v4",
+      "phase": "response_generation",
+      "question": "Does better reconstruction of identical admitted observations improve task accuracy?",
+      "arms": [
+        "diagonal",
+        "rendered_squared",
+        "rendered_huber"
+      ],
+      "status": "completed_not_promoted",
+      "uqis_intervention": false,
+      "prediction_storage": "volatile_released",
+      "runner": "scripts/research/run_tmm_stage_reconstruction.py",
+      "runner_args": [],
+      "launch_enabled": true,
+      "launch_note": "Full-cohort replay; private tmpfs bank supports worker recovery until successful cleanup.",
+      "report": "docs/experiments/2026-10-16-tmm-stage-reconstruction.md"
+    }
+  ],
+  "targeted_studies": [
+    {
+      "id": "Q01",
+      "run": "query_witness_anchor_v1",
+      "phase": "identity_conditioning",
+      "question": "Does query-conditioned other-view evidence preserve identity before complete membership?",
+      "arms": [
+        "query_witness",
+        "permuted_witness"
+      ],
+      "status": "completed_not_promoted",
+      "prediction_storage": "volatile_released",
+      "runner": "scripts/research/run_tmm_query_witness_anchor.py",
+      "runner_args": [],
+      "launch_enabled": true,
+      "launch_note": "All 67 image interventions, then score 268 UQIS queries; other families remain explicit historical references. RAM arrays require recomputation.",
+      "report": "docs/experiments/2026-10-16-tmm-query-witness-anchor.md"
+    },
+    {
+      "id": "Q02",
+      "run": "complete_response_verification_v1",
+      "phase": "complete_response_identity_verification",
+      "question": "Do existing teacher proposals contain better complete responses, and can query verification choose them?",
+      "arms": [
+        "verified",
+        "permuted"
+      ],
+      "status": "completed_not_promoted",
+      "prediction_storage": "volatile_released",
+      "runner": "scripts/research/run_tmm_complete_response_verification.py",
+      "runner_args": [],
+      "launch_enabled": true,
+      "launch_note": "67 image queries with original plus two frozen teacher proposals; all 268 UQIS queries scored. Other benchmarks remain historical references. Finite-pool oracle is diagnosis only.",
+      "report": "docs/experiments/2026-10-16-tmm-complete-response-verification.md"
+    }
+  ],
+  "failed_attempts": [
+    {
+      "id": "F01",
+      "parent": "E04",
+      "root": "stage_reconstruction_v1",
+      "receipt": "stage_reconstruction_v1_nvos_fern/failed_compatibility.json",
+      "reason": "NVOS historical numeric tolerance before source-only audit"
+    },
+    {
+      "id": "F02",
+      "parent": "E04",
+      "root": "stage_reconstruction_v2",
+      "receipt": "stage_reconstruction_v2/resource_failure.json",
+      "reason": "Shared GPU ran out of memory before prediction sealing"
+    },
+    {
+      "id": "F03",
+      "parent": "E04",
+      "root": "stage_reconstruction_v3",
+      "receipt": "stage_reconstruction_v3/input_record_failure.json",
+      "reason": "UQIS query directory treated as a file before prediction sealing"
+    },
+    {
+      "id": "F04",
+      "parent": "D01",
+      "root": "response_replacement_images_v1",
+      "receipt": "response_replacement_images_v1/stopped.json",
+      "reason": "Fixed temporal reference views missed independent construction targets; stopped before any model fit or benchmark evaluation"
+    },
+    {
+      "id": "F05",
+      "parent": "D04",
+      "root": "category_transfer_inputs_v1",
+      "receipt": "category_transfer_inputs_v1/interrupted.json",
+      "reason": "CPU native recomputation changed one 10-class tied label before any target GT or model access; original CUDA path restored in v2"
+    }
+  ],
+  "audits": [
+    {
+      "id": "A01",
+      "path": "legacy_core_replay_v2/summary.json",
+      "role": "historical LERF fusion compatibility"
+    },
+    {
+      "id": "A02",
+      "path": "runtime_core_replay/summary.json",
+      "role": "production LERF entry compatibility"
+    },
+    {
+      "id": "A03",
+      "path": "response_lineage_audit/summary.json",
+      "role": "evidence consumed upstream; not a full causal loss attribution"
+    },
+    {
+      "id": "A04",
+      "path": "stage_input_numeric_preflight/summary.json",
+      "role": "source-only NVOS and dual-native ScanNet compatibility"
+    },
+    {
+      "id": "A05",
+      "path": "stage_reconstruction_v4_analysis/analysis.json",
+      "role": "source-fit/task-score and additive class diagnosis"
+    },
+    {
+      "id": "A06",
+      "path": "estimated_anchor_authority_v1/summary.json",
+      "role": "causal isolation of forced estimated-anchor positivity; fresh 268-query UQIS scoring, retained other-task compatibility"
+    },
+    {
+      "id": "A07",
+      "path": "response_replacement_capacity_v1/summary.json",
+      "role": "exact replay of 134 complete candidate pools; fixed-identity provider control and finite-pool decision regret"
+    },
+    {
+      "id": "A08",
+      "path": "source_decision_audit_v1/summary.json",
+      "role": "22 source jobs: sealed whole-response agreement choices, exact E02 candidates, retained-score capacity and metric tradeoffs"
+    },
+    {
+      "id": "A09",
+      "path": "cross_task_targets_v1/summary.json",
+      "role": "29 independent rooms: official complete-menu/union target manifests and supervision coverage; utility training still incomplete"
+    },
+    {
+      "id": "A14",
+      "path": "scannet_paper8_metric_bridge_v1/summary.json",
+      "role": "unchanged v10 predictions rescored on VALA paper8 Gaussian metric; provided-mesh carrier differs; no learned gain"
+    },
+    {
+      "id": "A15",
+      "path": "protocol_correctness_audit_v2/summary.json",
+      "role": "independent retained-mask/mesh/Gaussian scoring; NVOS GT/readout controls and diagnostic-only threshold oracle"
+    },
+    {
+      "id": "A16",
+      "path": "protocol_input_lineage_audit_v2/summary.json",
+      "role": "source frame and unlabelled geometry checks, input/GT receipts and NVOS error visualization; not global training leakage certification"
+    },
+    {
+      "id": "A17",
+      "path": "nvos_v10_readout_audit_v1/summary.json",
+      "role": "all eight retained v10 continuous and independent-set outputs freshly rendered; existing capability, not new fitting"
+    },
+    {
+      "id": "A18",
+      "path": "nvos_coverage_ranking_v2/summary.json",
+      "role": "AP/AUROC on the exact 32 sealed N01 response images; identical binary counts and no new predictions"
+    },
+    {
+      "id": "A19",
+      "path": "nvos_v10_readout_factorial_v1/summary.json",
+      "role": "all eight retained v10 semantic/member fields crossed with fixed full-scene/selected-alpha readouts; no per-task winners"
+    },
+    {
+      "id": "A20",
+      "path": "nvos_score_changes_v1/summary.json",
+      "role": "exact N02 versus rerendered v10: full-cohort spatial transitions and symmetric score-group AP attribution; GT hybrids are nondeployable diagnostics"
+    },
+    {
+      "id": "A21",
+      "path": "nvos_local_credit_spatial_v1/summary.json",
+      "role": "exact sealed N03 predictions: all-eight spatial repair/damage, source-group score changes and error plots; GT diagnosis only"
+    },
+    {
+      "id": "A22",
+      "path": "nvos_reference_scope_v1/summary.json",
+      "role": "all-eight authorized-reference SAM seed versus SAM3 track agreement; no target RGB or GT; source agreement is not accuracy"
+    },
+    {
+      "id": "A23",
+      "path": "nvos_readout_capacity_v1/summary.json",
+      "role": "exact tied-score threshold capacity of retained v10; refines A15 grid; GT-oracle diagnostic, never a method result"
+    },
+    {
+      "id": "A24",
+      "run": "nvos_score_precision_v2",
+      "path": "nvos_score_precision_v2/summary.json",
+      "study_root": "output/tmm_response_20261018/study",
+      "role": "exact N16 image replay and logit/probability precision diagnostic; no new 3D candidate",
+      "runner": "scripts/research/audit_tmm_nvos_score_precision.py"
+    }
+  ],
+  "components": [
+    {
+      "role": "effective_identity",
+      "path": "radio_gs/querying/source_identity.py",
+      "status": "local_positive_evidence"
+    },
+    {
+      "role": "effective_observation_contract",
+      "path": "radio_gs/querying/typed_evidence.py",
+      "status": "retained_production"
+    },
+    {
+      "role": "effective_category_provider",
+      "path": "radio_gs/querying/local_element_fusion.py",
+      "status": "retained_production"
+    },
+    {
+      "role": "effective_complete_membership",
+      "path": "radio_gs/querying/direct_anchor_membership.py",
+      "status": "retained_production"
+    },
+    {
+      "role": "query_member_candidate",
+      "path": "radio_gs/querying/query_conditioned_membership.py",
+      "status": "optional_candidate_not_v10_default"
+    },
+    {
+      "role": "compatibility_fusion_and_first_control",
+      "path": "radio_gs/querying/response_refinement.py",
+      "status": "mixed_explicit_symbols_in_method_manifest"
+    },
+    {
+      "role": "compatibility_and_solver_controls",
+      "path": "radio_gs/querying/response_reconstruction.py",
+      "status": "verified_compatibility"
+    },
+    {
+      "role": "permission_control",
+      "path": "radio_gs/querying/response_permissions.py",
+      "status": "diagnostic_not_promoted"
+    },
+    {
+      "role": "normalization_control",
+      "path": "radio_gs/querying/visibility_refinement.py",
+      "status": "diagnostic_not_promoted"
+    },
+    {
+      "role": "scope_control",
+      "path": "radio_gs/querying/support_agreement.py",
+      "status": "diagnostic_not_promoted"
+    },
+    {
+      "role": "post_response_adapters",
+      "path": "radio_gs/querying/response_study_adapters.py",
+      "status": "experiment_infrastructure"
+    },
+    {
+      "role": "original_response_stage_adapters",
+      "path": "radio_gs/querying/response_stage_adapters.py",
+      "status": "experiment_infrastructure"
+    },
+    {
+      "role": "volatile_predictions",
+      "path": "scripts/research/tmm_ram_predictions.py",
+      "status": "experiment_infrastructure"
+    },
+    {
+      "role": "estimated_anchor_authority_control",
+      "path": "radio_gs/querying/estimated_anchor_authority.py",
+      "status": "diagnostic_not_promoted"
+    }
+  ],
+  "tests": [
+    "tests/test_response_refinement.py",
+    "tests/test_response_permissions.py",
+    "tests/test_response_study_lerf_scoring.py",
+    "tests/test_visibility_refinement.py",
+    "tests/test_support_agreement.py",
+    "tests/test_transient_response_predictions.py",
+    "tests/test_response_reconstruction.py",
+    "tests/test_tmm_transient_runtime.py",
+    "tests/test_tmm_ram_predictions.py",
+    "tests/test_response_study_registry.py",
+    "tests/test_estimated_anchor_authority.py",
+    "tests/test_query_witness_anchor.py",
+    "tests/test_complete_response_verification.py",
+    "tests/test_response_replacement.py",
+    "tests/test_response_supervision.py",
+    "tests/test_response_value.py",
+    "tests/test_complete_response_agreement.py",
+    "tests/test_category_response_supervision.py",
+    "tests/test_multitask_response_value.py",
+    "tests/test_category_response_transfer.py",
+    "tests/test_centered_response_value.py",
+    "tests/test_utility_diagnosis.py",
+    "tests/test_residual_response_value.py",
+    "tests/test_residual_diagnosis.py",
+    "tests/test_tmm_paper_experiments.py",
+    "tests/test_tmm_protocol_correctness.py",
+    "tests/test_coverage_evidence.py",
+    "tests/test_reference_study.py",
+    "tests/test_response_calibration.py",
+    "tests/test_source_readout_study.py",
+    "tests/test_local_response_credit.py",
+    "tests/test_image_conditioned_response.py",
+    "tests/test_partial_response_prompt.py",
+    "tests/test_reference_memory.py",
+    "tests/test_contribution_compositor.py",
+    "tests/test_gsplat_footprint_cuda.py",
+    "tests/test_nvos_readout_capacity.py",
+    "tests/test_signed_reference_affinity.py",
+    "tests/test_instance_extent.py",
+    "tests/test_reference_completion.py",
+    "tests/test_transport_residual.py",
+    "tests/test_reference_admission.py",
+    "tests/test_nvos_continuation_status.py",
+    "tests/test_multiview_response.py",
+    "tests/test_response_crop.py",
+    "tests/test_response_score_precision.py",
+    "tests/test_shared_evidence_core.py",
+    "tests/test_shared_evidence_migration.py",
+    "tests/test_shared_evidence_cpu_extension.py",
+    "tests/test_region_provenance.py",
+    "tests/test_reference_completion_pipeline.py"
+  ],
+  "reference_studies": [
+    {
+      "id": "N01",
+      "run": "nvos_coverage_evidence_v2",
+      "question": "Source resolution and partial coverage evidence",
+      "runner": "scripts/research/run_tmm_nvos_coverage.py",
+      "failed_attempt": "nvos_coverage_evidence_v1",
+      "report": "docs/experiments/2026-10-17-nvos-evidence-and-v10-method.md"
+    },
+    {
+      "id": "N02",
+      "run": "nvos_source_readout_v1",
+      "question": "Source-only decision calibration versus fixed readout",
+      "runner": "scripts/research/run_tmm_nvos_source_readout.py",
+      "report": "docs/experiments/2026-10-17-nvos-source-readout.md"
+    },
+    {
+      "id": "N03",
+      "run": "nvos_local_credit_v1",
+      "question": "Local source edit credit versus matched signed attenuation",
+      "runner": "scripts/research/run_tmm_nvos_local_credit.py",
+      "report": "docs/experiments/2026-10-17-nvos-local-credit.md"
+    },
+    {
+      "id": "N04",
+      "run": "nvos_image_response_v3",
+      "question": "Matched reconstructed/observed RGB response completion and 3D writeback",
+      "runner": "scripts/research/run_tmm_nvos_image_response.py",
+      "failed_attempt": "nvos_image_response_v1",
+      "report": "docs/experiments/2026-10-17-nvos-image-response.md"
+    },
+    {
+      "id": "N05",
+      "run": "nvos_partial_image_response_v1",
+      "question": "Retain positive identity hints while withholding uncertain dense exclusion",
+      "runner": "scripts/research/run_tmm_nvos_partial_response.py",
+      "report": "docs/experiments/2026-10-17-nvos-partial-response.md"
+    },
+    {
+      "id": "N06",
+      "run": "nvos_unboxed_image_response_v1",
+      "question": "Separate query identity from inherited response extent",
+      "runner": "scripts/research/run_tmm_nvos_unboxed_response.py",
+      "report": "docs/experiments/2026-10-17-nvos-unboxed-response.md"
+    },
+    {
+      "id": "N07",
+      "run": "nvos_memory_response_v1",
+      "question": "Transfer original reference identity by paired or sequential cross-view memory before 3D writeback",
+      "runner": "scripts/research/run_tmm_nvos_memory_response.py",
+      "report": "docs/experiments/2026-10-17-nvos-memory-response.md"
+    },
+    {
+      "id": "N08",
+      "run": "nvos_native_writeback_v3",
+      "question": "Native image-ray writeback with exact N07 evidence and unchanged 120-step solver",
+      "runner": "scripts/research/run_tmm_nvos_native_writeback.py",
+      "report": "docs/experiments/2026-10-17-nvos-native-writeback.md",
+      "failed_attempts": [
+        "nvos_native_writeback_v1",
+        "nvos_native_writeback_v2"
+      ]
+    },
+    {
+      "id": "N09",
+      "run": "nvos_signed_affinity_v1",
+      "question": "Transfer signed query evidence without assigning exclusion to unknown reference extent",
+      "runner": "scripts/research/run_tmm_nvos_signed_affinity.py",
+      "report": "docs/experiments/2026-10-17-nvos-signed-affinity.md"
+    },
+    {
+      "id": "N10",
+      "run": "nvos_direct_affinity_v2",
+      "question": "Does SAM refinement preserve the scope of the same frozen signed affinity evidence?",
+      "runner": "scripts/research/run_tmm_nvos_direct_affinity.py",
+      "report": "docs/experiments/2026-10-17-nvos-signed-affinity.md",
+      "failed_attempts": [
+        "nvos_direct_affinity_v1"
+      ]
+    },
+    {
+      "id": "N11",
+      "run": "nvos_instance_extent_v2",
+      "question": "Does instance-conditioned region admission preserve extent recovery without selecting other objects?",
+      "runner": "scripts/research/run_tmm_nvos_instance_extent.py",
+      "report": "docs/experiments/2026-10-17-nvos-instance-extent.md",
+      "failed_attempts": [
+        "nvos_instance_extent_v1"
+      ]
+    },
+    {
+      "id": "N12",
+      "run": "nvos_reference_completion_v1",
+      "study_root": "output/tmm_response_20261018/study",
+      "question": "Does completing original signed query scope before instance transport improve NVOS?",
+      "runner": "scripts/research/run_tmm_nvos_reference_completion.py",
+      "report": "docs/experiments/2026-10-18-nvos-reference-completion.md"
+    },
+    {
+      "id": "N13",
+      "run": "nvos_reference_delta_v1",
+      "study_root": "output/tmm_response_20261018/study",
+      "question": "Does transferring only a paired reference intervention preserve incumbent accuracy?",
+      "runner": "scripts/research/run_tmm_nvos_reference_delta.py",
+      "report": "docs/experiments/2026-10-18-nvos-reference-completion.md"
+    },
+    {
+      "id": "N14",
+      "run": "nvos_reference_admission_v1",
+      "study_root": "output/tmm_response_20261018/study",
+      "question": "Can original query constraints or source quality avoid unnecessary reference repair?",
+      "runner": "scripts/research/run_tmm_nvos_reference_admission.py",
+      "report": "docs/experiments/2026-10-18-nvos-reference-completion.md"
+    },
+    {
+      "id": "N15",
+      "run": "nvos_multiview_completion_v2",
+      "study_root": "output/tmm_response_20261018/study",
+      "question": "Does completed-reference evidence across all source views improve native target responses?",
+      "runner": "scripts/research/run_tmm_nvos_multiview_completion.py",
+      "report": "docs/experiments/2026-10-18-nvos-multiview-completion.md",
+      "failed_attempts": [
+        "nvos_multiview_completion_v1"
+      ]
+    },
+    {
+      "id": "N16",
+      "run": "nvos_target_redecode_v1",
+      "study_root": "output/tmm_response_20261018/study",
+      "question": "Can complete-query target re-decoding repair local shape, and does object-relative scale help?",
+      "runner": "scripts/research/run_tmm_nvos_target_redecode.py",
+      "report": "docs/experiments/2026-10-18-nvos-target-redecode.md"
+    }
+  ],
+  "current_nvos_candidate": {
+    "study": "N14",
+    "arm": "quality_native",
+    "role": "retained_balanced_development_recipe_after_fixed_metric_guards",
+    "primary_arm": "feasible_native",
+    "global_default_changed": false,
+    "report": "docs/experiments/2026-10-18-nvos-reference-completion.md"
+  },
+  "highest_nvos_iou_observation": {
+    "study": "N16",
+    "arm": "crop_native",
+    "role": "fixed_primary_development_iou_ap_tradeoff_not_promoted",
+    "feedback": "paper/tmm_response/nvos_target_redecode_feedback.json",
+    "report": "docs/experiments/2026-10-18-nvos-target-redecode.md",
+    "global_default_changed": false
+  }
+}

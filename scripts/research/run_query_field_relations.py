@@ -158,6 +158,38 @@ def build(design, gpus):
     write(ROOT / 'construction_complete.json', dict(records=records, paired_traces_exact=True))
 
 
+
+def current_prediction_binding(design, arm, family, job):
+    if "storage" not in design:return None
+    from radio_gs.query_field.research_storage import prediction_binding
+    cohort=read(design["arms"][arm]["path"])
+    files=[];effective=job
+    if family=="lerf":
+        config=ROOT/arm/"configs/lerf.json";files.append(config)
+        cfg=read(config);effective=next(j for j in cfg["jobs"] if j["name"]==job.get("name",job.get("scene")))
+        files.append(effective["queries"])
+    elif family=="nvos":
+        files.append(job["prediction_config"])
+        cfg=read(job["prediction_config"]);effective=next(j for j in cfg["jobs"] if j["name"]==job.get("name",job.get("scene")))
+        files.extend(effective[k] for k in ["camera_fixture","positive","negative"] if k in effective)
+        if "reference_mask" in effective:files.append(effective["reference_mask"])
+    elif family=="scannet":files.append(job["queries"])
+    else:
+        public=Path(cohort["uqis_package"])/"method"
+        files=[public/"scenes.json"]+[public/"queries"/(m+".json") for m in ["text","image","point_2d","point_3d"]]
+    return prediction_binding(effective["field"],design,
+        inputs=dict(arm=arm,family=family,job=job,effective=effective),query_files=files)
+
+
+def verify_prediction_cache(path, design, arm, family, job):
+    expected=current_prediction_binding(design,arm,family,job)
+    if expected is None:return
+    from radio_gs.query_field.research_storage import check_prediction_binding
+    check_prediction_binding(read(str(path)+".binding.json"),expected)
+    if read(path).get("field_binding")!=expected["field"]:
+        raise ValueError("prediction receipt does not bind current method")
+
+
 def verify_predictions(design):
     records = []
     for arm in ARMS:
@@ -168,6 +200,7 @@ def verify_predictions(design):
                 path = root / family / name
                 if family == 'nvos': path = path / name
                 report = read(path / 'prediction.json')
+                verify_prediction_cache(path/'prediction.json',design,arm,family,job)
                 if sha256(path / 'predictions.pt') != report['predictions_sha256']:
                     raise ValueError('prediction changed')
                 records.append(receipt(path / 'prediction.json'))
@@ -175,6 +208,7 @@ def verify_predictions(design):
         for job in cohort['uqis']:
             path = root / 'uqis/receipts' / (job['name'] + '.json')
             report = read(path)
+            verify_prediction_cache(path,design,arm,'uqis',job)
             for q in report['queries']:
                 expected.add(q['query_id'])
                 for folder, suffix, key in [('predictions', '.npy', 'prediction_sha256'),
@@ -214,12 +248,37 @@ def predict(design, gpus):
                        '--public', str(Path(cohort['uqis_package']) / 'method'), '--encoder', cohort['encoder'], '--output', str(out)]
         if family in {'scannet', 'uqis'} and design.get('query_program', 'original') != 'original':
             command += ['--query-program', design['query_program']]
-        if complete.exists(): return
+        binding=current_prediction_binding(design,arm,family,job)
+        if binding is not None and design["storage"]["blob_store"] is not None:
+            command+=["--store-root",design["storage"]["blob_store"]]
+        if complete.exists():
+            verify_prediction_cache(complete,design,arm,family,job)
+            return
         execute(command, ROOT / 'logs/predict' / (arm + '_' + family + '_' + name + '.log'), gpu)
+        if binding is not None:
+            if current_prediction_binding(design,arm,family,job)!=binding:raise ValueError("prediction inputs changed during execution")
+            if read(complete).get("field_binding")!=binding["field"]:raise ValueError("predictor used different field")
+            write(str(complete)+".binding.json",dict(prediction_binding=binding))
         print('predicted', arm, family, name, flush=True)
     lanes(tasks, gpus, action)
     write(ROOT / 'predictions_complete.json', dict(records=verify_predictions(design),
           all_arms_all_families_before_scoring=True, design=receipt(ROOT / 'design.json')))
+
+
+
+def current_score_binding(design,arm,family,job,cohort):
+    if 'storage' not in design:return None
+    files=[ROOT/'predictions_complete.json']
+    if family=='lerf':files.append(ROOT/arm/'configs/lerf.json')
+    elif family=='nvos':files.append(Path(job['scoring_config']))
+    elif family=='scannet':files.append(Path(job['evaluation']))
+    module=Path('radio_gs')/('benchmarks/uqis/evaluate.py' if family=='uqis' else 'query_field/public_'+family+'.py')
+    files.append(module)
+    # The prediction barrier binds all prediction receipts; the frozen design
+    # binds method/query configuration. Scoring-only paths never enter prediction.
+    return dict(design=receipt(ROOT/'design.json'),storage=design['storage'],
+        arm=arm,family=family,job=job,package=cohort.get('uqis_package'),
+        sources=[receipt(p) for p in files])
 
 
 def score(design, gpus):
@@ -251,8 +310,17 @@ def score(design, gpus):
             complete = out / 'evaluation.json'
             command = ['-m', 'radio_gs.benchmarks.uqis.evaluate', '--package', cohort['uqis_package'],
                        '--predictions', str(out / 'predictions'), '--selections', str(out / 'selections'), '--output', str(complete)]
-        if complete.exists(): return
+        binding=current_score_binding(design,arm,family,job,cohort)
+        if complete.exists():
+            if binding is not None:
+                saved=read(str(complete)+'.binding.json')
+                if saved.get('score_binding')!=binding or saved.get('result')!=receipt(complete):
+                    raise ValueError('cached score method/config/prediction identity differs')
+            return
         execute(command, ROOT / 'logs/score' / (arm + '_' + family + '_' + name + '.log'), gpu)
+        if binding is not None:
+            if current_score_binding(design,arm,family,job,cohort)!=binding:raise ValueError('score inputs changed')
+            write(str(complete)+'.binding.json',dict(score_binding=binding,result=receipt(complete)))
         print('scored', arm, family, name, flush=True)
     lanes(tasks, gpus, action)
     write(ROOT / 'scoring_complete.json', dict(arms=list(ARMS), families=['lerf2d', 'lerf3d', 'nvos', 'scannet', 'uqis']))

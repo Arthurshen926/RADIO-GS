@@ -1,0 +1,2453 @@
+{
+  "id": "N01",
+  "run": "nvos_coverage_evidence_v2",
+  "question": "Source resolution and partial coverage evidence",
+  "runner": "scripts/research/run_tmm_nvos_coverage.py",
+  "failed_attempt": "nvos_coverage_evidence_v1",
+  "report": "docs/experiments/2026-10-17-nvos-evidence-and-v10-method.md",
+  "complete": true,
+  "status": "completed_not_promoted",
+  "fresh_prediction_jobs": 8,
+  "other_jobs_unchanged": 23,
+  "other_jobs_fresh_inference": false,
+  "macro": {
+    "retained_gt_gt127": {
+      "legacy_low": 0.8651342290920546,
+      "coverage_low": 0.8670691741899108,
+      "legacy_high": 0.8561383692615709,
+      "coverage_high": 0.8777760827886283
+    },
+    "ludvig_gt_maximum": {
+      "legacy_low": 0.8668354120781661,
+      "coverage_low": 0.8695826704128842,
+      "legacy_high": 0.8577969660108697,
+      "coverage_high": 0.8792804156707661
+    }
+  },
+  "maximum_retained_field_error": 4.649162292480469e-05,
+  "receipts": {
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/manifest.json": "b66db5e28215fea292c1547577b47f4df43b05c06d8dd054b37085f9919949ac",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/summary.json": "a026a0c8bab9f3ce4d2424911c27c81e0604f2061336a707f0791a3903861707",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/predictions_complete.json": "d69256e6c17f12d597c91e4ed5a3af26e4a654de657f226b59682b9998afbaf0",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/source_snapshot.json": "4c1307cc218f63d9bf47c2579dcb5953ef2eadb01f2f3791a931afefec765698",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/summary.json": "e7566b45060b853e10602c6c28864002d5215d71d0b7dac681cd7fd599bc4c1c",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/fern_prediction.json": "a9a6a2e218b4a6d4f347d49bb4cb48cee2addc67c917778629f7a9dab26925fc",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/fern_evaluation.json": "e4b8988f71d7564502a5dff1fa4dad512039caa91ec1cf59acf8a8ab8771738d",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/flower_prediction.json": "8fcf6ab699d18b421b07398403363c8819dd61aaa4579fcd3302d80a79dca45e",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/flower_evaluation.json": "449674042f8242affcd942bb5dcea56bcb6784a941eb3c2b49852e8e86e96331",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/fortress_prediction.json": "a600f99a96d797f3cfa94e6a85180dd1db7f7d0a80ee279d9d566ea82e235bf2",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/fortress_evaluation.json": "cde335c6931a7a3b04a8e4be8ff7a082a0de614591c2f3d81bb14abf1cea812e",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/horns_center_prediction.json": "3b5f471bd5c364d8b6d12c987c14b87beeddd4fec294e197570caec43de9d4fd",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/horns_center_evaluation.json": "6b3b4e5571720ac0fa63f32c2078e757a5418837d2005516657de42bf37a934c",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/horns_left_prediction.json": "e0b73e7995d3529c313e7226476ac0c8968aba32945b483933a1f089946423f7",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/horns_left_evaluation.json": "5971617584df47ca58bd89da04b714c8b6864cce4a5135b7dd118acbdfe23bbb",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/leaves_prediction.json": "ee4bc1c63f5e63ef311076554e87996399e18981cb202ea00ff883c73df4ef7f",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/leaves_evaluation.json": "2318a6a2358356db0004931ce8ccccd41b49bda42b461e5bf40b894261d2e1f3",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/orchids_prediction.json": "62a1b852fc08409976ccd65c3dace7868101cd73d6e7de1ce47ea6cbdf91678e",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/orchids_evaluation.json": "73e3d7e213f150f156f7412f9e0dd916e62624e3cd82e8d1646f3059e257de17",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/trex_prediction.json": "f07cc834a8cd7180901391062a3a81a587213e89c9bd9b77934ec77aa0492610",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_evidence_v2/trex_evaluation.json": "8ac62c499a3ea1a576ef6bad258af8a0f680746a3e57734c2d2b29e28c031c23",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fern/query/reference/0/fit.json": "303b5152d3f6b0aec02d2a4c45e8d9e8f35d36f8587ab31777c3123e503f10ad",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fern/query/inputs/scene.json": "26adcff6b1de1a312f4242335e221ff9dbd592160d8bf0d7d0627fcaa7f848b0",
+    "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fern/tracks.pt": "4c8499b31c09b7a505c3752f2d11ee9da88fc77d57c2e0af0519a7da9d521f5c",
+    "configs/consolidated/nvos/fern.query.json": "b62d09371d97583d6b4f11550633712c524d22298a536eb13e0b07e93b1d7577",
+    "configs/consolidated/nvos/fern.evaluation.json": "ed29367aecd2f15ecb3ba38f451fcfbf3ff836acda4119a6ecb3422c86bcb3ff",
+    "output/nvos_carrier_next72/adaptive_allrgb/fern/geometry.pt": "c5b78322f789b5461032be14769fb72a84b21f3ed7bd311f23025274a6e01701",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/fern/source_scale_prior.json": "92501e9b153cc82b18294a78ee1a30e764764f247eacf06a53f5bb1709b41203",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/flower/query/reference/0/fit.json": "a0d503de586533b78d5e285595b95ba972b1f3136a478113b40143b531b8f77c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/flower/query/inputs/scene.json": "19519afba67039db0622e36e7705cc3652f93b3620bc37ba0c85d695b02b0774",
+    "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/flower/tracks.pt": "98f374b68aa41222fd462aae380fa64855cfbaa482dd58392b9c25beb18208bd",
+    "configs/consolidated/nvos/flower.query.json": "848141e3d27722e461cfd4cbba40788f6af214f70a91a58ca250a26ed1e18464",
+    "configs/consolidated/nvos/flower.evaluation.json": "91629841c54f34f6bc631a9f68a41ad052d8d59b38a13ac114bd30aac9f6298f",
+    "output/nvos_carrier_next72/adaptive_allrgb/flower/geometry.pt": "ee42624c9253f73d79612314164ea836bec08a142dd946cf698b561861c74c0c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/flower/source_scale_prior.json": "b120da90ac3799401bf83255caefbd5751b29e9633879292a0910d225dbf2f2f",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fortress/query/reference/0/fit.json": "9e0687151f896fca6a5fdf2427bd8a81d09ed43b16c6870342ea6207e7f5b002",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fortress/query/inputs/scene.json": "f26a3f7ff5e92b74e18724c3de84f4581966bd6e37ba1ca05e91ff4d09ee6f46",
+    "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/fortress/tracks.pt": "8ef77311c14140bc8e243510f8d1a7393fae7e56e6576ca3df408a2fdceaeebb",
+    "configs/consolidated/nvos/fortress.query.json": "30910fcaf4c324e8a4acfc24f99cfb523330ffd17fa0d7819beadf214b56e819",
+    "configs/consolidated/nvos/fortress.evaluation.json": "74660de86c6fe24d5decd3408effce156c1aef7dd3883996a22a916a5147d857",
+    "output/nvos_carrier_next72/adaptive_allrgb/fortress/geometry.pt": "fe4f8563f46e089e3d13698333c8ffc3c984bfc776e01db85538fc7e75747e17",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/fortress/source_scale_prior.json": "c29aad77394a61b5c820affff648766020ba6ef613dfbf370909f57280583491",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_center/query/reference/0/fit.json": "d3ff58409174980f64c8e5749e8fe219124b8cb4b163e5f50da5a6525d078827",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_center/query/inputs/scene.json": "878e4fc0ac4038ef2dda64d5656e357c74e524c377882c3ec6abcc3358ff68bb",
+    "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_center/tracks.pt": "ade2cca70f3069b7b6cc89f73c479b0d500f1e17fe6b8d100d03036bc108edc3",
+    "configs/consolidated/nvos/horns_center.query.json": "72f8ca1eb0eb29753e83c8fd2c117bbd7a8b8de9ac6758f819c12d8a2502e45d",
+    "configs/consolidated/nvos/horns_center.evaluation.json": "e7d5b67943d1fada78a9da947ce4218c42800c286603dd7d25f2dcfe84eb50e2",
+    "output/nvos_carrier_next72/adaptive_allrgb/horns_center/geometry.pt": "a6b51176689b4daadcb07f73d0af89873c5ac95b2017826b448190b23cfc242c",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/horns_center/source_scale_prior.json": "28fb726ee647301188e8c9c2a46a3d2b2d85c2138bc305a9df3d08a20aa73066",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_left/query/reference/0/fit.json": "4dca963ee47497d64006923c160abd09fdc646d76264af34c79db19400e47e61",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_left/query/inputs/scene.json": "e96a7e34e60d25ca3313d54d1170e70924b69df073dd5a47d09f32bf90328f88",
+    "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/horns_left/tracks.pt": "c5203681dc93c57a7d3661591f584bd89110226325189e61f33969dc3223aa2f",
+    "configs/consolidated/nvos/horns_left.query.json": "e99023e05427471133dfc805baef6a9f5acc3e64abf357e1dbd522e7419c4974",
+    "configs/consolidated/nvos/horns_left.evaluation.json": "ab10b5f0a1cc8ddfa147503158deda4793bbe09edc45b2e2a91b5de2ff537a8c",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/leaves/query/reference/0/fit.json": "02e9275aebb10df62197f03b977521f81f7ec6e0be2dab9341fdcb6c298bc32a",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/leaves/query/inputs/scene.json": "378ca11cfc1e133e66fbd5a68cbacf0991eda8179236b0d52e463c7aa8139821",
+    "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/leaves/tracks.pt": "6f6dc227d4fe6da6c4f137f7d4e28fbd1287615f52380f949e43cb183ec5aad3",
+    "configs/consolidated/nvos/leaves.query.json": "81d4485cba5137a023cb7bc69f748a0dc9c24b8e10d35cc94e386e9d6536089e",
+    "configs/consolidated/nvos/leaves.evaluation.json": "cd0a84e84dd23c9ccc24dcd6a8bd318aadb03d352f537889a9de64b06385ffca",
+    "output/nvos_carrier_next72/adaptive_allrgb/leaves/geometry.pt": "dbfd3871fd750808ab3591578b465a4c83db3cb498d0cd6a405faa98281220d0",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/leaves/source_scale_prior.json": "23b18ecbf5bbeedfd5f994e005d46bf5c37828980ec3a5e55228c3a974fd260e",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/orchids/query/reference/0/fit.json": "fe69445900e12ddfb8a493db0396781739c4bc4c63101b007cbb5904cbbddc91",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/orchids/query/inputs/scene.json": "78f79e56bc423bb0d202dab5414f78296d328cfa9416f216ee37b4605c40e0d6",
+    "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/orchids/tracks.pt": "a2097cbae3cf5887ef2b598618650820c6f1a5f463d1a5f166aff2cb0d3a1d3c",
+    "configs/consolidated/nvos/orchids.query.json": "d248a0805073ad3bb6838def4d3cfd6845d895c35447de9c33947418cbe19494",
+    "configs/consolidated/nvos/orchids.evaluation.json": "148bb728eb226939c5e49eeb5c17313207bb7fab43b6ed05fdd623c3bed639d0",
+    "output/nvos_carrier_next72/adaptive_allrgb/orchids/geometry.pt": "3cd2eb3720862b04d771efaefef6a65c1b138cfdc63d83173ae8bef3d478c897",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/orchids/source_scale_prior.json": "234b1bd8a4c3daa443acd30da7ec381dfda6c00f7b507e7f83803a6bb43eaf7f",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/trex/query/reference/0/fit.json": "c10e034f0647360849c06b77ec8783a1cc0a82e76eb6306bcd53d840003293b8",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_conditioned_membership_20261006/image_convergence/system/nvos/trex/query/inputs/scene.json": "2a5ce2e73af6a40b817900b8186cbbb309fd58747ede5cc8e2485b95629b3208",
+    "/root/RADIO-GS/output/typed_evidence_next44/full_source_tracks/trex/tracks.pt": "1bdfe66b91e56dcb245c82ca776ed5b2ebc56fac333033104974931e504ed093",
+    "configs/consolidated/nvos/trex.query.json": "680695277e0a5103ac848934cd3f97eab1aaad4ef22e5228c7db798ad518a296",
+    "configs/consolidated/nvos/trex.evaluation.json": "02daa6688231281cda94fc02a93831979607269c71db228990616dd711373ac7",
+    "output/nvos_carrier_next72/adaptive_allrgb/trex/geometry.pt": "6446a9fd14f1b20e90d7c9474e9a1b26038d8c1f801cc4addf6b29f0e0007baf",
+    "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/trex/source_scale_prior.json": "68ec8513f3df2b5ef6b9926266283724c26064c43488490530b9c6ebc01f4d30",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0030_00/result.json": "1c587361c3d51b63201a6bd5e90eb68da2008a6e639bc01b65284151150be427",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0203_00/result.json": "1e43b267cfc3593719984baa4396aa3cda82c34f992bdaa3fe523bd87fea605a",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0246_00/result.json": "5acbfe3a1879fa464dd1bcb6a83b34eb5510866076964a8ba9ea5557261d9beb",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0249_00/result.json": "b62b39c74021a3b9e933914399cc89e69891e7d7dbfc1fc25f329d210db6f078",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0353_00/result.json": "e40b1b3aeec0d9732937f00c9341a361da99ef057c461f32f85183abd5861435",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0435_00/result.json": "caab8c217ddae5428ba985369fc44f87a30ee6e9b8c31db96f78b4ca1f2fe0ca",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0535_00/result.json": "65237d720464a4e04acbc192974080ad5d43d225a2cb04899f98f75941bd2b79",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0700_00/result.json": "664e7b65dceca2e40737f18d8b5d7fcb054c6cfa9622a8deb532b568839b8736",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/uqis/scene0704_00/result.json": "8c5732b20e71b3bf1d4de8c8510ae06bfaaada9ca913321036bb09bfe27c3d46",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/lerf/ramen/result.json": "194699738816c272b9fd3a14a70fc111e1663812688f2d1ff74981704d23fe17",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/lerf/figurines/result.json": "b2d049623d4ffcdc136e59879d2eed3f1fee3712885673d66ab82cbdef78a2e8",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/lerf/teatime/result.json": "feae6bf0a476a91d1d0e3c6ae7baa08f15eabc7ce6785a9fcc41baaaccbe71fa",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/lerf/waldo_kitchen/result.json": "5003f7c871db8d51801967b7a01dfd737291449d39555ed17db615625fac394c",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0000_00/result.json": "417274130d6f51b052898c30b1c21829f94a5b109ec84e7944a66e00b6446d50",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0062_00/result.json": "95d7698918c8bbc403e5ee4eb595d05add9f0b45e842950a31cf81e20cdf13ff",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0070_00/result.json": "f2ac34898b660a5dbc44d147110e1a263689a2eecafc78f57a33f2600fd59afc",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0097_00/result.json": "7bd22e5d622e801a2c87aa7aab2ba02e0c09a6b4a8b93d8922864714f44d0d7d",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0140_00/result.json": "a1f76d89bdd12f36325976d49749145512e2fd95542f1302b6c9133914b047e1",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0200_00/result.json": "142fdae7efe8b7de983bd681dc0c321125e11e4d47f6a6faa0c87e33a9b29d3e",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0347_00/result.json": "ac014552c60fd2ec11d03e31ffff0bb764afef771ac453f45d4fe6a0ed4ffd00",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0400_00/result.json": "faf17b83900888f2f10f3f050a7609e0e4f98cb4791c04f55688665ba7861246",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0590_00/result.json": "4be99ac34e96add021668294a958deb2ae454065d02fe65b0be617e678badde2",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/scannet/scene0645_00/result.json": "bbc94e7b87079ae939f7266d73d36ba974c4b0a79c1882d4a53ee63dc429ec4d",
+    "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fern/IMG_4027_mask.png": "c48d8bdc2bc9260a1dc8e1f03864e5a91e7b5279d862edfece0e1623ffa9f47d",
+    "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/flower/IMG_2962_mask.png": "dd94edff4733c28944bf36f5b9cc4db062bd9385d73132e158038a48e71f51ff",
+    "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fortress/IMG_1800_mask.png": "b87257873a1efc29092e6f14af97d0615a50aa543467f44b86e6c699ab3eabe0",
+    "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_center/DJI_20200223_163024_597_mask.png": "bb2d799785f0da19c473354583303a462a87220daed883a1377bfba3f76ce307",
+    "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_left/DJI_20200223_163024_597_mask.png": "d64ba3b8a0648c2698dddd6eae1b0e3d6bbdbe163eac4a07f180be109d0f8c28",
+    "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/leaves/IMG_2997_mask.png": "b3275f9ee6894bb54340340e0af207bdd4b6b961984926211541a10bfeb5e2d4",
+    "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/orchids/IMG_4480_mask.png": "222ee86fd11c35eab26e4f27032d79d2b2d96658e01db3787d3e06bbe787f34b",
+    "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/trex/DJI_20200223_163619_411_mask.png": "f237151e17a048828f6a98fdbfcae462be067b5938a3c158c497f5727fe1df60",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_ranking_v2/manifest.json": "95a837f47456f811aa9d454c1a5bc71f6fb734b4623ee340b15f228fc1605d51",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_ranking_v2/summary.json": "92991dccf119998c935f82e3dc38229c36d4132ce125cb6222379aef3621700a",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_coverage_ranking_v2/source_snapshot.json": "67a3b2162134d686f6a5f5b531b89ba4a8a37c72b23894e672e82be44ca8d210",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/manifest.json": "4bd9c66b1e7266c2981eb9fa4bfc499b76009292ce789ba003a45740981c3c02",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/summary.json": "d4576e0225eeb89a283fa205e4721e6b50f08a601c0798262f6700095888e695",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/predictions_complete.json": "2f4739337a5a185336286cce823bed3ee05bbb8c981b2b03a2d4d6b2d58b090f",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/source_snapshot.json": "4865273a1592b7336f2fa40c109ddbec2cf86e664227bae68cbc826c1598fb8d",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/fern_prediction.json": "692ec00998d780bd70d13e42af61bae85a9aa065602a3107faee80483d132d34",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/fern_evaluation.json": "d52f28345741ac257ebdb46cbbc9c79ec2358cdebe6998396490132244e4352a",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/flower_prediction.json": "15e69d8a915b58bcd8b4dfc97bce712fe22b07526afc1c01eda830f30fad7279",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/flower_evaluation.json": "62ca105451e3cfde2a4b835b572a3f0682682d6fa7a70dec7bb9776fd6c7eeb4",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/fortress_prediction.json": "8223fe5543dbb7eda8ac23979b3fc62efb51aa81da6323f80f1367d6a8bce156",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/fortress_evaluation.json": "2eec83a93c57572bb2f04c86dec798438d3fb4a04f10618142775f95b3de8576",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/horns_center_prediction.json": "4b429e251ba1161ff69f77d937685080573a5f63dbb5c6b28a2f4a03ac8c738c",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/horns_center_evaluation.json": "f63985d91016e1b0ad01f0c402428699f0465883dc99366c9fa2cad5bcad8918",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/horns_left_prediction.json": "fedd16d52788af0caa2ba3ce85edcc3eecc6dd4a5aed0ccbcf1b264caf17e850",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/horns_left_evaluation.json": "6b5bcae04f82836131a477458d7615e1bd8438f882bad87b96b83aa77084cae6",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/leaves_prediction.json": "c8586ad75325cf5803e9c5e621d6cf3a8353783cd653f0ff5b7e43d820bfbc2c",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/leaves_evaluation.json": "1a9655aeca6744107c8ab4014bd53dfc2498dd86158f241f51f85b98575e8512",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/orchids_prediction.json": "497371d4f7019b8bf99a6fb852a0f93280c611eb2d88a5e848c75548cac41a96",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/orchids_evaluation.json": "6db0e612b3c171298cc255280a88c6bb76872e1df2c8c3740837d643c1430cac",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/trex_prediction.json": "daceac7ce45934d6fbb793afbb4d88a3e96c7445c2364a8303b223a1d4c14530",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/trex_evaluation.json": "39446e9e43ff52b374dc8cf1b47d8ae72b8762d9d9a57c0a795d9bd7ebb21752",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fern/query/typed_readout.pt": "b8677f0e4dce0ba3a6b315cd65e0f0cf84986907b76eb16820eed51491093b60",
+    "configs/pipeline/nvos_all_sources/fern.scene.json": "a969f2c116483128bbea73fea2e93bbdf4bc5e6cff6e9ba45524f3803a7eb067",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/flower/query/typed_readout.pt": "90483763311d1d3199d6f510c79e260c5c64c287d4050494c2a7e8fa36e52e59",
+    "configs/pipeline/nvos_all_sources/flower.scene.json": "93d1183fffcd41e3febd3469c6120c8ba42335dcee3a11dd475621536c4de9c1",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fortress/query/typed_readout.pt": "5471055f248e52ce5218adb0fb9d7264668007d300370db33b7f473d4b27b8ef",
+    "configs/pipeline/nvos_all_sources/fortress.scene.json": "b195dc0df72b9c9d8eaf91d71f05c4b1254a5195a2b4154c93b885c7c006a1e0",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_center/query/typed_readout.pt": "5c32329e343410f1decb7b9c6cd1f80de41c495f3fb57f77f2d24b5abbd5be21",
+    "configs/pipeline/nvos_all_sources/horns_center.scene.json": "5e5d52a237e273ab16069347c447ffa7d9bd1d4a5c1ab2007d80bca4b5334f39",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_left/query/typed_readout.pt": "dc9ac57fc23f86179b5cc25d92a8bdcd4593db7a8588116c5f07baaf6e8ee2a2",
+    "configs/pipeline/nvos_all_sources/horns_left.scene.json": "34d0025271da37100b58931f48be0caea16082d3ffccaae9814d7b03b227c7e3",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/leaves/query/typed_readout.pt": "6b31abe0c7ee5ba86544f68c5f3d0861ddd07304b004646918fa4a1c294f3336",
+    "configs/pipeline/nvos_all_sources/leaves.scene.json": "40877b0e733a0093f40d980f372ffa64a2c3cb329d0d979fc4617285f4925345",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/orchids/query/typed_readout.pt": "437a052a4f3533257d27478e8e683e10aa682114d662603792e2fe4adf26c9c6",
+    "configs/pipeline/nvos_all_sources/orchids.scene.json": "898c250c0aa705fd88f5051245d8e52751d40f513fb6ec3ea2a6e6fc2d988bb6",
+    "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/trex/query/typed_readout.pt": "ba8a296d05bc81a6d1e3b2d99838e0295175c9ec1211b31947f8c30a0bb1ce73",
+    "configs/pipeline/nvos_all_sources/trex.scene.json": "d0d617b273ba4efda097ecdac76981f992b0fd643a4230f975e8c6e75edc6bca",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/manifest.json": "15b1a127471c1b606fe69854493caa8dc4b94b39a22baee98723cfaa88cc3167",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/summary.json": "bd2431c395570c24b132e5551170629f509fb91fc44e8a36fa91da2aeae30438",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/predictions_complete.json": "384ea3de01e93ab41b39553c798be576bf1fe8ef65c716a13fa7135742122ef5",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/source_snapshot.json": "68a1f431f6d727bb69720493c54a51d0a808423e26887049c11d67663e7c8526",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/fern_prediction.json": "c71c83c1080b7a52647c6a7de72324eac01eb077ba67b25e4acd5e4f3e053a77",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/fern_evaluation.json": "bd600bf7f98db2eb4bc13d8459a89680565e8d0a04a75ce92bd07921c32d0a17",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/flower_prediction.json": "64b5be6ade93a913b7578dae501e836112ee416c1f3b3f04eaee0a43192755e6",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/flower_evaluation.json": "c84eb5913489ebfd271a8a5cbef73973a455a4ffa355f46087c4466f1fda9774",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/fortress_prediction.json": "123fd10d6fde326e823ab936a04a5520f5ed99368bd24c1fcc72cb4f46f70975",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/fortress_evaluation.json": "d0e5f4f3e5bfd64f31efccf7c2a1e1a97c193b4b44e158a7472923325425678e",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/horns_center_prediction.json": "09f12da0978d74fc9c42f05a583bffb5b49055658c712cbcaa8a490bbd837bb3",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/horns_center_evaluation.json": "34f6381b63b1b88f4850f1b153b749e03d8b7f0b39f42997bcd5b2b332c194a1",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/horns_left_prediction.json": "b2dda3d08372c5427eb9c04feeb232b8a8b97924dd789064eebd440db924357f",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/horns_left_evaluation.json": "0214048d77622836aad02b6f60efc1f8b89b17add6f76d85c9f4be64a6ab34aa",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/leaves_prediction.json": "5da45d38b3e72408a6b15afbd24cfbba5d2113843701b20ec697629e52ceede8",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/leaves_evaluation.json": "ac518de502c83e21af0a5636994fce982c9e1ee29f35173c13bdf39cc53f944c",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/orchids_prediction.json": "c10b01b46a70755f1de4c6bf60270e66c92a32395af917bfeec7358cc57a6356",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/orchids_evaluation.json": "c7d54244c68b5755a88b8d775591af79e730c3dda23f5128ff1e1d664f8f52a3",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/trex_prediction.json": "c0479a9aea8302a9ca4342a491dcf7bad19a48b724d9f7e91144173fbf9226e9",
+    "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/trex_evaluation.json": "dbae21fc61a069f31323cc4279ada5e3c81444637ae5c90f0366aedc3ce162f9"
+  },
+  "independent_test": false,
+  "effects": {
+    "retained_gt_gt127": {
+      "coverage_low": {
+        "delta_pp": 0.1934945097856175,
+        "per_task_delta_pp": {
+          "fern": 0.4495243470730381,
+          "flower": -0.293565353755354,
+          "fortress": -0.8857034516941864,
+          "horns_center": -1.3968633603408942,
+          "horns_left": 0.3141495667277949,
+          "leaves": -0.029328782167437062,
+          "orchids": -0.05169537189316786,
+          "trex": 3.4414384843351464
+        },
+        "improved": 3,
+        "harmed": 5,
+        "descriptive_scene_bootstrap95_pp": [
+          -0.4790471109367256,
+          1.3664631732087857
+        ],
+        "independent_scene_clusters": 7,
+        "bootstrap_samples": 5000
+      },
+      "legacy_high": {
+        "delta_pp": -0.8995859830483774,
+        "per_task_delta_pp": {
+          "fern": -0.3118483973026054,
+          "flower": -0.19976930485178235,
+          "fortress": -0.07153828577041166,
+          "horns_center": -0.21120730758985573,
+          "horns_left": -0.9863111376090417,
+          "leaves": -3.0700818970357147,
+          "orchids": -0.45907825690708615,
+          "trex": -1.8868532773205215
+        },
+        "improved": 0,
+        "harmed": 8,
+        "descriptive_scene_bootstrap95_pp": [
+          -1.7266848240017498,
+          -0.3094886891874149
+        ],
+        "independent_scene_clusters": 7,
+        "bootstrap_samples": 5000
+      },
+      "coverage_high": {
+        "delta_pp": 1.2641853696573682,
+        "per_task_delta_pp": {
+          "fern": 1.3477934570148897,
+          "flower": 0.8554377506896804,
+          "fortress": 0.23333850647864196,
+          "horns_center": -0.17308622538050322,
+          "horns_left": 1.7318645289279622,
+          "leaves": 0.9746624951761595,
+          "orchids": 1.9049026394827195,
+          "trex": 3.2385698048693956
+        },
+        "improved": 7,
+        "harmed": 1,
+        "descriptive_scene_bootstrap95_pp": [
+          0.738078895823086,
+          2.020167502648467
+        ],
+        "independent_scene_clusters": 7,
+        "bootstrap_samples": 5000
+      },
+      "factorial": {
+        "evidence_at_low_pp": 0.19349450978561888,
+        "evidence_at_high_pp": 2.1637713527057345,
+        "resolution_at_legacy_pp": -0.8995859830483677,
+        "resolution_at_coverage_pp": 1.070690859871748,
+        "interaction_pp": 1.9702768429201156
+      }
+    },
+    "ludvig_gt_maximum": {
+      "coverage_low": {
+        "delta_pp": 0.27472583347181306,
+        "per_task_delta_pp": {
+          "fern": 0.4495243470730381,
+          "flower": -0.25584295417578895,
+          "fortress": -0.8857034516941864,
+          "horns_center": -1.2949962365452206,
+          "horns_left": 0.7777245955103429,
+          "leaves": -0.029328782167437062,
+          "orchids": -0.0050093345613899665,
+          "trex": 3.4414384843351464
+        },
+        "improved": 3,
+        "harmed": 5,
+        "descriptive_scene_bootstrap95_pp": [
+          -0.36349534136074596,
+          1.386151966788338
+        ],
+        "independent_scene_clusters": 7,
+        "bootstrap_samples": 5000
+      },
+      "legacy_high": {
+        "delta_pp": -0.9038446067296396,
+        "per_task_delta_pp": {
+          "fern": -0.3118483973026054,
+          "flower": -0.21095500980509163,
+          "fortress": -0.07153828577041166,
+          "horns_center": -0.2609494468602258,
+          "horns_left": -0.941402758304466,
+          "leaves": -3.0700818970357147,
+          "orchids": -0.4771277814380803,
+          "trex": -1.8868532773205215
+        },
+        "improved": 0,
+        "harmed": 8,
+        "descriptive_scene_bootstrap95_pp": [
+          -1.7318418310106054,
+          -0.31472395481490223
+        ],
+        "independent_scene_clusters": 7,
+        "bootstrap_samples": 5000
+      },
+      "coverage_high": {
+        "delta_pp": 1.2445003592599992,
+        "per_task_delta_pp": {
+          "fern": 1.3477934570148897,
+          "flower": 0.8618530105921729,
+          "fortress": 0.23333850647864196,
+          "horns_center": -0.2545563375498494,
+          "horns_left": 1.643332265573072,
+          "leaves": 0.9746624951761595,
+          "orchids": 1.911009671925512,
+          "trex": 3.2385698048693956
+        },
+        "improved": 7,
+        "harmed": 1,
+        "descriptive_scene_bootstrap95_pp": [
+          0.7142819813096613,
+          2.0193650570167154
+        ],
+        "independent_scene_clusters": 7,
+        "bootstrap_samples": 5000
+      },
+      "factorial": {
+        "evidence_at_low_pp": 0.2747258334718117,
+        "evidence_at_high_pp": 2.1483449659896348,
+        "resolution_at_legacy_pp": -0.9038446067296313,
+        "resolution_at_coverage_pp": 0.9697745257881918,
+        "interaction_pp": 1.873619132517823
+      }
+    }
+  },
+  "source_erosion": {
+    "fern": {
+      "legacy_low": {
+        "hard_foreground_pixels": 287178,
+        "eroded_positive_pixels": 222877,
+        "positive_pixel_fraction_erased": 0.22390642737257027
+      },
+      "coverage_low": {
+        "hard_foreground_pixels": 287178,
+        "eroded_positive_pixels": 222877,
+        "positive_pixel_fraction_erased": 0.22390642737257027
+      },
+      "legacy_high": {
+        "hard_foreground_pixels": 1149118,
+        "eroded_positive_pixels": 890306,
+        "positive_pixel_fraction_erased": 0.2252266520931706
+      },
+      "coverage_high": {
+        "hard_foreground_pixels": 1149118,
+        "eroded_positive_pixels": 890306,
+        "positive_pixel_fraction_erased": 0.2252266520931706
+      }
+    },
+    "flower": {
+      "legacy_low": {
+        "hard_foreground_pixels": 307059,
+        "eroded_positive_pixels": 245059,
+        "positive_pixel_fraction_erased": 0.20191559276881643
+      },
+      "coverage_low": {
+        "hard_foreground_pixels": 307059,
+        "eroded_positive_pixels": 245059,
+        "positive_pixel_fraction_erased": 0.20191559276881643
+      },
+      "legacy_high": {
+        "hard_foreground_pixels": 1228204,
+        "eroded_positive_pixels": 977335,
+        "positive_pixel_fraction_erased": 0.20425678470351827
+      },
+      "coverage_high": {
+        "hard_foreground_pixels": 1228204,
+        "eroded_positive_pixels": 977335,
+        "positive_pixel_fraction_erased": 0.20425678470351827
+      }
+    },
+    "fortress": {
+      "legacy_low": {
+        "hard_foreground_pixels": 294645,
+        "eroded_positive_pixels": 262190,
+        "positive_pixel_fraction_erased": 0.1101495019430162
+      },
+      "coverage_low": {
+        "hard_foreground_pixels": 294645,
+        "eroded_positive_pixels": 262190,
+        "positive_pixel_fraction_erased": 0.1101495019430162
+      },
+      "legacy_high": {
+        "hard_foreground_pixels": 1178365,
+        "eroded_positive_pixels": 1048411,
+        "positive_pixel_fraction_erased": 0.11028331628994414
+      },
+      "coverage_high": {
+        "hard_foreground_pixels": 1178365,
+        "eroded_positive_pixels": 1048411,
+        "positive_pixel_fraction_erased": 0.11028331628994414
+      }
+    },
+    "horns_center": {
+      "legacy_low": {
+        "hard_foreground_pixels": 479904,
+        "eroded_positive_pixels": 386077,
+        "positive_pixel_fraction_erased": 0.19551201907048077
+      },
+      "coverage_low": {
+        "hard_foreground_pixels": 479904,
+        "eroded_positive_pixels": 386077,
+        "positive_pixel_fraction_erased": 0.19551201907048077
+      },
+      "legacy_high": {
+        "hard_foreground_pixels": 1919785,
+        "eroded_positive_pixels": 1543846,
+        "positive_pixel_fraction_erased": 0.1958234906512969
+      },
+      "coverage_high": {
+        "hard_foreground_pixels": 1919785,
+        "eroded_positive_pixels": 1543846,
+        "positive_pixel_fraction_erased": 0.1958234906512969
+      }
+    },
+    "horns_left": {
+      "legacy_low": {
+        "hard_foreground_pixels": 160930,
+        "eroded_positive_pixels": 130779,
+        "positive_pixel_fraction_erased": 0.18735475051264527
+      },
+      "coverage_low": {
+        "hard_foreground_pixels": 160930,
+        "eroded_positive_pixels": 130779,
+        "positive_pixel_fraction_erased": 0.18735475051264527
+      },
+      "legacy_high": {
+        "hard_foreground_pixels": 643694,
+        "eroded_positive_pixels": 522264,
+        "positive_pixel_fraction_erased": 0.18864553654376148
+      },
+      "coverage_high": {
+        "hard_foreground_pixels": 643694,
+        "eroded_positive_pixels": 522264,
+        "positive_pixel_fraction_erased": 0.18864553654376148
+      }
+    },
+    "leaves": {
+      "legacy_low": {
+        "hard_foreground_pixels": 65537,
+        "eroded_positive_pixels": 51987,
+        "positive_pixel_fraction_erased": 0.20675343698979198
+      },
+      "coverage_low": {
+        "hard_foreground_pixels": 65537,
+        "eroded_positive_pixels": 51987,
+        "positive_pixel_fraction_erased": 0.20675343698979198
+      },
+      "legacy_high": {
+        "hard_foreground_pixels": 262246,
+        "eroded_positive_pixels": 208059,
+        "positive_pixel_fraction_erased": 0.20662660250299336
+      },
+      "coverage_high": {
+        "hard_foreground_pixels": 262246,
+        "eroded_positive_pixels": 208059,
+        "positive_pixel_fraction_erased": 0.20662660250299336
+      }
+    },
+    "orchids": {
+      "legacy_low": {
+        "hard_foreground_pixels": 136822,
+        "eroded_positive_pixels": 96565,
+        "positive_pixel_fraction_erased": 0.29422899826051363
+      },
+      "coverage_low": {
+        "hard_foreground_pixels": 136822,
+        "eroded_positive_pixels": 96565,
+        "positive_pixel_fraction_erased": 0.29422899826051363
+      },
+      "legacy_high": {
+        "hard_foreground_pixels": 547476,
+        "eroded_positive_pixels": 385386,
+        "positive_pixel_fraction_erased": 0.29606777283387764
+      },
+      "coverage_high": {
+        "hard_foreground_pixels": 547476,
+        "eroded_positive_pixels": 385386,
+        "positive_pixel_fraction_erased": 0.29606777283387764
+      }
+    },
+    "trex": {
+      "legacy_low": {
+        "hard_foreground_pixels": 429080,
+        "eroded_positive_pixels": 217655,
+        "positive_pixel_fraction_erased": 0.4927402815325813
+      },
+      "coverage_low": {
+        "hard_foreground_pixels": 429080,
+        "eroded_positive_pixels": 217655,
+        "positive_pixel_fraction_erased": 0.4927402815325813
+      },
+      "legacy_high": {
+        "hard_foreground_pixels": 1717211,
+        "eroded_positive_pixels": 861718,
+        "positive_pixel_fraction_erased": 0.49818746793492474
+      },
+      "coverage_high": {
+        "hard_foreground_pixels": 1717211,
+        "eroded_positive_pixels": 861718,
+        "positive_pixel_fraction_erased": 0.49818746793492474
+      }
+    }
+  },
+  "rows": {
+    "fern": {
+      "legacy_low": {
+        "retained_gt_gt127": {
+          "tp": 3125782,
+          "fp": 368475,
+          "fn": 309085,
+          "iou": 0.8218514138355162,
+          "precision": 0.8945483975563332,
+          "recall": 0.9100154387346002
+        },
+        "ludvig_gt_maximum": {
+          "tp": 3125782,
+          "fp": 368475,
+          "fn": 309085,
+          "iou": 0.8218514138355162,
+          "precision": 0.8945483975563332,
+          "recall": 0.9100154387346002
+        }
+      },
+      "coverage_low": {
+        "retained_gt_gt127": {
+          "tp": 3107489,
+          "fp": 325648,
+          "fn": 327378,
+          "iou": 0.8263466573062466,
+          "precision": 0.9051456437654541,
+          "recall": 0.9046897594579354
+        },
+        "ludvig_gt_maximum": {
+          "tp": 3107489,
+          "fp": 325648,
+          "fn": 327378,
+          "iou": 0.8263466573062466,
+          "precision": 0.9051456437654541,
+          "recall": 0.9046897594579354
+        }
+      },
+      "legacy_high": {
+        "retained_gt_gt127": {
+          "tp": 3140969,
+          "fp": 401511,
+          "fn": 293898,
+          "iou": 0.8187329298624901,
+          "precision": 0.8866582168424381,
+          "recall": 0.9144368617474854
+        },
+        "ludvig_gt_maximum": {
+          "tp": 3140969,
+          "fp": 401511,
+          "fn": 293898,
+          "iou": 0.8187329298624901,
+          "precision": 0.8866582168424381,
+          "recall": 0.9144368617474854
+        }
+      },
+      "coverage_high": {
+        "retained_gt_gt127": {
+          "tp": 3175497,
+          "fp": 366624,
+          "fn": 259370,
+          "iou": 0.8353293484056651,
+          "precision": 0.8964959130419317,
+          "recall": 0.924489070464737
+        },
+        "ludvig_gt_maximum": {
+          "tp": 3175497,
+          "fp": 366624,
+          "fn": 259370,
+          "iou": 0.8353293484056651,
+          "precision": 0.8964959130419317,
+          "recall": 0.924489070464737
+        }
+      }
+    },
+    "flower": {
+      "legacy_low": {
+        "retained_gt_gt127": {
+          "tp": 2345095,
+          "fp": 28354,
+          "fn": 336798,
+          "iou": 0.8652698444090151,
+          "precision": 0.9880536721033399,
+          "recall": 0.8744178086150343
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2343263,
+          "fp": 30186,
+          "fn": 332555,
+          "iou": 0.8659495699193349,
+          "precision": 0.9872817996089236,
+          "recall": 0.875718378454738
+        }
+      },
+      "coverage_low": {
+        "retained_gt_gt127": {
+          "tp": 2327277,
+          "fp": 16918,
+          "fn": 354616,
+          "iou": 0.8623341908714616,
+          "precision": 0.9927830235965864,
+          "recall": 0.8677739939662023
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2325993,
+          "fp": 18202,
+          "fn": 349825,
+          "iou": 0.863391140377577,
+          "precision": 0.9922352875933956,
+          "recall": 0.8692642773163197
+        }
+      },
+      "legacy_high": {
+        "retained_gt_gt127": {
+          "tp": 2344926,
+          "fp": 34430,
+          "fn": 336967,
+          "iou": 0.8632721513604973,
+          "precision": 0.9855296979518828,
+          "recall": 0.8743547934238988
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2342938,
+          "fp": 36418,
+          "fn": 332880,
+          "iou": 0.863840019821284,
+          "precision": 0.9846941777522994,
+          "recall": 0.8755969202688673
+        }
+      },
+      "coverage_high": {
+        "retained_gt_gt127": {
+          "tp": 2363338,
+          "fp": 22699,
+          "fn": 318555,
+          "iou": 0.8738242219159119,
+          "precision": 0.9904867359558968,
+          "recall": 0.8812200934190887
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2361577,
+          "fp": 24460,
+          "fn": 314241,
+          "iou": 0.8745681000252566,
+          "precision": 0.9897486920781194,
+          "recall": 0.8825626406579222
+        }
+      }
+    },
+    "fortress": {
+      "legacy_low": {
+        "retained_gt_gt127": {
+          "tp": 2194682,
+          "fp": 1697,
+          "fn": 60819,
+          "iou": 0.9723037146054533,
+          "precision": 0.9992273646761328,
+          "recall": 0.9730352591286814
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2194682,
+          "fp": 1697,
+          "fn": 60819,
+          "iou": 0.9723037146054533,
+          "precision": 0.9992273646761328,
+          "recall": 0.9730352591286814
+        }
+      },
+      "coverage_low": {
+        "retained_gt_gt127": {
+          "tp": 2173080,
+          "fp": 26,
+          "fn": 82421,
+          "iou": 0.9634466800885114,
+          "precision": 0.9999880355583207,
+          "recall": 0.9634577860971908
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2173080,
+          "fp": 26,
+          "fn": 82421,
+          "iou": 0.9634466800885114,
+          "precision": 0.9999880355583207,
+          "recall": 0.9634577860971908
+        }
+      },
+      "legacy_high": {
+        "retained_gt_gt127": {
+          "tp": 2201864,
+          "fp": 10751,
+          "fn": 53637,
+          "iou": 0.9715883317477492,
+          "precision": 0.9951410435163822,
+          "recall": 0.9762194740769345
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2201864,
+          "fp": 10751,
+          "fn": 53637,
+          "iou": 0.9715883317477492,
+          "precision": 0.9951410435163822,
+          "recall": 0.9762194740769345
+        }
+      },
+      "coverage_high": {
+        "retained_gt_gt127": {
+          "tp": 2198370,
+          "fp": 77,
+          "fn": 57131,
+          "iou": 0.9746370996702397,
+          "precision": 0.9999649752757287,
+          "recall": 0.9746703725691099
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2198370,
+          "fp": 77,
+          "fn": 57131,
+          "iou": 0.9746370996702397,
+          "precision": 0.9999649752757287,
+          "recall": 0.9746703725691099
+        }
+      }
+    },
+    "horns_center": {
+      "legacy_low": {
+        "retained_gt_gt127": {
+          "tp": 1997430,
+          "fp": 30060,
+          "fn": 59087,
+          "iou": 0.957275959621907,
+          "precision": 0.9851737863072074,
+          "recall": 0.9712684115910541
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1992952,
+          "fp": 34538,
+          "fn": 43787,
+          "iou": 0.9621851640316578,
+          "precision": 0.9829651440944221,
+          "recall": 0.9785014181984044
+        }
+      },
+      "coverage_low": {
+        "retained_gt_gt127": {
+          "tp": 1979421,
+          "fp": 41867,
+          "fn": 77096,
+          "iou": 0.9433073260184981,
+          "precision": 0.9792869694966774,
+          "recall": 0.9625113723835008
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1976171,
+          "fp": 45117,
+          "fn": 60568,
+          "iou": 0.9492352016662056,
+          "precision": 0.9776790838316954,
+          "recall": 0.9702622672811784
+        }
+      },
+      "legacy_high": {
+        "retained_gt_gt127": {
+          "tp": 1996538,
+          "fp": 33740,
+          "fn": 59979,
+          "iou": 0.9551638865460085,
+          "precision": 0.9833815861670175,
+          "recall": 0.9708346685196378
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1991559,
+          "fp": 38719,
+          "fn": 45180,
+          "iou": 0.9595756695630555,
+          "precision": 0.9809292126496962,
+          "recall": 0.9778174817686508
+        }
+      },
+      "coverage_high": {
+        "retained_gt_gt127": {
+          "tp": 2010099,
+          "fp": 47098,
+          "fn": 46418,
+          "iou": 0.955545097368102,
+          "precision": 0.9771057414530548,
+          "recall": 0.9774288274786933
+        },
+        "ludvig_gt_maximum": {
+          "tp": 2004809,
+          "fp": 52388,
+          "fn": 31930,
+          "iou": 0.9596396006561593,
+          "precision": 0.9745342813546782,
+          "recall": 0.9843229790365874
+        }
+      }
+    },
+    "horns_left": {
+      "legacy_low": {
+        "retained_gt_gt127": {
+          "tp": 689770,
+          "fp": 29731,
+          "fn": 24600,
+          "iou": 0.9269843744330407,
+          "precision": 0.9586783062150018,
+          "recall": 0.965564063440514
+        },
+        "ludvig_gt_maximum": {
+          "tp": 684761,
+          "fp": 34740,
+          "fn": 18790,
+          "iou": 0.927494714143881,
+          "precision": 0.9517165368776416,
+          "recall": 0.9732926255523764
+        }
+      },
+      "coverage_low": {
+        "retained_gt_gt127": {
+          "tp": 685087,
+          "fp": 22183,
+          "fn": 29283,
+          "iou": 0.9301258701003187,
+          "precision": 0.9686357402406436,
+          "recall": 0.9590086369808363
+        },
+        "ludvig_gt_maximum": {
+          "tp": 681817,
+          "fp": 25453,
+          "fn": 21734,
+          "iou": 0.9352719600989844,
+          "precision": 0.9640123290963847,
+          "recall": 0.9691081385713332
+        }
+      },
+      "legacy_high": {
+        "retained_gt_gt127": {
+          "tp": 684753,
+          "fp": 32263,
+          "fn": 29617,
+          "iou": 0.9171212630569503,
+          "precision": 0.9550037934997266,
+          "recall": 0.9585410921511262
+        },
+        "ludvig_gt_maximum": {
+          "tp": 679948,
+          "fp": 37068,
+          "fn": 23603,
+          "iou": 0.9180806865608363,
+          "precision": 0.9483024088723264,
+          "recall": 0.9664516147372401
+        }
+      },
+      "coverage_high": {
+        "retained_gt_gt127": {
+          "tp": 697754,
+          "fp": 24539,
+          "fn": 16616,
+          "iou": 0.9443030197223203,
+          "precision": 0.9660262525041776,
+          "recall": 0.9767403446393326
+        },
+        "ludvig_gt_maximum": {
+          "tp": 692358,
+          "fp": 29935,
+          "fn": 11193,
+          "iou": 0.9439280367996117,
+          "precision": 0.9585556000127372,
+          "recall": 0.9840907055778473
+        }
+      }
+    },
+    "leaves": {
+      "legacy_low": {
+        "retained_gt_gt127": {
+          "tp": 687252,
+          "fp": 2932,
+          "fn": 40276,
+          "iou": 0.9408482326205405,
+          "precision": 0.9957518574756876,
+          "recall": 0.9446399313840842
+        },
+        "ludvig_gt_maximum": {
+          "tp": 687252,
+          "fp": 2932,
+          "fn": 40276,
+          "iou": 0.9408482326205405,
+          "precision": 0.9957518574756876,
+          "recall": 0.9446399313840842
+        }
+      },
+      "coverage_low": {
+        "retained_gt_gt127": {
+          "tp": 686148,
+          "fp": 1986,
+          "fn": 41380,
+          "iou": 0.9405549447988661,
+          "precision": 0.9971139342046752,
+          "recall": 0.9431224640151307
+        },
+        "ludvig_gt_maximum": {
+          "tp": 686148,
+          "fp": 1986,
+          "fn": 41380,
+          "iou": 0.9405549447988661,
+          "precision": 0.9971139342046752,
+          "recall": 0.9431224640151307
+        }
+      },
+      "legacy_high": {
+        "retained_gt_gt127": {
+          "tp": 664272,
+          "fp": 2323,
+          "fn": 63256,
+          "iou": 0.9101474136501834,
+          "precision": 0.996515125375978,
+          "recall": 0.9130535182151065
+        },
+        "ludvig_gt_maximum": {
+          "tp": 664272,
+          "fp": 2323,
+          "fn": 63256,
+          "iou": 0.9101474136501834,
+          "precision": 0.996515125375978,
+          "recall": 0.9130535182151065
+        }
+      },
+      "coverage_high": {
+        "retained_gt_gt127": {
+          "tp": 694420,
+          "fp": 2983,
+          "fn": 33108,
+          "iou": 0.9505948575723021,
+          "precision": 0.9957227026554231,
+          "recall": 0.9544924731419272
+        },
+        "ludvig_gt_maximum": {
+          "tp": 694420,
+          "fp": 2983,
+          "fn": 33108,
+          "iou": 0.9505948575723021,
+          "precision": 0.9957227026554231,
+          "recall": 0.9544924731419272
+        }
+      }
+    },
+    "orchids": {
+      "legacy_low": {
+        "retained_gt_gt127": {
+          "tp": 1302326,
+          "fp": 1222,
+          "fn": 607672,
+          "iou": 0.6814108265924383,
+          "precision": 0.999062558494202,
+          "recall": 0.6818467872741228
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1301192,
+          "fp": 2356,
+          "fn": 585191,
+          "iou": 0.6889210208504193,
+          "precision": 0.9981926250510146,
+          "recall": 0.68978144947235
+        }
+      },
+      "coverage_low": {
+        "retained_gt_gt127": {
+          "tp": 1301195,
+          "fp": 1012,
+          "fn": 608803,
+          "iou": 0.6808938728735067,
+          "precision": 0.9992228578098566,
+          "recall": 0.6812546400572147
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1300589,
+          "fp": 1618,
+          "fn": 585794,
+          "iou": 0.6888709275048054,
+          "precision": 0.9987574940082491,
+          "recall": 0.6894617901030703
+        }
+      },
+      "legacy_high": {
+        "retained_gt_gt127": {
+          "tp": 1293885,
+          "fp": 1714,
+          "fn": 616113,
+          "iou": 0.6768200440233675,
+          "precision": 0.9986770598001388,
+          "recall": 0.6774274109187549
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1292612,
+          "fp": 2987,
+          "fn": 593771,
+          "iou": 0.6841497430360385,
+          "precision": 0.997694502697208,
+          "recall": 0.6852330624268772
+        }
+      },
+      "coverage_high": {
+        "retained_gt_gt127": {
+          "tp": 1338763,
+          "fp": 1265,
+          "fn": 571235,
+          "iou": 0.7004598529872655,
+          "precision": 0.9990559898748385,
+          "recall": 0.7009237706008069
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1337446,
+          "fp": 2582,
+          "fn": 548937,
+          "iou": 0.7080311175696744,
+          "precision": 0.9980731745903817,
+          "recall": 0.7090002401421133
+        }
+      }
+    },
+    "trex": {
+      "legacy_low": {
+        "retained_gt_gt127": {
+          "tp": 1309248,
+          "fp": 258074,
+          "fn": 166484,
+          "iou": 0.755129466618526,
+          "precision": 0.8353407914901979,
+          "recall": 0.8871854781220438
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1309248,
+          "fp": 258074,
+          "fn": 166484,
+          "iou": 0.755129466618526,
+          "precision": 0.8353407914901979,
+          "recall": 0.8871854781220438
+        }
+      },
+      "coverage_low": {
+        "retained_gt_gt127": {
+          "tp": 1299346,
+          "fp": 169960,
+          "fn": 176386,
+          "iou": 0.7895438514618774,
+          "precision": 0.8843263418239632,
+          "recall": 0.8804755877083373
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1299346,
+          "fp": 169960,
+          "fn": 176386,
+          "iou": 0.7895438514618774,
+          "precision": 0.8843263418239632,
+          "recall": 0.8804755877083373
+        }
+      },
+      "legacy_high": {
+        "retained_gt_gt127": {
+          "tp": 1310730,
+          "fp": 304520,
+          "fn": 165002,
+          "iou": 0.7362609338453208,
+          "precision": 0.8114719083733168,
+          "recall": 0.8881897255057152
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1310730,
+          "fp": 304520,
+          "fn": 165002,
+          "iou": 0.7362609338453208,
+          "precision": 0.8114719083733168,
+          "recall": 0.8881897255057152
+        }
+      },
+      "coverage_high": {
+        "retained_gt_gt127": {
+          "tp": 1364485,
+          "fp": 256914,
+          "fn": 111247,
+          "iou": 0.7875151646672199,
+          "precision": 0.8415479471740145,
+          "recall": 0.9246157161327395
+        },
+        "ludvig_gt_maximum": {
+          "tp": 1364485,
+          "fp": 256914,
+          "fn": 111247,
+          "iou": 0.7875151646672199,
+          "precision": 0.8415479471740145,
+          "recall": 0.9246157161327395
+        }
+      }
+    }
+  },
+  "scoring_gt_receipts": {
+    "fern": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fern/IMG_4027_mask.png",
+      "sha256": "c48d8bdc2bc9260a1dc8e1f03864e5a91e7b5279d862edfece0e1623ffa9f47d",
+      "foreground_counts": {
+        "retained_gt_gt127": 3434867,
+        "ludvig_gt_maximum": 3434867
+      }
+    },
+    "flower": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/flower/IMG_2962_mask.png",
+      "sha256": "dd94edff4733c28944bf36f5b9cc4db062bd9385d73132e158038a48e71f51ff",
+      "foreground_counts": {
+        "retained_gt_gt127": 2681893,
+        "ludvig_gt_maximum": 2675818
+      }
+    },
+    "fortress": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fortress/IMG_1800_mask.png",
+      "sha256": "b87257873a1efc29092e6f14af97d0615a50aa543467f44b86e6c699ab3eabe0",
+      "foreground_counts": {
+        "retained_gt_gt127": 2255501,
+        "ludvig_gt_maximum": 2255501
+      }
+    },
+    "horns_center": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_center/DJI_20200223_163024_597_mask.png",
+      "sha256": "bb2d799785f0da19c473354583303a462a87220daed883a1377bfba3f76ce307",
+      "foreground_counts": {
+        "retained_gt_gt127": 2056517,
+        "ludvig_gt_maximum": 2036739
+      }
+    },
+    "horns_left": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_left/DJI_20200223_163024_597_mask.png",
+      "sha256": "d64ba3b8a0648c2698dddd6eae1b0e3d6bbdbe163eac4a07f180be109d0f8c28",
+      "foreground_counts": {
+        "retained_gt_gt127": 714370,
+        "ludvig_gt_maximum": 703551
+      }
+    },
+    "leaves": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/leaves/IMG_2997_mask.png",
+      "sha256": "b3275f9ee6894bb54340340e0af207bdd4b6b961984926211541a10bfeb5e2d4",
+      "foreground_counts": {
+        "retained_gt_gt127": 727528,
+        "ludvig_gt_maximum": 727528
+      }
+    },
+    "orchids": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/orchids/IMG_4480_mask.png",
+      "sha256": "222ee86fd11c35eab26e4f27032d79d2b2d96658e01db3787d3e06bbe787f34b",
+      "foreground_counts": {
+        "retained_gt_gt127": 1909998,
+        "ludvig_gt_maximum": 1886383
+      }
+    },
+    "trex": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/trex/DJI_20200223_163619_411_mask.png",
+      "sha256": "f237151e17a048828f6a98fdbfcae462be067b5938a3c158c497f5727fe1df60",
+      "foreground_counts": {
+        "retained_gt_gt127": 1475732,
+        "ludvig_gt_maximum": 1475732
+      }
+    }
+  },
+  "hypothesis": "low-resolution erosion loses useful reference evidence",
+  "evidence_intervention": "area/confidence/authority change together; not an isolated confidence-weight ablation",
+  "resolution_intervention": "source raster and geometric contribution sampling change; fixed geometry parameters",
+  "no_new_all_five_inference": true,
+  "default_changed": false,
+  "ranking": {
+    "retained_gt_gt127": {
+      "legacy_low": {
+        "average_precision": 0.980222492597284,
+        "auroc": 0.9952819645030825
+      },
+      "coverage_low": {
+        "average_precision": 0.9816160673964209,
+        "auroc": 0.9958237771384288
+      },
+      "legacy_high": {
+        "average_precision": 0.9784794540878873,
+        "auroc": 0.9947637599791814
+      },
+      "coverage_high": {
+        "average_precision": 0.9815268632560945,
+        "auroc": 0.995238307520359
+      }
+    },
+    "ludvig_gt_maximum": {
+      "legacy_low": {
+        "average_precision": 0.9798950286373957,
+        "auroc": 0.9952493550728012
+      },
+      "coverage_low": {
+        "average_precision": 0.9813022914464614,
+        "auroc": 0.9958101338800864
+      },
+      "legacy_high": {
+        "average_precision": 0.978100887124961,
+        "auroc": 0.9947223142227749
+      },
+      "coverage_high": {
+        "average_precision": 0.9812202452886283,
+        "auroc": 0.9952094495216921
+      }
+    }
+  },
+  "inherited_readouts": {
+    "complete": true,
+    "macro": {
+      "retained_gt_gt127": {
+        "semantic_response": {
+          "iou": 0.865134169185327,
+          "average_precision": 0.9802224516003605,
+          "precision": 0.956979590875688,
+          "recall": 0.9009965865038858
+        },
+        "independent_set_projection": {
+          "iou": 0.8522449940753349,
+          "average_precision": 0.9277006703837877,
+          "precision": 0.9619983783504781,
+          "recall": 0.8824280030859771
+        }
+      },
+      "ludvig_gt_maximum": {
+        "semantic_response": {
+          "iou": 0.8668353517289227,
+          "average_precision": 0.9798949876889143,
+          "precision": 0.9556280635535508,
+          "recall": 0.9040211860082941
+        },
+        "independent_set_projection": {
+          "iou": 0.8538932117012346,
+          "average_precision": 0.928444529543607,
+          "precision": 0.9606303146715301,
+          "recall": 0.8853625637923239
+        }
+      }
+    },
+    "rows": {
+      "fern": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 3125782,
+            "fp": 368475,
+            "fn": 309085,
+            "iou": 0.8218514138355162,
+            "precision": 0.8945483975563332,
+            "recall": 0.9100154387346002,
+            "average_precision": 0.9470451039613966
+          },
+          "ludvig_gt_maximum": {
+            "tp": 3125782,
+            "fp": 368475,
+            "fn": 309085,
+            "iou": 0.8218514138355162,
+            "precision": 0.8945483975563332,
+            "recall": 0.9100154387346002,
+            "average_precision": 0.9470451039613966
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 3096723,
+            "fp": 354839,
+            "fn": 338144,
+            "iou": 0.8171406964023067,
+            "precision": 0.8971946614315489,
+            "recall": 0.9015554314038943,
+            "average_precision": 0.9106329522041248
+          },
+          "ludvig_gt_maximum": {
+            "tp": 3096723,
+            "fp": 354839,
+            "fn": 338144,
+            "iou": 0.8171406964023067,
+            "precision": 0.8971946614315489,
+            "recall": 0.9015554314038943,
+            "average_precision": 0.9106329522041248
+          }
+        }
+      },
+      "flower": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 2345095,
+            "fp": 28354,
+            "fn": 336798,
+            "iou": 0.8652698444090151,
+            "precision": 0.9880536721033399,
+            "recall": 0.8744178086150343,
+            "average_precision": 0.9932169493177496
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2343263,
+            "fp": 30186,
+            "fn": 332555,
+            "iou": 0.8659495699193349,
+            "precision": 0.9872817996089236,
+            "recall": 0.875718378454738,
+            "average_precision": 0.9930099568253059
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 2331302,
+            "fp": 39827,
+            "fn": 350591,
+            "iou": 0.8565546786590832,
+            "precision": 0.9832033600871146,
+            "recall": 0.8692747995538972,
+            "average_precision": 0.9238539572398515
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2328826,
+            "fp": 42303,
+            "fn": 346992,
+            "iou": 0.8567778991442986,
+            "precision": 0.9821591317891182,
+            "recall": 0.8703230189796167,
+            "average_precision": 0.9239750211799881
+          }
+        }
+      },
+      "fortress": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 2194682,
+            "fp": 1697,
+            "fn": 60819,
+            "iou": 0.9723037146054533,
+            "precision": 0.9992273646761328,
+            "recall": 0.9730352591286814,
+            "average_precision": 0.9997674380162314
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2194682,
+            "fp": 1697,
+            "fn": 60819,
+            "iou": 0.9723037146054533,
+            "precision": 0.9992273646761328,
+            "recall": 0.9730352591286814,
+            "average_precision": 0.9997674380162314
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 2171080,
+            "fp": 7653,
+            "fn": 84421,
+            "iou": 0.9593160695206778,
+            "precision": 0.9964874080486228,
+            "recall": 0.9625710651425116,
+            "average_precision": 0.9915549819996191
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2171080,
+            "fp": 7653,
+            "fn": 84421,
+            "iou": 0.9593160695206778,
+            "precision": 0.9964874080486228,
+            "recall": 0.9625710651425116,
+            "average_precision": 0.9915549819996191
+          }
+        }
+      },
+      "horns_center": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 1997429,
+            "fp": 30060,
+            "fn": 59088,
+            "iou": 0.9572754803680861,
+            "precision": 0.9851737789946086,
+            "recall": 0.9712679253320056,
+            "average_precision": 0.9977812086259378
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1992951,
+            "fp": 34538,
+            "fn": 43788,
+            "iou": 0.9621846812377098,
+            "precision": 0.9829651356924748,
+            "recall": 0.9785009272174785,
+            "average_precision": 0.9978965439052241
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 1973804,
+            "fp": 42024,
+            "fn": 82713,
+            "iou": 0.9405601320155289,
+            "precision": 0.979152983290241,
+            "recall": 0.9597800553071042,
+            "average_precision": 0.9860690337432232
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1966305,
+            "fp": 49523,
+            "fn": 70434,
+            "iou": 0.9425014691347491,
+            "precision": 0.9754329238407246,
+            "recall": 0.9654182494664265,
+            "average_precision": 0.9868680071735455
+          }
+        }
+      },
+      "horns_left": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 689770,
+            "fp": 29731,
+            "fn": 24600,
+            "iou": 0.9269843744330407,
+            "precision": 0.9586783062150018,
+            "recall": 0.965564063440514,
+            "average_precision": 0.988662000282143
+          },
+          "ludvig_gt_maximum": {
+            "tp": 684761,
+            "fp": 34740,
+            "fn": 18790,
+            "iou": 0.927494714143881,
+            "precision": 0.9517165368776416,
+            "recall": 0.9732926255523764,
+            "average_precision": 0.9878336143395007
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 673126,
+            "fp": 28327,
+            "fn": 41244,
+            "iou": 0.9063265369322887,
+            "precision": 0.9596166813742332,
+            "recall": 0.9422652127049008,
+            "average_precision": 0.97020610089074
+          },
+          "ludvig_gt_maximum": {
+            "tp": 669660,
+            "fp": 31793,
+            "fn": 33891,
+            "iou": 0.910675819752388,
+            "precision": 0.9546755092643413,
+            "recall": 0.9518286520806594,
+            "average_precision": 0.9724341406063117
+          }
+        }
+      },
+      "leaves": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 687252,
+            "fp": 2932,
+            "fn": 40276,
+            "iou": 0.9408482326205405,
+            "precision": 0.9957518574756876,
+            "recall": 0.9446399313840842,
+            "average_precision": 0.9979117338412364
+          },
+          "ludvig_gt_maximum": {
+            "tp": 687252,
+            "fp": 2932,
+            "fn": 40276,
+            "iou": 0.9408482326205405,
+            "precision": 0.9957518574756876,
+            "recall": 0.9446399313840842,
+            "average_precision": 0.9979117338412364
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 687122,
+            "fp": 5642,
+            "fn": 40406,
+            "iou": 0.9371932839586999,
+            "precision": 0.991855812369003,
+            "recall": 0.9444612441033198,
+            "average_precision": 0.9852480308271154
+          },
+          "ludvig_gt_maximum": {
+            "tp": 687122,
+            "fp": 5642,
+            "fn": 40406,
+            "iou": 0.9371932839586999,
+            "precision": 0.991855812369003,
+            "recall": 0.9444612441033198,
+            "average_precision": 0.9852480308271154
+          }
+        }
+      },
+      "orchids": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 1302326,
+            "fp": 1222,
+            "fn": 607672,
+            "iou": 0.6814108265924383,
+            "precision": 0.999062558494202,
+            "recall": 0.6818467872741228,
+            "average_precision": 0.9782980182226545
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1301192,
+            "fp": 2356,
+            "fn": 585191,
+            "iou": 0.6889210208504193,
+            "precision": 0.9981926250510146,
+            "recall": 0.68978144947235,
+            "average_precision": 0.9765983500868847
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 1225844,
+            "fp": 4131,
+            "fn": 684154,
+            "iou": 0.6404186969634753,
+            "precision": 0.9966413951503079,
+            "recall": 0.6418038134071344,
+            "average_precision": 0.74633945415254
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1224320,
+            "fp": 5655,
+            "fn": 662063,
+            "iou": 0.6470905975461381,
+            "precision": 0.9954023455761296,
+            "recall": 0.6490304460971076,
+            "average_precision": 0.7491422503450638
+          }
+        }
+      },
+      "trex": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 1309248,
+            "fp": 258074,
+            "fn": 166484,
+            "iou": 0.755129466618526,
+            "precision": 0.8353407914901979,
+            "recall": 0.8871854781220438,
+            "average_precision": 0.9390971605355345
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1309248,
+            "fp": 258074,
+            "fn": 166484,
+            "iou": 0.755129466618526,
+            "precision": 0.8353407914901979,
+            "recall": 0.8871854781220438,
+            "average_precision": 0.9390971605355345
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 1236239,
+            "fp": 149936,
+            "fn": 239493,
+            "iou": 0.7604498581506187,
+            "precision": 0.8918347250527531,
+            "recall": 0.8377124030650551,
+            "average_precision": 0.9077008520130875
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1236239,
+            "fp": 149936,
+            "fn": 239493,
+            "iou": 0.7604498581506187,
+            "precision": 0.8918347250527531,
+            "recall": 0.8377124030650551,
+            "average_precision": 0.9077008520130875
+          }
+        }
+      }
+    },
+    "receipts": {
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/manifest.json": "4bd9c66b1e7266c2981eb9fa4bfc499b76009292ce789ba003a45740981c3c02",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/summary.json": "d4576e0225eeb89a283fa205e4721e6b50f08a601c0798262f6700095888e695",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/predictions_complete.json": "2f4739337a5a185336286cce823bed3ee05bbb8c981b2b03a2d4d6b2d58b090f",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/source_snapshot.json": "4865273a1592b7336f2fa40c109ddbec2cf86e664227bae68cbc826c1598fb8d",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/fern_prediction.json": "692ec00998d780bd70d13e42af61bae85a9aa065602a3107faee80483d132d34",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/fern_evaluation.json": "d52f28345741ac257ebdb46cbbc9c79ec2358cdebe6998396490132244e4352a",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/flower_prediction.json": "15e69d8a915b58bcd8b4dfc97bce712fe22b07526afc1c01eda830f30fad7279",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/flower_evaluation.json": "62ca105451e3cfde2a4b835b572a3f0682682d6fa7a70dec7bb9776fd6c7eeb4",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/fortress_prediction.json": "8223fe5543dbb7eda8ac23979b3fc62efb51aa81da6323f80f1367d6a8bce156",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/fortress_evaluation.json": "2eec83a93c57572bb2f04c86dec798438d3fb4a04f10618142775f95b3de8576",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/horns_center_prediction.json": "4b429e251ba1161ff69f77d937685080573a5f63dbb5c6b28a2f4a03ac8c738c",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/horns_center_evaluation.json": "f63985d91016e1b0ad01f0c402428699f0465883dc99366c9fa2cad5bcad8918",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/horns_left_prediction.json": "fedd16d52788af0caa2ba3ce85edcc3eecc6dd4a5aed0ccbcf1b264caf17e850",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/horns_left_evaluation.json": "6b5bcae04f82836131a477458d7615e1bd8438f882bad87b96b83aa77084cae6",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/leaves_prediction.json": "c8586ad75325cf5803e9c5e621d6cf3a8353783cd653f0ff5b7e43d820bfbc2c",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/leaves_evaluation.json": "1a9655aeca6744107c8ab4014bd53dfc2498dd86158f241f51f85b98575e8512",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/orchids_prediction.json": "497371d4f7019b8bf99a6fb852a0f93280c611eb2d88a5e848c75548cac41a96",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/orchids_evaluation.json": "6db0e612b3c171298cc255280a88c6bb76872e1df2c8c3740837d643c1430cac",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/trex_prediction.json": "daceac7ce45934d6fbb793afbb4d88a3e96c7445c2364a8303b223a1d4c14530",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_audit_v1/trex_evaluation.json": "39446e9e43ff52b374dc8cf1b47d8ae72b8762d9d9a57c0a795d9bd7ebb21752",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fern/IMG_4027_mask.png": "c48d8bdc2bc9260a1dc8e1f03864e5a91e7b5279d862edfece0e1623ffa9f47d",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/flower/IMG_2962_mask.png": "dd94edff4733c28944bf36f5b9cc4db062bd9385d73132e158038a48e71f51ff",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fortress/IMG_1800_mask.png": "b87257873a1efc29092e6f14af97d0615a50aa543467f44b86e6c699ab3eabe0",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_center/DJI_20200223_163024_597_mask.png": "bb2d799785f0da19c473354583303a462a87220daed883a1377bfba3f76ce307",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_left/DJI_20200223_163024_597_mask.png": "d64ba3b8a0648c2698dddd6eae1b0e3d6bbdbe163eac4a07f180be109d0f8c28",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/leaves/IMG_2997_mask.png": "b3275f9ee6894bb54340340e0af207bdd4b6b961984926211541a10bfeb5e2d4",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/orchids/IMG_4480_mask.png": "222ee86fd11c35eab26e4f27032d79d2b2d96658e01db3787d3e06bbe787f34b",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/trex/DJI_20200223_163619_411_mask.png": "f237151e17a048828f6a98fdbfcae462be067b5938a3c158c497f5727fe1df60",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fern/query/typed_readout.pt": "b8677f0e4dce0ba3a6b315cd65e0f0cf84986907b76eb16820eed51491093b60",
+      "configs/pipeline/nvos_all_sources/fern.scene.json": "a969f2c116483128bbea73fea2e93bbdf4bc5e6cff6e9ba45524f3803a7eb067",
+      "configs/consolidated/nvos/fern.evaluation.json": "ed29367aecd2f15ecb3ba38f451fcfbf3ff836acda4119a6ecb3422c86bcb3ff",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/fern/source_scale_prior.json": "92501e9b153cc82b18294a78ee1a30e764764f247eacf06a53f5bb1709b41203",
+      "output/nvos_carrier_next72/adaptive_allrgb/fern/geometry.pt": "c5b78322f789b5461032be14769fb72a84b21f3ed7bd311f23025274a6e01701",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/flower/query/typed_readout.pt": "90483763311d1d3199d6f510c79e260c5c64c287d4050494c2a7e8fa36e52e59",
+      "configs/pipeline/nvos_all_sources/flower.scene.json": "93d1183fffcd41e3febd3469c6120c8ba42335dcee3a11dd475621536c4de9c1",
+      "configs/consolidated/nvos/flower.evaluation.json": "91629841c54f34f6bc631a9f68a41ad052d8d59b38a13ac114bd30aac9f6298f",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/flower/source_scale_prior.json": "b120da90ac3799401bf83255caefbd5751b29e9633879292a0910d225dbf2f2f",
+      "output/nvos_carrier_next72/adaptive_allrgb/flower/geometry.pt": "ee42624c9253f73d79612314164ea836bec08a142dd946cf698b561861c74c0c",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fortress/query/typed_readout.pt": "5471055f248e52ce5218adb0fb9d7264668007d300370db33b7f473d4b27b8ef",
+      "configs/pipeline/nvos_all_sources/fortress.scene.json": "b195dc0df72b9c9d8eaf91d71f05c4b1254a5195a2b4154c93b885c7c006a1e0",
+      "configs/consolidated/nvos/fortress.evaluation.json": "74660de86c6fe24d5decd3408effce156c1aef7dd3883996a22a916a5147d857",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/fortress/source_scale_prior.json": "c29aad77394a61b5c820affff648766020ba6ef613dfbf370909f57280583491",
+      "output/nvos_carrier_next72/adaptive_allrgb/fortress/geometry.pt": "fe4f8563f46e089e3d13698333c8ffc3c984bfc776e01db85538fc7e75747e17",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_center/query/typed_readout.pt": "5c32329e343410f1decb7b9c6cd1f80de41c495f3fb57f77f2d24b5abbd5be21",
+      "configs/pipeline/nvos_all_sources/horns_center.scene.json": "5e5d52a237e273ab16069347c447ffa7d9bd1d4a5c1ab2007d80bca4b5334f39",
+      "configs/consolidated/nvos/horns_center.evaluation.json": "e7d5b67943d1fada78a9da947ce4218c42800c286603dd7d25f2dcfe84eb50e2",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/horns_center/source_scale_prior.json": "28fb726ee647301188e8c9c2a46a3d2b2d85c2138bc305a9df3d08a20aa73066",
+      "output/nvos_carrier_next72/adaptive_allrgb/horns_center/geometry.pt": "a6b51176689b4daadcb07f73d0af89873c5ac95b2017826b448190b23cfc242c",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_left/query/typed_readout.pt": "dc9ac57fc23f86179b5cc25d92a8bdcd4593db7a8588116c5f07baaf6e8ee2a2",
+      "configs/pipeline/nvos_all_sources/horns_left.scene.json": "34d0025271da37100b58931f48be0caea16082d3ffccaae9814d7b03b227c7e3",
+      "configs/consolidated/nvos/horns_left.evaluation.json": "ab10b5f0a1cc8ddfa147503158deda4793bbe09edc45b2e2a91b5de2ff537a8c",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/leaves/query/typed_readout.pt": "6b31abe0c7ee5ba86544f68c5f3d0861ddd07304b004646918fa4a1c294f3336",
+      "configs/pipeline/nvos_all_sources/leaves.scene.json": "40877b0e733a0093f40d980f372ffa64a2c3cb329d0d979fc4617285f4925345",
+      "configs/consolidated/nvos/leaves.evaluation.json": "cd0a84e84dd23c9ccc24dcd6a8bd318aadb03d352f537889a9de64b06385ffca",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/leaves/source_scale_prior.json": "23b18ecbf5bbeedfd5f994e005d46bf5c37828980ec3a5e55228c3a974fd260e",
+      "output/nvos_carrier_next72/adaptive_allrgb/leaves/geometry.pt": "dbfd3871fd750808ab3591578b465a4c83db3cb498d0cd6a405faa98281220d0",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/orchids/query/typed_readout.pt": "437a052a4f3533257d27478e8e683e10aa682114d662603792e2fe4adf26c9c6",
+      "configs/pipeline/nvos_all_sources/orchids.scene.json": "898c250c0aa705fd88f5051245d8e52751d40f513fb6ec3ea2a6e6fc2d988bb6",
+      "configs/consolidated/nvos/orchids.evaluation.json": "148bb728eb226939c5e49eeb5c17313207bb7fab43b6ed05fdd623c3bed639d0",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/orchids/source_scale_prior.json": "234b1bd8a4c3daa443acd30da7ec381dfda6c00f7b507e7f83803a6bb43eaf7f",
+      "output/nvos_carrier_next72/adaptive_allrgb/orchids/geometry.pt": "3cd2eb3720862b04d771efaefef6a65c1b138cfdc63d83173ae8bef3d478c897",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/trex/query/typed_readout.pt": "ba8a296d05bc81a6d1e3b2d99838e0295175c9ec1211b31947f8c30a0bb1ce73",
+      "configs/pipeline/nvos_all_sources/trex.scene.json": "d0d617b273ba4efda097ecdac76981f992b0fd643a4230f975e8c6e75edc6bca",
+      "configs/consolidated/nvos/trex.evaluation.json": "02daa6688231281cda94fc02a93831979607269c71db228990616dd711373ac7",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/trex/source_scale_prior.json": "68ec8513f3df2b5ef6b9926266283724c26064c43488490530b9c6ebc01f4d30",
+      "output/nvos_carrier_next72/adaptive_allrgb/trex/geometry.pt": "6446a9fd14f1b20e90d7c9474e9a1b26038d8c1f801cc4addf6b29f0e0007baf"
+    },
+    "new_method_gain": false,
+    "output_operator_changed": true,
+    "metric": "binary-mask IoU remains the same",
+    "independent_test": false
+  },
+  "readout_factorial": {
+    "complete": true,
+    "macro": {
+      "retained_gt_gt127": {
+        "semantic_response": {
+          "iou": 0.865134169185327,
+          "average_precision": 0.9802224516003605,
+          "precision": 0.956979590875688,
+          "recall": 0.9009965865038858
+        },
+        "semantic_set_projection": {
+          "iou": 0.8439342456771466,
+          "average_precision": 0.9541392284201226,
+          "precision": 0.8716470273275313,
+          "recall": 0.9669600711067351
+        },
+        "independent_response": {
+          "iou": 0.06914711283935683,
+          "average_precision": 0.9438356202299811,
+          "precision": 0.9795715717838129,
+          "recall": 0.06953839148653716
+        },
+        "independent_set_projection": {
+          "iou": 0.8522449940753349,
+          "average_precision": 0.9277006703837877,
+          "precision": 0.9619983783504781,
+          "recall": 0.8824280030859771
+        }
+      },
+      "ludvig_gt_maximum": {
+        "semantic_response": {
+          "iou": 0.8668353517289227,
+          "average_precision": 0.9798949876889143,
+          "precision": 0.9556280635535508,
+          "recall": 0.9040211860082941
+        },
+        "semantic_set_projection": {
+          "iou": 0.8412874433551913,
+          "average_precision": 0.9541251764979986,
+          "precision": 0.8679733830359928,
+          "recall": 0.967774383552378
+        },
+        "independent_response": {
+          "iou": 0.06926785529029447,
+          "average_precision": 0.942896890300333,
+          "precision": 0.9784257001775186,
+          "recall": 0.0696631362608784
+        },
+        "independent_set_projection": {
+          "iou": 0.8538932117012346,
+          "average_precision": 0.928444529543607,
+          "precision": 0.9606303146715301,
+          "recall": 0.8853625637923239
+        }
+      }
+    },
+    "rows": {
+      "fern": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 3125782,
+            "fp": 368475,
+            "fn": 309085,
+            "iou": 0.8218514138355162,
+            "precision": 0.8945483975563332,
+            "recall": 0.9100154387346002,
+            "average_precision": 0.9470451039613966
+          },
+          "ludvig_gt_maximum": {
+            "tp": 3125782,
+            "fp": 368475,
+            "fn": 309085,
+            "iou": 0.8218514138355162,
+            "precision": 0.8945483975563332,
+            "recall": 0.9100154387346002,
+            "average_precision": 0.9470451039613966
+          }
+        },
+        "semantic_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 3359787,
+            "fp": 809721,
+            "fn": 75080,
+            "iou": 0.7915460817398532,
+            "precision": 0.8057993892804619,
+            "recall": 0.9781418028703877,
+            "average_precision": 0.888701794606704
+          },
+          "ludvig_gt_maximum": {
+            "tp": 3359787,
+            "fp": 809721,
+            "fn": 75080,
+            "iou": 0.7915460817398532,
+            "precision": 0.8057993892804619,
+            "recall": 0.9781418028703877,
+            "average_precision": 0.888701794606704
+          }
+        },
+        "independent_response": {
+          "retained_gt_gt127": {
+            "tp": 835634,
+            "fp": 40096,
+            "fn": 2599233,
+            "iou": 0.24047277625689828,
+            "precision": 0.9542141984401585,
+            "recall": 0.24327987080722485,
+            "average_precision": 0.9228705746472174
+          },
+          "ludvig_gt_maximum": {
+            "tp": 835634,
+            "fp": 40096,
+            "fn": 2599233,
+            "iou": 0.24047277625689828,
+            "precision": 0.9542141984401585,
+            "recall": 0.24327987080722485,
+            "average_precision": 0.9228705746472174
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 3096723,
+            "fp": 354839,
+            "fn": 338144,
+            "iou": 0.8171406964023067,
+            "precision": 0.8971946614315489,
+            "recall": 0.9015554314038943,
+            "average_precision": 0.9106329522041248
+          },
+          "ludvig_gt_maximum": {
+            "tp": 3096723,
+            "fp": 354839,
+            "fn": 338144,
+            "iou": 0.8171406964023067,
+            "precision": 0.8971946614315489,
+            "recall": 0.9015554314038943,
+            "average_precision": 0.9106329522041248
+          }
+        }
+      },
+      "flower": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 2345095,
+            "fp": 28354,
+            "fn": 336798,
+            "iou": 0.8652698444090151,
+            "precision": 0.9880536721033399,
+            "recall": 0.8744178086150343,
+            "average_precision": 0.9932169493177496
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2343263,
+            "fp": 30186,
+            "fn": 332555,
+            "iou": 0.8659495699193349,
+            "precision": 0.9872817996089236,
+            "recall": 0.875718378454738,
+            "average_precision": 0.9930099568253059
+          }
+        },
+        "semantic_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 2625872,
+            "fp": 236396,
+            "fn": 56021,
+            "iou": 0.8997984778066874,
+            "precision": 0.9174095507478685,
+            "recall": 0.9791113963159604,
+            "average_precision": 0.9811669250054043
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2620799,
+            "fp": 241469,
+            "fn": 55019,
+            "iou": 0.8983685869782438,
+            "precision": 0.9156371800264685,
+            "recall": 0.9794384371433333,
+            "average_precision": 0.9806351180481487
+          }
+        },
+        "independent_response": {
+          "retained_gt_gt127": {
+            "tp": 119894,
+            "fp": 36,
+            "fn": 2561999,
+            "iou": 0.04470439001181612,
+            "precision": 0.9996998248978571,
+            "recall": 0.04470499009468312,
+            "average_precision": 0.9884285973367423
+          },
+          "ludvig_gt_maximum": {
+            "tp": 119894,
+            "fp": 36,
+            "fn": 2555924,
+            "iou": 0.04480588253320249,
+            "precision": 0.9996998248978571,
+            "recall": 0.044806485343920996,
+            "average_precision": 0.9881315377029155
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 2331302,
+            "fp": 39827,
+            "fn": 350591,
+            "iou": 0.8565546786590832,
+            "precision": 0.9832033600871146,
+            "recall": 0.8692747995538972,
+            "average_precision": 0.9238539572398515
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2328826,
+            "fp": 42303,
+            "fn": 346992,
+            "iou": 0.8567778991442986,
+            "precision": 0.9821591317891182,
+            "recall": 0.8703230189796167,
+            "average_precision": 0.9239750211799881
+          }
+        }
+      },
+      "fortress": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 2194682,
+            "fp": 1697,
+            "fn": 60819,
+            "iou": 0.9723037146054533,
+            "precision": 0.9992273646761328,
+            "recall": 0.9730352591286814,
+            "average_precision": 0.9997674380162314
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2194682,
+            "fp": 1697,
+            "fn": 60819,
+            "iou": 0.9723037146054533,
+            "precision": 0.9992273646761328,
+            "recall": 0.9730352591286814,
+            "average_precision": 0.9997674380162314
+          }
+        },
+        "semantic_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 2250526,
+            "fp": 113581,
+            "fn": 4975,
+            "iou": 0.9499569875588941,
+            "precision": 0.9519560662863399,
+            "recall": 0.9977942816252354,
+            "average_precision": 0.9986597970320811
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2250526,
+            "fp": 113581,
+            "fn": 4975,
+            "iou": 0.9499569875588941,
+            "precision": 0.9519560662863399,
+            "recall": 0.9977942816252354,
+            "average_precision": 0.9986597970320811
+          }
+        },
+        "independent_response": {
+          "retained_gt_gt127": {
+            "tp": 205148,
+            "fp": 0,
+            "fn": 2050353,
+            "iou": 0.09095451520526925,
+            "precision": 1.0,
+            "recall": 0.09095451520526925,
+            "average_precision": 0.9983057678292295
+          },
+          "ludvig_gt_maximum": {
+            "tp": 205148,
+            "fp": 0,
+            "fn": 2050353,
+            "iou": 0.09095451520526925,
+            "precision": 1.0,
+            "recall": 0.09095451520526925,
+            "average_precision": 0.9983057678292295
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 2171080,
+            "fp": 7653,
+            "fn": 84421,
+            "iou": 0.9593160695206778,
+            "precision": 0.9964874080486228,
+            "recall": 0.9625710651425116,
+            "average_precision": 0.9915549819996191
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2171080,
+            "fp": 7653,
+            "fn": 84421,
+            "iou": 0.9593160695206778,
+            "precision": 0.9964874080486228,
+            "recall": 0.9625710651425116,
+            "average_precision": 0.9915549819996191
+          }
+        }
+      },
+      "horns_center": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 1997429,
+            "fp": 30060,
+            "fn": 59088,
+            "iou": 0.9572754803680861,
+            "precision": 0.9851737789946086,
+            "recall": 0.9712679253320056,
+            "average_precision": 0.9977812086259378
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1992951,
+            "fp": 34538,
+            "fn": 43788,
+            "iou": 0.9621846812377098,
+            "precision": 0.9829651356924748,
+            "recall": 0.9785009272174785,
+            "average_precision": 0.9978965439052241
+          }
+        },
+        "semantic_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 2052114,
+            "fp": 255266,
+            "fn": 4403,
+            "iou": 0.8876758761527358,
+            "precision": 0.8893697613743726,
+            "recall": 0.9978590014086924,
+            "average_precision": 0.988597055828398
+          },
+          "ludvig_gt_maximum": {
+            "tp": 2034234,
+            "fp": 273146,
+            "fn": 2505,
+            "iou": 0.8806646218318228,
+            "precision": 0.8816207126697813,
+            "recall": 0.9987700927806655,
+            "average_precision": 0.988807691854821
+          }
+        },
+        "independent_response": {
+          "retained_gt_gt127": {
+            "tp": 106188,
+            "fp": 425,
+            "fn": 1950329,
+            "iou": 0.05162420719689714,
+            "precision": 0.9960136193522366,
+            "recall": 0.05163487586049617,
+            "average_precision": 0.9781241407128525
+          },
+          "ludvig_gt_maximum": {
+            "tp": 106006,
+            "fp": 607,
+            "fn": 1930733,
+            "iou": 0.05203141734393667,
+            "precision": 0.9943065104630767,
+            "recall": 0.0520469240290484,
+            "average_precision": 0.9761866397448413
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 1973804,
+            "fp": 42024,
+            "fn": 82713,
+            "iou": 0.9405601320155289,
+            "precision": 0.979152983290241,
+            "recall": 0.9597800553071042,
+            "average_precision": 0.9860690337432232
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1966305,
+            "fp": 49523,
+            "fn": 70434,
+            "iou": 0.9425014691347491,
+            "precision": 0.9754329238407246,
+            "recall": 0.9654182494664265,
+            "average_precision": 0.9868680071735455
+          }
+        }
+      },
+      "horns_left": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 689770,
+            "fp": 29731,
+            "fn": 24600,
+            "iou": 0.9269843744330407,
+            "precision": 0.9586783062150018,
+            "recall": 0.965564063440514,
+            "average_precision": 0.988662000282143
+          },
+          "ludvig_gt_maximum": {
+            "tp": 684761,
+            "fp": 34740,
+            "fn": 18790,
+            "iou": 0.927494714143881,
+            "precision": 0.9517165368776416,
+            "recall": 0.9732926255523764,
+            "average_precision": 0.9878336143395007
+          }
+        },
+        "semantic_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 711480,
+            "fp": 72546,
+            "fn": 2890,
+            "iou": 0.9041371633058675,
+            "precision": 0.907469905334772,
+            "recall": 0.9959544773716701,
+            "average_precision": 0.9831387746215154
+          },
+          "ludvig_gt_maximum": {
+            "tp": 701734,
+            "fp": 82292,
+            "fn": 1817,
+            "iou": 0.8929697153248168,
+            "precision": 0.895039195128733,
+            "recall": 0.9974173869413874,
+            "average_precision": 0.9822808199924113
+          }
+        },
+        "independent_response": {
+          "retained_gt_gt127": {
+            "tp": 38229,
+            "fp": 2851,
+            "fn": 676141,
+            "iou": 0.053301562558820785,
+            "precision": 0.9305988315481987,
+            "recall": 0.05351428531433291,
+            "average_precision": 0.9457278061253815
+          },
+          "ludvig_gt_maximum": {
+            "tp": 37936,
+            "fp": 3144,
+            "fn": 665615,
+            "iou": 0.053680866569029075,
+            "precision": 0.9234664070107108,
+            "recall": 0.05392075343507436,
+            "average_precision": 0.941503502574922
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 673126,
+            "fp": 28327,
+            "fn": 41244,
+            "iou": 0.9063265369322887,
+            "precision": 0.9596166813742332,
+            "recall": 0.9422652127049008,
+            "average_precision": 0.97020610089074
+          },
+          "ludvig_gt_maximum": {
+            "tp": 669660,
+            "fp": 31793,
+            "fn": 33891,
+            "iou": 0.910675819752388,
+            "precision": 0.9546755092643413,
+            "recall": 0.9518286520806594,
+            "average_precision": 0.9724341406063117
+          }
+        }
+      },
+      "leaves": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 687252,
+            "fp": 2932,
+            "fn": 40276,
+            "iou": 0.9408482326205405,
+            "precision": 0.9957518574756876,
+            "recall": 0.9446399313840842,
+            "average_precision": 0.9979117338412364
+          },
+          "ludvig_gt_maximum": {
+            "tp": 687252,
+            "fp": 2932,
+            "fn": 40276,
+            "iou": 0.9408482326205405,
+            "precision": 0.9957518574756876,
+            "recall": 0.9446399313840842,
+            "average_precision": 0.9979117338412364
+          }
+        },
+        "semantic_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 721847,
+            "fp": 23892,
+            "fn": 5681,
+            "iou": 0.9606438476484522,
+            "precision": 0.9679619813366339,
+            "recall": 0.9921913658305934,
+            "average_precision": 0.9973289565394111
+          },
+          "ludvig_gt_maximum": {
+            "tp": 721847,
+            "fp": 23892,
+            "fn": 5681,
+            "iou": 0.9606438476484522,
+            "precision": 0.9679619813366339,
+            "recall": 0.9921913658305934,
+            "average_precision": 0.9973289565394111
+          }
+        },
+        "independent_response": {
+          "retained_gt_gt127": {
+            "tp": 14067,
+            "fp": 0,
+            "fn": 713461,
+            "iou": 0.01933533829625801,
+            "precision": 1.0,
+            "recall": 0.01933533829625801,
+            "average_precision": 0.9954243596040003
+          },
+          "ludvig_gt_maximum": {
+            "tp": 14067,
+            "fp": 0,
+            "fn": 713461,
+            "iou": 0.01933533829625801,
+            "precision": 1.0,
+            "recall": 0.01933533829625801,
+            "average_precision": 0.9954243596040003
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 687122,
+            "fp": 5642,
+            "fn": 40406,
+            "iou": 0.9371932839586999,
+            "precision": 0.991855812369003,
+            "recall": 0.9444612441033198,
+            "average_precision": 0.9852480308271154
+          },
+          "ludvig_gt_maximum": {
+            "tp": 687122,
+            "fp": 5642,
+            "fn": 40406,
+            "iou": 0.9371932839586999,
+            "precision": 0.991855812369003,
+            "recall": 0.9444612441033198,
+            "average_precision": 0.9852480308271154
+          }
+        }
+      },
+      "orchids": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 1302326,
+            "fp": 1222,
+            "fn": 607672,
+            "iou": 0.6814108265924383,
+            "precision": 0.999062558494202,
+            "recall": 0.6818467872741228,
+            "average_precision": 0.9782980182226545
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1301192,
+            "fp": 2356,
+            "fn": 585191,
+            "iou": 0.6889210208504193,
+            "precision": 0.9981926250510146,
+            "recall": 0.68978144947235,
+            "average_precision": 0.9765983500868847
+          }
+        },
+        "semantic_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 1564204,
+            "fp": 68976,
+            "fn": 345794,
+            "iou": 0.7904115971205281,
+            "precision": 0.9577658310780196,
+            "recall": 0.8189558313673627,
+            "average_precision": 0.8803375892745641
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1552058,
+            "fp": 81122,
+            "fn": 334325,
+            "iou": 0.7888457716752943,
+            "precision": 0.9503288063777415,
+            "recall": 0.8227692891634414,
+            "average_precision": 0.8814042994575084
+          }
+        },
+        "independent_response": {
+          "retained_gt_gt127": {
+            "tp": 12216,
+            "fp": 0,
+            "fn": 1897782,
+            "iou": 0.006395818215516456,
+            "precision": 1.0,
+            "recall": 0.006395818215516456,
+            "average_precision": 0.9264246332451125
+          },
+          "ludvig_gt_maximum": {
+            "tp": 12212,
+            "fp": 4,
+            "fn": 1874171,
+            "iou": 0.0064737511443834165,
+            "precision": 0.9996725605762934,
+            "recall": 0.0064737648717148105,
+            "average_precision": 0.925373657960224
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 1225844,
+            "fp": 4131,
+            "fn": 684154,
+            "iou": 0.6404186969634753,
+            "precision": 0.9966413951503079,
+            "recall": 0.6418038134071344,
+            "average_precision": 0.74633945415254
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1224320,
+            "fp": 5655,
+            "fn": 662063,
+            "iou": 0.6470905975461381,
+            "precision": 0.9954023455761296,
+            "recall": 0.6490304460971076,
+            "average_precision": 0.7491422503450638
+          }
+        }
+      },
+      "trex": {
+        "semantic_response": {
+          "retained_gt_gt127": {
+            "tp": 1309248,
+            "fp": 258074,
+            "fn": 166484,
+            "iou": 0.755129466618526,
+            "precision": 0.8353407914901979,
+            "recall": 0.8871854781220438,
+            "average_precision": 0.9390971605355345
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1309248,
+            "fp": 258074,
+            "fn": 166484,
+            "iou": 0.755129466618526,
+            "precision": 0.8353407914901979,
+            "recall": 0.8871854781220438,
+            "average_precision": 0.9390971605355345
+          }
+        },
+        "semantic_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 1439831,
+            "fp": 1062292,
+            "fn": 35901,
+            "iou": 0.5673039340841537,
+            "precision": 0.575443733181782,
+            "recall": 0.9756724120639791,
+            "average_precision": 0.9151829344529022
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1439831,
+            "fp": 1062292,
+            "fn": 35901,
+            "iou": 0.5673039340841537,
+            "precision": 0.575443733181782,
+            "recall": 0.9756724120639791,
+            "average_precision": 0.9151829344529022
+          }
+        },
+        "independent_response": {
+          "retained_gt_gt127": {
+            "tp": 68603,
+            "fp": 3154,
+            "fn": 1407129,
+            "iou": 0.04638829497337861,
+            "precision": 0.9560461000320526,
+            "recall": 0.046487438098516534,
+            "average_precision": 0.7953790823393133
+          },
+          "ludvig_gt_maximum": {
+            "tp": 68603,
+            "fp": 3154,
+            "fn": 1407129,
+            "iou": 0.04638829497337861,
+            "precision": 0.9560461000320526,
+            "recall": 0.046487438098516534,
+            "average_precision": 0.7953790823393133
+          }
+        },
+        "independent_set_projection": {
+          "retained_gt_gt127": {
+            "tp": 1236239,
+            "fp": 149936,
+            "fn": 239493,
+            "iou": 0.7604498581506187,
+            "precision": 0.8918347250527531,
+            "recall": 0.8377124030650551,
+            "average_precision": 0.9077008520130875
+          },
+          "ludvig_gt_maximum": {
+            "tp": 1236239,
+            "fp": 149936,
+            "fn": 239493,
+            "iou": 0.7604498581506187,
+            "precision": 0.8918347250527531,
+            "recall": 0.8377124030650551,
+            "average_precision": 0.9077008520130875
+          }
+        }
+      }
+    },
+    "receipts": {
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/manifest.json": "15b1a127471c1b606fe69854493caa8dc4b94b39a22baee98723cfaa88cc3167",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/summary.json": "bd2431c395570c24b132e5551170629f509fb91fc44e8a36fa91da2aeae30438",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/predictions_complete.json": "384ea3de01e93ab41b39553c798be576bf1fe8ef65c716a13fa7135742122ef5",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/source_snapshot.json": "68a1f431f6d727bb69720493c54a51d0a808423e26887049c11d67663e7c8526",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/fern_prediction.json": "c71c83c1080b7a52647c6a7de72324eac01eb077ba67b25e4acd5e4f3e053a77",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/fern_evaluation.json": "bd600bf7f98db2eb4bc13d8459a89680565e8d0a04a75ce92bd07921c32d0a17",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/flower_prediction.json": "64b5be6ade93a913b7578dae501e836112ee416c1f3b3f04eaee0a43192755e6",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/flower_evaluation.json": "c84eb5913489ebfd271a8a5cbef73973a455a4ffa355f46087c4466f1fda9774",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/fortress_prediction.json": "123fd10d6fde326e823ab936a04a5520f5ed99368bd24c1fcc72cb4f46f70975",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/fortress_evaluation.json": "d0e5f4f3e5bfd64f31efccf7c2a1e1a97c193b4b44e158a7472923325425678e",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/horns_center_prediction.json": "09f12da0978d74fc9c42f05a583bffb5b49055658c712cbcaa8a490bbd837bb3",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/horns_center_evaluation.json": "34f6381b63b1b88f4850f1b153b749e03d8b7f0b39f42997bcd5b2b332c194a1",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/horns_left_prediction.json": "b2dda3d08372c5427eb9c04feeb232b8a8b97924dd789064eebd440db924357f",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/horns_left_evaluation.json": "0214048d77622836aad02b6f60efc1f8b89b17add6f76d85c9f4be64a6ab34aa",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/leaves_prediction.json": "5da45d38b3e72408a6b15afbd24cfbba5d2113843701b20ec697629e52ceede8",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/leaves_evaluation.json": "ac518de502c83e21af0a5636994fce982c9e1ee29f35173c13bdf39cc53f944c",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/orchids_prediction.json": "c10b01b46a70755f1de4c6bf60270e66c92a32395af917bfeec7358cc57a6356",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/orchids_evaluation.json": "c7d54244c68b5755a88b8d775591af79e730c3dda23f5128ff1e1d664f8f52a3",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/trex_prediction.json": "c0479a9aea8302a9ca4342a491dcf7bad19a48b724d9f7e91144173fbf9226e9",
+      "/root/RADIO-GS-query-field/output/tmm_response_20261016/study/nvos_v10_readout_factorial_v1/trex_evaluation.json": "dbae21fc61a069f31323cc4279ada5e3c81444637ae5c90f0366aedc3ce162f9",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fern/IMG_4027_mask.png": "c48d8bdc2bc9260a1dc8e1f03864e5a91e7b5279d862edfece0e1623ffa9f47d",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/flower/IMG_2962_mask.png": "dd94edff4733c28944bf36f5b9cc4db062bd9385d73132e158038a48e71f51ff",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/fortress/IMG_1800_mask.png": "b87257873a1efc29092e6f14af97d0615a50aa543467f44b86e6c699ab3eabe0",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_center/DJI_20200223_163024_597_mask.png": "bb2d799785f0da19c473354583303a462a87220daed883a1377bfba3f76ce307",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/horns_left/DJI_20200223_163024_597_mask.png": "d64ba3b8a0648c2698dddd6eae1b0e3d6bbdbe163eac4a07f180be109d0f8c28",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/leaves/IMG_2997_mask.png": "b3275f9ee6894bb54340340e0af207bdd4b6b961984926211541a10bfeb5e2d4",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/orchids/IMG_4480_mask.png": "222ee86fd11c35eab26e4f27032d79d2b2d96658e01db3787d3e06bbe787f34b",
+      "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/masks/trex/DJI_20200223_163619_411_mask.png": "f237151e17a048828f6a98fdbfcae462be067b5938a3c158c497f5727fe1df60",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fern/query/typed_readout.pt": "b8677f0e4dce0ba3a6b315cd65e0f0cf84986907b76eb16820eed51491093b60",
+      "configs/pipeline/nvos_all_sources/fern.scene.json": "a969f2c116483128bbea73fea2e93bbdf4bc5e6cff6e9ba45524f3803a7eb067",
+      "configs/consolidated/nvos/fern.evaluation.json": "ed29367aecd2f15ecb3ba38f451fcfbf3ff836acda4119a6ecb3422c86bcb3ff",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale_repair_20260917/fern/source_scale_prior.json": "92501e9b153cc82b18294a78ee1a30e764764f247eacf06a53f5bb1709b41203",
+      "output/nvos_carrier_next72/adaptive_allrgb/fern/geometry.pt": "c5b78322f789b5461032be14769fb72a84b21f3ed7bd311f23025274a6e01701",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/flower/query/typed_readout.pt": "90483763311d1d3199d6f510c79e260c5c64c287d4050494c2a7e8fa36e52e59",
+      "configs/pipeline/nvos_all_sources/flower.scene.json": "93d1183fffcd41e3febd3469c6120c8ba42335dcee3a11dd475621536c4de9c1",
+      "configs/consolidated/nvos/flower.evaluation.json": "91629841c54f34f6bc631a9f68a41ad052d8d59b38a13ac114bd30aac9f6298f",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/flower/source_scale_prior.json": "b120da90ac3799401bf83255caefbd5751b29e9633879292a0910d225dbf2f2f",
+      "output/nvos_carrier_next72/adaptive_allrgb/flower/geometry.pt": "ee42624c9253f73d79612314164ea836bec08a142dd946cf698b561861c74c0c",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/fortress/query/typed_readout.pt": "5471055f248e52ce5218adb0fb9d7264668007d300370db33b7f473d4b27b8ef",
+      "configs/pipeline/nvos_all_sources/fortress.scene.json": "b195dc0df72b9c9d8eaf91d71f05c4b1254a5195a2b4154c93b885c7c006a1e0",
+      "configs/consolidated/nvos/fortress.evaluation.json": "74660de86c6fe24d5decd3408effce156c1aef7dd3883996a22a916a5147d857",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_scale_repair_20260917/fortress/source_scale_prior.json": "c29aad77394a61b5c820affff648766020ba6ef613dfbf370909f57280583491",
+      "output/nvos_carrier_next72/adaptive_allrgb/fortress/geometry.pt": "fe4f8563f46e089e3d13698333c8ffc3c984bfc776e01db85538fc7e75747e17",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_center/query/typed_readout.pt": "5c32329e343410f1decb7b9c6cd1f80de41c495f3fb57f77f2d24b5abbd5be21",
+      "configs/pipeline/nvos_all_sources/horns_center.scene.json": "5e5d52a237e273ab16069347c447ffa7d9bd1d4a5c1ab2007d80bca4b5334f39",
+      "configs/consolidated/nvos/horns_center.evaluation.json": "e7d5b67943d1fada78a9da947ce4218c42800c286603dd7d25f2dcfe84eb50e2",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/horns_center/source_scale_prior.json": "28fb726ee647301188e8c9c2a46a3d2b2d85c2138bc305a9df3d08a20aa73066",
+      "output/nvos_carrier_next72/adaptive_allrgb/horns_center/geometry.pt": "a6b51176689b4daadcb07f73d0af89873c5ac95b2017826b448190b23cfc242c",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/horns_left/query/typed_readout.pt": "dc9ac57fc23f86179b5cc25d92a8bdcd4593db7a8588116c5f07baaf6e8ee2a2",
+      "configs/pipeline/nvos_all_sources/horns_left.scene.json": "34d0025271da37100b58931f48be0caea16082d3ffccaae9814d7b03b227c7e3",
+      "configs/consolidated/nvos/horns_left.evaluation.json": "ab10b5f0a1cc8ddfa147503158deda4793bbe09edc45b2e2a91b5de2ff537a8c",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/leaves/query/typed_readout.pt": "6b31abe0c7ee5ba86544f68c5f3d0861ddd07304b004646918fa4a1c294f3336",
+      "configs/pipeline/nvos_all_sources/leaves.scene.json": "40877b0e733a0093f40d980f372ffa64a2c3cb329d0d979fc4617285f4925345",
+      "configs/consolidated/nvos/leaves.evaluation.json": "cd0a84e84dd23c9ccc24dcd6a8bd318aadb03d352f537889a9de64b06385ffca",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/leaves/source_scale_prior.json": "23b18ecbf5bbeedfd5f994e005d46bf5c37828980ec3a5e55228c3a974fd260e",
+      "output/nvos_carrier_next72/adaptive_allrgb/leaves/geometry.pt": "dbfd3871fd750808ab3591578b465a4c83db3cb498d0cd6a405faa98281220d0",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/orchids/query/typed_readout.pt": "437a052a4f3533257d27478e8e683e10aa682114d662603792e2fe4adf26c9c6",
+      "configs/pipeline/nvos_all_sources/orchids.scene.json": "898c250c0aa705fd88f5051245d8e52751d40f513fb6ec3ea2a6e6fc2d988bb6",
+      "configs/consolidated/nvos/orchids.evaluation.json": "148bb728eb226939c5e49eeb5c17313207bb7fab43b6ed05fdd623c3bed639d0",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/orchids/source_scale_prior.json": "234b1bd8a4c3daa443acd30da7ec381dfda6c00f7b507e7f83803a6bb43eaf7f",
+      "output/nvos_carrier_next72/adaptive_allrgb/orchids/geometry.pt": "3cd2eb3720862b04d771efaefef6a65c1b138cfdc63d83173ae8bef3d478c897",
+      "/root/RADIO-GS-query-field/output/query_conditioned_membership_20261006/image_convergence/system/nvos/trex/query/typed_readout.pt": "ba8a296d05bc81a6d1e3b2d99838e0295175c9ec1211b31947f8c30a0bb1ce73",
+      "configs/pipeline/nvos_all_sources/trex.scene.json": "d0d617b273ba4efda097ecdac76981f992b0fd643a4230f975e8c6e75edc6bca",
+      "configs/consolidated/nvos/trex.evaluation.json": "02daa6688231281cda94fc02a93831979607269c71db228990616dd711373ac7",
+      "/mnt/pool/sqy/results/RADIO-GS/output/nvos_local_scale2_repair_20260917/trex/source_scale_prior.json": "68ec8513f3df2b5ef6b9926266283724c26064c43488490530b9c6ebc01f4d30",
+      "output/nvos_carrier_next72/adaptive_allrgb/trex/geometry.pt": "6446a9fd14f1b20e90d7c9474e9a1b26038d8c1f801cc4addf6b29f0e0007baf"
+    },
+    "new_method_gain": false,
+    "output_operator_changed": true,
+    "metric": "binary-mask IoU remains the same",
+    "independent_test": false
+  }
+}

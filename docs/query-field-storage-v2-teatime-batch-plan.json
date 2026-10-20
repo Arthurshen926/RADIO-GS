@@ -1,0 +1,175 @@
+{
+  "status": "approved_prepared",
+  "project": "agent:eden-container:sqy-29268143",
+  "executable": "/root/miniconda3/envs/cybersim_agent/bin/python",
+  "target_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261012/teatime_source_e5247b53",
+  "store_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+  "source_total_bytes": 43852232462,
+  "source_allocated_bytes": 46853573120,
+  "sources": [
+    {
+      "name": "teatime_18views_v1_untrained",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_18views_v1/models/untrained",
+      "manifest_sha256": "a1359bd9effbfd02f4d0592a46ef485f19427f5fb9a225ce69941d41ec1d555a",
+      "field_sha256": "822508dfab013ab4fb90b073c4ee4b52e14bbaf923ec984fa364c8d0138b6ba4",
+      "bytes": 8769348601,
+      "allocated_bytes": 9365275136,
+      "observations_sha256": "e5247b53c640fa1af47730eed4986d49641439a84f6bc458afa00881c4d8112d",
+      "spec": {
+        "default_scale": 0.4042361378669739,
+        "threshold": 0.5,
+        "candidate_count": 8,
+        "candidate_radius": 0.23964390754699708
+      }
+    },
+    {
+      "name": "teatime_18views_v1_trained",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_18views_v1/models/trained",
+      "manifest_sha256": "b21fd60343fe38bd7ef4370b6a6db94fbe944cbcc4af22e05f88349a909b70f0",
+      "field_sha256": "9482ca347b5c286f0570a4ee5642d64e137849211724f129873fcbcb79824e52",
+      "bytes": 8769348601,
+      "allocated_bytes": 9424818688,
+      "observations_sha256": "e5247b53c640fa1af47730eed4986d49641439a84f6bc458afa00881c4d8112d",
+      "spec": {
+        "default_scale": 0.4042361378669739,
+        "threshold": 0.5,
+        "candidate_count": 8,
+        "candidate_radius": 0.23964390754699708
+      }
+    },
+    {
+      "name": "teatime_supported_anchor_v1_trained",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_supported_anchor_v1/models/trained",
+      "manifest_sha256": "f71b786340dbd126710b7f58932495a69a809b08f2cccf9936e3e0918683ef8b",
+      "field_sha256": "ea6ec4fd8ce72c3867d083bffe6602759bf86081c3ba865b78609a550d6363bb",
+      "bytes": 8771178420,
+      "allocated_bytes": 9219179008,
+      "observations_sha256": "e5247b53c640fa1af47730eed4986d49641439a84f6bc458afa00881c4d8112d",
+      "spec": {
+        "default_scale": 0.4042361378669739,
+        "threshold": 0.5,
+        "candidate_count": 8,
+        "candidate_radius": 0.23964390754699708
+      }
+    },
+    {
+      "name": "teatime_fitted_metric_v1_untrained",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_fitted_metric_v1/models/untrained",
+      "manifest_sha256": "1c5e2cc070d8f9c3dcd826ee23254441c845acb71fe59b51d092b55d978ddf77",
+      "field_sha256": "229bfdad953b76a63ba9d604e12f0819045feb2d7d7d8cd5a91e1d7f6a70ea45",
+      "bytes": 8771178420,
+      "allocated_bytes": 9407590912,
+      "observations_sha256": "e5247b53c640fa1af47730eed4986d49641439a84f6bc458afa00881c4d8112d",
+      "spec": {
+        "default_scale": 0.4042361378669739,
+        "threshold": 0.5,
+        "candidate_count": 8,
+        "candidate_radius": 0.23964390754699708,
+        "spatial_metric": "scale_normalized",
+        "world_units_per_metre": 4.792878150939941
+      }
+    },
+    {
+      "name": "teatime_fitted_metric_v1_trained",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_fitted_metric_v1/models/trained",
+      "manifest_sha256": "8b6f304cfba5c1967c892c79fe9a9965ee9991b31198d3ea2ab7b7aaac8aa781",
+      "field_sha256": "d40a0d104aa52148ee74d79163fc2d226fc1faeee775a4204a66e0675f8d36c3",
+      "bytes": 8771178420,
+      "allocated_bytes": 9436709376,
+      "observations_sha256": "e5247b53c640fa1af47730eed4986d49641439a84f6bc458afa00881c4d8112d",
+      "spec": {
+        "default_scale": 0.4042361378669739,
+        "threshold": 0.5,
+        "candidate_count": 8,
+        "candidate_radius": 0.23964390754699708,
+        "spatial_metric": "scale_normalized",
+        "world_units_per_metre": 4.792878150939941
+      }
+    }
+  ],
+  "budget": {
+    "per_stage_seconds": 900,
+    "total_process_seconds": 3400,
+    "max_new_bytes_per_stage": 10737418240,
+    "max_new_blob_bytes_whole_batch": 51539607552,
+    "min_free_before_stage": 103079215104,
+    "reserve_bytes": 68719476736,
+    "min_available_ram_bytes": 68719476736,
+    "expected_nfs_io_bytes": 175408929848
+  },
+  "sharing": "Exact tensor content only. Same source suggests sharing but never authorizes substitutions; all raw states/specs independently verified.",
+  "originals_preserved": true,
+  "partial_recovery": "Completed manifests immutable; revalidate/skip. Incomplete target directories preserved; retry fresh suffix with same blob store. No deletions, no blind overwrite.",
+  "steps": [
+    {
+      "name": "teatime_18views_v1_untrained",
+      "timeout_secs": 900,
+      "args": [
+        "-c",
+        "import os,sys,json,time,hashlib,shutil\nfrom pathlib import Path\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nimport torch\ntorch.set_num_threads(2)\nfrom radio_gs.query_field.storage import sha256,field_from_state\nfrom radio_gs.query_field.shared_storage import save_field_v2,load_field_v2,_descriptor\nsource,expected,target,store,expected_bytes,expected_manifest=sys.argv[1:]\nexpected_bytes=int(expected_bytes)\nassert shutil.disk_usage(store).free>=96*1024**3\navailable=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))*1024\nassert available>=64*1024**3\nsource=Path(source); target=Path(target)\nmanifest_bytes=(source/'manifest.json').read_bytes()\nassert hashlib.sha256(manifest_bytes).hexdigest()==expected_manifest\nmanifest=json.loads(manifest_bytes)\nassert manifest['schema']=='radio_gs.query_preserving_field.v1'\nassert manifest['external_scene_dependencies']==[] and set(manifest['files'])=={'field.pt'}\npath=source/'field.pt'\nassert not path.is_symlink()\nbefore=path.stat()\nassert before.st_size==expected_bytes and manifest['files']['field.pt']['sha256']==expected\nassert sha256(path)==expected\nraw=torch.load(path,map_location='cpu',weights_only=True)\nfield=field_from_state(raw,manifest)\noriginal={k:_descriptor(v)[0] for k,v in raw.items()}\nassert original=={k:_descriptor(v)[0] for k,v in field.state_dict().items()},'v1 constructor altered raw state'\nif (target/'manifest.json').exists():\n    restored,saved=load_field_v2(target,store_root=store)\nelse:\n    assert not target.exists(),'incomplete target: preserve it and use a fresh attempt path with the same store'\n    saved=save_field_v2(field,target,dict(source_manifest=manifest,source_field_sha256=expected),\n                       store_root=store,max_new_bytes=10*1024**3,reserve_bytes=64*1024**3)\n    restored,saved=load_field_v2(target,store_root=store)\nassert original=={k:_descriptor(v)[0] for k,v in restored.state_dict().items()}\nassert field.export_spec()==restored.export_spec()\nafter=path.stat()\nassert (before.st_ino,before.st_size,before.st_mtime_ns)==(after.st_ino,after.st_size,after.st_mtime_ns)\nreport=dict(source=str(source),source_sha256=expected,raw_tensor_descriptors_exact=True,\n            spec_exact=True,source_metadata_unchanged=True,source_preserved=True,\n            target=str(target),state_identity=saved['state_identity'],new_blob_bytes=saved['new_blob_bytes'],\n            tensor_bytes=saved['tensor_bytes'],unique_blob_bytes=saved['unique_blob_bytes'])\nreceipt=target/'batch_verified.json'\nif receipt.exists():\n    assert json.loads(receipt.read_text())==report\nelse:\n    with receipt.open('x') as handle:json.dump(report,handle,indent=2)\nprint(json.dumps(report,indent=2))\n",
+        "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_18views_v1/models/untrained",
+        "822508dfab013ab4fb90b073c4ee4b52e14bbaf923ec984fa364c8d0138b6ba4",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261012/teatime_source_e5247b53/teatime_18views_v1_untrained",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+        "8769348601",
+        "a1359bd9effbfd02f4d0592a46ef485f19427f5fb9a225ce69941d41ec1d555a"
+      ]
+    },
+    {
+      "name": "teatime_18views_v1_trained",
+      "timeout_secs": 900,
+      "args": [
+        "-c",
+        "import os,sys,json,time,hashlib,shutil\nfrom pathlib import Path\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nimport torch\ntorch.set_num_threads(2)\nfrom radio_gs.query_field.storage import sha256,field_from_state\nfrom radio_gs.query_field.shared_storage import save_field_v2,load_field_v2,_descriptor\nsource,expected,target,store,expected_bytes,expected_manifest=sys.argv[1:]\nexpected_bytes=int(expected_bytes)\nassert shutil.disk_usage(store).free>=96*1024**3\navailable=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))*1024\nassert available>=64*1024**3\nsource=Path(source); target=Path(target)\nmanifest_bytes=(source/'manifest.json').read_bytes()\nassert hashlib.sha256(manifest_bytes).hexdigest()==expected_manifest\nmanifest=json.loads(manifest_bytes)\nassert manifest['schema']=='radio_gs.query_preserving_field.v1'\nassert manifest['external_scene_dependencies']==[] and set(manifest['files'])=={'field.pt'}\npath=source/'field.pt'\nassert not path.is_symlink()\nbefore=path.stat()\nassert before.st_size==expected_bytes and manifest['files']['field.pt']['sha256']==expected\nassert sha256(path)==expected\nraw=torch.load(path,map_location='cpu',weights_only=True)\nfield=field_from_state(raw,manifest)\noriginal={k:_descriptor(v)[0] for k,v in raw.items()}\nassert original=={k:_descriptor(v)[0] for k,v in field.state_dict().items()},'v1 constructor altered raw state'\nif (target/'manifest.json').exists():\n    restored,saved=load_field_v2(target,store_root=store)\nelse:\n    assert not target.exists(),'incomplete target: preserve it and use a fresh attempt path with the same store'\n    saved=save_field_v2(field,target,dict(source_manifest=manifest,source_field_sha256=expected),\n                       store_root=store,max_new_bytes=10*1024**3,reserve_bytes=64*1024**3)\n    restored,saved=load_field_v2(target,store_root=store)\nassert original=={k:_descriptor(v)[0] for k,v in restored.state_dict().items()}\nassert field.export_spec()==restored.export_spec()\nafter=path.stat()\nassert (before.st_ino,before.st_size,before.st_mtime_ns)==(after.st_ino,after.st_size,after.st_mtime_ns)\nreport=dict(source=str(source),source_sha256=expected,raw_tensor_descriptors_exact=True,\n            spec_exact=True,source_metadata_unchanged=True,source_preserved=True,\n            target=str(target),state_identity=saved['state_identity'],new_blob_bytes=saved['new_blob_bytes'],\n            tensor_bytes=saved['tensor_bytes'],unique_blob_bytes=saved['unique_blob_bytes'])\nreceipt=target/'batch_verified.json'\nif receipt.exists():\n    assert json.loads(receipt.read_text())==report\nelse:\n    with receipt.open('x') as handle:json.dump(report,handle,indent=2)\nprint(json.dumps(report,indent=2))\n",
+        "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_18views_v1/models/trained",
+        "9482ca347b5c286f0570a4ee5642d64e137849211724f129873fcbcb79824e52",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261012/teatime_source_e5247b53/teatime_18views_v1_trained",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+        "8769348601",
+        "b21fd60343fe38bd7ef4370b6a6db94fbe944cbcc4af22e05f88349a909b70f0"
+      ]
+    },
+    {
+      "name": "teatime_supported_anchor_v1_trained",
+      "timeout_secs": 900,
+      "args": [
+        "-c",
+        "import os,sys,json,time,hashlib,shutil\nfrom pathlib import Path\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nimport torch\ntorch.set_num_threads(2)\nfrom radio_gs.query_field.storage import sha256,field_from_state\nfrom radio_gs.query_field.shared_storage import save_field_v2,load_field_v2,_descriptor\nsource,expected,target,store,expected_bytes,expected_manifest=sys.argv[1:]\nexpected_bytes=int(expected_bytes)\nassert shutil.disk_usage(store).free>=96*1024**3\navailable=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))*1024\nassert available>=64*1024**3\nsource=Path(source); target=Path(target)\nmanifest_bytes=(source/'manifest.json').read_bytes()\nassert hashlib.sha256(manifest_bytes).hexdigest()==expected_manifest\nmanifest=json.loads(manifest_bytes)\nassert manifest['schema']=='radio_gs.query_preserving_field.v1'\nassert manifest['external_scene_dependencies']==[] and set(manifest['files'])=={'field.pt'}\npath=source/'field.pt'\nassert not path.is_symlink()\nbefore=path.stat()\nassert before.st_size==expected_bytes and manifest['files']['field.pt']['sha256']==expected\nassert sha256(path)==expected\nraw=torch.load(path,map_location='cpu',weights_only=True)\nfield=field_from_state(raw,manifest)\noriginal={k:_descriptor(v)[0] for k,v in raw.items()}\nassert original=={k:_descriptor(v)[0] for k,v in field.state_dict().items()},'v1 constructor altered raw state'\nif (target/'manifest.json').exists():\n    restored,saved=load_field_v2(target,store_root=store)\nelse:\n    assert not target.exists(),'incomplete target: preserve it and use a fresh attempt path with the same store'\n    saved=save_field_v2(field,target,dict(source_manifest=manifest,source_field_sha256=expected),\n                       store_root=store,max_new_bytes=10*1024**3,reserve_bytes=64*1024**3)\n    restored,saved=load_field_v2(target,store_root=store)\nassert original=={k:_descriptor(v)[0] for k,v in restored.state_dict().items()}\nassert field.export_spec()==restored.export_spec()\nafter=path.stat()\nassert (before.st_ino,before.st_size,before.st_mtime_ns)==(after.st_ino,after.st_size,after.st_mtime_ns)\nreport=dict(source=str(source),source_sha256=expected,raw_tensor_descriptors_exact=True,\n            spec_exact=True,source_metadata_unchanged=True,source_preserved=True,\n            target=str(target),state_identity=saved['state_identity'],new_blob_bytes=saved['new_blob_bytes'],\n            tensor_bytes=saved['tensor_bytes'],unique_blob_bytes=saved['unique_blob_bytes'])\nreceipt=target/'batch_verified.json'\nif receipt.exists():\n    assert json.loads(receipt.read_text())==report\nelse:\n    with receipt.open('x') as handle:json.dump(report,handle,indent=2)\nprint(json.dumps(report,indent=2))\n",
+        "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_supported_anchor_v1/models/trained",
+        "ea6ec4fd8ce72c3867d083bffe6602759bf86081c3ba865b78609a550d6363bb",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261012/teatime_source_e5247b53/teatime_supported_anchor_v1_trained",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+        "8771178420",
+        "f71b786340dbd126710b7f58932495a69a809b08f2cccf9936e3e0918683ef8b"
+      ]
+    },
+    {
+      "name": "teatime_fitted_metric_v1_untrained",
+      "timeout_secs": 900,
+      "args": [
+        "-c",
+        "import os,sys,json,time,hashlib,shutil\nfrom pathlib import Path\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nimport torch\ntorch.set_num_threads(2)\nfrom radio_gs.query_field.storage import sha256,field_from_state\nfrom radio_gs.query_field.shared_storage import save_field_v2,load_field_v2,_descriptor\nsource,expected,target,store,expected_bytes,expected_manifest=sys.argv[1:]\nexpected_bytes=int(expected_bytes)\nassert shutil.disk_usage(store).free>=96*1024**3\navailable=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))*1024\nassert available>=64*1024**3\nsource=Path(source); target=Path(target)\nmanifest_bytes=(source/'manifest.json').read_bytes()\nassert hashlib.sha256(manifest_bytes).hexdigest()==expected_manifest\nmanifest=json.loads(manifest_bytes)\nassert manifest['schema']=='radio_gs.query_preserving_field.v1'\nassert manifest['external_scene_dependencies']==[] and set(manifest['files'])=={'field.pt'}\npath=source/'field.pt'\nassert not path.is_symlink()\nbefore=path.stat()\nassert before.st_size==expected_bytes and manifest['files']['field.pt']['sha256']==expected\nassert sha256(path)==expected\nraw=torch.load(path,map_location='cpu',weights_only=True)\nfield=field_from_state(raw,manifest)\noriginal={k:_descriptor(v)[0] for k,v in raw.items()}\nassert original=={k:_descriptor(v)[0] for k,v in field.state_dict().items()},'v1 constructor altered raw state'\nif (target/'manifest.json').exists():\n    restored,saved=load_field_v2(target,store_root=store)\nelse:\n    assert not target.exists(),'incomplete target: preserve it and use a fresh attempt path with the same store'\n    saved=save_field_v2(field,target,dict(source_manifest=manifest,source_field_sha256=expected),\n                       store_root=store,max_new_bytes=10*1024**3,reserve_bytes=64*1024**3)\n    restored,saved=load_field_v2(target,store_root=store)\nassert original=={k:_descriptor(v)[0] for k,v in restored.state_dict().items()}\nassert field.export_spec()==restored.export_spec()\nafter=path.stat()\nassert (before.st_ino,before.st_size,before.st_mtime_ns)==(after.st_ino,after.st_size,after.st_mtime_ns)\nreport=dict(source=str(source),source_sha256=expected,raw_tensor_descriptors_exact=True,\n            spec_exact=True,source_metadata_unchanged=True,source_preserved=True,\n            target=str(target),state_identity=saved['state_identity'],new_blob_bytes=saved['new_blob_bytes'],\n            tensor_bytes=saved['tensor_bytes'],unique_blob_bytes=saved['unique_blob_bytes'])\nreceipt=target/'batch_verified.json'\nif receipt.exists():\n    assert json.loads(receipt.read_text())==report\nelse:\n    with receipt.open('x') as handle:json.dump(report,handle,indent=2)\nprint(json.dumps(report,indent=2))\n",
+        "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_fitted_metric_v1/models/untrained",
+        "229bfdad953b76a63ba9d604e12f0819045feb2d7d7d8cd5a91e1d7f6a70ea45",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261012/teatime_source_e5247b53/teatime_fitted_metric_v1_untrained",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+        "8771178420",
+        "1c5e2cc070d8f9c3dcd826ee23254441c845acb71fe59b51d092b55d978ddf77"
+      ]
+    },
+    {
+      "name": "teatime_fitted_metric_v1_trained",
+      "timeout_secs": 900,
+      "args": [
+        "-c",
+        "import os,sys,json,time,hashlib,shutil\nfrom pathlib import Path\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nimport torch\ntorch.set_num_threads(2)\nfrom radio_gs.query_field.storage import sha256,field_from_state\nfrom radio_gs.query_field.shared_storage import save_field_v2,load_field_v2,_descriptor\nsource,expected,target,store,expected_bytes,expected_manifest=sys.argv[1:]\nexpected_bytes=int(expected_bytes)\nassert shutil.disk_usage(store).free>=96*1024**3\navailable=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))*1024\nassert available>=64*1024**3\nsource=Path(source); target=Path(target)\nmanifest_bytes=(source/'manifest.json').read_bytes()\nassert hashlib.sha256(manifest_bytes).hexdigest()==expected_manifest\nmanifest=json.loads(manifest_bytes)\nassert manifest['schema']=='radio_gs.query_preserving_field.v1'\nassert manifest['external_scene_dependencies']==[] and set(manifest['files'])=={'field.pt'}\npath=source/'field.pt'\nassert not path.is_symlink()\nbefore=path.stat()\nassert before.st_size==expected_bytes and manifest['files']['field.pt']['sha256']==expected\nassert sha256(path)==expected\nraw=torch.load(path,map_location='cpu',weights_only=True)\nfield=field_from_state(raw,manifest)\noriginal={k:_descriptor(v)[0] for k,v in raw.items()}\nassert original=={k:_descriptor(v)[0] for k,v in field.state_dict().items()},'v1 constructor altered raw state'\nif (target/'manifest.json').exists():\n    restored,saved=load_field_v2(target,store_root=store)\nelse:\n    assert not target.exists(),'incomplete target: preserve it and use a fresh attempt path with the same store'\n    saved=save_field_v2(field,target,dict(source_manifest=manifest,source_field_sha256=expected),\n                       store_root=store,max_new_bytes=10*1024**3,reserve_bytes=64*1024**3)\n    restored,saved=load_field_v2(target,store_root=store)\nassert original=={k:_descriptor(v)[0] for k,v in restored.state_dict().items()}\nassert field.export_spec()==restored.export_spec()\nafter=path.stat()\nassert (before.st_ino,before.st_size,before.st_mtime_ns)==(after.st_ino,after.st_size,after.st_mtime_ns)\nreport=dict(source=str(source),source_sha256=expected,raw_tensor_descriptors_exact=True,\n            spec_exact=True,source_metadata_unchanged=True,source_preserved=True,\n            target=str(target),state_identity=saved['state_identity'],new_blob_bytes=saved['new_blob_bytes'],\n            tensor_bytes=saved['tensor_bytes'],unique_blob_bytes=saved['unique_blob_bytes'])\nreceipt=target/'batch_verified.json'\nif receipt.exists():\n    assert json.loads(receipt.read_text())==report\nelse:\n    with receipt.open('x') as handle:json.dump(report,handle,indent=2)\nprint(json.dumps(report,indent=2))\n",
+        "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/teatime_fitted_metric_v1/models/trained",
+        "d40a0d104aa52148ee74d79163fc2d226fc1faeee775a4204a66e0675f8d36c3",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261012/teatime_source_e5247b53/teatime_fitted_metric_v1_trained",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+        "8771178420",
+        "8b6f304cfba5c1967c892c79fe9a9965ee9991b31198d3ea2ab7b7aaac8aa781"
+      ]
+    }
+  ]
+}

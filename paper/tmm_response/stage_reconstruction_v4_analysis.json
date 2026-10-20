@@ -1,0 +1,1899 @@
+{
+  "schema": "tmm.stage_reconstruction.analysis.v1",
+  "run": "stage_reconstruction_v4",
+  "complete": true,
+  "all_prediction_reports_verified": 31,
+  "source_and_scorer_files_currently_match_recorded_hashes": 20,
+  "input_and_array_hash_verification": "driver verified all before scoring; evaluation manifest sealed",
+  "arrays_rechecked_after_release": false,
+  "dense_arrays_removed": true,
+  "source_fit_and_task_rows": [
+    {
+      "family": "nvos",
+      "name": "fern",
+      "metric": "iou",
+      "squared_source_reduction_percent": 20.555241051855933,
+      "squared_task_delta_pp": 0.031828880310058594,
+      "huber_task_delta_pp": 0.023037195205688477,
+      "huber_vs_squared_task_delta_pp": -0.008791685104370117,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 312.82801478755135,
+          "source_huber_objective": 286.9740910644498,
+          "supported_entries": 319621
+        },
+        "rendered_squared": {
+          "source_squared_objective": 248.52546227023464,
+          "source_huber_objective": 229.79768561989528,
+          "supported_entries": 319621
+        },
+        "rendered_huber": {
+          "source_squared_objective": 251.32796352035797,
+          "source_huber_objective": 227.80128114722166,
+          "supported_entries": 319621
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "name": "flower",
+      "metric": "iou",
+      "squared_source_reduction_percent": 29.95643336657676,
+      "squared_task_delta_pp": 0.0907599925994873,
+      "huber_task_delta_pp": 0.08229613304138184,
+      "huber_vs_squared_task_delta_pp": -0.008463859558105469,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 117.00470621371485,
+          "source_huber_objective": 114.6480306819997,
+          "supported_entries": 322873
+        },
+        "rendered_squared": {
+          "source_squared_objective": 81.95426936104447,
+          "source_huber_objective": 81.01101451023966,
+          "supported_entries": 322873
+        },
+        "rendered_huber": {
+          "source_squared_objective": 82.10613016538724,
+          "source_huber_objective": 80.93465888254747,
+          "supported_entries": 322873
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "name": "fortress",
+      "metric": "iou",
+      "squared_source_reduction_percent": 12.842426618611436,
+      "squared_task_delta_pp": -0.023758411407470703,
+      "huber_task_delta_pp": -0.023537874221801758,
+      "huber_vs_squared_task_delta_pp": 0.0002205371856689453,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 3.1618560729703136,
+          "source_huber_objective": 3.1618560729703136,
+          "supported_entries": 385582
+        },
+        "rendered_squared": {
+          "source_squared_objective": 2.7557970270129917,
+          "source_huber_objective": 2.7557970270129917,
+          "supported_entries": 385582
+        },
+        "rendered_huber": {
+          "source_squared_objective": 2.755836418198218,
+          "source_huber_objective": 2.755836418198218,
+          "supported_entries": 385582
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "name": "horns_center",
+      "metric": "iou",
+      "squared_source_reduction_percent": 11.113886168358212,
+      "squared_task_delta_pp": -0.09950399398803711,
+      "huber_task_delta_pp": -0.09969472885131836,
+      "huber_vs_squared_task_delta_pp": -0.00019073486328125,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 111.84067065174467,
+          "source_huber_objective": 104.83995518366582,
+          "supported_entries": 377726
+        },
+        "rendered_squared": {
+          "source_squared_objective": 99.41082582558136,
+          "source_huber_objective": 94.81360439891557,
+          "supported_entries": 377726
+        },
+        "rendered_huber": {
+          "source_squared_objective": 100.7968036086019,
+          "source_huber_objective": 94.01776897913776,
+          "supported_entries": 377726
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "name": "horns_left",
+      "metric": "iou",
+      "squared_source_reduction_percent": 9.291961826368711,
+      "squared_task_delta_pp": -0.31335949897766113,
+      "huber_task_delta_pp": -0.3100872039794922,
+      "huber_vs_squared_task_delta_pp": 0.0032722949981689453,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 113.66257053318492,
+          "source_huber_objective": 77.9130338140117,
+          "supported_entries": 377997
+        },
+        "rendered_squared": {
+          "source_squared_objective": 103.10108786837196,
+          "source_huber_objective": 70.99861228854392,
+          "supported_entries": 377997
+        },
+        "rendered_huber": {
+          "source_squared_objective": 105.34455063864257,
+          "source_huber_objective": 69.13552489429381,
+          "supported_entries": 377997
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "name": "leaves",
+      "metric": "iou",
+      "squared_source_reduction_percent": 35.81565386610972,
+      "squared_task_delta_pp": -0.0735938549041748,
+      "huber_task_delta_pp": -0.0735938549041748,
+      "huber_vs_squared_task_delta_pp": 0.0,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 1.641520949313419,
+          "source_huber_objective": 1.640029249945658,
+          "supported_entries": 274508
+        },
+        "rendered_squared": {
+          "source_squared_objective": 1.0535994879676465,
+          "source_huber_objective": 1.0535994879676465,
+          "supported_entries": 274508
+        },
+        "rendered_huber": {
+          "source_squared_objective": 1.0536331486408912,
+          "source_huber_objective": 1.0536331486408907,
+          "supported_entries": 274508
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "name": "orchids",
+      "metric": "iou",
+      "squared_source_reduction_percent": 21.32158480075311,
+      "squared_task_delta_pp": -0.40585994720458984,
+      "huber_task_delta_pp": -0.4044950008392334,
+      "huber_vs_squared_task_delta_pp": 0.0013649463653564453,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 119.91727307879404,
+          "source_huber_objective": 115.44630983167366,
+          "supported_entries": 334265
+        },
+        "rendered_squared": {
+          "source_squared_objective": 94.34901000854829,
+          "source_huber_objective": 90.9541899554179,
+          "supported_entries": 334265
+        },
+        "rendered_huber": {
+          "source_squared_objective": 94.62345380084007,
+          "source_huber_objective": 90.80197901399224,
+          "supported_entries": 334265
+        }
+      }
+    },
+    {
+      "family": "nvos",
+      "name": "trex",
+      "metric": "iou",
+      "squared_source_reduction_percent": 21.414236646223873,
+      "squared_task_delta_pp": 0.3384053707122803,
+      "huber_task_delta_pp": 0.3145456314086914,
+      "huber_vs_squared_task_delta_pp": -0.023859739303588867,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 695.3619534485537,
+          "source_huber_objective": 677.6390433460969,
+          "supported_entries": 420718
+        },
+        "rendered_squared": {
+          "source_squared_objective": 546.4554991892753,
+          "source_huber_objective": 534.4984761982439,
+          "supported_entries": 420718
+        },
+        "rendered_huber": {
+          "source_squared_objective": 547.6108354091457,
+          "source_huber_objective": 533.8246095277182,
+          "supported_entries": 420718
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0000_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 2.6249563387590324,
+      "squared_task_delta_pp": -0.5762725144827674,
+      "huber_task_delta_pp": -0.15011760475813762,
+      "huber_vs_squared_task_delta_pp": 0.42615490972462977,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 54134.97231854733,
+          "source_huber_objective": 45116.28397344307,
+          "supported_entries": 890998
+        },
+        "rendered_squared": {
+          "source_squared_objective": 52713.95293118617,
+          "source_huber_objective": 44137.79664877919,
+          "supported_entries": 890998
+        },
+        "rendered_huber": {
+          "source_squared_objective": 54647.95713201801,
+          "source_huber_objective": 42843.39045295535,
+          "supported_entries": 890998
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0062_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 0.9837830624541688,
+      "squared_task_delta_pp": 0.02041916465119753,
+      "huber_task_delta_pp": 0.7384910231129638,
+      "huber_vs_squared_task_delta_pp": 0.7180718584617662,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 3688.4626610053256,
+          "source_huber_objective": 3563.632885870895,
+          "supported_entries": 190746
+        },
+        "rendered_squared": {
+          "source_squared_objective": 3652.176190081409,
+          "source_huber_objective": 3535.076374972247,
+          "supported_entries": 190746
+        },
+        "rendered_huber": {
+          "source_squared_objective": 3672.958854289861,
+          "source_huber_objective": 3519.1240231525753,
+          "supported_entries": 190746
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0070_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 1.5296079272202334,
+      "squared_task_delta_pp": -1.077029870874452,
+      "huber_task_delta_pp": -0.7334678733264044,
+      "huber_vs_squared_task_delta_pp": 0.3435619975480475,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 11959.965422756784,
+          "source_huber_objective": 10581.360101255204,
+          "supported_entries": 1170302
+        },
+        "rendered_squared": {
+          "source_squared_objective": 11777.024843557498,
+          "source_huber_objective": 10474.350422567593,
+          "supported_entries": 1170302
+        },
+        "rendered_huber": {
+          "source_squared_objective": 12147.145076194432,
+          "source_huber_objective": 10255.973678863204,
+          "supported_entries": 1170302
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0097_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 1.2549783095656464,
+      "squared_task_delta_pp": -1.2416290638906924,
+      "huber_task_delta_pp": -1.0527270241570408,
+      "huber_vs_squared_task_delta_pp": 0.1889020397336516,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 4792.4312668467155,
+          "source_huber_objective": 4468.197362700952,
+          "supported_entries": 380054
+        },
+        "rendered_squared": {
+          "source_squared_objective": 4732.287293946947,
+          "source_huber_objective": 4420.820551280385,
+          "supported_entries": 380054
+        },
+        "rendered_huber": {
+          "source_squared_objective": 4814.124706937531,
+          "source_huber_objective": 4374.765190933576,
+          "supported_entries": 380054
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0140_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 2.1380823877952038,
+      "squared_task_delta_pp": -1.4884466306179012,
+      "huber_task_delta_pp": -0.6217098999725001,
+      "huber_vs_squared_task_delta_pp": 0.866736730645401,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 35778.552418953295,
+          "source_huber_objective": 29855.252131569607,
+          "supported_entries": 2941498
+        },
+        "rendered_squared": {
+          "source_squared_objective": 35013.57749107558,
+          "source_huber_objective": 29386.762715319113,
+          "supported_entries": 2941498
+        },
+        "rendered_huber": {
+          "source_squared_objective": 36148.25306051327,
+          "source_huber_objective": 28584.34862638192,
+          "supported_entries": 2941498
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0200_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 1.4665004782911106,
+      "squared_task_delta_pp": -1.1661239420638791,
+      "huber_task_delta_pp": -0.7889156421976296,
+      "huber_vs_squared_task_delta_pp": 0.3772082998662496,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 7608.812877910621,
+          "source_huber_objective": 6576.036445759068,
+          "supported_entries": 523860
+        },
+        "rendered_squared": {
+          "source_squared_objective": 7497.229600663786,
+          "source_huber_objective": 6516.120225409655,
+          "supported_entries": 523860
+        },
+        "rendered_huber": {
+          "source_squared_objective": 7786.728185769816,
+          "source_huber_objective": 6357.433710980033,
+          "supported_entries": 523860
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0347_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 1.0023172870624597,
+      "squared_task_delta_pp": -0.35520639925599173,
+      "huber_task_delta_pp": -0.2568635613605652,
+      "huber_vs_squared_task_delta_pp": 0.09834283789542653,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 10390.53237426533,
+          "source_huber_objective": 9149.716385443415,
+          "supported_entries": 336741
+        },
+        "rendered_squared": {
+          "source_squared_objective": 10286.386272060248,
+          "source_huber_objective": 9093.18686499088,
+          "supported_entries": 336741
+        },
+        "rendered_huber": {
+          "source_squared_objective": 10771.52511723545,
+          "source_huber_objective": 8835.393477815167,
+          "supported_entries": 336741
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0400_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 1.457490615962076,
+      "squared_task_delta_pp": 0.2045901081960566,
+      "huber_task_delta_pp": 0.45184307933796575,
+      "huber_vs_squared_task_delta_pp": 0.24725297114190914,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 2838.175778505605,
+          "source_huber_objective": 2736.611714898727,
+          "supported_entries": 586513
+        },
+        "rendered_squared": {
+          "source_squared_objective": 2796.8096328693773,
+          "source_huber_objective": 2701.7340143034126,
+          "supported_entries": 586513
+        },
+        "rendered_huber": {
+          "source_squared_objective": 2815.539963654958,
+          "source_huber_objective": 2687.0770191439833,
+          "supported_entries": 586513
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0590_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 1.7003696447225547,
+      "squared_task_delta_pp": -1.2226150122116253,
+      "huber_task_delta_pp": -0.5054174588956517,
+      "huber_vs_squared_task_delta_pp": 0.7171975533159736,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 18633.119576652083,
+          "source_huber_objective": 15902.90951583528,
+          "supported_entries": 2111661
+        },
+        "rendered_squared": {
+          "source_squared_objective": 18316.287667505836,
+          "source_huber_objective": 15693.439599182973,
+          "supported_entries": 2111661
+        },
+        "rendered_huber": {
+          "source_squared_objective": 18813.103898902962,
+          "source_huber_objective": 15356.978792902837,
+          "supported_entries": 2111661
+        }
+      }
+    },
+    {
+      "family": "scannet",
+      "name": "scene0645_00",
+      "metric": "miou_19",
+      "squared_source_reduction_percent": 2.345557096042772,
+      "squared_task_delta_pp": -0.41688305595615205,
+      "huber_task_delta_pp": 0.056604054890518896,
+      "huber_vs_squared_task_delta_pp": 0.47348711084667094,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 24709.878687283723,
+          "source_huber_objective": 21878.364824861288,
+          "supported_entries": 2762592
+        },
+        "rendered_squared": {
+          "source_squared_objective": 24130.29437431058,
+          "source_huber_objective": 21412.243080666733,
+          "supported_entries": 2762592
+        },
+        "rendered_huber": {
+          "source_squared_objective": 24721.72675899315,
+          "source_huber_objective": 21030.56108218475,
+          "supported_entries": 2762592
+        }
+      }
+    },
+    {
+      "family": "lerf",
+      "name": "figurines",
+      "metric": "semantic_iou",
+      "squared_source_reduction_percent": 15.453062844213061,
+      "squared_task_delta_pp": 0.5189902548279113,
+      "huber_task_delta_pp": 0.6842655794961128,
+      "huber_vs_squared_task_delta_pp": 0.1652753246682015,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 2964.9991457520505,
+          "source_huber_objective": 2330.7151012540853,
+          "supported_entries": 7022388
+        },
+        "rendered_squared": {
+          "source_squared_objective": 2506.8159644286056,
+          "source_huber_objective": 1980.9381476420363,
+          "supported_entries": 7022388
+        },
+        "rendered_huber": {
+          "source_squared_objective": 2636.288773341271,
+          "source_huber_objective": 1905.5977980913103,
+          "supported_entries": 7022388
+        }
+      }
+    },
+    {
+      "family": "lerf",
+      "name": "ramen",
+      "metric": "semantic_iou",
+      "squared_source_reduction_percent": 18.664369485634303,
+      "squared_task_delta_pp": 0.29730836952656103,
+      "huber_task_delta_pp": 0.2003646468822451,
+      "huber_vs_squared_task_delta_pp": -0.09694372264431594,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 7955.5860615999845,
+          "source_huber_objective": 5946.794473201754,
+          "supported_entries": 6013716
+        },
+        "rendered_squared": {
+          "source_squared_objective": 6470.726084315341,
+          "source_huber_objective": 4926.502494711794,
+          "supported_entries": 6013716
+        },
+        "rendered_huber": {
+          "source_squared_objective": 6937.623681902102,
+          "source_huber_objective": 4638.728683688584,
+          "supported_entries": 6013716
+        }
+      }
+    },
+    {
+      "family": "lerf",
+      "name": "teatime",
+      "metric": "semantic_iou",
+      "squared_source_reduction_percent": 20.61615518979829,
+      "squared_task_delta_pp": 0.4637896509493755,
+      "huber_task_delta_pp": 0.4415696139557834,
+      "huber_vs_squared_task_delta_pp": -0.022220036993592096,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 4152.806138193563,
+          "source_huber_objective": 3189.381218809422,
+          "supported_entries": 17300810
+        },
+        "rendered_squared": {
+          "source_squared_objective": 3296.6571800121087,
+          "source_huber_objective": 2573.0473871111926,
+          "supported_entries": 17300810
+        },
+        "rendered_huber": {
+          "source_squared_objective": 3560.8810561204855,
+          "source_huber_objective": 2414.8473752080426,
+          "supported_entries": 17300810
+        }
+      }
+    },
+    {
+      "family": "lerf",
+      "name": "waldo_kitchen",
+      "metric": "semantic_iou",
+      "squared_source_reduction_percent": 25.2493421559717,
+      "squared_task_delta_pp": 0.317687067118555,
+      "huber_task_delta_pp": 0.3627863119949004,
+      "huber_vs_squared_task_delta_pp": 0.04509924487634542,
+      "source_objectives": {
+        "diagonal": {
+          "source_squared_objective": 5534.039318763671,
+          "source_huber_objective": 4691.620778665705,
+          "supported_entries": 12534453
+        },
+        "rendered_squared": {
+          "source_squared_objective": 4136.730796123026,
+          "source_huber_objective": 3558.873990732951,
+          "supported_entries": 12534453
+        },
+        "rendered_huber": {
+          "source_squared_objective": 4339.0384871127835,
+          "source_huber_objective": 3443.874838652363,
+          "supported_entries": 12534453
+        }
+      }
+    }
+  ],
+  "families": {
+    "lerf": {
+      "jobs": 4,
+      "squared_objective_reduced_jobs": 4,
+      "source_reduction_median_percent": 19.640262337716297,
+      "source_reduction_range_percent": [
+        15.453062844213061,
+        25.2493421559717
+      ],
+      "squared_task_improved_jobs": 4,
+      "squared_task_degraded_jobs": 0,
+      "original_solver_max_error": 4.76837158203125e-07,
+      "original_solver_max_mean_error": 6.9021394155655e-10,
+      "original_solver_half_crossings": 0
+    },
+    "nvos": {
+      "jobs": 8,
+      "squared_objective_reduced_jobs": 8,
+      "source_reduction_median_percent": 20.938412926304522,
+      "source_reduction_range_percent": [
+        9.291961826368711,
+        35.81565386610972
+      ],
+      "squared_task_improved_jobs": 3,
+      "squared_task_degraded_jobs": 5,
+      "original_solver_max_error": 4.7206878662109375e-05,
+      "original_solver_max_mean_error": 6.776205907499389e-08,
+      "original_solver_half_crossings": 0
+    },
+    "scannet": {
+      "jobs": 10,
+      "squared_objective_reduced_jobs": 10,
+      "source_reduction_median_percent": 1.498054202755672,
+      "source_reduction_range_percent": [
+        0.9837830624541688,
+        2.6249563387590324
+      ],
+      "squared_task_improved_jobs": 2,
+      "squared_task_degraded_jobs": 8,
+      "original_solver_max_error": 7.748603820800781e-07,
+      "original_solver_max_mean_error": 4.814479037662522e-09,
+      "original_solver_half_crossings": 0
+    }
+  },
+  "scannet19_class_contributions": {
+    "rendered_squared": [
+      {
+        "class_id": 8,
+        "name": "door",
+        "present_scenes": 9,
+        "contribution_to_macro_delta_pp": -0.10371307107689096,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -3.535977430550019,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": -0.1939602572946897,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -1.2677589409573697,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -2.6982481089390276,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -0.07087406396396045,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": -1.968748906966522,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": 1.7663427027463041,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.35907337214897694,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -2.726755567363115,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 3,
+        "name": "cabinet",
+        "present_scenes": 8,
+        "contribution_to_macro_delta_pp": -0.10144600431427181,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -1.24188807275869,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -1.056697624072267,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -2.595443982125867,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -1.6813321079755028,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -1.6239258491169584,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": -0.43675551642990973,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.4636292980485207,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 1.1376331982862753,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 1,
+        "name": "wall",
+        "present_scenes": 10,
+        "contribution_to_macro_delta_pp": -0.0741918715409897,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -1.9474935238773194,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": -0.14938608350282268,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -2.8465188971289357,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -0.18129248893093974,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -1.2038843633052076,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": 0.2964427367687539,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": -0.4563139387310122,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": -0.2664238271169572,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.32734736515371843,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.06919776215443818,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 5,
+        "name": "chair",
+        "present_scenes": 6,
+        "contribution_to_macro_delta_pp": -0.07373699840342206,
+        "per_scene": [
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -0.9686183136704885,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -1.0438576685008472,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -3.1561292042475655,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": -0.28770079117718117,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.4693596285829327,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -0.4819450733589581,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 4,
+        "name": "bed",
+        "present_scenes": 6,
+        "contribution_to_macro_delta_pp": -0.07280257185584821,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -1.6440453313028458,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -3.0693429705244855,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -1.5087611364906217,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": 0.4164190185801053,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -1.6763960150159463,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -0.3313042881106565,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 24,
+        "name": "refrigerator",
+        "present_scenes": 4,
+        "contribution_to_macro_delta_pp": -0.06931694002349045,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -2.5815996301433164,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -1.4277670525914665,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": -2.1336189339812073,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": 0.0,
+            "valid_class_count": 14
+          }
+        ]
+      },
+      {
+        "class_id": 11,
+        "name": "picture",
+        "present_scenes": 4,
+        "contribution_to_macro_delta_pp": -0.06696038497814,
+        "per_scene": [
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -0.6929213682746932,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -2.8802302207211916,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -2.1074885367518945,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -1.3127826170774433,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 12,
+        "name": "counter",
+        "present_scenes": 5,
+        "contribution_to_macro_delta_pp": -0.047586348237557585,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -1.0131398344138343,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": 0.8050368908555428,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -1.724358974358975,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": 0.35543596326651494,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -4.789522308655575,
+            "valid_class_count": 14
+          }
+        ]
+      },
+      {
+        "class_id": 14,
+        "name": "desk",
+        "present_scenes": 5,
+        "contribution_to_macro_delta_pp": -0.0401249315995112,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 0.2626419069861552,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -2.816957546906662,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": 1.2437128165098121,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -2.3167812144806454,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -1.281258334137192,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 16,
+        "name": "curtain",
+        "present_scenes": 4,
+        "contribution_to_macro_delta_pp": -0.037154770419701895,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -2.6463617911196446,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -1.6519405412931065,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.9903833459949052,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 1.148300074071118,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 9,
+        "name": "window",
+        "present_scenes": 6,
+        "contribution_to_macro_delta_pp": -0.035868582495125347,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -1.4782694012565656,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": 0.0,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -1.0121359438215571,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -0.947260027193364,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": -1.0631274850944172,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 2.299275167318815,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 34,
+        "name": "sink",
+        "present_scenes": 6,
+        "contribution_to_macro_delta_pp": -0.033123806197434005,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 0.06264617440695508,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": -0.9067509067509083,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -1.7348913900638085,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": 1.681869123230062,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": 0.17553472137668003,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -3.0328195588626095,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 7,
+        "name": "table",
+        "present_scenes": 5,
+        "contribution_to_macro_delta_pp": -0.027363221536308213,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -4.177604231541321,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": 0.9749631522541504,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -1.5658969656989208,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": 1.6162796384959432,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -0.05236123430349959,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 36,
+        "name": "bathtub",
+        "present_scenes": 1,
+        "contribution_to_macro_delta_pp": -0.01550277176487043,
+        "per_scene": [
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -2.4804434823792687,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 6,
+        "name": "sofa",
+        "present_scenes": 3,
+        "contribution_to_macro_delta_pp": -0.00010932312118671489,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 6.896578738894132,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -5.421984520920842,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -1.7027422342164922,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 28,
+        "name": "shower curtain",
+        "present_scenes": 1,
+        "contribution_to_macro_delta_pp": 0.015692902458366374,
+        "per_scene": [
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 2.51086439333862,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 33,
+        "name": "toilet",
+        "present_scenes": 3,
+        "contribution_to_macro_delta_pp": 0.01597717857700178,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 0.9083097633453829,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": 0.5739978099409626,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -0.012380555155100392,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 2,
+        "name": "floor",
+        "present_scenes": 10,
+        "contribution_to_macro_delta_pp": 0.03541179487876458,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 4.068387460572465,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": -0.006422465340838457,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -0.38219227516030907,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": 0.24010938179372943,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": 0.17801233401907313,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": 0.49847355463944476,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": 0.4716874148200878,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": -0.3770916770753141,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": 0.013541074918543838,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -0.42060654550329923,
+            "valid_class_count": 16
+          }
+        ]
+      }
+    ],
+    "rendered_huber": [
+      {
+        "class_id": 11,
+        "name": "picture",
+        "present_scenes": 4,
+        "contribution_to_macro_delta_pp": -0.07577151055889166,
+        "per_scene": [
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -0.5740989760974924,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -3.6853553733674493,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -2.004259837889244,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -1.441527868863246,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 3,
+        "name": "cabinet",
+        "present_scenes": 8,
+        "contribution_to_macro_delta_pp": -0.07379727483556053,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -1.2323030956489733,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -3.2474350058500634,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -2.3347306395893663,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": 0.23177089884042767,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": 0.29280530335557,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": -0.27405228415997573,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": 0.1522678616165979,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.11375978898884864,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 8,
+        "name": "door",
+        "present_scenes": 9,
+        "contribution_to_macro_delta_pp": -0.07227450699218164,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -3.3231605162603985,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": -0.20511608471094345,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -0.9885533073287156,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -0.4008558499444481,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -1.3339274480506758,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": -2.0120239544452856,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": 2.4922591220933765,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.3781763640017255,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -2.155408971579109,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 1,
+        "name": "wall",
+        "present_scenes": 10,
+        "contribution_to_macro_delta_pp": -0.05649531175767866,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -1.913330578758221,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": -0.1911677163000669,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -1.8377287535814135,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -0.14298744289199528,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -0.3463431137767148,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -0.20686939344979338,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": -0.5187458253260058,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": -0.20265788992850364,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.20599966389082125,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.2418719742301012,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 24,
+        "name": "refrigerator",
+        "present_scenes": 4,
+        "contribution_to_macro_delta_pp": -0.051817568055423605,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -2.341228719467059,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -0.9498334652643381,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": -1.506781938881785,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": 0.0,
+            "valid_class_count": 14
+          }
+        ]
+      },
+      {
+        "class_id": 4,
+        "name": "bed",
+        "present_scenes": 6,
+        "contribution_to_macro_delta_pp": -0.0447342227705575,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -0.6798195405564256,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -2.6295160734002954,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -1.3736763041079514,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": 0.7825093743715983,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.9624417750657033,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.3528494258174364,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 12,
+        "name": "counter",
+        "present_scenes": 5,
+        "contribution_to_macro_delta_pp": -0.0365093078267623,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -1.3827036573512308,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": 0.9543888214416485,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -1.6532955159373308,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": 0.4195385273690788,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -3.4879927112895004,
+            "valid_class_count": 14
+          }
+        ]
+      },
+      {
+        "class_id": 16,
+        "name": "curtain",
+        "present_scenes": 4,
+        "contribution_to_macro_delta_pp": -0.03083757844987481,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -4.022385865116251,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": -0.728487261849109,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.5921287963175703,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 1.634806955168211,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 5,
+        "name": "chair",
+        "present_scenes": 6,
+        "contribution_to_macro_delta_pp": -0.017012174830614686,
+        "per_scene": [
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": 1.79235849150009,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": 0.12804135845618791,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -2.9129344988249484,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": -0.2634564068665024,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": 0.06222708963614654,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.1924926108068492,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 36,
+        "name": "bathtub",
+        "present_scenes": 1,
+        "contribution_to_macro_delta_pp": -0.015600618276851441,
+        "per_scene": [
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -2.4960989242962306,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 9,
+        "name": "window",
+        "present_scenes": 6,
+        "contribution_to_macro_delta_pp": -0.0062897399437407825,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 0.7831303185826421,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": 0.0,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -1.29371448594221,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -0.2000019821168264,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": -0.8846357403376137,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 3.1080930160825027,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 7,
+        "name": "table",
+        "present_scenes": 5,
+        "contribution_to_macro_delta_pp": -0.0039081429077972366,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": -4.093278201824225,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": 0.5516024593170771,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": -0.10893772712124994,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": 2.8341798883432077,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.050915495774633834,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 14,
+        "name": "desk",
+        "present_scenes": 5,
+        "contribution_to_macro_delta_pp": 0.0009656490983196422,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 1.1769769306032851,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": -1.2359344697435382,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": 1.5048487601098337,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.9409525747060998,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -1.0830236346296123,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 28,
+        "name": "shower curtain",
+        "present_scenes": 1,
+        "contribution_to_macro_delta_pp": 0.01333100558659218,
+        "per_scene": [
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 2.1329608938547486,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 33,
+        "name": "toilet",
+        "present_scenes": 3,
+        "contribution_to_macro_delta_pp": 0.03056941539614945,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 0.9577003755757874,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": 1.257443502824851,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.44340907424055276,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 6,
+        "name": "sofa",
+        "present_scenes": 3,
+        "contribution_to_macro_delta_pp": 0.041737053646925135,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 7.813883550341116,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -1.1144857677467868,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": -0.9785260251712113,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 2,
+        "name": "floor",
+        "present_scenes": 10,
+        "contribution_to_macro_delta_pp": 0.05359766441847218,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 4.542429610891885,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": 0.03693317255110129,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0070_00",
+            "delta_iou_pp": 0.07209426002349195,
+            "valid_class_count": 9
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": 0.2818574436529886,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0140_00",
+            "delta_iou_pp": 0.5017150930755276,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0200_00",
+            "delta_iou_pp": 0.6592136553572159,
+            "valid_class_count": 8
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": 0.3498586029663575,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0400_00",
+            "delta_iou_pp": -0.2659656640763508,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.09088044660766625,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.10362714301274112,
+            "valid_class_count": 16
+          }
+        ]
+      },
+      {
+        "class_id": 34,
+        "name": "sink",
+        "present_scenes": 6,
+        "contribution_to_macro_delta_pp": 0.05861907832683312,
+        "per_scene": [
+          {
+            "scene": "scene0000_00",
+            "delta_iou_pp": 1.6124429223744352,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0062_00",
+            "delta_iou_pp": 2.57846444287122,
+            "valid_class_count": 6
+          },
+          {
+            "scene": "scene0097_00",
+            "delta_iou_pp": -1.581546241740417,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0347_00",
+            "delta_iou_pp": 1.744161942953626,
+            "valid_class_count": 7
+          },
+          {
+            "scene": "scene0590_00",
+            "delta_iou_pp": -0.3472013266199947,
+            "valid_class_count": 14
+          },
+          {
+            "scene": "scene0645_00",
+            "delta_iou_pp": 0.6854639248109695,
+            "valid_class_count": 16
+          }
+        ]
+      }
+    ]
+  },
+  "class_contribution_unit": "additive percentage points of scene-macro mIoU, not per-class IoU",
+  "paired_metric_feedback": "paper/tmm_response/stage_reconstruction_v4_feedback.json",
+  "feedback_sha256": "bee37b1bf82ae5bf6424abd8563a7cdb9e740e73fe01097720815c1b42ece4da",
+  "summary_sha256": "7403156482e161c10f49019c0eba97d4aa9fa50c81714f161b8e3d51013ad94a",
+  "predictions_seal_sha256": "bc3bd31aeec52f990dbe84c05c81681bd65f5b8261a8d6a0db8de2a858838a08",
+  "actual_set_improvement_claim": false,
+  "uqis_compatibility_only": true,
+  "independent_test": false,
+  "new_default_selected": false,
+  "conclusion": "Lower source reconstruction loss is insufficient for downstream gains; no universal solver replacement selected.",
+  "attribution_limit": "Does not isolate identity errors, incomplete masks, geometry errors or cross-view inconsistency.",
+  "storage": {
+    "persistent_study_bytes_before_analysis": 2042447326,
+    "persistent_increment_since_turn_start_bytes": 5507749,
+    "transient_predictions_released_bytes": 1977173844,
+    "persistent_study_budget_bytes": 2147483648
+  }
+}

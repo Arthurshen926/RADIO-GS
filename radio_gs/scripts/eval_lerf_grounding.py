@@ -67,7 +67,11 @@ from radio_gs.evaluation.openclip_readout import (
     NEGATIVE_PROMPTS,
     load_or_generate_openclip_prompt_ensemble_embeddings,
 )
-from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.utils.evaluation_checkpoint import (
+    InferencePackageReader, add_inference_checkpoint_arguments, inference_reader_from_args,
+    load_evaluation_checkpoint, initialize_package_geometry, package_use_2dgs,
+    evaluation_checkpoint_sha256, evaluation_package_identity,
+)
 from radio_gs.querying.unified_query import cosine_relevancy_torch
 
 logger = logging.getLogger(__name__)
@@ -1653,10 +1657,11 @@ def build_sam3_prompt_initial_mask(
 def load_prompt_conditioned_mask_head(
     checkpoint_path: str | Path,
     device: torch.device,
+    *, checkpoint_reader=None,
 ) -> Tuple[PromptConditionedMaskHead, Tuple[int, int]]:
     """Load a trained feature-only prompt-conditioned SAM mask head."""
 
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    ckpt = load_evaluation_checkpoint(checkpoint_path, map_location="cpu", checkpoint_reader=checkpoint_reader)
     state = ckpt.get("prompt_mask_head_state_dict")
     if not isinstance(state, dict):
         raise KeyError(
@@ -1714,14 +1719,26 @@ def load_render_pipeline(
     strict_checkpoint_contract: bool = False,
     load_ply_rgb_features: bool = True,
     expected_checkpoint_sha256: str | None = None,
+    inference_package: bool = False,
+    checkpoint_reader=None,
 ):
     """Load the trained RADIO-GS model, codec, renderer, and refiner.
 
     Returns:
         ``(model, codec, renderer, sharpener, refiner, config, is_hybrid)``
     """
+    if inference_package and checkpoint_reader is None:
+        checkpoint_reader = InferencePackageReader(
+            checkpoint_path, expected_sha256=expected_checkpoint_sha256)
     R = _import_render_pipeline()
     config = R["load_config"](config_path)
+    package_ckpt = None
+    if checkpoint_reader is not None:
+        package_ckpt = load_evaluation_checkpoint(
+            checkpoint_path, checkpoint_reader=checkpoint_reader,
+            expected_sha256=expected_checkpoint_sha256)
+        config = checkpoint_reader.bind_config(config)
+        strict_checkpoint_contract = True
 
     architecture = getattr(config, "architecture", "explicit")
     is_hybrid = architecture == "hybrid"
@@ -1756,15 +1773,18 @@ def load_render_pipeline(
         )
     else:
         latent_dim = getattr(config, "latent_dim", 64)
-        model = R["ExplicitFeatureGaussian"](latent_dim=latent_dim)
+        explicit_kwargs = {"train_sh": getattr(config, "train_sh", False)} if checkpoint_reader is not None else {}
+        model = R["ExplicitFeatureGaussian"](latent_dim=latent_dim, **explicit_kwargs)
 
     ply_path = getattr(config, "ply_path", "")
-    ckpt = None
-    if is_hybrid and not load_ply_rgb_features:
+    ckpt = package_ckpt
+    if checkpoint_reader is not None:
+        initialize_package_geometry(model, ckpt["model_state_dict"])
+    elif is_hybrid and not load_ply_rgb_features:
         # Feature-only checkpoints already contain every geometry buffer.  Seed
         # matching shapes directly from the trusted state dict so large remote
         # PLY files are not parsed a second time merely to allocate tensors.
-        ckpt = load_trusted_checkpoint(
+        ckpt = load_evaluation_checkpoint(
             checkpoint_path,
             map_location="cpu",
             expected_sha256=expected_checkpoint_sha256,
@@ -1801,7 +1821,10 @@ def load_render_pipeline(
         else:
             model.load_from_ply(ply_path)
     model = model.to(device).eval()
-    use_2dgs = resolve_use_2dgs(config, ply_path)
+    use_2dgs = (
+        package_use_2dgs(config, ckpt["model_state_dict"])
+        if checkpoint_reader is not None else resolve_use_2dgs(config, ply_path)
+    )
 
     codec = R["build_feature_codec"](
         input_dim=getattr(config, "radio_feature_dim", 1280),
@@ -1854,7 +1877,7 @@ def load_render_pipeline(
         ).to(device).eval()
 
     if ckpt is None:
-        ckpt = load_trusted_checkpoint(
+        ckpt = load_evaluation_checkpoint(
             checkpoint_path,
             map_location=device,
             expected_sha256=expected_checkpoint_sha256,
@@ -3674,7 +3697,9 @@ def main() -> None:
     parser.add_argument("--gpu", type=int, default=0,
                         help="GPU device id")
 
+    add_inference_checkpoint_arguments(parser)
     args = parser.parse_args()
+    checkpoint_reader = inference_reader_from_args(args, parser)
     if not np.isfinite(args.feature_contribution_gamma) or args.feature_contribution_gamma <= 0:
         parser.error("--feature_contribution_gamma must be finite and positive")
     if (
@@ -3990,6 +4015,7 @@ def main() -> None:
             args.checkpoint,
             device,
             strict_checkpoint_contract=args.protocol_preset == "vala_paper_2d",
+            checkpoint_reader=checkpoint_reader,
             # LERF feature evaluation never calls Gaussian RGB/SH rendering;
             # optional RGB guides are loaded from the source image directly.
             load_ply_rgb_features=False,
@@ -4274,11 +4300,13 @@ def main() -> None:
         "provenance": {
             name: {
                 "path": str(path),
-                "sha256": file_sha256(path),
+                "sha256": evaluation_checkpoint_sha256(path, checkpoint_reader, file_sha256)
+                if name == "checkpoint" else file_sha256(path),
             }
             for name, path in provenance_paths.items()
             if path and Path(path).exists()
         },
+        "inference_checkpoint_identity": evaluation_package_identity(checkpoint_reader),
         "checkpoint_contract": (
             getattr(render_pipeline[5], "checkpoint_contract", {})
             if render_pipeline is not None

@@ -1,0 +1,25 @@
+\section{Signed reference evidence without an extent gate}
+N09 uses frozen DINOv2 ViT-B/14 descriptors on the original reference and target RGB. The primary branch gives authority only to original positive and negative scribbles; unlabelled reference pixels are unknown. The matched pseudo-mask control adds the retained reference SAM mask/complement as labels and applies the same scribble overrides. Both branches use identical teachers, query inputs and downstream operations. This explicitly extends the positive-only v10 input contract, without feature-field training. DINOv2 and SAM are external teachers, not new contributions of this paper.
+For normalized reference descriptors $z_j$, define $m_i=\max_{j\in P}z_i^\top z_j-\max_{j\in N}z_i^\top z_j$ and $p_i=\sigma(m_i/\tau)$. The scale $\tau$ is the median signed leave-one-out reference margin divided by $\log 9$. Mixed-sign patches are unknown. Missing support or a nonpositive median disables the edit and uses the static response. The frozen SAM decoder receives the transferred probability and its own extent box. Native-ray 3D writeback uses the same 120-step solver and observed domain as N08. No target-selected threshold, per-task winner or new user annotation is used.
+All 72 responses across eight tasks precede GT. Both GT conventions and AP are scored. Other benchmarks are unchanged references; outputs remain view-conditioned development evidence.
+\begin{center}\small\resizebox{\linewidth}{!}{\input{tables/nvos_signed_affinity.tex}}\end{center}
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & Static native & Signed native & Pseudo native & Signed direct affinity \\\midrule
+fern & 83.92 & 83.21 & 83.64 & 76.40 \\
+flower & 85.98 & 95.07 & 94.89 & 89.00 \\
+fortress & 97.36 & 97.88 & 97.62 & 88.00 \\
+horns\_center & 97.30 & 67.16 & 95.80 & 73.76 \\
+horns\_left & 93.68 & 91.07 & 93.90 & 72.44 \\
+leaves & 95.61 & 45.57 & 66.91 & 70.53 \\
+orchids & 73.17 & 88.89 & 76.04 & 83.08 \\
+trex & 83.71 & 83.79 & 79.85 & 66.92 \\
+\bottomrule\end{tabular}\end{center}
+signed native vs static native: -7.2621 IoU points, -8.8662 AP points; 4 improved and 4 harmed tasks.
+signed native vs pseudo native: -4.5009 IoU points, -8.2269 AP points; 4 improved and 4 harmed tasks.
+signed affinity vs pseudo affinity: -6.5841 IoU points, -1.7692 AP points; 1 improved and 7 harmed tasks.
+signed image vs signed affinity: +4.1607 IoU points, -8.6843 AP points; 6 improved and 2 harmed tasks.
+pseudo image vs pseudo affinity: +2.1325 IoU points, -2.8508 AP points; 7 improved and 1 harmed tasks.
+signed native vs signed image: -0.0975 IoU points, +1.4444 AP points; 2 improved and 6 harmed tasks.
+pseudo native vs pseudo image: -0.1526 IoU points, +2.0685 AP points; 0 improved and 8 harmed tasks.
+\begin{figure}[ht]\centering\includegraphics[width=\linewidth,height=.78\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_signed_affinity_v1/errors.png}
+\caption{N09 full cohort: green TP, red FP, blue FN.}\end{figure}

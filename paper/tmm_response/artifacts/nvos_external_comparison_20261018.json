@@ -1,0 +1,20 @@
+{
+  "checked_on": "2026-10-18",
+  "paper_url": "https://arxiv.org/html/2608.10057v1#S4.T1",
+  "reported_iou_percent": 94.2,
+  "reported_accuracy_percent": 98.7,
+  "reported_scenes": 7,
+  "exact_paper_task_roster_verified": false,
+  "local_reproduction": false,
+  "repository_commit": "eb6c012c7d26e96b8cd659c3933c2d4b123475ac",
+  "evaluator_url": "https://raw.githubusercontent.com/WHU-USI3DV/LEGO/eb6c012c7d26e96b8cd659c3933c2d4b123475ac/benchmarks/NVOS/eval_nvos.py",
+  "evaluator_sha256": "0ed808f24c0c66d417162e25895549fd83e16c341934830447fe76b97ffe2db8",
+  "code_observations": {
+    "gt": "nearest resize to rendered resolution, then >127",
+    "cluster_readout": "2DGS rendered membership >0.5 without observed-mass normalization",
+    "feature_readout": "positive-vs-negative prototype similarity",
+    "query": "positive and negative scribbles; optional source-only cluster/level selection",
+    "task_enumeration": "reference directories; evaluator recognizes horns_center and horns_left"
+  },
+  "conclusion": "Published contextual comparison; exact task roster, authorized inputs/prompts, GT grid and paper scoring command remain unverified. Identical teacher or geometry implementations are not required for benchmark comparisons. 93.5 is not a sufficient SOTA target."
+}

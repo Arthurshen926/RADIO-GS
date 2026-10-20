@@ -1,0 +1,57 @@
+{
+  "native_wh": [
+    1008,
+    756
+  ],
+  "solver_steps": 120,
+  "threshold": 0.5,
+  "footprint_backend": "gsplat_cuda",
+  "points_per_sign": 16,
+  "gpu_memory_fraction": 0.38,
+  "schema": "radiogs.signed_reference_completion.v1",
+  "policy": "feasible",
+  "target_frame": 0,
+  "inputs": {
+    "reference_rgb": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/llff_undistorted/leaves_undistort/images/IMG_3011.JPG",
+      "sha256": "c52fe85ccfecadb37686fe8e405535e17e59fe4b5daa9542c36f458429d950db"
+    },
+    "reference_mask": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_positive_queries_20260918/leaves/reference_sam_mask.png",
+      "sha256": "2b1ef377513db09e9058a3e543658e8b90fe1cfb27ca30a7dfc448e39416ae1a"
+    },
+    "positive_scribble": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/leaves/pos_0_leaves.png",
+      "sha256": "a3af8e0d8027df8f668f3c6b090ad6f0c2bbd71e446b75caf1209b87b2a83735"
+    },
+    "negative_scribble": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/leaves/neg_0_leaves.png",
+      "sha256": "ad2439b4b332dc52d1593a6489a2e39ced135e9e65d0ee78462d0b816116a0cd"
+    },
+    "target_rgb": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/llff_undistorted/leaves_undistort/images/IMG_2997.JPG",
+      "sha256": "987dd99652e68f2ee13f60ee7a171e8827f8acf067d7095b66171608faa09515"
+    }
+  },
+  "permissions": {
+    "reference_rgb": true,
+    "target_rgb": true,
+    "positive_scribble": true,
+    "negative_scribble": true,
+    "reference_gt": false,
+    "target_gt": false
+  },
+  "dino_repository": "/root/.cache/torch/hub/facebookresearch_dinov2_main",
+  "image_checkpoint": {
+    "path": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+    "sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"
+  },
+  "dino_checkpoint": {
+    "path": "/root/.cache/torch/hub/checkpoints/dinov2_vitb14_pretrain.pth",
+    "sha256": "0b8b82f85de91b424aded121c7e1dcc2b7bc6d0adeea651bf73a13307fad8c73"
+  },
+  "geometry_fit": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/nvos_carrier_next72/adaptive_allrgb/leaves/fit.json",
+    "sha256": "0d1a24247e8e91cbd38a043a32b58ee1c6392e93b47979ec1dd5ad174b896933"
+  }
+}

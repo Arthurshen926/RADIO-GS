@@ -1,0 +1,290 @@
+{
+  "schema": "radio_gs.intermediate_storage_method_audit.v1",
+  "date_utc": "2026-10-13",
+  "status": "audit_and_retirement_proposal_only_no_deletion_authorized",
+  "output_root": "/mnt/pool/sqy/results/RADIO-GS/output",
+  "scope": "No GPU, training, large tensor read/hash, whole-output du, source-code edits or artifact deletion. Small source/receipt/stat inspection only.",
+  "cpu_trial": {
+    "decision": "Strong candidate to retire five abandoned CPU-trial payloads, explicitly surrendering those exact checkpoints; not a claim of byte-identical v2 replacement.",
+    "files": [
+      {
+        "path": "query_field_20261008/native_coordinates_v1/fits/native_coordinates/lerf_figurines/field/field.pt",
+        "logical_bytes": 2658118304,
+        "allocated_bytes": 2840723968,
+        "nlink": 1,
+        "manifest_declared_sha256": "75b2e50038c7b5124a824403311c9448bb454680396798636ea26e53f30e3dee",
+        "payload_fresh_hash": false
+      },
+      {
+        "path": "query_field_20261008/native_coordinates_v1/fits/native_coordinates/nvos_fortress/field/field.pt",
+        "logical_bytes": 2132925984,
+        "allocated_bytes": 2299347456,
+        "nlink": 1,
+        "manifest_declared_sha256": "a5cf56f6db17c8e26eb3b34e4249092b39efe0881452eec031d2505e394b4a7d",
+        "payload_fresh_hash": false
+      },
+      {
+        "path": "query_field_20261008/native_coordinates_v1/fits/native_coordinates/nvos_fern/field/field.pt",
+        "logical_bytes": 1577411680,
+        "allocated_bytes": 1685430784,
+        "nlink": 1,
+        "manifest_declared_sha256": "e56b6483623d5573200d65cb8240ae24a207a3cea16f70ebb07fa15355dda0d6",
+        "payload_fresh_hash": false
+      },
+      {
+        "path": "query_field_20261008/native_coordinates_v1/fits/native_coordinates/nvos_leaves/field/field.pt",
+        "logical_bytes": 1335031776,
+        "allocated_bytes": 1428992512,
+        "nlink": 1,
+        "manifest_declared_sha256": "a3bf3be5d0502288a437c0fc8a221b7e43513d34338890e7346b9e3d3437525c",
+        "payload_fresh_hash": false
+      },
+      {
+        "path": "query_field_20261008/native_coordinates_v1/fits/native_coordinates/nvos_flower/field/field.pt",
+        "logical_bytes": 1578399264,
+        "allocated_bytes": 1703883264,
+        "nlink": 1,
+        "manifest_declared_sha256": "c9a28ecffec44f908767f205f3e440cebe505b82c15a52967c68b662a3694900",
+        "payload_fresh_hash": false
+      }
+    ],
+    "logical_bytes": 9281887008,
+    "allocated_bytes": 9958377984,
+    "evidence": [
+      {
+        "path": "query_field_20261008/native_coordinates_v1/execution_stopped.json",
+        "finding": "stopped_before_benchmark_prediction; five completed fields, no benchmark predictions"
+      },
+      {
+        "path": "query_field_20261008/native_coordinates_v2/construction_complete.json",
+        "finding": "30 records; all 60 training/manifest hashes freshly matched; every path names v2; 266727 metadata bytes read"
+      },
+      {
+        "path": "scripts/research/run_query_field_coordinates.py:14,20-31,87-96",
+        "finding": "Current runner targets v2, builds from protected_training parents, creates its own cohort and receipts."
+      },
+      {
+        "path": "docs/experiments/2026-10-08-native-coordinate-protocol.md:42-50",
+        "finding": "Full cohort rerun after optimizer device revision; CPU-trial fields excluded from published v2 results."
+      }
+    ],
+    "dependency_check": {
+      "metadata_files": 547,
+      "metadata_bytes": 5724303,
+      "scope": "Recent query_field date/*/design.json, date/*/*/cohort.json, date/*/fits/*/*/field/manifest.json and date/*/fields/*/manifest.json",
+      "external_v1_path_or_five_archive_sha_references": 0,
+      "not_exhaustive_of_arbitrary_user_scripts": true,
+      "visible_fd_and_mmap_references": 0,
+      "other_hosts_not_visible": true
+    },
+    "keep": [
+      "execution_stopped.json",
+      "design.json",
+      "all five training.json and field/manifest.json",
+      "logs",
+      "native_coordinates cohort/configs",
+      "all v2 weights/results/validation"
+    ],
+    "reproducibility": "Historical recipe and trace retained; exact CPU checkpoints would be lost. No claim they can be regenerated bitwise. Payload SHA values above are manifest declarations, not freshly rehashed in this audit."
+  },
+  "assignments": {
+    "decision": "Conditional abandoned/interrupted-attempt cache candidate, not currently certified bitwise reproducible. May be retired only with explicit acceptance of losing this unsealed attempt, or after separate source-hash/environment/rebuild verification.",
+    "directory": "optimization_20260824/nvos_registered_all_view_v1/horns_left/plan/assignments",
+    "filenames": [
+      "DJI_20200223_163016_842.pt",
+      "DJI_20200223_163017_967.pt",
+      "DJI_20200223_163018_942.pt",
+      "DJI_20200223_163019_752.pt",
+      "DJI_20200223_163020_712.pt",
+      "DJI_20200223_163021_627.pt",
+      "DJI_20200223_163022_557.pt",
+      "DJI_20200223_163023_427.pt",
+      "DJI_20200223_163024_597.pt",
+      "DJI_20200223_163025_977.pt",
+      "DJI_20200223_163028_017.pt",
+      "DJI_20200223_163029_038.pt",
+      "DJI_20200223_163029_877.pt",
+      "DJI_20200223_163030_687.pt",
+      "DJI_20200223_163031_602.pt",
+      "DJI_20200223_163032_532.pt",
+      "DJI_20200223_163033_432.pt",
+      "DJI_20200223_163034_287.pt",
+      "DJI_20200223_163035_787.pt",
+      "DJI_20200223_163036_792.pt",
+      "DJI_20200223_163042_402.pt",
+      "DJI_20200223_163043_257.pt",
+      "DJI_20200223_163045_537.pt",
+      "DJI_20200223_163046_438.pt",
+      "DJI_20200223_163047_307.pt",
+      "DJI_20200223_163048_057.pt",
+      "DJI_20200223_163049_048.pt",
+      "DJI_20200223_163050_292.pt",
+      "DJI_20200223_163052_122.pt",
+      "DJI_20200223_163053_007.pt",
+      "DJI_20200223_163053_863.pt",
+      "DJI_20200223_163054_672.pt",
+      "DJI_20200223_163055_437.pt",
+      "DJI_20200223_163056_232.pt",
+      "DJI_20200223_163056_982.pt",
+      "DJI_20200223_163057_732.pt",
+      "DJI_20200223_163058_602.pt",
+      "DJI_20200223_163101_047.pt",
+      "DJI_20200223_163101_947.pt",
+      "DJI_20200223_163102_892.pt",
+      "DJI_20200223_163103_777.pt",
+      "DJI_20200223_163104_557.pt",
+      "DJI_20200223_163105_427.pt",
+      "DJI_20200223_163106_343.pt",
+      "DJI_20200223_163156_668.pt",
+      "DJI_20200223_163157_823.pt",
+      "DJI_20200223_163159_803.pt",
+      "DJI_20200223_163200_643.pt",
+      "DJI_20200223_163201_633.pt",
+      "DJI_20200223_163202_443.pt",
+      "DJI_20200223_163203_267.pt",
+      "DJI_20200223_163204_077.pt",
+      "DJI_20200223_163204_859.pt",
+      "DJI_20200223_163205_713.pt",
+      "DJI_20200223_163206_598.pt",
+      "DJI_20200223_163208_008.pt",
+      "DJI_20200223_163208_938.pt",
+      "DJI_20200223_163209_763.pt",
+      "DJI_20200223_163210_513.pt",
+      "DJI_20200223_163222_378.pt",
+      "DJI_20200223_163224_103.pt",
+      "DJI_20200223_163225_243.pt"
+    ],
+    "file_count": 62,
+    "logical_bytes": 75354239202,
+    "allocated_bytes": 80217926656,
+    "nlink_values": [
+      1
+    ],
+    "candidate_plan_exists": false,
+    "final_result_exists": false,
+    "projected_view_directories": 28,
+    "producer": "radio_gs/scripts/build_nvos_synchronous_multiview_candidate_plan.py:346-476,500-619",
+    "algorithm": "Each registered camera produces exact accepted-hit front-to-back alpha/transmittance assignments. Persist gaussian_ids int64, pixel_ids int64, weights float32; then lift/project signed evidence. It writes all 62 assignments before later per-view projection and candidate-plan sealing.",
+    "reader": "Producer _load_assignment checks archive SHA, geometry hash, count, compositor identity. Downstream all-view executor expects a sealed candidate_plan.json. No such plan exists for this horns_left attempt.",
+    "write_boundary": "Atomic no-replace; rerun refuses an existing assignment filename. Rebuild needs a fresh output directory; no automatic missing-cache reconstruction.",
+    "source_checks": [
+      {
+        "kind": "dataset_manifest",
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+        "bytes": 118875,
+        "expected_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+        "fresh_small_hash_matches": true
+      },
+      {
+        "kind": "config",
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_left/gaussfm_main_track.yaml",
+        "bytes": 3293,
+        "expected_sha256": "cf55a2e3ba8a3805e3981934f6aea53514fc718250d7279a05fb7e2e22918847",
+        "fresh_small_hash_matches": true
+      },
+      {
+        "kind": "camera_map",
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_left/rgb_to_colmap_camera_mapping.json",
+        "bytes": 42044,
+        "expected_sha256": "c0620bbd893d2bdafb9b917e4583187d002032a3b5fca6829eab675459aec9dc",
+        "fresh_small_hash_matches": true
+      },
+      {
+        "kind": "geometry",
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_left/feature_field/checkpoints/best.pth",
+        "bytes": 774114937,
+        "expected_sha256": "ba629ed840c8dd20c466ffc8e4bc8ab14278024869d8f121427976eef428311e",
+        "exists": true,
+        "fresh_hash_performed": false
+      }
+    ],
+    "cpu_dryrun": {
+      "registered_camera_headers": 62,
+      "bytes_read_from_colmap_images_bin": 6208,
+      "point_observations_skipped": true,
+      "all_quaternions_and_translations_finite": true,
+      "all_camera_names_match_locked_mapping": true,
+      "all_62_rgb_files_exist": true,
+      "weights_rendered": false
+    },
+    "current_environment": {
+      "torch": "2.0.1+cu118",
+      "numpy": "1.26.4",
+      "gsplat": "1.2.0",
+      "historical_environment_identity_proven": false
+    },
+    "limitations": [
+      "Producer explicitly requires CUDA at lines419-421; no real one-view CPU replay is supported.",
+      "No complete plan means original CLI/source signed-prompt binding and per-assignment SHA ledger are not sealed.",
+      "The 774MB geometry archive is present but not freshly hashed; defer to a separately coordinated I/O window.",
+      "No source/render weight equality or GPU nondeterminism claim established.",
+      "No visible fd/mmap consumers among 67 candidate payloads; remote hosts and arbitrary external scripts are not visible."
+    ],
+    "keep": [
+      "horns_left_plan.log",
+      "all source authority/config/camera/geometry assets",
+      "projected intermediates and attempt metadata pending separate decision",
+      "all fern/leaves completed plans and results"
+    ],
+    "future_policy": [
+      "Preflight all source/camera identities and space budget before rendering.",
+      "Write a small per-view resumable receipt and explicit completion manifest; cache lifetime policy must distinguish unsealed attempts from completed result dependencies.",
+      "Treat assignments as query-independent geometry/camera/operator content-addressed objects across experiments, rather than one copy per query or method directory.",
+      "A versioned int32 storage representation with validated nonnegative bounds and lossless int64 restoration would reduce the two-index-plus-float32 triplet from20 to12 bytes per hit (40% of raw triplet bytes). Keep FP32 weights and row/order exact; measure actual savings rather than promising40% of allocated total.",
+      "Stream or retain only a bounded view cache once sealed consumers no longer require full operators; completed live plans need explicit resolver/versioned readers before eviction."
+    ]
+  },
+  "prediction_policy": {
+    "user_reported_total_GiB": 78.22,
+    "total_not_remeasured_here": true,
+    "evidence": [
+      {
+        "path": "radio_gs/query_field/public_scannet.py:24-44,66-79",
+        "finding": "Persists geometry/observed and native/member/typed N-by-class score matrices; scorer uses per-declared-split argmax and fixed nearest-Gaussian mapping."
+      },
+      {
+        "path": "radio_gs/query_field/public_lerf.py:45-57,80-96",
+        "finding": "Persists geometry and per-query native/member scores and selections; retained scorer re-renders with cameras. Readout/metric/support studies also directly consume these payloads."
+      },
+      {
+        "path": "radio_gs/query_field/public_nvos.py:185-187,237-249",
+        "finding": "Persists Gaussian selected/membership plus continuous response and retained_response. Scorer needs continuous responses for resize/ranking, but only selected count for that fixed scoring path."
+      },
+      {
+        "path": "radio_gs/query_field/public_uqis.py:95-120",
+        "finding": "Persists benchmark-point arrays and additionally full Gaussian membership/selection/native scores per query."
+      }
+    ],
+    "recommended_default": "For completed, protocol-frozen evaluations, retain per-query metrics, denominators/counts, configuration/query/model/scorer/GT identities, and exact task-sufficient compact predictions. Keep detailed tensors for a declared fixed diagnostic sample and selected failure cases; failure diagnostics must not become post-hoc tuning evidence. For active score/readout studies retain their explicitly declared dense parent tensors.",
+    "task_sufficient_payloads": {
+      "scannet": "Exact per-Gaussian class-label vector separately for every declared class subset and arm, observed mask and shared immutable geometry/point mapping; one full-menu argmax cannot substitute for each subset.",
+      "nvos": "Retain FP32 response and retained_response for exact threshold/resize/ranking metrics, plus exact selected count. Pack selected bits for recoverable membership visualization; omit dense Gaussian scores only after auditing consumers.",
+      "lerf": "Keep fixed scored per-query metrics and any required exact projected masks/responses for replay, plus a declared diagnostic set. Dense Gaussian scores are still needed for new camera/readout experiments; explicitly classify such parents rather than permanently saving every variant.",
+      "uqis": "Benchmark-point scores/selections already exist; full-Gaussian detailed output can be bounded diagnostics when no later analysis consumes it."
+    },
+    "not_lossless_claims": [
+      "Metrics alone reproduce reported values, not independent rescoring or new thresholds.",
+      "Binary masks are insufficient for AP/ranking or changed thresholds; FP16 score quantization can change ties/ranking and is not lossless.",
+      "A summary-only file cannot silently replace a v1 predictions.pt whose archived SHA is referenced."
+    ],
+    "existing_migration": "First offer lossless chunk/content-addressed storage for repeated geometry/observed/query vectors and identical score tensors; pack booleans losslessly. For evidence retirement, publish an explicit reduced-evidence manifest bound to the original prediction SHA and exact retained metrics, validate fixed-protocol rescoring on a small cohort, then seek exact old-payload deletion approval. Do not retrofit old manifests silently."
+  },
+  "initial_policy": {
+    "user_reported_total_GiB": 54.17,
+    "total_not_remeasured_here": true,
+    "source": "radio_gs/query_field/observations.py:167-197; radio_gs/query_field/train.py:50-57",
+    "finding": "initial.pt is compiled geometry/native semantic/native local/observed state. Native channels use only train frames; development views are excluded from accumulation. train currently verifies and loads the archive before seeded group projection.",
+    "not_safely_regenerated_from_compiled_views": "Initial accumulates FP32 raw-projection pixel values, whereas stored view semantic/local pixels are FP16 and operator/mass differ from the original raw operator representation. Rebuilding from saved view tensors is not guaranteed bit-exact; re-running encoders/rendering additionally depends on environment and arithmetic order.",
+    "preferred_fix": "Store nested initial tensors by exact content-address, sharing identical geometry/native/observed tensors with field packages. Keep an observations-specific manifest for split/source/encoder/row identities. Add a versioned old initial archive SHA -> exact state/store resolver for train, retain explicit v1 export for frozen code.",
+    "selection_safety": "Do not reuse by scene name alone or include development frames to save storage. Match actual dtype/shape/value/row identities and preserve each experiment's train/development split and source receipt.",
+    "status": "Method proposal only; no initial payload migration or reader modification performed."
+  },
+  "protected_sources": [
+    "extent_preparation_v1 fields consumed by v2",
+    "scope_topology_v1",
+    "semantic_measure_functions_v2",
+    "native_mode_functions_v1",
+    "unique training weights/source geometry/teacher features/current metrics",
+    "next20 originals and its standalone export pending separate approval"
+  ]
+}

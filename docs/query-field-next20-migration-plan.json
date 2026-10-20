@@ -1,0 +1,358 @@
+{
+  "status": "prepared_not_executed_not_deletion_approval",
+  "source_inventory": "docs/experiments/2026-10-12-next-native-unchanged-candidates.json",
+  "target_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20",
+  "store_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+  "mapping_destination": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/field_mapping.json",
+  "source_root": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1",
+  "versioned_replay_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_replay",
+  "field_count": 20,
+  "source_logical_bytes": 50994366888,
+  "source_allocated_bytes_last_stat": 54326806528,
+  "potential_duplicate_native_bytes_unverified": 24507896832,
+  "expected_new_payload_upper_if_native_equality_verified": 26486470056,
+  "max_new_blob_bytes": 55834574848,
+  "max_export_bytes": 8589934592,
+  "conservative_temporary_and_metadata_bytes": 9663676416,
+  "required_free_bytes": 171798691840,
+  "minimum_available_ram_bytes": 68719476736,
+  "estimated_peak_ram_bytes": 34359738368,
+  "reserve_bytes": 68719476736,
+  "conservative_total_io_budget_bytes": 700000000000,
+  "stages": [
+    {
+      "stage": 1,
+      "kind": "migrate_existing_v1_to_v2",
+      "field_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "source_bytes": 20031935784,
+      "stage_timeout_seconds": 3400,
+      "per_field_timeout_seconds": 800
+    },
+    {
+      "stage": 2,
+      "kind": "migrate_existing_v1_to_v2",
+      "field_indices": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "source_bytes": 9610804864,
+      "stage_timeout_seconds": 3400,
+      "per_field_timeout_seconds": 800
+    },
+    {
+      "stage": 3,
+      "kind": "migrate_existing_v1_to_v2",
+      "field_indices": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "source_bytes": 7983078400,
+      "stage_timeout_seconds": 3400,
+      "per_field_timeout_seconds": 800
+    },
+    {
+      "stage": 4,
+      "kind": "migrate_existing_v1_to_v2",
+      "field_indices": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "source_bytes": 6955321984,
+      "stage_timeout_seconds": 3400,
+      "per_field_timeout_seconds": 800
+    },
+    {
+      "stage": 5,
+      "kind": "migrate_existing_v1_to_v2",
+      "field_indices": [
+        16,
+        17,
+        18,
+        19
+      ],
+      "source_bytes": 6413225856,
+      "stage_timeout_seconds": 3400,
+      "per_field_timeout_seconds": 800
+    },
+    {
+      "stage": 6,
+      "kind": "exact_registration_and_mapping",
+      "method": "legacy_field_resolver.create_mapping on all 20 pairs; rehash old archives and compare full raw tensors/spec to v2; publish no-replace mapping only if all pass",
+      "stage_timeout_seconds": 3400
+    },
+    {
+      "stage": 7,
+      "kind": "versioned_parent_resume_and_representative_export",
+      "method": "Prepare protected_v2 overlay bound to actual source design/construction ledger and mapping SHA. Run build --keys with exactly these 10 scene keys (30 arms:20 mapped plus10 unmigrated functional parents), separately budget all full-load/hash I/O. No training. Export one explicitly selected largest mapped package into a fresh fixed slot capped8GiB and require archive SHA exact before claiming byte-exact replay for that package only.",
+      "stage_timeout_seconds": 3400,
+      "selected_scene_keys": [
+        "lerf_waldo_kitchen",
+        "lerf_ramen",
+        "lerf_figurines",
+        "nvos_trex",
+        "nvos_fortress",
+        "nvos_horns_center",
+        "scannet_scene0140_00",
+        "scannet_scene0645_00",
+        "nvos_orchids",
+        "uqis_scene0249_00"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "index": 0,
+      "scene": "lerf_waldo_kitchen",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/lerf_waldo_kitchen/field",
+      "source_field_sha256": "f637d8e925bb7a60af87ae4fda5286dbf33292b496a7b490ac774ce1c06498d9",
+      "source_logical_bytes": 7174517428,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/lerf_waldo_kitchen",
+      "observations_sha256": "78f75064354afd7c8a395610e2778b9883b1b7680adca95ba914fc4c60fe9f66",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 1,
+      "scene": "lerf_waldo_kitchen",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/lerf_waldo_kitchen/field",
+      "source_field_sha256": "eeec03225af2ba57fceedacee15fd8283cdee86006d4a3412272668bbd6804c1",
+      "source_logical_bytes": 7174517428,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/lerf_waldo_kitchen",
+      "observations_sha256": "78f75064354afd7c8a395610e2778b9883b1b7680adca95ba914fc4c60fe9f66",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 2,
+      "scene": "lerf_ramen",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/lerf_ramen/field",
+      "source_field_sha256": "2dd5cb48ca61da6f27c1b3ac82e3f76ff52544451085b99366cf6c16a8762f0a",
+      "source_logical_bytes": 2841450464,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/lerf_ramen",
+      "observations_sha256": "56ce7d8dfd170171ab22c4b86b0b7475162751d04b004f8f5f169e945d484821",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 3,
+      "scene": "lerf_ramen",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/lerf_ramen/field",
+      "source_field_sha256": "9db4721cf5bfaa220827270b3ef3dc113c001fe85bfdde7845e6de38cd09fb08",
+      "source_logical_bytes": 2841450464,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/lerf_ramen",
+      "observations_sha256": "56ce7d8dfd170171ab22c4b86b0b7475162751d04b004f8f5f169e945d484821",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 4,
+      "scene": "lerf_figurines",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/lerf_figurines/field",
+      "source_field_sha256": "b44ada370186f0ad401715ed8e71ab98f88dba6f1992b3d7214560ff6df6e10d",
+      "source_logical_bytes": 2658118304,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/lerf_figurines",
+      "observations_sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 5,
+      "scene": "lerf_figurines",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/lerf_figurines/field",
+      "source_field_sha256": "d689f0385d760621abe95e03e8e05ea4f97cb929f02afe8aacfd15ab5f38fa06",
+      "source_logical_bytes": 2658118304,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/lerf_figurines",
+      "observations_sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 6,
+      "scene": "nvos_trex",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/nvos_trex/field",
+      "source_field_sha256": "947d2ebb6fe7b1a343b60e522eeb185385535927bfcdb6f6b6169384dccddc66",
+      "source_logical_bytes": 2147284128,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/nvos_trex",
+      "observations_sha256": "5e1817dc2f4d0c3f64d893f2308c3c05c502e68bd11f17fe53a3cc2848496990",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 7,
+      "scene": "nvos_trex",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/nvos_trex/field",
+      "source_field_sha256": "f554388e873f1035c912560d4896d8c1e6a4523f322120f39f068a428ee114a5",
+      "source_logical_bytes": 2147284128,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/nvos_trex",
+      "observations_sha256": "5e1817dc2f4d0c3f64d893f2308c3c05c502e68bd11f17fe53a3cc2848496990",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 8,
+      "scene": "nvos_fortress",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/nvos_fortress/field",
+      "source_field_sha256": "37e5a29ff3392cd4a32226921bff10101f0b942ddaaf9459e2349741f59065e6",
+      "source_logical_bytes": 2132925984,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/nvos_fortress",
+      "observations_sha256": "351d948be24d06a651bfc81aa57ccaa1a2ec14bb8d219c3f7e7f890b43261b35",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 9,
+      "scene": "nvos_fortress",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/nvos_fortress/field",
+      "source_field_sha256": "7461b8d7b9c97005578a532c5247fa2f19bb92b9fc2257c69c038591eab9758f",
+      "source_logical_bytes": 2132925984,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/nvos_fortress",
+      "observations_sha256": "351d948be24d06a651bfc81aa57ccaa1a2ec14bb8d219c3f7e7f890b43261b35",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 10,
+      "scene": "nvos_horns_center",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/nvos_horns_center/field",
+      "source_field_sha256": "59a2aa75179ab4df5f532bac5beff27687dd4b4467ea4b13e399b86eeb4b9859",
+      "source_logical_bytes": 1858613216,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/nvos_horns_center",
+      "observations_sha256": "161ca045119a51ce2f67a9ff0e2b31c6dbd23eee79315d7dca59b85b0a7c9d77",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 11,
+      "scene": "nvos_horns_center",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/nvos_horns_center/field",
+      "source_field_sha256": "59c508d4694b345308027938bea8980c8bf363a623115bfce4aaafca19664073",
+      "source_logical_bytes": 1858613216,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/nvos_horns_center",
+      "observations_sha256": "161ca045119a51ce2f67a9ff0e2b31c6dbd23eee79315d7dca59b85b0a7c9d77",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 12,
+      "scene": "scannet_scene0140_00",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/scannet_scene0140_00/field",
+      "source_field_sha256": "df8e0125dcf5646932c9567a453adf31385fc97e9d0bbb1c85d6d927107d34da",
+      "source_logical_bytes": 1787882720,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/scannet_scene0140_00",
+      "observations_sha256": "6094277860fcd1fb949f3b5f8dcc744ea019473b4c52309eec1d3e2b49bbd2d6",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 13,
+      "scene": "scannet_scene0140_00",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/scannet_scene0140_00/field",
+      "source_field_sha256": "360760a354dd79bb6f8a2427b57b0a173ed5cd25a3347460e0e232e40978ec52",
+      "source_logical_bytes": 1787882720,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/scannet_scene0140_00",
+      "observations_sha256": "6094277860fcd1fb949f3b5f8dcc744ea019473b4c52309eec1d3e2b49bbd2d6",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 14,
+      "scene": "scannet_scene0645_00",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/scannet_scene0645_00/field",
+      "source_field_sha256": "f020c567836a6bc384378e9926d3b185f6bfb19b6edfad6e72833352f32d92c0",
+      "source_logical_bytes": 1689778272,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/scannet_scene0645_00",
+      "observations_sha256": "383bae9db0b38abc5a3837776c7b874bb3e03a0ccf40563e17dfc80b6b6b0ad8",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 15,
+      "scene": "scannet_scene0645_00",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/scannet_scene0645_00/field",
+      "source_field_sha256": "0abf8522a8607df5a13af22e9444afe3532df1025699e5e46ce34be394424464",
+      "source_logical_bytes": 1689778272,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/scannet_scene0645_00",
+      "observations_sha256": "383bae9db0b38abc5a3837776c7b874bb3e03a0ccf40563e17dfc80b6b6b0ad8",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 16,
+      "scene": "nvos_orchids",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/nvos_orchids/field",
+      "source_field_sha256": "114c56bb9d5a2687ee670f0cce37fdd0900ae3f5f8da04929368c476f9336c6e",
+      "source_logical_bytes": 1619646752,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/nvos_orchids",
+      "observations_sha256": "b4c9fb5e922ae3281260ffe893dc9d8d152ffe12eef4a2dc87bdc6eb1a8afc80",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 17,
+      "scene": "nvos_orchids",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/nvos_orchids/field",
+      "source_field_sha256": "8f5bf88d52415b788249faeda8fa28c2836ead43fe4bb9e363e25071c8cd9278",
+      "source_logical_bytes": 1619646752,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/nvos_orchids",
+      "observations_sha256": "b4c9fb5e922ae3281260ffe893dc9d8d152ffe12eef4a2dc87bdc6eb1a8afc80",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 18,
+      "scene": "uqis_scene0249_00",
+      "arm": "decoder_rollback",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/uqis_scene0249_00/field",
+      "source_field_sha256": "00c32ba10783db97641c835ccd518284bfd159cfdd6892e246e181f96c34e636",
+      "source_logical_bytes": 1586966176,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/decoder_rollback/uqis_scene0249_00",
+      "observations_sha256": "1528ec70acfefc2984b98a0f581129a13a1943b4223e640a3988fe7047f50974",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    },
+    {
+      "index": 19,
+      "scene": "uqis_scene0249_00",
+      "arm": "protected_training",
+      "source_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/uqis_scene0249_00/field",
+      "source_field_sha256": "633513ad119b9827bf70ca988fa7f8dfa55a05332aec9484cb1fee230caf13b0",
+      "source_logical_bytes": 1586966176,
+      "target_directory": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_batches_20261013/protected_native_next20/protected_training/uqis_scene0249_00",
+      "observations_sha256": "1528ec70acfefc2984b98a0f581129a13a1943b4223e640a3988fe7047f50974",
+      "state_identity": null,
+      "target_manifest_sha256": null
+    }
+  ],
+  "recovery": "Originals retained throughout. Each successful target manifest is immutable. Revalidate complete existing targets; partial targets get a fresh explicitly recorded suffix, reusing validated blobs. Failed mapping leaves originals and all successful artifacts untouched. No automatic deletion or overwrite.",
+  "compatibility": "Versioned protected build is verification/resume of frozen original three-arm outputs, not fresh chained training. Explicit fit replays chosen frozen parent; it never silently substitutes a new protected fit. Old configs remain unchanged; LERF/NVOS use explicit standalone export/config override. All target tensors retained.",
+  "retirement_gate": "Only after each source SHA/tensor/spec/coldload/required mapped dependency verified, consumer replay commands prepared and measured union cost reported. Separate exact permanent deletion approval remains required."
+}

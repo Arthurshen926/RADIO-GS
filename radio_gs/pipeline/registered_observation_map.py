@@ -114,14 +114,20 @@ def build_scene(mapping, domain, public_root, config, output, encoder):
     membership=sparse.hstack(matrices,format='csr')
     visibility=sparse.coo_matrix((np.ones(sum(map(len,visible_rows)),np.float32),
         (np.concatenate(visible_rows),np.concatenate(visible_cols))),shape=(len(xyz),len(frames))).tocsr()
-    # Each observed view receives equal mass; nested masks share its pixel mass.
-    mixed=[]
-    for matrix in matrices:
-        count=np.asarray(matrix.sum(1)).reshape(-1)
-        mixed.append(sparse.diags(1/np.maximum(count,1))@matrix)
-    transfer=sparse.hstack(mixed,format='csr')
-    mass=np.asarray(transfer.sum(1)).reshape(-1)
-    transfer=(sparse.diags(1/np.maximum(mass,1))@transfer).tocsr()
+    # These weights retain view balance; Gaussian contribution mass is a
+    # different adapter policy and must not silently replace this operation.
+    from radio_gs import evidence_core
+    if evidence_core.enabled():
+        transfer=evidence_core.view_balanced_transfer(membership,np.asarray(offsets))
+        mass=np.asarray(transfer.sum(1)).reshape(-1)
+    else:
+        mixed=[]
+        for matrix in matrices:
+            count=np.asarray(matrix.sum(1)).reshape(-1)
+            mixed.append(sparse.diags(1/np.maximum(count,1))@matrix)
+        transfer=sparse.hstack(mixed,format='csr')
+        mass=np.asarray(transfer.sum(1)).reshape(-1)
+        transfer=(sparse.diags(1/np.maximum(mass,1))@transfer).tocsr()
     sparse.save_npz(output/'membership.npz',membership)
     sparse.save_npz(output/'visibility.npz',visibility)
     sparse.save_npz(output/'transfer.npz',transfer)

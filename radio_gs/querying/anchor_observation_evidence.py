@@ -35,6 +35,9 @@ JOINT_FEATURE_NAMES = [
 
 def joint_anchor_evidence(membership, visibility, region_frames, anchor, vertices):
     """Retain the exact positive-point observation relation, including ambiguity."""
+    from radio_gs import evidence_core
+    if evidence_core.enabled():
+        return evidence_core.grouped_membership_features(membership, visibility, region_frames, anchor, vertices)
     regions = membership[anchor].indices
     frames, inverse, counts = np.unique(region_frames[regions], return_inverse=True, return_counts=True)
     association = sparse.csc_matrix((1. / counts[inverse],

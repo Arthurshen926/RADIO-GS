@@ -1,0 +1,103 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "release_gate": "Only after every AnyGS 90-round GPU timing job AND final CPU summaries/rechecks are finished; design_cambridge_input_matrix explicitly releases shared NFS. No automatic start.",
+  "project": "agent:eden-container:sqy-29268143",
+  "executable": "/root/miniconda3/envs/cybersim_agent/bin/python",
+  "sources": [
+    {
+      "name": "untrained",
+      "sha256": "ae60a46be5769e47a23d0e21aa1ca9d51bafa2ba5d48be861c387e4ce3507920",
+      "allocated_bytes": 2848805376,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/figurines_18views_v1/models/untrained",
+      "bytes": 2657563621
+    },
+    {
+      "name": "trained",
+      "sha256": "e926257bb3ee3c924246c779a0f640f98e8b4d7a8ddb77289036469cb54dbe8f",
+      "allocated_bytes": 2817024512,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/figurines_18views_v1/models/trained",
+      "bytes": 2657563621
+    }
+  ],
+  "observations_sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+  "target_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views",
+  "store_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+  "standalone_export": "/tmp/radiogs-v2-real-deploy-20261012",
+  "budget": {
+    "max_new_bytes_per_variant": 3221225472,
+    "reserve_bytes": 2147483648,
+    "minimum_shared_free_bytes": 8589934592,
+    "minimum_local_tmp_free_bytes": 4294967296,
+    "minimum_available_ram_bytes": 34359738368,
+    "estimated_peak_ram_bytes": 25769803776,
+    "total_window_seconds": 900,
+    "shared_nfs_io_estimate_bytes": 23918072589,
+    "total_io_estimate_bytes": 34548327073,
+    "estimate_notes": "No measured throughput guarantee. Includes source SHA+read, raw-state checks in memory, shared save/reuse/readback, standalone local export and independent cold read. Hash CPU work is additional; reserve 15 min after final release. Native sharing is an expectation until measured."
+  },
+  "expected_not_measured": {
+    "shared_tensor_bytes": 2586588555,
+    "union_blob_bytes": 2728532379,
+    "potential_saved_bytes": 2586594863,
+    "actual_freed_bytes": 0
+  },
+  "steps": [
+    {
+      "name": "migrate_untrained",
+      "timeout_secs": 300,
+      "args": [
+        "-c",
+        "import os,sys,json,time\nfrom pathlib import Path\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nimport torch\ntorch.set_num_threads(2)\nfrom radio_gs.query_field.storage import sha256,field_from_state\nfrom radio_gs.query_field.shared_storage import save_field_v2,load_field_v2,_descriptor\nsource,expected,target,store=sys.argv[1:]\nsource=Path(source); target=Path(target)\nmanifest=json.loads((source/'manifest.json').read_text())\nassert manifest['schema']=='radio_gs.query_preserving_field.v1'\nassert manifest['external_scene_dependencies']==[] and set(manifest['files'])=={'field.pt'}\npath=source/'field.pt'\nassert not path.is_symlink()\nbefore=path.stat()\nassert before.st_size==2657563621 and manifest['files']['field.pt']['sha256']==expected\nassert sha256(path)==expected\nraw=torch.load(path,map_location='cpu',weights_only=True)\nfield=field_from_state(raw,manifest)\noriginal={k:_descriptor(v)[0] for k,v in raw.items()}\nassert original=={k:_descriptor(v)[0] for k,v in field.state_dict().items()},'v1 constructor altered raw state'\nif (target/'manifest.json').exists():\n    restored,saved=load_field_v2(target,store_root=store)\nelse:\n    assert not target.exists(),'incomplete target: preserve it and use a fresh attempt path with the same store'\n    saved=save_field_v2(field,target,dict(source_manifest=manifest,source_field_sha256=expected),\n                       store_root=store,max_new_bytes=3221225472,reserve_bytes=2147483648)\n    restored,saved=load_field_v2(target,store_root=store)\nassert original=={k:_descriptor(v)[0] for k,v in restored.state_dict().items()}\nassert field.export_spec()==restored.export_spec()\nafter=path.stat()\nassert (before.st_ino,before.st_size,before.st_mtime_ns)==(after.st_ino,after.st_size,after.st_mtime_ns)\nreport=dict(source=str(source),source_sha256=expected,raw_tensor_descriptors_exact=True,\n            spec_exact=True,source_metadata_unchanged=True,source_preserved=True,\n            target=str(target),state_identity=saved['state_identity'],new_blob_bytes=saved['new_blob_bytes'],\n            tensor_bytes=saved['tensor_bytes'],unique_blob_bytes=saved['unique_blob_bytes'])\nreceipt=target/'pilot_verified.json'\nif receipt.exists():\n    assert json.loads(receipt.read_text())==report\nelse:\n    with receipt.open('x') as handle:json.dump(report,handle,indent=2)\nprint(json.dumps(report,indent=2))\n",
+        "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/figurines_18views_v1/models/untrained",
+        "ae60a46be5769e47a23d0e21aa1ca9d51bafa2ba5d48be861c387e4ce3507920",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/untrained",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs"
+      ]
+    },
+    {
+      "name": "migrate_trained",
+      "timeout_secs": 300,
+      "args": [
+        "-c",
+        "import os,sys,json,time\nfrom pathlib import Path\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nimport torch\ntorch.set_num_threads(2)\nfrom radio_gs.query_field.storage import sha256,field_from_state\nfrom radio_gs.query_field.shared_storage import save_field_v2,load_field_v2,_descriptor\nsource,expected,target,store=sys.argv[1:]\nsource=Path(source); target=Path(target)\nmanifest=json.loads((source/'manifest.json').read_text())\nassert manifest['schema']=='radio_gs.query_preserving_field.v1'\nassert manifest['external_scene_dependencies']==[] and set(manifest['files'])=={'field.pt'}\npath=source/'field.pt'\nassert not path.is_symlink()\nbefore=path.stat()\nassert before.st_size==2657563621 and manifest['files']['field.pt']['sha256']==expected\nassert sha256(path)==expected\nraw=torch.load(path,map_location='cpu',weights_only=True)\nfield=field_from_state(raw,manifest)\noriginal={k:_descriptor(v)[0] for k,v in raw.items()}\nassert original=={k:_descriptor(v)[0] for k,v in field.state_dict().items()},'v1 constructor altered raw state'\nif (target/'manifest.json').exists():\n    restored,saved=load_field_v2(target,store_root=store)\nelse:\n    assert not target.exists(),'incomplete target: preserve it and use a fresh attempt path with the same store'\n    saved=save_field_v2(field,target,dict(source_manifest=manifest,source_field_sha256=expected),\n                       store_root=store,max_new_bytes=3221225472,reserve_bytes=2147483648)\n    restored,saved=load_field_v2(target,store_root=store)\nassert original=={k:_descriptor(v)[0] for k,v in restored.state_dict().items()}\nassert field.export_spec()==restored.export_spec()\nafter=path.stat()\nassert (before.st_ino,before.st_size,before.st_mtime_ns)==(after.st_ino,after.st_size,after.st_mtime_ns)\nreport=dict(source=str(source),source_sha256=expected,raw_tensor_descriptors_exact=True,\n            spec_exact=True,source_metadata_unchanged=True,source_preserved=True,\n            target=str(target),state_identity=saved['state_identity'],new_blob_bytes=saved['new_blob_bytes'],\n            tensor_bytes=saved['tensor_bytes'],unique_blob_bytes=saved['unique_blob_bytes'])\nreceipt=target/'pilot_verified.json'\nif receipt.exists():\n    assert json.loads(receipt.read_text())==report\nelse:\n    with receipt.open('x') as handle:json.dump(report,handle,indent=2)\nprint(json.dumps(report,indent=2))\n",
+        "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007/figurines_18views_v1/models/trained",
+        "e926257bb3ee3c924246c779a0f640f98e8b4d7a8ddb77289036469cb54dbe8f",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/trained",
+        "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs"
+      ]
+    },
+    {
+      "name": "measure_shared_savings",
+      "timeout_secs": 30,
+      "args": [
+        "-c",
+        "import json,os\nfrom pathlib import Path\nroot=Path('/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views')\npackages=[root/name for name in ['untrained','trained']]\nmanifests=[json.loads((p/'manifest.json').read_text()) for p in packages]\nassert all((p/'pilot_verified.json').exists() for p in packages)\na,b=manifests\nshared=[k for k in a['tensors'] if a['tensors'][k]==b['tensors'].get(k)]\nassert 'semantic.codes' in shared and 'local.codes' in shared\nassert a['row_contract']['geometry']==b['row_contract']['geometry']\nids={e['sha256'] for m in manifests for e in m['tensors'].values()}\nblobs=[root/'blobs'/(x+'.bin') for x in ids]\nassert all(p.is_file() and not p.is_symlink() for p in blobs)\nseen=set();physical=0\nfor p in blobs+list(root.rglob('*.json')):\n s=p.stat();key=(s.st_dev,s.st_ino)\n if key not in seen:seen.add(key);physical+=s.st_blocks*512\nold=2*2657563621\nlogical=sum(p.stat().st_size for p in blobs)+sum(p.stat().st_size for p in root.rglob('*.json'))\nreport=dict(shared_state_keys=shared,required_unique_blobs=len(ids),new_logical_bytes=logical,\n            new_allocated_bytes=physical,old_field_pt_bytes=old,old_field_pt_allocated_bytes=5665829888,\n            potential_logical_reduction_bytes=old-logical,\n            potential_allocated_reduction_bytes=5665829888-physical,\n            original_files_deleted=False,actual_freed_bytes=0,\n            note='Original packages remain. Potential saving is not actual free-space recovery.')\nwith (root/'pilot_summary.json').open('x') as handle:json.dump(report,handle,indent=2)\nprint(json.dumps(report,indent=2))\n"
+      ]
+    },
+    {
+      "name": "export_independent_v1_locally",
+      "timeout_secs": 180,
+      "args": [
+        "-c",
+        "import sys,os\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nfrom radio_gs.query_field.pipeline_v2 import main\nmain(['export-v1','--field','/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/trained','--store-root','/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs','--output','/tmp/radiogs-v2-real-deploy-20261012'])\n"
+      ]
+    },
+    {
+      "name": "cold_verify_independent_export",
+      "timeout_secs": 90,
+      "args": [
+        "-c",
+        "import os,sys,json,builtins,io\nos.environ['CUDA_VISIBLE_DEVICES']=''\nsys.path.insert(0,'/root/RADIO-GS-query-field')\nimport torch\ntorch.set_num_threads(2)\nfrom radio_gs.query_field.storage import load_field\nfrom radio_gs.query_field.shared_storage import _descriptor\nfrom radio_gs.query_field import QueryPacket,Support\nfield,manifest=load_field('/tmp/radiogs-v2-real-deploy-20261012')\nwith open('/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/trained/manifest.json') as handle:shared=json.load(handle)\nassert {k:_descriptor(v)[0] for k,v in field.state_dict().items()}==shared['tensors']\nrow=int(torch.where(field.observed)[0][0])\npacket=QueryPacket('point_3d',positive=Support(torch.tensor([row]),torch.ones(1)),exact_positive=True)\nexpected=field.query(packet)\ndef denied(*args,**kwargs):raise AssertionError('unexpected query file access')\nbuiltins.open=denied;io.open=denied;torch.load=denied\nactual=field.query(packet)\nassert torch.equal(expected.membership_scores,actual.membership_scores) and torch.equal(expected.selected,actual.selected)\nprint(json.dumps(dict(cold_process=True,independent_v1_export_state_exact=True,\n                     query_file_access_denied=True,query_scores_and_bits_exact=True)))\n"
+      ]
+    }
+  ],
+  "recovery": [
+    "No source deletions, moves, chmod or modifications. Never delete old packages as part of this pilot.",
+    "Stop on any failed step or global 900-second deadline; no automatic unbounded retry.",
+    "Completed package manifests are immutable and can be revalidated then skipped/reused. Existing blobs are verified before reuse.",
+    "Incomplete reserved variant directories remain preserved. For a retry use a fresh suffixed variant destination with the same blob store; update downstream explicit paths, never overwrite the partial directory.",
+    "No manifest means incomplete, not successful. Orphan blob candidates are report-only; do not delete.",
+    "Summary uses exact distinct blob addresses and distinct filesystem inodes; distinguish logical bytes, allocated bytes, complete model bytes and incremental bytes.",
+    "Keep local standalone deployment until its validation receipt is retained; any cleanup must be separately authorized. Real source reclaim requires a separate exact-batch deletion decision."
+  ]
+}

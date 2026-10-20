@@ -1,0 +1,94 @@
+{
+  "status": "bounded_readonly_candidate_intersection_complete",
+  "created_utc": "2026-10-15T03:01:22.983192+00:00",
+  "closure": {
+    "path": "docs/experiments/2026-10-15-selected-closure-readonly.json",
+    "sha256": "bd55915776649ad61abc0ce95c50d696e52480c14524eeee6283085ac88d643d",
+    "bytes": 8658287
+  },
+  "serialized_sam_paths": {
+    "path": "docs/experiments/2026-10-15-selected-serialized-sam-paths.json",
+    "sha256": "c0298806285511239809ce818a27e58e79cf742b2f6632a5269f26dcbcec7ab4",
+    "bytes": 777138
+  },
+  "path_entries": 12782,
+  "region_metadata_files": 3030,
+  "region_pickle_bytes": 2214179,
+  "geometry_native_metadata_files": 25,
+  "geometry_native_pickle_bytes": 29306,
+  "candidate_intersections": {
+    "unified694": {
+      "candidate_count": 694,
+      "hits": [],
+      "candidate_identity_freshness": "2026-10-15 fresh metadata"
+    },
+    "dino46": {
+      "candidate_count": 46,
+      "hits": [],
+      "candidate_identity_freshness": "2026-10-15 fresh metadata"
+    },
+    "replaced23": {
+      "candidate_count": 23,
+      "hits": [],
+      "candidate_identity_freshness": "Sibling 2026-10-15 fresh stat matches all acceptance identities exactly; local radio_retirement_candidate_46plus23_exact_paths_20261015.json updated."
+    }
+  },
+  "selected_open_radio_gs_best_edges": 0,
+  "serialized_best_or_unified_strings": 0,
+  "required_output_roots": [
+    "adapter_observation_control",
+    "compiled_native_observations",
+    "joint_carrier_next66",
+    "moge_pixel_calibration_v2_20260914",
+    "nvos_bound_pipeline_20260917",
+    "nvos_carrier_next72",
+    "nvos_geometry_sources_bound_20260916",
+    "nvos_local_scale2_repair_20260917",
+    "nvos_local_scale_repair_20260917",
+    "nvos_positive_queries_20260918",
+    "nvos_scale_repair_20260917",
+    "nvos_source_sam_20260917",
+    "optimization_20260807",
+    "optimization_20260815",
+    "optimization_20260823",
+    "query_conditioned_membership_20261006",
+    "query_field_20261007",
+    "query_field_20261009",
+    "query_field_20261011",
+    "real_direct_membership_20261006",
+    "research_consolidation",
+    "scannet_cold_completion",
+    "scannet_coverage_native_next28",
+    "scannet_coverage_native_probe_20260919",
+    "scannet_expanded_budget_next29",
+    "scannet_frozen_field_20260918",
+    "scannet_native_completion",
+    "scannet_public_next72",
+    "scannet_uqis_9_v0_3_1_candidate",
+    "source_coverage_next72",
+    "system_map_rebuild",
+    "typed_evidence_next44"
+  ],
+  "explicit_additional_holds": [
+    "canonical_fields",
+    "storage_v2_pilots_20261013",
+    "G14 selected shared-store closure remains uninspected and held"
+  ],
+  "known_prior_loss_alias_spellings": 220,
+  "new_O_N_loss_found": false,
+  "legacy_compatibility_edge": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/confidence_mixture_functions_v1/fits/confidence_mixture_function/scannet_scene0062_00/field/field.pt",
+    "approval_record": "docs/experiments/2026-10-13-exact11-retirement-completion.json",
+    "request_entry": "docs/experiments/2026-10-13-duplicate-exact11-retirement-request.json entries[2]",
+    "current_legacy_call": "scripts/research/run_query_field_semantic_measure.py:58,63; storage.py:56-68 is v1-only and opens old field.pt",
+    "resolver_status": "legacy_field_resolver.FieldResolver is explicit opt-in; selected historical semantic_measure script has no resolver injection; G01/G14 consumer overlay and shared-store loading not rerun or read here",
+    "status": "intentional approved legacy payload retirement; not a new O/N loss; selected legacy cold command requires explicit overlay/versioned route"
+  },
+  "bounds": [
+    "Only selected v10 and T0 actual loader/build/observation consumer edges; no future builders, all historical training DAG, other repositories, all-pool or all-output sweep.",
+    "No G14 field manifests read. G14/shared field storage and C0 canonical_fields remain on hold.",
+    "Exact zero intersections establish no known dependency hit for the supplied candidate sets within this bounded selected closure; not permanent-deletion authority.",
+    "174 prior SAM-loss rows reused; 220 alias spellings matched these known targets, not 220 new losses.",
+    "No tensor deserialization, GPU, source edit, link changes, restoration or deletion."
+  ]
+}

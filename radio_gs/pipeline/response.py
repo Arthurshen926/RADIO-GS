@@ -8,6 +8,7 @@ import argparse,json,time
 from pathlib import Path
 from types import SimpleNamespace
 import torch
+from radio_gs import evidence_core
 from torch.nn import functional as F
 from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
 from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
@@ -16,6 +17,7 @@ from radio_gs.querying.typed_evidence import visible_operator,solve_rendered_evi
 from radio_gs.pipeline.subset import sample_operator_rows
 from radio_gs.querying.finite_evidence import combine_with_native,source_strength
 from radio_gs.querying.instance_reliability import instance_reliability
+from radio_gs.querying.response_refinement import fuse_admitted_evidence
 
 @torch.no_grad()
 def main():
@@ -40,20 +42,25 @@ def main():
             negative_weight=torch.stack([r[1] for r in reliability])[None].expand(h*w,-1)
         else:positive_weight=negative_weight=confidence[None].expand(h*w,-1)
         phase=i%4;pixels=torch.arange(h*w,device='cuda').reshape(h,w)[phase//2::2,phase%2::2].flatten();op=sample_operator_rows(op,pixels);pos=pos[pixels];neg=neg[pixels];target=target[pixels];native_positive=torch.sparse.mm(op,prior)>.5
-        views.append((op,target,pos,neg,native_positive,confidence,positive_weight[pixels],negative_weight[pixels]))
+        views.append((op,target,pos,neg,native_positive,confidence,positive_weight[pixels],negative_weight[pixels],valid[pixels]))
     strength=source_strength([v[5]*(v[2].any(0)) for v in views],a.evidence_strength)
     results={}
     for policy in a.policies:
         observations=[]
-        for op,target,pos,neg,native_positive,confidence,positive_weight,negative_weight in views:
+        for op,target,pos,neg,native_positive,confidence,positive_weight,negative_weight,visible in views:
             admitted=neg&~native_positive if policy=='native_protected' else neg
-            known=pos*positive_weight+admitted*negative_weight;observations.append((op,target,known,1.))
+            if evidence_core.enabled():
+                domains=evidence_core.compile_domains(pos, neg, visible=visible,
+                    exclusion_veto=native_positive if policy=='native_protected' else None,
+                    negative_origin='model_complement')
+                positive, negative=evidence_core.signed_weights(domains, positive_weight, negative_weight)
+                known=positive+negative
+            else:
+                known=pos*positive_weight+admitted*negative_weight
+            observations.append((op,target,known,1.))
         if a.solver=='rendered':values,mass=solve_rendered_evidence(prior,observations,steps=a.steps)
         else:
-            mass=torch.zeros_like(prior);positive=torch.zeros_like(prior)
-            for op,target,known,weight in observations:
-                mass+=torch.sparse.mm(op.T,known);positive+=torch.sparse.mm(op.T,known*target)
-            values=torch.where(mass>1e-8,positive/mass.clamp_min(1e-8),prior)
+            values,mass=fuse_admitted_evidence(prior,((op,target,known) for op,target,known,_ in observations))
         if a.finite_evidence:values=combine_with_native(values,prior,strength[None])
         values[~observed]=0
         dest=out/policy;dest.mkdir(exist_ok=True);torch.save(dict(data,scores=values.cpu(),response_evidence=a.inputs,response_policy=policy),dest/'typed_readout.pt')

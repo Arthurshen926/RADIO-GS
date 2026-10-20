@@ -1,0 +1,241 @@
+\section{Experiments}
+\label{sec:experiments}
+\subsection{Datasets, metrics and comparison protocol}
+We use one fixed provider recipe across 31 scene jobs. Four LERF scenes yield
+two outputs, so the cohort comprises five evaluation tasks rather than five
+independent datasets. All reported numbers are percentages. The existing
+benchmark rooms have been used during development; they are not an untouched
+final test. Scene-level intervals describe this cohort rather than certify
+generalization after repeated research feedback.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{lp{.25\linewidth}p{.43\linewidth}}
+\toprule
+Task & Cohort and primary metric & Input and evaluation contract \\
+\midrule
+LERF-2D & 4 scenes, 208 observations; mIoU and localization & Source-assisted text; semantic response rendered before thresholding. \\
+LERF-3D selection & Same scenes; projection mIoU and Acc.@0.25 & Independent selected Gaussians rendered to 2D GT; not volumetric GT IoU. \\
+ScanNet OVS & Paper8 Gaussian mIoU/mAcc; internal10 mesh mIoU & Fixed 19/15/10 menus; Gaussian and mesh domains reported separately. \\
+NVOS & 8 tasks, 7 scene clusters; IoU & Retained positive-reference, cached-source variant; external prompt/RGB access declared. \\
+UQIS & 9 rooms, 67 instances, 268 queries; set IoU and AP & Text, image, 2D point and 3D point; map-only query-time access. \\
+\bottomrule
+\end{tabular}
+\caption{Evaluation units. LERF and UQIS average within scenes then across
+scenes; NVOS averages eight tasks, with three seeds per task for LUDVIG.}
+\label{tab:protocols}
+\end{table}
+
+\paragraph{Published results and verified reproductions.}
+We reuse values reported in VALA Tables 1--2 and LUDVIG Tables 1/D, including
+their cited baseline results~\cite{vala,ludvig}. No new external baseline training
+is needed. Every local reproduction is linked to its frozen result hashes;
+four-scene, eight-scene and eight-task aggregates are recomputed from the
+original reports. Table origins are \textbf{P}: published, \textbf{R}: locally
+reproduced, \textbf{B}: frozen provider and \textbf{M}: measured shared replacement.
+An empty mechanism result is marked pending, never filled with a provider score.
+We do not bold a global winner across different input contracts.
+
+\subsection{Implementation and independent supervision}
+We keep the 22 fit, three calibration and four development rooms, disjoint from
+benchmark room identities. The inherited membership provider also used the fit
+rooms. Natural-language episodes provide 629/207/175 fit/calibration/development
+expressions. Original RGB-D and official instance annotations construct 290
+natural image queries, split 237/28/25. Annotation geometry selects reference
+views; neither teacher predictions nor predicted utility choose the query crop.
+Reference frames, temporal neighbors and nearby poses are jointly excluded from
+image candidate construction. At least half of mapping views and two
+target-observing views remain. The full-scan geometry remains available; target
+masks are not inputs to the query encoders. Original SigLIP and DINO image
+evidence and complete decoders are preserved.
+
+Category supervision adds 116 whole-menu episodes: one full map and three
+chronological view folds per room. Only 88 fit-room episodes enter training;
+calibration and development use full maps. SigLIP2, Mask-Adapter and literal
+category SAM3 evidence are retained. View folds are correlated and do not add
+independent rooms. Six classes are absent from calibration. One margin protects
+text and image IoU and the three category outputs in every calibration room
+(15 cells). Calibration and development feedback has informed model design.
+No modality or benchmark identifier is an estimator input.
+
+The latest evaluated parameterization splits the common potential into a
+structural prior and a query-conditioned residual. Five room-wise folds supply
+out-of-room prior predictions for residual targets; each branch uses 64 trees.
+Permuted queries receive zero residual targets, an assumption tested by the
+matched no-null control. The deployed comparison uses the same candidate pool,
+one checkpoint and one margin (0.15052), selected before benchmark prediction.
+All 19 ScanNet/UQIS scene-job predictions are sealed before scoring; only compact
+signatures, models and reports persist. Dense predictions remain transient.
+
+\subsection{Comparison with existing methods}
+\paragraph{LERF semantic segmentation and projected selection.}
+Tables~\ref{tab:lerf2d}--\ref{tab:lerf3d} reuse the published context and verified
+Occam/VALA reproductions. The VALA reproduction follows its semantic and
+evaluation path on compatible Occam RGB geometry, rather than retraining the
+entire original geometry pipeline. The frozen v10 values quantify preserved
+provider capability; the new shared decision has not yet been measured on these
+two outputs. In particular, semantic-response improvements cannot be substituted
+for independent selected-set improvements.
+Our provider includes SAM3 text-conditioned source evidence and native SigLIP2
+matching; external VALA scores are not matched-teacher controls. An independent
+CPU audit exactly reproduces all 208 retained selected-set mask IoUs. Semantic
+IoU/localization records are reaggregated, without a fresh semantic render in
+that audit.
+
+\begin{table}[ht]
+\centering\small\input{tables/comparison_lerf2d.tex}
+\caption{LERF-2D. P values are reported in VALA Table 1~\cite{vala}.
+Localization is peak-in-box accuracy, not ranking AP. B uses source-assisted
+full teachers; it is not a gain of the proposed replacement decision.}
+\label{tab:lerf2d}
+\end{table}
+\begin{table}[ht]
+\centering\small\input{tables/comparison_lerf3d.tex}
+\caption{LERF selected-Gaussian projection. P values are reported in VALA
+Table 1~\cite{vala}; Acc.@0.25 counts projected masks with IoU above 0.25.
+VALA's published value is 58.02/82.85; 43.29/64.30 belongs to Dr. Splat.
+The local VALA R row uses compatible RGB geometry.}
+\label{tab:lerf3d}
+\end{table}
+
+\paragraph{ScanNet open-vocabulary segmentation.}
+Table~\ref{tab:scannet} separates the paper-eight Gaussian metric from the
+original ten-room mesh metric. For the metric bridge, we score unchanged v10
+labels with the existing VALA evaluator: anisotropic Mahalanobis pseudo labels,
+five-scale radius, top-1000 class-balanced votes and opacity--volume weights.
+All eight scene predictions are hashed before opening their target labels.
+This aligns the metric and scene list, but not the input carrier: v10 uses
+provided unlabelled mesh geometry, while VALA uses optimized RGB Gaussians.
+The bridge is a protocol diagnostic, not an additional learned gain. The
+replacement policy retains every original menu on the internal ten-room track.
+Independent scoring reproduces all ten mesh scenes and all eight Gaussian
+scenes. All 1,134,207 pseudo labels agree, including 256 checks with the released
+VALA code. On the same eight rooms, 19-class mesh mIoU is 61.0567 versus
+66.9480 for Gaussian scoring: this 5.8913-point change is metric-dependent.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/comparison_scannet.tex}}
+\caption{ScanNet OVS. P rows from VALA Table 2~\cite{vala}, R and the metric
+bridge use paper8 Gaussian scoring. Rows marked 10-mesh use the original
+ten-room mesh evaluation and cannot be ranked against the paper8 rows.
+The metric bridge still differs in geometry and teacher access.}
+\label{tab:scannet}
+\end{table}
+
+\paragraph{NVOS.}
+Table~\ref{tab:nvos} includes the complete three-seed LUDVIG-SAM reproduction.
+Its positive scribbles, all-view RGB geometry and online target-RGB access
+follow the released implementation. Our retained provider uses a
+positive-derived reference SAM mask and cached source tracks, without online
+target RGB. These are contextual method comparisons with declared access
+differences. A matched-input test is needed before attributing their difference
+to the replacement mechanism.
+The audit also finds a GT boundary convention difference: our retained scorer
+uses $g>127$, while LUDVIG uses integer division by the mask maximum. Applying
+only its GT convention changes our score from 86.5134 to 86.6835; historical
+values remain unchanged. Switching bilinear implementations changes less than
+0.00002 points. Borrowing its min--max and fixed 0.25 response threshold yields
+86.6085 on our GT convention, and is not a full LUDVIG reproduction. Flower,
+trex and orchids account for 78.04\% of the gap to the local 91.2577 reproduction.
+Flower/orchids primarily miss foreground; trex also activates background.
+The separate effects of target RGB, geometry and response inference remain
+unmeasured under matched inputs.
+\begin{table}[ht]
+\centering\small\input{tables/comparison_nvos.tex}
+\caption{NVOS eight-task IoU. P values are reported in LUDVIG Tables 1/D~\cite{ludvig}.
+R averages all three seeds in each task. B uses a different reference/source
+contract; its new learned replacement remains pending.}
+\label{tab:nvos}
+\end{table}
+
+\paragraph{Multimodal UQIS.}
+UQIS is the local ScanNet-UQIS9 v0.3.1 protocol; no external published row in
+the cited papers evaluates these same 268 queries. Table~\ref{tab:uqis} therefore
+reports all modalities and a retained regional-readout baseline. The difference
+between regional readout and v10 belongs to the preserved complete decoder,
+not the new selector. The matched v10-to-replacement comparison isolates the
+response decision. The full
+shared policy improves image IoU by 1.088 points and AP by 1.268 points. One
+query improves and none are harmed. Text and both actual-point outputs remain
+unchanged; the point rows verify preservation rather than learned improvements.
+All reported outputs use the same policy, without choosing a different winning
+variant for text, images or categories.
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/comparison_uqis.tex}}
+\caption{UQIS matched comparison. T/I/P2/P3 denote text, image, 2D point and 3D
+point. Actual selected-set IoU and continuous-response AP are distinct metrics.}
+\label{tab:uqis}
+\end{table}
+
+\subsection{Mechanism ablations}
+All rows in Table~\ref{tab:ablations} retain the same teachers, complete
+candidates, supervision rooms and output definitions. The query-blind arm returns only the fitted structural prior (64 trees,
+versus 128 in the full model); it therefore also changes capacity. Permutation
+instead uses the fitted full model and
+shuffles all teacher scores jointly within each view. It preserves their
+multisets and correlations. Removing the null constraint retains the same
+64+64-tree capacity and total fit weight, replacing permuted training examples
+with duplicates of aligned examples. Each trained control uses the same
+calibration procedure. The zero-margin control uses the full fitted model and
+changes only the acceptance margin. These are response-level ablations.
+
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/mechanism_ablations.tex}}
+\caption{Matched controls on all ten ScanNet rooms and 268 UQIS queries.
+S19/15/10 are mesh mIoU. Repair/harm counts concern actual UQIS set IoU;
+unchanged actual points are included in the denominator. This is one coupled
+policy comparison, not a collection of per-benchmark best runs.}
+\label{tab:ablations}
+\end{table}
+
+The image gain over query-blind and permuted controls is respectively 0.725 and
+1.088 points; descriptive nine-room bootstrap intervals are [0,2.174] and
+[0,3.264]. They do not establish a robust query-specific advantage. The full
+and no-null arms make identical choices in all 144 text/image/menu decisions,
+so the null constraint has no demonstrated accuracy contribution. Removing the
+positive margin improves text and image IoU, but reduces ScanNet mIoU, including
+a 0.869-point loss on the ten-class menu. Retention prevents some damage while
+also rejecting useful instance replacements. Neither the full policy nor the
+zero-margin variant is promoted to replace the reference system.
+
+\subsection{Candidate capacity and failure attribution}
+For a fixed candidate pool, let $G_0$ be gain under zero-margin selection and
+$G_\tau$ gain under calibrated retention. The exact diagnostic is
+\[
+G_{\rm pool}=R_{\rm rank}+(G_0-G_\tau)+G_\tau.
+\]
+The middle term is signed: it is negative when retention prevents damage.
+This identity prevents attributing all unused candidate capacity to the margin.
+For text, 15.395 points of available IoU gain decompose into 9.615 ranking regret,
+5.780 retention cost and zero actual gain. For images, 9.492 available points
+decompose into 8.224 ranking regret, 0.180 retention cost and 1.088 actual gain.
+Thus image ranking is the dominant measured bottleneck; lowering the margin
+cannot recover most of the unused capacity. Category mean-menu capacity is
+only 0.913 points, and its negative retention cost indicates prevented damage.
+These label-oracle diagnostics are computed after prediction and are never
+automatic method results.
+
+\paragraph{Five-task ablation coverage.}
+The same causal questions apply to all five outputs. Current coverage and the
+minimal remaining tests are listed in Table~\ref{tab:coverage}. Historical full
+cohort fusion/solver controls remain in the supplement; they cannot substitute
+for the learned mechanism's missing LERF/NVOS experiments. No new systematic
+feature-field ablation is required.
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{lp{.25\linewidth}p{.41\linewidth}}
+\toprule
+Task & Completed mechanism evidence & Remaining matched test \\
+\midrule
+LERF-2D & Provider and historical fusion controls & Complete-response alternatives; full / blind / permuted / zero-margin. \\
+LERF-3D & Independent provider selection scored & Alternatives for the actual selection; same query decision across views. \\
+ScanNet OVS & Full / blind / permuted / no-null / zero-margin & Cross-provider transfer with input contract fixed. \\
+NVOS & Provider and historical solver controls & Reference/track evidence that works with one region per view; same decision controls. \\
+UQIS & All five controls; 268 queries scored & Independent teacher configurations and unseen rooms; actual-point interventions if claimed. \\
+\bottomrule
+\end{tabular}
+\caption{Required mechanism evidence. Planned cells are not completed ablations.
+Teacher-transfer tests must hold each provider fixed within its paired comparison.}
+\label{tab:coverage}
+\end{table}

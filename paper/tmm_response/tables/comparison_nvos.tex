@@ -1,0 +1,40 @@
+\begin{tabular}{llr}
+\toprule
+Method & Origin & IoU \\
+\midrule
+NVOS \cite{ludvig} & P & 70.10 \\
+SA3D-TRF \cite{ludvig} & P & 90.30 \\
+SA3D-GS \cite{ludvig} & P & 92.20 \\
+SAGA \cite{ludvig} & P & 92.60 \\
+OmniSeg3D \cite{ludvig} & P & 91.70 \\
+LUDVIG-DINOv2 \cite{ludvig} & P & 92.40 \\
+LUDVIG-SAM \cite{ludvig} & P & 91.30 \\
+LUDVIG-SAM2 \cite{ludvig} & P & 91.30 \\
+VCAR \cite{vcar} & P & 93.50 \\
+LEGO \cite{lego} & P & 94.20 \\
+WildSeg3D \cite{wildseg3d} & P & 94.10 \\
+Trace3D \cite{trace3d} & P & 92.50 \\
+LUDVIG-SAM & R & 91.26 \\
+Ours (v10) & O & 86.51 \\
+Ours + coverage (N01) & M & 87.78 \\
+Ours + coverage + source readout (N02) & M & 87.58 \\
+Ours + local edit credit (N03) & M & 87.55 \\
+Ours + image response + 3D (N04) & M & 88.32 \\
+Ours + partial image response + 3D (N05) & M & 85.38 \\
+Ours + unboxed image response + 3D (N06) & M & 84.15 \\
+Ours + reference memory + 3D (N07) & M & 87.89 \\
+Ours + native memory writeback (N08) & M & 88.11 \\
+Ours + static native writeback (N08 secondary) & M & 88.84 \\
+Ours + signed reference affinity (N09) & M & 81.58 \\
+Ours + direct signed affinity (N10) & M & 77.73 \\
+Ours + instance-constrained extent (N11) & M & 89.97 \\
+Ours + signed reference completion (N12) & M & 91.48 \\
+Ours + paired reference delta (N13) & M & 90.75 \\
+Ours + source feasibility admission (N14) & M & 92.94 \\
+Ours + source quality admission (N14 secondary) & M & 93.17 \\
+Ours + completed multiview fusion (N15) & M & 93.03 \\
+Ours + query-local target decoding (N16) & M & 93.28 \\
+Ours + full-frame target decoding (N16 control) & M & 93.10 \\
+Ours (v10, selected set) & O & 85.22 \\
+\bottomrule
+\end{tabular}

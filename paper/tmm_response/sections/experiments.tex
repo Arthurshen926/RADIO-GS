@@ -1,0 +1,227 @@
+\section{Experiments}
+\label{sec:experiments}
+We organize evaluation around three questions: whether query identity must be
+resolved before fusion, whether repairing reference scope improves complete
+extent, and whether better reconstruction or a different readout alone explains
+the gains. Comparisons establish task performance; matched interventions address
+these mechanism questions.
+
+\subsection{Protocol, inputs and supervision}
+The established method covers 31 scene jobs and five task outputs. Four LERF
+scenes supply two outputs, so these are not five independent datasets.
+All values are percentages. The benchmark rooms have been used during
+development; neither prediction-before-scoring seals nor scene-level intervals
+make this an untouched final test.
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{lp{.25\linewidth}p{.43\linewidth}}
+\toprule
+Task & Cohort and primary metric & Input and evaluation contract \\
+\midrule
+LERF-2D & 4 scenes, 208 observations; mIoU and localization & Source-assisted text; semantic response rendered before thresholding. \\
+LERF-3D selection & Same scenes; projection mIoU and Acc.@0.25 & Independent selected Gaussians projected to 2D GT, not volumetric GT IoU. \\
+ScanNet OVS & Paper8 Gaussian mIoU/mAcc; internal10 mesh mIoU & Fixed 19/15/10 menus; Gaussian and mesh domains kept separate. \\
+NVOS & 8 tasks, 7 scene clusters; IoU and AP & Original reference/source access and target-image extensions explicitly separated. \\
+UQIS & 9 rooms, 67 instances, 268 queries; set IoU and AP & Text, image, 2D point and 3D point; map-only query-time access. \\
+\bottomrule
+\end{tabular}
+\caption{Evaluation units. LERF and UQIS average within scenes then across
+scenes; NVOS averages tasks. Its LUDVIG reproduction first averages three seeds
+within each task.}
+\label{tab:protocols}
+\end{table}
+
+The implementation recorded as v10 is our method, including native matching,
+admission, fusion and complete membership. LERF uses SAM3 source masks and
+SigLIP2 matching; ScanNet retains SigLIP2 and Mask-Adapter priors with
+literal-category SAM3 evidence. Original NVOS uses positive-derived SAM3
+reference/source tracks. All UQIS maps retain SigLIP2 giant and DINOv2 ViT-B/14.
+Its complete-member decoder uses 22 independently labelled training rooms and
+three calibration rooms, disjoint from the benchmark. Frozen teachers do not
+make this supervised component training-free. The reference-completion
+extension adds original negative scribbles and DINOv2; its target-conditioned
+variant also uses observed target RGB. It does not replace the input contract
+of the original five-output results.
+
+Table origins are \textbf{P}: published, \textbf{R}: locally reproduced,
+\textbf{O}: our established implementation, and \textbf{M}: a measured extension.
+Published values retain their reporting-paper provenance. Local aggregates
+are recomputed from hash-bound reports; no new external training is performed.
+No per-scene or per-task winners are combined. The full experiment catalog,
+secondary variants, both NVOS GT conventions and optional complete-response
+replacement are retained in the supplements.
+
+\subsection{Five-output performance and protocol checks}
+\paragraph{LERF semantic response and actual selection.}
+Tables~\ref{tab:lerf2d}--\ref{tab:lerf3d} report semantic IoU/localization and
+selected-set projection separately. Our method achieves 70.40 semantic IoU
+and 66.96 projection IoU. SAM3 text-conditioned evidence and native SigLIP2
+matching differ from the external methods' teacher access; these differences
+cannot be assigned to the admission mechanism alone. The VALA reproduction
+uses compatible Occam RGB geometry rather than retraining VALA geometry.
+An independent CPU audit exactly reproduces all 208 selected-mask IoUs;
+semantic records are reaggregated without claiming a fresh render.
+\begin{table}[ht]
+\centering\small\input{tables/comparison_lerf2d.tex}
+\caption{LERF-2D. Published context from VALA Table 1~\cite{vala}.
+Localization is peak-in-box accuracy, not ranking AP. Teacher access differs.}
+\label{tab:lerf2d}
+\end{table}
+\begin{table}[ht]
+\centering\small\input{tables/comparison_lerf3d.tex}
+\caption{LERF selected-Gaussian projection, using 2D masks as GT.
+Acc.@0.25 counts projections with IoU above 0.25. Published values from
+VALA Table 1~\cite{vala}; its local reproduction uses compatible RGB geometry.}
+\label{tab:lerf3d}
+\end{table}
+
+\paragraph{ScanNet open-vocabulary segmentation.}
+Table~\ref{tab:scannet} separates eight-scene Gaussian scoring from ten-scene
+mesh scoring. Our unchanged labels achieve 66.95 mIoU19 under the paper-eight
+Gaussian metric and 61.01 under ten-room mesh scoring. The former applies the
+VALA evaluator with anisotropic Mahalanobis pseudo labels, five-scale radius,
+top-1000 class-balanced votes and opacity--volume weights. Predictions are
+sealed before target-label scoring. Independent scoring reproduces all ten
+mesh scenes and eight Gaussian scenes; all 1,134,207 pseudo labels agree,
+including 256 checks with the released VALA implementation. On the \emph{same}
+eight rooms, mesh and Gaussian mIoU19 are 61.0567 and 66.9480: that 5.8913-point
+change is caused by the metric, not a learned improvement. The metric bridge
+still uses provided unlabelled mesh geometry, whereas VALA uses RGB-optimized
+Gaussians. Geometry and teacher access remain comparison qualifications.
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/comparison_scannet.tex}}
+\caption{ScanNet OVS. Published context from VALA Table 2~\cite{vala}.
+Paper8 Gaussian and internal10 mesh scoring are separate tracks.
+The metric bridge aligns scoring, not teacher or geometry access.}
+\label{tab:scannet}
+\end{table}
+
+\paragraph{NVOS reference responses.}
+Table~\ref{tab:nvos} shows the established response, both fixed reference
+admission policies and the highest-IoU refinement as an explicit tradeoff.
+The primary feasibility policy reaches 92.94 IoU; the source-quality secondary
+reaches 93.17 IoU and 98.95 AP. Direct image evidence reaches 93.50 IoU but is
+not substituted for the actual re-rendered 3D result. Original v10 uses cached
+source evidence without online target RGB; these extensions use target RGB,
+negative reference scribbles and DINOv2. The improvement over 86.51 therefore
+is not an input-identical ablation.
+
+The local LUDVIG-SAM reproduction reaches 91.26 over eight tasks and three
+seeds. Its GT mask-maximum convention differs from our retained $g>127$
+convention; changing only this convention takes original v10 from 86.5134 to
+86.6835, far below the observed extension gain. Changing bilinear
+implementations moves the result by less than 0.00002 points. These checks
+limit scorer explanations but do not make different input protocols identical.
+Recent published rows are contextual: VCAR uses seven targets, and LEGO's
+seven-scene target roster has not been verified against ours. We do not claim
+same-protocol SOTA.
+\begin{table}[ht]
+\centering\small\input{tables/comparison_nvos_main.tex}
+\caption{NVOS comparison context. P values retain LUDVIG Tables 1/D and
+later papers' provenance~\cite{ludvig,vcar,lego,wildseg3d,trace3d}.
+N14 policies are fixed across all eight tasks. N16 has the highest measured
+native IoU but lower AP (98.47 versus 98.95); it is not a uniform improvement.
+All intervening variants remain in the diagnostic supplement.}
+\label{tab:nvos}
+\end{table}
+
+\paragraph{Multimodal UQIS.}
+Table~\ref{tab:uqis} evaluates the local ScanNet-UQIS9 v0.3.1 protocol. None
+of the cited external tables evaluates these same 268 queries, so we do not
+fabricate an external row. Regional readout provides an internal capability
+reference; the paired component experiments below provide finer attribution.
+An optional complete-response selector improves image IoU by 1.088 points,
+with one query improved and other outputs unchanged. Its controls and limited
+transfer are documented separately, rather than used to explain v10's gains.
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/comparison_uqis_main.tex}}
+\caption{All four UQIS modalities: text (T), image (I), 2D point (P2) and
+3D point (P3). Actual-set IoU and continuous-response AP are distinct.
+Both rows use our system; the regional baseline is not an external method.}
+\label{tab:uqis}
+\end{table}
+
+\subsection{Q1: does query identity need to precede response formation?}
+\begin{table}[ht]
+\centering\small\resizebox{\linewidth}{!}{\input{tables/mechanism_evidence.tex}}
+\caption{Historical matched component controls in our method. The first two
+rows measure LERF selected projection and semantic IoU, respectively; the last
+two measure UQIS actual image-instance IoU. These interventions are non-additive
+and are not final-system leave-one-module-out experiments.}
+\label{tab:core-components}
+\end{table}
+Query-relative identity admission improves projected selection by 2.54 points
+with geometry, native features and the set solver fixed. Using admitted source
+responses improves semantic IoU by 19.79 points with the evidence, map and
+independent selected set fixed. This isolates whether available evidence is
+used in the answer, not the novelty of a weighted mean.
+Native local image correspondence adds 4.14 points with the same teachers and
+extent head; complete-carrier membership adds a further 5.02 in its paired
+identity-fixed contrast. The two controls distinguish matching the requested
+instance from retrieving all its members.
+
+Additional controls give a 2.35-point category gain from dual-native priors on
+three ScanNet rooms, and 9.62-point gains for each UQIS point modality from
+real-observation membership training. These include teacher capability and
+training-observation changes, respectively. They are not evidence for a
+teacher-independent weighting formula; details remain in the supplement.
+
+\subsection{Q2: does completing reference scope before transport recover extent?}
+\begin{table}[ht]
+\centering\small\input{tables/reference_scope_controls.tex}
+\caption{Reference-scope interventions on all eight NVOS tasks, retained GT.
+Each paired row keeps its downstream propagation, fusion, geometry and readout
+fixed. Completion introduces signed reference evidence and DINOv2 into response
+construction; it is a mechanism bundle, not an isolated teacher ablation.
+Source-only fitting excludes target-image evidence.}
+\label{tab:reference-scope}
+\end{table}
+Under the same frozen two-frame memory and native-ray fitting, replacing the
+original reference with the constrained completed reference raises IoU from
+88.20 to 91.48 (N12). Semantic completion without the signed constraint yields
+88.52; unrestricted semantic similarity does not reliably preserve instance
+identity. Reference-only feasibility and quality admission subsequently reach
+92.94 and 93.17 under their fixed policies (N14). Their candidates and selection
+criteria are independent of target GT; design nevertheless follows feedback
+on this opened cohort.
+
+More directly, N15 propagates original and completed references through the
+same 318 source views, excludes target-image evidence and applies the same
+fusion. IoU rises from 88.01 to 92.75, with AP rising from 98.26 to 98.81.
+Five tasks improve and three regress; completion is not uniformly beneficial.
+This paired result shows that the scope intervention survives source-view
+fusion and is not explained solely by decoding the target image. It does not
+separately identify the contribution of negative scribbles, DINOv2 and frozen
+SAM3 completion. The central supported claim is about the completed-reference
+mechanism under this declared access contract.
+
+\subsection{Q3: are stronger fitting or additional decoding sufficient?}
+With fixed evidence, squared reconstruction reduces its source objective on
+all 22 source-assisted jobs. Yet LERF semantic IoU/AP change from 70.40/87.62
+to 70.80/87.00, and ScanNet mIoU19 falls from 61.01 to 60.28. UQIS outputs are
+unchanged compatibility references. Better fit to admitted labels therefore
+does not establish better task responses across outputs.
+
+Within the completed-reference experiment, adding target evidence to the source
+fit gives 93.03 IoU and 98.98 AP. Against the target-only N14 response,
+source residual decreases from 0.004626 to 0.000748 while IoU drops by 0.14
+points and AP gains 0.03. All tasks reduce both true and false positives:
+consistency suppresses errors but also useful extent. This is a tradeoff,
+not evidence that a lower residual solves scope correctness.
+
+Query-local target re-decoding gives 93.28 IoU, only 0.1075 above its N14
+control, while AP loses 0.4787; four tasks improve and four regress.
+Removing the horns scene cluster eliminates the mean IoU advantage.
+A numerical audit exactly recovers all 24 image arrays and checks stable
+probability-mixture ranking: the largest macro AP correction is below 0.002
+points and no hard masks change. Thus the image AP loss is not explained by
+sigmoid saturation or interpolation precision. This audit does not rerun the
+3D fits. The joint-fusion and re-decoding search routes are stopped rather than
+promoted on one metric.
+
+Finally, retained field-by-readout controls report original NVOS semantic IoU
+86.51 and independent selected-set projection IoU 85.22. Crossed outputs are
+scored separately. The analysis in Section~\ref{sec:analysis} explains why one
+cannot replace the semantic result with a selected-set number or infer better
+actual selection from a modified score field. The supplements retain all
+crossed readouts, solver failures, prompt controls and per-task diagnostics.

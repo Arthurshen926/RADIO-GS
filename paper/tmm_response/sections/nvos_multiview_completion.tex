@@ -1,0 +1,23 @@
+\section{Completed-reference multiview fusion}
+N15 freezes N14 reference-quality selection and independently transports original and completed reference masks to every authorized source view with the same two-frame memory. Source-only fusion excludes target image evidence; the joint arm balances the average normalized source objective with one native target objective. All three columns use identical geometry, initial responses, observed elements and 120 Huber iterations. Source evidence is integrated at $512\times384$, with native $1008\times756$ target rays and rendering. There is no view-subset or fusion-weight search. All 48 predictions precede both GT scoring conventions. The original eight tasks are development data. Other four benchmarks remain unchanged references.
+\begin{center}\small\resizebox{\linewidth}{!}{\input{tables/nvos_multiview_completion.tex}}\end{center}
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & N14 & Original source & Complete source & Complete joint \\\midrule
+fern & 83.20 & 83.72 & 82.92 & 83.68 \\
+flower & 96.71 & 87.55 & 95.77 & 96.29 \\
+fortress & 98.00 & 97.45 & 97.70 & 97.76 \\
+horns\_center & 95.69 & 96.52 & 95.32 & 95.48 \\
+horns\_left & 94.81 & 95.05 & 95.09 & 94.78 \\
+leaves & 94.84 & 94.97 & 94.66 & 94.70 \\
+orchids & 95.60 & 68.49 & 94.40 & 94.99 \\
+trex & 86.54 & 80.30 & 86.12 & 86.57 \\
+\bottomrule\end{tabular}\end{center}
+completed source native vs legacy source native: +4.7400 IoU points, +0.5563 AP points; 5 improved and 3 harmed tasks.
+completed joint native vs completed source native: +0.2841 IoU points, +0.1648 AP points; 7 improved and 1 harmed tasks.
+completed joint native vs quality native: -0.1428 IoU points, +0.0346 AP points; 2 improved and 6 harmed tasks.
+completed source native vs quality native: -0.4269 IoU points, -0.1302 AP points; 1 improved and 7 harmed tasks.
+The matched source-only comparison isolates reference completion under the same transport and fusion, with zero target-image evidence in either field. Its gain remains +1.7152 to +6.5129 points when leaving out one whole scene. This is descriptive cohort sensitivity, not independent validation. The historical N01 comparison additionally changes negative-scribble and DINOv2 access and is not a matched control.
+Against N14, joint fusion reduces mean completed-source Huber residual from 0.004626 to 0.000748. Mean precision changes by +0.5054 points and recall by -0.6629. Teacher agreement therefore does not by itself certify target accuracy. These teacher residuals are not source-view ground-truth scores.
+The predeclared stopping criterion requires higher mean IoU without lower AP. No arm qualifies; this fusion branch is stopped and N14 is retained. This is a local negative result, not a universal performance bound.
+\begin{figure}[ht]\centering\includegraphics[width=.85\linewidth,height=.75\textheight,keepaspectratio]{../../output/tmm_response_20261018/study/nvos_multiview_completion_spatial_v1/errors.png}
+\caption{All eight N15 tasks: green TP, red FP, blue FN. Display resizing only; metrics use original GT resolution.}\end{figure}

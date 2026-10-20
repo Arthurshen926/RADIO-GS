@@ -1,0 +1,21 @@
+{
+  "run": "nvos_v10_readout_factorial_v1",
+  "question": "Separate inherited response field versus output operator effects with a fixed all-eight 2x2 readout study",
+  "arms": [
+    "semantic_response",
+    "semantic_set_projection",
+    "independent_response",
+    "independent_set_projection"
+  ],
+  "continuous_threshold": 0.5,
+  "set_element_threshold": 0.5,
+  "projection_rule": "floor(clamp(alpha,0,1)*255+0.5)>10; existing evaluator rule, no new tuning",
+  "all_eight_predictions_before_scoring": true,
+  "target_rgb_used": false,
+  "per_task_winner_selection": false,
+  "default_changed": false,
+  "scoring_barrier": "nvos_coverage_evidence_v2/predictions_complete.json",
+  "maximum_volatile_bytes": 268435456,
+  "maximum_new_durable_bytes": 262144,
+  "gpu_memory_fraction": 0.14
+}

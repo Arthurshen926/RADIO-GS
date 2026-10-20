@@ -1,0 +1,173 @@
+{
+  "schema": "radio_gs.unified_five_launch.v1",
+  "status": "running_not_accuracy_complete",
+  "branch": "codex/unified-compact-multiteacher",
+  "study_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_five_20261015/study",
+  "config": "configs/query_field/unified_five_benchmark.json",
+  "plan_sha256": "b5b872744de790c00ee13ff5bce86df33f61e6af6eb60e63b10fd541270d2283",
+  "all_tasks": [
+    "lerf2d",
+    "lerf3d_local_projection",
+    "nvos",
+    "scannet_ovs",
+    "uqis"
+  ],
+  "expected": {
+    "lerf_scenes": 4,
+    "lerf_queries": 67,
+    "nvos_cases": 8,
+    "scannet_rooms": 10,
+    "uqis_rooms": 9,
+    "uqis_queries": 268,
+    "uqis_queries_by_modality": {
+      "text": 67,
+      "image": 67,
+      "point_2d": 67,
+      "point_3d": 67
+    }
+  },
+  "total_fields": 30,
+  "completed_predictions": [
+    "lerf_figurines",
+    "nvos_fern",
+    "scannet_scene0070_00",
+    "uqis_scene0030_00"
+  ],
+  "failures": [],
+  "completed_training": [
+    {
+      "run": "lerf_figurines",
+      "selected_step": 600,
+      "state_identity": "23ddebaad921b1f53928cf5d50c21d6e82ecc3d660b13cfeb4b7b36a43076b66",
+      "model_bytes": 245493408,
+      "teacher_gradient_norms": {
+        "semantic": 0.02777916006743908,
+        "local": 0.0060400888323783875,
+        "membership": 0.0010736259864643216
+      }
+    },
+    {
+      "run": "nvos_fern",
+      "selected_step": 500,
+      "state_identity": "ba9b515c89a8fd2fa152c52d108e47864468e33927e388ce697d98f202105368",
+      "model_bytes": 146079219,
+      "teacher_gradient_norms": {
+        "semantic": 0.007576273754239082,
+        "local": 0.002896660938858986,
+        "membership": 0.0007988360011950135
+      }
+    },
+    {
+      "run": "scannet_scene0070_00",
+      "selected_step": 600,
+      "state_identity": "b8883cd89cd28dbe7d5bd0c5a880752f31ba927d94dc39a3a70e30382287ec53",
+      "model_bytes": 49210019,
+      "teacher_gradient_norms": {
+        "semantic": 0.0665547177195549,
+        "local": 0.03868906572461128,
+        "membership": 0.0014030883321538568
+      }
+    },
+    {
+      "run": "uqis_scene0030_00",
+      "selected_step": 500,
+      "state_identity": "772886aad16751c475eb9cd3a241e7883b7235aa8f7a8e8832ea6516a73d742a",
+      "model_bytes": 130544098,
+      "teacher_gradient_norms": {
+        "semantic": 0.027065729722380638,
+        "local": 0.07925508171319962,
+        "membership": 0.0009152318234555423
+      }
+    }
+  ],
+  "uqis_completed_scenes": [
+    {
+      "scene": "scene0030_00",
+      "queries": 32,
+      "unsupported": 2,
+      "modalities": [
+        "image",
+        "point_2d",
+        "point_3d",
+        "text"
+      ]
+    }
+  ],
+  "all_teachers_every_scene": [
+    "SigLIP2",
+    "DINOv2",
+    "SAM"
+  ],
+  "same_latent_dim": 96,
+  "same_steps": 600,
+  "same_loss_weights": true,
+  "same_query_rules": true,
+  "per_scene_weights": true,
+  "shared_cross_scene_weights": false,
+  "benchmark_specific_routes": false,
+  "scannet_dictionary_pilot_promoted": false,
+  "primary_readouts": {
+    "lerf2d": "shared_membership.iou",
+    "lerf3d_local_projection": "shared_membership.selected.miou",
+    "nvos": "retained_response.foreground_iou",
+    "scannet_ovs": "native complete-category partition",
+    "uqis": "all four modalities: AP and actual selected-set IoU"
+  },
+  "legacy_public_entrypoint_primary_metadata_is_not_cohort_contract": true,
+  "all_prediction_seal_before_scoring": true,
+  "storage": {
+    "policy": {
+      "study_bytes": 17179869184,
+      "run_bytes": 8589934592,
+      "artifact_bytes": 3221225472,
+      "reserve_bytes": 21474836480
+    },
+    "current_bytes": 1835930633,
+    "estimated_model_bytes": 4708823982,
+    "conservative_peak_bytes": 14358950282,
+    "teacher_copies": 0,
+    "historical_deletions": 0
+  },
+  "validation": {
+    "training_env": {
+      "python": "/tmp/radiogs-unified-env/bin/python",
+      "versions": {
+        "torch": "2.10.0+cu128",
+        "numpy": "2.5.2",
+        "scipy": "1.18.1",
+        "transformers": "4.46.3",
+        "gsplat": "1.4.0"
+      },
+      "core_tests_passed": 30,
+      "new_barrier_and_gradient_tests_passed": 4,
+      "extended_tests": {
+        "passed": 52,
+        "failed": 1,
+        "reason": "numba missing on scorer dependency import; actual scoring uses existing prediction environment"
+      }
+    },
+    "prediction_env": {
+      "python": "/root/miniconda3/envs/cybersim_agent/bin/python",
+      "torch": "2.0.1+cu118",
+      "transformers": "4.49.0",
+      "gsplat": "1.2.0",
+      "compact_and_barrier_tests_passed": 15,
+      "public_storage_and_barrier_tests_passed": 43,
+      "cuda_raster_smoke": {
+        "shape": [
+          1,
+          16,
+          16,
+          1
+        ],
+        "alpha_sum": 3.430088520050049
+      }
+    },
+    "benchmark_accuracy_established": false
+  },
+  "supervisor_pid": 96856,
+  "report_finisher_pid": 102202,
+  "expected_final_summary": "/mnt/pool/sqy/results/RADIO-GS/output/unified_five_20261015/study/cohort/summary.json",
+  "accuracy_claim": false,
+  "v10_recovery_claim": false
+}

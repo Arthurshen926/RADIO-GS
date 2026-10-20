@@ -1,0 +1,296 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=23mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
+\setlength{\emergencystretch}{2em}
+\title{Learning to Preserve and Replace Complete Responses to 3D Scene Queries}
+\author{TMM working manuscript --- empirical closure in progress}
+\date{October 16, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+A stronger teacher match does not necessarily yield a better complete answer
+to a scene query. An alternative may repair identity while losing object extent,
+or replace an already correct response with a plausible distractor. We study
+one decision: when is replacing an existing complete response beneficial?
+Frozen providers supply an explicit incumbent and intact alternatives. A
+teacher-order-invariant signature measures observable query--response agreement,
+and a set-conditioned utility predictor learns actual relative answer quality from
+separate labelled scenes. One shared calibration rule chooses whether to retain
+the incumbent or return a whole alternative. No teacher representation, feature
+field or complete membership decoder is retrained. We implement joint text and
+real-image supervision with original image teachers and held-out reference
+observations, together with query-blind and correspondence-permutation controls.
+An exact candidate-pool decomposition separates available answer quality from
+decision regret. Current measured transfer covers text and image instance
+queries and complete category menus, with actual point responses preserved.
+The shared policy preserves all three ScanNet menu metrics and improves UQIS
+image set IoU by 0.97 pp, while text remains unchanged. Gains over query-blind and
+permuted controls remain statistically inconclusive on the nine opened rooms.
+LERF and NVOS transfer remain unfinished; the full-system reference and historical provider
+gains are reported separately. This working manuscript does not claim a
+validated universal replacement for the complete retained system.
+\end{abstract}
+
+\section{Problem and intended contribution}
+Existing scene-query systems already possess useful but nonidentical abilities:
+native teacher matching identifies candidates, geometric observations constrain
+their support, and complete member decoders recover extent. Replacing those
+abilities can lose performance even when the underlying features are retained.
+Adding observations or optimizing their reconstruction more accurately can also
+damage a correct answer. Our research variable is the \emph{decision over
+preserved complete answers}.
+
+We formulate the intervention as relative task utility, rather than teacher
+confidence, anchor correctness or source fitting error. The proposed mechanism
+couples complete functional candidates with explicit retention, query-conditioned
+observable signatures with a consistent utility comparison, and one
+independently calibrated selective replacement rule. These are stages of one
+decision mechanism, not three representation networks. The empirical contribution
+must establish that query correspondence improves decisions beyond structural
+answer priors, and that repairs do not cause greater damage to correct responses.
+Neither follows merely from fitting the utility regressor.
+
+\section{Complete-response replacement}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{figures/replacement_overview.pdf}
+\caption{One decision mechanism over preserved complete answers. The shared
+utility model and calibration margin are fitted on separate rooms; target labels
+do not enter inference. The diagram specifies the method, not a claim of
+successful transfer to every output.}
+\end{figure}
+\input{sections/replacement_method.tex}
+
+\section{Independent joint supervision}
+We retain the fixed 22-room fit, three-room calibration and four-room development
+split. These room identities do not overlap the benchmarks. The complete member
+provider also used the fit rooms; this inherited overlap is explicit. The
+development rooms and benchmarks were already opened in earlier research, so
+they are not an untouched final test.
+Calibration rooms are disjoint from fitting, but their paired-model feedback
+motivates the set-utility architecture test. They therefore are not an untouched
+model-selection test either; no statistical risk guarantee is claimed.
+
+Text supervision reuses sealed natural-language episodes and all candidate
+utilities. At most 32 eligible expressions per fit room are selected by a fixed
+hash; all calibration and development expressions are included. The deployed
+scope response is the text incumbent. Official instance annotations and original
+RGB-D construct natural square image references. Annotated geometric visibility
+greedily selects up to four reference views; constructor image quality chooses
+each target's crop among those views. This uses neither teacher predictions nor
+model utility. An initial fixed-temporal-view preparation was stopped before
+model fitting because it missed targets in some rooms; it is not an accuracy
+experiment.
+
+Reference frames, temporal neighbors and nearby camera poses are excluded
+jointly from every image candidate provider. We keep at least half of original
+mapping views, two target-observing views and 50\% target visibility. The official
+full-scan mesh remains the carrier; geometry itself is not held out. Original
+SAM regions and SigLIP coordinates are retained. Original DINO local symmetric
+Chamfer is computed from streamed patches with the same quantization and
+regional weights. No target mask is supplied to either image query encoder.
+The direct member response is the image incumbent.
+
+The protocol produces 290 image episodes across all 29 rooms. Fit, calibration
+and development use 237, 28 and 25 images respectively, alongside 629, 207 and
+175 text expressions. Fit weight is equal per room, modality and query. Neither
+modality nor benchmark identity enters the estimator. The SAME threshold must
+protect all six calibration room--modality cells. The smallest image calibration
+cell contains only two queries, limiting this empirical protection. Automatic
+references include blur, partial views and border padding; a 12-query visual
+and reconstruction check is not a full corpus audit.
+
+The complete joint corpus also contains 116 whole-category-menu episodes on
+the same 29 rooms: one full-map episode and three chronological view folds per
+room. All original SigLIP2, Mask-Adapter and literal-category SAM3 paths are
+retained. Only the 88 fit-room category episodes enter optimization; calibration
+and development use the full-map episode of each room. The shared margin
+protects 15 room/output cells. Three view folds do not create independent rooms,
+and the full-scan mesh remains shared. Six classes are absent from calibration.
+
+\begin{table}[ht]
+\centering\small\input{tables/multitask_development.tex}
+\caption{Joint text, image and whole-menu utility on the four opened development
+rooms (\%). Relative denotes the fixed control that removes absolute signature
+and set-mean context. Category utility averages the three menu outputs. These
+development results are distinct from target-benchmark transfer.}
+\end{table}
+The full joint model improves image IoU by 8.78 pp, but its query-blind control
+improves it by 9.73 pp. Text and category utility are unchanged. No development
+category episode has a better candidate under mean-menu utility. The relative-only
+control calibrates to reject every replacement; removing absolute context is
+therefore not supported by this controlled result. The declared joint development
+gate fails for both models.
+
+\section{Evaluation and functional attribution}
+The full reference cohort has 31 jobs: four LERF scenes supporting semantic 2D
+and selected-set projection outputs, eight NVOS requests, ten ScanNet rooms and
+nine UQIS rooms. LERF selected sets are evaluated by 2D projection, not independent
+3D ground-truth IoU. LERF, NVOS and ScanNet use declared source assistance; UQIS
+is map-only at query time. The reference is one fixed recipe, not task-specific
+winning configurations.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/system_reference.tex}}
+\caption{Retained complete-system capability. These metrics belong to its
+existing providers, not automatically to the proposed learned decision.}
+\end{table}
+
+The initial text-only utility learner increased UQIS text set IoU from 16.39 to
+24.35 but reduced image IoU from 39.90 to 34.72. Its image candidate pool contains
+answers with scene-macro label-oracle IoU 49.39. Candidate ability and decision
+quality are therefore distinct failure sites. The oracle is a finite-pool
+diagnostic, never an automatic result. Joint supervision addresses the decision
+transfer gap without altering these benchmark candidates.
+
+The paired and set-consistent versions are measured separately, with identical
+candidate supervision and calibration rules. Their models and calibration are sealed before development evaluation and UQIS
+scoring. All 134 text/image predictions are sealed before scoring all 268 UQIS
+queries. The other two input types retain their complete point responses.
+Continuous ranking AP and actual selected-set IoU are reported separately.
+\IfFileExists{tables/joint_replacement.tex}{
+\begin{table}[ht]
+\centering\small\input{tables/joint_replacement.tex}
+\caption{One jointly supervised policy and one margin on UQIS (\%). Both
+modalities use the same learned mechanism; no modality-wise winners are combined.
+These are development transfer results.}
+\end{table}
+\input{tables/joint_summary.tex}
+}{Joint transfer results are pending the sealed run.}
+
+\IfFileExists{tables/response_value.tex}{
+\begin{table}[ht]
+\centering\small\input{tables/response_value.tex}
+\caption{Controlled change to a common candidate-set utility potential (\%).
+The complete candidate pool and independent joint supervision are unchanged.}
+\end{table}
+\input{tables/response_value_summary.tex}
+}{Set-consistent utility transfer results are pending the sealed run.}
+
+Controls remove explicit query features from a separately fitted regressor, or
+jointly permute all teacher scores within each view at inference. The latter
+retains their multiset and correlations, geometry and the SAME candidate pool.
+We also report unrestricted replacement, repair and harm counts, predicted
+versus actual gains, and finite-pool decision regret. Descriptive scene-bootstrap
+intervals are not independent final-test guarantees. Supervision, modality
+weighting and incumbent calibration change together relative to the earlier
+learner; their combined difference does not isolate any one factor causally.
+
+\section{Whole-cohort boundary and remaining closure}
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{p{.23\linewidth}p{.69\linewidth}}
+\toprule
+Output & Required transfer contract and current status \\
+\midrule
+LERF semantic 2D & Legal source-region signatures and independent utility supervision; pending. \\
+LERF projected set & Preserve and evaluate the independent actual set and its original renderer; pending. \\
+NVOS & Distinguish supplied-reference authority from partial propagated observations; pending. \\
+ScanNet OVS & Ten complete menus freshly scored with one shared checkpoint and margin; all original menus retained. \\
+UQIS & Complete text/image instance interventions, all 268 queries scored; actual point outputs preserved. \\
+\bottomrule
+\end{tabular}
+\caption{A common software signature does not establish successful task transfer.}
+\end{table}
+
+Four previous full-cohort studies test partial permissions, available-domain
+normalization, extent agreement and response-stage reconstruction. More accurate
+source fitting lowers objectives in all 22 source-assisted jobs but yields mixed
+accuracy. Historical text-admission and local-image/provider controls explain
+which capabilities to retain; they are not gains of the new learner. Their
+equations and negative results remain in the diagnostic supplement and archived
+partial-evidence manuscript. Those failed controls are not stacked into the
+proposed mechanism.
+
+The cross-task decision audit recomputes legal source agreement for all 22
+source jobs using the exact incumbent and retained available-domain alternative.
+It seals label-free choices before joining cached intact-response scores;
+target images are not newly rendered. LERF uses one decision per query across
+frames, and ScanNet uses one whole menu for all three category splits. Authorized
+source Brier agreement selects all ten ScanNet alternatives, harming seven.
+The LERF IoU gain survives spatial correspondence permutation exactly. These
+observations do not support source fitting as a sufficient replacement utility.
+Source observations also contributed to candidate construction; they are not
+independent validation evidence.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/cross_task_capacity.tex}}
+\caption{Cross-task attribution using retained complete-answer metrics. The
+historical pool contains nine conditions from the earlier four studies. Oracles
+use labels for diagnosis only. The pool oracle chooses by query IoU or complete
+menu mIoU19; all other metrics use that SAME answer. The joint oracle additionally
+requires no harm to any reported metric within each decision unit. Neither is a
+method result or an assertion that these gains are attainable by one policy.}
+\end{table}
+
+Source candidate headroom is substantially smaller than instance-query headroom.
+In particular, selecting a menu only for mIoU19 can lose mIoU10 even with a label
+oracle. The independent LERF selected set has no alternative in this pool.
+Official menu/union target manifests are now prepared on the 29 separate rooms,
+with exact official vertex alignment and all 19 classes retained. Three
+chronological blocks define 87 cross-view episodes but still only 29 rooms;
+boundary pose dependence and full-scan geometry remain. Six classes are absent
+from calibration. Original Mask-Adapter responses are now compiled for all
+2,643 source views and 97,532 regions, retaining only 19-column cosine responses.
+Literal-category SAM3 and foreground/context source evidence are now complete
+for all 29 rooms. One joint estimator fits text, image and whole-menu utility,
+with one margin protecting five outputs in each calibration room. On the 22 fit
+rooms, the finite complete-menu oracle adds only 0.78 pp to the incumbent's mean
+menu utility; this is training-set capacity, not benchmark performance. The
+registered mesh training carrier differs from the benchmark Gaussian renderer.
+
+Benchmark menu preparation now covers all ten original Gaussian scenes, with
+1,158 views and 73,905 regions. Replaying original native and fused responses
+gives maximum probability error $7.16\times10^{-7}$ and no changed labels for
+any 19/15/10 submenu. The incumbent bytes are retained beside complete
+dual-native and source-readout alternatives. These label-free compatibility
+checks establish provider preservation, not learned gains. The fixed-policy
+category/instance transfer follows complete corpus construction and fitting. Its
+Gaussian signature uses positive native-transfer support and per-view region
+unions; this narrower domain is not equivalent to full mesh visibility in
+supervision. All category and UQIS predictions must precede fresh target scoring.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/multitask_transfer.tex}}
+\caption{One checkpoint and one full-policy margin on ten ScanNet rooms and
+all 268 UQIS queries (\%). S19/15/10 denote menu mIoU. All 19 scene-job predictions
+are sealed before scoring; point responses are exact. No per-task winners are
+combined.}
+\end{table}
+The full policy improves one image query and harms another; all text, category
+and point decisions retain their incumbent. Image IoU exceeds the query-blind
+control by 0.61 pp and the permutation control by 0.36 pp. Descriptive scene
+bootstrap intervals include zero for both differences. The image result is also
+below the earlier instance-only model's 40.99\% IoU. These results do not yet
+validate the central query-dependent contribution.
+
+The exact-pool diagnosis leaves 15.39 pp available text IoU gain entirely unused,
+and 8.52 pp image decision regret against 9.49 pp available gain. Complete-menu
+mean-utility capacity is 0.91 pp (0.85 pp when protecting all three outputs).
+Thus the instance decision and the category candidate family have different
+limitations; adding teachers or reducing fitting loss alone cannot be taken as
+resolving either. The NVOS cache has one target region per view, so the current
+within-view comparison signature supplies no verification evidence there.
+
+Full closure requires effective source-assisted observation signatures and a
+better verified decision over useful candidates, followed by a fixed-policy five-output
+evaluation. Retained scores for unfinished adapters cannot count as new mechanism
+successes. An untouched test and broader calibration coverage are also needed.
+The scientific default remains v10 until the joint gate is met.
+
+\IfFileExists{tables/residual_summary.tex}{\input{sections/residual_control.tex}}{}
+
+\section{Reproducibility}
+The registry binds configuration, source snapshots, input hashes, model seals,
+candidate hashes and complete metrics. Only compact candidate signatures,
+utility targets, construction coordinates and the small fitted model are
+retained. Teachers, raw scans and maps are referenced in place; dense predictions
+and image patch features are transient. A small qualitative reference figure is
+retained separately. Storage and compatibility checks support the experiment and
+are not claimed as algorithmic contributions.
+
+\input{sections/related_work.tex}
+\end{document}

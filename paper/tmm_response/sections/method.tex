@@ -1,0 +1,217 @@
+\section{Query-conditioned evidence fusion}
+\label{sec:method}
+The method forms a response in three stages: determine which observations
+apply to the query, assign their spatial support and exclusion authority, and
+combine their admitted responses through geometry. The reference extension repairs scope before transport. Semantic and
+complete-instance outputs retain their own objectives and readouts. The following equations
+describe the implemented system and identify its query-specific realizations.
+
+\begin{figure}[ht]
+\centering\includegraphics[width=\linewidth]{figures/method_overview.pdf}
+\caption{Our evidence-to-response method. Applicability and spatial authority
+determine how native evidence acts on the response. Geometric aggregation and
+complete membership have distinct typed implementations. Reference completion precedes cross-view transport. Actual selections are
+evaluated separately from continuous semantic responses.}
+\label{fig:method}
+\end{figure}
+
+\subsection{Native evidence and query applicability}
+For query $q$, observations $\mathcal E_q$ supply responses $y_e\in[0,1]$,
+nonnegative geometric operators $A_e$ and visible domains $v_e$. Nonempty
+operator rows are normalized. Text similarities and local visual correspondence
+stay in their native teacher spaces; points and reference masks retain their own
+semantics. We combine response evidence, not raw feature vectors. LERF, NVOS
+and ScanNet use declared source-assisted observations; UQIS reads its map without
+source RGB or depth at query time.
+
+Let $g_e(q)$ express whether observation $e$ applies to the requested target.
+For text candidates, we compare one- and two-component native-score models
+within candidates already detected for the same query. If their Bayesian
+information criteria are $B_1,B_2$, the implemented support is
+\begin{equation}
+ a_e=(1-\pi_2)+\pi_2\gamma_{\rm high}(s_e),\quad
+ \pi_2=\sigma((B_1-B_2)/2),\quad g_e=\mathbf1[a_e\geq0.5],
+ \label{eq:admission}
+\end{equation}
+where $\gamma_{\rm high}$ is responsibility for the higher-score component.
+A single mode supplies no relative identity veto. Degenerate or missing evidence
+does not invent one. Rejected regions become unknown rather than background.
+Mixture support is not a calibrated probability of semantic truth.
+
+This rule has a controlled LERF result. Reference queries instead inherit
+identity through a positive-prompt mask and source tracks; categories combine
+native probabilities with literal-category evidence. Image queries use local
+correspondence to select identity hypotheses. Actual points supply explicit
+spatial conditions. These are typed estimators, not unreported copies of
+Equation~\ref{eq:admission}.
+
+\subsection{Spatial authority: support, exclusion and unknown}
+An applicable observation need not describe complete extent. Let $p_e,n_e$
+denote disjoint support and exclusion domains and $c_e^+,c_e^-$ their weights:
+\begin{equation}
+ w_e=v_e g_e(q)(c_e^+p_e+c_e^-n_e).
+ \label{eq:authority}
+\end{equation}
+Unobserved space and rejected detections carry no exclusion solely because they
+lack a match. Predicted reference-mask complements and category competition can supply
+exclusion under their stated completeness assumptions. These are fallible
+provider estimates, not hard negative user prompts. Our LERF path vetoes negatives where
+native positive support exists. NVOS uses interior positive/negative regions and
+tracked negative reliability. ScanNet keeps both native priors and source weights.
+
+\subsection{Reference-scope completion and admission before transport}\label{sec:reference-completion}
+The NVOS extension estimates a complete reference response before cross-view
+transport. For reference image $I_r$, let $\mathcal P,\mathcal N$ be original
+positive and negative scribble patches. A patch containing both signs is unknown;
+unmarked patches do not supply negative labels. With frozen normalized DINOv2
+descriptors $f_r$, define
+\[
+ h_r(u)=\max_{v\in\mathcal P} f_r(u)^\top f_r(v)
+       -\max_{v\in\mathcal N} f_r(u)^\top f_r(v),
+ \qquad a_r(u)=\sigma(h_r(u)/\tau_r).
+\]
+The source-only scale $\tau_r$ is the median signed leave-one-out reference
+margin divided by $\log9$. Missing signed support or a nonpositive scale falls
+back to the original reference mask. Upsample $a_r$ and decode a semantic reference response with frozen SAM3,
+using its thresholded extent as a box and its log-odds as a dense prompt.
+Probabilities are clipped to $[10^{-4},1-10^{-4}]$ before log-odds conversion;
+the dense prompt uses the decoder's $288\times288$ grid. A second candidate additionally uses 16 deterministically spread points
+per original scribble sign. Threshold both at 0.5; for the constrained candidate,
+impose all original positive/negative pixels exactly, without relabelling
+unknown pixels. Agreement with sparse annotations does not prove complete scope.
+
+Two fixed reference-only admission policies are compared. The feasibility policy
+retains the semantic candidate when it satisfies every original signed pixel,
+otherwise choosing the constrained candidate. The source-quality policy chooses
+\[
+ \hat k=\arg\max_{k\in\{\mathrm{semantic},\mathrm{constrained}\}}
+             \widehat Q_r(k),
+\]
+where $\widehat Q_r$ is SAM3's predicted mask quality at reference decoding,
+before the final hard annotation constraints. Ties prefer the semantic candidate;
+missing quality falls back to feasibility. These scores are fallible predictions,
+not target GT or calibrated correctness probabilities. Neither rule reads a
+scene identifier, target score or task-specific threshold.
+
+The selected whole reference mask initializes frozen two-frame SAM3 memory,
+producing $y_t=T(I_r,m_r^{\hat k},I_t)$. The native-ray fit below then
+creates and actually re-renders the 3D response. Original negative scribbles,
+DINOv2 and observed target RGB remain declared extensions to v10's input contract.
+This changes response construction and admission, keeping teacher weights and
+Gaussian geometry fixed. Both fixed policies are reported on all eight tasks;
+reference-admission design follows the opened-cohort completion diagnosis.
+A source-only control instead propagates original or completed references
+through the same source-view sequence and fits a response without target-image
+evidence. This tests whether the scope intervention survives multi-view fusion.
+
+\subsection{Geometric response formation}
+For direct consensus, define $m=\sum_e A_e^\top w_e$ and
+$b=\sum_e A_e^\top(w_ey_e)$. The response is
+\begin{equation}
+ r_i=\begin{cases}
+ (b_i+\lambda_i\bar r_i)/(m_i+\lambda_i),&m_i>10^{-8},\\
+ r_{0,i},&\text{otherwise}.
+ \end{cases}
+ \label{eq:consensus}
+\end{equation}
+LERF uses $\lambda=0$. ScanNet uses a two-native mean $\bar r$ and prior strength
+0.1 times visible mass. This is an established weighted-consensus operation;
+the tested design concerns admitted evidence and its actual use in the response.
+The active ScanNet implementation has no fitted local residual head.
+
+The original NVOS path instead minimizes robust rendered discrepancy,
+\begin{equation}
+ \min_{r\in[0,1]^N}\sum_e\langle w_e,\rho_{0.25}(A_er-y_e)\rangle,
+ \label{eq:reference}
+\end{equation}
+with 120 mass-preconditioned updates from a neutral 0.5 response. Its output
+adapter zeros unsupported elements. Changing this solver while preserving
+evidence is an ablation. Our controls do not support replacing every typed
+operator by one inverse solver.
+
+\paragraph{Native-ray fitting of completed reference responses.}
+Let $p_t$ denote the transported target-image response and $s^0$ the original
+v10 Gaussian response. Native-ray writeback retains
+$y_t=p_t$ on the
+$1008\times756$ output grid and uses $w_t=|2p_t-1|v_t$. Here $v_t$ admits rays
+with nonzero observed mass and more than half of their rendered alpha supplied
+by the original observed Gaussians. The normalized observation matrix
+$\bar A_t$ is formed on the same ray grid, using the fixed original Gaussian
+geometry. Initialize at $s^0$ and take 120 bounded Huber updates for
+\begin{equation}
+ \min_{0\leq s\leq1}\sum_u w_{tu}\rho_{0.25}((\bar A_t s)_u-y_{tu}),
+ \qquad s_i=s_i^0\ \text{when no admitted observation supports }i.
+\end{equation}
+We measure both $p_t$ and the actual re-rendered 3D response. Geometry and
+teacher weights remain fixed. Because this update uses view $t$'s image,
+the result is view-conditioned; a query-global field and preserved source-view
+accuracy do not follow from target-view gains. Original source-teacher
+residuals are reported as a separate compatibility check.
+
+\subsection{Complete extent and typed outputs}
+For source-assisted actual selections, our implementation also fits membership
+against the silhouette of the selected Gaussians. This is distinct from rendering
+their semantic scores in the full scene. Let $z_i\in[0,1]$ be membership and
+$o_{vi}(u)$ the uncomposited per-Gaussian opacity at pixel $u$. The selected
+silhouette has the compositing form
+\begin{equation}
+ \alpha_v(u;z)=1-\prod_i(1-z_i o_{vi}(u)).
+\end{equation}
+The implemented loss combines foreground/background-balanced binary
+cross-entropy and soft Dice on admitted source pixels, plus a 0.1-weighted
+projected-footprint membership penalty. The footprint is normalized by its
+cost at source-initialized membership. Optimization uses at least 240 Adam
+updates (extended to the source-view count when larger) at learning rate 0.05,
+cycling through the active views. Actual membership is then
+thresholded at 0.5 and its selected opacity is rendered. The existing projection
+readout thresholds quantized 8-bit alpha above 10. This describes an existing
+v10 capability, not a new solver introduced by the subsequent NVOS experiment.
+
+\paragraph{Native image identity and conditional complete membership.}
+For an image query, let $q_u,f_v$ be normalized query and regional patch
+features, with unit-sum weights $a_u,b_v$. Local correspondence uses the
+symmetric weighted Chamfer score
+\begin{equation}
+ k(Q,R)=\tfrac12\left[\sum_{u\in Q}a_u\max_{v\in R}q_u^\top f_v+
+                         \sum_{v\in R}b_v\max_{u\in Q}q_u^\top f_v\right].
+\end{equation}
+The deployed image route averages the candidate ranks from native SigLIP
+matching and local DINOv2 correspondence. It selects a nonempty region, then
+uses its actual member nearest the coordinate-wise 3D median as the identity
+anchor. Both teacher spaces remain unchanged. An actual point supplies a
+geometric anchor directly; an image-derived anchor remains an identity estimate.
+
+For anchor $a$ and every carrier element $i$, the complete-membership decoder
+predicts
+\begin{equation}
+ p_i=f_\theta(\phi(i,a)),\qquad S_a=\{i:p_i>\tau\},\quad p_a=1.
+\end{equation}
+The 15-dimensional evidence vector retains view-balanced nested-mask votes,
+any-mask/all-mask agreement and their disagreement, common visibility and its
+presence flag, anchor/element visibility fractions, bounded signed displacement
+and distances, native appearance agreement, and native-support availability.
+Nested masks share a view's vote instead of becoming independent observations.
+The decision is evaluated over the complete carrier, without requiring an
+intermediate mask to be a pure or complete instance.
+
+The deployed decoder is an Extra Trees classifier with 64 trees, at most 512
+leaves per tree and minimum leaf size 32. It is inherited from training on
+independent 3D instance labels in 22 real-observation rooms; three separate
+calibration rooms select $\tau=0.35$. Neither split overlaps the benchmark
+rooms. This supervised decoder is disclosed as part of the method; freezing
+teacher features does not make the complete system training-free. The same
+anchor-positive rule is applied to inferred image anchors. Its identity
+condition is fallible, and an ablation removing only that assignment leaves
+all measured selected sets unchanged.
+
+Continuous semantic response, category argmax and actual instance selection
+have different readouts. LERF and NVOS maintain independent Gaussian sets;
+changing the semantic response does not change that set automatically.
+Selected-set projection IoU uses 2D GT, not volumetric GT. UQIS complete
+membership is not Equation~\ref{eq:consensus}. These distinctions are essential
+to evaluating functional improvement.
+
+The counterexample in Section~\ref{sec:analysis} explains why these output
+operators cannot be exchanged silently. Field-by-readout controls evaluate the
+actual retained NVOS fields separately; they are evidence about the output
+contract, not a new gain in either field.

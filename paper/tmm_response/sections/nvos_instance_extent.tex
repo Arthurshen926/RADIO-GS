@@ -1,0 +1,22 @@
+\section{Instance-constrained additive extent recovery}
+N11 retains the exact N09 static and signed-SAM image evidence. Three matched policies accept all proposal components, use the v10 response as signed identity evidence, or use original signed scribbles transported through fixed geometry (primary). Unmarked reference coverage has zero authority in the geometry branch. Eight-connected proposal regions require positive evidence mass greater than negative mass; empty/tied evidence retains the static response. Admitted pixels take the maximum of static and proposal probability. This image update is additive, but downstream 3D fitting is not guaranteed monotone. Every branch uses the same native rays and 120-step fit. DINOv2, SAM3, target RGB and official negative scribbles are explicitly retained inputs. All 72 predictions precede GT; other benchmarks remain unchanged references.
+\begin{center}\small\resizebox{\linewidth}{!}{\input{tables/nvos_instance_extent.tex}}\end{center}
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & Static & Unrestricted & v10 anchor & Scribble geometry \\\midrule
+fern & 83.92 & 83.73 & 83.67 & 83.66 \\
+flower & 85.98 & 94.93 & 94.93 & 94.93 \\
+fortress & 97.36 & 97.77 & 97.77 & 97.77 \\
+horns\_center & 97.30 & 75.49 & 97.42 & 97.43 \\
+horns\_left & 93.68 & 93.30 & 93.70 & 93.70 \\
+leaves & 95.61 & 52.49 & 95.66 & 95.66 \\
+orchids & 73.17 & 87.82 & 73.54 & 73.54 \\
+trex & 83.71 & 83.13 & 83.05 & 83.10 \\
+\bottomrule\end{tabular}\end{center}
+scribble anchor native vs static native: +1.1310 IoU points, -0.1540 AP points; 6 improved and 2 harmed tasks.
+scribble anchor native vs union native: +6.3929 IoU points, -0.3869 AP points; 3 improved and 3 harmed tasks.
+scribble anchor native vs prior anchor native: +0.0061 IoU points, +0.0003 AP points; 4 improved and 1 harmed tasks.
+prior anchor native vs static native: +1.1248 IoU points, -0.1544 AP points; 6 improved and 2 harmed tasks.
+union native vs static native: -5.2619 IoU points, +0.2329 AP points; 3 improved and 5 harmed tasks.
+scribble anchor native vs scribble anchor image: -0.1884 IoU points, +1.8326 AP points; 3 improved and 5 harmed tasks.
+\begin{figure}[ht]\centering\includegraphics[width=.85\linewidth,height=.75\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_instance_extent_spatial_v1/errors.png}
+\caption{All eight N11 tasks. Green TP, red FP, blue FN; native-grid display resizing only. Scores use original GT resolution.}\end{figure}

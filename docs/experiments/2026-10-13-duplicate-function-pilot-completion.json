@@ -1,0 +1,65 @@
+{
+  "pilot_plan_sha256": "3966f4966f6fce2bbaabe9a2d3a4b456cbdee060416a5d845b578f9a07aa71dc",
+  "final": {
+    "status": "validated_non_destructive_pilot",
+    "source_files": 5,
+    "groups": 2,
+    "source_originals_retained": true,
+    "old_logical_bytes": 3255651141,
+    "old_allocated_bytes": 3438164480,
+    "complete_union_blob_bytes": 1463897092,
+    "complete_union_allocated_bytes": 1544815616,
+    "new_unique_blob_bytes": 1463897092,
+    "new_unique_blob_allocated_bytes": 1544815616,
+    "pilot_artifact_logical_bytes": 2053352,
+    "pilot_artifact_allocated_bytes": 2295296,
+    "total_new_logical_bytes": 1465951353,
+    "total_new_allocated_bytes": 1547111424,
+    "application_read_bytes": 14498368650,
+    "application_write_bytes": 1463897092,
+    "prior_attempt_application_read_bytes": 4725521779,
+    "accounting": "Operation-size application byte estimates, not backend NFS measurements; small metadata IO separately bounded16MiB",
+    "allocation_observation_utc": "2026-10-13T10:13:43.507472+00:00",
+    "observed_df": {
+      "available": 890400407552,
+      "total": 47827571965952
+    },
+    "freed_now_bytes": 0,
+    "overlay_sha256": "c9d35fdd7890ab0e1e3ff26c2d2424bed06ea43f2dd99f61d5aecf35ad3edd30",
+    "retirement": "Not authorized; all original payloads retained",
+    "artifact_accounting_excludes_this_summary": true,
+    "final_summary_sha256": "59acf0897b2396b6d535ee1322a3f7ec16d7b9e3800cd03ecc2cbee399347854",
+    "fresh_new_cost": {
+      "logical": 1465965116,
+      "allocated": 1547128320,
+      "observed_utc": "2026-10-13T10:14:01.426994+00:00"
+    }
+  },
+  "settled": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/settled_retirement_proposal.json",
+    "sha256": "bb80c34c5b7d182fe889fc0e4b431bd65d059a0564d61dc4bf1de2b7ad8f7971",
+    "receipt_bytes": 14959,
+    "logical_including_this_receipt": 1465980075,
+    "allocated_including_this_receipt": 1547210752,
+    "blob_union_count": 66,
+    "blob_union_bytes": 1463897092,
+    "manifest_bytes": 50579,
+    "df": {
+      "available": 888642994176,
+      "total": 47827569868800
+    },
+    "hypothetical_net_logical_after_all_old_payloads_removed": 1789671066
+  },
+  "independent_tests": {
+    "job": "wc_job_unRzYEuzJ6TRE4Ah",
+    "passed": 20,
+    "seconds": 25.25
+  },
+  "boundary": "5 original payloads retained; no deletion authorized. Consumer overlay binds identities, not automatic legacy path interception; full native 9-scene design not rebuilt.",
+  "notes": [
+    "Two failed attempts retained, all I/O accounted.",
+    "No extra standalone export created.",
+    "Local source snapshots and docs are separate small version-recovery artifacts.",
+    "49-group document is planning only; group-level verification cache and consumer replay overlay are not yet implemented."
+  ]
+}

@@ -7,6 +7,7 @@ All semantic-observed elements may update, including source-occluded elements.
 import argparse, json, time, shutil
 from pathlib import Path
 import torch
+from radio_gs import evidence_core
 from torch.nn import functional as F
 from gsplat import rasterization
 from radio_gs.geometry.frozen_gaussian import FrozenGaussianGeometry
@@ -14,6 +15,10 @@ from radio_gs.field.moge_geometry_prior import MogeGeometryPrior
 from radio_gs.querying.typed_evidence import visible_operator
 from radio_gs.querying.finite_evidence import combine_with_native, source_strength
 from radio_gs.querying.instance_reliability import instance_reliability
+
+def _transport(operator, values):
+    return evidence_core.project(operator, values) if evidence_core.enabled() else torch.sparse.mm(operator, values)
+
 
 def load(p):
     return torch.load(p, map_location='cpu', weights_only=False)
@@ -179,7 +184,7 @@ def main():
             if local_reliability:
                 positive_weight, negative_weight, detector_positive_weight, detector_negative_weight = [
                     x[pixels] for x in (positive_weight, negative_weight, detector_positive_weight, detector_negative_weight)]
-        native_positive = torch.sparse.mm(op_old, exclusion_reference) > 0.5
+        native_positive = _transport(op_old, exclusion_reference) > 0.5
         if args.arm in ('agreement', 'decision', 'anneal'):
             original_complement = neg
             neg = neg if args.scope_negatives else neg & old_valid & ~native_positive
@@ -234,27 +239,27 @@ def main():
         for v in views:
             active = (v['confidence'] > 0) & v['pos'].any(0)
             if args.positive_witnesses:
-                purity = torch.sparse.mm(v['op'].T, v['pos'].float()) / v['mass'][:, None].clamp_min(1e-08)
+                purity = _transport(v['op'].T, v['pos'].float()) / v['mass'][:, None].clamp_min(1e-08)
                 v['positive_witness'] = (purity > 0.5) & active[None] & (v['mass'][:, None] > 1e-08)
                 positive_witness_count += v['positive_witness']
             weight = v['confidence'][None] * active[None]
             known = (v['pos'] | v['pending_negative']).float() * weight
             negative = v['pending_negative'].float() * weight
-            known_mass += torch.sparse.mm(v['op'].T, known)
-            negative_mass += torch.sparse.mm(v['op'].T, negative)
+            known_mass += _transport(v['op'].T, known)
+            negative_mass += _transport(v['op'].T, negative)
         for v in views:
             active = (v['confidence'] > 0) & v['pos'].any(0)
             weight = v['confidence'][None] * active[None]
             known = (v['pos'] | v['pending_negative']).float() * weight
             negative = v['pending_negative'].float() * weight
-            other_mass = known_mass - torch.sparse.mm(v['op'].T, known)
-            other_negative = negative_mass - torch.sparse.mm(v['op'].T, negative)
-            coverage = torch.sparse.mm(v['op'], (other_mass > 1e-08).float())
-            fraction = torch.sparse.mm(v['op'], other_negative / other_mass.clamp_min(1e-08)) / coverage.clamp_min(1e-08)
+            other_mass = known_mass - _transport(v['op'].T, known)
+            other_negative = negative_mass - _transport(v['op'].T, negative)
+            coverage = _transport(v['op'], (other_mass > 1e-08).float())
+            fraction = _transport(v['op'], other_negative / other_mass.clamp_min(1e-08)) / coverage.clamp_min(1e-08)
             admitted = v['pending_negative'] & (coverage > 0.5) & (fraction > 0.5) & active[None]
             if args.positive_witnesses:
                 other_witnesses = positive_witness_count - v['positive_witness'].float()
-                protected = torch.sparse.mm(v['op'], (other_witnesses >= args.positive_witnesses).float()) > 0.5
+                protected = _transport(v['op'], (other_witnesses >= args.positive_witnesses).float()) > 0.5
                 protected_negative_counts += (admitted & ~v['neg'] & protected).sum(0).cpu()
                 admitted &= ~protected
             corroborated_negative_counts += (admitted & ~v['neg']).sum(0).cpu()
@@ -269,16 +274,16 @@ def main():
         weight = v['detector_positive_weight'] * detector_pos + v['detector_negative_weight'] * detector_neg
         v['detector_pos'] = detector_pos
         v['detector_weight'] = weight
-        total_mass += torch.sparse.mm(v['op'].T, weight)
-        total_positive += torch.sparse.mm(v['op'].T, weight * detector_pos)
+        total_mass += _transport(v['op'].T, weight)
+        total_positive += _transport(v['op'].T, weight * detector_pos)
     admission = []
     for ((frame, _), v) in zip(records, views):
-        m = torch.sparse.mm(v['op'].T, v['detector_weight'])
-        n = torch.sparse.mm(v['op'].T, v['detector_weight'] * v['detector_pos'])
+        m = _transport(v['op'].T, v['detector_weight'])
+        n = _transport(v['op'].T, v['detector_weight'] * v['detector_pos'])
         other_mass = total_mass - m
         other = (total_positive - n) / other_mass.clamp_min(1e-08)
-        coverage = torch.sparse.mm(v['op'], (other_mass > 1e-08).float())
-        corroboration = torch.sparse.mm(v['op'], other) / coverage.clamp_min(1e-08)
+        coverage = _transport(v['op'], (other_mass > 1e-08).float())
+        corroboration = _transport(v['op'], other) / coverage.clamp_min(1e-08)
         extra = v['detector_pos'] & (coverage > 0.5) & (corroboration > 0.5) & ~v['pos']
         for (qi, t) in enumerate(tracks):
             evidence = t['frames'].get(frame, {})
@@ -292,12 +297,12 @@ def main():
         witnesses = torch.zeros_like(prior)
         for v in views:
             active = (v['confidence'] > 0) & v['pos'].any(0)
-            purity = torch.sparse.mm(v['op'].T, v['pos'].float()) / v['mass'][:, None].clamp_min(1e-08)
+            purity = _transport(v['op'].T, v['pos'].float()) / v['mass'][:, None].clamp_min(1e-08)
             v['positive_witness'] = (purity > 0.5) & active[None] & (v['mass'][:, None] > 1e-08)
             witnesses += v['positive_witness']
         for v in views:
             other = witnesses - v['positive_witness'].float()
-            disputed = torch.sparse.mm(v['op'], (other >= 2).float()) > 0.5
+            disputed = _transport(v['op'], (other >= 2).float()) > 0.5
             removed = v['neg'] & disputed
             conflict_counts += removed.sum(0).cpu()
             v['neg'] &= ~disputed
@@ -347,6 +352,11 @@ def main():
             for v in active:
                 v['positive_weight'][:, qi] *= factor
                 v['negative_weight'][:, qi] *= factor
+        if evidence_core.enabled():
+            for v in active:
+                domains = evidence_core.compile_domains(v['pos'][:, qi], v['neg'][:, qi],
+                    visible=v['valid'][:, 0], negative_origin='model_complement')
+                v['pos'][:, qi], v['neg'][:, qi] = domains.positive, domains.negative
         strength = source_strength([v['confidence'][qi] for v in active], args.evidence_strength)
         visibility = sum((v['mass'] for v in active))
         support = observed
@@ -356,8 +366,8 @@ def main():
             known_mass = torch.zeros_like(start_membership)
             for v in active:
                 known = v['pos'][:, qi] * v['positive_weight'][:, qi] + v['neg'][:, qi] * v['negative_weight'][:, qi]
-                known_mass += torch.sparse.mm(v['op'].T, known[:, None])[:, 0]
-                positive_mass += torch.sparse.mm(v['op'].T, (known * v['y'][:, qi])[:, None])[:, 0]
+                known_mass += _transport(v['op'].T, known[:, None])[:, 0]
+                positive_mass += _transport(v['op'].T, (known * v['y'][:, qi])[:, None])[:, 0]
             start_membership = torch.where(known_mass > 1e-08, positive_mass / known_mass.clamp_min(1e-08), start_membership)
         if args.source_fusion_only:
             membership = combine_with_native(start_membership, prior[:, qi], strength) if args.finite_evidence else start_membership
@@ -391,7 +401,7 @@ def main():
             proposal = parameter.sigmoid()
             membership = combine_with_native(proposal, prior[:, qi], strength) if args.finite_evidence else proposal
             p = torch.where(support, membership, prior[:, qi])
-            response = torch.sparse.mm(v['op'], p[:, None])[:, 0]
+            response = _transport(v['op'], p[:, None])[:, 0]
             member = p * observed
             if args.arm in ('decision', 'anneal'):
                 temperature = 0.5 * (0.1 / 0.5) ** (step / max(steps - 1, 1))

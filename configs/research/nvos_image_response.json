@@ -1,0 +1,21 @@
+{
+  "run": "nvos_image_response_v3",
+  "arms": ["v10", "render_box", "rgb_box", "render_mask", "rgb_mask", "render_mask_lift", "rgb_mask_lift"],
+  "primary_arm": "rgb_mask_lift",
+  "source_hw": [384, 512],
+  "solver_steps": 120,
+  "threshold": 0.5,
+  "image_decoder": "SAM3 official interactive single-mask; box extent of v10 >=0.5, optionally continuous log-odds prior",
+  "image_checkpoint": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+  "image_backbone_resolution": 1008,
+  "target_rgb_arms": ["rgb_box", "rgb_mask", "rgb_mask_lift"],
+  "lift_observation": "confidence-weighted area pooled SAM probability; normalized existing observed geometry; initialize v10 and preserve unsupported elements",
+  "target_gt_used_for_prediction": false,
+  "geometry_changed": false,
+  "per_task_winner_selection": false,
+  "independent_test": false,
+  "maximum_new_durable_bytes": 4194304,
+  "maximum_volatile_prediction_bytes": 268435456,
+  "gpu_memory_fraction": 0.5,
+  "gt_tracks": ["retained_gt_gt127", "ludvig_gt_maximum"]
+}

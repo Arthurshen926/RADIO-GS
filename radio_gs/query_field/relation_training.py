@@ -17,7 +17,7 @@ import torch
 from .contracts import Support
 from .geometry import relaxed_subset_alpha
 from .observations import training_episode
-from .storage import load_field, save_field, sha256
+from .storage import load_field, save_field, sha256, field_identity, deployment_bytes
 
 
 def weighted_partial_loss(predicted, positive, negative):
@@ -150,13 +150,15 @@ def training_parameters(field, policy):
 
 
 def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_rate=.001,
-        parameter_policy='joint', device='cuda'):
+        parameter_policy='joint', device='cuda', field_loader=None, save_function=None):
     if arm not in {'local_anchor_control', 'cross_view_anchor'}:
         raise ValueError('unknown relation training arm')
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
-    field, parent_manifest = load_field(parent, device)
+    loader = load_field if field_loader is None else field_loader
+    writer = save_field if save_function is None else save_function
+    field, parent_manifest = loader(parent, device)
     before = buffer_digests(field)
     source = SourceRelations(observations, field.observed)
     if source.manifest['world_units_per_metre'] != field.world_units_per_metre:
@@ -213,11 +215,12 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
         raise ValueError('relation training modified protected shared member parameters')
     if not bool((visits == epochs).all()):
         raise ValueError('source region exposure is incomplete')
-    export = save_field(field, output / 'field', dict(parent_field_sha256=parent_manifest['files']['field.pt']['sha256'],
+    export = writer(field, output / 'field', dict(parent_field_sha256=parent_manifest['files']['field.pt']['sha256'],
         observations_sha256=sha256(Path(observations) / 'observations.json'),
         supervision='source-only partial multi-view SAM relations', arm=arm, parameter_policy=parameter_policy,
         additional_3d_labels=False, benchmark_queries_used=False))
     report = dict(arm=arm, parent=str(parent), parent_sha256=parent_manifest['files']['field.pt']['sha256'],
+        parent_source_schema=parent_manifest['schema'],
         observations=str(observations), observations_sha256=sha256(Path(observations) / 'observations.json'),
         epochs=epochs, steps=nsteps, learning_rate=learning_rate, seed=seed,
         parameter_policy=parameter_policy, protected_member_parameters=list(protected),
@@ -228,6 +231,8 @@ def fit(parent, observations, output, *, arm, epochs=2, seed=20261008, learning_
         distinct_anchor_steps=sum(t['anchor'] != t['secondary_anchor'] for t in trace),
         ambiguity_steps=sum(t['disagreement_pixels'] > 0 for t in trace),
         trace=trace, history=history, seconds=time.monotonic() - started,
-        export_sha256=export['files']['field.pt']['sha256'], source_access_at_query=False)
+        export_sha256=field_identity(export), field_schema=export['schema'],
+        export_state_identity=export.get('state_identity'), deployment_bytes=deployment_bytes(export),
+        source_access_at_query=False)
     (output / 'training.json').write_text(json.dumps(report, indent=2) + '\n')
     return report

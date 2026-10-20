@@ -1,0 +1,18 @@
+\section{Direct affinity writeback without a second segmentation}
+N10 was fixed before N09 scoring. Exact signed and pseudo-mask affinity probabilities from N09 are fitted directly into the same observed Gaussians using the identical native-ray operator, confidence and 120-step objective. The four parent controls retain exact continuous-array hashes and scores. No teacher calls, new prompts, geometry or target-selected parameters are introduced. All 48 responses precede GT. Original negative reference scribbles and observed target RGB remain explicit input extensions; the result is view-conditioned development evidence.
+\begin{center}\small\resizebox{\linewidth}{!}{\input{tables/nvos_direct_affinity.tex}}\end{center}
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+Task & Static & Signed + SAM & Signed direct & Pseudo direct \\\midrule
+fern & 83.92 & 83.21 & 76.40 & 80.64 \\
+flower & 85.98 & 95.07 & 89.46 & 91.38 \\
+fortress & 97.36 & 97.88 & 88.02 & 94.45 \\
+horns\_center & 97.30 & 67.16 & 73.90 & 94.01 \\
+horns\_left & 93.68 & 91.07 & 72.72 & 87.81 \\
+leaves & 95.61 & 45.57 & 70.55 & 84.47 \\
+orchids & 73.17 & 88.89 & 83.64 & 69.93 \\
+trex & 83.71 & 83.79 & 67.15 & 70.99 \\
+\bottomrule\end{tabular}\end{center}
+signed direct native vs static native: -11.1117 IoU points, -1.5029 AP points; 2 improved and 6 harmed tasks.
+signed direct native vs signed native: -3.8496 IoU points, +7.3633 AP points; 2 improved and 6 harmed tasks.
+pseudo direct native vs pseudo native: -1.8713 IoU points, +0.8362 AP points; 1 improved and 7 harmed tasks.
+signed direct native vs pseudo direct native: -6.4791 IoU points, -1.6998 AP points; 1 improved and 7 harmed tasks.

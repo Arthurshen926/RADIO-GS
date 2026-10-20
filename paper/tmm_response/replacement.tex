@@ -1,0 +1,51 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=24mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
+\setlength{\emergencystretch}{2em}
+\title{Learning When to Replace a Complete 3D Query Response}
+\author{Optional extension: measured controls and limitations}
+\date{October 18, 2026}
+\begin{document}
+\maketitle
+
+\input{sections/replacement_method.tex}
+
+\paragraph{Evaluation and attribution.}
+Use 22 independent fit rooms, three calibration rooms and four previously opened
+development rooms. The frozen member provider also used the fit rooms; disclose
+that overlap. Train on at most 32 deterministically selected eligible natural
+expressions per fit room, then evaluate all calibration/development expressions.
+The joint extension also constructs real RGB reference crops from those same
+independent rooms, using official instance annotations only for training-data
+construction and complete-answer utility targets. Greedy geometric visibility
+coverage proposes up to four reference views. Reference frames, their temporal neighbors, and nearby
+camera poses are withheld jointly from every candidate provider. Original
+SigLIP descriptors and SAM masks are retained; original DINO local matching is
+streamed without storing another dense feature map. The full-scan mesh remains
+the geometric carrier. This is not a reconstruction experiment with held-out
+geometry. Text starts from the deployed scope incumbent and images from the
+deployed direct-member incumbent. Only a single shared decision model is fitted.
+Seal the model before development and benchmark scoring. Test the same policy
+on text and image queries, including one- and two-teacher inputs, without new
+benchmark margins. Compare against the same learner without query features and
+against a joint within-view permutation of all teacher scores. The latter keeps
+their correlations and multiset, geometry and candidate pool unchanged.
+
+The current adapter operates on regional instance evidence. LERF semantic and
+projected-set outputs, NVOS reference responses, and ScanNet's complete category
+competition require their own legal observation adapters and validation under
+the same decision rule. They must not be called successful transfers merely
+because their retained reference outputs are unchanged. The finite-pool
+selection layer is an active candidate, not yet a validated replacement for
+the full v10 system. The accompanying experiment report supplies measured
+results; historical text-admission gains belong to our established method and
+are not attributed to this learner.
+
+\IfFileExists{tables/joint_replacement.tex}{
+\paragraph{Measured joint transfer (development evidence).}
+\begin{center}\input{tables/joint_replacement.tex}\end{center}
+The table uses the same frozen candidates and the same decision checkpoint for
+both modalities. It is not an independent final test or a full-five result.
+}{ }
+\input{sections/replacement_controls.tex}
+\end{document}

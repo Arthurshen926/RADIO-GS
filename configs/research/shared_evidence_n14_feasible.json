@@ -1,0 +1,136 @@
+{
+  "schema": "radiogs.shared_core_migration.v1",
+  "recipe": "configs/pipeline/reference_completion_20261019/feasible.recipe.json",
+  "historical_recipe": "configs/pipeline/system_v10.json",
+  "protocol_freeze": "paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+  "component_audit": "docs/experiments/2026-10-19-shared-core-component-audit-v7.json",
+  "study_root": "output/shared_evidence_20261018",
+  "outputs": [
+    "lerf2d",
+    "lerf3d_projected_selection",
+    "scannet_ovs",
+    "nvos",
+    "uqis_four_modalities"
+  ],
+  "cohorts": {
+    "lerf": [
+      "ramen",
+      "figurines",
+      "teatime",
+      "waldo_kitchen"
+    ],
+    "nvos": [
+      "fern",
+      "flower",
+      "fortress",
+      "horns_center",
+      "horns_left",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "scannet": [
+      "scene0000_00",
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00",
+      "scene0140_00",
+      "scene0200_00",
+      "scene0347_00",
+      "scene0400_00",
+      "scene0590_00",
+      "scene0645_00"
+    ],
+    "uqis": [
+      "scene0030_00",
+      "scene0203_00",
+      "scene0246_00",
+      "scene0249_00",
+      "scene0353_00",
+      "scene0435_00",
+      "scene0535_00",
+      "scene0700_00",
+      "scene0704_00"
+    ]
+  },
+  "protocols": {
+    "lerf": "4 scenes; semantic response and actual selected-Gaussian projection; no volumetric 3D GT claim",
+    "scannet": "same fresh predictions: internal10 mesh point metric plus paper8 Gaussian opacity-volume metric; historical dual native teachers for parity",
+    "nvos": "8 tasks; N14 feasible source selection; signed reference scribbles and observed target RGB; fresh source-only initializer and frozen geometry; direct image/native response separate; two GT conventions",
+    "uqis": "9 rooms, 268 queries; map-only; public crop/point permissions; existing complete member head and inherited training unchanged"
+  },
+  "evaluators": [
+    "scripts/research/evaluate_consolidated_query.py",
+    "scripts/research/evaluate_reference_instance.py",
+    "scripts/research/evaluate_scannet_runtime.py",
+    "radio_gs/benchmarks/uqis/evaluate.py",
+    "radio_gs/evaluation/lerf_readouts.py",
+    "radio_gs/scripts/eval_scannet_vala_gaussian_protocol.py"
+  ],
+  "minimum_free_gpu_mib": 16384,
+  "storage": {
+    "transient_root": "/dev/shm",
+    "transient_bytes": 42949672960,
+    "transient_reserve_bytes": 4294967296,
+    "durable_policy": {
+      "study_bytes": 268435456,
+      "run_bytes": 33554432,
+      "artifact_bytes": 8388608,
+      "reserve_bytes": 1073741824
+    },
+    "persist": "configuration/source hashes, small reports, logs, traces, final prediction hashes",
+    "dense_outputs": "private transient RAM, removed on success/failure; recompute from frozen references",
+    "duplicate_static_maps": false
+  },
+  "pending_extensions": [
+    "Fresh full legacy/shared_v1 inference and per-output regression; current component audit is not a benchmark score",
+    "Validate the integrated N14 whole provider on GPU, preserving both frozen source policies and matched input access",
+    "Single SigLIP2 ScanNet profile as a separately measured teacher change",
+    "Crop-only UQIS image SAM refinement with matched image access",
+    "Complete source-cache content sealing and costs beyond current configuration/declared-hash binding"
+  ],
+  "promotion": {
+    "default": "legacy",
+    "requires": "complete five-output parity plus per-task/scene regressions; no benchmark-wise winner stitching"
+  },
+  "stage1_checkpoint": "5674e4b3fe5b3115103be9560fd5963337d2cd40",
+  "validation_ladder": [
+    {
+      "stage": "cpu_components",
+      "status": "implemented",
+      "full_benchmark_claim": false
+    },
+    {
+      "stage": "fixed_end_to_end_smoke",
+      "status": "pending_gpu",
+      "cases": [
+        "lerf/ramen",
+        "nvos/fern",
+        "nvos/horns_center",
+        "scannet/scene0000_00",
+        "uqis/scene0030_00"
+      ],
+      "selection_rule": "fixed coverage of output types, reference extent and four query modalities; not chosen by new scores",
+      "scoring": "component and old/new final-output parity; not full-cohort metrics"
+    },
+    {
+      "stage": "one_change_at_a_time",
+      "status": "pending_smoke",
+      "changes": [
+        "member_chunk_size=8192",
+        "single_semantic_teacher",
+        "N14_same_access",
+        "UQIS_crop_only_SAM"
+      ]
+    },
+    {
+      "stage": "frozen_five_output",
+      "status": "pending_small_controls",
+      "promotion_allowed": false
+    }
+  ],
+  "base_component_recipe": "output/shared_evidence_20261018/region_provenance_20261019_v1/recipe.json",
+  "extension_cpu_audit": "docs/experiments/2026-10-19-reference-completion-cpu-audit-v1.json",
+  "method_change": "N14 input extension relative to v10; not an unchanged-input core ablation",
+  "historical_n14_policy_role": "primary"
+}

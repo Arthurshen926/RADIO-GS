@@ -1,0 +1,185 @@
+--- before/scripts/audits/pilot_duplicate_function_storage.py
++++ after/scripts/audits/pilot_duplicate_function_storage.py
+@@ -10,6 +10,16 @@
+ def now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
+ def read(p):return json.loads(Path(p).read_text())
+ def digest(v):return hashlib.sha256(json.dumps(v,sort_keys=True,separators=(',',':')).encode()).hexdigest()
++SPEC_DEFAULTS={'semantic_measure_rule':'none','native_mode_rule':'none'}
++SPEC_RULE='historical_disabled_rules_explicit_none.v1'
++def spec_contract(historical,effective):
++ expected=dict(historical)
++ added={k:v for k,v in SPEC_DEFAULTS.items() if k not in historical}
++ expected.update(added)
++ if digest(effective)!=digest(expected):raise ValueError('unapproved effective spec difference')
++ return dict(rule=SPEC_RULE,historical_spec=dict(historical),historical_spec_sha256=digest(historical),
++  effective_spec=dict(effective),effective_spec_sha256=digest(effective),added_defaults=added,
++  identity_note='Historical dictionary values retained; exact original JSON bytes bound by source_manifest_sha256')
+ def publish(p,v):
+  p=Path(p);p.parent.mkdir(parents=True,exist_ok=True)
+  with p.open('x') as h:json.dump(v,h,indent=2);h.write('\n');h.flush();os.fsync(h.fileno())
+@@ -41,7 +51,7 @@
+  source_hash=sum(s['bytes'] for g in plan['groups'] for s in g['source_members'])
+  source_load=sum(g['one_archive_bytes'] for g in plan['groups'])
+  # Conservative: count ALL writer verification reads AND all possible new writes.
+- bound=source_hash+source_load+2*tensor_total+representative_tensors+64*1024**2
++ bound=source_hash+source_load+2*tensor_total+representative_tensors+64*1024**2+plan.get('prior_attempt_application_read_bytes',0)
+  if bound>plan['max_application_io_bytes']:raise ValueError('precompute IO budget exceeded')
+  if bound!=plan.get('application_io_upper_bound_bytes',bound):raise ValueError('frozen IO bound changed')
+  for entry in plan.get('metadata_bindings',[]):
+@@ -142,8 +152,8 @@
+   if fp(path)!=item['stat']:raise ValueError('published blob changed')
+  metadata=metadata_files(root) if root.exists() else {}
+  return dict(new_blobs=new,metadata=metadata,
+-  logical=sum(x['stat']['bytes'] for x in new.values())+sum(x['bytes'] for x in metadata.values()),
+-  allocated=sum(x['stat']['allocated'] for x in new.values())+sum(x['allocated'] for x in metadata.values()))
++  logical=sum(x['stat']['bytes'] for x in new.values())+sum(x['bytes'] for x in metadata.values())+plan.get('prior_attempt_artifact_logical_bytes',0),
++  allocated=sum(x['stat']['allocated'] for x in new.values())+sum(x['allocated'] for x in metadata.values())+plan.get('prior_attempt_artifact_allocated_bytes',0))
+ def check_cap(plan,usage):
+  if max(usage['logical'],usage['allocated'])>plan['max_total_new_bytes']:raise ValueError('pilot cumulative new-disk cap exceeded')
+ def migrate(plan,group):
+@@ -157,14 +167,14 @@
+  for index,(source,original,payload) in enumerate(sources):
+   # Historical loader semantics must themselves preserve this real raw state.
+   legacy=field_from_state(raw,original,preserve_dtypes=False);assert_state(raw,legacy)
+-  if legacy.export_spec()!=original['spec']:raise ValueError('legacy spec normalization differs; stop for review')
++  contract=spec_contract(original['spec'],legacy.export_spec())
+   if reference_fixture is None:
+    reference_fixture=probes(legacy)
+    torch.save(reference_fixture,destination/'probe_fixture.pt')
+   baseline=probe_results(legacy,reference_fixture,group['group_id'])
+   del legacy;gc.collect()
+   field=field_from_state(raw,original,preserve_dtypes=True);assert_state(raw,field)
+-  if field.export_spec()!=original['spec']:raise ValueError('lossless spec differs')
++  if field.export_spec()!=contract['effective_spec']:raise ValueError('lossless effective spec differs')
+   target=destination/('variant_'+str(index));store=Path(plan['store_root'])
+   absent={d['sha256']:d for d in expected.values() if not (store/(d['sha256']+'.bin')).exists()}
+   before_usage=current_new_usage(plan);check_cap(plan,before_usage)
+@@ -172,12 +182,12 @@
+   missing=sum(d['bytes'] for d in absent.values())
+   if before_usage['allocated']+int(missing*1.25)+16*1024**2>plan['max_total_new_bytes']:raise ValueError('conservative cumulative allocation gate')
+   provenance=dict(original['provenance'],source_manifest=original,source_field_sha256=group['raw_payload_sha256'],
+-      source_manifest_sha256=source['manifest_sha256'],migration_kind='exact_function_variant_storage_only')
++      source_manifest_sha256=source['manifest_sha256'],spec_migration=contract,migration_kind='exact_function_variant_storage_only')
+   publish(destination/('intent_'+str(index)+'.json'),dict(target=str(target),missing_blobs=[
+     dict(path=str(store/(h+'.bin')),descriptor=d) for h,d in absent.items()]))
+   manifest=save_field_v2(field,target,provenance,store_root=store,
+       max_new_bytes=plan['max_total_new_bytes']-before_usage['logical'],reserve_bytes=plan['reserve_bytes'])
+-  if manifest['tensors']!=expected or manifest['spec']!=original['spec']:raise ValueError('published scientific state differs')
++  if manifest['tensors']!=expected or manifest['spec']!=contract['effective_spec']:raise ValueError('published scientific state differs')
+   new_blobs=[dict(path=str(store/(h+'.bin')),stat=fp(store/(h+'.bin'))) for h in absent]
+   io_write+=sum(d['bytes'] for d in absent.values())
+   # Writer verifies one blob for each already-existing tensor key (including intra-state aliases).
+@@ -185,7 +195,7 @@
+   record=dict(index=index,group_id=group['group_id'],old_path=str(payload),old_manifest=str(payload.with_name('manifest.json')),
+    old_manifest_sha256=source['manifest_sha256'],old_field_sha256=group['raw_payload_sha256'],target=str(target),
+    target_manifest_sha256=sha256(target/'manifest.json'),state_identity=manifest['state_identity'],
+-   store_root=plan['store_root'],original_spec=original['spec'],tensor_descriptors=expected,
++   store_root=plan['store_root'],original_spec=original['spec'],spec_migration=contract,tensor_descriptors=expected,
+    probe_fixture=str(destination/'probe_fixture.pt'),probe_fixture_sha256=sha256(destination/'probe_fixture.pt'),
+    expected_probes=baseline,new_blobs=new_blobs,raw_legacy_and_lossless_dtype_value_exact=True)
+   publish(destination/('publish_'+str(index)+'.json'),record);records.append(record)
+@@ -237,7 +247,9 @@
+  before=fp(Path(record['target'])/'manifest.json')
+  if sha256(Path(record['target'])/'manifest.json')!=record['target_manifest_sha256']:raise ValueError('target manifest changed')
+  field,manifest=load_field_versioned(record['target'],store_root=record['store_root'])
+- if manifest['state_identity']!=record['state_identity'] or manifest['spec']!=record['original_spec'] or manifest['tensors']!=record['tensor_descriptors']:
++ contract=spec_contract(record['original_spec'],manifest['spec'])
++ if contract!=record['spec_migration'] or manifest['provenance']['spec_migration']!=contract:raise ValueError('spec migration identity differs')
++ if manifest['state_identity']!=record['state_identity'] or field.export_spec()!=contract['effective_spec'] or manifest['tensors']!=record['tensor_descriptors']:
+   raise ValueError('cold scientific identity differs')
+  actual=probe_results(field,fixture,group_id)
+  if actual!=record['expected_probes'] or attempts:raise ValueError('cold query mismatch or forbidden source attempted')
+@@ -252,7 +264,7 @@
+ 
+ def finalize(plan):
+  check_input_budget(plan)
+- root=Path(plan['new_root']);entries=[];union={};new={};read_bytes=write_bytes=0
++ root=Path(plan['new_root']);entries=[];union={};new={};read_bytes=plan.get('prior_attempt_application_read_bytes',0);write_bytes=0
+  for group in plan['groups']:
+   checked_sources(plan,group)
+   migration=read(root/group['group_id']/'migration_complete.json')
+@@ -271,7 +283,7 @@
+    if sha256(Path(record['target'])/'manifest.json')!=record['target_manifest_sha256']:raise ValueError('target changed')
+    union.update({d['sha256']:d for d in manifest['tensors'].values()})
+    new.update({x['path']:x for x in record['new_blobs']})
+-   entries.append({k:record[k] for k in ['group_id','index','old_path','old_manifest','old_manifest_sha256','old_field_sha256','target','target_manifest_sha256','state_identity','store_root','original_spec']})
++   entries.append({k:record[k] for k in ['group_id','index','old_path','old_manifest','old_manifest_sha256','old_field_sha256','target','target_manifest_sha256','state_identity','store_root','original_spec','spec_migration']})
+  for h,d in union.items():
+   p=Path(plan['store_root'])/(h+'.bin')
+   if not p.is_file() or p.stat().st_size!=d['bytes']:raise ValueError('closure missing')
+@@ -293,6 +305,7 @@
+   pilot_artifact_allocated_bytes=sum(x['allocated'] for x in usage['metadata'].values()),
+   total_new_logical_bytes=usage['logical'],total_new_allocated_bytes=usage['allocated'],
+   application_read_bytes=read_bytes,application_write_bytes=write_bytes,
++  prior_attempt_application_read_bytes=plan.get('prior_attempt_application_read_bytes',0),
+   accounting='Operation-size application byte estimates, not backend NFS measurements; small metadata IO separately bounded16MiB',
+   observed_df=df(plan['output_root']),freed_now_bytes=0,overlay_sha256=sha256(root/'consumer_overlay.json'),
+   retirement='Not authorized; all original payloads retained')
+--- before/tests/test_duplicate_function_pilot.py
++++ after/tests/test_duplicate_function_pilot.py
+@@ -10,7 +10,7 @@
+ from radio_gs.query_field.native_modes import NativeModes
+ from scripts.audits import pilot_duplicate_function_storage as pilot
+ 
+-def fixture_plan(tmp_path):
++def fixture_plan(tmp_path,historical=False):
+  output=tmp_path/'output';output.mkdir();store=output/'store';store.mkdir()
+  f=example();enable(f,data([[1,1],[0,1]]+[[0,0]]*10,[[0,0],[1,0]]+[[0,0]]*10,[0,0]))
+  native=example();native.native_modes=NativeModes(mode_state()[0],12)
+@@ -24,6 +24,10 @@
+    if i:
+     shutil.copyfile(output/'old'/gid/'0/field.pt',directory/'field.pt')
+     m['files']['field.pt']['sha256']=sha256(directory/'field.pt');(directory/'manifest.json').write_text(json.dumps(m))
++   if historical:
++    m['spec'].pop('semantic_measure_rule')
++    if gid=='G01':m['spec'].pop('native_mode_rule')
++    (directory/'manifest.json').write_text(json.dumps(m))
+    entry=dict(pilot.fp(directory/'field.pt'),path=str((directory/'field.pt').relative_to(output)),manifest_sha256=sha256(directory/'manifest.json'))
+    members.append(entry)
+   groups.append(dict(group_id=gid,raw_payload_sha256=m['files']['field.pt']['sha256'],one_archive_bytes=m['files']['field.pt']['bytes'],source_members=members))
+@@ -31,8 +35,9 @@
+   max_total_new_bytes=32*1024**2,max_application_io_bytes=128*1024**2,reserve_bytes=0,groups=groups,consumers=[],
+   forbidden_source_roots=[str(output/'training')],code=[])
+ 
+-def test_real_two_groups_and_independent_denied_cold(tmp_path):
+- plan=fixture_plan(tmp_path)
++@pytest.mark.parametrize('historical',[False,True])
++def test_real_two_groups_and_independent_denied_cold(tmp_path,historical):
++ plan=fixture_plan(tmp_path,historical)
+  for group in plan['groups']:pilot.migrate(plan,group)
+  config=tmp_path/'plan.json';config.write_text(json.dumps(plan))
+  for group in plan['groups']:
+@@ -59,3 +64,33 @@
+  plan=fixture_plan(tmp_path);plan['max_total_new_bytes']=1
+  with pytest.raises(ValueError,match='cap|gate'):pilot.migrate(plan,plan['groups'][0])
+  assert not list(Path(plan['store_root']).glob('*.bin'))
++@pytest.mark.parametrize('effective',[
++ {'semantic_measure_rule':'measure','native_mode_rule':'none'},
++ {'semantic_measure_rule':'none','native_mode_rule':'none','unknown':'none'},
++ {'semantic_measure_rule':'none'},
++])
++def test_only_two_missing_disabled_defaults_allowed(effective):
++ with pytest.raises(ValueError,match='unapproved'):pilot.spec_contract({},effective)
++
++def test_existing_values_cannot_change_and_historical_identity_retained():
++ old={'native_mode_rule':'measure','threshold':0.5}
++ effective=dict(old,semantic_measure_rule='none')
++ contract=pilot.spec_contract(old,effective)
++ assert contract['historical_spec']==old and contract['historical_spec_sha256']==pilot.digest(old)
++ assert contract['effective_spec_sha256']!=contract['historical_spec_sha256']
++ assert contract['added_defaults']=={'semantic_measure_rule':'none'}
++ with pytest.raises(ValueError,match='unapproved'):
++  pilot.spec_contract(old,dict(effective,native_mode_rule='none'))
++ with pytest.raises(ValueError,match='unapproved'):
++  pilot.spec_contract(old,dict(effective,threshold=0.6))
++
++@pytest.mark.parametrize('old,new',[(8,8.0),(1,True)])
++def test_spec_existing_value_json_type_cannot_change(old,new):
++ with pytest.raises(ValueError,match='unapproved'):
++  pilot.spec_contract({'candidate_count':old},dict(pilot.SPEC_DEFAULTS,candidate_count=new))
++
++def test_prior_failed_read_cost_enforced_before_payload(tmp_path,monkeypatch):
++ plan=fixture_plan(tmp_path);plan['prior_attempt_application_read_bytes']=plan['max_application_io_bytes']
++ monkeypatch.setattr(torch,'load',lambda *a,**k:pytest.fail('must not load over budget'))
++ with pytest.raises(ValueError,match='IO budget'):pilot.migrate(plan,plan['groups'][0])
++

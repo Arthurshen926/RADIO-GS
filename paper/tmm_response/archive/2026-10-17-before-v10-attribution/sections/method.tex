@@ -1,0 +1,146 @@
+\section{Query-conditioned partial-evidence fusion}
+\label{sec:method}
+The method question is whether an observation is entitled to change the
+response to a particular query. We organize this decision as one mechanism:
+\emph{query applicability, spatial evidence authority, and geometric fusion}.
+These are successive decisions about the same evidence, not three independent
+networks. The strongest existing implementation supplies concrete instances of
+this mechanism; a single admission rule with demonstrated gains across every
+input type is still under development.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{figures/method_overview.pdf}
+\caption{Method abstraction and implementation boundary. Frozen providers
+supply native responses, query identity and available observations. Admission
+determines which observations may act, and where; fixed geometry transports
+their responses. Complete membership and independent set outputs are retained
+as providers/readouts. The shared admission rule is the research variable;
+the diagram does not assert a completed common algorithm across all tasks.}
+\label{fig:method}
+\end{figure}
+
+\paragraph{Frozen providers and legal evidence.}
+For query $q$, a frozen provider supplies an initial response $r_0$, legal
+observations $\mathcal E_q$, and any independently produced set $S_0$.
+An observation supplies a target $y_e\in[0,1]$, a nonnegative geometric
+operator $A_e$, and visible support $v_e$. Nonempty rows of $A_e$ are
+normalized; invisible rows do not contribute. Native text similarities,
+local image correspondence and explicit point support remain in their
+respective matching spaces. Their feature vectors need not share a dimension.
+The mechanism consumes responses and evidence, not an average of raw teacher
+vectors. Inputs obey the original access ledger: source-assisted observations
+for LERF/NVOS/ScanNet, map-only observations for UQIS at query time.
+
+\paragraph{Query applicability: which observations may participate?}
+Let $g_e(q)$ denote evidence that observation $e$ refers to the requested target
+or category union. Geometry alone cannot supply this judgment. The existing
+text implementation compares native scores \emph{within the candidates
+already detected for the same query}. It compares one- and two-component
+score models rather than rejecting candidates against a scene-wide percentile.
+Writing their Bayesian information criteria as $B_1,B_2$, the implemented
+candidate support is
+\begin{equation}
+ a_e=(1-\pi_2)+\pi_2\gamma_{\mathrm{high}}(s_e),
+ \qquad \pi_2=\sigma((B_1-B_2)/2),\qquad
+ g_e=\mathbf 1[a_e\geq 0.5],
+ \label{eq:admission}
+\end{equation}
+where $\gamma_{\mathrm{high}}$ is responsibility for the higher-score component.
+The one-component hypothesis supplies no relative identity veto. Insufficient
+samples, nearly constant scores or unavailable correspondences do not invent
+one. Rejected regions are recorded as unknown, not relabelled as background.
+These mixture quantities are model support, not calibrated probabilities of
+semantic correctness; view or crop variation can also explain score modes.
+Equation~\ref{eq:admission} has a positive controlled result for text candidates.
+It has not been validated as the common rule for reference images, categories
+and clicks. Those paths currently retain their effective identity providers.
+
+\paragraph{Spatial authority: what may an admitted observation assert?}
+Admission of an observation does not establish complete object extent. We
+represent positive and exclusion domains by disjoint masks $p_e,n_e$ and their
+reliabilities by $c_e^+,c_e^-$. The admitted weight is
+\begin{equation}
+ w_e(q)=v_e g_e(q)\big(c_e^+p_e+c_e^-n_e\big).
+ \label{eq:authority}
+\end{equation}
+This notation describes an evidence contract; it does not establish that the
+estimated masks or weights are correct. No detection, occlusion and identity
+rejection do not by themselves license exclusion. Conversely, an explicit
+but fallible reference-mask estimate or reliable rival-category evidence can
+supply exclusion under its declared assumptions. The retained LERF path
+also vetoes negative observations where native positive support exists;
+NVOS uses tracked negative reliability; ScanNet preserves its actual source
+weights and both native priors. These inherited rules are disclosed, not
+claimed to be the same learned authority estimator.
+
+The contract must also distinguish an observed part from a complete member
+estimate. In UQIS, the retained image path selects an estimated regional anchor
+and reuses the actual-point membership classifier. Its implementation forces
+even this estimated anchor to probability one. Thus its declared identity
+uncertainty does not yet enforce different positive authority: distinguishing
+estimated anchors from explicit clicks remains an implementation gap, not an
+achieved property of our method. All nine retained maps use this direct-anchor
+provider, not the optional query-conditioned membership candidate. Complete
+extent uses map observations and inherited instance supervision. A region merely
+containing an anchor also does not justify raising every element in that region;
+the post-refinement controls measured this separate failure.
+
+A targeted control now removes only the estimated-anchor override, preserving
+the selected identity, classifier and threshold. Its raw conditional member
+score at every image anchor remains above threshold, so all actual sets are
+unchanged. Conditional membership $m(i\mid h,\mathcal E)$ is not evidence that
+identity hypothesis $h$ answers query $q$: it cannot substitute for applicability
+$g(h,q)$. Consequently, changing a single positive assignment does not repair the
+whole response conditioned on an incorrect identity. This distinction sharpens
+the admission problem without adding another module or retraining the provider.
+
+\paragraph{Geometric fusion and unsupported responses.}
+After admission, define evidence mass and response sum
+\begin{equation}
+ m=\sum_e A_e^\top w_e,\qquad
+ b=\sum_e A_e^\top(w_e y_e).
+\end{equation}
+The retained simple fusion path computes
+\begin{equation}
+ r_i=\begin{cases}
+ (b_i+\lambda_i\bar r_i)/(m_i+\lambda_i),&m_i>\epsilon,\\
+ r_{0,i},&m_i\leq\epsilon,
+ \end{cases}\qquad \epsilon=10^{-8}.
+ \label{eq:consensus}
+\end{equation}
+LERF uses $\lambda=0$; ScanNet retains its original two-native mean
+$\bar r$ and $\lambda=0.1$ times visible mass. Unlike a positive-only residual
+rule, consensus need not monotonically increase a response whenever an
+observation is marked positive. The evidence contract and the numerical update
+must not be conflated. NVOS retains its original robust rendered solver, with
+a neutral initial response. Section~\ref{sec:stage-study} compares solvers on
+the same admitted observations; a common inverse solver is not required or
+supported by those results. Unsupported-value preservation applies inside the
+core; the retained output adapter may still abstain or zero unobserved elements.
+
+Continuous response $r$ and independent set $S_0$ enter the fixed task readout.
+Semantic thresholding, category competition and actual instance selection
+retain their distinct definitions. A frozen set does not become a newly
+improved output merely because the continuous response changes. UQIS complete
+membership is currently a preserved provider, not an implementation of
+Equation~\ref{eq:consensus}.
+
+\paragraph{What is settled, and what is still a hypothesis?}
+The scope, evidence contract, provider boundary and intervention position are
+settled for this working method. The text admission and admitted-response-use
+controls provide positive local evidence. Extracted reconstruction cores
+preserve the original functional behavior. The unresolved component is a
+concrete transferable rule for $g_e,p_e,n_e,c_e^+,c_e^-$ that improves strong
+providers across query types. A shared interface alone does not resolve it.
+Active-residual normalization, scope agreement and replacement inverse solvers
+are diagnostic alternatives, not additional modules in the proposed method.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/claim_evidence.tex}}
+\caption{Claims bound to their actual evidence. Historical local controls,
+functional preservation, diagnostic findings and open transfer claims have
+different evidential roles; their gains cannot be added or substituted.}
+\label{tab:claims}
+\end{table}

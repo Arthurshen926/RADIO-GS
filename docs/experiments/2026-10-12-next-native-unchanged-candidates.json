@@ -1,0 +1,369 @@
+{
+  "schema": "radio_gs.next_native_unchanged_candidate_batch.v1",
+  "status": "metadata_candidate_only_not_authorized_for_execution",
+  "source_scan": {
+    "entries": 5001,
+    "metadata_bytes": 134615,
+    "partial": true,
+    "scope": "10/8 partial traversal, 10/7 not reached, no payload read/hash"
+  },
+  "total_original_bytes_manifest": 50994366888,
+  "field_count": 20,
+  "scene_count": 10,
+  "estimated_duplicate_native_bytes_if_tensor_hashes_agree": 24507896832,
+  "size_estimate_assumption": "fp16 semantic1536+local768 once per scene; actual tensor digest required; neither common observation SHA nor manifest field SHA establishes native equality",
+  "max_field_bytes": 7174517428,
+  "ram_budget_available_bytes": 34359738368,
+  "estimated_peak_ram_bytes": 25769803776,
+  "serial_only": true,
+  "originals_retained": true,
+  "candidates": [
+    {
+      "scene": "lerf_waldo_kitchen",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/lerf_waldo_kitchen/field",
+      "field_pt_sha256_manifest": "f637d8e925bb7a60af87ae4fda5286dbf33292b496a7b490ac774ce1c06498d9",
+      "field_pt_bytes_manifest": 7174517428,
+      "observations_sha256": "78f75064354afd7c8a395610e2778b9883b1b7680adca95ba914fc4c60fe9f66",
+      "elements": 1496561,
+      "provenance": {
+        "parent_field_sha256": "1d66b8de62e8da582a5d69360f7d7e30d6204bd5c50f0ee91b3bf2cd2c2c936d",
+        "shared_parameters_field_sha256": "14095978dd013eaca9a2f55ad8bc3833e1f5c0beb0233ca27c43676a2874621c",
+        "observations_sha256": "78f75064354afd7c8a395610e2778b9883b1b7680adca95ba914fc4c60fe9f66",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "lerf_waldo_kitchen",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/lerf_waldo_kitchen/field",
+      "field_pt_sha256_manifest": "eeec03225af2ba57fceedacee15fd8283cdee86006d4a3412272668bbd6804c1",
+      "field_pt_bytes_manifest": 7174517428,
+      "observations_sha256": "78f75064354afd7c8a395610e2778b9883b1b7680adca95ba914fc4c60fe9f66",
+      "elements": 1496561,
+      "provenance": {
+        "parent_field_sha256": "14095978dd013eaca9a2f55ad8bc3833e1f5c0beb0233ca27c43676a2874621c",
+        "observations_sha256": "78f75064354afd7c8a395610e2778b9883b1b7680adca95ba914fc4c60fe9f66",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "lerf_ramen",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/lerf_ramen/field",
+      "field_pt_sha256_manifest": "2dd5cb48ca61da6f27c1b3ac82e3f76ff52544451085b99366cf6c16a8762f0a",
+      "field_pt_bytes_manifest": 2841450464,
+      "observations_sha256": "56ce7d8dfd170171ab22c4b86b0b7475162751d04b004f8f5f169e945d484821",
+      "elements": 592709,
+      "provenance": {
+        "parent_field_sha256": "61141c94101c876e20b9c653aeeb25555844901666f0a495551b837000fb689a",
+        "shared_parameters_field_sha256": "e9a0f24e8fbe96f89dc17e716b42139662f4c98b52cbb362381d439ba38226fb",
+        "observations_sha256": "56ce7d8dfd170171ab22c4b86b0b7475162751d04b004f8f5f169e945d484821",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "lerf_ramen",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/lerf_ramen/field",
+      "field_pt_sha256_manifest": "9db4721cf5bfaa220827270b3ef3dc113c001fe85bfdde7845e6de38cd09fb08",
+      "field_pt_bytes_manifest": 2841450464,
+      "observations_sha256": "56ce7d8dfd170171ab22c4b86b0b7475162751d04b004f8f5f169e945d484821",
+      "elements": 592709,
+      "provenance": {
+        "parent_field_sha256": "e9a0f24e8fbe96f89dc17e716b42139662f4c98b52cbb362381d439ba38226fb",
+        "observations_sha256": "56ce7d8dfd170171ab22c4b86b0b7475162751d04b004f8f5f169e945d484821",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "lerf_figurines",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/lerf_figurines/field",
+      "field_pt_sha256_manifest": "b44ada370186f0ad401715ed8e71ab98f88dba6f1992b3d7214560ff6df6e10d",
+      "field_pt_bytes_manifest": 2658118304,
+      "observations_sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+      "elements": 554467,
+      "provenance": {
+        "parent_field_sha256": "20182f20356ffdb5ae2831a890950b8a29636f381e6bc838ec1fa6c8ed255fe0",
+        "shared_parameters_field_sha256": "1a2a790569c5c5d192a24604e275cc9abfdfe51e587f8ccf14da680fc4b80ec4",
+        "observations_sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "lerf_figurines",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/lerf_figurines/field",
+      "field_pt_sha256_manifest": "d689f0385d760621abe95e03e8e05ea4f97cb929f02afe8aacfd15ab5f38fa06",
+      "field_pt_bytes_manifest": 2658118304,
+      "observations_sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+      "elements": 554467,
+      "provenance": {
+        "parent_field_sha256": "1a2a790569c5c5d192a24604e275cc9abfdfe51e587f8ccf14da680fc4b80ec4",
+        "observations_sha256": "b27b7d08ff5a894f86effc382c8a78e7672a9ef50278200fad5799aa97b710b7",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "nvos_trex",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/nvos_trex/field",
+      "field_pt_sha256_manifest": "947d2ebb6fe7b1a343b60e522eeb185385535927bfcdb6f6b6169384dccddc66",
+      "field_pt_bytes_manifest": 2147284128,
+      "observations_sha256": "5e1817dc2f4d0c3f64d893f2308c3c05c502e68bd11f17fe53a3cc2848496990",
+      "elements": 447910,
+      "provenance": {
+        "parent_field_sha256": "dcdc1e2c8c3307d76746e7ff6ad587bfd4e4dddbbffcf6339a88def316b5668c",
+        "shared_parameters_field_sha256": "3cb4713733f0acf79aa12f8725292c9c955d3585a4617e077a803b49077a59c5",
+        "observations_sha256": "5e1817dc2f4d0c3f64d893f2308c3c05c502e68bd11f17fe53a3cc2848496990",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "nvos_trex",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/nvos_trex/field",
+      "field_pt_sha256_manifest": "f554388e873f1035c912560d4896d8c1e6a4523f322120f39f068a428ee114a5",
+      "field_pt_bytes_manifest": 2147284128,
+      "observations_sha256": "5e1817dc2f4d0c3f64d893f2308c3c05c502e68bd11f17fe53a3cc2848496990",
+      "elements": 447910,
+      "provenance": {
+        "parent_field_sha256": "3cb4713733f0acf79aa12f8725292c9c955d3585a4617e077a803b49077a59c5",
+        "observations_sha256": "5e1817dc2f4d0c3f64d893f2308c3c05c502e68bd11f17fe53a3cc2848496990",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "nvos_fortress",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/nvos_fortress/field",
+      "field_pt_sha256_manifest": "37e5a29ff3392cd4a32226921bff10101f0b942ddaaf9459e2349741f59065e6",
+      "field_pt_bytes_manifest": 2132925984,
+      "observations_sha256": "351d948be24d06a651bfc81aa57ccaa1a2ec14bb8d219c3f7e7f890b43261b35",
+      "elements": 444915,
+      "provenance": {
+        "parent_field_sha256": "6b781816fc15fd1b22d89a3f65b4cbb84797a40393274cffde26eb3aceb3526a",
+        "shared_parameters_field_sha256": "5db3a179c8864e7c1079e5fc6297719d1f599a5fc71b013aad8cfa1c3e1088aa",
+        "observations_sha256": "351d948be24d06a651bfc81aa57ccaa1a2ec14bb8d219c3f7e7f890b43261b35",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "nvos_fortress",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/nvos_fortress/field",
+      "field_pt_sha256_manifest": "7461b8d7b9c97005578a532c5247fa2f19bb92b9fc2257c69c038591eab9758f",
+      "field_pt_bytes_manifest": 2132925984,
+      "observations_sha256": "351d948be24d06a651bfc81aa57ccaa1a2ec14bb8d219c3f7e7f890b43261b35",
+      "elements": 444915,
+      "provenance": {
+        "parent_field_sha256": "5db3a179c8864e7c1079e5fc6297719d1f599a5fc71b013aad8cfa1c3e1088aa",
+        "observations_sha256": "351d948be24d06a651bfc81aa57ccaa1a2ec14bb8d219c3f7e7f890b43261b35",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "nvos_horns_center",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/nvos_horns_center/field",
+      "field_pt_sha256_manifest": "59a2aa75179ab4df5f532bac5beff27687dd4b4467ea4b13e399b86eeb4b9859",
+      "field_pt_bytes_manifest": 1858613216,
+      "observations_sha256": "161ca045119a51ce2f67a9ff0e2b31c6dbd23eee79315d7dca59b85b0a7c9d77",
+      "elements": 387695,
+      "provenance": {
+        "parent_field_sha256": "750811101bb3aa2e4d1576ad889514e93654a584cf5341b4ff81a4038fcc708e",
+        "shared_parameters_field_sha256": "d5f058f241e3cb28435adfac311584d5c8e0127d2a6cf5e4c7c94399280de8ef",
+        "observations_sha256": "161ca045119a51ce2f67a9ff0e2b31c6dbd23eee79315d7dca59b85b0a7c9d77",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "nvos_horns_center",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/nvos_horns_center/field",
+      "field_pt_sha256_manifest": "59c508d4694b345308027938bea8980c8bf363a623115bfce4aaafca19664073",
+      "field_pt_bytes_manifest": 1858613216,
+      "observations_sha256": "161ca045119a51ce2f67a9ff0e2b31c6dbd23eee79315d7dca59b85b0a7c9d77",
+      "elements": 387695,
+      "provenance": {
+        "parent_field_sha256": "d5f058f241e3cb28435adfac311584d5c8e0127d2a6cf5e4c7c94399280de8ef",
+        "observations_sha256": "161ca045119a51ce2f67a9ff0e2b31c6dbd23eee79315d7dca59b85b0a7c9d77",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "scannet_scene0140_00",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/scannet_scene0140_00/field",
+      "field_pt_sha256_manifest": "df8e0125dcf5646932c9567a453adf31385fc97e9d0bbb1c85d6d927107d34da",
+      "field_pt_bytes_manifest": 1787882720,
+      "observations_sha256": "6094277860fcd1fb949f3b5f8dcc744ea019473b4c52309eec1d3e2b49bbd2d6",
+      "elements": 372941,
+      "provenance": {
+        "parent_field_sha256": "1155a67c4d639801b6c097b9f1d0f41763b1e514bf519ef1b003bb656e6d1960",
+        "shared_parameters_field_sha256": "8c45958f9222c89f4d7d09471866e468bfd87baa74e5299a333fa94b92a44138",
+        "observations_sha256": "6094277860fcd1fb949f3b5f8dcc744ea019473b4c52309eec1d3e2b49bbd2d6",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "scannet_scene0140_00",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/scannet_scene0140_00/field",
+      "field_pt_sha256_manifest": "360760a354dd79bb6f8a2427b57b0a173ed5cd25a3347460e0e232e40978ec52",
+      "field_pt_bytes_manifest": 1787882720,
+      "observations_sha256": "6094277860fcd1fb949f3b5f8dcc744ea019473b4c52309eec1d3e2b49bbd2d6",
+      "elements": 372941,
+      "provenance": {
+        "parent_field_sha256": "8c45958f9222c89f4d7d09471866e468bfd87baa74e5299a333fa94b92a44138",
+        "observations_sha256": "6094277860fcd1fb949f3b5f8dcc744ea019473b4c52309eec1d3e2b49bbd2d6",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "scannet_scene0645_00",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/scannet_scene0645_00/field",
+      "field_pt_sha256_manifest": "f020c567836a6bc384378e9926d3b185f6bfb19b6edfad6e72833352f32d92c0",
+      "field_pt_bytes_manifest": 1689778272,
+      "observations_sha256": "383bae9db0b38abc5a3837776c7b874bb3e03a0ccf40563e17dfc80b6b6b0ad8",
+      "elements": 352477,
+      "provenance": {
+        "parent_field_sha256": "d1d15d8b7f2c89f164b2f82c683b4cb1c15d0ae23a0fda6c3ad92537ed7d6231",
+        "shared_parameters_field_sha256": "59eeceb32c850f40f2afc1361fe9089ecc58d300483deb50df1639fe35fd2c96",
+        "observations_sha256": "383bae9db0b38abc5a3837776c7b874bb3e03a0ccf40563e17dfc80b6b6b0ad8",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "scannet_scene0645_00",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/scannet_scene0645_00/field",
+      "field_pt_sha256_manifest": "0abf8522a8607df5a13af22e9444afe3532df1025699e5e46ce34be394424464",
+      "field_pt_bytes_manifest": 1689778272,
+      "observations_sha256": "383bae9db0b38abc5a3837776c7b874bb3e03a0ccf40563e17dfc80b6b6b0ad8",
+      "elements": 352477,
+      "provenance": {
+        "parent_field_sha256": "59eeceb32c850f40f2afc1361fe9089ecc58d300483deb50df1639fe35fd2c96",
+        "observations_sha256": "383bae9db0b38abc5a3837776c7b874bb3e03a0ccf40563e17dfc80b6b6b0ad8",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "nvos_orchids",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/nvos_orchids/field",
+      "field_pt_sha256_manifest": "114c56bb9d5a2687ee670f0cce37fdd0900ae3f5f8da04929368c476f9336c6e",
+      "field_pt_bytes_manifest": 1619646752,
+      "observations_sha256": "b4c9fb5e922ae3281260ffe893dc9d8d152ffe12eef4a2dc87bdc6eb1a8afc80",
+      "elements": 337848,
+      "provenance": {
+        "parent_field_sha256": "f8bb438ea17058ab3fb55bad464a8f6c2bde7fca14d8ef8a4c9f4c80dca7e813",
+        "shared_parameters_field_sha256": "607796e83a0aad97a52ae3a89203d464d65082289a54b82e7fdde11f0c8db0bd",
+        "observations_sha256": "b4c9fb5e922ae3281260ffe893dc9d8d152ffe12eef4a2dc87bdc6eb1a8afc80",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "nvos_orchids",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/nvos_orchids/field",
+      "field_pt_sha256_manifest": "8f5bf88d52415b788249faeda8fa28c2836ead43fe4bb9e363e25071c8cd9278",
+      "field_pt_bytes_manifest": 1619646752,
+      "observations_sha256": "b4c9fb5e922ae3281260ffe893dc9d8d152ffe12eef4a2dc87bdc6eb1a8afc80",
+      "elements": 337848,
+      "provenance": {
+        "parent_field_sha256": "607796e83a0aad97a52ae3a89203d464d65082289a54b82e7fdde11f0c8db0bd",
+        "observations_sha256": "b4c9fb5e922ae3281260ffe893dc9d8d152ffe12eef4a2dc87bdc6eb1a8afc80",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "uqis_scene0249_00",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/decoder_rollback/uqis_scene0249_00/field",
+      "field_pt_sha256_manifest": "00c32ba10783db97641c835ccd518284bfd159cfdd6892e246e181f96c34e636",
+      "field_pt_bytes_manifest": 1586966176,
+      "observations_sha256": "1528ec70acfefc2984b98a0f581129a13a1943b4223e640a3988fe7047f50974",
+      "elements": 331031,
+      "provenance": {
+        "parent_field_sha256": "1459e7b446c90534ac819f0d16711ceab5fcbda7faf34720520ae0d39e2080b2",
+        "shared_parameters_field_sha256": "c45da77f6d700fffd7baa8d37aaf31d0e3b233c457e6683a918f928553fb4ea6",
+        "observations_sha256": "1528ec70acfefc2984b98a0f581129a13a1943b4223e640a3988fe7047f50974",
+        "intervention": "restore original shared acceptance parameters, retain cross-view Gaussian groups",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    },
+    {
+      "scene": "uqis_scene0249_00",
+      "field_directory": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008/protected_relations_v1/fits/protected_training/uqis_scene0249_00/field",
+      "field_pt_sha256_manifest": "633513ad119b9827bf70ca988fa7f8dfa55a05332aec9484cb1fee230caf13b0",
+      "field_pt_bytes_manifest": 1586966176,
+      "observations_sha256": "1528ec70acfefc2984b98a0f581129a13a1943b4223e640a3988fe7047f50974",
+      "elements": 331031,
+      "provenance": {
+        "parent_field_sha256": "c45da77f6d700fffd7baa8d37aaf31d0e3b233c457e6683a918f928553fb4ea6",
+        "observations_sha256": "1528ec70acfefc2984b98a0f581129a13a1943b4223e640a3988fe7047f50974",
+        "supervision": "source-only partial multi-view SAM relations",
+        "arm": "cross_view_anchor",
+        "parameter_policy": "group_only",
+        "additional_3d_labels": false,
+        "benchmark_queries_used": false
+      }
+    }
+  ],
+  "protected_dependencies": [
+    "Original run_query_field_protected frozen design/config/training SHA and exported field paths",
+    "Functional-native training uses protected_training/scene/field as its parent; keep original pending versioned replay dependency migration",
+    "Original current mainline and v10 dependency closures remain unchanged"
+  ],
+  "source_evidence": [
+    "docs/experiments/2026-10-08-protected-native-results.md completeness: rollback/protected native unchanged",
+    "scripts/research/run_query_field_protected.py rollback and group_only policy",
+    "radio_gs/query_field/functional_training.py:190-200 writes native codes; exclude this family",
+    "Current configs no literal protected_relations_v1; generated cohort and scripts remain real historical consumers"
+  ],
+  "exclusions": [
+    "all teatime deferred until the ongoing 10/7 five-package same-source group is validated; there is no exact path overlap with these 10/8 manifests",
+    "functional_native and native_coordinates: native state is modified, no full native dedup assumption",
+    "No optimization/checkpoint or map retirement"
+  ],
+  "retirement_gate": "Per-field original hash validation, complete tensor/spec equivalence, shared-blob equality and complete dependency/export/replay plan; exact user deletion approval required separately."
+}

@@ -1,0 +1,112 @@
+\section{Source-verified local response edits (N03)}
+N02 tests a scalar decision scale; N03 instead asks where a response may change.
+The anchor $b$ is our original v10 semantic response and $c$ is the fixed N01
+coverage/high candidate. The same teachers and frozen geometry are reused.
+Let $\delta=c-b$, $u=A\delta$, and $e=y-Ab$ on the common supported source domain.
+For Huber loss $\rho$, define the integrated residual coefficient
+\begin{equation}
+ s_p=\begin{cases}
+ [\rho(e_p)-\rho(e_p-u_p)]/u_p,&u_p\ne0,\\
+ \rho'(e_p),&u_p=0.
+ \end{cases}
+\end{equation}
+The signed and absolute allocations to element $i$ are
+\begin{equation}
+ g_i=\delta_i\sum_{v,p} A_{v,pi}w_{v,p}s_{v,p},\qquad
+ h_i=|\delta_i|\sum_{v,p} A_{v,pi}w_{v,p}|s_{v,p}|.
+\end{equation}
+For nonnegative $A,w$, $|g_i|\le h_i$, and
+$\sum_i g_i=\sum_{v,p}w_{v,p}[\rho(e_{v,p})-\rho(e_{v,p}-u_{v,p})]$.
+This exact path accounting motivates a local gate
+$q_i=\max(g_i,0)/h_i$, with zero permission for absent evidence. It is a
+source-loss attribution identity, not a claim that the gated field has the same
+loss reduction or higher target accuracy. A simple cancellation example shows why:
+with $A=(1/2,1/2)$, $b=(0.5,0.5)$, $c=(1,0.1)$ and $y=0.55$, the candidate fits
+exactly. Keeping only its positively credited first edit yields response 0.75,
+which has higher source loss than the anchor's response 0.5. The quotient is an integrated loss
+secant, not a newly claimed mathematical primitive.
+
+Fit-source and held-source gates use exactly the same every-fourth eligible
+source views, targets, weights and common support. The former uses the full
+candidate; the latter uses a second field reconstructed without those views.
+The latter gate applies to the final full-field edit only if its direction
+agrees with the split-field edit; otherwise permission is zero. Geometry,
+teacher tracks and the v10 anchor still use shared source information. Thus
+this is a candidate-reconstruction holdout, not independent validation.
+
+All anchored fields retain the v10 observation domain and output
+$b+q\odot(c-b)$, preserving bounded values and the anchor where no update is
+supported. A coverage-on-anchor-domain control isolates the domain change.
+The matched uniform control separately preserves the positive and negative
+Gaussian-space L1 edit masses for each query; it does not match projected
+pixel counts. Six arms on all eight tasks yield 48 images sealed before target
+scoring, with the unchanged 0.5 readout and both GT conventions. The held-local
+arm is designated before scoring. No target RGB, GT-derived update regions,
+per-task winners, or changed teachers are used.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/nvos_local_credit.tex}}
+\caption{N03 all-eight IoU. Domain means coverage on the original anchor's
+observed domain; uniform matches held-local signed edit mass.}
+\label{tab:nvos-local-credit}
+\end{table}
+\begin{table}[ht]
+\centering\small\input{tables/nvos_local_credit_macro.tex}
+\caption{N03 macro metrics on retained GT. Every arm uses the same fixed
+threshold; AP evaluates continuous scores.}
+\label{tab:nvos-local-credit-macro}
+\end{table}
+\input{sections/nvos_local_credit_results.tex}
+
+The local allocation has a measured advantage over matched attenuation, but
+it is not a replacement for the highest-IoU coverage candidate. Against
+coverage, orchids recovers 1.4523 AP points while losing 0.4319 IoU points:
+it gains 4,311 foreground pixels but loses 12,484, and adds 117 net false
+positives. Trex loses 9,274 net foreground pixels and adds 9,129 net false
+positives despite a lower mean background score. Relative to matched uniform
+attenuation, however, the same trex local output gains 8,449 net foreground
+pixels and removes 17,648 net false positives. The aggregate superiority over
+uniform attenuation therefore does not establish preservation of every useful
+coverage edit. All quantities are post-seal diagnostics, never update gates.
+
+The observation-domain control changes mean IoU by only 0.000065 points.
+Candidate-reconstruction holdout changes fit-local IoU by $-0.0141$ points;
+we do not attribute an IoU gain to that extra reconstruction. Coverage remains
+the principal best-IoU candidate, and there is no per-task selection between
+coverage and local edits. Further constant or threshold searches around this
+gate are not the next research step; the unresolved object extent and transport
+of the admitted evidence require separate matched interventions.
+
+
+\subsection{Does reference initialization discard the seed extent?}
+A separate source-only audit compares the original predicted SAM reference mask
+with the SAM3 track in that same authorized reference view. The fitted-query
+lineage matches the declared query for every task. Agreement ranges from
+96.49\% to 99.82\%; flower and orchids give 99.21\% and 97.47\% respectively.
+This does not show a large reference-initialization collapse relative to the
+seed. It does not establish that either mask describes the complete requested
+object, or that later tracked views and geometric reconstruction are accurate.
+Neither mask is ground truth; source agreement cannot substitute for target
+accuracy or causally explain the target-RGB gap.
+\begin{table}[ht]
+\centering\small\input{tables/nvos_reference_scope.tex}
+\caption{A22: agreement between two source predictions. ``Seed retained'' is
+intersection/seed area, and ``track inside seed'' is intersection/track area.
+These quantities are not benchmark recall or precision against ground truth.}
+\end{table}
+\begin{figure}[p]
+\centering
+\includegraphics[width=.94\linewidth,height=.87\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_reference_scope_v1/reference_scope.jpg}
+\caption{All eight authorized reference views, with original seed and tracked
+extent. Difference panel: green overlap, blue seed-only, red track-only.
+Target RGB and target GT are not used in this audit.}
+\end{figure}
+\IfFileExists{../../output/tmm_response_20261016/study/nvos_local_credit_spatial_v1/errors.png}{
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth,height=.87\textheight,keepaspectratio]{../../output/tmm_response_20261016/study/nvos_local_credit_spatial_v1/errors.png}
+\caption{N03 post-seal diagnostics on all eight tasks. Green: true positive;
+red: false positive; blue: false negative. The held-local method and matched
+uniform control use their predeclared rules, without task-wise selection.}
+\end{figure}}{}

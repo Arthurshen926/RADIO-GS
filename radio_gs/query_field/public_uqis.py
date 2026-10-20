@@ -12,13 +12,35 @@ import torch
 
 from .adapters import NativeQueryEncoder, point_2d, point_3d
 from .contracts import QueryPacket
-from .storage import load_field, sha256
+from .storage import load_field_versioned, sha256, field_identity, deployment_bytes
+from .research_storage import method_binding
+from .public_artifacts import persist
+
+
+def _preflight_v2(field_path,store_root):
+    manifest=json.loads((Path(field_path)/'manifest.json').read_text())
+    if manifest.get('schema')!='radio_gs.query_preserving_field.v2':
+        return
+    from .shared_storage import _read_manifest,_safe_root,_blob_path
+    directory,manifest=_read_manifest(field_path)
+    if manifest['blob_store']=='explicit':
+        if store_root is None:raise ValueError('shared v2 requires explicit store_root before query encoding')
+        root=_safe_root(store_root)
+    elif manifest['blob_store']=='local':
+        if store_root is not None:raise ValueError('standalone package cannot use an external store')
+        root=_safe_root(directory/'blobs')
+    else:raise ValueError('unknown blob store mode')
+    for descriptor in manifest['tensors'].values():
+        path=_blob_path(root,descriptor['sha256'])
+        if not path.is_file() or path.stat().st_size!=descriptor['bytes']:
+            raise ValueError('missing blob or blob size differs before query encoding')
 
 
 @torch.no_grad()
-def predict(field_path,public,scene,output,encoder_path,device='cuda',query_program='original'):
+def predict(field_path,public,scene,output,encoder_path,device='cuda',query_program='original', *, field_loader=None, store_root=None, artifact_writer=None):
     from .query_program import PROGRAM
     if query_program not in {'original', PROGRAM}: raise ValueError('unknown query program')
+    if field_loader is None:_preflight_v2(field_path,store_root)
     public=Path(public);root=Path(output)
     for folder in ['predictions','selections','receipts','gaussians']:(root/folder).mkdir(parents=True,exist_ok=True)
     report_path=root/'receipts'/f'{scene}.json'
@@ -47,7 +69,8 @@ def predict(field_path,public,scene,output,encoder_path,device='cuda',query_prog
     del encoder
     if encoded:del packet
     gc.collect();torch.cuda.empty_cache()
-    field,manifest=load_field(field_path,device)
+    field,manifest=(load_field_versioned(field_path,device,store_root=store_root)
+                    if field_loader is None else field_loader(field_path,device))
     if query_program == PROGRAM:
         from .runtime import QueryFieldRuntime
         runtime = QueryFieldRuntime(field, manifest)
@@ -83,7 +106,9 @@ def predict(field_path,public,scene,output,encoder_path,device='cuda',query_prog
                                 'support requires nonempty integer indices',
                                 'positive support lacks trained observation support',
                                 '3D query has no Gaussian within registration tolerance',
-                                'field has no observed identity candidates'}:
+                                'field has no observed identity candidates',
+                                'support has no observed mass', 'no observed identity candidates',
+                                'exact positive outside observed support'}:
                 raise
             status='unsupported';reason=str(exc);scores=np.zeros(len(xyz),np.float32);selected=np.zeros(len(xyz),bool)
             diagnostics={}
@@ -91,30 +116,40 @@ def predict(field_path,public,scene,output,encoder_path,device='cuda',query_prog
                           candidates=torch.empty(0,dtype=torch.long),candidate_weights=torch.empty(0),native_scores=None)
         prediction=root/'predictions'/f'{qid}.npy';selection=root/'selections'/f'{qid}.npy'
         if prediction.exists() or selection.exists():raise FileExistsError(qid)
-        np.save(prediction,scores);np.save(selection,selected)
-        gaussian_path=root/'gaussians'/f'{qid}.pt';torch.save(gaussian,gaussian_path)
+        persist(prediction,scores,'numpy',artifact_writer);persist(selection,selected,'numpy',artifact_writer)
+        gaussian_path=root/'gaussians'/f'{qid}.pt';persist(gaussian_path,gaussian,'tensor',artifact_writer)
         rows.append(dict(query_id=qid,modality=modality,status=status,reason=reason,selected=int(selected.sum()),
                          seconds=time.monotonic()-stamp,diagnostics=diagnostics,
                          prediction_sha256=sha256(prediction),selection_sha256=sha256(selection),
                          gaussian_sha256=sha256(gaussian_path)))
         print(scene,modality,qid,status,flush=True)
-    report=dict(scene=scene,query_program=query_program,field_sha256=manifest['files']['field.pt']['sha256'],field_spec=manifest['spec'],
+    report=dict(scene=scene,query_program=query_program,field_sha256=field_identity(manifest),field_binding=method_binding(field_path,manifest),
+                field_schema=manifest['schema'],complete_field_payload_bytes=deployment_bytes(manifest),
+                field_spec=manifest['spec'],
                 queries=rows,query_count=len(rows),unsupported=sum(r['status']!='ok' for r in rows),
                 domain_sha256=domain['mesh_xyz_sha256'],distance_quantiles_m=np.quantile(distance,[.5,.9,.99,1]).tolist(),
                 observed_vertex_fraction=float(field.observed[indices].float().mean()),
                 transport='fixed nearest Gaussian centre; scores and actual set transported with the same indices',
                 encoding_seconds=encoding_seconds,source_access=False,evaluator_access=False,
                 target_pairing_used=False,threshold=field.threshold)
-    report_path.write_text(json.dumps(report,indent=2)+'\n')
+    persist(report_path,report,'json',artifact_writer)
     return report
 
 
-if __name__=='__main__':
+def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--field',required=True);parser.add_argument('--public',required=True)
     parser.add_argument('--scene',required=True);parser.add_argument('--output',required=True)
     parser.add_argument('--encoder',required=True)
     parser.add_argument('--query-program',default='original')
-    args=parser.parse_args();torch.set_num_threads(4)
-    report=predict(args.field,args.public,args.scene,args.output,args.encoder,query_program=args.query_program)
+    parser.add_argument('--store-root',help='Explicit v2 shared blob store; v1 remains readable')
+    parser.add_argument('--device',default='cuda')
+    args=parser.parse_args(argv);torch.set_num_threads(4)
+    report=predict(args.field,args.public,args.scene,args.output,args.encoder,device=args.device,
+                   query_program=args.query_program,store_root=args.store_root)
     print(json.dumps({k:v for k,v in report.items() if k!='queries'},indent=2))
+    return report
+
+
+if __name__=='__main__':
+    main()

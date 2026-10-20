@@ -1,0 +1,40 @@
+\subsection{Query-evidence residual control}
+We test whether explicitly separating structural predictability from query
+evidence improves the same complete-response utility decision:
+\begin{equation}
+ V(A,q)=b(S(A,\mathcal C))+r(X(A,q,\mathcal C)).
+\end{equation}
+Here $S$ contains the structural coordinates of the same candidate, set mean,
+and centered signature; $X$ is the unchanged full signature. Five folds group
+all tasks from a room together. A structural model fitted on the other folds
+produces $b^{-k}(S)$, and the correction target is the candidate-centered true
+utility minus this out-of-room prediction. The final prior uses all fit rooms.
+Matched within-view query permutations receive a zero correction target,
+which is a regularization assumption, not a claim of zero answer utility.
+
+The full and no-null models each use 64 prior and 64 correction trees. The
+no-null control duplicates aligned examples instead of inserting permutations,
+with identical total sample weight and capacity. This is a larger model than
+the preceding 64-tree potential. Each arm calibrates one global margin on the
+same 15 cells; zero-margin results separate ranking from retention effects.
+All teachers, intact candidates, room splits and task weights remain fixed.
+Previous benchmark and calibration feedback informed this design.
+
+\begin{table}[ht]
+\centering\small
+\resizebox{\linewidth}{!}{\input{tables/residual_transfer.tex}}
+\caption{Residual-utility control on the complete category/instance cohort
+(\%). Unregularized is the matched no-null control, not a different teacher or
+candidate pool. All five policies are sealed before fresh scoring.}
+\end{table}
+\input{tables/residual_summary.tex}
+
+For a fixed candidate pool, utility model and evidence-availability rule, we
+decompose unused capacity into zero-margin ranking regret and a signed
+retention cost:
+\begin{equation}
+ G_{\rm pool}=R_{\rm rank}+(G_{0}-G_{\rm guarded})+G_{\rm guarded}.
+\end{equation}
+A negative retention cost means the guard prevented damage. This diagnostic
+cannot attribute every unused gain to an overly conservative threshold. It
+also does not change the fixed policy or use an oracle at inference.

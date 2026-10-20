@@ -1,0 +1,70 @@
+{
+  "schema": "radio_gs.unified_condition_audit.v1",
+  "families": {
+    "lerf": {
+      "episodes": 96,
+      "fields": 4,
+      "negative_majority": 2,
+      "positive_majority": 44,
+      "means": {
+        "positive_mass": 0.44863191599979313,
+        "negative_mass": 0.022821970632027438,
+        "unknown_mass": 0.5285461133681796,
+        "invisible_mass": 0.14057770767187544
+      }
+    },
+    "nvos": {
+      "episodes": 168,
+      "fields": 7,
+      "negative_majority": 0,
+      "positive_majority": 56,
+      "means": {
+        "positive_mass": 0.3513453068803727,
+        "negative_mass": 0.0009036825076450901,
+        "unknown_mass": 0.6477510106119823,
+        "invisible_mass": 0.11337264609187526
+      }
+    },
+    "scannet": {
+      "episodes": 240,
+      "fields": 10,
+      "negative_majority": 4,
+      "positive_majority": 113,
+      "means": {
+        "positive_mass": 0.43534066605981914,
+        "negative_mass": 0.02656236994283388,
+        "unknown_mass": 0.538096963997347,
+        "invisible_mass": 0.21253006566930896
+      }
+    },
+    "uqis": {
+      "episodes": 216,
+      "fields": 9,
+      "negative_majority": 4,
+      "positive_majority": 117,
+      "means": {
+        "positive_mass": 0.5362647306154885,
+        "negative_mass": 0.021376300532953432,
+        "unknown_mass": 0.44235896885155807,
+        "invisible_mass": 0.07167090808623644
+      }
+    }
+  },
+  "fields": 30,
+  "source_only": true,
+  "exact_optimizer_history": false,
+  "interpretation": "Known-negative source footprint proves some conditioning-target mismatches; invisible mass is inconclusive. This does not measure full instance accuracy or establish the causal effect of training repair.",
+  "source_files": {
+    "radio_gs/query_field/unified_condition_audit.py": "1fdb33a5d045017e5fbd7aa9bbc43910e7f2ee7628748bfe6839067d14d234a7",
+    "tests/test_unified_condition_audit.py": "214d6ed10eaa638a83e67876dc4d355d0afe27d9ce1938c6eb33059f84c813ba"
+  },
+  "source_snapshot_sha256": "3d66f55ad5553a214648d6ebac55a3bba845cda5e6cfaf0d4ab27683ded7adf4",
+  "tests_passed": 2,
+  "negative_majority_total": 10,
+  "positive_majority_total": 330,
+  "episodes_total": 720,
+  "decision": "Missing support-association validation is real; these data do not establish that wrong associations dominate the benchmark gap. Unknown supports remain unknown.",
+  "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_five_20261015/study/condition_audit",
+  "model_changes": false,
+  "benchmark_predictions_changed": false
+}

@@ -1,0 +1,339 @@
+{
+  "schema": "radio_gs.unified_five_attribution.v1",
+  "five_complete": true,
+  "baseline_summary_sha256": "54e210596a5aba06829ed83371a99b74756c8e0cbc3eb7539cbc72c3760db9e5",
+  "baseline_comparison": [
+    {
+      "task": "lerf2d",
+      "metric": "member response IoU",
+      "candidate": 0.19492090849552723,
+      "v10_readback": 0.7040067569509945,
+      "delta_pp": -50.90858484554672
+    },
+    {
+      "task": "lerf2d",
+      "metric": "member response AP",
+      "candidate": 0.698281075477734,
+      "v10_readback": 0.8761927775455381,
+      "delta_pp": -17.791170206780414
+    },
+    {
+      "task": "lerf3d_local_projection",
+      "metric": "actual subset projection IoU",
+      "candidate": 0.11266641835490268,
+      "v10_readback": 0.6696327365836882,
+      "delta_pp": -55.69663182287855
+    },
+    {
+      "task": "scannet_ovs",
+      "metric": "category mIoU 19",
+      "candidate": 0.3657237492560753,
+      "v10_readback": 0.6101149054806628,
+      "delta_pp": -24.43911562245875
+    },
+    {
+      "task": "scannet_ovs",
+      "metric": "category mIoU 15",
+      "candidate": 0.37629461814195253,
+      "v10_readback": 0.6252758904159778,
+      "delta_pp": -24.898127227402522
+    },
+    {
+      "task": "scannet_ovs",
+      "metric": "category mIoU 10",
+      "candidate": 0.4584649867174114,
+      "v10_readback": 0.7248606102956524,
+      "delta_pp": -26.639562357824097
+    },
+    {
+      "task": "nvos",
+      "metric": "signed response IoU",
+      "candidate": 0.6224977605562005,
+      "v10_readback": 0.865134172141552,
+      "delta_pp": -24.263641158535144
+    },
+    {
+      "task": "nvos",
+      "metric": "signed response AP",
+      "candidate": 0.9426533199169969,
+      "v10_readback": 0.9802224516003604,
+      "delta_pp": -3.756913168336351
+    },
+    {
+      "task": "uqis/text",
+      "metric": "AP",
+      "candidate": 0.19910506828790192,
+      "v10_readback": 0.2659587047562112,
+      "delta_pp": -6.685363646830927
+    },
+    {
+      "task": "uqis/text",
+      "metric": "actual subset IoU",
+      "candidate": 0.09778956696763887,
+      "v10_readback": 0.16386530164545418,
+      "delta_pp": -6.607573467781531
+    },
+    {
+      "task": "uqis/image",
+      "metric": "AP",
+      "candidate": 0.3141484956475582,
+      "v10_readback": 0.5930878179400586,
+      "delta_pp": -27.89393222925004
+    },
+    {
+      "task": "uqis/image",
+      "metric": "actual subset IoU",
+      "candidate": 0.18433159058735488,
+      "v10_readback": 0.39897960281086925,
+      "delta_pp": -21.464801222351436
+    },
+    {
+      "task": "uqis/point_2d",
+      "metric": "AP",
+      "candidate": 0.588101502445289,
+      "v10_readback": 0.7579009711011095,
+      "delta_pp": -16.97994686558205
+    },
+    {
+      "task": "uqis/point_2d",
+      "metric": "actual subset IoU",
+      "candidate": 0.3062315846552234,
+      "v10_readback": 0.49735675405728724,
+      "delta_pp": -19.112516940206387
+    },
+    {
+      "task": "uqis/point_3d",
+      "metric": "AP",
+      "candidate": 0.5834242250536168,
+      "v10_readback": 0.7532525076702995,
+      "delta_pp": -16.98282826166827
+    },
+    {
+      "task": "uqis/point_3d",
+      "metric": "actual subset IoU",
+      "candidate": 0.3055453699925911,
+      "v10_readback": 0.4904698335651834,
+      "delta_pp": -18.492446357259233
+    }
+  ],
+  "same_cohort_previous_system_comparison": [
+    {
+      "family": "lerf",
+      "metric": "native_iou",
+      "compact": 0.4508755433653797,
+      "previous_high_capacity": 0.4389426272475049,
+      "delta_pp": 1.1932916117874837
+    },
+    {
+      "family": "lerf",
+      "metric": "native_ap",
+      "compact": 0.6946598750595562,
+      "previous_high_capacity": 0.746331983135695,
+      "delta_pp": -5.167210807613887
+    },
+    {
+      "family": "lerf",
+      "metric": "member_iou",
+      "compact": 0.19492090849552723,
+      "previous_high_capacity": 0.4941304379057988,
+      "delta_pp": -29.920952941027156
+    },
+    {
+      "family": "lerf",
+      "metric": "member_ap",
+      "compact": 0.698281075477734,
+      "previous_high_capacity": 0.7173264898404148,
+      "delta_pp": -1.9045414362680813
+    },
+    {
+      "family": "lerf",
+      "metric": "subset_iou",
+      "compact": 0.11266641835490268,
+      "previous_high_capacity": 0.3231297063698939,
+      "delta_pp": -21.046328801499122
+    },
+    {
+      "family": "nvos",
+      "metric": "response_iou",
+      "compact": 0.6224977605562005,
+      "previous_high_capacity": 0.5768645863582337,
+      "delta_pp": 4.563317419796686
+    },
+    {
+      "family": "nvos",
+      "metric": "ap",
+      "compact": 0.9426533199169969,
+      "previous_high_capacity": 0.9489883291546826,
+      "delta_pp": -0.6335009237685707
+    },
+    {
+      "family": "nvos",
+      "metric": "subset_iou",
+      "compact": 0.6780571970841387,
+      "previous_high_capacity": 0.7053595732215252,
+      "delta_pp": -2.730237613738651
+    },
+    {
+      "family": "scannet",
+      "metric": "native_miou_19",
+      "compact": 0.3657237492560753,
+      "previous_high_capacity": 0.36945195042257717,
+      "delta_pp": -0.37282011665018544
+    },
+    {
+      "family": "scannet",
+      "metric": "native_miou_15",
+      "compact": 0.37629461814195253,
+      "previous_high_capacity": 0.377524039875153,
+      "delta_pp": -0.12294217332004531
+    },
+    {
+      "family": "scannet",
+      "metric": "native_miou_10",
+      "compact": 0.4584649867174114,
+      "previous_high_capacity": 0.4419944270960567,
+      "delta_pp": 1.6470559621354741
+    },
+    {
+      "family": "uqis",
+      "modality": "text",
+      "metric": "ap",
+      "compact": 0.19910506828790192,
+      "previous_high_capacity": 0.21393697989936844,
+      "delta_pp": -1.483191161146652
+    },
+    {
+      "family": "uqis",
+      "modality": "text",
+      "metric": "subset_iou",
+      "compact": 0.09778956696763887,
+      "previous_high_capacity": 0.12075455715566535,
+      "delta_pp": -2.2964990188026486
+    },
+    {
+      "family": "uqis",
+      "modality": "image",
+      "metric": "ap",
+      "compact": 0.3141484956475582,
+      "previous_high_capacity": 0.24752952785433557,
+      "delta_pp": 6.661896779322262
+    },
+    {
+      "family": "uqis",
+      "modality": "image",
+      "metric": "subset_iou",
+      "compact": 0.18433159058735488,
+      "previous_high_capacity": 0.15986098757685518,
+      "delta_pp": 2.4470603010499694
+    },
+    {
+      "family": "uqis",
+      "modality": "point_2d",
+      "metric": "ap",
+      "compact": 0.588101502445289,
+      "previous_high_capacity": 0.47952669373604706,
+      "delta_pp": 10.857480870924196
+    },
+    {
+      "family": "uqis",
+      "modality": "point_2d",
+      "metric": "subset_iou",
+      "compact": 0.3062315846552234,
+      "previous_high_capacity": 0.28373218415322987,
+      "delta_pp": 2.2499400501993505
+    },
+    {
+      "family": "uqis",
+      "modality": "point_3d",
+      "metric": "ap",
+      "compact": 0.5834242250536168,
+      "previous_high_capacity": 0.4678093371437719,
+      "delta_pp": 11.561488790984493
+    },
+    {
+      "family": "uqis",
+      "modality": "point_3d",
+      "metric": "subset_iou",
+      "compact": 0.3055453699925911,
+      "previous_high_capacity": 0.27691263469022975,
+      "delta_pp": 2.8632735302361323
+    }
+  ],
+  "same_cohort_does_not_prove_all_training_budgets_or_readouts_matched": true,
+  "source_support_interventions": {
+    "lerf": {
+      "ray_explicit": 0.8966622728001004,
+      "ray_inferred_flag": 0.8614369351062746,
+      "retrieved_explicit_flag": 0.5875446664502509,
+      "retrieved_inferred": 0.6249144032133981
+    },
+    "nvos": {
+      "ray_explicit": 0.929777106460625,
+      "ray_inferred_flag": 0.9254980150452717,
+      "retrieved_explicit_flag": 0.8083370947640333,
+      "retrieved_inferred": 0.8358095977036928
+    },
+    "scannet": {
+      "ray_explicit": 0.8166240952337303,
+      "ray_inferred_flag": 0.7882858238239958,
+      "retrieved_explicit_flag": 0.3461433276576826,
+      "retrieved_inferred": 0.43145208410483704
+    },
+    "uqis": {
+      "ray_explicit": 0.7923718555761039,
+      "ray_inferred_flag": 0.7698715925614094,
+      "retrieved_explicit_flag": 0.3099093155062883,
+      "retrieved_inferred": 0.35628952162303545
+    }
+  },
+  "uqis_anchor_identity": {
+    "text": {
+      "queries": 67,
+      "supported": 67,
+      "top_weight_target": 14,
+      "any_target": 14,
+      "dominant_target": 12,
+      "correct_anchor_wrong_extent": 3,
+      "mean_correct_anchor_iou": 0.38711282539201136
+    },
+    "image": {
+      "queries": 67,
+      "supported": 67,
+      "top_weight_target": 26,
+      "any_target": 26,
+      "dominant_target": 20,
+      "correct_anchor_wrong_extent": 11,
+      "mean_correct_anchor_iou": 0.306566621390798
+    },
+    "point_2d": {
+      "queries": 67,
+      "supported": 61,
+      "top_weight_target": 61,
+      "any_target": 61,
+      "dominant_target": 43,
+      "correct_anchor_wrong_extent": 18,
+      "mean_correct_anchor_iou": 0.33902329309743934
+    },
+    "point_3d": {
+      "queries": 67,
+      "supported": 59,
+      "top_weight_target": 59,
+      "any_target": 59,
+      "dominant_target": 43,
+      "correct_anchor_wrong_extent": 16,
+      "mean_correct_anchor_iou": 0.3500523026139286
+    }
+  },
+  "findings": [
+    "Compression is not a uniform bottleneck: category native close to old common field and image/point AP improved; v10 gap predates this compact baseline.",
+    "Text/image anchor failure and correct-anchor extent failure are separate; caller flag swap does not explain most source degradation.",
+    "Source partial-member IoU is not complete-object or benchmark accuracy.",
+    "No target-tuned threshold sweep, no new labels in training; current cohort is reused development data."
+  ],
+  "next_control": "Same frozen all-teacher single latent; transient member-aware hypotheses with matched peak vs pooled native ranking, both full-five scored.",
+  "study_budget_bytes": 17179869184,
+  "baseline_file_bytes": 6646087657,
+  "baseline_model_bytes": 4675112831,
+  "query_encoders_excluded_from_model_bytes": true,
+  "accuracy_promotion": false
+}

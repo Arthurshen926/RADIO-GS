@@ -1,0 +1,1634 @@
+{
+  "schema": "radio_gs.duplicate_function_pilot_plan.v1",
+  "priority_plan_sha256": "c80fe100d328f1e66a00cdcfe0562fc450a354a25844e56417e55fa881fe6d0c",
+  "output_root": "/mnt/pool/sqy/results/RADIO-GS/output",
+  "new_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2",
+  "store_root": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilot_20261012/figurines_18views/blobs",
+  "groups": [
+    {
+      "group_id": "G01",
+      "raw_payload_sha256": "7266295944768d360b73fdb0331777416312849774916c33b1024f4cc5b9dca6",
+      "one_archive_bytes": 315909865,
+      "source_members": [
+        {
+          "allocated": 340128256,
+          "bytes": 315909865,
+          "ctime_ns": 1791481407585656736,
+          "dev": 55,
+          "evidence_kind": "soft_partial_view_evidence_v1",
+          "ino": 135620762,
+          "manifest_sha256": "a19f14f961af32c42a721a3bcee6ba50ec4a7a1223a35bf1b74447f89a91c822",
+          "mode": "0o644",
+          "mtime_ns": 1791481407585656736,
+          "nlink": 1,
+          "path": "query_field_20261009/soft_paired_functions_v1/fits/soft_paired_function/scannet_scene0062_00/field/field.pt"
+        },
+        {
+          "allocated": 332857856,
+          "bytes": 315909865,
+          "ctime_ns": 1791514850323364927,
+          "dev": 55,
+          "evidence_kind": "mixture_partial_view_evidence_v1",
+          "ino": 135658847,
+          "manifest_sha256": "f4aa0761989be6171a1a93c7bcf8ba67a0d232a708812005bae0f6d06c84200c",
+          "mode": "0o644",
+          "mtime_ns": 1791514850323364927,
+          "nlink": 1,
+          "path": "query_field_20261009/mixture_functions_v1/fits/mixture_function/scannet_scene0062_00/field/field.pt"
+        },
+        {
+          "allocated": 337744384,
+          "bytes": 315909865,
+          "ctime_ns": 1791516450378791694,
+          "dev": 55,
+          "evidence_kind": "confidence_mixture_partial_view_evidence_v1",
+          "ino": 135659727,
+          "manifest_sha256": "3f106be299cc17ceaf7ead7e3a95cd29ad3191ab93f6880a92fba37366c8a13a",
+          "mode": "0o644",
+          "mtime_ns": 1791516450378791694,
+          "nlink": 1,
+          "path": "query_field_20261009/confidence_mixture_functions_v1/fits/confidence_mixture_function/scannet_scene0062_00/field/field.pt"
+        }
+      ]
+    },
+    {
+      "group_id": "G14",
+      "raw_payload_sha256": "9ccd96effc44e778ae85fa610e9efd50da96df73f968955759ec0edab210a7e5",
+      "one_archive_bytes": 1153960773,
+      "source_members": [
+        {
+          "allocated": 1211650560,
+          "bytes": 1153960773,
+          "ctime_ns": 1791526542984093504,
+          "dev": 55,
+          "evidence_kind": "joint_observation_function_v1",
+          "ino": 135675308,
+          "manifest_sha256": "1c5355619a9a0fe3f7e589791e7df46c0f357bfcbd330877979cd740ef712c32",
+          "mode": "0o644",
+          "mtime_ns": 1791526542984093504,
+          "nlink": 1,
+          "path": "query_field_20261009/native_mode_functions_v1/fits/scene0535_00/measure/field/field.pt"
+        },
+        {
+          "allocated": 1215783424,
+          "bytes": 1153960773,
+          "ctime_ns": 1791526539127951481,
+          "dev": 55,
+          "evidence_kind": "joint_observation_function_v1",
+          "ino": 135676249,
+          "manifest_sha256": "9548cb5fede40980c8508c9ac058e3c02c45f664c36261cfec5ca3eb7b83f857",
+          "mode": "0o644",
+          "mtime_ns": 1791526539127951481,
+          "nlink": 1,
+          "path": "query_field_20261009/native_mode_functions_v1/fits/scene0535_00/mean/field/field.pt"
+        }
+      ],
+      "artifact_directory": "G14_attempt2"
+    }
+  ],
+  "consumers": [
+    {
+      "group_id": "G01",
+      "consumers": [
+        {
+          "variant": "soft_paired_function",
+          "cohort": "query_field_20261009/soft_paired_functions_v1/soft_paired_function/cohort.json:3565",
+          "reader": "scripts/research/run_query_field_relations.py:predict -> radio_gs.query_field.public_scannet",
+          "receipt": "query_field_20261009/soft_paired_functions_v1/soft_paired_function/predictions/scannet/scene0062_00/prediction.json",
+          "recorded_prediction_sha256": "f8497e876d3837c4164ac64e1491df1b7fb7c60eaee770bf587905df80678be2"
+        },
+        {
+          "variant": "mixture_function",
+          "cohort": "query_field_20261009/mixture_functions_v1/mixture_function/cohort.json:3565",
+          "reader": "same common/public_scannet chain",
+          "receipt_status": "This ScanNet prediction was not completed. Whole trial stopped after two LERF prediction receipts before scoring; preserve stopped status."
+        },
+        {
+          "variant": "confidence_mixture_function",
+          "cohort": "query_field_20261009/confidence_mixture_functions_v1/confidence_mixture_function/cohort.json:3565",
+          "reader": "same common/public_scannet chain",
+          "receipt": "query_field_20261009/confidence_mixture_functions_v1/confidence_mixture_function/predictions/scannet/scene0062_00/prediction.json",
+          "recorded_prediction_sha256": "042c7f73b9de3f3f3c9f521dfe66ebee3748cfda1c7f38993ec41e6d5098a0a3"
+        }
+      ],
+      "reader": "public_scannet versioned loader",
+      "query_file": "configs/consolidated/scannet_native/scene0062_00.queries.json",
+      "consumer_scope": "New target field path can be passed explicitly to public_scannet; no old cached prediction is relabelled."
+    },
+    {
+      "group_id": "G14",
+      "consumers": [
+        {
+          "arm": "mean_native",
+          "package_rule": "mean",
+          "receipt": "query_field_20261009/native_mode_functions_v1/mean_native/predictions/uqis/receipts/scene0535_00.json:937",
+          "original_manifest_sha256": "9548cb5fede40980c8508c9ac058e3c02c45f664c36261cfec5ca3eb7b83f857"
+        },
+        {
+          "arm": "measure_resized",
+          "package_rule": "measure",
+          "receipt": "query_field_20261009/native_mode_functions_v1/measure_resized/predictions/uqis/receipts/scene0535_00.json:937",
+          "original_manifest_sha256": "1c5355619a9a0fe3f7e589791e7df46c0f357bfcbd330877979cd740ef712c32"
+        },
+        {
+          "arm": "measure_native",
+          "package_rule": "measure",
+          "receipt": "query_field_20261009/native_mode_functions_v1/measure_native/predictions/uqis/receipts/scene0535_00.json:937",
+          "original_manifest_sha256": "1c5355619a9a0fe3f7e589791e7df46c0f357bfcbd330877979cd740ef712c32"
+        }
+      ],
+      "reader": "scripts/research/run_query_field_native_modes.py:scene loads measure once, then switches native_mode_rule and chooses corresponding manifest per arm. scene_binding binds arm, scene, public query files and explicit storage.",
+      "query_file": null,
+      "consumer_scope": "Single-scene QueryFieldRuntime CPU proxy validation covers mean/native and measure/native-or-resized-shaped inputs; full nine-scene runner design remains historical and is not reconstructed."
+    }
+  ],
+  "metadata_bindings": [
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/soft_paired_functions_v1/soft_paired_function/cohort.json",
+      "bytes": 158236,
+      "sha256": "9fd7cc87e4d2af8ead248f6a1a8dba1a80e4a647e1aa7c056a8f02d9f1993974"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/soft_paired_functions_v1/soft_paired_function/predictions/scannet/scene0062_00/prediction.json",
+      "bytes": 6106,
+      "sha256": "fb2af23d2ccc38641306720288ee3807fb950398d5d1875f1c864e2b753afd2f"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/mixture_functions_v1/mixture_function/cohort.json",
+      "bytes": 157820,
+      "sha256": "a70a65058aabff6f06c73ec29c9a5daa1edf83ebfd00955ce824794a7a785d51"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/confidence_mixture_functions_v1/confidence_mixture_function/cohort.json",
+      "bytes": 158964,
+      "sha256": "02ffbb0ca70a00542a860f4b3fafb0c2e92f5945d5bb275dcc45edb9c77bd6d6"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/confidence_mixture_functions_v1/confidence_mixture_function/predictions/scannet/scene0062_00/prediction.json",
+      "bytes": 6120,
+      "sha256": "4bca2bc97f932b146c2162a8c4e42f4ea775fae808b10ec83a490eb434c61a8e"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/native_mode_functions_v1/mean_native/predictions/uqis/receipts/scene0535_00.json",
+      "bytes": 44740,
+      "sha256": "1c45994e68618a30e917b7a5f5f78babb4d61d25a3f6b0a938534ba5587f950b"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/native_mode_functions_v1/measure_resized/predictions/uqis/receipts/scene0535_00.json",
+      "bytes": 45069,
+      "sha256": "a05118344f6ce2d13df00b831d609b10e773de1758e005eab7df3bd1f922c2db"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/native_mode_functions_v1/measure_native/predictions/uqis/receipts/scene0535_00.json",
+      "bytes": 44997,
+      "sha256": "54b914f052818afb0897d03442a4297572aa7b2bb91b08d94a11b92d50911a70"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/native_mode_functions_v1/design.json",
+      "bytes": 50009,
+      "sha256": "8deb8862435edc004c6990bcae04fb02a0da685b5dd4142afe73f7689c2973a7"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009/native_mode_functions_v1/construction_complete.json",
+      "bytes": 1857,
+      "sha256": "7d19f895c92bc8bded5a84b2464f7fdeb0c56e672866e08371f0e5d5196fe20e"
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/configs/consolidated/scannet_native/scene0062_00.queries.json",
+      "sha256": "71b082a232fd9403d3e02d53550b2407b68aae4f3e90462c4cbe19d43e2b44a6",
+      "bytes": 2480
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14/failed_attempt.json",
+      "sha256": "8d2656209cff5e9635b20733ab25af8f4425747cfc974478749ea673a5614427",
+      "bytes": 909
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/cold_0.json",
+      "bytes": 843,
+      "sha256": "41c54b7eac2f20e15534eed94b246a5fb3d9adaad9fea15907240c1a2a8c8e0f"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/cold_1.json",
+      "bytes": 843,
+      "sha256": "fc165bd9d3c23cec6351bcdfccb03c7f4986fe4e3d37db7b3290b31315129070"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/cold_2.json",
+      "bytes": 843,
+      "sha256": "553e2e6c29ca10b525d020e7f130c2f915a075aff9ad7f64bc0d4691c60e26d6"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/intent_0.json",
+      "bytes": 9965,
+      "sha256": "8870b9265cd54958b18efdf68f046a0a4310ffd5aa52ddb5c3644b24ac33af60"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/intent_1.json",
+      "bytes": 157,
+      "sha256": "d61406aaa720710406ba6948a9639cc4d5e812ba642234d27bf4ff713287bd08"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/intent_2.json",
+      "bytes": 157,
+      "sha256": "8e55de447bed5555c2faad1bd8f5305a3be6ef0129a0acad7131e10f52df31e6"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/migration_complete.json",
+      "bytes": 916,
+      "sha256": "cbdab43f7b2f15f0163f9511e6678462e9a8cb48f7ff49090a07e5b51b4ea0f9"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/publish_0.json",
+      "bytes": 21007,
+      "sha256": "db7d5e8cb6a9ffd41caaf195c0d16cea53c2b9c36690d267a481c6923a52e749"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/publish_1.json",
+      "bytes": 10611,
+      "sha256": "eb74fe90bc3c46ff27b3b69c7b66dda5ee059540256e324c4c44407e7bf4ba5c"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/publish_2.json",
+      "bytes": 10688,
+      "sha256": "4b4b1f741a213673b8fd33bef084d40ab923d943c09b0865f4157eb805acd063"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/variant_0/manifest.json",
+      "bytes": 8473,
+      "sha256": "fd5f3c25cbdb89a5acd2b2d601a5f457282b67d09c43a0a4740a7c34ba3a590f"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/variant_1/manifest.json",
+      "bytes": 8617,
+      "sha256": "7268eb5e6d764963d49007def1abb1780f273028ab8cd505bdf9527bcd70115a"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/variant_2/manifest.json",
+      "bytes": 8661,
+      "sha256": "f815d120715ff21bdf089ac10598c2535b3bb5221738caa45a436fb5f71af02c"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G01/probe_fixture.pt",
+      "bytes": 386305,
+      "sha256": "b69dc82a8352544dfeeaa05ce84d14d3d5abf2275867cdc2eac4b9cb37d325e6"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G14/failed_attempt.json",
+      "bytes": 18927,
+      "sha256": "d367994827f1e5fe5b8337c621befd6069804e39358574325d0bcc94dba05162"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/storage_v2_pilots_20261013/duplicate_functions_G01_G14_attempt2/G14/probe_fixture.pt",
+      "bytes": 688001,
+      "sha256": "7bc0bcbc29dc6a5629582c7b6c8d657f3d30133a3460fe323a73757bff8005ff"
+    }
+  ],
+  "minimum_free_bytes": 68719476736,
+  "minimum_ram_bytes": 34359738368,
+  "max_total_new_bytes": 2147483648,
+  "max_application_io_bytes": 19327352832,
+  "reserve_bytes": 8589934592,
+  "application_io_upper_bound_bytes": 17499228242,
+  "forbidden_source_roots": [
+    "/mnt/pool/sqy/3d_understanding",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261007",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261008",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261009",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261010",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261011",
+    "/mnt/pool/sqy/results/RADIO-GS/output/query_field_20261012"
+  ],
+  "stages": [
+    "migrate --group G14",
+    "cold --key G14:0 --migration-sha256 RECEIPT_SHA",
+    "cold --key G14:1 --migration-sha256 RECEIPT_SHA",
+    "finalize"
+  ],
+  "partial_policy": "Every missing blob intent is published before writer; completed package/receipt are no-replace. Stop on failure; do not auto-delete or overwrite partials. Completed groups are not rerun, subsequent cold stages are independently addressable. Any incomplete publication recovery requires reviewed explicit continuation.",
+  "disk_note": "Cumulative cap checks both logical and st_blocks for new addressed blobs plus all pilot fixtures/metadata. Prewrite conservative allocation gate uses 25% missing-blob margin plus16MiB metadata; unreferenced partial blobs tracked by intent. No whole-store scan.",
+  "runtime_code_note": "Source snapshot retained separately on code-project filesystem; included in free margin, <16MiB. Cold children deny old field.pt AND manifest access with an actively tested Python audit hook, not an OS hostile-code sandbox.",
+  "permission_boundary": "Non-destructive migration only; no retirement or modification of original artifacts authorized.",
+  "code": [
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/__init__.py",
+      "sha256": "bc7064c5ae34dfa06d45b841bd23e51f8262e0e0a9f0a08788c526b60a21b6fc",
+      "bytes": 401
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/__main__.py",
+      "sha256": "5a77c4743cc5562d1f52f9f370f1c105c715d6e8ef6445f024f433e7fa0de218",
+      "bytes": 3027
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/adapters.py",
+      "sha256": "01a57f3a98b1d34c77cbb9e61c1d8d02122d05c3b6fba9bb2204f5887079e434",
+      "bytes": 10691
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/atomic_scope.py",
+      "sha256": "717ca773c8af47c1b2c81cef2f25625080740e1ae7d31da76269e5dfc893e534",
+      "bytes": 2752
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/baseline.py",
+      "sha256": "3e598682d64413da88f2ba48b1016b6708120720ea8ffacf9f3515b7c4a665af",
+      "bytes": 4590
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/category_evidence.py",
+      "sha256": "a2e0e442ae9e5e7860a8d74513ab75f7355c15ba2444201c821c7543434a43bb",
+      "bytes": 1493
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/cold_check.py",
+      "sha256": "97d1c5bd69b498a9d9e992ea6ebc752c145b4f76e368b3b5fc10a4de468b14c4",
+      "bytes": 2618
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compile_joint_observation.py",
+      "sha256": "2a67685f4386b26d9835df604eb7c08ae900d8d4784910314ea320c8cc894dd3",
+      "bytes": 10308
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compile_mixture_evidence.py",
+      "sha256": "043f4c94ef1dc421b97c1005dac14640b93b05f1858e5e78cc1aa5be0d0e5745",
+      "bytes": 8327
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compile_native_modes.py",
+      "sha256": "50fb6ef98d2a2bfb0d8f17dd461ab61369716ca2cd42d929005bd94116c1d92b",
+      "bytes": 6637
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compile_paired_evidence.py",
+      "sha256": "6dedad863da3673b8a670d1be1d52bccf54980d32b0a4a5812cad62f7ac5152b",
+      "bytes": 6345
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compile_region_semantic.py",
+      "sha256": "37fb99bcbfedf4adb734f4fb2284ee84b98b35bcdc6563e4b1a68fa9f01ead50",
+      "bytes": 4276
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compile_semantic_views.py",
+      "sha256": "e58ffd2ef6d48b4171b8c45a4bf4e135507832393fd90baf5995aafa1597d73c",
+      "bytes": 7375
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compile_soft_paired_evidence.py",
+      "sha256": "714f6edce06257e5a8fbb843c8d018d365a7804050ff2a770cffd153a7d13f00",
+      "bytes": 6669
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compiled_forest.py",
+      "sha256": "f8dfd36a9e5f4bc38263ba1aaa7eb33f309bd922e06accd654ddba29974e9724",
+      "bytes": 3361
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/compositional_evidence.py",
+      "sha256": "916da97732ae80bfca02c1c1563293c3e11c3eb6d314d8acd01b8a9f1a8a6ae6",
+      "bytes": 3775
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/conditional_relation.py",
+      "sha256": "6632e0be6f26766a99aaebc11cf34a37a6b7e36e95c8e55577b7d87b0f2e9b37",
+      "bytes": 4234
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/confidence_mixture_evidence.py",
+      "sha256": "9f02b0f3a069524105d13f3378f1003e99246297a5de2b5081e5fe377e32011d",
+      "bytes": 874
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/contracts.py",
+      "sha256": "0c45234da4afd00066e1bf7b20cbb089900c84e0cbb866f2f85fa2b1204d40cb",
+      "bytes": 5097
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/coordinate_training.py",
+      "sha256": "0299e81fc9a2dda8404bf63ab1f2153a55a400e1d1dc36742564a4bddf076e0c",
+      "bytes": 8710
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/coverage_factors.py",
+      "sha256": "c7768ce8d5e8a3b017ed29480d1626e03184d012b4e3c5d7a2475515b4068e56",
+      "bytes": 5542
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/diagnose.py",
+      "sha256": "06074fcfd3379820a43ca898b70d87c303dc99505f08ecdca5adfbb030f3b4b4",
+      "bytes": 3819
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/element_relation_training.py",
+      "sha256": "dbc2e6d8537c150649ff5b56cd82c889325b959acb54b89c39396f97ab9fb278",
+      "bytes": 16802
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/evaluate.py",
+      "sha256": "b895327810ab7ff0a4c0243a6e714035b867e8a0ed54416564f94cb0a7c53f98",
+      "bytes": 9950
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/exclusion_audit.py",
+      "sha256": "4274ec6b1368b605b534e7bb9ad009bc771dc366c526b1014b4250f9fd53f4d9",
+      "bytes": 5243
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_cuda.py",
+      "sha256": "844b8c5633d9a01cc7756881bc73a66a927eefbb56dbbbedf40965d7012f16dc",
+      "bytes": 3021
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_decision.py",
+      "sha256": "aae45fd40bbeec9f349775567032be6127e74c03158adde9ae30a3cc29142279",
+      "bytes": 8224
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_decision_coupled.py",
+      "sha256": "a7f3b23566786f41d6f582466bcd54229f8ebd7f4332808a3fc0756f63f4c253",
+      "bytes": 7825
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_decision_linked.py",
+      "sha256": "fcaf0ada300a8c0f67041aaceb6b7dae701867fefcf11e1d1408754461b6a54e",
+      "bytes": 8196
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_edit.py",
+      "sha256": "cbdf9eb938e05d0df319e4caf5c3a4d906845bcfc9503b1f8e62725b5c1f38cd",
+      "bytes": 2541
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_factors.py",
+      "sha256": "e7c9cebc3346f279fcfb4ec3155b82245f6a8343ffd4cb296ff344dd225dc21d",
+      "bytes": 5989
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_groups.py",
+      "sha256": "fade5b039588ff6488716f33661bc5483f7e63226412092bda525f5a027205b0",
+      "bytes": 6237
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_preparation.py",
+      "sha256": "33c1d7e6af790fc82b197554763bbd51b112ac41e5cdefa533ae26129da122a9",
+      "bytes": 7103
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_proposals.py",
+      "sha256": "c7590146f709520bb5d9766398dfea0649e92bf4ef4abe77deefe8ffdfe7f4c5",
+      "bytes": 3032
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/extent_runtime.py",
+      "sha256": "ed83bc10132cbd94cb9566cc374a6d8bbf4bc9a765b73df20ebbbc2431b5c083",
+      "bytes": 5108
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/field.py",
+      "sha256": "b8dc318c8343534c42dd784db45d6c549341000528e609ebcf1044d2af9de0bf",
+      "bytes": 25213
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/functional_training.py",
+      "sha256": "eb29efcaf0418e7494a4261d138bbfe96fc9cd9740ead63d006c1e8e4ee8e5f3",
+      "bytes": 12489
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/geometry.py",
+      "sha256": "e9cbcec5a80183136c0e3bc9e74d9117e05a9ba9bcfa9cc8d0ca4c511353ac47",
+      "bytes": 4397
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/hypotheses.py",
+      "sha256": "e80320195844089d4ffe696b4008d7da81c1075f14ee9a4321677ea3e17f6941",
+      "bytes": 5813
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/hypothesis_study.py",
+      "sha256": "0ce39edff9b07e6077bf03800490e0d058a451bb9255573dccb72e3039ef1db7",
+      "bytes": 6961
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/identity_evidence.py",
+      "sha256": "e2eb98d84d73a871f4da57450374a71db972a8f2910663690fc1b3d1850c4f76",
+      "bytes": 8295
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/identity_region_scope.py",
+      "sha256": "705e69448b22789dd18079b3a755f01427ccc9c20742b231ebdac00af6eaf438",
+      "bytes": 3513
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/joint_exclusion.py",
+      "sha256": "f7abfc967edc30999826461ac0fdbb0abac94ad1ec245fbe99fcee444a78d548",
+      "bytes": 7225
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/joint_observation.py",
+      "sha256": "3c2c649201a4e789142e1a29ad0c3c55f27eca570fee7cd113af7218fca2f533",
+      "bytes": 7054
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/legacy_field_resolver.py",
+      "sha256": "ae8026750eca7de997d9b460924bede0f8fac4dae0bbc167dfcd7f6faf59dae1",
+      "bytes": 8479
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/local_metric_bound.py",
+      "sha256": "630b8950d9a565a60f632b1d61b652c7ee5e0826cf280ccb72576381a9f32082",
+      "bytes": 4400
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/member_energy.py",
+      "sha256": "b7d781ca651f9cd796d687f4794a80c61d90822e34a51c3251e7e0f92b6a88f7",
+      "bytes": 11695
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/member_energy_kernel.py",
+      "sha256": "eb903e364b1b5d915fb9ac70b8bce4a59c1e2a5e464934c29dcbcc59c8b999bc",
+      "bytes": 4739
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/metric_study.py",
+      "sha256": "984807f5659a88fe33a9e955a6b63f15cae9ee1996b627938c8773c73527906d",
+      "bytes": 5647
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/mixture_paired_evidence.py",
+      "sha256": "792bd30e87a8f993b9ea0e5aac4084e496a5cfee2217ba3210c9a4abdb0852eb",
+      "bytes": 5048
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/native_modes.py",
+      "sha256": "78be9e1486e54d65bfb2b2d0a4156f7ae1d664632dd8379b93ae3d8ff77fd2cc",
+      "bytes": 6711
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/native_text_device.py",
+      "sha256": "c41e5f592bfb4870c2a7fbc1519cf207504101e2d10222d4f32284a8836c5cb2",
+      "bytes": 1459
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/native_transfer.py",
+      "sha256": "dd08379042e2129f7bf71a3800f0a235211c7fa97bba0e8b15788700f628185d",
+      "bytes": 4838
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/negative_evidence.py",
+      "sha256": "f1eb71d23d3723992816cdae257a0c77341b6ebca4a2e3eb8f07bd46c7d0e082",
+      "bytes": 2921
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/observations.py",
+      "sha256": "c525bfe9de6d95939c6fcc73ad3b187d2f5237a9885516b1e94842e600b4b2b4",
+      "bytes": 11615
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/paired_evidence.py",
+      "sha256": "a09f543f6718fd0617e9e301282aaf21af32c3ec9b552545aa87325dce153280",
+      "bytes": 5643
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/part_conditioning.py",
+      "sha256": "7c98a957dfbdac03ae27a8cbdbfca934a9ed3ce004ab61e0e532cbb9b61e2e18",
+      "bytes": 5031
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/pipeline_v2.py",
+      "sha256": "b695086fe466d21f57bd3099271b7b271b7e2969cb8c66e1e2e7943372222748",
+      "bytes": 3382
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/positive_rays.py",
+      "sha256": "a3b5365347993529acdc2d3e666203fc3a75ff3211493eeaeafa26a323d80f7f",
+      "bytes": 7311
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/public_lerf.py",
+      "sha256": "ef42a8b85ef2772152a87b6e174589ce58649c8a13d2835a2cbbe0a7762f309e",
+      "bytes": 7418
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/public_nvos.py",
+      "sha256": "6ef5d757a9728877dce84824fd73a2b125da34eb6c901a1af32bfa096c85dfa8",
+      "bytes": 19811
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/public_scannet.py",
+      "sha256": "4e9917bdeec02ce75b4800eb48d792b226c7f322253bae2c450dcf083dd47e6b",
+      "bytes": 6451
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/public_uqis.py",
+      "sha256": "26228b4782e07fab4ce23410b0685d179ae3ece29d5130863973dd7ffd5ce82b",
+      "bytes": 8863
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/query_program.py",
+      "sha256": "5f7ecdc4db16d042757db8c00435f7a5c76b1a08f8457c99701102cf62ec9f29",
+      "bytes": 8244
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/readout_study.py",
+      "sha256": "66ae30e7aa70f252b50927f12f256dad9110248a140ce6b15c1a64904bdb067d",
+      "bytes": 4720
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/reference_extent.py",
+      "sha256": "ab0f93d4240d3457d50c952d8cada7eaaaf32122dea657bdcdef023903bab9b9",
+      "bytes": 7192
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/reference_scope.py",
+      "sha256": "11e68d94bf83e9e1b2fd5ab9fd4168d13d36deb59b7cc70cfa86f1ea6e24b9fe",
+      "bytes": 8897
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/region_admission.py",
+      "sha256": "31d7bc4d6bf2ca1137b98f639f485a832d9c4390a648df3caeb13d8e0010a5b5",
+      "bytes": 2528
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/region_carrier.py",
+      "sha256": "77689c06188dc3f0bf74c5f9c9dc357378e8a86c3939e4d9bb6e0076244338b9",
+      "bytes": 6252
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/region_quality.py",
+      "sha256": "4d1ff7a74ee9ce73ff4d65178217616fa34620eeff493f599678546f36c02b4d",
+      "bytes": 6759
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/region_union.py",
+      "sha256": "406ffe4403587aec8cc672f2e9be49266fa4398ea0153f27942a98c77da024e1",
+      "bytes": 2322
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/relation_training.py",
+      "sha256": "91eb9382a3d47aa93931e73fa389fb5d6e881d1e8f3d75ced970fe20499f96f2",
+      "bytes": 13249
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/relative_extent_decision.py",
+      "sha256": "57622643cebf7952e05ecf28e00a19e7a2ab1445baebc34e6bb4537f7f4177d4",
+      "bytes": 1467
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/replay_v2.py",
+      "sha256": "e89bb712cb08c109999232d1b81c075914842f49a26f98994d6afc37c453595a",
+      "bytes": 6798
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/research_storage.py",
+      "sha256": "a7350a2c66d34cfb70b87c688b9f9561f481e55624a486b84026def73bc39f14",
+      "bytes": 4769
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/runtime.py",
+      "sha256": "b7b8b5eda757937349efbb8721475103918c7a3592f94cc8427fb31cff02362b",
+      "bytes": 2942
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/scope_activation.py",
+      "sha256": "7320e04c5a08f7c971001ab2f23fcf10e73776aa4bb1e02735149bff6bd1ef61",
+      "bytes": 767
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/scope_completion.py",
+      "sha256": "50d2be3ec8755c98afec0f131beefc115e24f7532613ac053725dffda603045e",
+      "bytes": 3575
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/scope_confidence.py",
+      "sha256": "faec8ab7d65e5e4d5a8788c3169d58ed3878e48cad299d9c78bff8337a709524",
+      "bytes": 2989
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/scope_constraints.py",
+      "sha256": "4887d3085480cf945940d5beaf2113e61d43540268bc6bc1e9c0941b6dcff39f",
+      "bytes": 6120
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/scope_exclusion.py",
+      "sha256": "f8c36742a2f9984f0af95f06eb4233504941d5d5b6e6f391621dd9864410f998",
+      "bytes": 1901
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/scope_permissions.py",
+      "sha256": "c69281c38dec981b1cb18b06cbd25ccfb837baf98f2556d0d1152156735cc343",
+      "bytes": 3572
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/scope_readout.py",
+      "sha256": "2a69908b45857599f2696bc14391a51495bd82b7f899ddfd257e9c5e94cfd172",
+      "bytes": 1743
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/scope_topology.py",
+      "sha256": "777feff5ccb8984a292a43be4264f6c3f75c27e791f2b7edfd2857da4142348a",
+      "bytes": 5793
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/seed_scope.py",
+      "sha256": "f8b558becd36314bb4be13e3c701f488439db0ce7aec864ea90db0d81a02f19e",
+      "bytes": 2620
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/semantic_measure.py",
+      "sha256": "f0f42124653e68232d2b3463f2a042e4caa897d0ab605f69c98d57ed88cbcfa9",
+      "bytes": 5452
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/shared_storage.py",
+      "sha256": "222f24ddf5341d89820fecac3d701b21b4c355aa387b1cb43022c250c48aed44",
+      "bytes": 13961
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/signed_regions.py",
+      "sha256": "5a5a0f135d96a5fa1a2e22e649f8773a78ac995595e6afb7398ec09a17668cba",
+      "bytes": 3294
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/smoke.py",
+      "sha256": "9485fbb6100f062308164555421a24e70da524f1d4839046f1698f69404f5dd4",
+      "bytes": 5571
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/soft_paired_evidence.py",
+      "sha256": "f77088e1cd758a388f20146a4f43da7d25ee83ff7b6ec662079b0f1a24042ab9",
+      "bytes": 1935
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/source_member_readout.py",
+      "sha256": "43e610c1fe626b8729c069af227983bc1403c68bb7ab72a67e715a0e652e34fc",
+      "bytes": 1180
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/source_regions.py",
+      "sha256": "df98a089403f38afbdee0579b3de7b7163d0508457c97d470247686fb491f7fc",
+      "bytes": 3898
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/storage.py",
+      "sha256": "3eee57ab44c4e6fe81f588bb18a59286fb3bf145fce2574f25fa6a6410329904",
+      "bytes": 8224
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/subset_errors.py",
+      "sha256": "3a2621eed33e262073775020876733cbede4e8799c917e09e329082f32e51abd",
+      "bytes": 2598
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/support_audit.py",
+      "sha256": "c21588ee04c0d8e4febdb5912d3338e26baeded29194a5a77cab2882dcf7045c",
+      "bytes": 4081
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/support_concentration.py",
+      "sha256": "d9ee559a75dc9b1c53f4fe551cdb501ce709487aa79f1873a5f7e422758f0e57",
+      "bytes": 4668
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/support_control.py",
+      "sha256": "1eac14b80aa68a5d6009b203168093133785cce1e44fe714fc4f136c13f50590",
+      "bytes": 5953
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/support_energy.py",
+      "sha256": "ed3e9ed2e0250929eb88be7ea9f8d7e4faab830b3c7fe183dd64062bf0bf5a2a",
+      "bytes": 3973
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/support_footprint.py",
+      "sha256": "dc07ad9a272d59fd50378db5f229c2e63e6d723617073052ca66fe95b0e9d35c",
+      "bytes": 2503
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/support_jensen_audit.py",
+      "sha256": "c9ea4c845cb32f5c93dca823f5ebb1fce7d739713dc8b8b29004dd7f12c2c89a",
+      "bytes": 6159
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/support_training.py",
+      "sha256": "254446de91c08fe21cb56e90fb1dd90f056de17016c7f2df9f4d1300d654bdcc",
+      "bytes": 3642
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/surface_point.py",
+      "sha256": "08bbd5194dbf531a4a2c743726756b10d49a7a00254bd00788d63daf042c54de",
+      "bytes": 3040
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/query_field/train.py",
+      "sha256": "7f518515aee935a021bb80eaf31d935e0ee06ea4ae2f82dad530bac24ec2d45f",
+      "bytes": 11806
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/__init__.py",
+      "sha256": "a79c820a1c10d47d2318db32c529da54f828326c718888eb6f4843f22d50cf7f",
+      "bytes": 6911
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/absolute_relevance_relation_readout.py",
+      "sha256": "0fbcc93670dfb513bddd16946f59150caf279dbab7e065e9d703b5e64b5eb1ef",
+      "bytes": 8710
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/absorbing_extent_head.py",
+      "sha256": "1b37d5f1354f2cdfd0187f6cce12e319b74ebb8f1b48a3e9ea84629f24b2e1cd",
+      "bytes": 8091
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/adaptive_otsu_score_calibration.py",
+      "sha256": "2364b302bab5cf840c3e02ace4a88f8e4d5eb624fc6e2b41863723b577094c23",
+      "bytes": 3764
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/adaptive_signed_native_image.py",
+      "sha256": "8782bcbb0d3a598357977f24e26d9561c89bab3236fcebd2c319a319427716bf",
+      "bytes": 5722
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/adaptive_support.py",
+      "sha256": "73df6cd9e9687f8d40bc0d9c42eb912d3834fc3704d514778f9cf488931920d9",
+      "bytes": 4703
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/all_available_source_view_authority.py",
+      "sha256": "3803ebf362c128688d317cffb7f87da1830e80e807bedd55887766d83951c97a",
+      "bytes": 18762
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/all_available_source_views.py",
+      "sha256": "e8a7b486cd2d4e74be4f9471b2ac3d1a131b4c645436ab079c4fa5f50b7650d4",
+      "bytes": 4065
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/anchor_observation_evidence.py",
+      "sha256": "ec0b62dec5efdbbb2ee52658394b005303c2145078edb24873605d7414fe1adc",
+      "bytes": 3141
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/anchor_preserving_transport.py",
+      "sha256": "df369a76b458dc9e2827458f61989753cd2d04d91897a79a50a87b5129d229aa",
+      "bytes": 8430
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/anchor_preserving_transport_checkpoint.py",
+      "sha256": "6a4d7ba3ff2af67ef0944916673f064e961764e61a98f0e699726aca14345918",
+      "bytes": 6863
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/bounded_native_scope.py",
+      "sha256": "28a7c986b4a87734ddaaeb8ba4b818f3419564745b8b0318eff9c914ae65d512",
+      "bytes": 1522
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/bounded_region_comembership_query_readout.py",
+      "sha256": "6c9949bd4b40a0a74d6683ed239ad8bdb6b442fe1d86d3cd5111e6008cc259f4",
+      "bytes": 3610
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/bounded_region_comembership_readout.py",
+      "sha256": "eef0bdb709a89a674e53a458dea729efd98c7caa64a5c4114891bb1bc442e2dc",
+      "bytes": 8496
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/categorical_evidence.py",
+      "sha256": "fb696cf7603980339fb8a83589249a27f5fd02d8788b1060b3e388f2f1f1a33e",
+      "bytes": 1963
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/category_competition.py",
+      "sha256": "550fa22bfc19328bb1b20b68e7dc5444477e804435f893df4c59587846480be4",
+      "bytes": 355
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/category_observation.py",
+      "sha256": "fc3f86cc1722d494327642a0f6301677ba6c5f777ed362cd6d6f583cf67d00f0",
+      "bytes": 3065
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/cold_category.py",
+      "sha256": "22e7ecb91ec8a447c74904cc8926f7361429ba4cceff7491d2867e16498c40b4",
+      "bytes": 3209
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/component_reference_evidence.py",
+      "sha256": "0b92e0ddf45fffb73fe2dfaa113174f35cc28a6d1e1774bcf4418fde3ddd4211",
+      "bytes": 4060
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/component_reference_evidence_numeric.py",
+      "sha256": "0ea61c59cb300d1f98e6439f2fea0f96182b4dfeb77b3dce49c0d3da1be420a6",
+      "bytes": 1586
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/conditional_element_membership.py",
+      "sha256": "1c02841151e7350feeef5610801d5b25e66d159325d46d4993fa0f6ffdcce87f",
+      "bytes": 7620
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/conditional_region_membership.py",
+      "sha256": "ca3d4cec3f4f5ccf97618ec67e5cad09d91020bdf03606fff65ea47a71632cfb",
+      "bytes": 8371
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/corroborated_scale_aware_native_v3_support_fusion.py",
+      "sha256": "803f794bd4e67954f4507ec8ba229c484de931117a0cd75bedb3724d275b47e8",
+      "bytes": 7922
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/coverage_deficit_native_v3_support_fusion.py",
+      "sha256": "e79b564f6de195125903d0b369813d3169f154653a3dcbc4fb3e24edfcd096bb",
+      "bytes": 11152
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/dense_surface_field.py",
+      "sha256": "8568a75bafa1e6cc6407eb9ec217d902eb6bc9c8162e8076255250cd9ed71dca",
+      "bytes": 1162
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/deployed_scale_corroborated_native_v3_support_fusion.py",
+      "sha256": "b0fd779fa31117616dca571fb4b2bb9e897075ba891dfefbc9e1498cd87460fd",
+      "bytes": 7181
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/direct_anchor_membership.py",
+      "sha256": "20c0d33798850cbb0813d6ac00bc5f672a257237a8eedf5473080367a2e8a127",
+      "bytes": 5054
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/disjoint_domain_composition.py",
+      "sha256": "8981b3b5c6bb2314ff946e48d4e634d4acc167b060a50e56d51a73343812c165",
+      "bytes": 5619
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/element_posterior_transport.py",
+      "sha256": "849bcc62064840f56ce642801ce7c29f56e1600e229b04b6c5b2737f03f5153e",
+      "bytes": 5711
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/element_reliability_fit.py",
+      "sha256": "1535905a41568ae338c6bdfe5b808c2f81ef5b7597a73222481132cfb8202d0c",
+      "bytes": 2398
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/entity_observation_scope.py",
+      "sha256": "3e980b9958b9b2028009adeebc67072f2acd209eef9422fcd51272fb151a6cdd",
+      "bytes": 3541
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/evidence_scorer.py",
+      "sha256": "4a55a80cc6acf3e8ead4fe661c1f744435fddf8c338299a864e0b3a1244eb2b6",
+      "bytes": 63600
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/finite_evidence.py",
+      "sha256": "adfe78e185d4936fbc360993b52fa50aefddfda178da2803f16746365ff2bdbb",
+      "bytes": 1190
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/global_prompt_logit_calibrator.py",
+      "sha256": "9c400b1107a0a87e649eaf3103e6603c315f5f4b68514d0f0f3e34a3bff74067",
+      "bytes": 3478
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/grounded_scene_binding.py",
+      "sha256": "6bc975c796120f23ac6ff5e5db9f07c9af16614f832ac3dfca116374854223f0",
+      "bytes": 2838
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/higher_order_edge_likelihood.py",
+      "sha256": "173cef1c2ae5b620d722bc450922a28bf16bf349cfd8c85ecc02de56b25d18b2",
+      "bytes": 1563
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/identity_seeded_object_topology.py",
+      "sha256": "36cd2c117b23cbaf285c0fb92a6b27afc9a6f95c645926ac8ae2c095999a9b57",
+      "bytes": 21121
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/instance_edge_likelihood.py",
+      "sha256": "4de618fdada044b127bb84f7285a6967c9917f8e7ff70209b4d3f1129b3f8979",
+      "bytes": 7948
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/instance_observation_scope.py",
+      "sha256": "7374c408259a005f8a4e443f22a263d4409eb76ab133769fadd0d03a235c8e50",
+      "bytes": 6145
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/instance_reliability.py",
+      "sha256": "ff534b0ee435ac03bb5a64343e0df5a2a09ce5f83c73aa8590b37595a0b6c0cc",
+      "bytes": 1103
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/interactive_2d.py",
+      "sha256": "c77ea39adc189a6b9c31cb48f04097ebf7dcd2363b9f2c90029e541916f5f31f",
+      "bytes": 4033
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/latent_proposal_posterior.py",
+      "sha256": "5151e4affdf1bc40a5c25b5f03772b3caf9fdfb8a0f0979f6b2c5b760c35ef4c",
+      "bytes": 7082
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/learned_compact_object_affinity.py",
+      "sha256": "54641eeefe46df0e8d21f8e6efd1d88a903e8d00355054e5074320cb6318d2e1",
+      "bytes": 9408
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/legacy_anchored_coverage_supplement.py",
+      "sha256": "0c488441d4232f51e69424bcc39745a6ded7b36202d1cf747e0d9703a029b9d6",
+      "bytes": 11367
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/lerf_source_text_likelihood.py",
+      "sha256": "2a4e393f1cbce5ca62bd772b6e783571fd1cdaa5fc947698fc870c50878bec30",
+      "bytes": 34982
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/lexical_identity_reader.py",
+      "sha256": "1f72aa9ee80202a6efa592fd598335d0fcebf5301f4a7893d68e170da8a80d9a",
+      "bytes": 4339
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/local_appearance_match.py",
+      "sha256": "39f955ab13edbd4e68f5961f4bbcb19622c050071a960631dd942ea4cb38af3f",
+      "bytes": 2890
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/local_element_fusion.py",
+      "sha256": "70979ec3a934abf946b4c248727cb9a3aa88a54f90c83599f631f1ccddd40c17",
+      "bytes": 8753
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/local_observation_membership.py",
+      "sha256": "6bf54abd8bbc4233b3f2432b9d4ba2745f0f6cd8500bfba0b63384a17bf31e60",
+      "bytes": 4343
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/multi_region_union_readout.py",
+      "sha256": "131b7342b9e32608502b7dad0e41eb36c8a08562d6956530e183296afc0f2121",
+      "bytes": 12517
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/multiview_region_memory.py",
+      "sha256": "54fa4383260f9eb912bfec5283d6f284ee2881ee97590d819558bcd901eaa245",
+      "bytes": 15724
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/multiview_region_memory_runtime.py",
+      "sha256": "a43478f11506dc8f75f73a337224634648555760073b89b3ecd36c536f14b1a2",
+      "bytes": 12128
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/native_category_head.py",
+      "sha256": "4f1189c46dbc999a9eb61b3a36c7fad205aab161fc2164461691104c3308e1ee",
+      "bytes": 1970
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/native_image_conditioning.py",
+      "sha256": "a98d01ab1a522af3030080d8a5beeb10354a76d77534a1b5a51f4af2ea2c6d59",
+      "bytes": 3455
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/native_map_response.py",
+      "sha256": "06ac652b7bc5de8f6a37228664060568d6610b4c7af43a0efb44639e043cbe3b",
+      "bytes": 880
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/native_observation_prior.py",
+      "sha256": "87deb3d1e5d46f34cb031f25fbb18ae5d2f0ebe4f8bbd2bc1e47f3cbf9cfa567",
+      "bytes": 6329
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/native_phrase_binding.py",
+      "sha256": "ba2f1116e26d4f52a4f024d1b638f260d4f9d43791670f2538dcbb6bea58219c",
+      "bytes": 5944
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/native_scope_union.py",
+      "sha256": "21e0f7ec30f72b64054abfb0460842418e010aa6df73c086648022436ae2507a",
+      "bytes": 2145
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/nvos_local_positive_completion.py",
+      "sha256": "d2d61097c0cc84c8ee754ffdb383e08f2121221efadb0767a4fdf01e3366b8d3",
+      "bytes": 9892
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/nvos_source_completion_calibration.py",
+      "sha256": "9e1e76d3a91371025d0921bb89e939928bb9eb4a19a8ef09ae59490b99f5922b",
+      "bytes": 9840
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/object_aware_text_track_posterior.py",
+      "sha256": "6cfa755d2d7251f58a5bd43cacf413a8445b4758367c6802f0b00d41456f4ef7",
+      "bytes": 7191
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/object_aware_visibility_track_posterior.py",
+      "sha256": "eeeff1c6f8d0074ea89465bd1011195dfb270feafdc5eef66b1aae3405de77e4",
+      "bytes": 8081
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/object_track_extent_authority.py",
+      "sha256": "1b5f8d034a4d79ea6f0430e678b9814541787407e47808b836606ef2f080eb45",
+      "bytes": 4788
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/observation_clamped_harmonic.py",
+      "sha256": "6a1a7197645ff885ad601c31e05a36a5850a8d72360451e0cd7584724144bebe",
+      "bytes": 9074
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/observation_conditioned_prompt_calibrator.py",
+      "sha256": "ff96eb5d8c323b5ec2c947b2b23367af537e185d285ad082b2c2a33f153913cb",
+      "bytes": 2093
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/observation_hypotheses.py",
+      "sha256": "993213766921177de4ccd2142944b9e950d8ea0d96c6b047f0083112017f90e8",
+      "bytes": 5581
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/observation_readout.py",
+      "sha256": "ac9bbc1eccbb10062eecd894fb91255c12b43492f52d67c23b4995747be7a6a0",
+      "bytes": 2083
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/observation_reliability.py",
+      "sha256": "872202bf6f7e3d3ad40f1d0ddddd3f3769948ee005b377a63401093d590a85b1",
+      "bytes": 3486
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/partial_extent_supervision.py",
+      "sha256": "92e92f13de497906e37d0c6921df487aec039c006192754ea90fd90ecca6db3f",
+      "bytes": 703
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/positive_reference_ensemble.py",
+      "sha256": "ccbd42c76c173639c236f6849b145c9f83a07992fec3be0ce74739aaa8b054ab",
+      "bytes": 2012
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/prompt_mode_logit_calibrator.py",
+      "sha256": "f9b86a789f2f50d2bcc8ad7dac5aaa99d130869a1aa4034ff44298f8f6e9033f",
+      "bytes": 1952
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_compilers.py",
+      "sha256": "6d7083c4b50c3523ddeec5b00ce0975ec0a138612eaa1abc77bf5d32b2875a6a",
+      "bytes": 36865
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_conditioned_diffusion.py",
+      "sha256": "f2fc92aeaa838d821a81e6d06f18b35fa9e3977db7324958e859e4b16161b528",
+      "bytes": 31677
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_conditioned_membership.py",
+      "sha256": "b721c12e781874ee0d0b04d41363fa75e8b80dbf7aaaefd37edc35cdf517eb77",
+      "bytes": 6391
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_engine.py",
+      "sha256": "e6714462bb5d2bcd7481eeb848326f52f0f5f75f0a8107a948c0030e5d721cf9",
+      "bytes": 29959
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_likelihood_head.py",
+      "sha256": "6bb7f82ba8c7c0ee042b9a9521a751a67e4f085639430b428e9717160beafd9c",
+      "bytes": 24454
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_region_evidence.py",
+      "sha256": "fbd499d5c36bdbe9f50758d9b3a1565392491c392f5486a42c391f1879779caa",
+      "bytes": 9776
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_relative_scope.py",
+      "sha256": "bd4b12f1a1710736d5b007b2088ad66540f4c26099bf24804c34213910b5fe5d",
+      "bytes": 2809
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_spec.py",
+      "sha256": "dca61e9bed5267592350f040ba1213bc82d583ea200352fae5ebbf874042d8cf",
+      "bytes": 12741
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/query_specific_propagation_cv.py",
+      "sha256": "d73cd40fccaf79465108e530022dc6b142b28bc29abcdc4aabaa44cbaa465dc3",
+      "bytes": 41647
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/reference_response.py",
+      "sha256": "c572cc5b59b48b3c99503a085855b8e5d1bfb8003b3aad072815bf1a5800b063",
+      "bytes": 8792
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/reference_scope_completion.py",
+      "sha256": "3736fd8406c183c5c2f130bf10372f9b64694df1aa82d810f9e3b1e67bf3d2ac",
+      "bytes": 2585
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/referent_identity.py",
+      "sha256": "17267628ba91138c9ecad66432afe75317e4fd3bf23ae85207ac221e1ffb542c",
+      "bytes": 4693
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/region_bank.py",
+      "sha256": "157692eeb2c256ac3dab327dfaae4d9be8d4821b87af61d7a2c569dbb13edefa",
+      "bytes": 2511
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/region_comembership_readout.py",
+      "sha256": "decf7f5f629b8edcb9d0cb943a44024ae351b87005d47fd2ae55d8ef093f3904",
+      "bytes": 2643
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/region_native_field.py",
+      "sha256": "1535820fdf781dc6aa73300acbb865c83b64ff0d2bb986426d153f234f16af78",
+      "bytes": 1624
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/region_observation_vote.py",
+      "sha256": "967d06e5c089cfdad2514d8f4c43eb8270ff5598f4a2a394bdb8b206e4db967b",
+      "bytes": 4281
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/region_positive_grounding.py",
+      "sha256": "69d0607d5e50adeaaa00f3d3a2c4a4783fa510b829f859f1ae158a91586852d5",
+      "bytes": 5853
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/registered_coordinate_query.py",
+      "sha256": "2ddf0298200528e1f77c4eb7439cc229a0a6c711354a2d3147396f8118509637",
+      "bytes": 879
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/registered_evidence_external_adapter.py",
+      "sha256": "0004e79c2d18e640a8c302a87d973cb47cdc2f8621bbc787544704867b8298a6",
+      "bytes": 24606
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/registered_evidence_to_unary.py",
+      "sha256": "ad04244c4b7ca5c5ac6d3716d46086a7afa02b4fd8e54daefa3e74d44d6455bc",
+      "bytes": 12518
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/registered_observation_query.py",
+      "sha256": "f164d32730ad5437ad37d7a0b3583ac74a3ff9f14a2fcc32f0b0498fd23e8ae9",
+      "bytes": 34843
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/reliability_fusion.py",
+      "sha256": "56256733a95d9a64017726938603d7297a768093c1330189e9b49e3e14088b94",
+      "bytes": 5690
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/reliability_weighted_valid_domain_knn_readout.py",
+      "sha256": "e0bf58dd20e84200f9ef7b310ac96d74539a98e4f63064917af60be42c411645",
+      "bytes": 12330
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/rgb_scope_correspondence.py",
+      "sha256": "7798ba1d2f6503fe4c29a09fc3a4c1d81c6526295702aabd5c517cb0c66f1b7c",
+      "bytes": 2438
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/sam3_reference_completion.py",
+      "sha256": "15ca3c291e862d6888de3421e06f458c6fe3745bd0575f37acc2e39913a77396",
+      "bytes": 5856
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/sam_categorical_instance_posterior.py",
+      "sha256": "94a43ab1930a0b2d8a9ff80aea3309b5222241606f84cbe8a4301c402c54b37a",
+      "bytes": 8444
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/sam_siglip_object_posterior.py",
+      "sha256": "bed69eaed9a3ba4550d1e8d0d1b9e3ca7e43a480f601190eb15f865d9fd0ad09",
+      "bytes": 31532
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/scale_aware_native_v3_support_fusion.py",
+      "sha256": "28b0fea351c7ec952f06772b798b31a2ed4e191cefb2f2fd66ca10b40051d562",
+      "bytes": 11605
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/scannet_object_aware_category_voting.py",
+      "sha256": "4275147f492d3fc53e60fd9f453e9f4aed3277b7e3808ca8ee190b6d00dd5eca",
+      "bytes": 6941
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/scannet_runtime.py",
+      "sha256": "bbbd69b7d078199261aa2d815fea553e58f097503915017a612ab511762564a1",
+      "bytes": 12030
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/scannet_shared_region_residual.py",
+      "sha256": "06ec4b599d8ab1bbd77e523bae1b979e39f3a9723b24d9eac9219c7b11f27f9a",
+      "bytes": 8040
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/scene_referent_grounding.py",
+      "sha256": "80fadcf27f5c005ff19c1b26462ec2a314fdc58a8036182f603dd30122b1486d",
+      "bytes": 5039
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/scope_composition.py",
+      "sha256": "6e31a6c0285fa148b2e30eec4e5d7c1333cd801dae5804305d19bdad5577d400",
+      "bytes": 2202
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/scope_hypergraph.py",
+      "sha256": "65a825242691554da15c6e9b84e8a1e8896c6ef6855d74f09ff9bb1b72de73f4",
+      "bytes": 5204
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/scope_quality.py",
+      "sha256": "e16a8cb1805fa60f170d9c27723668bce96e4740551fd03756b750da8fbbb084",
+      "bytes": 1782
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/score_calibration.py",
+      "sha256": "6ab30a9f96d36f2c19b07f7d224d290a74795a02efc5fc57ed963e3a16ae382a",
+      "bytes": 5851
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/seed_conditioned_graph_residual.py",
+      "sha256": "8a1cc7224c94aee21dbaec5e83fda40512a9258a942173d60437c6c7a5ec68ca",
+      "bytes": 9304
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/seeded_extent_cut.py",
+      "sha256": "69dfdadbc2e526b3952be0b47137d41c309149736e9d9fae6534ead63a9f69ca",
+      "bytes": 6567
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/semantic_conditioned_region_comembership_readout.py",
+      "sha256": "25e374233140b61889edae0dacbd5881abfb6fcb0469d6eed718da396ea1eaaa",
+      "bytes": 5331
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/semantic_point_readout.py",
+      "sha256": "3f84f046c5e2153e3c3a2b6ecf9101ab59946da5e16400801370b2cf6fe668f1",
+      "bytes": 638
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/signed_native_image_query.py",
+      "sha256": "2ef6cc7f682dea0d2313a47c635e72e213992372f3380689f7d2a8a60eb81feb",
+      "bytes": 4351
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_accepted_category.py",
+      "sha256": "fe7e2de768bb9b59ae8b0291af0cc5d389cbc8280bb98d7c923f4f90f2b62a44",
+      "bytes": 3392
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_category_ambiguity.py",
+      "sha256": "13041360589ff13049fe4d20678fb131cd73a1f847ff4c6c4a7cba6f14776112",
+      "bytes": 2674
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_conditioned_hierarchy_completion.py",
+      "sha256": "50e7b224b0b9cc761fffabf5c82b938016d855cfbf464e2f9d7260b1018ee4e9",
+      "bytes": 34882
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_footprint_fold_authority.py",
+      "sha256": "8c365c4f8974a770f6a58176d4d1de6518237065b7a8230d90bfa8a8ff7a508d",
+      "bytes": 32010
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_heldout_missing_support.py",
+      "sha256": "d67a5e62d14e1f11e512b2248420861d8c84c4b46ffc13d50cfa83f0ebda28fd",
+      "bytes": 12929
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_identity.py",
+      "sha256": "16f4a2862841f4d741edd00a8193ff0c223f1bf9c512ceee034c6fb5baa92a25",
+      "bytes": 1537
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_kernel_extent.py",
+      "sha256": "f751ad7472658bd91b5b7de5a1e5f8e1862340d8f8b300d33ded809abe632184",
+      "bytes": 4688
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_loo_component_gate.py",
+      "sha256": "04be4bcb134e1db1f518441217e9ad18f43fcd18ca79a2a29bddfd657cf399fb",
+      "bytes": 13274
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_multiview_object_tracks.py",
+      "sha256": "ee74eddd32c1d9be5d2a45643546d1cc7938448dfdd084ef1396604ff3ae9b41",
+      "bytes": 14436
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_observation_authority.py",
+      "sha256": "0d110f9c78661b896c5fcb99266fd4ea2c7a37110a49f8847b2933e176398fa6",
+      "bytes": 9466
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_observation_likelihood.py",
+      "sha256": "677b497a55815e104c516055620850910f9838bf2be887a39ef54af574e35df8",
+      "bytes": 6591
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_only_correspondence_completion.py",
+      "sha256": "461b8cb8713e1daed08ae36250bbc0f0827041dff766be3d852d56ae8f312107",
+      "bytes": 9964
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_oof_transport_admission.py",
+      "sha256": "203365ab86f189aa649d97d879305eb9278f0fbf57e44d1ed378986024dfce59",
+      "bytes": 10783
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_post_spatial_text_posterior.py",
+      "sha256": "c67a0b46371b6a54db1d2df68d720d783b96bd1b8dfa652bda77faa9608531e7",
+      "bytes": 9474
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_refitted_category.py",
+      "sha256": "9940b229de39214c92f5b52d2a6d7ddafd541aa0e77d40b32e89968257b0519e",
+      "bytes": 2729
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_scope_consensus.py",
+      "sha256": "a9dd608195890613caad827fe7bf7938825cd238462af4b0ba3e93942d6b9352",
+      "bytes": 2904
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_spatial_text_likelihood.py",
+      "sha256": "8036f368ba6345f8158101a38e4ac938d8ae82a603b68bb11b622ee25cb77b7f",
+      "bytes": 15559
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_text_query_likelihood.py",
+      "sha256": "358fe1213a35ab3983d59653412b14aa8f300c83601ab77d677b02f3cff1a2dd",
+      "bytes": 24493
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/source_typed_spatial_text_likelihood.py",
+      "sha256": "35cbec6a54d74bcb35651a13b7001727c10cd244f8d692d1ef28326c4bd88247",
+      "bytes": 17431
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/spin_source_footprint_quantile_calibration.py",
+      "sha256": "d076bc2baf21413630772004f7665402d76f807428d74140f16a213293d9da4b",
+      "bytes": 27395
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/spin_source_footprint_visibility_calibration.py",
+      "sha256": "c064afb2d42139a403b278995d4143f5794c215cd50a5f6df0a0db9fe747e372",
+      "bytes": 19891
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/streamed_category_vote.py",
+      "sha256": "0aeff829a180618af23b98fc68123e80bc6cb311c0536029e8e2917198150fea",
+      "bytes": 5269
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/supervised_scope_reliability.py",
+      "sha256": "b895bcd9b1c48c571e8fa32c0e4f07b5ee18b465b10cbc08c0e776a99adfa549",
+      "bytes": 2918
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/support_solver.py",
+      "sha256": "0c764bf127b8ba3f30b82fbcb1a34a682ba559e2287ed6daa80b9970ebb29fd3",
+      "bytes": 60336
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/surface_consistency.py",
+      "sha256": "79f631ced3bf577d480461f17dd972ac6a96f8995f82511d072218ca6707a6a8",
+      "bytes": 8840
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/synchronous_multiview_candidate_marginal.py",
+      "sha256": "33cef922f90e871c906bfbeec2ddf926ac53ada41ee3e80852877e4af38a55da",
+      "bytes": 12306
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/transient_rgb_sam.py",
+      "sha256": "c6c7131dc11bbaff9a4beeefab31d07229d2b00a0655d5109cde6bc02c2a23ad",
+      "bytes": 14801
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/typed_evidence.py",
+      "sha256": "81719f171e2afc594b0f7b6940708c08113c5a59c56cceaa84bda5ba31b2613b",
+      "bytes": 8857
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/typed_extent_posterior.py",
+      "sha256": "1776e986808c7f34e91e6ab6b964078329c3f653a5d6b552b49594935d40ad0b",
+      "bytes": 4061
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/typed_posteriors.py",
+      "sha256": "fac38cabde8fe18ac2dcb13c659b6a44f65848a4f1ce6a926dc0d1a243643a59",
+      "bytes": 20265
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/typed_referent_binding.py",
+      "sha256": "691ebb93462af263dcfde472b6c9971ec84f44244a01d3bc05336c329e2364d6",
+      "bytes": 3483
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/uncertain_scope_bridge.py",
+      "sha256": "e32ef1b39bc804dae82d2fc7caee294154725c3de108ff82edb12ba8b83b4da7",
+      "bytes": 649
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/unified_query.py",
+      "sha256": "b0e3fc3e4e78dcb5220333c72135916e2fcb4a87dadb5e38d97934c93620745a",
+      "bytes": 18732
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/union_category_observation.py",
+      "sha256": "f7041a7d598011fc9d94d8cdc045fc3be8b4b12ebaab157c368d277c9805d262",
+      "bytes": 3577
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/v21_absolute_relevance_adapter.py",
+      "sha256": "64cfebfb4ba3bbf6a8e0032955427c0f7afbb3bd6bd6edf95e1b812de36f7fe3",
+      "bytes": 6534
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/valid_domain_knn_readout.py",
+      "sha256": "d4ca07376f4a18d3f7b45fd9fcf19730b8a436270ea50c23f0962948c4f7878a",
+      "bytes": 10335
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/view_support_carrier.py",
+      "sha256": "efbda21f70fa98d18945031140f5b45f70382902b18f8bfc3edd18a425097f60",
+      "bytes": 6140
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/visibility_semantic_writing.py",
+      "sha256": "8a6545e621baeaf61918b9d348d61eea90febba556de56be44f2239bef5cfea4",
+      "bytes": 3222
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/visual_scope_membership.py",
+      "sha256": "8a648af0884ca6d88af84745382d34f3f9aba03a5ba124ac4b9497333d40ac51",
+      "bytes": 6176
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/volume_matched_region_readout.py",
+      "sha256": "4f962ab65dae28ba2588ae13cb1f4e6621ab12d89f551a145fb15a26f3e52d3d",
+      "bytes": 1361
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/radio_gs/querying/witnessed_observation_scope.py",
+      "sha256": "05befa20ba6ecb6fdd10beab095eec8cacd67872fe692f8f35f7590469c20646",
+      "bytes": 6436
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/scripts/audits/pilot_duplicate_function_storage.py",
+      "sha256": "2c5c98d4f16b5bc2952e80c43faec4a1bb0fb52330238178d9c3b4c510e4b86c",
+      "bytes": 23900
+    },
+    {
+      "path": "/root/RADIO-GS-query-field/tests/test_duplicate_function_pilot.py",
+      "sha256": "70e42c6881d5db0c4ef1c0d49f519c20422e695748fbeea20ec9cad6838b4590",
+      "bytes": 8207
+    }
+  ],
+  "code_snapshot": "/root/RADIO-GS-query-field/docs/experiments/duplicate_function_pilot_20261013_recovery_sources",
+  "head": "9363333eba24bb9d3f707293928edeb40c52f511",
+  "revision_reason": "Fresh allocation is cost only; all stable identity checks retained; G01 accepted once; G14 new no-replace recovery directory; both failed source reads included",
+  "supersedes_plan_sha256": "b89ac2ccf3cc47b9e2251d1aef84ae99ce11fc5efebe87c986ba9774aa0c7c7f",
+  "prior_attempt_application_read_bytes": 4725521779,
+  "prior_attempt_artifact_logical_bytes": 909,
+  "prior_attempt_artifact_allocated_bytes": 512,
+  "spec_migration_contract": {
+    "rule": "historical_disabled_rules_explicit_none.v1",
+    "only_missing_defaults": {
+      "semantic_measure_rule": "none",
+      "native_mode_rule": "none"
+    },
+    "existing_values_unchanged": true,
+    "historical_spec_identity": "canonical JSON SHA plus archived exact original manifest SHA",
+    "effective_spec_identity": "exact current legacy export; new v2 state identity",
+    "reader_source_sha256": "b8dc318c8343534c42dd784db45d6c549341000528e609ebcf1044d2af9de0bf",
+    "origin_commits": [
+      "ae80fc4d",
+      "9930ec21"
+    ]
+  },
+  "inherited_acceptance": {
+    "group": "G01",
+    "plan_sha256": "b89ac2ccf3cc47b9e2251d1aef84ae99ce11fc5efebe87c986ba9774aa0c7c7f",
+    "migration_receipt_sha256": "cbdab43f7b2f15f0163f9511e6678462e9a8cb48f7ff49090a07e5b51b4ea0f9",
+    "reason": "All scientific runtime and probe code unchanged; only accounting and explicit G14 directory recovery changed. Exact existing receipt/file hashes frozen in metadata_bindings; no repeat G01 payload IO or rewrite."
+  },
+  "remaining_expected_application_io_bytes": 8077681951,
+  "completed_application_io_bytes_including_writes": 7884584159
+}

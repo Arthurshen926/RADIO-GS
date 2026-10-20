@@ -1,0 +1,42 @@
+{
+  "run": "nvos_memory_response_v2",
+  "arms": [
+    "v10",
+    "static_image",
+    "pair_memory",
+    "sequence_memory",
+    "static_image_lift",
+    "pair_memory_lift",
+    "sequence_memory_lift"
+  ],
+  "primary_arm": "sequence_memory_lift",
+  "source_hw": [
+    384,
+    512
+  ],
+  "solver_steps": 120,
+  "threshold": 0.5,
+  "image_checkpoint": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+  "image_backbone_resolution": 1008,
+  "target_rgb_used": true,
+  "target_gt_used_for_prediction": false,
+  "per_task_winners": false,
+  "independent_test": false,
+  "maximum_new_durable_bytes": 1048576,
+  "maximum_volatile_prediction_bytes": 268435456,
+  "gpu_memory_fraction": 0.28,
+  "gt_tracks": [
+    "retained_gt_gt127",
+    "ludvig_gt_maximum"
+  ],
+  "metrics": [
+    "iou",
+    "precision",
+    "recall",
+    "accuracy"
+  ],
+  "registration_context": "N04\u2013N06 complete all-eight results and spatial audits known. Before all N07 predictions.",
+  "memory_seed": "original positive-only SAM reference mask; no target GT",
+  "memory_paths": "pair and canonical source frames between reference and target",
+  "memory_selection": true
+}
